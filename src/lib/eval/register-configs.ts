@@ -77,9 +77,12 @@ export type RegisterFieldLike = { symbol: string; dataType: string; widget?: str
  * above, then (Plan 2b) the register-kind entries of the 36 TS selection
  * configs (Plan 1 Task 7) rendered through `toDbShape` — the same shape the
  * per-standard `20260911120000_selection_configs_<STD>.sql` migrations write,
- * so a migrated row and its TS twin resolve identically. Checklist-kind
- * entries stay on `resolveSelectionConfig`. Each TS entry retires the moment
- * its migration makes `widget` non-null.
+ * so a migrated row and its TS twin resolve identically EXCEPT `placement`:
+ * the migrations carry no placement key, the TS entry pins `'bottom'`, and the
+ * renderer defaults an absent placement to bottom (`registerPlacement()` in
+ * register-editor.tsx — the single default), so both render in the same spot.
+ * Checklist-kind entries stay on `resolveSelectionConfig`. Each TS entry
+ * retires the moment its migration makes `widget` non-null.
  */
 export function resolveRegisterConfig(f: RegisterFieldLike): RegisterUiConfig | null {
   if (f.widget != null) {

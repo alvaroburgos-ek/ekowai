@@ -1,6 +1,8 @@
-import type { SurfaceSourceState } from '@/lib/eval/surface-source-state';
+import type { CarrierSourceState } from '@/lib/eval/carrier-source-state';
 
-export function SurfaceSourceBanner({ state }: { state: SurfaceSourceState }) {
+/** Upstream-cause banner for a CONSUMED register carrier (any register since
+ * Plan 2b Task 3; the A138-07 `SurfaceSourceState` shim is the same shape). */
+export function SurfaceSourceBanner({ state }: { state: CarrierSourceState }) {
   if (state.state === 'ok' || !state.message) return null;
   return (
     <div

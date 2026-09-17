@@ -13,26 +13,16 @@ import {
   ManualOverridePill,
   useManualOverride,
 } from './manual-override-pill';
-import { RainfallTablesEditor } from './rainfall-tables-editor';
-import { RainfallTableSelector } from './rainfall-table-selector';
-import { normalizeRainfallCarrier, facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
-import { SurfaceInventoryEditor } from './surface-inventory-editor';
-import { RiskRegisterEditor } from './risk-register-editor';
-import { MitigationPlanEditor } from './mitigation-plan-editor';
-import { ChecklistEditor } from './checklist-editor';
-import { StructuredRegisterEditor } from './structured-register-editor';
-import { resolveSelectionConfig, type SelectionConfig } from '@/lib/eval/selection-fields';
-import { EditorErrorBoundary } from './editor-error-boundary';
-import { PollutantRegisterEditor } from './pollutant-register-editor';
+import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { POLLUTANT_REGISTER_SYMBOL, POLLUTANT_OUTPUT_SYMBOLS } from '@/lib/eval/pollutant-register';
 import { SurfaceSourceBanner } from './surface-source-banner';
-import { surfaceSourceState } from '@/lib/eval/surface-source-state';
-import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
-import { lookupTab9 } from '@/lib/eval/tab9';
+import { carrierSourceState } from '@/lib/eval/carrier-source-state';
 import { registerTables, type RegulationTable } from '@/lib/eval/regulation-tables';
 import { SourceFormReferencePanel } from '@/components/form-templates/SourceFormReferencePanel';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
-import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
+import { withFallbackRegisterEquations, resolveRegisterConfig, registerFlagKeys } from '@/lib/eval/register-configs';
+import { renderWidget, widgetPlacement, type WorksheetFormField, type WidgetContext } from './widgets';
+import { ReadOnlyRegisterTable } from './register-editor';
 import { visibleFields } from './visible-fields';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { computeVisibility } from '@/lib/compliance/visibility';
@@ -105,12 +95,9 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
 // that declared the current worksheet a consumer; we show it in a separate
 // "Vorgelagerte Werte" panel and feed it to the engine, but don't render
 // an editable input here (engineer edits on the origin worksheet).
-type FieldDef = Parameters<typeof DynamicField>[0]['field'] & {
-  sectionId: string | null;
-  orderIndex: number;
-  active: boolean;
-  inheritedFromWorksheet?: string;
-};
+// Plan 2b (Task 3): the row type lives in widgets.tsx (the registry consumes it).
+export type { WorksheetFormField };
+type FieldDef = WorksheetFormField;
 
 type Section = Parameters<typeof SectionGroup>[0]['section'];
 
@@ -175,10 +162,12 @@ type Props = {
   /** True when the current viewer is on the platform-engineer allowlist.
    * Gates the "Bestätigen" buttons on every field/equation. */
   isPlatformEngineer?: boolean;
-  /** Surface-inventory source data from A138-07 for consumer worksheets (e.g.
-   * A138-10). null when this worksheet IS the owner or the standard has no
-   * surface_inventory field. */
-  surfaceSource?: { status: string; carrier: unknown } | null;
+  /** Register carriers this worksheet CONSUMES from an owner worksheet (e.g.
+   * A138-07 `surface_inventory` on A138-10): the owner instance status + the
+   * stored carrier. Each renders an upstream-cause banner (carrierSourceState
+   * under the register's own config) and a read-only mirror table at the
+   * bottom. Empty/undefined when this worksheet owns every register. */
+  registerSources?: Array<{ symbol: string; ownerCode: string; status: string; carrier: unknown }>;
   /** Field ids whose persisted project_parameters row was written by a
    * SERVER-side engine (source_type='computed', e.g. the VSME CO₂ engine;
    * plus VSME 'derived' rows like the B04 per-medium sums). These render
@@ -228,13 +217,13 @@ export function WorksheetForm({
   priorSnapshotCount,
   diffHref,
   isPlatformEngineer = false,
-  surfaceSource,
+  registerSources,
   serverComputedFieldIds,
   regulationTables,
 }: Props) {
   // Register server-loaded regulation tables into the eval-layer registry
   // BEFORE any hook or child that could read the tab9/tab6-loading accessors
-  // (e.g. lookupTab9() below, in the Tab.9 rows render). useMemo runs
+  // (e.g. the register editors' TAB9 lookups in the bottom strip). useMemo runs
   // synchronously during render, so this must be the first thing after the
   // props are destructured — no effect delay, no flash of TS-fallback data.
   useMemo(() => {
@@ -511,27 +500,11 @@ export function WorksheetForm({
     [sortedEquations, engineEquationIds, fieldBySymbol],
   );
 
-  // A138-04 KOSTRA table: carrier field has symbol `r_D_n_table` and
-  // data_type='json'; the engine reads it from the store. The carrier may hold
-  // MULTIPLE source-tagged tables (Piece 2); it is EDITED on its owner (A138-04)
-  // and merely REFERENCED by a per-facility `rainfall_table_ref` selector on the
-  // consumer worksheets that inherit it.
-  const kostraField = fields.find((f) => f.symbol === 'r_D_n_table');
-  const rainfallRefField = fields.find((f) => f.symbol === 'rainfall_table_ref');
-  const rainfallRefValue = rainfallRefField ? values[rainfallRefField.id] : undefined;
-  const rainfallTableRef =
-    (rainfallRefValue?.type === 'text' || rainfallRefValue?.type === 'enum') &&
-    typeof rainfallRefValue.value === 'string'
-      ? rainfallRefValue.value
-      : null;
-  const kostraValue = kostraField ? values[kostraField.id] : undefined;
-  const rainfallTables = normalizeRainfallCarrier(
-    kostraValue?.type === 'json' ? kostraValue.value : undefined,
-  ).tables;
-
-  // Design return-period for the rainfall editor: resolve project n/T_n via the
-  // shared facilityReturnPeriod helper.  A pickNumberBySymbol closure reads from
-  // the store's current values using the field-by-symbol map built above.
+  // Design return-period for the bespoke rainfall editor (A138-04 KOSTRA
+  // carrier `r_D_n_table`, dispatched by the WIDGETS registry): resolve project
+  // n/T_n via the shared facilityReturnPeriod helper. A pickNumberBySymbol
+  // closure reads from the store's current values using the field-by-symbol
+  // map built above.
   const rainfallDesignReturnPeriod = useMemo(() => {
     const pick = (sym: string): number | null => {
       const f = fieldBySymbol.get(sym);
@@ -542,45 +515,9 @@ export function WorksheetForm({
     return facilityReturnPeriod(worksheet.template.code, pick);
   }, [fieldBySymbol, values, worksheet.template.code]);
 
-  // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
-  const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
-
-  // DWA-M 820-1 · Anhang A · risk register: per-row structured risk analysis
-  // (Risikogruppe, Eintretenswahrscheinlichkeit × Schaden, Maßnahme). Replaces
-  // a free-text blob with the guideline's Tab. A.1 model.
-  const riskRegisterField = fields.find((f) => f.symbol === 'risk_register');
-
-  // DWA-M 820-1 · Anhang A · Tab. A.2 · risk mitigation plan: per-risk measure
-  // plan (Maßnahmen T/O/P with Verantwortung/Durchführen/Überwachung).
-  const mitigationPlanField = fields.find((f) => f.symbol === 'risk_mitigation_plan');
-
-  // Config-driven selection fields (checklists + structured registers whose
-  // options/columns the guideline prescribes — see selection-fields.ts).
-  // Dispatch by `field.widget`: the DB config wins whenever `widget` is
-  // non-null; the TS registry (SELECTION_CONFIGS) applies only while
-  // `widget IS NULL` (resolveSelectionConfig, Task 9).
-  const selectionFields = useMemo(
-    () =>
-      fields
-        .filter((f) => f.active)
-        .map((f) => ({
-          field: f,
-          config: resolveSelectionConfig({
-            symbol: f.symbol,
-            dataType: f.dataType,
-            enumValues: f.enumValues,
-            widget: f.widget ?? null,
-            uiConfig: f.uiConfig,
-            lookup: f.lookup,
-            visibleWhen: f.visibleWhen ?? null,
-          }),
-        }))
-        .filter((x): x is { field: typeof fields[number]; config: SelectionConfig } => x.config != null),
-    [fields],
-  );
-  const selectionFieldIds = useMemo(() => new Set(selectionFields.map((x) => x.field.id)), [selectionFields]);
   // VSME-B04.100 pollutant register: per-pollutant E-PRTR rows; the three
   // AmountOfEmissionTo{Air,Water,Soil} scalars are derived per-medium sums.
+  // (Plan 2b Task 4 generalises the computedHint below and drops this lookup.)
   const pollutantRegisterField = fields.find((f) => f.symbol === POLLUTANT_REGISTER_SYMBOL);
 
   // Field ids whose persisted value was engine-written server-side → locked.
@@ -589,9 +526,35 @@ export function WorksheetForm({
     [serverComputedFieldIds],
   );
 
-  // Upstream-cause state for consumer worksheets (A138-10). null when this
-  // worksheet does not consume a surface-inventory source.
-  const srcState = surfaceSource ? surfaceSourceState(surfaceSource.carrier, surfaceSource.status) : null;
+  // Plan 2b (Task 3): upstream-cause state per CONSUMED register (e.g. A138-10
+  // consuming A138-07's surface_inventory). The gate runs under the register's
+  // own config (carrierSourceState, Plan 2a Task 9) so the banner, the
+  // read-only mirror and the engine agree on "complete". The config comes from
+  // the consumer's own field row when it carries one (DB widget wins), else
+  // from the symbol-keyed TS fallback (the carrier is owned elsewhere and is
+  // usually NOT a field of the consumer — today's A138-10 case); no config at
+  // all ⇒ state=null → nothing renders.
+  const registerSourceStates = useMemo(
+    () =>
+      (registerSources ?? []).map((src) => {
+        const f = fieldBySymbol.get(src.symbol);
+        const cfg = f
+          ? resolveRegisterConfig({ symbol: f.symbol, dataType: f.dataType, widget: f.widget ?? null, uiConfig: f.uiConfig })
+          : resolveRegisterConfig({ symbol: src.symbol, dataType: 'json', widget: null });
+        const state = cfg
+          ? carrierSourceState(src.carrier, cfg.columns, src.status, {
+              ownerLabel: src.ownerCode,
+              standardCode,
+              legacyMap: cfg.legacy_map,
+              overrideFlagKey: cfg.override?.flag_key,
+              overrideAppliesTo: cfg.override?.applies_to,
+              flagKeys: registerFlagKeys(src.symbol, cfg),
+            })
+          : null;
+        return { ...src, cfg, state };
+      }),
+    [registerSources, fieldBySymbol, standardCode],
+  );
 
   // (Retired) The legacy naive sum-evaluator lived here — it ignored `formula`
   // and summed input_symbols for every equation NOT on the old 138-only
@@ -606,26 +569,23 @@ export function WorksheetForm({
   // (they show in a separate read-only panel since the engineer edits them
   // on the origin worksheet). The engine sees the unfiltered `fields` so
   // every consumed symbol is resolved.
+  // Plan 2b (Task 3): ONE pass decides where each visible own field renders —
+  // `widgetPlacement(f)` sends registers/bespoke editors/legacy checklists to
+  // the bottom strip (`bottom`, sorted by orderIndex) and everything else into
+  // its section (`map`). A hidden field is dropped BEFORE placement, so a
+  // hidden register renders nothing (the old `shown()` gate, now uniform).
   const fieldsBySectionId = useMemo(() => {
     const map = new Map<string | null, FieldDef[]>();
+    const bottom: FieldDef[] = [];
     for (const f of visibleFields(fields)) {
       if (f.inheritedFromWorksheet) continue;
       // Plan 2a (Task 10): hidden by `visible_when` (own rule or hidden
       // section) — leaves the grid entirely; the engine sees it as null.
       if (visibility.hiddenFieldIds.has(f.id)) continue;
-      // rainfall_table_ref is rendered by its dedicated RainfallTableSelector
-      // section (table-id picker), not as a raw text input in the field grid.
-      if (f.symbol === 'rainfall_table_ref') continue;
-      // risk_register is rendered by its dedicated RiskRegisterEditor section
-      // (structured Tab. A.1 register), not as a raw json placeholder.
-      if (f.symbol === 'risk_register') continue;
-      // risk_mitigation_plan is rendered by its dedicated MitigationPlanEditor.
-      if (f.symbol === 'risk_mitigation_plan') continue;
-      // config-driven selection fields render via their dedicated section.
-      if (selectionFieldIds.has(f.id)) continue;
-      // pollutant_register is rendered by its dedicated PollutantRegisterEditor
-      // section, not as a raw json field in the grid.
-      if (f.symbol === POLLUTANT_REGISTER_SYMBOL) continue;
+      if (widgetPlacement(f).placement === 'bottom') {
+        bottom.push(f);
+        continue;
+      }
       const key = f.sectionId ?? null;
       const arr = map.get(key) ?? [];
       arr.push(f);
@@ -634,8 +594,9 @@ export function WorksheetForm({
     for (const arr of map.values()) {
       arr.sort((a, b) => a.orderIndex - b.orderIndex);
     }
-    return map;
-  }, [fields, selectionFieldIds, visibility]);
+    bottom.sort((a, b) => a.orderIndex - b.orderIndex);
+    return { map, bottom };
+  }, [fields, visibility]);
 
   // The inherited-values panel content. Built once from `fields` + the
   // store's resolved values.
@@ -655,7 +616,7 @@ export function WorksheetForm({
   const visibleSectionIds = useMemo(() => {
     const parentBySection = new Map(sections.map((s) => [s.id, s.parentSectionId]));
     const result = new Set<string>();
-    for (const [sid, arr] of fieldsBySectionId) {
+    for (const [sid, arr] of fieldsBySectionId.map) {
       if (!sid || arr.length === 0) continue;
       let cur: string | null = sid;
       while (cur && !result.has(cur)) {
@@ -667,14 +628,8 @@ export function WorksheetForm({
     return result;
   }, [fieldsBySectionId, sections, visibility]);
 
-  // Plan 2a (Task 10, fix round 1): the dedicated bottom-section editors
-  // (rainfall tables/selector, surface inventory, risk register, mitigation
-  // plan, selection checklists/registers, pollutant register) bypass the grid,
-  // so they honour `hiddenFieldIds` here explicitly.
-  const shown = (f: { id: string }) => !visibility.hiddenFieldIds.has(f.id);
-
   const topSections = sections.filter((s) => s.parentSectionId === null);
-  const orphanFields = fieldsBySectionId.get(null) ?? [];
+  const orphanFields = fieldsBySectionId.map.get(null) ?? [];
   const title = locale === 'de' ? worksheet.template.titleDe : worksheet.template.titleEn ?? worksheet.template.titleDe;
 
   // asmMethod is resolved above (hoisted before useEquationEngine) so it can be
@@ -691,88 +646,109 @@ export function WorksheetForm({
   const asmNeedsReconfirmation: boolean | null =
     asmReconfValue?.type === 'boolean' ? (asmReconfValue.value ?? null) : null;
 
-  const renderField = (sectionId: string | null) => {
-    const fs = fieldsBySectionId.get(sectionId) ?? [];
-    return fs.map((f) => {
-      const overrideMeta = overrideMetaByOutputFieldId.get(f.id);
+  // Today's <DynamicField …/> factory (scalar / select_one / attestation and the
+  // json placeholder + json-checklist branches). Owned by the form because it
+  // threads per-field context (computedHint, statusReason, override pill, ASM
+  // props); the WIDGETS registry calls it for every non-register widget.
+  const renderDynamic = (f: FieldDef) => {
+    const overrideMeta = overrideMetaByOutputFieldId.get(f.id);
 
-      // Server-engine-written value (source_type='computed' / VSME 'derived'):
-      // locked via the existing isComputed path + a provenance hint telling the
-      // engineer WHERE the value is produced (single-source rule).
-      //
-      // The VSME hints render even BEFORE the engine has ever written a value
-      // (empty project): without them the CO₂ calculator / register is
-      // invisible from the worksheet and the engineer types the totals by
-      // hand. Pre-computation the field stays editable — only the hint shows.
-      const isServerComputed = serverComputedSet.has(f.id);
-      const isVsme = standardCode === 'VSME';
-      const computedHint = isVsme && VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
+    // Server-engine-written value (source_type='computed' / VSME 'derived'):
+    // locked via the existing isComputed path + a provenance hint telling the
+    // engineer WHERE the value is produced (single-source rule).
+    //
+    // The VSME hints render even BEFORE the engine has ever written a value
+    // (empty project): without them the CO₂ calculator / register is
+    // invisible from the worksheet and the engineer types the totals by
+    // hand. Pre-computation the field stays editable — only the hint shows.
+    const isServerComputed = serverComputedSet.has(f.id);
+    const isVsme = standardCode === 'VSME';
+    const computedHint = isVsme && VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
+      ? {
+          label: isServerComputed
+            ? 'Automatisch berechnet aus den CO₂-Aktivitätslinien.'
+            : 'Dieses Feld berechnet der CO₂-Rechner aus den erfassten Aktivitäten.',
+          href: `/${locale}/projects/${projectId}/vsme/emissions`,
+          hrefLabel: '→ CO₂-Rechner öffnen',
+        }
+      : isVsme && VSME_POLLUTANT_SUM_SYMBOLS.has(f.symbol) && pollutantRegisterField
         ? {
             label: isServerComputed
-              ? 'Automatisch berechnet aus den CO₂-Aktivitätslinien.'
-              : 'Dieses Feld berechnet der CO₂-Rechner aus den erfassten Aktivitäten.',
-            href: `/${locale}/projects/${projectId}/vsme/emissions`,
-            hrefLabel: '→ CO₂-Rechner öffnen',
+              ? 'Summe aus dem Schadstoffregister (unten auf dieser Seite).'
+              : 'Wird beim Speichern als Summe aus dem Schadstoffregister (unten) berechnet.',
           }
-        : isVsme && VSME_POLLUTANT_SUM_SYMBOLS.has(f.symbol) && pollutantRegisterField
-          ? {
-              label: isServerComputed
-                ? 'Summe aus dem Schadstoffregister (unten auf dieser Seite).'
-                : 'Wird beim Speichern als Summe aus dem Schadstoffregister (unten) berechnet.',
-            }
-          : isServerComputed
-            ? { label: 'Serverseitig berechneter Wert.' }
-            : undefined;
+        : isServerComputed
+          ? { label: 'Serverseitig berechneter Wert.' }
+          : undefined;
 
-      // For ac_as_ratio_check, resolve the sibling reason field's current
-      // value and thread it in as statusReason so AcAsRatioCheckStatus can
-      // display the distinguishing text (keine Anforderung vs behördlich).
-      let statusReason: string | null = null;
-      if (f.symbol === 'ac_as_ratio_check') {
-        const reasonField = fieldBySymbol.get('ac_as_ratio_check_reason');
-        if (reasonField) {
-          const rv = values[reasonField.id];
-          statusReason = rv?.type === 'text' ? (rv.value ?? null) : null;
-        }
+    // For ac_as_ratio_check, resolve the sibling reason field's current
+    // value and thread it in as statusReason so AcAsRatioCheckStatus can
+    // display the distinguishing text (keine Anforderung vs behördlich).
+    let statusReason: string | null = null;
+    if (f.symbol === 'ac_as_ratio_check') {
+      const reasonField = fieldBySymbol.get('ac_as_ratio_check_reason');
+      if (reasonField) {
+        const rv = values[reasonField.id];
+        statusReason = rv?.type === 'text' ? (rv.value ?? null) : null;
       }
+    }
 
-      return (
-        <DynamicField
-          key={f.id}
-          field={f}
-          locale={locale}
-          projectId={projectId}
-          standardCode={standardCode}
-          sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
-          inheritedFrom={inheritedFromBySymbol[f.symbol]}
-          docs={docs}
-          isComputed={(computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')) || isServerComputed}
-          computedHint={computedHint}
-          prefillSource={prefillSourceByFieldId?.[f.id]}
-          siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
-          clientSupplied={clientSuppliedByFieldId?.[f.id] ?? false}
-          inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
-          overridePill={
-            overrideMeta ? (
-              <OverridePillForField
-                fieldId={f.id}
-                projectId={projectId}
-                equationNumber={overrideMeta.equationNumber}
-                outputSymbol={overrideMeta.outputSymbol}
-                computedValue={overrideMeta.computedValue}
-              />
-            ) : undefined
-          }
-          isPlatformEngineer={isPlatformEngineer}
-          readOnly={locked}
-          statusReason={statusReason}
-          asmMethod={asmMethod}
-          asmProvenance={asmProvenance}
-          asmNeedsReconfirmation={asmNeedsReconfirmation}
-        />
-      );
-    });
+    return (
+      <DynamicField
+        field={f}
+        locale={locale}
+        projectId={projectId}
+        standardCode={standardCode}
+        sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
+        inheritedFrom={inheritedFromBySymbol[f.symbol]}
+        docs={docs}
+        isComputed={(computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')) || isServerComputed}
+        computedHint={computedHint}
+        prefillSource={prefillSourceByFieldId?.[f.id]}
+        siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
+        clientSupplied={clientSuppliedByFieldId?.[f.id] ?? false}
+        inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
+        overridePill={
+          overrideMeta ? (
+            <OverridePillForField
+              fieldId={f.id}
+              projectId={projectId}
+              equationNumber={overrideMeta.equationNumber}
+              outputSymbol={overrideMeta.outputSymbol}
+              computedValue={overrideMeta.computedValue}
+            />
+          ) : undefined
+        }
+        isPlatformEngineer={isPlatformEngineer}
+        readOnly={locked}
+        statusReason={statusReason}
+        asmMethod={asmMethod}
+        asmProvenance={asmProvenance}
+        asmNeedsReconfirmation={asmNeedsReconfirmation}
+      />
+    );
   };
+
+  // Plan 2b (Task 3): the ONE renderer path. Every field — section grid and
+  // bottom strip alike — goes through the WIDGETS registry with this context.
+  const widgetCtx: WidgetContext = {
+    standardCode,
+    locale,
+    projectId,
+    readOnly: locked,
+    fieldBySymbol,
+    values,
+    setField,
+    symbolLookup,
+    engineStates,
+    equations: engineEquations,
+    computedSymbols,
+    serverComputedSet,
+    rainfallDesignReturnPeriod,
+    renderDynamic,
+  };
+  const renderField = (sectionId: string | null) =>
+    (fieldsBySectionId.map.get(sectionId) ?? []).map((f) => renderWidget(f, widgetCtx));
 
   return (
     <article className="space-y-8 max-w-3xl">
@@ -813,7 +789,7 @@ export function WorksheetForm({
 
       <SourceFormReferencePanel standardCode={standardCode} locale={locale} />
 
-      {srcState && <SurfaceSourceBanner state={srcState} />}
+      {registerSourceStates.map((s) => s.state && <SurfaceSourceBanner key={s.symbol} state={s.state} />)}
 
       {inheritedFieldsForPanel.length > 0 && (
         <section
@@ -900,98 +876,34 @@ export function WorksheetForm({
           />
         ))}
 
-      {surfaceSource && srcState && srcState.state !== 'missing' && (
-        <section className="border-t border-hairline pt-6 mt-8 space-y-2">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Flächenverzeichnis (aus A138-07 — schreibgeschützt)
-          </h2>
-          <ReadOnlySurfaceTable carrier={surfaceSource.carrier} />
-        </section>
+      {/* Consumed registers (e.g. A138-10 ← A138-07 surface_inventory): a
+          read-only mirror of the owner's carrier under the register's own
+          config. Hidden while the source is missing (the banner above says so). */}
+      {registerSourceStates.map((s) =>
+        s.cfg && s.state && s.state.state !== 'missing' ? (
+          <section key={s.symbol} className="border-t border-hairline pt-6 mt-8 space-y-2" data-testid={`source-${s.symbol}`}>
+            <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+              {s.cfg.title} (aus {s.ownerCode} — schreibgeschützt)
+            </h2>
+            <ReadOnlyRegisterTable config={s.cfg} carrier={s.carrier} symbol={s.symbol} standardCode={standardCode} />
+          </section>
+        ) : null,
       )}
 
-      {/* Owner (A138-04): manage the project's rainfall table(s). */}
-      {kostraField && !kostraField.inheritedFromWorksheet && shown(kostraField) && (
-        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Regenspendentabellen (für V_VA nach Gl. 8)
-          </h2>
-          <RainfallTablesEditor fieldId={kostraField.id} readOnly={locked} designReturnPeriod={rainfallDesignReturnPeriod} />
-        </section>
-      )}
-
-      {/* Consumer facility: choose WHICH table this facility uses (table id
-          only — never an r_D(n) value). Rendered whenever the facility carries
-          the rainfall_table_ref field; the table options come from the
-          inherited carrier (empty list if none is inherited yet). Robust to
-          carrier-inheritance state — never falls back to a raw text input. */}
-      {rainfallRefField && !rainfallRefField.inheritedFromWorksheet && shown(rainfallRefField) && (
-        <section className="border-t border-hairline pt-6 mt-8 space-y-2" data-testid="rainfall-table-ref-section">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Verwendete Regenspendentabelle
-          </h2>
-          <RainfallTableSelector
-            tables={rainfallTables}
-            value={rainfallTableRef}
-            onSelect={(id) => setField(rainfallRefField.id, { type: 'text', value: id })}
-            readOnly={locked}
-          />
-        </section>
-      )}
-
-      {surfaceInventoryField && shown(surfaceInventoryField) && (
-        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Flächenverzeichnis (Tab. 9 — C_i für Gl. 2 und C_s für Gl. 10)
-          </h2>
-          <SurfaceInventoryEditor fieldId={surfaceInventoryField.id} readOnly={locked} />
-        </section>
-      )}
-
-      {riskRegisterField && shown(riskRegisterField) && (
-        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Risikoanalyse (Anhang A — Tab. A.1)
-          </h2>
-          <EditorErrorBoundary label="Risikoregister">
-            <RiskRegisterEditor fieldId={riskRegisterField.id} readOnly={locked} />
-          </EditorErrorBoundary>
-        </section>
-      )}
-
-      {mitigationPlanField && shown(mitigationPlanField) && (
-        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Risiko-Maßnahmenplan (Anhang A — Tab. A.2)
-          </h2>
-          <EditorErrorBoundary label="Risiko-Maßnahmenplan">
-            <MitigationPlanEditor fieldId={mitigationPlanField.id} readOnly={locked} />
-          </EditorErrorBoundary>
-        </section>
-      )}
-
-      {selectionFields.filter(({ field: f }) => shown(f)).map(({ field: f, config }) => {
+      {/* Bottom strip (Plan 2b Task 3): every own visible field whose widget
+          places it at the bottom — registers (generic RegisterEditor or a
+          bespoke editor: KOSTRA tables, risk register, mitigation plan, and the
+          Task 4/6 hand-offs) and legacy TS checklists — in orderIndex order,
+          under the title widgetPlacement() resolves (config title / today's h2). */}
+      {fieldsBySectionId.bottom.map((f) => {
+        const { title } = widgetPlacement(f);
         return (
-          <section key={f.id} className="border-t border-hairline pt-6 mt-8 space-y-4">
-            <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">{config.title}</h2>
-            <EditorErrorBoundary label={config.title}>
-              {config.kind === 'checklist' ? (
-                <ChecklistEditor fieldId={f.id} config={config} readOnly={locked} />
-              ) : (
-                <StructuredRegisterEditor fieldId={f.id} config={config} readOnly={locked} />
-              )}
-            </EditorErrorBoundary>
+          <section key={f.id} className="border-t border-hairline pt-6 mt-8 space-y-4" data-testid={`bottom-${f.symbol}`}>
+            {title && <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">{title}</h2>}
+            {renderWidget(f, widgetCtx)}
           </section>
         );
       })}
-
-      {pollutantRegisterField && shown(pollutantRegisterField) && (
-        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Schadstoffregister — Emissionen je Schadstoff (VSME Abs. 32)
-          </h2>
-          <PollutantRegisterEditor fieldId={pollutantRegisterField.id} readOnly={locked} />
-        </section>
-      )}
 
       <EquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} />
 
@@ -1033,50 +945,6 @@ export function WorksheetForm({
         diffHref={diffHref}
       />
     </article>
-  );
-}
-
-const NUM_FMT = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 });
-function fmt(v: number | null): string {
-  return v != null && Number.isFinite(v) ? NUM_FMT.format(v) : '—';
-}
-
-/** Read-only mirror of the A138-07 surface-inventory carrier for consumer
- * worksheets (e.g. A138-10). No inputs; no store writes. */
-function ReadOnlySurfaceTable({ carrier }: { carrier: unknown }) {
-  const { rows } = normalizeSurfaceCarrier(carrier);
-  if (rows.length === 0) return <p className="text-sm text-subtext">Keine Zeilen erfasst.</p>;
-  return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full text-sm border-collapse">
-        <thead>
-          <tr className="text-left text-[10px] uppercase tracking-[0.15em] text-subtext border-b border-hairline">
-            <th className="pr-4 pb-1 font-normal">Bezeichnung</th>
-            <th className="pr-4 pb-1 font-normal">Oberflächentyp</th>
-            <th className="pr-4 pb-1 font-normal text-right">A (m²)</th>
-            <th className="pr-4 pb-1 font-normal text-right">C_i</th>
-            <th className="pr-4 pb-1 font-normal text-right">C_s</th>
-            <th className="pb-1 font-normal text-right">A·C_i</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => {
-            const typeLabel = row.tab9_value ? (lookupTab9(row.tab9_value)?.label ?? '—') : '—';
-            const aCi = row.area_m2 != null && row.c_i != null ? row.area_m2 * row.c_i : null;
-            return (
-              <tr key={row.id} className="border-b border-hairline last:border-b-0">
-                <td className="pr-4 py-1 text-ink">{row.label || '—'}</td>
-                <td className="pr-4 py-1 text-ink">{typeLabel}</td>
-                <td className="pr-4 py-1 font-mono tabular-nums text-right text-ink">{fmt(row.area_m2)}</td>
-                <td className="pr-4 py-1 font-mono tabular-nums text-right text-ink">{fmt(row.c_i)}</td>
-                <td className="pr-4 py-1 font-mono tabular-nums text-right text-ink">{fmt(row.c_s)}</td>
-                <td className="py-1 font-mono tabular-nums text-right text-ink">{fmt(aCi)}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
   );
 }
 

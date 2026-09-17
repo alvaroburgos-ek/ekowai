@@ -400,12 +400,14 @@ export async function userHasProjectAccess(
 
 /** Load the surface-inventory SOURCE (A138-07) instance status + carrier value
  * for a consumer worksheet render. Returns null when the current worksheet is
- * itself the owner of `surface_inventory`, or no source row exists. */
+ * itself the owner of `surface_inventory`, or no source row exists. The result
+ * carries its register `symbol` so the form can list it under the generic
+ * `registerSources` prop (Plan 2b Task 3). */
 export async function loadSurfaceSource(
   projectId: string,
   standardId: string,
   currentWorksheetCode: string,
-): Promise<{ status: string; carrier: unknown; ownerCode: string } | null> {
+): Promise<{ symbol: 'surface_inventory'; status: string; carrier: unknown; ownerCode: string } | null> {
   const ownerField = await db
     .select({ fieldId: fields.id, ownerCode: worksheetTemplates.code, templateId: worksheetTemplates.id })
     .from(fields)
@@ -432,5 +434,5 @@ export async function loadSurfaceSource(
       .where(and(eq(projectParameters.projectId, projectId), eq(projectParameters.fieldId, owner.fieldId)))
       .limit(1),
   ]);
-  return { status: inst[0]?.status ?? 'draft', carrier: param[0]?.value ?? null, ownerCode: owner.ownerCode };
+  return { symbol: 'surface_inventory' as const, status: inst[0]?.status ?? 'draft', carrier: param[0]?.value ?? null, ownerCode: owner.ownerCode };
 }

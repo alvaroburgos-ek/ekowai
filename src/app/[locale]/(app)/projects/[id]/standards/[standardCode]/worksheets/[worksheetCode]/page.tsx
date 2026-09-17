@@ -128,6 +128,8 @@ export default async function WorksheetPage({
   // Load surface-inventory source (A138-07) status + carrier for consumer
   // worksheets (e.g. A138-10). Returns null when the current worksheet IS the
   // owner of surface_inventory, or the standard has no surface_inventory field.
+  // Plan 2b (Task 3): the form takes it as one entry of the generic
+  // `registerSources` list (symbol-tagged; per-register upstream cause).
   const surfaceSource = await loadSurfaceSource(projectId, ws.template.standard.id, worksheetCode);
 
   // Regulation reference tables (Tab.9/5/6/13 etc.) for this standard — registered
@@ -407,7 +409,7 @@ export default async function WorksheetPage({
           priorSnapshotCount={priorSnapshotCount}
           diffHref={`/${localeTyped}/projects/${projectId}/standards/${standardCode}/worksheets/${worksheetCode}/diff`}
           isPlatformEngineer={isPlatformEngineer}
-          surfaceSource={surfaceSource}
+          registerSources={surfaceSource ? [surfaceSource] : []}
           serverComputedFieldIds={serverComputedFieldIds}
           regulationTables={regulationTablesData}
         />

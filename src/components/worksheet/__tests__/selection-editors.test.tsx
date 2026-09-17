@@ -3,9 +3,16 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderToString } from 'react-dom/server';
 import { ChecklistEditor } from '../checklist-editor';
-import { StructuredRegisterEditor } from '../structured-register-editor';
+// Plan 2b: StructuredRegisterEditor deleted — the generic RegisterEditor renders the TS selection registers via resolveRegisterConfig (Task 1).
+import { RegisterEditor } from '../register-editor';
+import { resolveRegisterConfig } from '@/lib/eval/register-configs';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { SELECTION_CONFIGS, normalizeChecklist, normalizeRegister } from '@/lib/eval/selection-fields';
+
+/** The TS selection register as the generic editor sees it (widget IS NULL ⇒ resolveRegisterConfig fallback). */
+const reg = (symbol: string) => (
+  <RegisterEditor fieldId={FIELD_ID} symbol={symbol} config={resolveRegisterConfig({ symbol, dataType: 'json', widget: null })!} standardCode="DWA-M-820-1" />
+);
 
 const FIELD_ID = 'fixture-selection';
 
@@ -51,14 +58,14 @@ describe('ChecklistEditor (applicable_legal_bases)', () => {
   });
 });
 
-describe('StructuredRegisterEditor (bewertungskommission_members)', () => {
+describe('RegisterEditor (bewertungskommission_members)', () => {
   if (commission.kind !== 'register') throw new Error('config');
   it('SSR renders without throwing', () => {
-    expect(() => renderToString(<StructuredRegisterEditor fieldId={FIELD_ID} config={commission} />)).not.toThrow();
+    expect(() => renderToString(reg('bewertungskommission_members'))).not.toThrow();
   });
   it('adds a row and edits typed cells (text + boolean)', async () => {
     const user = userEvent.setup();
-    render(<StructuredRegisterEditor fieldId={FIELD_ID} config={commission} />);
+    render(reg('bewertungskommission_members'));
     await user.click(screen.getByRole('button', { name: commission.addLabel }));
     await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Meier');
     await user.click(screen.getByRole('checkbox', { name: 'Stimmberechtigt' }));
@@ -67,7 +74,7 @@ describe('StructuredRegisterEditor (bewertungskommission_members)', () => {
   });
 });
 
-describe('StructuredRegisterEditor (change_orders — derived count + summed volume)', () => {
+describe('RegisterEditor (change_orders — derived count + summed volume)', () => {
   const co = SELECTION_CONFIGS.change_orders;
   if (co.kind !== 'register') throw new Error('config');
   it('derives count and sums the volume column in the footer', () => {
@@ -75,20 +82,20 @@ describe('StructuredRegisterEditor (change_orders — derived count + summed vol
       { id: 'a', aenderung: 'Nachtrag 1', kosten_eur: 1000, status: 'genehmigt' },
       { id: 'b', aenderung: 'Nachtrag 2', kosten_eur: 500, status: 'offen' },
     ] });
-    render(<StructuredRegisterEditor fieldId={FIELD_ID} config={co} />);
-    const el = screen.getByTestId('structured-register-editor').textContent ?? '';
+    render(reg('change_orders'));
+    const el = screen.getByTestId('register-editor').textContent ?? '';
     expect(el).toMatch(/2\s*Einträge/);
     expect(el).toMatch(/Volumen/);
     expect(el).toMatch(/1\.500/); // 1000 + 500, de-DE formatting
   });
 });
 
-describe('StructuredRegisterEditor (award_criteria_list — enum + number cols)', () => {
+describe('RegisterEditor (award_criteria_list — enum + number cols)', () => {
   if (award.kind !== 'register') throw new Error('config');
   it('enum column offers the printed E.2 criteria; number column stores a weight', async () => {
     const user = userEvent.setup();
     init({ rows: [{ id: 'r', kriterium: '', gewichtung: null, anmerkung: '' }] });
-    render(<StructuredRegisterEditor fieldId={FIELD_ID} config={award} />);
+    render(reg('award_criteria_list'));
     expect(screen.getByRole('option', { name: 'Schlüsselpersonal' })).toBeTruthy();
     await user.selectOptions(screen.getByRole('combobox', { name: 'Kriterium' }), 'Preis');
     await user.type(screen.getByRole('spinbutton', { name: 'Gewichtung (%)' }), '30');

@@ -30,14 +30,14 @@ vi.mock('../approval-bar', () => ({ ApprovalBar: () => null }));
 vi.mock('../equation-engine-card', () => ({ EquationEngineCard: () => null }));
 vi.mock('../rainfall-tables-editor', () => ({ RainfallTablesEditor: () => null }));
 vi.mock('../rainfall-table-selector', () => ({ RainfallTableSelector: () => null }));
-vi.mock('../surface-inventory-editor', () => ({ SurfaceInventoryEditor: () => null }));
+// Plan 2b: `../surface-inventory-editor` deleted (generic RegisterEditor) — its vi.mock removed.
 vi.mock('../surface-source-banner', () => ({ SurfaceSourceBanner: () => null }));
 vi.mock('@/components/form-templates/SourceFormReferencePanel', () => ({ SourceFormReferencePanel: () => null }));
 vi.mock('@/components/documents/citation-picker', () => ({ CitationPicker: () => null }));
 vi.mock('@/components/documents/citation-chips', () => ({ CitationChips: () => null }));
 vi.mock('./verify-button', () => ({ VerifyButton: () => null }));
-// NOTE: checklist-editor / structured-register-editor are intentionally NOT
-// mocked — the dispatch under test renders them for real.
+// NOTE: checklist-editor / register-editor are intentionally NOT mocked — the
+// dispatch under test (the WIDGETS registry since Plan 2b Task 3) renders them for real.
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -124,7 +124,11 @@ describe('WorksheetForm dispatch by field.widget (Task 9 integration proof)', ()
     act(() => { useWorksheetStore.getState().init('reset', {}, {}, {}); });
   });
 
-  it('DB widget (select_many) wins: renders its bottom-section checklist with the DB title, NOT in the grid', () => {
+  // Plan 2b (Task 3): a DB-configured select_many renders IN ITS SECTION slot
+  // (spec §6; sectionId null ⇒ the orphan block) instead of the bottom strip —
+  // the assertions hold unchanged because ChecklistEditor carries the DB title
+  // and never renders the field's grid label.
+  it('DB widget (select_many) wins: renders its checklist with the DB title, NOT as a grid input', () => {
     render(<WorksheetForm {...PROPS} />);
     // Bottom-section checklist editor exists with the DB-supplied title.
     const editors = screen.getAllByTestId('checklist-editor');
