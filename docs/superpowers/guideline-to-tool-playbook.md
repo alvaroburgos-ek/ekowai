@@ -34,6 +34,12 @@ Apply strictly in this order, never skip or reorder a step:
 
 1. `supabase/migrations/20260911100000_guideline_to_tool_schema.sql` — the four `fields`
    columns, `worksheet_sections.visible_when`, the two `regulation_*` tables.
+   **Since Plan 3 Task 4 fix round 1 (sign-off plan1-D-3-1):** prod carries a LEGACY per-cell table already
+   named `regulation_tables` (5,382 rows / 35 standards, no `standard_code`); the migration first RENAMES it to
+   `regulation_tables_legacy_v1` (+ pkey / fkey / index names; data untouched; idempotent) and only then creates the
+   Plan-1 tables — without that step every seed migration below fails on "column standard_code does not exist" and
+   the runtime fallback masks it. Its rollback refuses while the new table still holds rows (roll the seeds back
+   first) and renames the legacy table back. Reproduction: `tests/harness/guideline-to-tool-schema-legacy-rename.integration.test.ts`.
 2. `scripts/migrations/20260911110000_regulation_tables_seed_a138.sql` — TAB9/5/6/13 seed rows.
 3. The `scripts/migrations/20260911120000_selection_configs_*.sql` files — one per standard,
    any order among themselves (each is standard-scoped and independent of the others).

@@ -260,6 +260,8 @@ export const equations = pgTable(
   (t) => ({ uniqWorksheetEqn: unique().on(t.worksheetTemplateId, t.equationNumber) }),
 );
 
+// Plan-1 table. Prod carried a LEGACY per-cell table of the same name; the schema migration renames it to
+// regulation_tables_legacy_v1 before creating this one (sign-off plan1-D-3-1; no drizzle model for the legacy table).
 export const regulationTables = pgTable(
   'regulation_tables',
   {
