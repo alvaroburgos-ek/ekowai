@@ -317,8 +317,14 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     //     conditions (empty register, null cell, no table row) — data, not
     //     a malformed formula
     //   - Erwarte … Argument(e)                : a supported call with the wrong
-    //     arity — the legacy engine reported such calls as unsupported
-    //     (`Funktionsaufruf …`), i.e. manual_required, never a red pill
+    //     arity. Legacy parity holds only for calls the legacy engine did NOT
+    //     know (every Plan-2a registry function — `lookup`, `if`, the row
+    //     functions — failed there as `Funktionsaufruf …` = manual_required;
+    //     pinned by DWA-M-1200-1 EQ-001 in formula-parse-failure-triage.test.ts).
+    //     A mis-arity LEGACY math call (`sqrt(a, b)`, `min(a)`) was a parse
+    //     failure in the old engine (`Erwarte ',' …` / `Fehlende schließende
+    //     Klammer …` → error); it is manual_required here on purpose — an
+    //     authoring defect the engineer can act on, not an engine fault
     if (
       /Unbekanntes Symbol|Funktionsaufruf|Division durch Null|Nicht-endliches Ergebnis|Keine vollständigen Zeilen|Fehlende Eingabe|lookup\(\)|stdev_rows\(\)|Operand ist keine Zahl|^Erwarte .*Argument\(e\)/.test(
         msg,
@@ -337,7 +343,7 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     // grammar reports first (fix-wave item 2; DWA-M-816 ×19, DWA-A-272E RULE-11).
     if (PARSE_FAILURE.test(msg)) {
       const known = (sym: string): boolean =>
-        sym in scope || req.registers?.[sym] !== undefined || req.carriers?.[sym] !== undefined;
+        Object.hasOwn(scope, sym) || req.registers?.[sym] !== undefined || req.carriers?.[sym] !== undefined;
       const triaged = triageParseFailure(expression, known);
       if (triaged) {
         return { kind: 'manual_required', reason: triaged.reason, rewrite: rewrite ?? undefined };

@@ -40,6 +40,13 @@ describe('parse-failure triage keeps the legacy manual_required classification',
     const r = evaluateFormula(REQ('treatment_process valid_for (material_flow_class, treatment_objective)', ['material_flow_class', 'treatment_objective', 'treatment_process']));
     expect(r).toMatchObject({ kind: 'manual_required', reason: 'Funktionsaufruf "valid_for(...)" wird nicht unterstützt — Rewrite-Regel erforderlich.' });
   });
+  it('Plan 2b close-out: a prototype-named unknown symbol is still unknown (Object.hasOwn, not `in`)', () => {
+    // `toString` is not in scope; `'toString' in scope` would have been true
+    // through Object.prototype and the triage would have skipped the symbol,
+    // reaching the juxtaposed `2` and reporting `error` instead of legacy manual.
+    const r = evaluateFormula(REQ('Z = toString 2', []));
+    expect(r).toMatchObject({ kind: 'manual_required', reason: 'Unbekanntes Symbol "toString" im Ausdruck.' });
+  });
   it('DWA-M-1200-1 EQ-001: arity failure of a supported call is manual, not error', () => {
     const r = evaluateFormula(REQ('risikoniveau_ausgangs = lookup(eintrittswahrscheinlichkeit, schadensausmass)', ['eintrittswahrscheinlichkeit', 'schadensausmass']));
     expect(r.kind).toBe('manual_required');

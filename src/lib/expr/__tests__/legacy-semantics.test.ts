@@ -136,6 +136,32 @@ describe('C-1 scope: an arithmetic LHS keeps the legacy symbol-ref RHS (fix-wave
     // an enum literal that merely shares a hidden symbol's name in a non-hidden gate is untouched
     expect(evalCondition('x == paved', sc({ x: 'paved' }), { hiddenSymbols: new Set(['other']) })).toEqual({ kind: 'pass' });
   });
+  it('C-2 mirror (Plan 2b close-out): row-scoped args of a row function never trigger N.A.', () => {
+    // A column name or enum literal inside the row-scoped condition of
+    // count_rows/sum_rows/… is NOT a worksheet symbol; a hidden worksheet
+    // symbol of the same name must not turn the gate not_applicable (the
+    // `extractSymbols` C-2 rule, mirrored in `hiddenReferences`).
+    const reg = {
+      rows: [
+        { id: 'a', values: { kind: 'paved', area_m2: 100 }, complete: true },
+        { id: 'b', values: { kind: 'unpaved', area_m2: 50 }, complete: true },
+      ],
+      flags: {},
+    };
+    const s: Scope = { symbol: () => undefined, register: (n) => (n === 'reg' ? reg : undefined) };
+    expect(evalCondition('count_rows(reg, kind == paved) > 0', s, { hiddenSymbols: new Set(['paved']) }))
+      .toEqual({ kind: 'pass' });
+    expect(evalCondition("count_rows(reg, kind == 'paved') > 0", s, { hiddenSymbols: new Set(['kind']) }))
+      .toEqual({ kind: 'pass' });
+    expect(evalCondition('sum_rows(reg, if(kind == paved, area_m2, 0)) > 0', s, { hiddenSymbols: new Set(['paved', 'area_m2']) }))
+      .toEqual({ kind: 'pass' });
+    // the register symbol itself stays a free symbol (hidden register ⇒ N.A.)
+    expect(evalCondition('count_rows(reg, kind == paved) > 0', s, { hiddenSymbols: new Set(['reg']) }))
+      .toEqual({ kind: 'not_applicable', hiddenSymbols: ['reg'] });
+    // the `p` argument of percentile_rows is outer-scope arithmetic and IS checked
+    expect(evalCondition('percentile_rows(reg, area_m2, p) > 0', { ...s, symbol: (n) => (n === 'p' ? 50 : undefined) }, { hiddenSymbols: new Set(['p']) }))
+      .toEqual({ kind: 'not_applicable', hiddenSymbols: ['p'] });
+  });
   it('corpus gate DWA-A-102-2 REQ-04: A_b_a_I + A_b_a_II + A_b_a_III == A_b_a', () => {
     const g = 'A_b_a_I + A_b_a_II + A_b_a_III == A_b_a';
     expect(evalCondition(g, sc({ A_b_a_I: 100, A_b_a_II: 50, A_b_a_III: 25 }))).toEqual({ kind: 'pending', missingSymbols: ['A_b_a'] });

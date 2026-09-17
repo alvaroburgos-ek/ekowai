@@ -3,9 +3,11 @@
 Owner request 2026-09-11: save this structure so encoding the next guideline costs fewer
 tokens than the first pass did. Plan 1 (schema, table accessors, selection-config plumbing)
 is DB-side and built; Plan 2a (expression language, `visible_when`, register equations,
-generic materialiser — see "What Plan 2a added" at the end) is built on the same branch.
-This is the recipe for turning one more standard's §1–§3 content into worksheet rows on top
-of them — not a description of the whole compliance-SaaS architecture.
+generic materialiser — see "What Plan 2a added" at the end) and Plan 2b (the generic
+editors: `RegisterEditor`, the `WIDGETS` registry, `reference` and `lookup_fill` — see "What
+Plan 2b added") are built on the same branch. This is the recipe for turning one more
+standard's §1–§3 content into worksheet rows on top of them — not a description of the whole
+compliance-SaaS architecture.
 
 ## Apply order (hard constraint)
 
@@ -44,7 +46,24 @@ Apply strictly in this order, never skip or reorder a step:
    `ON CONFLICT DO NOTHING`).
 6. `scripts/migrations/20260916120000_a138_12_visible_when.sql` — `fields.visible_when` on
    `soil_bodenart_tab13` and `a_s_m_provenance` (only `WHERE visible_when IS NULL`).
-7. Deploy the build.
+7. `scripts/migrations/20260916130000_a138_07_surface_inventory_widget.sql` — DWA-A-138-1
+   `surface_inventory` gets `widget='register'` + the `ui_config` the TS fallback serves today
+   (Plan 2b; retires `REGISTER_CONFIGS_FALLBACK.surface_inventory`).
+8. `scripts/migrations/20260916140000_vsme_b04_pollutant_register_widget.sql` — VSME
+   `pollutant_register` gets `widget='register'` + `ui_config` incl. the `not_applicable` flag
+   (retires `REGISTER_CONFIGS_FALLBACK.pollutant_register` + `REGISTER_FLAG_KEYS`).
+9. `scripts/migrations/20260916150000_a138_rainfall_table_ref_reference.sql` — DWA-A-138-1
+   `rainfall_table_ref` (8 prod rows, one per consumer worksheet among A138-13..22 — controller read-only query, 2b ledger) gets
+   `widget='reference'` + `ui_config` (retires `REFERENCE_CONFIGS_FALLBACK.rainfall_table_ref`).
+   `data_type` stays `text` — the migration never touches it (three `saveWorksheet` readers
+   accept a text value only; pinned).
+10. **GATED — EXCLUDED from the apply list until sign-off D-2b-3 is RATIFIED:**
+    `scripts/migrations/20260916160000_a138_12_ac_as_ratio_limit_lookup_fill.sql` — A138-12
+    `ac_as_ratio_limit` (home template only, `w.code = 'A138-12'`) gets `widget='lookup_fill'`
+    + the TAB6 `lookup` binding. Its key symbols `tab6_tier` / `bbz_band` are not fields yet, so
+    the widget is display-only either way and the migration is cosmetic (code → data); the
+    file header carries the three options. Do NOT apply it as part of step 7–9.
+11. Deploy the build.
 
 Steps 4–6 are **independent of each other** (different tables/rows; any order among the three)
 but every one of them needs step 1 first (`input_symbols` exists already, `visible_when` does
@@ -52,21 +71,54 @@ not before step 1). **None of the three is required for the build to be correct*
 carries a deploy-safety bridge for each (see "Bridge retirement" below), so the Plan-2a build
 may go live with steps 4–6 still pending; applying them later changes nothing an engineer
 sees except the "source formula" line of the six A138-07 cards (the rewrite badge disappears).
-Applying any of them to `vadsmshzebefjreqcicl` is the owner's stamp, never this branch's.
+The same holds for steps 7–9 (Plan 2b): each is one transactional `UPDATE fields … WHERE
+f.widget IS NULL` emitted from the very TS fallback the code renders while `widget IS NULL`
+(byte-pinned by `scripts/__tests__/widget-configs-sql-freshness.test.ts`), so applying them
+changes nothing on screen; they are independent of each other and of steps 4–6, and need only
+step 1. Applying any of them to `vadsmshzebefjreqcicl` is the owner's stamp, never this
+branch's.
 
 **Rollback is the reverse order, with one twist:** redeploy the previous (pre-this-branch)
 build BEFORE running `rollback-20260911100000_guideline_to_tool_schema.sql` — dropping the
 schema columns while the new build is still live re-creates the exact "column does not exist"
 failure this order is designed to avoid, just in the opposite direction. So: redeploy old build
-→ `scripts/rollback-20260916120000-a138-12-visible-when.sql` →
+→ `scripts/rollback-20260916130000-widget-configs.sql` (the ONE canonical Plan-2b rollback:
+all four widget rows at once, reverse order inside, each statement guarded by
+`f.widget = '<what the forward wrote>'` so the never-applied gated row is a no-op — the
+standalone Task-7 rollback for 20260916160000 was deleted at close-out as redundant) →
+`scripts/rollback-20260916120000-a138-12-visible-when.sql` →
 `scripts/rollback-20260916110000-vsme-b04-register-equations.sql` →
 `scripts/rollback-20260916100000-a138-07-register-equations.sql` →
 `scripts/rollback-20260911120000-selection-configs.sql` →
 `scripts/rollback-20260911110000-regulation-tables-seed-a138.sql` →
-`rollback-20260911100000_guideline_to_tool_schema.sql`. (The three 2a rollbacks can also run
-alone, in any order, while the 2a build stays live — the bridges take over again; the A138-07
-rollback only changes the stored text, the engine keeps computing the register form through
-the bridge, as its header says.)
+`rollback-20260911100000_guideline_to_tool_schema.sql`. (The three 2a rollbacks and the 2b
+rollback can also run alone, in any order, while the branch build stays live — the bridges and
+the TS fallbacks take over again; the A138-07 rollback only changes the stored text, the engine
+keeps computing the register form through the bridge, as its header says.)
+
+**Post-apply verification (steps 7–9):**
+
+```sql
+-- expect: surface_inventory register (1 row, A138-07), pollutant_register register (1 row, B04.100),
+--         rainfall_table_ref reference (8 rows, A138-13..22); ac_as_ratio_limit only if D-2b-3 was ratified
+select s.code, w.code, f.symbol, f.widget, f.ui_config is not null as has_ui, f.lookup is not null as has_lookup
+  from fields f join worksheet_templates w on w.id = f.worksheet_template_id join standards s on s.id = w.standard_id
+ where f.widget is not null and f.symbol in ('surface_inventory','pollutant_register','rainfall_table_ref','ac_as_ratio_limit')
+ order by 1, 2, 3;
+```
+
+**Post-apply cleanup (delete code, nothing else) once the owner has applied the named step:**
+step 7 → `REGISTER_CONFIGS_FALLBACK.surface_inventory` (`src/lib/eval/register-configs.ts`);
+step 8 → `REGISTER_CONFIGS_FALLBACK.pollutant_register` + `REGISTER_FLAG_KEYS` (same file);
+step 9 → `REFERENCE_CONFIGS_FALLBACK.rainfall_table_ref` (`src/lib/eval/reference-configs.ts`);
+step 10 (if ever applied) → `LOOKUP_BINDINGS_FALLBACK.ac_as_ratio_limit`
+(`src/lib/eval/lookup-fill.ts`); any `BESPOKE_BY_SYMBOL` entry (`src/components/worksheet/widgets.tsx`)
+whose row now carries `ui_config.editor` in prod (none of the three bespoke rows has such a
+migration yet); and the `SELECTION_CONFIGS`-register branch of `resolveRegisterConfig` once
+EVERY `20260911120000_selection_configs_*.sql` is applied (step 3 — until then a still-NULL
+selection register renders through that branch). Each deletion reds the matching pin in
+`register-configs.test.ts` / `reference-configs.test.ts` / `lookup-fill.test.ts` /
+`widget-configs-sql-freshness.test.ts` — remove the pin with the constant.
 
 **Post-apply verification (steps 4–6):**
 
@@ -152,8 +204,15 @@ render-side). Add a `discriminator: true` column for parallel technologies, and
 `lookup_key`/`lookup_value` column pairs bound to a `table_code` when the group looks up a
 Step-2 table. Generate the migration with an `emit-selection-configs-sql.ts`-style UPDATE —
 new entries go in `scripts/regulation-tables/selection-config-entries.json` (itself generated
-read-only from prod; don't hand-edit stale rows out of it). Write one render test with a
-2-row fixture.
+read-only from prod; don't hand-edit stale rows out of it). **The register renders
+generically since Plan 2b** — a `widget='register'` row (or a TS fallback while `widget IS
+NULL`) goes through `RegisterEditor` with no per-standard React; consumers that inherit it
+get `ReadOnlyRegisterTable`. Write one render test with a 2-row fixture through
+`RegisterEditor` (pattern: `src/components/worksheet/__tests__/register-editor-a138-07.test.tsx`
+— `resolveRegisterConfig(...)` → `<RegisterEditor symbol config standardCode>` over a real
+store, assert `lookup-value-<key>` / `derived-<key>` / `footer-<symbol>` / `rows-complete`).
+See "What Plan 2b added" for the column keys, `flags`, `footer`, `placement` and the bespoke
+escape hatch.
 
 Today's TS fallback registry (`SELECTION_CONFIGS` in `src/lib/eval/selection-fields.ts`) has
 36 configs; it's consulted only while a field's DB `widget` column is `NULL` (D-1 ruling), so
@@ -251,11 +310,11 @@ in, sections/tables/registers out) and record the number here before quoting a r
 
 ## What Plan 2a added (2026-09-16/17, commits `7ee7d22..9b0e1bd` on `feat/guideline-to-tool`)
 
-**Plan 2b (editors) is NOT built.** Registers still render through the bespoke editors
-(`surface-inventory-editor`, `pollutant-register-editor`, risk register, …); a new standard's
-register from Step 3 has no generic renderer yet. Plan 2a changed **computation, visibility and
-persistence only** — nothing an engineer sees in an editor. Plan 3 (encode the 29 inventoried
-standards) is drafted, not started. Sign-off sheet for everything decided in 2a:
+**Plan 2b (editors) is built on top — see "What Plan 2b added" below.** (At 2a close-out the
+registers still rendered through the bespoke editors; that paragraph is superseded.) Plan 2a
+changed **computation, visibility and persistence only** — nothing an engineer sees in an
+editor. Plan 3 (encode the 29 inventoried standards) is drafted, not started. Sign-off sheet
+for everything decided in 2a:
 `docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-2a.md`.
 
 ### The expression language — `src/lib/expr/`
@@ -372,3 +431,179 @@ present at base `da79b99`) · project `pnpm -s lint` 57 errors / 179 warnings, a
 18 files none of which this branch touched · `pnpm vitest run --project integration
 tests/harness/register-materialise.integration.test.ts` 1 passed on embedded PG 18 · no new
 `supabase/migrations/*` on the branch (the three 2a migrations live under `scripts/migrations/`).
+
+## What Plan 2b added (2026-09-16/17, commits `5c6bc98..f47d7f9` + close-out on `feat/guideline-to-tool`)
+
+Plan 2b is the **editor half**: a register, a reference and a table-fill scalar now render from
+their DB row (`widget` + `ui_config` / `lookup`) with no per-standard React. Nothing here
+changes a computed number — the six A138-07 outputs and the three VSME-B04 sums come from the
+same Plan-2a formula strings (`engine-wiring-a138-07*.test.tsx` untouched). Sign-off sheet
+for everything decided in 2b: `docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-2b.md`.
+**Plan 3 encodes the 29 inventoried standards onto this** — the recipe in Steps 2–5 plus the
+encoder notes below; no new renderer is expected per standard.
+
+### The `WIDGETS` registry — one renderer path (`src/components/worksheet/widgets.tsx`)
+
+- `renderWidget(f, ctx)` = `WIDGETS[effectiveWidget(f)]`, where `effectiveWidget(f)` is
+  `f.widget ?? inferWidget(dataType, hasEnumValues)`; an out-of-enum DB string falls back to
+  the scalar renderer (`Object.hasOwn` guard, never a prototype key). `worksheet-form.tsx` has no
+  symbol-keyed carrier wiring left — the guard test
+  `src/components/worksheet/__tests__/worksheet-form-no-symbol-wiring.test.ts` pins the exact
+  allow-list of symbol reads that remain (ASM method/provenance, `ac_as_ratio_check`, `A_S_m`)
+  and fails the moment a new `fieldBySymbol.get('…')` / `f.symbol === '…'` appears in the form.
+- Dispatch precedence while `widget IS NULL` (mirrors the pre-2b form): bespoke-by-symbol >
+  register config (`resolveRegisterConfig`: the two hand-built fallbacks, then the 36 TS
+  selection registers via `toDbShape`) > legacy TS checklist (`resolveSelectionConfig`) >
+  `renderDynamic` (`DynamicField`: scalar / select_one / attestation, the json-checklist
+  branch, the "Mehrzeilige Eingabe — Phase 2" placeholder). A DB row with a non-null `widget`
+  is authoritative and skips every fallback.
+- `widgetPlacement(f)` → `{ placement: 'section' | 'bottom', title }`: bespoke ⇒ bottom with
+  its h2; register ⇒ `ui_config.placement ?? 'bottom'` (the single default lives in
+  `registerPlacement()` in `register-editor.tsx` — the 36 selection migrations carry no
+  placement key and keep their bottom position); TS checklist ⇒ bottom; DB `select_many`,
+  `reference`, `lookup_fill` and everything scalar ⇒ in its section. The bottom strip is
+  ordered by `orderIndex` and every bottom section carries `data-testid="bottom-<symbol>"`.
+- `WidgetContext` carries `standardCode, locale, projectId, readOnly, fieldBySymbol, values,
+  setField, symbolLookup, engineStates, equations (the ENGINE list incl. fallback register
+  equations), computedSymbols, serverComputedSet, rainfallDesignReturnPeriod, renderDynamic`.
+  A widget that cannot resolve its config calls `ctx.renderDynamic(f)` — the `DynamicField`
+  path is never bypassed for an unmigrated field.
+- **Bespoke escape hatch:** `ui_config.editor` ∈ `rainfall_tables | risk_register |
+  risk_mitigation_plan` (DB) or, while `widget IS NULL`, `BESPOKE_BY_SYMBOL` (`r_D_n_table`,
+  `risk_register`, `risk_mitigation_plan`). Unknown keys never dispatch. The KOSTRA grid, the
+  basin editor, the ASM block and the VSME CO₂ engine stay bespoke by design (spec §5.3).
+
+### Encoding a register (`widget='register'`, `ui_config` per `field-config.ts` `registerUi`)
+
+`RegisterEditor` (`src/components/worksheet/register-editor.tsx`) renders any register from
+its config; `ReadOnlyRegisterTable` is the consumer-side mirror (a consumer worksheet never
+gets an editable carrier — `registerSources` on the form feeds `carrierSourceState` + the
+mirror; the "nicht erfasst / nicht final" banner is generic per source).
+
+- **Columns** (`columns[].type`): `text` (datalist), `number` (min/max warning, not a gate),
+  `boolean`, `enum` (`options` + `option_labels` / `value_labels`, `sort_by_label`), `date`,
+  `lookup_key` (select over the bound table's rows, `<optgroup>` by `lookup.group_by`),
+  `lookup_value` (read-only, refilled from the table row; an override input only while the
+  register's `override` flag is on and the column is in `override.applies_to`), `derived`
+  (`expr` evaluated per row by Plan 2a's `prepareRegisterRows` — never stored; `display:
+  'badge'` renders it as a badge in its own column), `grid` (placeholder — Task 9 NOT built).
+  `aria_label` when the input label must differ from the header; `discriminator` +
+  per-column `visible_when` in ROW scope (`fail` hides the cell and stores `null` / `''` on the
+  next write; the engine's completeness rule skips the same cell — one rule).
+- **`flags`**: `[{ key, label?, note?, disables_rows? }]` — one checkbox each, stored on the
+  carrier next to `rows`, read by `flag(register, 'key')` in formulas;
+  `registerFlagKeys(symbol, ui)` reads them (the `REGISTER_FLAG_KEYS` symbol fallback only
+  while `widget IS NULL`). `disables_rows: true` greys the table while the flag is on
+  (VSME "Keine berichtspflichtigen Schadstoffemissionen").
+- **`footer`**: the symbols of the equation rows whose `input_symbols` name the register
+  (`['A_E_ba', 'A_E_nba', 'A_C']`, `['AmountOfEmissionToAir', …]`). The footer shows ENGINE
+  states (`footerStatesFor`: value, or `—` with the reason as title) — the editor never sums.
+  Every register footer reads `n Einträge · n/m vollständig · <label>: <value> <unit> …`. The
+  legacy `sum_column` (Plan-1 contract, the 36 TS selection registers) is a display-only
+  client sum — retire it per register when an equation row exists (sign-off D-2b-5).
+- **`override`**: `{ flag_key, applies_to, policy }` — `flag_key` MUST name a `boolean`
+  column (zod refine, Task 5); no `override` block ⇒ locked (no toggle). The toggle sits under
+  the first `lookup_key` column; while on, the table pair stays visible (`Tab. 9: 0,9 / 1`)
+  and a stored value ≠ table shows `mismatch-<key>`.
+- **`placement`** (`section | bottom`, default bottom), `title`, `subtitle`, `add_label`,
+  `legacy_map` (Plan-2a legacy-shape replay), `catalog` (Task 9 — contract only).
+- Output fields fed by the register carry the hint `Aus dem Register „<title>“ berechnet
+  (unten auf dieser Seite | in diesem Abschnitt).` / `Wird beim Speichern aus dem Register
+  „<title>“ berechnet.` (generic, all standards).
+- Test recipe: one render test with a 2-row fixture through `RegisterEditor` (Step 3) plus,
+  if the register feeds equations, one FORM-level case asserting the `footer-<symbol>` values
+  from the engine (pattern: `register-editor-vsme-b04.test.tsx`).
+
+### Encoding a reference (`widget='reference'`, `ui_config` REQUIRED — importer rejects a row without it)
+
+`{ carrier_symbol, rows_path, id_key, label_key, badge_key?, badge_labels?, title?,
+aria_label?, empty_label? }` — `ReferenceField` renders a `<select>` over the rows found at
+`carrier_symbol` → `rows_path` on THIS worksheet (own or inherited carrier;
+`CARRIER_NORMALISERS` upgrades a legacy carrier shape first) and stores the row's `id_key`
+value as the field's own `text` (or `enum`) value — never a copied row. No rows ⇒ a disabled
+select + `reference-empty` notice (never a raw text input). A stored id no longer among the
+rows ⇒ placeholder selected + `reference-stale` hint naming the table the engine actually
+uses. **Contract note for Plan 3 encoders (D-2b-13):** the stale-ref hint assumes every
+reference consumer resolves a stale/unset id to the carrier's FIRST row (true today: the only
+config is `rainfall_table_ref` and all five readers route through `resolveSelectedTable`,
+which falls back to `tables[0]`). A new reference config must either adopt that first-row
+fallback convention in its readers or the hint must become config-driven (`stale_fallback:
+'first' | 'none'`) — do not encode a reference whose engine reads "nothing" on a stale id
+without first adding that key. First instance: A138 `rainfall_table_ref` (renders in its
+section on A138-13..22; `RainfallTableSelector` deleted).
+
+### Encoding a lookup_fill (`widget='lookup_fill'`, binding in `fields.lookup`, presentation in `ui_config`)
+
+`lookup = { table_code, role: 'value' | 'limit', keys: [{ column, from_symbol }], value,
+edition? }` — `keys[].column` must equal the table's `key_columns` in order (importer rule
+`validateLookupKeysOrder`); `ui_config = { source_label?, reason_min_length? (≥ 10) } | null`.
+`LookupFillField` resolves the row by column NAME from the worksheet symbols named in
+`from_symbol` and shows a source badge (`Tab. 6 (Grenzwert)` / `Tab. 9: 0,2`).
+
+- **Ownership rule:** a symbol in `ctx.computedSymbols`, in `ctx.serverComputedSet`, or on an
+  inherited copy (`inheritedFromWorksheet != null`) is **display-only** — the persisted value
+  read-only, source-only badge, no write, no override control (A138-12 `ac_as_ratio_limit`:
+  the five `materializeLoadingCheck` sites stay the single producer). Otherwise the widget
+  **fills** the field once from the table row (`{ type: 'number', value }` through the store)
+  and re-fills on a key change only while the stored value still equals the previous row's
+  figure; a typed deviation is never overwritten (a key change WHILE editing resets the
+  deviation like "übernehmen" — the old value would be a phantom deviation against a row the
+  engineer never saw).
+- **Override = derived, not stored** (sign-off D-2b-2): `table_value` and `override` are
+  computed at render (`resolveLookupFill`, `isOverridden`); the reason is persisted through the
+  existing `recordManualOverride` → `audit_log` (`equationNumber = 'lookup:<TABLE_CODE>'`). The
+  table's `override_policy` drives the affordance: `locked` ⇒ note, no button; `anhaltswert |
+  kann | messwert` ⇒ `abweichend wählen` / `Tab. X übernehmen`, number input (`kann` ⇒ a select
+  over the printed alternatives only; `messwert` ⇒ input labelled "(Messwert)"), textarea
+  `Begründung der Abweichung` (≥ max(`reason_min_length`, 10)) + `Abweichung begründen`;
+  `Begründung fehlt` is shown while overridden without a saved reason — a VISIBLE state, no
+  save-time gate (sign-off D-2b-10).
+- The `lookup_fill` label block is minimal (label, unit, badge, description) — no clause chip
+  / verification marker / VerifyButton yet (sign-off D-2b-9; same gap on `reference`).
+
+### The TS fallbacks and the migrations that retire them (all WRITTEN, NOT APPLIED)
+
+| fallback (while `widget IS NULL`) | retiring migration (apply-order step) |
+|---|---|
+| `REGISTER_CONFIGS_FALLBACK.surface_inventory` | `20260916130000_a138_07_surface_inventory_widget.sql` (7) |
+| `REGISTER_CONFIGS_FALLBACK.pollutant_register` + `REGISTER_FLAG_KEYS` | `20260916140000_vsme_b04_pollutant_register_widget.sql` (8) |
+| `REFERENCE_CONFIGS_FALLBACK.rainfall_table_ref` | `20260916150000_a138_rainfall_table_ref_reference.sql` (9) |
+| `LOOKUP_BINDINGS_FALLBACK.ac_as_ratio_limit` | `20260916160000_a138_12_ac_as_ratio_limit_lookup_fill.sql` — **GATED D-2b-3, EXCLUDED** (10) |
+
+All four (and the combined rollback `scripts/rollback-20260916130000-widget-configs.sql`, the
+canonical one) are emitted by `scripts/regulation-tables/emit-widget-configs-sql.ts` from the
+very fallback objects and byte-pinned by `scripts/__tests__/widget-configs-sql-freshness.test.ts`;
+the embedded JSON round-trips through `parseFieldConfig` to the fallback (deploy-before-migration
+parity). The four pre-schema readers named under "Apply order" (`saveWorksheet`, the approval
+gate, the PDF loader, snapshot capture) are unchanged by 2b — step 1 is still the hard gate.
+Cleanup after apply: the "Post-apply cleanup" list under "Apply order".
+
+### What is NOT built (honest residue)
+
+- **Task 9 — risk-register grid** (`grid` column type as an editor, the multi-party assessment
+  pattern, `catalog` picker, `grid_mean/grid_stdev/grid_count` reducers): SKIPPED by ruling —
+  needs the grid reducers that Plan 2a did not add (sign-off D-2b-12 names the 2a amendment).
+  `risk_register` / `risk_mitigation_plan` stay bespoke via `BESPOKE_BY_SYMBOL`; a `grid`
+  column renders a `grid-pending` placeholder.
+- **Per-row diagnostics dedupe**: `PreparedRegister.diagnostics` are de-duplicated by message
+  in the editor list, but the save-path warnings still repeat per row (2a L-11 residue).
+- **a11y readOnly pass**: read-only controls are `disabled` (per the brief's pin), not
+  `readOnly` + `aria-readonly`; `aria-describedby` on the register's warnings is not wired
+  (sign-off D-2b-7).
+- **Shared `FieldHeader`** for the scalar-shaped widgets (D-2b-9); **save-time gate** for an
+  unjustified lookup override (D-2b-10); the page's withhold gate stays on the surface shim
+  (D-2b-8); `surface-inventory.ts` remains as a test-only differential oracle (D-2b-11).
+- No render spot-check on a deployed build was run by Plan 2b (no dev DB in the executing
+  sessions); the "Ready for your 5-minute look" list on the 2b sign-off sheet is the owner's.
+
+### Verification snapshot at close-out (HEAD `f47d7f9` + the close-out commit, 2026-09-17)
+
+`pnpm test` 231 files passed | 1 skipped · **2278 passed** | 1 expected fail | 1 skipped
+(2275 at `f47d7f9` + 3 close-out pins; the Task-5 `it.todo` is closed) · `pnpm -s typecheck`
+exit 0 · `pnpm eslint <51 branch-touched .ts/.tsx files>` 0 errors introduced (1 pre-existing
+`no-require-imports` error + 1 warning in `engine-wiring-suppress-a138-17.test.tsx`, both
+present at `3a1d8fa`; 2b's only touch there was removing a `vi.mock` line) · `pnpm vitest run
+--project integration tests/harness/register-materialise.integration.test.ts` 1 passed
+(embedded PG — 2b did not touch the save path) · `scripts/reasoning-map/` scorecards
+regenerated by the full run are byte-identical in content to HEAD (EOL-only diff; 2b changed
+no corpus result) · `git status --short` empty after the close-out commit.

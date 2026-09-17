@@ -357,6 +357,27 @@ describe('LookupFillField — fix round 1 pins', () => {
     expect(screen.getByTestId('lookup-fill-value')).toHaveTextContent('0,2');
   });
 
+  it('Plan 2b close-out: a key change WHILE EDITING resets the deviation (treated as "übernehmen") — no phantom "abweichend" against the new row', async () => {
+    const KIES_CM = resolveRegulationTable(STD, 'TAB9')!.rows.find((r) => r.row_key === 'kiesbelag_locker')!.values.cm as number;
+    const setField = vi.fn();
+    const controls = (set: (id: string, v: FieldValue) => void) => <button type="button" onClick={() => set('f-surf', { type: 'enum', value: 'kiesbelag_locker' })}>→ kies</button>;
+    render(<Harness field={C_TEST} fields={[C_TEST, SURFACE]} initial={{ ...ASPHALT }} onSet={setField} controls={controls} />);
+    await waitFor(() => expect(setField).toHaveBeenCalledWith('f-c', { type: 'number', value: TAB9_ASPHALT_CM }));
+    // open the deviation against the ASPHALT row and type a value (editing mode)
+    fireEvent.click(screen.getByRole('button', { name: 'abweichend wählen' }));
+    fireEvent.change(screen.getByLabelText('c_test (abweichend)'), { target: { value: '0.5' } });
+    expect(setField).toHaveBeenLastCalledWith('f-c', { type: 'number', value: 0.5 });
+    expect(screen.getByText('abweichend')).toBeInTheDocument();
+    // the sibling key moves to another row: the in-progress deviation was against the old row
+    fireEvent.click(screen.getByRole('button', { name: '→ kies' }));
+    await waitFor(() => expect(setField).toHaveBeenLastCalledWith('f-c', { type: 'number', value: KIES_CM }));
+    expect(screen.queryByLabelText('c_test (abweichend)')).toBeNull();
+    expect(screen.queryByText('abweichend')).toBeNull();
+    expect(screen.queryByTestId('lookup-reason-missing')).toBeNull();
+    expect(screen.getByTestId('lookup-fill-value')).toHaveTextContent('0,2');
+    expect(screen.getByRole('button', { name: 'abweichend wählen' })).toBeInTheDocument();
+  });
+
   it('clearing the number input keeps it empty (writes null, no snap-back to the table value)', async () => {
     const setField = vi.fn();
     render(<Harness field={C_TEST} fields={[C_TEST, SURFACE]} initial={{ ...ASPHALT, 'f-c': { type: 'number', value: 0.75 } }} onSet={setField} />);

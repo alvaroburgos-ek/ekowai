@@ -105,7 +105,11 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
   // overwritten. `lastResolved` is updated only on resolved rows, so keys cleared in between
   // (keys_missing) do not fake a fresh row and turn the old fill into a phantom "abweichend".
   // While the engineer is editing (opened "abweichend", or typed/cleared the input) nothing is
-  // filled — a cleared input stays empty instead of snapping back to the table value.
+  // filled — a cleared input stays empty instead of snapping back to the table value. The one
+  // exception (Plan 2b close-out): the keys move to ANOTHER row while editing — the in-progress
+  // deviation was against the previous row, so it is dropped like "übernehmen" (editing closed,
+  // confirmation cleared) and the new row's figure is filled; otherwise the old typed value
+  // would read as a phantom "abweichend" against a row the engineer never saw.
   const rowKey = state.kind === 'resolved' ? state.row.row_key : null;
   const lastResolved = useRef<{ rowKey: string; tableNumber: number } | null>(null);
   const { setField, values } = ctx;
@@ -113,8 +117,17 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
     if (mode !== 'fill' || rowKey == null || tableNumber == null) return;
     const before = lastResolved.current;
     lastResolved.current = { rowKey, tableNumber };
-    if (readOnly || editing) return;
+    if (readOnly) return;
     const keysMoved = before != null && before.rowKey !== rowKey;
+    if (editing) {
+      if (!keysMoved) return;
+      savedReasons.delete(field.id);
+      setSaved(null);
+      setEditing(false);
+      setError(null);
+      if (stored !== tableNumber) setField(field.id, { type: 'number', value: tableNumber });
+      return;
+    }
     const followsTable = stored == null || (keysMoved && stored === before.tableNumber);
     if (followsTable && stored !== tableNumber) setField(field.id, { type: 'number', value: tableNumber });
     // `values` is a dependency on purpose: the form's store init (parent effect, runs AFTER this child effect on

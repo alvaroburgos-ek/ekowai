@@ -28,14 +28,17 @@
  *     migration's full header is reproducible by the freshness pin;
  *   - `template_code` additionally scopes the UP and its rollback to the
  *     symbol's home worksheet template (`w.code`);
- *   - `hand_authored` marks an entry whose committed file was written by hand
- *     (Task 7) and is still being edited there — the CLI skips writing it
- *     unless `--all` is passed and its byte-pin is deferred (it.todo) until
- *     the emitter regenerates it; `provenance` replaces line 1 for that case.
+ *   - `provenance` replaces the generated-by line 1 (no entry uses it today;
+ *     kept for a migration whose header must name a different origin). Since
+ *     the Plan 2b close-out ALL four files are emitter-owned and byte-pinned —
+ *     the former `hand_authored` skip (Task 7's interim header) is gone.
  *
  * Apply order (after 20260911100000_guideline_to_tool_schema.sql and the Plan
  * 2a data migrations): the entries below in array order; a GATED entry is
- * EXCLUDED from the apply list until its sign-off is ratified.
+ * EXCLUDED from the apply list until its sign-off is ratified. The combined
+ * rollback `scripts/rollback-20260916130000-widget-configs.sql` is the ONE
+ * canonical rollback for all four (reverse order inside; the gated entry's
+ * statement is a no-op while its migration is unapplied).
  */
 import { writeFileSync } from 'node:fs';
 import { REGISTER_CONFIGS_FALLBACK } from '../../src/lib/eval/register-configs';
@@ -64,8 +67,6 @@ export type WidgetEntry = {
   template_code?: string;
   /** Custom line-1 provenance comment (defaults to the generated-by line). */
   provenance?: string;
-  /** Set when the committed file is hand-authored and not yet emitter-owned: the CLI skips it without `--all`; freshness pin deferred. */
-  hand_authored?: string;
 };
 
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`;
@@ -83,8 +84,8 @@ Why gated (Plan 2b Task 7): the binding's key symbols \`tab6_tier\` and \`bbz_ba
 DWA-A-138-1 today. The server materialiser (src/lib/eval/materialize-tab6-loading.ts, five call sites in
 src/lib/actions/worksheet.ts) derives them internally (flaechengruppe -> TAB5 tier; bbz_thickness >= 0,30 m ->
 band) and UPSERTs \`ac_as_ratio_limit\` as source_type='derived'. The widget therefore renders the symbol in
-DISPLAY mode (LOADING_CHECK_SYMBOLS marks it server-owned): persisted value read-only, badge
-"Tab. 6: — (Schlüssel fehlt: tab6_tier, bbz_band) (Grenzwert)", no client write. Applying this migration changes
+DISPLAY mode (LOADING_CHECK_SYMBOLS marks it server-owned): persisted value read-only, badge names the source
+only — "Tab. 6 (Grenzwert)" (key diagnostics are fill-mode information), no client write. Applying this migration changes
 NOTHING the engineer sees (the TS fallback serves the identical binding while widget IS NULL) — it only moves
 the binding from code to data. The owner rules D-2b-3 between:
   (a) two derived scalar fields + two equation rows on A138-12:
@@ -96,8 +97,12 @@ the binding from code to data. The owner rules D-2b-3 between:
       of a symbol — no new fields, but a contract change to the Plan-1 binding shape;
   (c) leave the widget in display mode with the keys_missing badge and the server materialiser as the single
       producer (the CURRENT state; this migration is then cosmetic and may be applied or left unapplied).
-Rollback: scripts/rollback-20260916160000-a138-12-ac-as-ratio-limit-lookup-fill.sql (superseded by the combined
-scripts/rollback-20260916130000-widget-configs.sql, Plan 2b Task 5).`;
+Scope: the HOME template only (w.code = 'A138-12'). An inherited copy of the symbol on a consumer worksheet is the
+SAME fields row (inheritance is by reference, not a second row), so this scope is about which template's field
+row carries the binding; display-only for inherited copies is enforced by the component (inheritedFromWorksheet
+!= null ⇒ display mode), not by this WHERE clause.
+Rollback: the combined scripts/rollback-20260916130000-widget-configs.sql (canonical; its ac_as_ratio_limit statement
+mirrors this scope and is a no-op while this migration is unapplied).`;
 
 /** The four Plan 2b widget migrations, in apply order. */
 export const WIDGET_MIGRATION_ENTRIES: readonly WidgetEntry[] = [
@@ -121,11 +126,8 @@ export const WIDGET_MIGRATION_ENTRIES: readonly WidgetEntry[] = [
     ui_config: null, lookup: LOOKUP_BINDINGS_FALLBACK.ac_as_ratio_limit,
     retires: 'LOOKUP_BINDINGS_FALLBACK.ac_as_ratio_limit (src/lib/eval/lookup-fill.ts)',
     gated: 'D-2b-3', gated_note: AC_AS_RATIO_LIMIT_GATED_NOTE, template_code: 'A138-12',
-    // Task 7 hand-authored this file and is still editing its header (provenance line, badge wording, home-template
-    // scope) — the Task 5 CLI does not overwrite it. Once Task 7's fix lands: set `provenance` (and `gated_note`) to
-    // Task 7's final text, run the CLI with --all, and turn the deferred it.todo byte-pin in
-    // scripts/__tests__/widget-configs-sql-freshness.test.ts into the exact one.
-    hand_authored: 'Plan 2b Task 7',
+    // Originally hand-authored by Plan 2b Task 7; emitter-owned since the Plan 2b close-out (Task 10) — the
+    // committed file is byte-pinned against this entry like the other three.
   },
 ];
 
@@ -170,15 +172,10 @@ export function emitWidgetRollbackSql(entries: readonly WidgetEntry[]): string {
 }
 
 if (process.argv[1]?.endsWith('emit-widget-configs-sql.ts')) {
-  const all = process.argv.includes('--all');
-  const byFile = new Map(WIDGET_MIGRATION_ENTRIES.map((e) => [e.file, e]));
+  // `--all` is accepted for backwards compatibility (it used to bypass the Task-7 hand-authored skip); every
+  // entry is emitter-owned now, so the CLI always writes all four files + the combined rollback.
   let written = 0;
   for (const [file, sql] of emitWidgetConfigSql(WIDGET_MIGRATION_ENTRIES)) {
-    const owner = byFile.get(file)?.hand_authored;
-    if (owner && !all) {
-      console.log(`skipped ${file}.sql (hand-authored by ${owner}; pass --all to regenerate)`);
-      continue;
-    }
     writeFileSync(`scripts/migrations/${file}.sql`, sql);
     written++;
   }

@@ -746,20 +746,42 @@ export function extractSymbols(e: Expr): Set<string> {
  * ident names a hidden symbol, because the evaluator DOES resolve such an
  * RHS as a symbol whenever it is valued. Kept separate so the residual
  * gate-symbol check (`extractConditionSymbols`) keeps excluding enum literals.
+ * Mirrors the C-2 rule of `extractSymbols` (Plan 2b close-out): identifiers
+ * and bare-ident RHS literals inside the ROW-SCOPED arguments of a row
+ * function are column names / enum values of that register, never worksheet
+ * symbols — a hidden worksheet symbol that happens to share such a name must
+ * not make the gate `not_applicable`. Only the register argument (and the
+ * outer-scope `p` of `percentile_rows`) is walked for those calls.
  */
 export function hiddenReferences(e: Expr, hiddenSymbols: ReadonlySet<string>): string[] {
   const out = new Set<string>();
   for (const s of extractSymbols(e)) if (hiddenSymbols.has(s)) out.add(s);
+  const walkAny = (arg: Expr): void => {
+    if (isConditionNode(arg)) walk(arg);
+    else walkArith(arg);
+  };
+  const walkRegisterArg = (arg: Expr): void => {
+    if (arg.kind === 'call' && canonicalFunctionName(arg.name) === 'last_rows') {
+      if (arg.args[0]) walkRegisterArg(arg.args[0]);
+      if (arg.args[1]) walkAny(arg.args[1]);
+      return;
+    }
+    walkAny(arg);
+  };
   const walkArith = (n: ArithNode): void => {
     switch (n.kind) {
       case 'aneg': walkArith(n.inner); return;
       case 'abin': walkArith(n.left); walkArith(n.right); return;
-      case 'call':
-        for (const arg of n.args) {
-          if (isConditionNode(arg)) walk(arg);
-          else walkArith(arg);
+      case 'call': {
+        const fn = canonicalFunctionName(n.name) ?? '';
+        if (ROW_SCOPED_FUNCTIONS.has(fn)) {
+          if (n.args[0]) walkRegisterArg(n.args[0]);
+          if (fn === 'percentile_rows' && n.args[2]) walkAny(n.args[2]);
+          return;
         }
+        for (const arg of n.args) walkAny(arg);
         return;
+      }
       default: return;
     }
   };

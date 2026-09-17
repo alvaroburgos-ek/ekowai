@@ -13,8 +13,10 @@ import type { WidgetContext, WorksheetFormField } from '../widgets';
 import type { FieldValue } from '@/lib/state/worksheet-store';
 import { type RainfallTable, RETURN_PERIODS } from '@/lib/eval/rainfall-tables';
 
+// Plan 2b close-out: the FIRST table is named alphabetically LAST on purpose — the stale-ref hint pins
+// `rows[0]` = carrier order (the resolveSelectedTable rule), which a label sort could otherwise satisfy by accident.
 const TABLES: RainfallTable[] = [
-  { id: 'k1', name: 'KOSTRA Krefeld', source: 'KOSTRA-DWD-2020', columns: [...RETURN_PERIODS], rows: [] },
+  { id: 'k1', name: 'Zentrale KOSTRA-Tabelle', source: 'KOSTRA-DWD-2020', columns: [...RETURN_PERIODS], rows: [] },
   { id: 'l1', name: 'Lokal 531', source: 'DWA-A-531-local', columns: [...RETURN_PERIODS], rows: [] },
 ];
 
@@ -48,7 +50,7 @@ describe('ReferenceField — rainfall_table_ref through the fallback config', ()
     const ctx = makeCtx();
     render(<ReferenceField field={REF} ctx={ctx} />);
     const select = screen.getByRole('combobox') as HTMLSelectElement;
-    expect(screen.getByRole('option', { name: /KOSTRA Krefeld/ })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /Zentrale KOSTRA-Tabelle/ })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Lokal 531/ })).toBeInTheDocument();
     fireEvent.change(select, { target: { value: 'l1' } });
     expect(ctx.setField).toHaveBeenCalledWith('f-ref', { type: 'text', value: 'l1' });
@@ -69,7 +71,7 @@ describe('ReferenceField — rainfall_table_ref through the fallback config', ()
 
   it('badge labels come from ui_config.badge_labels; title + aria-label from the config', () => {
     render(<ReferenceField field={REF} ctx={makeCtx()} />);
-    expect(screen.getByRole('option', { name: 'KOSTRA Krefeld · KOSTRA' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Zentrale KOSTRA-Tabelle · KOSTRA' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Lokal 531 · DWA-A 531' })).toBeInTheDocument();
     expect(screen.getByLabelText('Regenspendentabelle wählen')).toBeInTheDocument();
     expect(screen.getByText('Regenspendentabelle (Quelle für r_D(n))')).toBeInTheDocument();
@@ -168,7 +170,7 @@ describe('ReferenceField — Task 8 sweep (Task 6 review items)', () => {
     expect(select.value).toBe('');
     expect(select.disabled).toBe(false);
     const hint = screen.getByTestId('reference-stale');
-    expect(hint.textContent).toBe('Verweis „gone-42“ nicht gefunden — die Berechnung verwendet bis zur Neuauswahl „KOSTRA Krefeld“. Bitte neu wählen.');
+    expect(hint.textContent).toBe('Verweis „gone-42“ nicht gefunden — die Berechnung verwendet bis zur Neuauswahl „Zentrale KOSTRA-Tabelle“. Bitte neu wählen.');
     expect(hint.tagName).toBe('SPAN');
     expect(select.getAttribute('aria-describedby')).toBe(hint.id);
     expect(ctx.setField).not.toHaveBeenCalled();
@@ -191,7 +193,7 @@ describe('ReferenceField — stale-ref hint tells the truth about the engine fal
     expect(select.disabled).toBe(true);
     expect(select.value).toBe('');
     const hint = screen.getByTestId('reference-stale');
-    expect(hint.textContent).toBe('Verweis „gone-42“ nicht gefunden — die Berechnung verwendet „KOSTRA Krefeld“.');
+    expect(hint.textContent).toBe('Verweis „gone-42“ nicht gefunden — die Berechnung verwendet „Zentrale KOSTRA-Tabelle“.');
     expect(hint.textContent).not.toMatch(/neu wählen/);
     expect(select.getAttribute('aria-describedby')).toBe(hint.id);
   });
