@@ -464,6 +464,24 @@ sibling table (`TAB1_ASPHALT` by `mischgutart`) and leave the coarse token witho
 (7) A table whose printed cells are only "X" / "(X)" / "-¹" carries no "not allowed" state — count what is printed
 (`zulaessig == 'sonder'`), not the absent negative.
 
+**Encoding traps (Plan 3 Task 8, FLL-Naturteich).** (1) A register whose rows mix a `locked` table and an `anhaltswert` table
+(Tab. 10 hydrobotanical limits vs Tab. 15 grain surface) must keep the locked-table key as a plain `enum` column and reserve
+the single `lookup_key` for the table whose value the engineer may override — the override toggle follows the FIRST
+`lookup_key` (G-B2 / I-4); the locked limits are read by `lookup('TABLE10', <enum column>, …)` in `derived` columns. (2) A
+transposed limits table with ONE printed value column (Tab. 7 / Tab. 8) is a single-row table keyed by a literal (`source =
+'all'`) and read with `lookup('TABLE7', 'all', '<param>_max')` from row scope; only the parameters that print a per-type split
+go into a table keyed on the prod driver (`TABLE8_P`, one row per token with identical cells per group). (3) Check the DRIVER's
+`consumer_worksheets` before keying a register column on a worksheet symbol: a row `derived` that reads a symbol not in scope
+is null and turns `count_rows(reg, ok == 0)` into `manual_required` — emit it anyway (pinned), STAGE the consumer edit, and key
+the tables that do not need the type (Tab. 9) on a CREATED select instead. (4) An English pdftotext layout may be the only
+place a wide table's cells can be assigned to their columns (Tab. 1 interleaved; Tab. 10–12 single cells spanning two
+columns): cite both files and lines, keep the md as the verifier's source, and let the reviewer see which tables lean on the
+layout (`imported_unverified` + a J-block) — the brief's "both agree cell-for-cell" is the bar for `md_verified`. (5) The two
+sources hyphenate differently ("verifica- tion" vs "verifi- cation") — a per-table printed fragment, asserted with `cell()`,
+catches the slip before any migration is emitted. (6) A guideline that defines a zone as NOT part of the pool ("Supplementary
+area … do not belong directly", §3) may still be summed by prod's own field definition — encode the guideline's share
+(water area only) and prod's total (all zones) as two outputs and record the difference (J-4), never silently pick one.
+
 **Staged DELETE rollbacks (controller ruling, Plan 3 Task 6 fix round 1 — corpus-wide).** A STAGED block that deletes rows
 from a table without an `active` column (`equations`, `compliance_requirements`) (1) copies the full rows into an archive table
 created in the SAME transaction (`CREATE TABLE IF NOT EXISTS <table>_archive_<slug> AS SELECT * FROM <table> WHERE false;

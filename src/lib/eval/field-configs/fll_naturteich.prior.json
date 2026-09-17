@@ -1,0 +1,3188 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs FLL-Naturteich fll_naturteich",
+    "captured_at": "2026-09-17T22:51:34.096Z",
+    "standard": "FLL-Naturteich",
+    "slug": "fll_naturteich",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 130,
+    "section_rows": 135,
+    "sections_total": 135,
+    "equation_rows": 6
+  },
+  "FLLNT-01 attest_fllnt_01_req_03": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-01 attest_fllnt_01_req_04": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-01 client_address": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-01 client_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-14",
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-01 consultation_checklist_completed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-01 contractor_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-01 intended_use_intensity": {
+    "enum_values": [
+      {
+        "value": "low",
+        "label_de": "gering",
+        "label_en": "Low",
+        "order_index": 1,
+        "regulation_reference": "§6.5"
+      },
+      {
+        "value": "medium",
+        "label_de": "mittel",
+        "label_en": "Medium",
+        "order_index": 2,
+        "regulation_reference": "§6.5"
+      },
+      {
+        "value": "high",
+        "label_de": "hoch",
+        "label_en": "High",
+        "order_index": 3,
+        "regulation_reference": "§6.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-04",
+      "FLLNT-06"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-01 planner_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-01 planning_date": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "date",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-01 pool_use_type": {
+    "enum_values": [
+      {
+        "value": "private_single_household",
+        "label_de": "Privat (Einzelhaushalt)",
+        "label_en": "Private (single household)",
+        "order_index": 1,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "private_multi_household",
+        "label_de": "Privat (Mehrfamilienhaushalt)",
+        "label_en": "Private (multi-household)",
+        "order_index": 2,
+        "regulation_reference": "§1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-03",
+      "FLLNT-04"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-01 project_id": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-02",
+      "FLLNT-03",
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-01 project_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-02 enclosure_provided": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-07",
+      "FLLNT-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-02 existing_system": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-02 groundwater_level": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-07"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-02 operating_manual_provided": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-14"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-02 site_address": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-02 subsoil_type": {
+    "enum_values": [
+      {
+        "value": "rock",
+        "label_de": "Fels",
+        "label_en": "Rock",
+        "order_index": 1,
+        "regulation_reference": "§8.1.3"
+      },
+      {
+        "value": "gravel",
+        "label_de": "Kies",
+        "label_en": "Gravel",
+        "order_index": 2,
+        "regulation_reference": "§8.1.3"
+      },
+      {
+        "value": "sand",
+        "label_de": "Sand",
+        "label_en": "Sand",
+        "order_index": 3,
+        "regulation_reference": "§8.1.3"
+      },
+      {
+        "value": "clay",
+        "label_de": "Ton",
+        "label_en": "Clay",
+        "order_index": 4,
+        "regulation_reference": "§8.1.3"
+      },
+      {
+        "value": "loam",
+        "label_de": "Lehm",
+        "label_en": "Loam",
+        "order_index": 5,
+        "regulation_reference": "§8.1.3"
+      },
+      {
+        "value": "mixed",
+        "label_de": "Mischboden",
+        "label_en": "Mixed soil",
+        "order_index": 6,
+        "regulation_reference": "§8.1.3"
+      },
+      {
+        "value": "fill",
+        "label_de": "Auffüllung",
+        "label_en": "Fill",
+        "order_index": 7,
+        "regulation_reference": "§8.1.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-07"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-03 natural_pool_type": {
+    "enum_values": [
+      {
+        "value": "type_I",
+        "label_de": "Typ I (ohne Aufbereitungstechnik)",
+        "label_en": "Type I (without water purification technology)",
+        "order_index": 1,
+        "regulation_reference": "§5, Tab.2"
+      },
+      {
+        "value": "type_II",
+        "label_de": "Typ II (Oberflächen-Aufbereitung)",
+        "label_en": "Type II (with water surface purification)",
+        "order_index": 2,
+        "regulation_reference": "§5, Tab.3"
+      },
+      {
+        "value": "type_III",
+        "label_de": "Typ III (langsamer Substratfilter + P-Bindung)",
+        "label_en": "Type III (controlled slow flow + P-binding)",
+        "order_index": 3,
+        "regulation_reference": "§5, Tab.4"
+      },
+      {
+        "value": "type_IV",
+        "label_de": "Typ IV (schneller Substratfilter)",
+        "label_en": "Type IV (controlled quick flow)",
+        "order_index": 4,
+        "regulation_reference": "§5, Tab.5"
+      },
+      {
+        "value": "type_V",
+        "label_de": "Typ V (technische Filtereinheit)",
+        "label_en": "Type V (controlled flow through technical unit)",
+        "order_index": 5,
+        "regulation_reference": "§5, Tab.6"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-06",
+      "FLLNT-09",
+      "FLLNT-10",
+      "FLLNT-11",
+      "FLLNT-12",
+      "FLLNT-14"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-03 p_binding_required": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-10",
+      "FLLNT-11"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-03 regeneration_area_share": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-06"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-03 regeneration_technique": {
+    "enum_values": [
+      {
+        "value": "hydrobotanical_submergent",
+        "label_de": "Hydrobotanik (submers)",
+        "label_en": "Hydrobotanical (submergent)",
+        "order_index": 1,
+        "regulation_reference": "§10.2.1, Tab.10"
+      },
+      {
+        "value": "hydrobotanical_emersed",
+        "label_de": "Hydrobotanik (emers)",
+        "label_en": "Hydrobotanical (emersed)",
+        "order_index": 2,
+        "regulation_reference": "§10.2.1, Tab.10"
+      },
+      {
+        "value": "substrate_filter_slow",
+        "label_de": "Substratfilter (langsam)",
+        "label_en": "Substrate filter (slow flow)",
+        "order_index": 3,
+        "regulation_reference": "§10.2.2, Tab.11"
+      },
+      {
+        "value": "substrate_filter_quick",
+        "label_de": "Substratfilter (schnell)",
+        "label_en": "Substrate filter (quick flow)",
+        "order_index": 4,
+        "regulation_reference": "§10.2.3, Tab.12"
+      },
+      {
+        "value": "technical_unit",
+        "label_de": "Technische Filtereinheit",
+        "label_en": "Technical unit",
+        "order_index": 5,
+        "regulation_reference": "§10.2.4"
+      },
+      {
+        "value": "physical_chemical",
+        "label_de": "Physikalisch-chemische Verfahren",
+        "label_en": "Physical / chemical techniques",
+        "order_index": 6,
+        "regulation_reference": "§10.2.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-09",
+      "FLLNT-10",
+      "FLLNT-11"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-03 type_III": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-04 swimming_test_acid_capacity_ks43": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 swimming_test_ammonium": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 swimming_test_conductivity": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 swimming_test_hardness": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 swimming_test_nitrate": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 swimming_test_nitrite": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 swimming_test_orthophosphate": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 swimming_test_p_total": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 swimming_test_ph": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_source": {
+    "enum_values": [
+      {
+        "value": "tap_water",
+        "label_de": "Leitungswasser",
+        "label_en": "Tap water",
+        "order_index": 1,
+        "regulation_reference": "§7.1.1"
+      },
+      {
+        "value": "well_water",
+        "label_de": "Brunnenwasser",
+        "label_en": "Well water",
+        "order_index": 2,
+        "regulation_reference": "§7.1.1"
+      },
+      {
+        "value": "rainwater",
+        "label_de": "Regenwasser",
+        "label_en": "Rainwater",
+        "order_index": 3,
+        "regulation_reference": "§7.1.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-04 water_test_acid_capacity_ks43": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_test_ammonium": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_test_conductivity": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_test_hardness": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_test_iron": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_test_manganese": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_test_nitrate": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_test_orthophosphate": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_test_p_total": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-04 water_test_ph": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-05 concrete_spec_compliant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-07",
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-05 filter_substrate_elutable_p": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-10",
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-05 filter_substrate_elutriated_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-10"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-05 filter_substrate_oversize_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-10"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-05 materials_biocide_free": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-05 plant_substrate_compliant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-09",
+      "FLLNT-12"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-05 wood_treatment_compliant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-07",
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-06 attest_fllnt_06_req_14": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-06 attest_fllnt_06_req_18": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-06 pool_depth_max": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-07",
+      "FLLNT-10"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-06 pool_ground_area_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-06 pool_submerged_wall_area_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-06 pool_underwater_surface": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-10",
+      "FLLNT-11"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-06 regeneration_area_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-09",
+      "FLLNT-10",
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-06 supplementary_area_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-06 swimming_area_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-07",
+      "FLLNT-10",
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-06 total_pool_area_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-07 area_separation_method": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-07 edge_design": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-07 edge_height_tolerance_mm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-07 entry_exit_provision": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-07 excavation_depth": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-07 freeboard_water_to_seal": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-07 ground_covering_type": {
+    "enum_values": [
+      {
+        "value": "gravel",
+        "label_de": "Kies",
+        "label_en": "Gravel",
+        "order_index": 1,
+        "regulation_reference": "§9.5.2"
+      },
+      {
+        "value": "sand",
+        "label_de": "Sand",
+        "label_en": "Sand",
+        "order_index": 2,
+        "regulation_reference": "§9.5.2"
+      },
+      {
+        "value": "mortar",
+        "label_de": "Mörtel/Estrich",
+        "label_en": "Mortar / screed",
+        "order_index": 3,
+        "regulation_reference": "§9.5.2"
+      },
+      {
+        "value": "plastic_mat",
+        "label_de": "Kunststoffmatte",
+        "label_en": "Plastic mat",
+        "order_index": 4,
+        "regulation_reference": "§9.5.2"
+      },
+      {
+        "value": "other",
+        "label_de": "Andere",
+        "label_en": "Other",
+        "order_index": 5,
+        "regulation_reference": "§9.5.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-07 sealing_biocide_free_biofilm_ok": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-07 sealing_type": {
+    "enum_values": [
+      {
+        "value": "clay_loam",
+        "label_de": "Ton/Lehm-Dichtung",
+        "label_en": "Clay/loam seal",
+        "order_index": 1,
+        "regulation_reference": "§9.3"
+      },
+      {
+        "value": "EPDM",
+        "label_de": "EPDM-Folie",
+        "label_en": "EPDM membrane",
+        "order_index": 2,
+        "regulation_reference": "§9.3"
+      },
+      {
+        "value": "PVC",
+        "label_de": "PVC-Folie",
+        "label_en": "PVC membrane",
+        "order_index": 3,
+        "regulation_reference": "§9.3"
+      },
+      {
+        "value": "concrete",
+        "label_de": "Beton-Dichtung",
+        "label_en": "Concrete",
+        "order_index": 4,
+        "regulation_reference": "§9.3"
+      },
+      {
+        "value": "other",
+        "label_de": "Andere",
+        "label_en": "Other",
+        "order_index": 5,
+        "regulation_reference": "§9.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-08 equipment_elements_list": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-15"
+    ],
+    "data_type": "json",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-08 service_description_provided": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-09 attest_fllnt_09_req_23": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-09 emersed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-09 hydrobot_feed_rate": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-11"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-09 hydrobot_grain_size_max": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-09 hydrobot_substrate_thickness": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-09 hydrobot_type": {
+    "enum_values": [
+      {
+        "value": "submergent",
+        "label_de": "submers (Unterwasserpflanzen)",
+        "label_en": "Submergent",
+        "order_index": 1,
+        "regulation_reference": "§10.2.1, Tab.10"
+      },
+      {
+        "value": "emersed",
+        "label_de": "emers (Sumpf-/Uferpflanzen)",
+        "label_en": "Emersed",
+        "order_index": 2,
+        "regulation_reference": "§10.2.1, Tab.10"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-10",
+      "FLLNT-12"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-09 hydrobot_water_column": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-09 submergent": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-09 vertical_continuous_overflow": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-09 vertical_no_overflow": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-10 aerobic_filtration_confirmed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-11",
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-10 F_filter": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-10 filter_50x_rule_met": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "FLLNT-10 filter_colonized_surface_actual": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-10 filter_feed_rate_quick_qmin": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-11"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-10 filter_feed_rate_slow_qmax": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-11"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-10 filter_flow_direction": {
+    "enum_values": [
+      {
+        "value": "vertical_continuous_overflow",
+        "label_de": "vertikal, durchgehender Vollüberlauf",
+        "label_en": "vertical flow, continuous full-surface overflow",
+        "order_index": 1,
+        "regulation_reference": "Tab.11, Tab.12"
+      },
+      {
+        "value": "vertical_no_overflow",
+        "label_de": "vertikal, ohne Überlauf",
+        "label_en": "vertical flow, no overflow",
+        "order_index": 2,
+        "regulation_reference": "Tab.11, Tab.12"
+      },
+      {
+        "value": "horizontal",
+        "label_de": "horizontal",
+        "label_en": "horizontal flow",
+        "order_index": 3,
+        "regulation_reference": "Tab.11, Tab.12"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-10 filter_flow_type": {
+    "enum_values": [
+      {
+        "value": "slow",
+        "label_de": "Langsamströmung",
+        "label_en": "Slow flow",
+        "order_index": 1,
+        "regulation_reference": "§10.2.2"
+      },
+      {
+        "value": "quick",
+        "label_de": "Schnellströmung",
+        "label_en": "Quick flow",
+        "order_index": 2,
+        "regulation_reference": "§10.2.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-11"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-10 filter_frost_resistance": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-10 filter_grain_size_max": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-10 filter_kf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-10 filter_layer_thickness": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-10 filter_layer_tolerance_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-10 filter_volume_required": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-10 filter_water_column": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-10 grain_specific_surface": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-10 h_filter": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-11 circulation_type": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-11 intake_discharge_provided": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-11 overflow_edge_length": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-11 overflow_horizontal_tolerance_mm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-11 overflow_type": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-11 physical_chemical_used": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-11 rigid_overflow_used": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLLNT-11 splash_water_tank_volume": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-11 swimming_area_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-11 treatment_impermissible_used": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-12 attest_fllnt_12_req_25": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-12 plant_density_marsh_medium_per_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-12 plant_density_marsh_small_per_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-12 plant_density_submerged_per_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-12 plant_species_list": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "json",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-12 planting_completion_date": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13"
+    ],
+    "data_type": "date",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLLNT-12 pre_maturity_care_provided": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-13",
+      "FLLNT-14"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-13 acceptance_date": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "date",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-13 acceptance_passed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "FLLNT-13 attest_fllnt_13_req_28": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLLNT-13 completion_notice_days_advance": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-13 defects_noted": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-14 inspection_frequency": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-14 maintenance_contract_in_place": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLLNT-15"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-14 repair_provisions": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-15 compliance_verdict_overall": {
+    "enum_values": [
+      {
+        "value": "compliant",
+        "label_de": "konform",
+        "label_en": "Compliant",
+        "order_index": 1,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "compliant_with_conditions",
+        "label_de": "konform mit Auflagen",
+        "label_en": "Compliant with conditions",
+        "order_index": 2,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "not_compliant",
+        "label_de": "nicht konform",
+        "label_en": "Not compliant",
+        "order_index": 3,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "insufficient_data",
+        "label_de": "unzureichende Daten",
+        "label_en": "Insufficient data",
+        "order_index": 4,
+        "regulation_reference": "workflow"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "FLLNT-15 phase_1_gate": {
+    "enum_values": [
+      {
+        "value": "pass",
+        "label_de": "bestanden",
+        "label_en": "Pass",
+        "order_index": 1,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "fail",
+        "label_de": "nicht bestanden",
+        "label_en": "Fail",
+        "order_index": 2,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "conditional",
+        "label_de": "bedingt",
+        "label_en": "Conditional",
+        "order_index": 3,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "not_applicable",
+        "label_de": "nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 4,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "pending",
+        "label_de": "ausstehend",
+        "label_en": "Pending",
+        "order_index": 5,
+        "regulation_reference": "workflow"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-15 phase_2_gate": {
+    "enum_values": [
+      {
+        "value": "pass",
+        "label_de": "bestanden",
+        "label_en": "Pass",
+        "order_index": 1,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "fail",
+        "label_de": "nicht bestanden",
+        "label_en": "Fail",
+        "order_index": 2,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "conditional",
+        "label_de": "bedingt",
+        "label_en": "Conditional",
+        "order_index": 3,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "not_applicable",
+        "label_de": "nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 4,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "pending",
+        "label_de": "ausstehend",
+        "label_en": "Pending",
+        "order_index": 5,
+        "regulation_reference": "workflow"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-15 phase_3_gate": {
+    "enum_values": [
+      {
+        "value": "pass",
+        "label_de": "bestanden",
+        "label_en": "Pass",
+        "order_index": 1,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "fail",
+        "label_de": "nicht bestanden",
+        "label_en": "Fail",
+        "order_index": 2,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "conditional",
+        "label_de": "bedingt",
+        "label_en": "Conditional",
+        "order_index": 3,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "not_applicable",
+        "label_de": "nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 4,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "pending",
+        "label_de": "ausstehend",
+        "label_en": "Pending",
+        "order_index": 5,
+        "regulation_reference": "workflow"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-15 phase_4_gate": {
+    "enum_values": [
+      {
+        "value": "pass",
+        "label_de": "bestanden",
+        "label_en": "Pass",
+        "order_index": 1,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "fail",
+        "label_de": "nicht bestanden",
+        "label_en": "Fail",
+        "order_index": 2,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "conditional",
+        "label_de": "bedingt",
+        "label_en": "Conditional",
+        "order_index": 3,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "not_applicable",
+        "label_de": "nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 4,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "pending",
+        "label_de": "ausstehend",
+        "label_en": "Pending",
+        "order_index": 5,
+        "regulation_reference": "workflow"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-15 phase_5_gate": {
+    "enum_values": [
+      {
+        "value": "pass",
+        "label_de": "bestanden",
+        "label_en": "Pass",
+        "order_index": 1,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "fail",
+        "label_de": "nicht bestanden",
+        "label_en": "Fail",
+        "order_index": 2,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "conditional",
+        "label_de": "bedingt",
+        "label_en": "Conditional",
+        "order_index": 3,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "not_applicable",
+        "label_de": "nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 4,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "pending",
+        "label_de": "ausstehend",
+        "label_en": "Pending",
+        "order_index": 5,
+        "regulation_reference": "workflow"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLLNT-15 phase_6_gate": {
+    "enum_values": [
+      {
+        "value": "pass",
+        "label_de": "bestanden",
+        "label_en": "Pass",
+        "order_index": 1,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "fail",
+        "label_de": "nicht bestanden",
+        "label_en": "Fail",
+        "order_index": 2,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "conditional",
+        "label_de": "bedingt",
+        "label_en": "Conditional",
+        "order_index": 3,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "not_applicable",
+        "label_de": "nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 4,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "pending",
+        "label_de": "ausstehend",
+        "label_en": "Pending",
+        "order_index": 5,
+        "regulation_reference": "workflow"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "sections": {
+    "FLLNT-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-01 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-01 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-02 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-02 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-03 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-03 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-04 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-05 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-05 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-05 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-06 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-07 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-07 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-07 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-08 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-08 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-08 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-08 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-08 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-08 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-08 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-08 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-08 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-09 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-09 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-09 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-09 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-09 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-09 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-09 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-09 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-09 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-10 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-10 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-10 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-10 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-10 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-10 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-10 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-10 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-10 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-11 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-11 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-11 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-11 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-11 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-11 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-11 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-11 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-11 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-12 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-12 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-12 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-12 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-12 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-12 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-12 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-12 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-12 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-13 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-13 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-13 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-13 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-13 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-13 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-13 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-13 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-13 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-14 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-14 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-14 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-14 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-14 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-14 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-14 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-14 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-14 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-15 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-15 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-15 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-15 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-15 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-15 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-15 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-15 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLLNT-15 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "FLLNT-06 EQ-PUWS": {
+      "id": "c1928ea5-bdb7-4396-9cbd-cdaffa5c4b2f",
+      "output_symbol": "pool_underwater_surface",
+      "input_symbols": [
+        "pool_ground_area_m2",
+        "pool_submerged_wall_area_m2"
+      ]
+    },
+    "FLLNT-10 EQ-01": {
+      "id": "0a875bd8-1e8f-47f2-9a38-62396ea73c70",
+      "output_symbol": "filter_50x_rule_met",
+      "input_symbols": [
+        "filter_colonized_surface_actual",
+        "pool_underwater_surface"
+      ]
+    },
+    "FLLNT-10 EQ-02": {
+      "id": "e56fc10a-de59-4b62-af9b-bbfa6bc012b4",
+      "output_symbol": "filter_colonized_surface_actual",
+      "input_symbols": [
+        "grain_specific_surface",
+        "F_filter",
+        "h_filter"
+      ]
+    },
+    "FLLNT-10 EQ-03": {
+      "id": "b722809a-24c4-4c2d-8e8c-ea65a65a7e49",
+      "output_symbol": "filter_volume_required",
+      "input_symbols": [
+        "pool_underwater_surface",
+        "grain_specific_surface"
+      ]
+    },
+    "FLLNT-11 EQ-04": {
+      "id": "356a95cc-499a-454c-a905-d0de3bf41643",
+      "output_symbol": "overflow_edge_length",
+      "input_symbols": [
+        "swimming_area_m2"
+      ]
+    },
+    "FLLNT-11 EQ-05": {
+      "id": "27f94c84-87bd-411e-a9e5-c7546c59f713",
+      "output_symbol": "splash_water_tank_volume",
+      "input_symbols": [
+        "pool_underwater_surface"
+      ]
+    }
+  }
+}

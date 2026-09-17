@@ -1751,3 +1751,244 @@ Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar
 - **Scalar-only equations are not server-materialised** (2a design) — FLL-GAR-02-D1, -05-D1/-D2, -11-D1, -12-D1, -14-D1, -16-D2, -18-D1/-D2 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
 - **cm vs mm**: `bauteildicke_cm` / `asph_dicke` / `schichtdicke_*_cm` are cm in prod while Tab. 8 / Tab. 12 print mm — the created fills carry the printed unit (mm) and say so in the label; comparisons need × 10 (GAR-12 F2).
 - **The transcript is plain text with hyphenated line breaks**; whitespace-collapsed fragments keep the hyphen ("Gruben- tone", "Geo- textilien") — presentation strings in the seed (labels, `werkstoffe_text`) carry them verbatim rather than a guessed de-hyphenation.
+
+## Task 8 — FLL-Naturteich (fll_naturteich)
+
+Report: `reports/plan-3-fll_naturteich.md` · STAGED SQL: `scripts/verification/fll_naturteich-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\FLL-Guidelines natural pool.md` (2nd edition 2017, English translation; lines cited; the secondary `C:\Users\Ekowai\Desktop\FLL Guidelines PDF\FLL-Naturteich-2017_pdftotext.txt` cited as P<line> where it was used) · prod capture `src/lib/eval/field-configs/fll_naturteich.prior.json` (2026-09-17, read-only). Ids follow the skeleton's class letters plus J (judgment / reading) as in Tasks 1 and 7. Nothing below is applied.
+
+### fll_naturteich-J-1 · FLL-Naturteich · FLLNT-03 · TABLE1 (column assignment from the pdftotext layout)
+- Class: unreadable-cell (reading)
+- Chosen now (fail-safe): TABLE1 seeded `md_verified` — every cell is legible in the md and both sources agree cell-for-cell; the ASSIGNMENT of the interleaved md cells to the five type columns follows the pdftotext layout, which the brief allows for exactly this table.
+- Evidence (verbatim, transcript line): "no filter no filter, skimmer operation" (L1174) / "intermittently intermittent/permanent permanent dependent on system" (L1176) — interleaved; "\> 50% \> 50% \> 30%" (L1212); pdftotext P1235 "no filter … intermittent/permanent permanent dependent on system", P1249 "> 50% > 50% > 30% based on design refer to based on design refer to", P1250 "Tab. 5 Tab. 6".
+- Proposed SQL / config: none (REJECTED = downgrade TABLE1 to `imported_unverified` in the seed builder; a one-line change).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-J-2 · FLL-Naturteich · FLLNT-09 / -10 · TABLE10, TABLE11, TABLE12 (column span of the single-cell rows)
+- Class: unreadable-cell (reading)
+- Chosen now (fail-safe): the three tables stay `imported_unverified`. The md prints the single-cell rows once ("≥ 40 cm" L2703, "Filters ≤ 16 mm" L2719, "10% deviation" L2727, "≤ 8 mm" L2617) and the horizontal column's "Individual verifica- tion no further information" once per parameter group (L2695–L2699, L2713–L2717, L2729–L2733, L2737–L2741); the executor read the pdftotext layout (P2507–P2535, P2429–P2450) to assign the single cells to the two vertical columns and every horizontal cell to "individual verification" (all numeric cells null, `individual_verification = true`). The brief allowed the secondary file for Table 1 only — recorded here as a deviation.
+- Evidence (verbatim, transcript line): "2 Water column height ≥ 10 cm — Individual verifica- tion no further information" (L2695–L2699); "3 Thickness of the filter-effective layer ≥ 40 cm" (L2701–L2703); pdftotext P2509–P2511 "Thickness of the filter-effective … no further / 3 … ≥ 40 cm / layer … information".
+- Proposed SQL / config: a PDF look at pp. 47 / 50 / 52 flips the three tables to `md_verified` (seed builder status change).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-J-3 · FLL-Naturteich · FLLNT-03 · TABLE1 regeneration share type III: "> 30%" (Tab. 1) vs "≥ 30%" (Tab. 4)
+- Class: gate-guard (reading)
+- Chosen now (fail-safe): TABLE1 carries `regeneration_share_min_pct = 30` with `share_comparator = '>'` as Tab. 1 prints; prod REQ-07 already tests `> 30`; the FLLNT-06-D2 share is compared strictly in the STAGED G-1 gate.
+- Evidence (verbatim, transcript line): "\> 50% \> 50% \> 30%" (L1212, Tab. 1); "≥ 30%" (L1457, Tab. 4 "Regeneration area in % of the total water area" column for type III).
+- Proposed SQL / config: the owner decides which printed form governs type III; G-1's condition changes `>` to `>=` if Tab. 4 wins.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-J-4 · FLL-Naturteich · FLLNT-06 · "total water area" excludes supplementary areas
+- Class: equation-replacement (reading)
+- Chosen now (fail-safe): `regeneration_share_calc` (FLLNT-06-D2) divides Σ regeneration zones by Σ (swimming + regeneration) zones — the guideline's "total water area"; supplementary rows are captured but excluded from the denominator. `total_pool_area_calc` (D1) sums ALL zones to match prod's definition of `total_pool_area_m2` ("sum of zones", VR "computed: swimming_area_m2 + regeneration_area_m2 + supplementary_area_m2").
+- Evidence (verbatim, transcript line): "Supplementary area Areas which do not belong directly to the natural swimming pool but are added for their use, e. g. paths and access routes to the pool, rest areas and areas for lying down, playing areas for children." (L765–L768); "Biological characteristics Regeneration area in % of the total water area" (L1233–L1234).
+- Proposed SQL / config: none; if the owner wants supplementary areas in the share denominator (prod's reading), the D2 formula changes to `/ sum_rows(zonen, area_m2)`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-J-5 · FLL-Naturteich · FLLNT-10 · section rules hide the substrate-filter worksheet for type V
+- Class: gate-guard (reading)
+- Chosen now (fail-safe): the FLLNT-10 section rules use `natural_pool_type IN {'type_III', 'type_IV'}` (Tab. 1's regeneration-area column); only the driver-free sections A / J / K / L / M hide, so a type-V project keeps every input visible (C-3).
+- Evidence (verbatim, transcript line): "Carrier material, e.g. plastic or mineral medium in a technical unit" (L1149–L1151, type V regeneration area); "they must be assigned to the quick filter types;" (L2872, §10.2.4 technical unit).
+- Proposed SQL / config: if the technical unit should be dimensioned on FLLNT-10 (quick-filter rules), the rule becomes `IN {'type_III', 'type_IV', 'type_V'}` (one string in `field-configs/fll_naturteich.ts`, re-emit).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-J-6 · FLL-Naturteich · FLLNT-12 · S10_4_3 plant groups "half-height to tall" vs "medium height to tall"
+- Class: range-SR-2 (reading)
+- Chosen now (fail-safe): two tokens `marsh_small` (3 – 5 / m²) and `marsh_medium` (5 – 7 / m²) with the printed bullets as labels; both ranges overlap in wording ("to tall") as printed — the engineer picks the group per species, the density stays an explicit input inside the range (SR-2), out-of-range is a badge.
+- Evidence (verbatim, transcript line): "• half-height to tall marsh and aquatic plants 3 – 5 plants;" (L3052); "• medium height to tall marsh and aquatic plants 5 – 7 plants;" (L3053); "• lilies and lily pads depending on type." (L3054).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-O-1 · FLL-Naturteich · FLLNT-05 · TABLE9 override policy (`locked`) — "must" vs "should" per row
+- Class: override-policy
+- Chosen now (fail-safe): `locked` (no override) for the whole table; the oversized-grain sentence says "must", the elutriated-parts and elutable-phosphorus sentences say "should".
+- Evidence (verbatim, transcript line): "The percentage of oversized grain must not exceed 15% by weight." (L2018); "should indicate a silt and clay percentage (\< 0.063 mm) of ≤ 0.5% by weight; a threshold value of ≤ 2% by weight applies here for all other filter substrates." (L2019–L2021); "The level of elutable phosphorus should not exceed 5 mg P/kg." (L2022).
+- Proposed SQL / config: `anhaltswert` (override with reason) if the "should" rows may deviate — one word in the seed builder, re-emit.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-O-2 · FLL-Naturteich · FLLNT-10 · TABLE12 override policy (`locked`) — "Smaller feed rates are permissible"
+- Class: override-policy
+- Chosen now (fail-safe): `locked`; `feed_ok` counts a quick-filter row under Qmin 15 as a violation (badge + `filter_feed_violations`), no gate.
+- Evidence (verbatim, transcript line): "According to experience, substrate filters with a controlled quick flow must be operated with a feed rate of Qmin ≥ 15 m3/(m2 x day). Smaller feed rates are permissible if the functionality of pool is ensured." (L2784–L2786).
+- Proposed SQL / config: `anhaltswert` on TABLE12 if the per-row deviation should be justified in place; the G-6 gate severity follows the same reading.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-C-1 · FLL-Naturteich · FLLNT-03 · natural_pool_type consumer_worksheets += FLLNT-04
+- Class: consumer-edit
+- Chosen now (fail-safe): the two Tab.-8 P-limit fills on -04 and the swimming-row P checks of `wasserproben` are emitted reading `natural_pool_type`; they show "Schlüssel fehlt" / leave `sample_violations` `manual_required` until the edit (pinned).
+- Evidence (verbatim, transcript line): "≤ 0.03 mg/l (type I-III) ≤ 0.01 mg/l (type IV, V)" (L1947–L1948; L1960–L1961).
+- Proposed SQL / config: STAGED block fll_naturteich-C-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-C-2 · FLL-Naturteich · FLLNT-03 p_binding_required · FLLNT-11 splash_water_tank_volume · visibility refused
+- Class: consumer-edit
+- Chosen now (fail-safe): no `visible_when` on either (the emitter refuses both — consumed by -10 / -11 resp. -15); both stay visible on every type / project.
+- Evidence (verbatim, transcript line): "with controlled slow flow through the substrate fil- ter and downstream P-binding unit" (L1117–L1122); "A water reservoir is mandatory when using rigid overflow weirs." (L2930).
+- Proposed SQL / config: STAGED block fll_naturteich-C-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-C-3 · FLL-Naturteich · FLLNT-09 B / C / D · FLLNT-10 B / C / D / F · section rules refused
+- Class: consumer-edit
+- Chosen now (fail-safe): 11 section rules on the driver-free sections only (A / F / J / K / L / M of -09, A / J / K / L / M of -10); the producer sections stay visible for every type.
+- Evidence (verbatim, transcript line): "Regeneration area Hydrobotanical system Hydrobotanical system Substrate filter (usually mineral, with or without plants), hydrobotanical sys- tem, technical unit for phosphor elimination Substrate filter (usually mineral, with or without plants)" (L1135–L1147); "these systems are not taken into account for the dimensioning of the water purification system." (L2580–L2581).
+- Proposed SQL / config: STAGED block fll_naturteich-C-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-E-1 · FLL-Naturteich · FLLNT-05 / -09 / -10 · existing inputs NOT re-bound as lookup_fill limit carriers
+- Class: data_type (widget of consumed inputs)
+- Chosen now (fail-safe): six `*_tab9` limits created on -05 next to the created `substrate_role`, six `*_tab10` limits created on -09 next to `hydrobot_type`; `filter_substrate_*` (-05), `filter_grain_size_max` / `filter_kf` (-10) and `hydrobot_*` (-09) keep their input widgets (the brief's re-bind + `*_ist` twins = the brief's fllnt-S-1).
+- Evidence (verbatim, transcript line): "Recommended maxi- mum grain size 16 mm 32 mm 8 mm" (L2042–L2043); "2 Water column height ≥ 80 cm 10 – 50 cm" (L2607).
+- Proposed SQL / config: STAGED block fll_naturteich-E-1 (nothing to apply for the built layout).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-R-1 · FLL-Naturteich · FLLNT-06 · total_pool_area_m2 / the four area scalars in favour of `zonen`
+- Class: equation-replacement
+- Chosen now (fail-safe): `total_pool_area_calc` (FLLNT-06-D1) is a NEW symbol; `total_pool_area_m2` (VR "computed", no equation) and the three area inputs stay manual; REQ-13 unchanged.
+- Evidence (verbatim, transcript line): "Dimension of the regenera- tion area compared to the total area" (L1207–L1210).
+- Proposed SQL / config: STAGED block fll_naturteich-R-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-R-2 · FLL-Naturteich · FLLNT-06 · EQ-PUWS onto Σ zonen (pool_underwater_surface_calc)
+- Class: equation-replacement
+- Chosen now (fail-safe): `pool_underwater_surface_calc` (FLLNT-06-D3) beside the verified EQ-PUWS; consumers -10 / -11 keep reading the prod symbol.
+- Evidence (verbatim, transcript line): "Surface that can be colonized Ground area: 50 m2 Wall area: 45 m2 Total: 95 m2" (L4088–L4091).
+- Proposed SQL / config: STAGED block fll_naturteich-R-2 (archive pattern).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-R-3 · FLL-Naturteich · FLLNT-10 · EQ-02 / EQ-03 onto Σ filtereinheiten
+- Class: equation-replacement
+- Chosen now (fail-safe): `filter_colonized_surface_total` (FLLNT-10-D1) beside the verified EQ-02; the typed scalars `grain_specific_surface` / `F_filter` / `h_filter` and EQ-03 stay; the brief's `grain_specific_surface` derivation from Tab. 15 (fllnt-D-2) happens per register row instead.
+- Evidence (verbatim, transcript line): "Surface of the filter body \= 600 m2 /m3 x 15 m2 x 0.7 m \= 6300 m2" (L4078–L4080); "4750 m2 / 600 m2 / m3 \= approx. 8 m3" (L4099–L4100).
+- Proposed SQL / config: STAGED block fll_naturteich-R-3 (archive pattern; EQ-03 archived + deleted).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-R-4 · FLL-Naturteich · FLLNT-11 · EQ-04 outputs its own input field (overflow_edge_length)
+- Class: equation-replacement
+- Chosen now (fail-safe): `overflow_edge_length_total` (FLLNT-11-D1) is a NEW symbol; EQ-04 untouched; no gate Σ ≥ guide.
+- Evidence (verbatim, transcript line): "As a guide for the required length of overflow edge, the following value can be used for flexible and rigid overflow weirs depending on the shape and type of the natural pool: 1% of the surface area of the swimming area in metres. Example: Swimming area 30 m2, 1% of 30 \= 0.3 i. e. length of the overflow edge 0.3 m." (L2909–L2912).
+- Proposed SQL / config: STAGED block fll_naturteich-R-4 (archive pattern; creates `overflow_edge_length_guide`, renames EQ-04's output, proposes REQ-34).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-R-5 · FLL-Naturteich · FLLNT-11 / -09 · EQ-05 and REQ-33 multiply the colonizable underwater surface, the text says "inundated water surface"
+- Class: equation-replacement / gate-guard
+- Chosen now (fail-safe): untouched (prod's reading — ground + submerged walls — yields the larger, stricter volume).
+- Evidence (verbatim, transcript line): "The usable volume of the splash water tank must be dimensioned so that at least 150 l per square metre can be provided to the inundated water surface." (L2936–L2937); "In the case of multi-area systems, only the water surface of the area to which the overflow weir is connected is taken into account." (L2947–L2948).
+- Proposed SQL / config: STAGED block fll_naturteich-R-5 (archive pattern for EQ-05 + REQ-33 onto `swimming_area_m2`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-G-1 · FLL-Naturteich · FLLNT-03 / -06 · REQ-07 onto regeneration_share_calc vs the Tab.-1 minimum
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-07 keeps reading the manual `regeneration_area_share`; the register share and the Tab.-1 fill are visible derived / filled values.
+- Evidence (verbatim, transcript line): "\> 50% \> 50% \> 30%" (L1212); "% indication irrelevant, de- sign-related" (L1559–L1560).
+- Proposed SQL / config: STAGED block fll_naturteich-G-1 (new gate REQ-07R on -06 + consumer edit of regeneration_share_min_pct).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-G-2 · FLL-Naturteich · FLLNT-05 · new gates on the Tab.-9 fills
+- Class: gate-guard
+- Chosen now (fail-safe): none; REQ-12 keeps its literal `filter_substrate_elutable_p <= 5`.
+- Evidence (verbatim, transcript line): "≤ 15% by weight ≤ 15% by weight no requirement" (L2051); "≤ 2% by weight ≤ 0.5% by weight no requirement" (L2058).
+- Proposed SQL / config: STAGED block fll_naturteich-G-2 (REQ-12A block / REQ-12B warn — severities per owner).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-G-3 · FLL-Naturteich · FLLNT-09 · REQ-19 onto the Tab.-10 fills
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-19 keeps its literals (correct values today); the six fills are visible beside the inputs.
+- Evidence (verbatim, transcript line): "3 Thickness of substrate layer 10 – 20 cm 10 – 30 cm" (L2608); "12 Feed rate Qmax 5 m3/(m2 x day) 5 m3/(m2 x day)" (L2632).
+- Proposed SQL / config: STAGED block fll_naturteich-G-3 (archive pattern).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-G-4 · FLL-Naturteich · FLLNT-04 / -03 · REQ-09 / REQ-10 onto sample_violations
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-09 / REQ-10 keep their literal chains over the 21 scalars; `sample_violations` is a visible count (REQ-10 sits on FLLNT-03 where its swimming_test_* symbols are not in scope — X-3).
+- Evidence (verbatim, transcript line): "If the analysis results deviate from the approximate values, the biological processes must be observed and if applicable, an advanced total water analysis must be implemented and re- spective measures taken. Temporary fluctuations (e.g. due to environmental influences) can occur." (L1973–L1978).
+- Proposed SQL / config: STAGED block fll_naturteich-G-4 (archive pattern; REQ-10 moved to -04).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-G-5 · FLL-Naturteich · FLLNT-06 · new gate: submerged hydrobotanical share ≥ 50 % (type I / II)
+- Class: gate-guard
+- Chosen now (fail-safe): none; `submerged_hydrobot_share_calc` is a visible derived value.
+- Evidence (verbatim, transcript line): "\> 50% therefrom at least half as submerged hydrobotanical system" (L1273–L1276; L1360–L1363).
+- Proposed SQL / config: STAGED block fll_naturteich-G-5 (REQ-35).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-G-6 · FLL-Naturteich · FLLNT-10 · EQ-01 / REQ-22 onto Σ filtereinheiten · new gate on filter_feed_violations
+- Class: gate-guard
+- Chosen now (fail-safe): EQ-01 / REQ-22 keep reading `filter_colonized_surface_actual`; `filter_feed_violations` is a visible count.
+- Evidence (verbatim, transcript line): "should, as experience shows, amount to at least 50-times the surfaces of the pool that are exposed to light and inundated (refer to Appendix 5)." (L2769–L2771); "Smaller feed rates are permissible if the functionality of pool is ensured." (L2785–L2786).
+- Proposed SQL / config: STAGED block fll_naturteich-G-6 (archive pattern; REQ-36 warn).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-G-7 · FLL-Naturteich · FLLNT-11 · new gate on overflow_tolerance_violations
+- Class: gate-guard
+- Chosen now (fail-safe): none; the per-row badge and the count are visible; `overflow_horizontal_tolerance_mm` keeps its VR text.
+- Evidence (verbatim, transcript line): "Overflow weirs are to be installed in a manner that the overflow edge does not deviate horizontally by more than \+/- 2 mm or for overflow edges up to 1 m, by more than \+/- 1 mm." (L2922–L2924).
+- Proposed SQL / config: STAGED block fll_naturteich-G-7 (REQ-37).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-D-1 · FLL-Naturteich · FLLNT-10 · filter_flow_type ← natural_pool_type
+- Class: deactivation (manual enum vs derivation)
+- Chosen now (fail-safe): manual; the printed Tab.-1 "Flow" cell is filled as text on -03 (`flow_tab1_text`).
+- Evidence (verbatim, transcript line): "with controlled slow flow through the substrate fil- ter" (L1117–L1119); "with controlled quick flow through the sub- strate filter" (L1127–L1130); "quick or slow controlled flow through the technical unit" (L1168–L1171).
+- Proposed SQL / config: STAGED block fll_naturteich-D-1 (none applied).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-D-2 · FLL-Naturteich · FLLNT-03 · regeneration_technique (single enum) vs the per-zone technique of `zonen`
+- Class: deactivation
+- Chosen now (fail-safe): the manual enum stays; the register carries one technique per regeneration zone with the same prod tokens; TABLE1 keeps the printed cell as text.
+- Evidence (verbatim, transcript line): "Substrate filter (usually mineral, with or without plants), hydrobotanical sys- tem, technical unit for phosphor elimination" (L1137–L1143).
+- Proposed SQL / config: STAGED block fll_naturteich-D-2 (none applied).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-S-1 · FLL-Naturteich · FLLNT-03 type_III · FLLNT-09 emersed / submergent / vertical_continuous_overflow / vertical_no_overflow
+- Class: deactivation
+- Chosen now (fail-safe): untouched (five orphan fields named after enum tokens, no clause, no consumers).
+- Evidence (verbatim, transcript line): capture (section_id NULL, consumer_worksheets NULL); no transcript claim.
+- Proposed SQL / config: STAGED block fll_naturteich-S-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-X-1 · FLL-Naturteich · FLLNT-06 / -11 · swimming_area_m2 declared twice
+- Class: cross-standard (duplicate symbol)
+- Chosen now (fail-safe): untouched; the -11 copy is an orphan (section NULL) that EQ-04 reads instead of inheriting -06's value.
+- Evidence (verbatim, transcript line): capture; "Example: Swimming area 30 m2, 1% of 30 \= 0.3" (L2912).
+- Proposed SQL / config: after R-4: `active = false` on the -11 copy + consumer edit `swimming_area_m2` (-06) += FLLNT-11.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-X-2 · FLL-Naturteich · FLLNT-12 · plant_density_* scalars vs the register densities
+- Class: cross-standard (duplicate)
+- Chosen now (fail-safe): the three scalars (consumed by -13) stay; the register carries the §10.4.3 range per row and the chosen density.
+- Evidence (verbatim, transcript line): "For plant density, the following number of plants applies as an approximate value per m2 of planting surface area:" (L3049–L3050).
+- Proposed SQL / config: `active = false` on the three scalars once -13's consumer is re-pointed to `plant_species_list` (already consumed there).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-X-3 · FLL-Naturteich · FLLNT-03 / -09 · prod gates reading symbols that are not in scope on their worksheet
+- Class: cross-standard (prod hygiene; observation with a block)
+- Chosen now (fail-safe): untouched. REQ-10 (FLLNT-03) reads swimming_test_* (-04, consumed by -15 only); REQ-08 (FLLNT-09) reads filter_flow_type (-10 → -11) and p_binding_required (-03 → -10 / -11); REQ-20 / REQ-21 (FLLNT-09) read filter_* (-10, unconsumed); REQ-33 (FLLNT-09) reads rigid_overflow_used / splash_water_tank_volume (-11) — each is `pending` on every project today (the same class as m1200_3's mirror-worksheet gates).
+- Evidence (verbatim, transcript line): capture (compliance rows + consumer_worksheets); no transcript claim.
+- Proposed SQL / config: move each gate to the worksheet that owns its symbols (G-4 moves REQ-10; the others are one UPDATE of `worksheet_template_id` each with the archive pattern) — a follow-up block once the owner confirms the FLL-NT harness expectations.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-F-1 · FLL-Naturteich · FLLNT-11 · tol_limit = if(edge_length_m <= 1, 1, 2)
+- Class: text-only-formula
+- Chosen now (fail-safe): encoded as a register `derived` column (the sentence, not a printed formula); "up to 1 m" read as ≤ 1 m.
+- Evidence (verbatim, transcript line): "does not deviate horizontally by more than \+/- 2 mm or for overflow edges up to 1 m, by more than \+/- 1 mm." (L2922–L2924).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_naturteich-F-2 · FLL-Naturteich · FLLNT-10 / -11 · rows without a measured value are not counted as violations
+- Class: text-only-formula (decidability)
+- Chosen now (fail-safe): `feed_ok` is 1 when `feed_rate` is empty, for technical units and for horizontal filters; `tol_ok` is 1 when `tolerance_mm` is empty — so `filter_feed_violations` / `overflow_tolerance_violations` stay decidable and count only measured deviations (the m1200_1 `IS NULL` pattern); a missing measurement is visible as an empty cell, never a violation.
+- Evidence (verbatim, transcript line): "Individual verifica- tion no further information" (L2695–L2699, horizontal column); "The manufacturer's instructions must be observed (e.g. feed rate, cleaning, operation)." (L2879).
+- Proposed SQL / config: none; if a missing feed rate should count as a violation, drop the `IS NULL` branch (one expr in `field-configs/fll_naturteich.ts`, re-emit).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 8, no signature needed)
+
+- **`natural_pool_type` is NOT consumed by FLLNT-04 / -05** (capture) — the Tab.-8 P-limit fills and the swimming-row P checks are inert until C-1; TABLE9 keys on the created `substrate_role` instead of the type on purpose (the plant substrate exists in every type; Tab. 9 prints three roles, not five types).
+- **Edition token `'2017'`** is printed ("nd edition 2017 (German), English Translation 2023, 50 copies and download version, Bonn, May 2024" L236–L237; "an accurate translation of the second edition … issued in 2017" L477–L479) and prod `standards.version` reads "2017 (2nd edition, German); English translation 2023/2024" — no numbered edition block.
+- **TABLE2_SUBMERGED has two rows, not the brief's one**: Tab. 3 (type II, L1360–L1363) prints the same "therefrom at least half" cell as Tab. 2 (type I, L1273–L1276); both are seeded with their own span.
+- **TABLE7 / TABLE8 are single-row tables keyed `source = 'all'`** (one printed value column), read with a literal key from the register rows; only the two type-split parameters live in the pool_type-keyed TABLE8_P (five rows with identical cells per group, the m1200_1 trap-6 pattern) — not the brief's per-parameter `TABLE7_<PARAM>` split (m277e trap 3).
+- **The `filtereinheiten` register keeps `hydrobot_type` as a plain enum column** (prod tokens) rather than a `lookup_key` on TABLE10, so that the register's single `lookup_key` (`grain_class`, TABLE15 — `anhaltswert`) carries the override toggle for the Tab.-15 surface; the Tab.-10 limits are read by `lookup('TABLE10', hydrobot_type, …)` in the derived columns.
+- **App. 5 Example 1 reproduces exactly**: a substrate row with 8/16 (600 m²/m³), F 15 m², layer 70 cm → 6300 m² (`colonized_m2`, `/ 100` = cm → m); Example 2's 95 m² is the `zonen` underwater sum.
+- **Scalar-only equations: none in this task** — every equation is register-fed and server-materialised.
+- **Prod's `total_pool_area_m2` VR includes supplementary areas** while §3 defines them as not belonging to the pool (J-4) — D1 follows prod's definition (Σ all zones), D2 the guideline's water-area share.
+- **No drainage field exists on FLLNT-07** (the brief's §9.1 `drainage_*` rule has no target; REQ-14 is the attestation on -06).
+- **The transcript is plain text with hyphenated line breaks**; the `*_printed` cells of TABLE1 / TABLE9 keep the hyphen fragments verbatim ("purifi- cation", "natu- ral"), the select labels de-hyphenate for display.

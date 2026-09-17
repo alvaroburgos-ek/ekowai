@@ -1,0 +1,491 @@
+-- FLL-Naturteich — Plan 3 Task 8 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the 6 equation rows, the 33 compliance rows —
+-- ids / severities / conditions / md5) were captured read-only on 2026-09-17/18 (src/lib/eval/field-configs/
+-- fll_naturteich.prior.json; prod-query.mjs for compliance_requirements / equations / standards.version / field
+-- labels + validation_rules, long conditions read in 105-char chunks). Transcript lines refer to
+-- C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\FLL-Guidelines natural pool.md (2nd edition 2017,
+-- English translation). This task changes NO gate severity.
+--
+-- Conventions: `s.code = 'FLL-Naturteich'`, worksheets by code, never by id (gates / equations by their captured uuid + a
+-- guard on md5(condition) / md5(formula) of the text they replace so a re-run is a no-op); each block names its rollback.
+-- Every block that replaces VERIFIED or long text (R-2, R-3, R-4, R-5, G-1, G-3, G-4, G-6) follows the amendment-I archive
+-- pattern: the affected rows are copied into `equations_archive_fll_naturteich` / `compliance_requirements_archive_
+-- fll_naturteich` in the SAME transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE false; INSERT … SELECT * …
+-- WHERE (id = … AND md5(<content>) = …)`), the UPDATE / DELETE is guarded on md5(condition) / md5(formula) read read-only
+-- from prod, and the rollback DELETEs the changed row by id + md5 of the NEW text and re-INSERTs the archived row with an
+-- EXPLICIT column list (never `SELECT *`, never retyped — prod-query.mjs truncates cells at 120 chars); the archive table
+-- is dropped by the rollback or on the owner's sign-off that the change is final. A field retirement is `active = false`
+-- (reversible). New gates (G-2, G-5, G-7) are INSERTs with a DELETE-by-description rollback. The Plan-3 DATA migrations
+-- (20260917100800 seed · 20260917100810 field configs · 20260917100820 equations) must be applied BEFORE any block that
+-- reads a created symbol (zonen, total_pool_area_calc, regeneration_share_calc, pool_underwater_surface_calc,
+-- submerged_hydrobot_share_calc, wasserproben, sample_violations, substrate_role, *_tab9, *_tab10, filtereinheiten,
+-- filter_colonized_surface_total, filter_feed_violations, ueberlaufeinrichtungen, overflow_edge_length_total,
+-- overflow_tolerance_violations, plant_count_total, regeneration_share_min_pct, swimming_p_total_limit,
+-- swimming_orthophosphate_limit). Consumer edits append to `fields.consumer_worksheets` (text[]); the guard
+-- `NOT (… = ANY(…))` keeps a re-run idempotent. The Plan-1 schema migration renames the LEGACY prod regulation_tables
+-- first (plan1-D-3-1) — apply order in the playbook.
+--
+-- Captured equation rows (read-only 2026-09-18; all verification_status = 'verified_against_standard'):
+--   EQ-PUWS  c1928ea5-bdb7-4396-9cbd-cdaffa5c4b2f  FLLNT-06  md5 bd320f35f15595d2bbe13cc38904ee22  'pool_underwater_surface = pool_ground_area_m2 + pool_submerged_wall_area_m2'
+--   EQ-01    0a875bd8-1e8f-47f2-9a38-62396ea73c70  FLLNT-10  md5 c234e8111d2f7a3e9a93ee13f2d6813c  'filter_colonized_surface_actual >= 50 * pool_underwater_surface'
+--   EQ-02    e56fc10a-de59-4b62-af9b-bbfa6bc012b4  FLLNT-10  md5 688c77844473740257d32551fdce265d  'filter_colonized_surface_actual = grain_specific_surface * F_filter * h_filter'
+--   EQ-03    b722809a-24c4-4c2d-8e8c-ea65a65a7e49  FLLNT-10  md5 84868073719d3b012820c1534bfd0130  'filter_volume_required = (pool_underwater_surface * 50) / grain_specific_surface'
+--   EQ-04    356a95cc-499a-454c-a905-d0de3bf41643  FLLNT-11  md5 ddd672eb1e96284045ab1d12f236965f  'overflow_edge_length = 0.01 * swimming_area_m2'
+--   EQ-05    27f94c84-87bd-411e-a9e5-c7546c59f713  FLLNT-11  md5 42d7b4598ace260aa16254d8ae2709ff  'splash_water_tank_volume >= 150 * pool_underwater_surface'
+-- Captured compliance rows referenced below (all severity 'block'):
+--   REQ-07 fabaa982-e703-4080-b596-1b19025bd23f (FLLNT-03, md5 984b088086c4eb8e2960d0f07f2e7aee, 150 chars)
+--   REQ-09 86bb8bb3-2a4e-4f3f-86f4-6a8c50207644 (FLLNT-04, md5 a7b0b5992ddb0830a574ac47fe4635bf, 342 chars)
+--   REQ-10 d1cacb11-3cbb-421a-8ea5-03980ce5e5f8 (FLLNT-03, md5 e475bc092a0d9ffc88ec47cc7260c872, 527 chars)
+--   REQ-13 829721fa-7bcc-4dd6-8684-51791d16f9f2 (FLLNT-06, md5 5dec64c63daaa42b105f246ae18dc690, 100 chars)
+--   REQ-19 0ff40c3b-1b77-4d20-8cd3-61a12a92c200 (FLLNT-09, md5 585ed193b7a5ea51f2a6e6c711db1291, 385 chars)
+--   REQ-22 63af0d3a-9db1-4879-8d12-6ef86803419c (FLLNT-10, md5 b13a2a94ebef8a2b5459958925d7e1e8, 'filter_50x_rule_met == true')
+--   REQ-33 585759fc-a645-4d0e-b484-bd75558b23f6 (FLLNT-09, md5 0753314de0f071c3c10cab2fbda6a5af, 'IF rigid_overflow_used == true THEN splash_water_tank_volume >= 150 * pool_underwater_surface')
+-- Explicit column lists (information_schema, read-only 2026-09-18):
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+
+-- =====================================================================================================================
+-- fll_naturteich-C-1 · FLLNT-03 natural_pool_type consumer_worksheets += FLLNT-04 — the Tab.-8 P limits by type on the water worksheet
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: natural_pool_type.consumer_worksheets = '{FLLNT-06,FLLNT-09,FLLNT-10,FLLNT-11,FLLNT-12,FLLNT-14}' — FLLNT-04 is
+-- not in it, so the two created fills swimming_p_total_limit / swimming_orthophosphate_limit read "Schlüssel fehlt" and
+-- the swimming-row checks p_total_ok / orthophosphate_ok of `wasserproben` are null (sample_violations = manual_required
+-- for any project with a swimming-area sample) until this edit. Note that prod's own REQ-10 (on FLLNT-03) already reads
+-- natural_pool_type together with the -04 swimming_test_* symbols (fll_naturteich-X-3).
+-- Evidence: L1947–L1948 "≤ 0.03 mg/l (type I-III) ≤ 0.01 mg/l (type IV, V)"; L1960–L1961 (Orthophosphate, same split).
+-- Why staged: a consumer_worksheets edit is an always-sign-off class.
+-- Option:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(f.consumer_worksheets, 'FLLNT-04')
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'natural_pool_type' AND w.code = 'FLLNT-03' AND s.code = 'FLL-Naturteich' AND f.active
+--    AND NOT ('FLLNT-04' = ANY(f.consumer_worksheets));
+-- COMMIT;
+-- Rollback: SET consumer_worksheets = array_remove(f.consumer_worksheets, 'FLLNT-04') on that row.
+
+-- =====================================================================================================================
+-- fll_naturteich-C-2 · FLLNT-03 p_binding_required · FLLNT-11 splash_water_tank_volume — visibility refused (consumed producers)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: p_binding_required.consumer_worksheets = '{FLLNT-10,FLLNT-11}'; splash_water_tank_volume.consumer_worksheets =
+-- '{FLLNT-15}' (and it is the EQ-05 output). The emitter refuses `visible_when` on both (a hidden producer nulls the
+-- inherited copy). Today: p_binding_required is a boolean on every type (REQ-08 on FLLNT-09 reads it together with
+-- filter_flow_type, both foreign to -09 — X-3); splash_water_tank_volume is a number on every project (REQ-33 guards it
+-- with IF rigid_overflow_used == true).
+-- Evidence: L1117–L1125 "with controlled slow flow through the substrate fil- ter and downstream P-binding unit" (Tab. 1,
+-- type III only); L2658–L2659 "Substrate filters with a controlled slow flow must be equipped with a downstream
+-- phosphrous- binding purification stage"; L2930 "A water reservoir is mandatory when using rigid overflow weirs."
+-- Why staged: hiding a consumed producer is an always-sign-off class (the consumers would read null for I / II / IV / V
+-- resp. for flexible-only projects — REQ-08 / REQ-33 would turn not_applicable there, which is the printed intent).
+-- Option (visible_when on the two rows; the schema column exists after 20260911100000):
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'natural_pool_type == ''type_III''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'p_binding_required' AND w.code = 'FLLNT-03' AND s.code = 'FLL-Naturteich' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'rigid_overflow_used == true' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'splash_water_tank_volume' AND w.code = 'FLLNT-11' AND s.code = 'FLL-Naturteich' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on both rows (captured NULL).
+
+-- =====================================================================================================================
+-- fll_naturteich-C-3 · FLLNT-09 sections B / C / D · FLLNT-10 sections B / C / D / F — section rules refused (consumed producers inside)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: -09 B hydrobot_type (→ -10, -12), C hydrobot_substrate_thickness / hydrobot_water_column (→ -15), D
+-- hydrobot_feed_rate (→ -11); -10 B filter_flow_type (→ -11), C aerobic_filtration_confirmed (→ -11, -15), D
+-- filter_feed_rate_slow_qmax / filter_feed_rate_quick_qmin (→ -11), filter_colonized_surface_actual /
+-- filter_volume_required (→ -15), F filter_50x_rule_met (→ -15). Emitted: the driver-free sections only (A, F, J, K, L, M
+-- on -09; A, J, K, L, M on -10) — the headings hide, the inputs stay visible for every type.
+-- Evidence: L1135–L1147 (Tab. 1 regeneration-area column: "Hydrobotanical system" for I / II / III, "Substrate filter"
+-- for III / IV); L2580–L2581 "There must be a flow in supplementary hydrobotanical systems in natural pool type IV; these
+-- systems are not taken into account for the dimensioning of the water purification system."
+-- Why staged: hiding the producer sections nulls the inherited values on -11 / -12 / -15 for the non-applicable types
+-- (REQ-19 / -20 / -21 / -22 / -30 would report not_applicable there — the printed intent, but an enforcement change).
+-- Option (the seven section rows; each guarded on the captured NULL):
+-- BEGIN;
+-- UPDATE worksheet_sections ws SET visible_when = 'natural_pool_type IN {''type_I'', ''type_II'', ''type_III''}'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE ws.worksheet_template_id = w.id AND w.code = 'FLLNT-09' AND s.code = 'FLL-Naturteich' AND ws.code IN ('B', 'C', 'D') AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'natural_pool_type IN {''type_III'', ''type_IV''}'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE ws.worksheet_template_id = w.id AND w.code = 'FLLNT-10' AND s.code = 'FLL-Naturteich' AND ws.code IN ('B', 'C', 'D', 'F') AND ws.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on the seven rows.
+
+-- =====================================================================================================================
+-- fll_naturteich-E-1 · FLLNT-05 filter_substrate_* / FLLNT-10 filter_grain_size_max, filter_kf / FLLNT-09 hydrobot_* — NOT re-bound as lookup_fill limit carriers
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The brief binds TABLE9 (role limit) onto the EXISTING inputs filter_grain_size_max / filter_substrate_oversize_pct /
+-- filter_substrate_elutriated_pct / filter_kf / filter_substrate_elutable_p and creates `*_ist` twins for the measured
+-- values. Not done: filter_substrate_* (-05) are consumed by -10 / -15 and REQ-12 reads filter_substrate_elutable_p <= 5;
+-- filter_grain_size_max / filter_kf live on -10 where no substrate_role exists; a fill on an existing input hides the
+-- engineer's value (a262e-E-3 / fll_gar-E-2). Built instead: six `*_tab9` limit fills on -05 next to the created
+-- substrate_role and six `*_tab10` limit fills on -09 next to the prod hydrobot_type; every existing input keeps its widget.
+-- Evidence: Tab. 9 L2042–L2065; Tab. 10 L2607–L2632; prod validation_rules of the -05 fields mix the slow / quick columns
+-- ("≤ 2 % slow / ≤ 0.5 % quick", inventory §3).
+-- Why staged: changing the widget of a consumed input + creating `*_ist` twins + re-pointing REQ-12 is a data_type /
+-- consumer class ruling. Option: keep the built layout (nothing to apply); REJECTED = the brief's re-bind — a follow-up
+-- Plan-3 UPDATE entry per field with `*_ist` creates and REQ-12 onto filter_substrate_elutable_p_ist <= elutable_p_max_tab9.
+
+-- =====================================================================================================================
+-- fll_naturteich-R-1 · FLLNT-06 total_pool_area_m2 / regeneration_area_share — the manual totals in favour of the zonen register
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: total_pool_area_m2 (D, consumed by -15; validation_rules "computed: swimming_area_m2 + regeneration_area_m2 +
+-- supplementary_area_m2" — no equation exists); swimming_area_m2 / regeneration_area_m2 / supplementary_area_m2 (C,
+-- consumed by -07 / -09 / -10 / -15); regeneration_area_share (FLLNT-03 D, consumed by -06; REQ-07 reads it). Created:
+-- zonen, total_pool_area_calc (FLLNT-06-D1), regeneration_share_calc (FLLNT-06-D2).
+-- Evidence: L1207–L1212 "Dimension of the regenera- tion area compared to the total area > 50% > 50% > 30%"; L1233–L1234
+-- "Regeneration area in % of the total water area"; L765–L768 (supplementary areas do not belong to the pool — J-4).
+-- Why staged: a NEW equation whose output is an existing consumed manual field (single-source), plus the retirement of
+-- four inputs REQ-13 reads. Option (one equation row for the existing symbol + REQ-13 onto the register; the four scalars
+-- stay active until the consumers -07 / -09 / -10 / -15 are re-pointed — a second block):
+-- BEGIN;
+-- INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status)
+-- SELECT w.id, 'FLLNT-06-R1', 'total_pool_area_m2 = sum_rows(zonen, area_m2)', ARRAY['zonen'], 'total_pool_area_m2', 'm²', '§5, Tab. 1; §8.2',
+--        'Plan 3 (fll_naturteich-R-1): Gesamtfläche aus den Zonen-Zeilen — ersetzt die manuelle Eingabe.', 'imported_unverified'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLLNT-06' AND s.code = 'FLL-Naturteich'
+--   AND NOT EXISTS (SELECT 1 FROM equations e WHERE e.worksheet_template_id = w.id AND e.equation_number = 'FLLNT-06-R1');
+-- COMMIT;
+-- Rollback: DELETE FROM equations WHERE equation_number = 'FLLNT-06-R1' AND description LIKE 'Plan 3 (fll_naturteich-R-1)%'.
+-- (regeneration_area_share on FLLNT-03 cannot be fed from -06 without a reverse consumer edit -06 → -03; the share gate
+-- moves to -06 instead — G-1.)
+
+-- =====================================================================================================================
+-- fll_naturteich-R-2 · EQ-PUWS (c1928ea5-bdb7-4396-9cbd-cdaffa5c4b2f, FLLNT-06, md5 bd320f35f15595d2bbe13cc38904ee22) — onto Σ zonen
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2769–L2773 "at least 50-times the surfaces of the pool that are exposed to light and inundated … surface of the
+-- bottom of the pool and pool walls"; L4088–L4091 "Surface that can be colonized Ground area: 50 m2 Wall area: 45 m2 Total:
+-- 95 m2". prod 'pool_underwater_surface = pool_ground_area_m2 + pool_submerged_wall_area_m2' (verified_against_standard),
+-- consumed by -10 / -11. Created: zonen (ground_area_m2 / wall_area_m2 per zone), pool_underwater_surface_calc (FLLNT-06-D3).
+-- Why staged: replacing a VERIFIED equation; the per-zone split is the executor's reading of "bottom … and pool walls".
+-- Option — archive pattern (equations has no `active` column; the full captured row travels in the archive):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_fll_naturteich AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_fll_naturteich SELECT * FROM equations
+--  WHERE id = 'c1928ea5-bdb7-4396-9cbd-cdaffa5c4b2f' AND md5(formula) = 'bd320f35f15595d2bbe13cc38904ee22';
+-- UPDATE equations SET formula = 'pool_underwater_surface = sum_rows(zonen, underwater_m2)', input_symbols = ARRAY['zonen'], verification_status = 'imported_unverified'
+--  WHERE id = 'c1928ea5-bdb7-4396-9cbd-cdaffa5c4b2f' AND md5(formula) = 'bd320f35f15595d2bbe13cc38904ee22';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol IN ('pool_ground_area_m2', 'pool_submerged_wall_area_m2') AND w.code = 'FLLNT-06' AND s.code = 'FLL-Naturteich' AND f.active;
+-- COMMIT;
+-- Rollback (full row from the archive, explicit column list, never retyped; the two inputs back to active):
+-- BEGIN;
+-- DELETE FROM equations WHERE id = 'c1928ea5-bdb7-4396-9cbd-cdaffa5c4b2f' AND md5(formula) = md5('pool_underwater_surface = sum_rows(zonen, underwater_m2)');
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_fll_naturteich WHERE id = 'c1928ea5-bdb7-4396-9cbd-cdaffa5c4b2f' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM equations_archive_fll_naturteich WHERE id = 'c1928ea5-bdb7-4396-9cbd-cdaffa5c4b2f';
+-- UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol IN ('pool_ground_area_m2', 'pool_submerged_wall_area_m2') AND w.code = 'FLLNT-06' AND s.code = 'FLL-Naturteich' AND NOT f.active;
+-- COMMIT;
+-- The archive table `equations_archive_fll_naturteich` is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
+
+-- =====================================================================================================================
+-- fll_naturteich-R-3 · EQ-02 (e56fc10a-de59-4b62-af9b-bbfa6bc012b4, md5 688c77844473740257d32551fdce265d) / EQ-03 (b722809a-24c4-4c2d-8e8c-ea65a65a7e49, md5 84868073719d3b012820c1534bfd0130) — FLLNT-10 onto Σ filtereinheiten
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L4078–L4080 "Surface of the filter body = 600 m2 /m3 x 15 m2 x 0.7 m = 6300 m2" (EQ-02's printed form, one
+-- filter); L4099–L4100 "4750 m2 / 600 m2 / m3 = approx. 8 m3" (EQ-03, one grain class); Tab. 15 L4113–L4121. prod EQ-02
+-- 'filter_colonized_surface_actual = grain_specific_surface * F_filter * h_filter' (inputs grain_specific_surface, F_filter,
+-- h_filter — typed scalars, h_filter in m), EQ-03 '(pool_underwater_surface * 50) / grain_specific_surface'; both
+-- verified_against_standard; filter_colonized_surface_actual consumed by -15 and by EQ-01. Created: filtereinheiten (Tab.-15
+-- lookup per row, layer in cm), filter_colonized_surface_total (FLLNT-10-D1).
+-- Why staged: replacing VERIFIED equations; several filter units are the executor's generalisation of the one-filter example;
+-- EQ-03 (required volume for ONE grain class) has no per-row analogue when units mix grain classes.
+-- Option — archive pattern (EQ-02 re-pointed onto the Σ; EQ-03 archived and DELETED — the register makes it per row; the
+-- three typed inputs retired):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_fll_naturteich AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_fll_naturteich SELECT * FROM equations
+--  WHERE (id = 'e56fc10a-de59-4b62-af9b-bbfa6bc012b4' AND md5(formula) = '688c77844473740257d32551fdce265d')
+--     OR (id = 'b722809a-24c4-4c2d-8e8c-ea65a65a7e49' AND md5(formula) = '84868073719d3b012820c1534bfd0130');
+-- UPDATE equations SET formula = 'filter_colonized_surface_actual = sum_rows(filtereinheiten, colonized_m2)', input_symbols = ARRAY['filtereinheiten'], verification_status = 'imported_unverified'
+--  WHERE id = 'e56fc10a-de59-4b62-af9b-bbfa6bc012b4' AND md5(formula) = '688c77844473740257d32551fdce265d';
+-- DELETE FROM equations e USING equations_archive_fll_naturteich a WHERE e.id = a.id AND e.id = 'b722809a-24c4-4c2d-8e8c-ea65a65a7e49' AND md5(e.formula) = md5(a.formula);
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol IN ('grain_specific_surface', 'F_filter', 'h_filter', 'filter_volume_required') AND w.code = 'FLLNT-10' AND s.code = 'FLL-Naturteich' AND f.active;
+-- COMMIT;
+-- Rollback (full rows from the archive, explicit column list, never retyped; the four fields back to active):
+-- BEGIN;
+-- DELETE FROM equations WHERE id = 'e56fc10a-de59-4b62-af9b-bbfa6bc012b4' AND md5(formula) = md5('filter_colonized_surface_actual = sum_rows(filtereinheiten, colonized_m2)');
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_fll_naturteich WHERE id IN ('e56fc10a-de59-4b62-af9b-bbfa6bc012b4', 'b722809a-24c4-4c2d-8e8c-ea65a65a7e49') ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM equations_archive_fll_naturteich WHERE id IN ('e56fc10a-de59-4b62-af9b-bbfa6bc012b4', 'b722809a-24c4-4c2d-8e8c-ea65a65a7e49');
+-- UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol IN ('grain_specific_surface', 'F_filter', 'h_filter', 'filter_volume_required') AND w.code = 'FLLNT-10' AND s.code = 'FLL-Naturteich' AND NOT f.active;
+-- COMMIT;
+-- The archive table `equations_archive_fll_naturteich` is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
+
+-- =====================================================================================================================
+-- fll_naturteich-R-4 · EQ-04 (356a95cc-499a-454c-a905-d0de3bf41643, FLLNT-11, md5 ddd672eb1e96284045ab1d12f236965f) — the guide value must not output the input field
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2909–L2912 "As a guide for the required length of overflow edge, the following value can be used … 1% of the
+-- surface area of the swimming area in metres. Example: Swimming area 30 m2, 1% of 30 = 0.3 i. e. length of the overflow
+-- edge 0.3 m." prod 'overflow_edge_length = 0.01 * swimming_area_m2' outputs the field overflow_edge_length (FLLNT-11 D,
+-- consumed by -15) which is ALSO the engineer's input; swimming_area_m2 is re-declared on -11 as an orphan (X-1) instead of
+-- inherited from -06. Created: ueberlaufeinrichtungen, overflow_edge_length_total (FLLNT-11-D1).
+-- Why staged: replacing a verified equation's OUTPUT SYMBOL + creating the guide field + a new gate (Σ ≥ guide, "can be
+-- used" = a guide, so severity is the owner's).
+-- Option — archive pattern:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_fll_naturteich AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_fll_naturteich SELECT * FROM equations
+--  WHERE id = '356a95cc-499a-454c-a905-d0de3bf41643' AND md5(formula) = 'ddd672eb1e96284045ab1d12f236965f';
+-- INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status, widget, order_index)
+-- SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'D'), 'overflow_edge_length_guide', 'Richtwert Überlaufkantenlänge (1 % der Schwimmbereichsfläche, §10.3.1)', 'number', 'm', false, '§10.3.1',
+--        'Plan 3 (fll_naturteich-R-4): Ausgabe von EQ-04 nach der Umbenennung; Vergleich mit overflow_edge_length_total.', 'imported_unverified', 'derived', (SELECT COALESCE(MAX(order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = w.id)
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLLNT-11' AND s.code = 'FLL-Naturteich'
+--   AND NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = w.id AND f2.symbol = 'overflow_edge_length_guide');
+-- UPDATE equations SET formula = 'overflow_edge_length_guide = 0.01 * swimming_area_m2', output_symbol = 'overflow_edge_length_guide', verification_status = 'imported_unverified'
+--  WHERE id = '356a95cc-499a-454c-a905-d0de3bf41643' AND md5(formula) = 'ddd672eb1e96284045ab1d12f236965f';
+-- COMMIT;
+-- Rollback (full row from the archive, explicit column list; the created field removed):
+-- BEGIN;
+-- DELETE FROM equations WHERE id = '356a95cc-499a-454c-a905-d0de3bf41643' AND md5(formula) = md5('overflow_edge_length_guide = 0.01 * swimming_area_m2');
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_fll_naturteich WHERE id = '356a95cc-499a-454c-a905-d0de3bf41643' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM equations_archive_fll_naturteich WHERE id = '356a95cc-499a-454c-a905-d0de3bf41643';
+-- DELETE FROM fields f USING worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'overflow_edge_length_guide' AND w.code = 'FLLNT-11' AND s.code = 'FLL-Naturteich' AND f.description LIKE 'Plan 3 (fll_naturteich-R-4)%';
+-- COMMIT;
+-- The archive table `equations_archive_fll_naturteich` is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
+-- Follow-up gate (same ruling): INSERT INTO compliance_requirements … code 'REQ-34', condition 'overflow_edge_length_total >= overflow_edge_length_guide', severity per owner ("can be used" — a guide value), clause '§10.3.1'.
+
+-- =====================================================================================================================
+-- fll_naturteich-R-5 · EQ-05 (27f94c84-87bd-411e-a9e5-c7546c59f713, FLLNT-11, md5 42d7b4598ace260aa16254d8ae2709ff) / REQ-33 — "inundated water surface" is the water surface, not ground + walls
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2936–L2937 "The usable volume of the splash water tank must be dimensioned so that at least 150 l per square
+-- metre can be provided to the inundated water surface."; L2947–L2948 "In the case of multi-area systems, only the water
+-- surface of the area to which the overflow weir is connected is taken into account." prod EQ-05 'splash_water_tank_volume
+-- >= 150 * pool_underwater_surface' and REQ-33 (on FLLNT-09) 'IF rigid_overflow_used == true THEN splash_water_tank_volume
+-- >= 150 * pool_underwater_surface' both multiply the COLONIZABLE underwater surface (ground + submerged walls, App. 5 —
+-- 95 m² in the example) instead of the water surface of the connected area (50 m² in the example) — a stricter number.
+-- Why staged: changing the input of a verified equation and a gate's condition (enforcement change; today's reading is the
+-- stricter one). Option (both onto swimming_area_m2 — the water surface of the swimming area, own on -11 as an orphan,
+-- X-1 — or onto a per-zone surface once R-1 lands):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_fll_naturteich AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_fll_naturteich SELECT * FROM equations
+--  WHERE id = '27f94c84-87bd-411e-a9e5-c7546c59f713' AND md5(formula) = '42d7b4598ace260aa16254d8ae2709ff';
+-- UPDATE equations SET formula = 'splash_water_tank_volume >= 150 * swimming_area_m2', input_symbols = ARRAY['swimming_area_m2'], verification_status = 'imported_unverified'
+--  WHERE id = '27f94c84-87bd-411e-a9e5-c7546c59f713' AND md5(formula) = '42d7b4598ace260aa16254d8ae2709ff';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_fll_naturteich AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_fll_naturteich SELECT * FROM compliance_requirements
+--  WHERE id = '585759fc-a645-4d0e-b484-bd75558b23f6' AND md5(condition) = '0753314de0f071c3c10cab2fbda6a5af';
+-- UPDATE compliance_requirements SET condition = 'IF rigid_overflow_used == true THEN splash_water_tank_volume >= 150 * swimming_area_m2'
+--  WHERE id = '585759fc-a645-4d0e-b484-bd75558b23f6' AND md5(condition) = '0753314de0f071c3c10cab2fbda6a5af';
+-- COMMIT;
+-- Rollback (full rows from the archives, explicit column lists, never retyped):
+-- BEGIN;
+-- DELETE FROM equations WHERE id = '27f94c84-87bd-411e-a9e5-c7546c59f713' AND md5(formula) = md5('splash_water_tank_volume >= 150 * swimming_area_m2');
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_fll_naturteich WHERE id = '27f94c84-87bd-411e-a9e5-c7546c59f713' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM equations_archive_fll_naturteich WHERE id = '27f94c84-87bd-411e-a9e5-c7546c59f713';
+-- DELETE FROM compliance_requirements WHERE id = '585759fc-a645-4d0e-b484-bd75558b23f6' AND md5(condition) = md5('IF rigid_overflow_used == true THEN splash_water_tank_volume >= 150 * swimming_area_m2');
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_fll_naturteich WHERE id = '585759fc-a645-4d0e-b484-bd75558b23f6' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM compliance_requirements_archive_fll_naturteich WHERE id = '585759fc-a645-4d0e-b484-bd75558b23f6';
+-- COMMIT;
+-- The archive tables `equations_archive_fll_naturteich` / `compliance_requirements_archive_fll_naturteich` are dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
+-- Note (X-3): REQ-33 sits on FLLNT-09 and reads rigid_overflow_used / splash_water_tank_volume, which live on FLLNT-11 and are not consumed by -09 — the gate is `pending` on every project today regardless of this block.
+
+-- =====================================================================================================================
+-- fll_naturteich-G-1 · REQ-07 (fabaa982-e703-4080-b596-1b19025bd23f, FLLNT-03, md5 984b088086c4eb8e2960d0f07f2e7aee) — onto regeneration_share_calc / the Tab.-1 minimum
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1212 "> 50% > 50% > 30%" (Tab. 1); L1457 "≥ 30%" (Tab. 4, type III — J-3); L1559–L1560 / L1660–L1661 "% indication
+-- irrelevant, de- sign-related" (IV / V). prod REQ-07 '(IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share
+-- > 50) AND (IF natural_pool_type == type_III THEN regeneration_area_share > 30)' on FLLNT-03 (reads the manual share).
+-- Created: regeneration_share_min_pct (fill on -03, TABLE1), regeneration_share_calc (-06, from zonen).
+-- Why staged: a gate re-point (the register Σ lives on -06, the gate on -03; moving it needs the reverse consumer edit or a
+-- new gate on -06) and the > vs ≥ reading for type III.
+-- Option (a NEW gate on FLLNT-06 over the register share — REQ-07 stays as the manual check until R-1 retires the share):
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-07R', 'Regenerationsanteil aus den Zonen ≥ Tab.-1-Minimum', 'IF natural_pool_type IN {type_I, type_II, type_III} THEN regeneration_share_calc > regeneration_share_min_pct', '§5, Tab. 1', 'block',
+--        'Plan 3 (fll_naturteich-G-1): Σ Regenerationszonen / Σ Wasserfläche gegen den Tab.-1-Mindestanteil (> 50 / > 50 / > 30 %; Tab. 4 druckt ≥ 30 % — J-3); regeneration_share_min_pct muss dafür von -03 nach -06 vererbt werden (consumer edit in diesem Block).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLLNT-06' AND s.code = 'FLL-Naturteich'
+--   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-07R');
+-- UPDATE fields f SET consumer_worksheets = ARRAY['FLLNT-06'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'regeneration_share_min_pct' AND w.code = 'FLLNT-03' AND s.code = 'FLL-Naturteich' AND f.active AND f.consumer_worksheets IS NULL;
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-07R' AND description LIKE 'Plan 3 (fll_naturteich-G-1)%'; SET consumer_worksheets = NULL on regeneration_share_min_pct.
+
+-- =====================================================================================================================
+-- fll_naturteich-G-2 · FLLNT-05 — new gates: the measured substrate values against the Tab.-9 fills (after E-1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 9 L2042–L2065; L2018 "must not exceed 15% by weight"; L2019–L2022 "should indicate … ≤ 0.5% … should not exceed
+-- 5 mg P/kg". prod REQ-12 'filter_substrate_elutable_p <= 5' (literal, every role). Created: substrate_role + six *_tab9 fills.
+-- Why staged: new gates; the modal verbs differ per row (O-1) and the measured inputs are split across -05 / -10 (E-1).
+-- Option (one gate per printed row on -05; the -10 inputs need a consumer edit first):
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-12A', 'Überkorn ≤ Tab. 9', 'IF substrate_role IN {filter_iii, filter_iv} THEN filter_substrate_oversize_pct <= oversize_max_tab9', '§7.2.3, Tab. 9', 'block', 'Plan 3 (fll_naturteich-G-2): Tab. 9 "≤ 15% by weight" (L2051; L2018 "must not exceed").', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLLNT-05' AND s.code = 'FLL-Naturteich' AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-12A');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-12B', 'Abschlämmbare Anteile ≤ Tab. 9', 'IF substrate_role IN {filter_iii, filter_iv} THEN filter_substrate_elutriated_pct <= fines_max_tab9', '§7.2.3, Tab. 9', 'warn', 'Plan 3 (fll_naturteich-G-2): Tab. 9 "≤ 2% / ≤ 0.5% by weight" (L2058; L2019–L2021 "should indicate") — severity per owner.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLLNT-05' AND s.code = 'FLL-Naturteich' AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-12B');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code IN ('REQ-12A', 'REQ-12B') AND description LIKE 'Plan 3 (fll_naturteich-G-2)%'.
+
+-- =====================================================================================================================
+-- fll_naturteich-G-3 · REQ-19 (0ff40c3b-1b77-4d20-8cd3-61a12a92c200, FLLNT-09, md5 585ed193b7a5ea51f2a6e6c711db1291) — onto the Tab.-10 fills
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2607–L2632 (Tab. 10). prod REQ-19 'hydrobot_grain_size_max <= 8 AND hydrobot_feed_rate <= 5 AND (IF hydrobot_type ==
+-- submergent THEN (hydrobot_water_column >= 80 AND hydrobot_substrate_thickness >= 10 AND hydrobot_substrate_thickness <= 20)) AND
+-- (IF hydrobot_type == emersed THEN (hydrobot_water_column >= 10 AND hydrobot_water_column <= 50 AND hydrobot_substrate_thickness >=
+-- 10 AND hydrobot_substrate_thickness <= 30))' — the Tab.-10 cells as literals (correct today). Created: six *_tab10 fills.
+-- Why staged: a gate condition change (single-source hygiene, not a value change).
+-- Option — archive pattern:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_fll_naturteich AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_fll_naturteich SELECT * FROM compliance_requirements
+--  WHERE id = '0ff40c3b-1b77-4d20-8cd3-61a12a92c200' AND md5(condition) = '585ed193b7a5ea51f2a6e6c711db1291';
+-- UPDATE compliance_requirements SET condition = 'hydrobot_grain_size_max <= hydrobot_grain_max_tab10 AND hydrobot_feed_rate <= hydrobot_feed_qmax_tab10 AND hydrobot_water_column >= hydrobot_water_column_min_tab10 AND hydrobot_substrate_thickness >= hydrobot_substrate_min_tab10 AND hydrobot_substrate_thickness <= hydrobot_substrate_max_tab10 AND (IF hydrobot_type == emersed THEN hydrobot_water_column <= hydrobot_water_column_max_tab10)'
+--  WHERE id = '0ff40c3b-1b77-4d20-8cd3-61a12a92c200' AND md5(condition) = '585ed193b7a5ea51f2a6e6c711db1291';
+-- COMMIT;
+-- Rollback (full row from the archive, explicit column list, never retyped):
+-- BEGIN;
+-- DELETE FROM compliance_requirements WHERE id = '0ff40c3b-1b77-4d20-8cd3-61a12a92c200' AND md5(condition) = md5('hydrobot_grain_size_max <= hydrobot_grain_max_tab10 AND hydrobot_feed_rate <= hydrobot_feed_qmax_tab10 AND hydrobot_water_column >= hydrobot_water_column_min_tab10 AND hydrobot_substrate_thickness >= hydrobot_substrate_min_tab10 AND hydrobot_substrate_thickness <= hydrobot_substrate_max_tab10 AND (IF hydrobot_type == emersed THEN hydrobot_water_column <= hydrobot_water_column_max_tab10)');
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_fll_naturteich WHERE id = '0ff40c3b-1b77-4d20-8cd3-61a12a92c200' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM compliance_requirements_archive_fll_naturteich WHERE id = '0ff40c3b-1b77-4d20-8cd3-61a12a92c200';
+-- COMMIT;
+-- The archive table `compliance_requirements_archive_fll_naturteich` is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
+
+-- =====================================================================================================================
+-- fll_naturteich-G-4 · REQ-09 (86bb8bb3-2a4e-4f3f-86f4-6a8c50207644, FLLNT-04, md5 a7b0b5992ddb0830a574ac47fe4635bf) / REQ-10 (d1cacb11-3cbb-421a-8ea5-03980ce5e5f8, FLLNT-03, md5 e475bc092a0d9ffc88ec47cc7260c872) — onto sample_violations
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 7 L1906–L1932, Tab. 8 L1940–L1971; L1973–L1978 "If the analysis results deviate from the approximate values,
+-- the biological processes must be observed … Temporary fluctuations (e.g. due to environmental influences) can occur."
+-- prod REQ-09 (342 chars, the ten Tab.-7 literals over water_test_*) on FLLNT-04; REQ-10 (527 chars, the Tab.-8 literals over
+-- swimming_test_* with the type split) on FLLNT-03 — where the swimming_test_* symbols are NOT in scope (they are consumed by
+-- -15 only; X-3), so REQ-10 is `pending` on every project today. Created: wasserproben, sample_violations (FLLNT-04-D1).
+-- Why staged: gate re-points; the caption says "Approximate chemical values" and L1973–L1978 allows deviation with
+-- observation — severity is the owner's ("block" today).
+-- Option — archive pattern (REQ-09 onto the register count on -04; REQ-10 MOVED to -04 onto the same count — the register
+-- rows carry the location, so one count covers both tables; needs C-1 for the swimming rows to decide):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_fll_naturteich AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_fll_naturteich SELECT * FROM compliance_requirements
+--  WHERE (id = '86bb8bb3-2a4e-4f3f-86f4-6a8c50207644' AND md5(condition) = 'a7b0b5992ddb0830a574ac47fe4635bf')
+--     OR (id = 'd1cacb11-3cbb-421a-8ea5-03980ce5e5f8' AND md5(condition) = 'e475bc092a0d9ffc88ec47cc7260c872');
+-- UPDATE compliance_requirements SET condition = 'sample_violations == 0'
+--  WHERE id = '86bb8bb3-2a4e-4f3f-86f4-6a8c50207644' AND md5(condition) = 'a7b0b5992ddb0830a574ac47fe4635bf';
+-- UPDATE compliance_requirements c SET condition = 'sample_violations == 0', worksheet_template_id = w.id
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE c.id = 'd1cacb11-3cbb-421a-8ea5-03980ce5e5f8' AND md5(c.condition) = 'e475bc092a0d9ffc88ec47cc7260c872' AND w.code = 'FLLNT-04' AND s.code = 'FLL-Naturteich';
+-- COMMIT;
+-- Rollback (full rows from the archive incl. the original worksheet_template_id, explicit column list, never retyped):
+-- BEGIN;
+-- DELETE FROM compliance_requirements WHERE id IN ('86bb8bb3-2a4e-4f3f-86f4-6a8c50207644', 'd1cacb11-3cbb-421a-8ea5-03980ce5e5f8') AND md5(condition) = md5('sample_violations == 0');
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_fll_naturteich WHERE id IN ('86bb8bb3-2a4e-4f3f-86f4-6a8c50207644', 'd1cacb11-3cbb-421a-8ea5-03980ce5e5f8') ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM compliance_requirements_archive_fll_naturteich WHERE id IN ('86bb8bb3-2a4e-4f3f-86f4-6a8c50207644', 'd1cacb11-3cbb-421a-8ea5-03980ce5e5f8');
+-- COMMIT;
+-- The archive table `compliance_requirements_archive_fll_naturteich` is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
+-- (The 21 scalars water_test_* / swimming_test_* stay active — their retirement is the same ruling's second step.)
+
+-- =====================================================================================================================
+-- fll_naturteich-G-5 · FLLNT-06 — new gate: submerged hydrobotanical share ≥ half of the regeneration area for type I / II
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1273–L1276 / L1360–L1363 "> 50% therefrom at least half as submerged hydrobotanical system" (Tab. 2 / Tab. 3).
+-- Created: zonen.technique (prod regeneration_technique tokens per zone), submerged_hydrobot_share_calc (FLLNT-06-D4), TABLE2_SUBMERGED.
+-- Why staged: a new gate; "at least half" read as ≥ 50 %.
+-- Option:
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-35', 'Submerses hydrobotanisches System ≥ Hälfte des Regenerationsbereichs (Typ I / II)', 'IF natural_pool_type IN {type_I, type_II} THEN submerged_hydrobot_share_calc >= 50', '§5, Tab. 2 / Tab. 3', 'block',
+--        'Plan 3 (fll_naturteich-G-5): Tab. 2 / 3 "therefrom at least half as submerged hydrobotanical system" (L1273–L1276, L1360–L1363).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLLNT-06' AND s.code = 'FLL-Naturteich'
+--   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-35');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-35' AND description LIKE 'Plan 3 (fll_naturteich-G-5)%'.
+
+-- =====================================================================================================================
+-- fll_naturteich-G-6 · EQ-01 (0a875bd8-1e8f-47f2-9a38-62396ea73c70, FLLNT-10, md5 c234e8111d2f7a3e9a93ee13f2d6813c) / REQ-22 — the 50×-rule onto Σ filtereinheiten; feed-rate violations
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2769–L2771 "should, as experience shows, amount to at least 50-times the surfaces of the pool that are exposed to
+-- light and inundated"; L1565–L1571 (Tab. 5: "must equal at least 50-times all visible underwater surfaces"); L4092–L4093
+-- "95 m2 x 50 = 4750 m2". prod EQ-01 'filter_colonized_surface_actual >= 50 * pool_underwater_surface' (criterion, output
+-- filter_50x_rule_met, consumed by -15; REQ-22 'filter_50x_rule_met == true'). Created: filter_colonized_surface_total
+-- (FLLNT-10-D1), filter_feed_violations (FLLNT-10-D2).
+-- Why staged: replacing a verified equation's input + a new gate (Qmax / Qmin — "must be operated with … Qmin ≥ 15" but "Smaller
+-- feed rates are permissible if the functionality of pool is ensured", L2784–L2786 — O-2).
+-- Option — archive pattern (EQ-01 onto the Σ; REQ-22 unchanged; REQ-36 new):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_fll_naturteich AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_fll_naturteich SELECT * FROM equations
+--  WHERE id = '0a875bd8-1e8f-47f2-9a38-62396ea73c70' AND md5(formula) = 'c234e8111d2f7a3e9a93ee13f2d6813c';
+-- UPDATE equations SET formula = 'filter_colonized_surface_total >= 50 * pool_underwater_surface', input_symbols = ARRAY['filter_colonized_surface_total', 'pool_underwater_surface'], verification_status = 'imported_unverified'
+--  WHERE id = '0a875bd8-1e8f-47f2-9a38-62396ea73c70' AND md5(formula) = 'c234e8111d2f7a3e9a93ee13f2d6813c';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-36', 'Beschickung je Einheit innerhalb Qmax / Qmin (Tab. 10 / 11 / 12)', 'filter_feed_violations == 0', '§10.2.1–10.2.3, Tab. 10–12', 'warn',
+--        'Plan 3 (fll_naturteich-G-6): Qmax 5 (Tab. 10), 5 / 8 (Tab. 11), Qmin ≥ 15 (Tab. 12, "Smaller feed rates are permissible if the functionality of pool is ensured" L2785–L2786 — severity per owner).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLLNT-10' AND s.code = 'FLL-Naturteich'
+--   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-36');
+-- COMMIT;
+-- Rollback (full row from the archive, explicit column list; the new gate deleted by description):
+-- BEGIN;
+-- DELETE FROM equations WHERE id = '0a875bd8-1e8f-47f2-9a38-62396ea73c70' AND md5(formula) = md5('filter_colonized_surface_total >= 50 * pool_underwater_surface');
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_fll_naturteich WHERE id = '0a875bd8-1e8f-47f2-9a38-62396ea73c70' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM equations_archive_fll_naturteich WHERE id = '0a875bd8-1e8f-47f2-9a38-62396ea73c70';
+-- DELETE FROM compliance_requirements WHERE code = 'REQ-36' AND description LIKE 'Plan 3 (fll_naturteich-G-6)%';
+-- COMMIT;
+-- The archive table `equations_archive_fll_naturteich` is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
+-- Note (X-3): REQ-20 / REQ-21 (Tab. 11 / 12 literals over filter_* symbols) sit on FLLNT-09 where none of those symbols is in scope — `pending` on every project today; their move to -10 or their re-point onto the register rows is the same ruling's second step.
+
+-- =====================================================================================================================
+-- fll_naturteich-G-7 · FLLNT-11 — new gate: overflow-edge tolerance per device (±2 mm; ±1 mm up to 1 m)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2922–L2924 "Overflow weirs are to be installed in a manner that the overflow edge does not deviate horizontally by
+-- more than +/- 2 mm or for overflow edges up to 1 m, by more than +/- 1 mm." prod: overflow_horizontal_tolerance_mm (FLLNT-11 C,
+-- consumed by -13 / -15) with a VR text only, no gate. Created: ueberlaufeinrichtungen, overflow_tolerance_violations (FLLNT-11-D2).
+-- Why staged: a new gate ("are to be installed" — block per the wording, the owner's call).
+-- Option:
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-37', 'Überlaufkanten innerhalb ±2 mm (bis 1 m: ±1 mm)', 'overflow_tolerance_violations == 0', '§10.3.1', 'block',
+--        'Plan 3 (fll_naturteich-G-7): L2922–L2924 horizontal deviation of the overflow edge.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLLNT-11' AND s.code = 'FLL-Naturteich'
+--   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-37');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-37' AND description LIKE 'Plan 3 (fll_naturteich-G-7)%'.
+
+-- =====================================================================================================================
+-- fll_naturteich-D-1 · FLLNT-10 filter_flow_type ← natural_pool_type (III → slow, IV → quick)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1117–L1130 (Tab. 1 technical names: III "with controlled slow flow through the substrate fil- ter", IV "with
+-- controlled quick flow through the sub- strate filter"); L1168–L1171 (V: "quick or slow controlled flow through the technical
+-- unit" — not decidable). prod filter_flow_type is a manual enum (slow / quick) on -10, consumed by -11 (REQ-08 on -09 reads it).
+-- Built: the text fill flow_tab1_text on -03 (TABLE1.flow_printed). Why staged: replacing a manual enum by a derivation —
+-- the enum has no token for I / II ("no filter") and V ("quick or slow"); a derivation would leave those types blank.
+-- Option: none applied (DEFER = stays manual with the printed Tab.-1 cell next to the type on -03).
+
+-- =====================================================================================================================
+-- fll_naturteich-D-2 · FLLNT-03 regeneration_technique ← natural_pool_type — NOT derivable 1:1
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1137–L1143 (type III: "Substrate filter (usually mineral, with or without plants), hydrobotanical sys- tem,
+-- technical unit for phosphor elimination" — three techniques in one cell); L1149–L1151 (type V carrier material); prod
+-- description "Derived from selected pool type: hydrobotanical, slow filter, quick filter, technical unit, or physical/chemical".
+-- Built: the printed regeneration-area cell as TABLE1.regeneration_technique (string), the per-zone technique column of
+-- `zonen` (prod tokens). Why staged: the single prod enum cannot carry a type-III combination; deactivating it in favour of
+-- the register column is a deactivation ruling. Option: none applied.
+
+-- =====================================================================================================================
+-- fll_naturteich-S-1 · FLLNT-03 type_III · FLLNT-09 emersed, submergent, vertical_continuous_overflow, vertical_no_overflow — orphan fields (enum values leaked as fields)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: five active fields with section_id NULL, no clause, no consumers (type_III / emersed / submergent number,
+-- vertical_* boolean) — their names are the enum tokens of natural_pool_type / hydrobot_type / filter_flow_direction.
+-- Why staged: deactivation is an always-sign-off class. Option:
+-- BEGIN;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'FLL-Naturteich' AND f.active AND f.section_id IS NULL AND f.consumer_worksheets IS NULL
+--    AND ((w.code = 'FLLNT-03' AND f.symbol = 'type_III') OR (w.code = 'FLLNT-09' AND f.symbol IN ('emersed', 'submergent', 'vertical_continuous_overflow', 'vertical_no_overflow')));
+-- COMMIT;
+-- Rollback: SET active = true on the same five rows.

@@ -25,6 +25,7 @@ import { m277eSeedTables } from './regulation-tables-seed-m277e';
 import { m12001SeedTables } from './regulation-tables-seed-m1200_1';
 import { m12003SeedTables } from './regulation-tables-seed-m1200_3';
 import { fllGarSeedTables } from './regulation-tables-seed-fll_gar';
+import { fllNaturteichSeedTables } from './regulation-tables-seed-fll_naturteich';
 
 export type SeedBuilder = { build: () => RegulationTable[]; ts: string; slugFile: string; supersedes?: string };
 
@@ -37,7 +38,8 @@ export const SEED_BUILDERS: Record<string, SeedBuilder> = {
   m1200_1: { build: m12001SeedTables, ts: '20260917100500', slugFile: 'm1200_1' }, // Plan 3 Task 5: DWA-M-1200-1 (seven tables)
   m1200_3: { build: m12003SeedTables, ts: '20260917100600', slugFile: 'm1200_3' }, // Plan 3 Task 6: DWA-M-1200-3 (ten tables)
   fll_gar: { build: fllGarSeedTables, ts: '20260917100700', slugFile: 'fll_gar' }, // Plan 3 Task 7: FLL-GAR-2023 (twenty tables)
-  // Plan-3 tasks append one line each, e.g. fll_naturteich: { build: fllNaturteichSeedTables, ts: '20260917100800', slugFile: 'fll_naturteich' }
+  fll_naturteich: { build: fllNaturteichSeedTables, ts: '20260917100800', slugFile: 'fll_naturteich' }, // Plan 3 Task 8: FLL-Naturteich (eleven tables)
+  // Plan-3 tasks append one line each, e.g. m820_3: { build: m8203SeedTables, ts: '20260917100900', slugFile: 'm820_3' }
 };
 
 /** Slugs that no other builder supersedes — the set the runtime fallback serves. */

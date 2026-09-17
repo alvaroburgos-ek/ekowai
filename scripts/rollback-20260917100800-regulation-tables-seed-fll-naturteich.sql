@@ -1,0 +1,13 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE1';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE2_SUBMERGED';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE7';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE8';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE8_P';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE9';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE10';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE11';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE12';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'TABLE15';
+DELETE FROM regulation_tables WHERE standard_code = 'FLL-Naturteich' AND edition = '2017' AND table_code = 'S10_4_3';
+COMMIT;
