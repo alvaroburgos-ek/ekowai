@@ -10,7 +10,8 @@
  */
 import { prepareRegisterRows } from './register-rows';
 import { makeTableLookup, makeTableRows } from './regulation-tables-fallback';
-import type { RegisterColumn } from './field-config';
+import type { RegisterColumn, RegisterFlag } from './field-config';
+import type { Value } from '@/lib/expr';
 
 const READY_STATUSES = new Set(['engineer_approved', 'final']);
 
@@ -30,6 +31,11 @@ export type CarrierSourceOpts = {
   overrideFlagKey?: string;
   overrideAppliesTo?: readonly string[];
   flagKeys?: readonly string[];
+  /** The register's flag declarations: a flag with `disables_rows` that is ON is an explicit null-report —
+   * zero rows then count as complete (final-review minor), matching the editor (rows hidden) and the engine. */
+  flags?: readonly RegisterFlag[];
+  /** Worksheet-symbol lookup for column `visible_when` / derived expressions in row scope (unknown ⇒ undefined). */
+  symbol?: (sym: string) => Value | undefined;
 };
 
 /** Decide whether a consumer's inherited derived values should render or blank-with-cause. */
@@ -39,14 +45,15 @@ export function carrierSourceState(
   sourceStatus: string | null,
   opts: CarrierSourceOpts,
 ): CarrierSourceState {
-  const { rows } = prepareRegisterRows(
+  const { rows, flags } = prepareRegisterRows(
     carrierRaw,
     columns,
-    { table: makeTableLookup(opts.standardCode), tableRows: makeTableRows(opts.standardCode) },
+    { table: makeTableLookup(opts.standardCode), tableRows: makeTableRows(opts.standardCode), symbol: opts.symbol },
     { legacyMap: opts.legacyMap, flagKeys: opts.flagKeys, overrideFlagKey: opts.overrideFlagKey, overrideAppliesTo: opts.overrideAppliesTo },
   );
   const total = rows.length;
-  if (total === 0) {
+  const nullReport = opts.flags?.some((f) => f.disables_rows && flags[f.key] === true) ?? false;
+  if (total === 0 && !nullReport) {
     return { state: 'missing', complete: 0, total: 0, message: `Quelle ${opts.ownerLabel} nicht erfasst — abgeleitete Werte ausgeblendet.` };
   }
   const complete = rows.filter((r) => r.complete).length;

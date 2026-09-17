@@ -552,6 +552,7 @@ export function WorksheetForm({
               overrideFlagKey: cfg.override?.flag_key,
               overrideAppliesTo: cfg.override?.applies_to,
               flagKeys: registerFlagKeys(src.symbol, cfg),
+              flags: cfg.flags,
             })
           : null;
         return { ...src, cfg, state };

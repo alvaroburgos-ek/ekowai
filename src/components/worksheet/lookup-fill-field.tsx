@@ -39,31 +39,24 @@
  * title = row.verbatim_quote), `lookup-fill-value` (read-only span), `lookup-locked`,
  * `lookup-reason-missing`.
  */
-import { useEffect, useRef, useState, useTransition } from 'react';
-import { recordManualOverride } from '@/lib/actions/overrides';
+import { useEffect, useRef, useState } from 'react';
 import { useWorksheetStore, type FieldValue } from '@/lib/state/worksheet-store';
+import { OverrideReasonForm, ReasonMissing, overrideReasonKey, resetSavedOverrideReasons, useOverrideReason } from './override-reason';
 import { isOverridden, resolveLookupFill, resolveLookupFillConfig, type LookupFillState } from '@/lib/eval/lookup-fill';
 import type { LookupBinding } from '@/lib/eval/field-config';
 import { fmt } from './register-editor';
 import type { WidgetContext, WorksheetFormField } from './widgets';
 
-/** The server action's own floor (overrides.ts `reason: z.string().min(10)`) — a smaller ui value would always be rejected. */
-const SERVER_MIN_REASON = 10;
-
 type Scalar = number | string;
 type ScalarType = 'number' | 'text' | 'enum';
 
-// `${instanceId}:${fieldId}` → { reason, value } of the last saved justification, module-scoped
-// like manual-override-pill.tsx so the "✓ Abweichung begründet" confirmation survives parent
-// re-renders. Keyed by the store's instance id too (final-review minor): the same field id
-// cannot carry another instance's confirmation across a client-side navigation. The
-// confirmation is valid ONLY while the stored value is still the one that was justified — a
-// later different override (or `takeTable`) drops it. Reset on page refresh (audit_log is the truth).
-const savedReasons = new Map<string, { reason: string; value: Scalar }>();
-const reasonKey = (instanceId: string | null, fieldId: string) => `${instanceId ?? ''}:${fieldId}`;
-/** Test isolation only — clears the in-memory confirmation map (no production caller). */
+// The "✓ Abweichung begründet" confirmation lives in override-reason.tsx (shared with the register
+// editor, I-4), keyed by (instanceId, fieldId) — the same field id cannot carry another instance's
+// confirmation across a client-side navigation — and valid ONLY while the stored value is still the
+// one that was justified; a later different override (or `takeTable`) drops it.
+/** Test isolation only — clears the shared in-memory confirmation map (no production caller). */
 export function resetSavedLookupReasons(): void {
-  savedReasons.clear();
+  resetSavedOverrideReasons();
 }
 
 /** The widget's scalar type for the field — `lookup_fill` is number | text | enum only (importer rule, _pass3c-validate.ts). */
@@ -143,12 +136,8 @@ function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: Works
   const policy = state.kind === 'resolved' ? state.policy : null;
 
   const [editing, setEditing] = useState(false);
-  const [reason, setReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-  const [saved, setSaved] = useState<{ reason: string; value: Scalar } | null>(() => savedReasons.get(reasonKey(instanceId, field.id)) ?? null);
-  const savedReason = saved && stored != null && saved.value === stored ? saved.reason : null;
-  const minReason = Math.max(ui?.reason_min_length ?? SERVER_MIN_REASON, SERVER_MIN_REASON);
+  const reasonState = useOverrideReason(overrideReasonKey(instanceId, field.id), stored, ui?.reason_min_length);
+  const savedReason = stored != null ? reasonState.savedReason : null;
 
   // FILL mode — the one client-side write. Fill when nothing is stored; on a key change
   // (a different row than the LAST RESOLVED one) re-fill only when the stored value still
@@ -172,10 +161,8 @@ function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: Works
     const keysMoved = before != null && before.rowKey !== rowKey;
     if (editing) {
       if (!keysMoved) return;
-      savedReasons.delete(reasonKey(instanceId, field.id));
-      setSaved(null);
+      reasonState.clear();
       setEditing(false);
-      setError(null);
       if (stored !== tableScalar) setField(field.id, tagged(scalarType, tableScalar));
       return;
     }
@@ -184,6 +171,7 @@ function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: Works
     // `values` is a dependency on purpose: the form's store init (parent effect, runs AFTER this child effect on
     // mount) can reset the store to a state whose derived deps equal the previous run's — re-run on every store
     // change so a fill lost to that reset is re-applied; the write itself is idempotent (stored === table ⇒ no-op).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reasonState.clear is stable per key; listing the state object would re-run on every keystroke in the reason textarea
   }, [mode, readOnly, editing, rowKey, tableScalar, stored, field.id, setField, values, scalarType, instanceId]);
 
   const canOverride = mode === 'fill' && !readOnly && state.kind === 'resolved' && policy !== 'locked' && tableScalar != null;
@@ -199,28 +187,13 @@ function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: Works
     setField(field.id, tagged(scalarType, v));
   };
   const takeTable = () => {
-    savedReasons.delete(reasonKey(instanceId, field.id));
-    setSaved(null);
+    reasonState.clear();
     setEditing(false);
-    setError(null);
     if (tableScalar != null && stored !== tableScalar) setField(field.id, tagged(scalarType, tableScalar));
   };
   const submitReason = () => {
-    setError(null);
-    const trimmed = reason.trim();
-    if (trimmed.length < minReason || stored == null) return;
-    const justified = stored;
-    startTransition(async () => {
-      const res = await recordManualOverride({ projectId: ctx.projectId, fieldId: field.id, equationNumber: `lookup:${binding.table_code}`, reason: trimmed });
-      if (res.ok) {
-        const entry = { reason: trimmed, value: justified };
-        savedReasons.set(reasonKey(instanceId, field.id), entry);
-        setSaved(entry);
-        setReason('');
-      } else {
-        setError(res.error);
-      }
-    });
+    if (stored == null) return;
+    reasonState.submit({ projectId: ctx.projectId, fieldId: field.id, equationNumber: `lookup:${binding.table_code}` });
   };
 
   const displayValue = (v: Scalar): string => (scalarType === 'enum' ? (enumOptions.find((o) => o.value === v)?.label_de ?? String(v)) : fmt(v));
@@ -293,11 +266,7 @@ function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: Works
             {badgeText(state, label, binding.role, mode, enumMismatch)}
           </span>
           {overridden && <span className="normal-case tracking-normal text-accent-2">abweichend</span>}
-          {overridden && policy !== 'locked' && !savedReason && (
-            <span data-testid="lookup-reason-missing" className="normal-case tracking-normal text-warning" title="Abweichung ohne gespeicherte Begründung (Auditprotokoll)">
-              Begründung fehlt
-            </span>
-          )}
+          {overridden && policy !== 'locked' && !savedReason && <ReasonMissing testId="lookup-reason-missing" />}
         </div>
         {field.description && <p className="text-xs text-subtext mt-1.5 leading-snug">{field.description}</p>}
       </div>
@@ -319,26 +288,7 @@ function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: Works
           <button type="button" className={smallBtn} onClick={showInput ? takeTable : () => setEditing(true)}>
             {showInput ? `${label} übernehmen` : 'abweichend wählen'}
           </button>
-          {showInput && (savedReason ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-success/40 bg-success/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-success" title={savedReason}>
-              ✓ Abweichung begründet
-            </span>
-          ) : (
-            <div className="space-y-1">
-              <textarea
-                aria-label="Begründung der Abweichung"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                rows={2}
-                placeholder={`Begründung (mind. ${minReason} Zeichen — wird im Auditprotokoll gespeichert)`}
-                className={inputBox}
-              />
-              {error && <p className="text-xs text-error">{error}</p>}
-              <button type="button" className={smallBtn} disabled={pending || stored == null || reason.trim().length < minReason} onClick={submitReason}>
-                {pending ? 'Speichere…' : 'Abweichung begründen'}
-              </button>
-            </div>
-          ))}
+          {showInput && <OverrideReasonForm state={{ ...reasonState, savedReason }} canSubmit={stored != null} onSubmit={submitReason} />}
         </div>
       )}
     </div>

@@ -218,6 +218,16 @@ export const WIDGETS: Record<Widget, (f: WorksheetFormField, ctx: WidgetContext)
   register: (f, ctx) => {
     const { cfg, bespoke } = resolveRegister(f);
     if (bespoke) return renderBespoke(bespoke, f, ctx);
+    // A DB `register` whose ui_config fails parseFieldConfig: visible notice + today's dynamic input, never silent
+    // (mirror of `reference-unconfigured`, final-review minor).
+    if (!cfg && f.widget === 'register') {
+      return (
+        <div className="space-y-1">
+          <p data-testid="register-unconfigured" className="text-[11px] text-warning">Register nicht konfiguriert (ui_config ungültig)</p>
+          {ctx.renderDynamic(f)}
+        </div>
+      );
+    }
     // Legacy TS checklist behind a json field, else json without any config ⇒
     // "Mehrzeilige Eingabe — Phase 2" placeholder (dynamic-field.test.tsx pin).
     if (!cfg) return checklistOrDynamic(f, ctx);
@@ -231,6 +241,7 @@ export const WIDGETS: Record<Widget, (f: WorksheetFormField, ctx: WidgetContext)
           readOnly={ctx.readOnly}
           footerStates={footerStatesFor(cfg, ctx)}
           symbolLookup={ctx.symbolLookup}
+          projectId={ctx.projectId}
         />
       </EditorErrorBoundary>
     );

@@ -70,9 +70,12 @@ export const REGISTER_CONFIGS_FALLBACK: Readonly<Record<string, RegisterUiConfig
  * Retired together with 20260916140000_vsme_b04_pollutant_register_widget.sql (the migrated ui_config carries `flags`). */
 const REGISTER_FLAG_KEYS: Readonly<Record<string, readonly string[]>> = { pollutant_register: ['not_applicable'] };
 
-/** Register-level boolean flags read by `flag()`: `ui.flags` when present (DB-configured register), else the symbol-keyed fallback. */
+/** Register-level boolean flags read by `flag()`. Once a config is given (a DB register or a TS fallback config),
+ * ONLY its `flags` count — never the symbol map (final-review minor: a migrated pollutant register without `flags`
+ * must not silently inherit the TS `not_applicable`). The symbol-keyed fallback applies only to callers WITHOUT a
+ * config (legacy DB rows). */
 export function registerFlagKeys(symbol: string, ui?: Partial<RegisterUiConfig> | null): readonly string[] {
-  if (ui?.flags) return ui.flags.map((f) => f.key);
+  if (ui) return ui.flags?.map((f) => f.key) ?? [];
   return REGISTER_FLAG_KEYS[symbol] ?? [];
 }
 

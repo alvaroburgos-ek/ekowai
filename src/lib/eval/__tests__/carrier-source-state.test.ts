@@ -38,3 +38,31 @@ describe('carrierSourceState (generic)', () => {
     expect(carrierWithholdFieldIds(fields, null, 'incomplete', produced)).toEqual([]);
   });
 });
+
+// Final-review minors: a `disables_rows` flag that is ON with zero rows is an explicit null-report,
+// not a missing source; `symbol` (worksheet-symbol lookup) is threaded into the row scope so a
+// column `visible_when` over a worksheet symbol decides completeness the same way the engine does.
+describe('carrierSourceState — disables_rows flags + symbol scope', () => {
+  const cfg = REGISTER_CONFIGS_FALLBACK.pollutant_register;
+  const base = { ownerLabel: 'VSME-B04.100', standardCode: 'VSME', flagKeys: registerFlagKeys('pollutant_register', cfg), flags: cfg.flags };
+
+  it('flag ON + zero rows ⇒ ok when the source is ready, incomplete (0/0) while it is not', () => {
+    expect(carrierSourceState({ rows: [], not_applicable: true }, cols, 'final', base)).toEqual({ state: 'ok', complete: 0, total: 0, message: null });
+    expect(carrierSourceState({ rows: [], not_applicable: true }, cols, 'draft', base)).toMatchObject({ state: 'incomplete', complete: 0, total: 0 });
+    // Flag OFF + zero rows stays "missing" (unchanged).
+    expect(carrierSourceState({ rows: [], not_applicable: false }, cols, 'final', base).state).toBe('missing');
+    // A flag without disables_rows never counts as a null-report.
+    expect(carrierSourceState({ rows: [], estimated: true }, cols, 'final', { ...base, flags: [{ key: 'estimated' }], flagKeys: ['estimated'] }).state).toBe('missing');
+  });
+
+  it('symbol lookup reaches a column visible_when: a hidden required column does not block completeness', () => {
+    const columns = [
+      { key: 'a', type: 'number' as const, label: 'A', required: true },
+      { key: 'b', type: 'number' as const, label: 'B', required: true, visible_when: 'mode == "full"' },
+    ];
+    const rows = [{ id: '1', a: 1, b: null }];
+    const opts = { ownerLabel: 'X-01', standardCode: 'X' };
+    expect(carrierSourceState({ rows }, columns, 'final', { ...opts, symbol: (s) => (s === 'mode' ? 'lite' : undefined) }).state).toBe('ok');
+    expect(carrierSourceState({ rows }, columns, 'final', { ...opts, symbol: (s) => (s === 'mode' ? 'full' : undefined) }).state).toBe('incomplete');
+  });
+});

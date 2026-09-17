@@ -24,17 +24,26 @@
  *   hides the cell (and nulls it on the next write); pending / manual /
  *   not_applicable keep it visible (fail-safe, same rule as the engine's
  *   completeness — register-rows.ts `columnHiddenInRow`).
+ * - Override policy (I-4, spec §7): the TABLE of the FIRST lookup_key column is
+ *   the single source — `resolveRegulationTable(std, code).override_policy`;
+ *   when `ui_config.override.policy` disagrees, the table wins and a diagnostic
+ *   is listed. `locked` ⇒ no toggle; `anhaltswert` ⇒ toggle + a reason per
+ *   overridden row (`recordManualOverride(fieldId, 'register:<TABLE>:<rowId>')`,
+ *   "Begründung fehlt" until saved — visible state only); `kann` ⇒ the override
+ *   control is a select over the value column's printed alternatives; `messwert`
+ *   ⇒ free entry labelled "(Messwert)" + reason.
  */
 import { useMemo } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { prepareRegisterRows } from '@/lib/eval/register-rows';
 import { registerFlagKeys } from '@/lib/eval/register-configs';
-import { makeTableLookup, makeTableRows } from '@/lib/eval/regulation-tables-fallback';
+import { makeTableLookup, makeTableRows, resolveRegulationTable } from '@/lib/eval/regulation-tables-fallback';
 import { tableLabel } from '@/lib/eval/lookup-fill';
+import { OverrideReasonForm, ReasonMissing, clearSavedOverrideReason, overrideReasonKey, useOverrideReason } from './override-reason';
 import { evalCondition, type PreparedRegister, type PreparedRow, type Scope, type Value } from '@/lib/expr';
 import type { RegisterColumn, RegisterUiConfig } from '@/lib/eval/field-config';
 import type { EvalState } from '@/lib/eval/formula';
-import type { RegulationRow } from '@/lib/eval/regulation-tables';
+import type { RegulationRow, RegulationTable, ValueColumn } from '@/lib/eval/regulation-tables';
 
 export type FooterState = { label: string; unit: string | null; state: EvalState | undefined };
 export type RegisterEditorProps = {
@@ -49,7 +58,12 @@ export type RegisterEditorProps = {
   footerStates?: Record<string, FooterState>;
   /** worksheet-symbol lookup for column visible_when + derived exprs (row values shadow it); MUST return `undefined` for unknown names. */
   symbolLookup?: (sym: string) => Value | undefined;
+  /** Project id for the per-row override REASON (`recordManualOverride`, I-4). Without it the reason form is not rendered
+   * (no audit path) — the "Begründung fehlt" marker still shows. */
+  projectId?: string;
 };
+
+type OverridePolicy = RegulationTable['override_policy'];
 
 const NUM = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 });
 const SUM_NUM = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 });
@@ -128,7 +142,7 @@ function groupRows(rows: readonly RegulationRow[], groupBy: string | undefined):
 /** Column visibility in ROW scope (mirror of register-rows.ts columnHiddenInRow): row keys shadow worksheet symbols; only `fail` hides. */
 function cellHiddenInRow(c: RegisterColumn, row: PreparedRow, symbol: Scope['symbol'], table: Scope['table']): boolean {
   if (!c.visible_when || !c.visible_when.trim()) return false;
-  const r = evalCondition(c.visible_when, { symbol: (s) => (s in row.values ? row.values[s] : symbol(s)), table });
+  const r = evalCondition(c.visible_when, { symbol: (s) => (Object.hasOwn(row.values, s) ? row.values[s] : symbol(s)), table });
   return r.kind === 'fail';
 }
 
@@ -138,9 +152,10 @@ function useTables(standardCode: string) {
   return { table, tableRows };
 }
 
-export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly = false, footerStates, symbolLookup }: RegisterEditorProps) {
+export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly = false, footerStates, symbolLookup, projectId }: RegisterEditorProps) {
   const raw = useWorksheetStore((s) => s.values[fieldId]);
   const setField = useWorksheetStore((s) => s.setField);
+  const instanceId = useWorksheetStore((s) => s.instanceId);
   const { table, tableRows } = useTables(standardCode);
   const rowSymbol = symbolLookup ?? NO_SYMBOL;
   const flagKeys = useMemo(() => registerFlagKeys(symbol, config), [symbol, config]);
@@ -161,6 +176,18 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
   const keyCol = columns.find((c) => c.type === 'lookup_key');
   const rowById = useMemo(() => new Map(prepared.rows.map((r) => [r.id, r])), [prepared.rows]);
   const colByKey = useMemo(() => new Map(columns.map((c) => [c.key, c])), [columns]);
+  // I-4: the override policy comes from the TABLE of the first lookup_key column (the toggle binds to it — G-B2);
+  // `ui_config.override.policy` is only the fallback while the table is unknown, and a disagreement is listed.
+  const overrideTable = keyCol?.lookup ? resolveRegulationTable(standardCode, keyCol.lookup.table_code) : undefined;
+  const policy: OverridePolicy | null = override ? (overrideTable?.override_policy ?? override.policy) : null;
+  const policyDiagnostic = override && overrideTable && overrideTable.override_policy !== override.policy
+    ? `override.policy „${override.policy}“ weicht von ${tableLabel(overrideTable.table_code)} (${overrideTable.override_policy}) ab — die Tabelle gilt`
+    : null;
+  const canToggle = !!override && policy !== 'locked';
+  const needsReason = policy === 'anhaltswert' || policy === 'messwert';
+  /** The regulation-table value column behind a lookup_value column (type + printed alternatives for `kann`). */
+  const valueColumnOf = (vc: RegisterColumn): ValueColumn | undefined =>
+    vc.type === 'lookup_value' && vc.lookup?.value ? resolveRegulationTable(standardCode, vc.lookup.table_code)?.value_columns.find((c) => c.name === vc.lookup!.value) : undefined;
 
   const cellHidden = (row: PreparedRow, c: RegisterColumn) => cellHiddenInRow(c, row, rowSymbol, table);
   const hiddenCells = (rowId: string, key: string): boolean => {
@@ -210,6 +237,8 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
         const vc = columns.find((c) => c.key === key);
         patch[key] = vc ? (tableValue(r, vc) ?? null) : null;
       }
+      // Taking the table back drops the row's justification (the confirmation is per justified value).
+      clearSavedOverrideReason(overrideReasonKey(instanceId, fieldId, r.id));
     }
     patchRow(r.id, patch);
   }
@@ -218,7 +247,10 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
   const complete = prepared.rows.filter((r) => r.complete).length;
   const rowsDisabled = config.flags?.some((f) => f.disables_rows && prepared.flags[f.key] === true) ?? false;
   const addLabel = config.add_label ?? '+ Zeile hinzufügen';
-  const diagnostics = useMemo(() => (prepared.diagnostics ? [...new Set(prepared.diagnostics)] : []), [prepared.diagnostics]);
+  const diagnostics = useMemo(
+    () => [...new Set([...(prepared.diagnostics ?? []), ...(policyDiagnostic ? [policyDiagnostic] : [])])],
+    [prepared.diagnostics, policyDiagnostic],
+  );
   // Legacy structured-register footer (display-only, never written; the engine's Σ is `footer` below).
   const legacySum = useMemo(() => {
     if (!config.sum_column) return null;
@@ -226,7 +258,8 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
     for (const r of prepared.rows) { const v = r.values[config.sum_column.key]; if (typeof v === 'number' && Number.isFinite(v)) t += v; }
     return t;
   }, [prepared, config.sum_column]);
-  const listId = (c: RegisterColumn) => (c.datalist?.length ? `reg-${slug(config.title)}-${c.key}` : undefined);
+  // Datalist ids keyed by the FIELD id — two registers with the same title on one page must not share a list.
+  const listId = (c: RegisterColumn) => (c.datalist?.length ? `reg-${fieldId}-${slug(c.key)}` : undefined);
 
   return (
     <div className="space-y-3" data-testid="register-editor" data-symbol={symbol}>
@@ -297,13 +330,15 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
                           listId={listId(c)}
                           overridden={overridden(r)}
                           tableValue={tableValue(r, c)}
+                          valueColumn={valueColumnOf(c)}
+                          policy={policy}
                           tableRows={c.lookup ? (tableRows(c.lookup.table_code) ?? []) : []}
                           isApplies={!!override?.applies_to.includes(c.key)}
                           onChange={(v) => patchRow(r.id, { [c.key]: v })}
                           onSelectKey={(v) => selectKey(r.id, c, v)}
                         />
                       )}
-                      {c.type === 'lookup_key' && override && keyCol?.key === c.key && r.values[c.key] != null && c.lookup && (
+                      {c.type === 'lookup_key' && override && canToggle && keyCol?.key === c.key && r.values[c.key] != null && c.lookup && (
                         <>
                           <button
                             type="button"
@@ -317,6 +352,15 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
                             <div data-testid="lookup-original" className="text-[10px] text-subtext mt-0.5">
                               {tableLabel(c.lookup.table_code)}: {override.applies_to.map((k) => { const vc = columns.find((x) => x.key === k); return fmt(vc ? tableValue(r, vc) : undefined); }).join(' / ')}
                             </div>
+                          )}
+                          {overridden(r) && needsReason && (
+                            <RowOverrideReason
+                              storeKey={overrideReasonKey(instanceId, fieldId, r.id)}
+                              justified={Object.fromEntries(override.applies_to.map((k) => [k, r.values[k] ?? null]))}
+                              projectId={readOnly ? undefined : projectId}
+                              fieldId={fieldId}
+                              equationNumber={`register:${c.lookup.table_code}:${r.id}`}
+                            />
                           )}
                         </>
                       )}
@@ -388,13 +432,16 @@ function numberOrNull(s: string): number | null {
 }
 
 /** One branch per column type; aria-label = `col.aria_label ?? col.label`. */
-function Cell({ col, row, readOnly, listId, overridden, tableValue, tableRows, isApplies, onChange, onSelectKey }: {
+function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn, policy, tableRows, isApplies, onChange, onSelectKey }: {
   col: RegisterColumn;
   row: PreparedRow;
   readOnly: boolean;
   listId?: string;
   overridden: boolean;
   tableValue: Value | undefined;
+  /** The regulation-table value column behind a lookup_value column (I-4: type + printed alternatives). */
+  valueColumn?: ValueColumn;
+  policy?: OverridePolicy | null;
   tableRows: readonly RegulationRow[];
   isApplies: boolean;
   onChange: (v: Value) => void;
@@ -458,16 +505,30 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, tableRows, i
     }
     case 'lookup_value': {
       const tl = tableLabel(col.lookup?.table_code ?? '');
-      const mismatch = typeof v === 'number' && typeof tableValue === 'number' && v !== tableValue;
+      const mismatch = v != null && v !== '' && tableValue !== undefined && v !== tableValue;
+      const label = `${col.label} (${policy === 'messwert' ? 'Messwert' : 'abweichend'})`;
+      // The override control follows the value column: `kann` ⇒ select over the printed alternatives; a string/enum
+      // column ⇒ text input (never a number input over a non-numeric cell); else number input.
+      const numeric = valueColumn ? valueColumn.type === 'number' : typeof tableValue !== 'string';
+      const alternatives = policy === 'kann' && valueColumn?.values?.length ? valueColumn.values : null;
       return (
         <>
           {overridden && isApplies ? (
-            <input
-              type="number" inputMode="decimal" step="any" min={col.min} max={col.max}
-              aria-label={`${col.label} (abweichend)`} value={typeof v === 'number' ? v : ''} disabled={readOnly}
-              onChange={(e) => onChange(numberOrNull(e.target.value))}
-              className={`${cellInput} text-right tabular-nums`}
-            />
+            alternatives ? (
+              <select aria-label={label} value={v == null ? '' : String(v)} disabled={readOnly} onChange={(e) => { if (e.target.value === '') return; onChange(numeric ? Number(e.target.value) : e.target.value); }} className={cellInput}>
+                {v == null && <option value="">— wählen —</option>}
+                {alternatives.map((a) => <option key={a} value={a}>{a}</option>)}
+              </select>
+            ) : numeric ? (
+              <input
+                type="number" inputMode="decimal" step="any" min={col.min} max={col.max}
+                aria-label={label} value={typeof v === 'number' ? v : ''} disabled={readOnly}
+                onChange={(e) => onChange(numberOrNull(e.target.value))}
+                className={`${cellInput} text-right tabular-nums`}
+              />
+            ) : (
+              <input type="text" aria-label={label} value={typeof v === 'string' ? v : ''} disabled={readOnly} onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)} className={cellInput} />
+            )
           ) : (
             <span data-testid={`lookup-value-${col.key}`} className="font-mono text-ink">{fmt(v)}</span>
           )}
@@ -494,6 +555,20 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, tableRows, i
   }
 }
 
+/** Per-row override reason (I-4): "Begründung fehlt" until the reason for the CURRENT overridden values is saved
+ * through `recordManualOverride`; the form itself renders only with a project id (no audit path without one). */
+function RowOverrideReason({ storeKey, justified, projectId, fieldId, equationNumber }: {
+  storeKey: string; justified: Record<string, Value>; projectId?: string; fieldId: string; equationNumber: string;
+}) {
+  const state = useOverrideReason(storeKey, justified);
+  return (
+    <div className="mt-1 space-y-1 text-[10px]">
+      {!state.savedReason && <ReasonMissing testId="register-reason-missing" />}
+      {projectId && <OverrideReasonForm state={state} onSubmit={() => state.submit({ projectId, fieldId, equationNumber })} />}
+    </div>
+  );
+}
+
 /**
  * Read-only mirror of a register carrier for consumer worksheets (port of the
  * A138-07 `ReadOnlySurfaceTable` in worksheet-form.tsx, generalised). No inputs,
@@ -514,6 +589,8 @@ export function ReadOnlyRegisterTable({ config, carrier, standardCode, symbol }:
   if (prepared.rows.length === 0) return <p className="text-sm text-subtext">Keine Zeilen erfasst.</p>;
 
   const text = (r: PreparedRow, c: RegisterColumn): string => {
+    // Column visible_when in ROW scope (same rule as the editor): a hidden cell renders empty.
+    if (cellHiddenInRow(c, r, NO_SYMBOL, table)) return '';
     const v = r.values[c.key];
     switch (c.type) {
       case 'lookup_key': return typeof v === 'string' ? (tableRows(c.lookup?.table_code ?? '')?.find((tr) => tr.row_key === v)?.label_de ?? '—') : '—';

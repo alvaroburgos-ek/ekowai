@@ -26,7 +26,8 @@ describe('REGISTER_CONFIGS_FALLBACK', () => {
     expect(registerFlagKeys('surface_inventory')).toEqual([]);
     expect(registerFlagKeys('surface_inventory', { flags: [{ key: 'estimated', label: 'geschätzt' }, { key: 'x' }] })).toEqual(['estimated', 'x']);
     expect(registerFlagKeys('pollutant_register', { flags: [] })).toEqual([]);
-    expect(registerFlagKeys('pollutant_register', {})).toEqual(['not_applicable']);
+    // Final-review minor: a config WITHOUT flags never falls back to the symbol map (only a missing config does).
+    expect(registerFlagKeys('pollutant_register', {})).toEqual([]);
     // Plan 2b: the flag carries today's editor label/note + disables_rows (pinned in detail below).
     expect(REGISTER_CONFIGS_FALLBACK.pollutant_register.flags?.map((f) => f.key)).toEqual(['not_applicable']);
   });

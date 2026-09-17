@@ -24,7 +24,8 @@ async function requireUser() {
 const Input = z.object({
   projectId: z.string().uuid(),
   fieldId: z.string().uuid(),
-  equationNumber: z.string().min(1).max(50),
+  // 80: `register:<TABLE>:<rowId>` (I-4) — a uuid row id under a 5-char table code is 51 chars.
+  equationNumber: z.string().min(1).max(80),
   reason: z.string().min(10).max(2000),
 });
 

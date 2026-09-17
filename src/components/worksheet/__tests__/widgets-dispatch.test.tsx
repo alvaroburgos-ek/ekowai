@@ -85,3 +85,22 @@ describe('effectiveWidget / placement / bespoke', () => {
     expect(widgetPlacement({ ...base, symbol: 'n', dataType: 'number' })).toEqual({ placement: 'section', title: null });
   });
 });
+
+// Final-review minor: a DB `register` whose ui_config fails parseFieldConfig renders a visible
+// `register-unconfigured` notice + the dynamic input (mirror of `reference-unconfigured`), never silent.
+describe('register widget without a usable ui_config', () => {
+  it('renders the register-unconfigured notice', async () => {
+    const { renderWidget } = await import('../widgets');
+    const { render, screen } = await import('@testing-library/react');
+    const React = await import('react');
+    const f = { ...base, symbol: 'broken', dataType: 'json' as const, widget: 'register', uiConfig: { title: 'no columns' } };
+    const ctx = {
+      standardCode: 'X', locale: 'de' as const, projectId: 'p', readOnly: false, fieldBySymbol: new Map(), values: {}, setField: () => {},
+      symbolLookup: () => undefined, engineStates: {}, equations: [], computedSymbols: new Set<string>(), serverComputedSet: new Set<string>(),
+      rainfallDesignReturnPeriod: null, renderDynamic: () => React.createElement('input', { 'data-testid': 'dynamic-fallback' }),
+    };
+    render(React.createElement(React.Fragment, null, renderWidget(f, ctx)));
+    expect(screen.getByTestId('register-unconfigured').textContent).toBe('Register nicht konfiguriert (ui_config ungültig)');
+    expect(screen.getByTestId('dynamic-fallback')).toBeInTheDocument();
+  });
+});
