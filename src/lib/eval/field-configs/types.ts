@@ -77,8 +77,19 @@ export type PriorSectionRow = {
   /** Code of the parent section; null at root or when the parent has no code. */
   parent_code?: string | null;
 };
+/**
+ * One captured `equations` row of the standard, keyed `"<worksheet> <equation_number>"` (Task 3 fix round 1).
+ * The emitter's producer guard walks these TRANSITIVELY: hiding a symbol that feeds a same-worksheet equation
+ * whose output (directly or through further same-worksheet equations) is consumed elsewhere is refused.
+ */
+export type PriorEquationRow = {
+  /** `equations.id` — lets the guard honour `rewriteRules[id]?.remap` (the Plan-2a bridge) on top of the stored inputs. */
+  id?: string | null;
+  output_symbol: string;
+  input_symbols: string[];
+};
 export type PriorSnapshot = { [key: PriorFieldKey]: PriorFieldRow }
-  & { sections?: Record<string, PriorSectionRow>; _meta?: Record<string, unknown> };
+  & { sections?: Record<string, PriorSectionRow>; equations?: Record<string, PriorEquationRow>; _meta?: Record<string, unknown> };
 
 /** What one `src/lib/eval/field-configs/<slug>.ts` module exports. */
 export type FieldConfigModule = { FIELD_CONFIGS: FieldConfigEntry[]; SECTION_VISIBILITY: SectionVisibilityEntry[] };

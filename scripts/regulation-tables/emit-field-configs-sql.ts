@@ -13,7 +13,15 @@
  *   - a `visible_when` on a symbol that another worksheet consumes
  *     (`consumer_worksheets` non-empty in the prior snapshot) is REFUSED
  *     (importer rule, Plan 2a Task 10 — hiding a producer would hide the
- *     value its consumers inherit); the same refusal applies to a SECTION
+ *     value its consumers inherit); since Task 3 fix round 1 the guard is
+ *     TRANSITIVE: a symbol that is an `input_symbols` member of a
+ *     same-worksheet equation whose output — directly, or through further
+ *     same-worksheet equations — is a consumed field is refused too (a hidden
+ *     input nulls the equation, and the consumers inherit the null); the
+ *     chain is walked over the captured `prior.equations` (plus the Plan-2a
+ *     `rewriteRules[id].remap` inputs) and named in the message; a legacy
+ *     prior without `equations` degrades to the direct rule (the CLI warns);
+ *     the same refusal applies to a SECTION
  *     `visible_when` whose section — or any descendant section, coded or
  *     not, since the runtime hides descendants of a hidden section — contains
  *     such a producer (walked via the captured `section_path`);
@@ -51,12 +59,13 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseFieldConfig, type RegisterUiConfig } from '../../src/lib/eval/field-config';
 import { parseCondition, parseNumeric } from '../../src/lib/expr';
-import type { FieldConfigEntry, SectionVisibilityEntry, PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorSnapshot } from '../../src/lib/eval/field-configs/types';
+import type { FieldConfigEntry, SectionVisibilityEntry, PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorSnapshot } from '../../src/lib/eval/field-configs/types';
 import { FIELD_CONFIG_MODULES } from '../../src/lib/eval/field-configs';
+import { rewriteRules } from '../../src/lib/eval/rewrites';
 import { q, j, JOIN, SCHEMA_MIGRATION, gatedHeaderLines } from './emit-widget-configs-sql';
 
 /** The prior-snapshot types live in src/lib/eval/field-configs/types.ts (re-exported for the tests and the CLI). */
-export type { PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorSnapshot };
+export type { PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorSnapshot };
 
 /** File-level header options (the Plan-2b `gated` / `gated_note` / `provenance` pattern, one file per slug). */
 export type FieldConfigHeader = {
@@ -71,7 +80,7 @@ export type FieldConfigHeader = {
 export const SIGN_OFF_DOC_PLAN_3 = 'docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md';
 const LOOKUP_FILL_DATA_TYPES: ReadonlySet<string> = new Set(['number', 'text', 'enum']);
 const JSON_COLUMNS = ['enum_values', 'ui_config', 'lookup'] as const;
-const RESERVED_KEYS: ReadonlySet<string> = new Set(['sections', '_meta']);
+const RESERVED_KEYS: ReadonlySet<string> = new Set(['sections', 'equations', '_meta']);
 
 /**
  * The read-only prod capture (full-schema form) that `build-prior-snapshot.mjs`
@@ -84,6 +93,8 @@ export const PRIOR_SQL = {
   // EVERY section, null-coded ones included: the fold derives each field's ancestor chain (section_path) from id/parent_section_id
   // and keys the `sections` map by the coded ones only.
   sections: "select w.code as worksheet, ws.id, ws.parent_section_id, ws.code as section_code, p.code as parent_code, ws.visible_when from worksheet_sections ws join worksheet_templates w on w.id=ws.worksheet_template_id join standards s on s.id=w.standard_id left join worksheet_sections p on p.id=ws.parent_section_id where s.code='<CODE>'",
+  // Every equation of the standard (Task 3 fix round 1): the producer guard walks input_symbols → output_symbol chains per worksheet.
+  equations: "select w.code as worksheet, e.id, e.equation_number, e.output_symbol, e.input_symbols from equations e join worksheet_templates w on w.id=e.worksheet_template_id join standards s on s.id=w.standard_id where s.code='<CODE>'",
 };
 
 /** Every captured field row (skips `sections` / `_meta`). */
@@ -116,6 +127,50 @@ export function assertPriorSnapshot(prior: PriorSnapshot): void {
     if (row == null || typeof row !== 'object') throw new Error(`prior.sections "${key}": row must be an object`);
     if (row.visible_when != null && typeof row.visible_when !== 'string') throw new Error(`prior.sections "${key}".visible_when must be a string/null`);
   }
+  for (const [key, row] of Object.entries(prior.equations ?? {})) {
+    if (!key.includes(' ')) throw new Error(`prior.equations "${key}": keys are "<worksheet> <equation_number>"`);
+    if (row == null || typeof row !== 'object' || Array.isArray(row)) throw new Error(`prior.equations "${key}": row must be an object`);
+    if (typeof row.output_symbol !== 'string' || !row.output_symbol) throw new Error(`prior.equations "${key}".output_symbol must be a non-empty string`);
+    if (!Array.isArray(row.input_symbols) || row.input_symbols.some((x) => typeof x !== 'string')) throw new Error(`prior.equations "${key}".input_symbols must be a string array`);
+    if (row.id != null && typeof row.id !== 'string') throw new Error(`prior.equations "${key}".id must be a string/null`);
+  }
+}
+
+/**
+ * Does hiding `symbol` on `worksheet` hide a value another worksheet inherits — directly (the symbol is a
+ * consumed field) or TRANSITIVELY (it feeds a same-worksheet equation whose output, possibly through further
+ * same-worksheet equations, is a consumed field)? Returns the chain to name in the refusal, or null. Walked
+ * over the captured `prior.equations` (stored `input_symbols` + the Plan-2a `rewriteRules[id].remap`
+ * inputs); a prior without `equations` yields the direct answer only.
+ */
+export function producerChain(prior: PriorSnapshot, worksheet: string, symbol: string): string | null {
+  const consumers = (sym: string): string[] | null => {
+    const row = prior[`${worksheet} ${sym}` as PriorFieldKey];
+    return row?.consumer_worksheets?.length ? row.consumer_worksheets : null;
+  };
+  const direct = consumers(symbol);
+  if (direct) return `${symbol} (consumed by ${direct.join(', ')})`;
+  const prefix = `${worksheet} `;
+  const eqs = Object.entries(prior.equations ?? {}).filter(([k]) => k.startsWith(prefix)).map(([k, e]) => {
+    const remap = e.id ? Object.values(rewriteRules[e.id]?.remap ?? {}) : [];
+    const n = k.slice(prefix.length);
+    return { label: /^\d/.test(n) ? `Gl.${n}` : n, output: e.output_symbol, inputs: new Set([...e.input_symbols, ...remap]) };
+  });
+  // BFS from the hidden symbol through same-worksheet equations; the first consumed output names the chain.
+  const queue: Array<{ sym: string; chain: string }> = [{ sym: symbol, chain: symbol }];
+  const seen = new Set<string>([symbol]);
+  while (queue.length) {
+    const { sym, chain } = queue.shift()!;
+    for (const e of eqs) {
+      if (!e.inputs.has(sym) || seen.has(e.output)) continue;
+      seen.add(e.output);
+      const next = `${chain} → ${e.label} ${e.output}`;
+      const c = consumers(e.output);
+      if (c) return `${next} (consumed by ${c.join(', ')})`;
+      queue.push({ sym: e.output, chain: next });
+    }
+  }
+  return null;
 }
 
 const where = (e: { standard: string; worksheet: string; symbol: string }) =>
@@ -136,8 +191,9 @@ function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior:
       if (c.visible_when && parseCondition(c.visible_when) === null) throw new Error(`${id}.${c.key}: visible_when does not parse: ${c.visible_when}`);
     }
   }
-  if (e.visible_when != null && p?.consumer_worksheets?.length) {
-    throw new Error(`${id}: visible_when on a symbol consumed by ${p.consumer_worksheets.join(', ')} (hiding a producer hides the inherited value; STAGE the consumer edit instead)`);
+  if (e.visible_when != null && !e.create) {
+    const chain = producerChain(prior, e.worksheet, e.symbol);
+    if (chain) throw new Error(`${id}: visible_when on a symbol consumed by another worksheet — hides ${chain} (hiding a producer, or an input of a producer, hides the inherited value; STAGE the consumer edit instead)`);
   }
   if (e.widget === 'lookup_fill') {
     const dt = e.create?.data_type ?? p?.data_type;
@@ -182,9 +238,10 @@ function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot): void 
   if (parseCondition(s.visible_when) === null) throw new Error(`section ${key}: visible_when does not parse: ${s.visible_when}`);
   if (prior.sections && !(key in prior.sections)) throw new Error(`section ${key}: not a captured section (its UPDATE would touch 0 rows) — check worksheet_sections.code`);
   const producers = priorFieldRows(prior)
-    .filter(([k, r]) => k.startsWith(`${s.worksheet} `) && inSectionTree(r, s.section_code) && r.consumer_worksheets?.length)
-    .map(([k, r]) => `${k.slice(s.worksheet.length + 1)} (consumed by ${r.consumer_worksheets!.join(', ')})`);
-  if (producers.length) throw new Error(`section ${key}: visible_when on a section (or a descendant of it) containing a symbol consumed by another worksheet: ${producers.join('; ')} (hiding a producer hides the inherited value; STAGE the consumer edit instead)`);
+    .filter(([k, r]) => k.startsWith(`${s.worksheet} `) && inSectionTree(r, s.section_code))
+    .map(([k]) => producerChain(prior, s.worksheet, k.slice(s.worksheet.length + 1)))
+    .filter((chain): chain is string => chain != null);
+  if (producers.length) throw new Error(`section ${key}: visible_when on a section (or a descendant of it) containing a symbol consumed by another worksheet: ${producers.join('; ')} (hiding a producer, or an input of a producer, hides the inherited value; STAGE the consumer edit instead)`);
 }
 
 export function emitFieldConfigSql(slug: string, entries: FieldConfigEntry[], sections: SectionVisibilityEntry[], prior: PriorSnapshot, header: FieldConfigHeader = {}): { up: string; down: string } {
@@ -288,6 +345,7 @@ if (process.argv[1]?.endsWith('emit-field-configs-sql.ts')) {
   const files = fieldConfigFilesFor(slug, ts);
   const header = parseHeaderArgs(rest);
   const prior = loadPriorSnapshot(`src/lib/eval/field-configs/${slug}.prior.json`);
+  if (!prior.equations) console.error(`warning: ${slug}.prior.json carries no "equations" map — the producer guard is direct-only; re-capture with build-prior-snapshot.mjs for the transitive check`);
   load().then((m) => {
     const { up, down } = emitFieldConfigSql(slug, m.FIELD_CONFIGS, m.SECTION_VISIBILITY, prior, header);
     writeFileSync(files.migration, up);

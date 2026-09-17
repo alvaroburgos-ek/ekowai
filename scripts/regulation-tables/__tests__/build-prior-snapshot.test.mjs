@@ -60,7 +60,8 @@ describe('sectionPath / foldSnapshot', () => {
   it('produces the PriorSnapshot shape (keys "<ws> <sym>", coded sections with parent_code, _meta) that assertPriorSnapshot accepts, with full JSON values and section paths', () => {
     const snap = foldSnapshot(fieldRows, sectionRows, { standard: 'DWA-A-138-1', slug: 'a138' });
     expect(() => assertPriorSnapshot(snap)).not.toThrow();
-    expect(snap._meta).toEqual({ standard: 'DWA-A-138-1', slug: 'a138', field_rows: 3, section_rows: 3, sections_total: 4 });
+    expect(snap._meta).toEqual({ standard: 'DWA-A-138-1', slug: 'a138', field_rows: 3, section_rows: 3, sections_total: 4, equation_rows: 0 });
+    expect(snap.equations).toEqual({});
     expect(snap['A138-07 A_C']).toEqual({ enum_values: null, widget: null, ui_config: null, lookup: null, visible_when: null, consumer_worksheets: ['A138-12'], data_type: 'number', section_code: null, section_id_is_null: false, section_path: ['A', 'A.1', null] });
     expect(snap['A138-07 orphan']).toMatchObject({ section_code: null, section_id_is_null: true, section_path: [] });
     expect(snap['A138-07 surface_inventory']).toMatchObject({ section_code: 'B', section_id_is_null: false, section_path: ['B'] });
@@ -87,5 +88,36 @@ describe('sectionPath / foldSnapshot', () => {
     expect(snap['W s']).toEqual({ enum_values: null, widget: null, ui_config: null, lookup: null, visible_when: null, consumer_worksheets: null, data_type: 'text', section_code: null, section_id_is_null: true, section_path: [] });
     expect(() => foldSnapshot([{ worksheet: 'W', symbol: 's' }, { worksheet: 'W', symbol: 's' }], [], {})).toThrow(/duplicate field key W s/);
     expect(() => foldSnapshot([], [{ worksheet: 'W', id: '1', section_code: 'c' }, { worksheet: 'W', id: '2', section_code: 'c' }], {})).toThrow(/duplicate section key W c/);
+  });
+  it('equations (Task 3 fix round 1): the query selects id/equation_number/output/inputs per worksheet; the fold keys "<ws> <equation_number>" and the emitter walks the chain transitively', () => {
+    const q = buildQueries(detectColumns([]));
+    expect(q.equations).toContain('select w.code as worksheet, e.id, e.equation_number, e.output_symbol, e.input_symbols');
+    expect(q.equations).toContain('from equations e join worksheet_templates w on w.id = e.worksheet_template_id');
+    expect(q.equations).toContain('where s.code = $1 order by w.code, e.equation_number');
+    const fields = [
+      { worksheet: 'A262-06', symbol: 'm_T_aM', data_type: 'number', consumer_worksheets: null, section_id: 's-B', section_code: 'B' },
+      { worksheet: 'A262-06', symbol: 'Q_F_d_aM', data_type: 'number', consumer_worksheets: [], section_id: 's-D', section_code: 'D' },
+      { worksheet: 'A262-06', symbol: 'Q_T_d_aM', data_type: 'number', consumer_worksheets: ['A262-07', 'A262-09'], section_id: 's-F', section_code: 'F' },
+    ];
+    const secs = [
+      { worksheet: 'A262-06', id: 's-B', parent_section_id: null, section_code: 'B', parent_code: null, visible_when: null },
+      { worksheet: 'A262-06', id: 's-D', parent_section_id: null, section_code: 'D', parent_code: null, visible_when: null },
+      { worksheet: 'A262-06', id: 's-F', parent_section_id: null, section_code: 'F', parent_code: null, visible_when: null },
+    ];
+    const eqs = [
+      { worksheet: 'A262-06', id: 'e10', equation_number: '10', output_symbol: 'Q_F_d_aM', input_symbols: ['m_T_aM', 'Q_S_d_aM'] },
+      { worksheet: 'A262-06', id: 'e9', equation_number: '9', output_symbol: 'Q_T_d_aM', input_symbols: ['Q_S_d_aM', 'Q_F_d_aM'] },
+    ];
+    const snap = foldSnapshot(fields, secs, { slug: 'a262e' }, eqs);
+    expect(() => assertPriorSnapshot(snap)).not.toThrow();
+    expect(snap._meta.equation_rows).toBe(2);
+    expect(snap.equations).toEqual({
+      'A262-06 10': { id: 'e10', output_symbol: 'Q_F_d_aM', input_symbols: ['m_T_aM', 'Q_S_d_aM'] },
+      'A262-06 9': { id: 'e9', output_symbol: 'Q_T_d_aM', input_symbols: ['Q_S_d_aM', 'Q_F_d_aM'] },
+    });
+    const rule = { standard: 'DWA-A-262E', worksheet: 'A262-06', section_code: 'B', visible_when: 'a == 1', verification_quote: 'q' };
+    expect(() => emitFieldConfigSql('a262e', [], [rule], snap)).toThrow("m_T_aM → Gl.10 Q_F_d_aM → Gl.9 Q_T_d_aM (consumed by A262-07, A262-09)");
+    expect(() => foldSnapshot([], [], {}, [{ worksheet: 'W', equation_number: '1', output_symbol: 'x', input_symbols: [] }, { worksheet: 'W', equation_number: '1', output_symbol: 'y', input_symbols: [] }])).toThrow(/duplicate equation key W 1/);
+    expect(foldSnapshot([], [], {}, [{ worksheet: 'W', equation_number: '1', output_symbol: 'x', input_symbols: null }]).equations['W 1']).toEqual({ id: null, output_symbol: 'x', input_symbols: [] });
   });
 });

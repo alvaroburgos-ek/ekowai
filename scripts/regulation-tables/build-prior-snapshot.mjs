@@ -7,7 +7,10 @@
 // emitter consumes (scripts/regulation-tables/emit-field-configs-sql.ts):
 //   { "_meta": { … }, "<worksheet> <symbol>": { enum_values, widget, ui_config, lookup, visible_when,
 //     consumer_worksheets, data_type, section_code, section_id_is_null, section_path },
-//     "sections": { "<worksheet> <section_code>": { visible_when, parent_code } } }
+//     "sections": { "<worksheet> <section_code>": { visible_when, parent_code } },
+//     "equations": { "<worksheet> <equation_number>": { id, output_symbol, input_symbols } } }
+// equations (Task 3 fix round 1) = EVERY equation row of the standard; the emitter's producer guard walks
+// input_symbols → output_symbol chains per worksheet so a rule can never hide an input of a consumed output.
 // section_path = codes of the field's section ancestors root → own section (null for a null-coded section, [] for
 // an orphan); the emitter's section-level producer guard walks it because the runtime hides every descendant of
 // a hidden section. The sections query therefore captures EVERY section (null-coded ones included); the
@@ -43,7 +46,7 @@ export function detectColumns(informationSchemaRows) {
   };
 }
 
-/** The two capture queries, with `null as <col>` for every optional column prod does not have yet. `$1` = standards.code. */
+/** The three capture queries, with `null as <col>` for every optional column prod does not have yet. `$1` = standards.code. */
 export function buildQueries(columnsPresent) {
   const fieldSelect = OPTIONAL_FIELD_COLUMNS.map((c) => (columnsPresent.fields[c] ? `f.${c}` : `null as ${c}`)).join(', ');
   const sectionSelect = OPTIONAL_SECTION_COLUMNS.map((c) => (columnsPresent.worksheet_sections[c] ? `ws.${c}` : `null as ${c}`)).join(', ');
@@ -56,6 +59,9 @@ where s.code = $1 and f.active order by w.code, f.symbol`,
 from worksheet_sections ws join worksheet_templates w on w.id = ws.worksheet_template_id join standards s on s.id = w.standard_id
 left join worksheet_sections p on p.id = ws.parent_section_id
 where s.code = $1 order by w.code, ws.order_index, ws.code`,
+    equations: `select w.code as worksheet, e.id, e.equation_number, e.output_symbol, e.input_symbols
+from equations e join worksheet_templates w on w.id = e.worksheet_template_id join standards s on s.id = w.standard_id
+where s.code = $1 order by w.code, e.equation_number`,
   };
 }
 
@@ -71,14 +77,15 @@ export function sectionPath(sectionId, byId) {
 }
 
 /**
- * Folds the two row sets into the `PriorSnapshot` object (throws on a duplicate key). `sectionRows` is EVERY
+ * Folds the row sets into the `PriorSnapshot` object (throws on a duplicate key). `sectionRows` is EVERY
  * section of the standard (id, parent_section_id, code, parent_code, visible_when); the coded ones become the
- * `sections` map, all of them feed each field's `section_path`.
+ * `sections` map, all of them feed each field's `section_path`. `equationRows` (optional, Task 3 fix round 1)
+ * is every equation of the standard → the `equations` map keyed "<worksheet> <equation_number>".
  */
-export function foldSnapshot(fieldRows, sectionRows, meta) {
+export function foldSnapshot(fieldRows, sectionRows, meta, equationRows = []) {
   const byId = new Map(sectionRows.filter((r) => r.id != null).map((r) => [r.id, r]));
   const coded = sectionRows.filter((r) => r.section_code != null);
-  const snapshot = { _meta: { ...meta, field_rows: fieldRows.length, section_rows: coded.length, sections_total: sectionRows.length } };
+  const snapshot = { _meta: { ...meta, field_rows: fieldRows.length, section_rows: coded.length, sections_total: sectionRows.length, equation_rows: equationRows.length } };
   for (const r of fieldRows) {
     const key = `${r.worksheet} ${r.symbol}`;
     if (snapshot[key]) throw new Error(`duplicate field key ${key}`);
@@ -100,6 +107,12 @@ export function foldSnapshot(fieldRows, sectionRows, meta) {
     const key = `${r.worksheet} ${r.section_code}`;
     if (snapshot.sections[key]) throw new Error(`duplicate section key ${key}`);
     snapshot.sections[key] = { visible_when: r.visible_when ?? null, parent_code: r.parent_code ?? null };
+  }
+  snapshot.equations = {};
+  for (const r of equationRows) {
+    const key = `${r.worksheet} ${r.equation_number}`;
+    if (snapshot.equations[key]) throw new Error(`duplicate equation key ${key}`);
+    snapshot.equations[key] = { id: r.id ?? null, output_symbol: r.output_symbol, input_symbols: Array.isArray(r.input_symbols) ? [...r.input_symbols] : [] };
   }
   return snapshot;
 }
@@ -133,6 +146,7 @@ async function main() {
     const queries = buildQueries(columnsPresent);
     const fieldRows = await ro(queries.fields, [code]);
     const sectionRows = await ro(queries.sections, [code]);
+    const equationRows = await ro(queries.equations, [code]);
     if (fieldRows.length === 0) {
       console.error(`no active fields found for standards.code = ${JSON.stringify(code)} — check the code (nothing written)`);
       process.exit(2);
@@ -144,11 +158,11 @@ async function main() {
       slug,
       source: 'prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)',
       columns_present: columnsPresent,
-    });
+    }, equationRows);
     const out = path.join(root, 'src', 'lib', 'eval', 'field-configs', `${slug}.prior.json`);
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.writeFileSync(out, JSON.stringify(snapshot, null, 2) + '\n');
-    console.log(`wrote ${path.relative(root, out)}: ${fieldRows.length} field rows (${fieldRows.filter((r) => r.section_id == null).length} orphan), ${snapshot._meta.section_rows} coded sections of ${sectionRows.length}; optional columns present: ${JSON.stringify(columnsPresent)}`);
+    console.log(`wrote ${path.relative(root, out)}: ${fieldRows.length} field rows (${fieldRows.filter((r) => r.section_id == null).length} orphan), ${snapshot._meta.section_rows} coded sections of ${sectionRows.length}, ${equationRows.length} equations; optional columns present: ${JSON.stringify(columnsPresent)}`);
   } finally {
     await sql.end();
   }

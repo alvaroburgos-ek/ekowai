@@ -300,6 +300,13 @@ Express each as `visible_when` (field or section) in the compliance DSL — the 
 flag it as a judgment item instead. Where the inventory flags an unguarded gate, add
 `IF driver == x THEN …` explicitly.
 
+**The emitter's producer guard is TRANSITIVE (Plan 3 Task 3 fix round 1).** `emit-field-configs-sql.ts` refuses a field or
+section `visible_when` that would hide a symbol which is an `input_symbols` member of a same-worksheet equation whose output —
+directly or through further same-worksheet equations — is a consumed field (a hidden input nulls the equation and the consumers
+inherit the null). The prior snapshot carries the standard's equations (`prior.equations`, written by `build-prior-snapshot.mjs`;
+`rewriteRules[id].remap` inputs are honoured); the refusal names the chain (`hides m_T_aM → Gl.10 Q_F_d_aM → Gl.9 Q_T_d_aM (consumed
+by …)`). A legacy prior without `equations` degrades to the direct rule and the CLI prints a warning — re-capture before emitting.
+
 **`visible_when` is evaluated since Plan 2a** (`src/lib/compliance/visibility.ts`,
 `computeVisibility`) — on the form, the approval gate, the report, the snapshot, the PDF
 assembler and the save-path materialiser, all through the one pure helper. Semantics you are
