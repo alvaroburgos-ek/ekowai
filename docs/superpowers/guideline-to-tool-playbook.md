@@ -18,7 +18,15 @@ loads, the worksheet page, the importer's re-verification pre-pass) fails with a
 never-throws guard (`src/lib/db/queries/regulation-tables.ts`) only covers the regulation-tables
 DATA migration being absent (missing seed rows) — it does not, and cannot, cover the `fields`
 columns not existing at all, because the ordinary (non-try/catch) field-read call sites are not
-wrapped in that guard.
+wrapped in that guard. Concretely, four server surfaces read the Plan-1 columns
+(`fields.visible_when` / `widget` / `ui_config` / `lookup`, `worksheet_sections.visible_when`)
+on every request, before any UI is involved: **`saveWorksheet`** (`src/lib/actions/worksheet.ts`
+— visibility for hidden-symbol N.A. and the materialiser), the **approval gate**
+(`src/lib/actions/approval-gate.ts` — hidden required fields, N.A. gates), the **PDF loader**
+(`src/lib/pdf/load-data.ts` → `assemble-standard-report.ts`) and **snapshot capture**
+(`src/lib/snapshots/capture.ts` / `payload.ts`). Deploying the build before step 1 therefore
+breaks saving, approving, printing and snapshotting every worksheet of every standard — not
+just the ones that use the new widgets.
 
 Apply strictly in this order, never skip or reorder a step:
 
