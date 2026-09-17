@@ -12,6 +12,7 @@
  * for every compliance row, both keyed for the per-worksheet report renderer.
  */
 import { evaluateFormula, type EvalState } from './formula';
+import { engineInputValue } from './engine-input';
 import { evaluateCondition, type EvalResult } from '../compliance/evaluate';
 import { computeVisibility, hiddenFieldIdsOf, withHidden, type Visibility, type VisibilitySection } from '../compliance/visibility';
 import { equationProfiles } from './equation-profiles';
@@ -115,6 +116,9 @@ function buildValueMap(
   parameters: ReportParameter[],
 ): {
   numByField: Map<string, number | null>;
+  /** Plan 3 Task 1b: enum/text values BY FIELD (like numByField) so a formula input reads the
+   * field the symbol resolves to, never a same-symbol sibling. */
+  strByField: Map<string, string | null>;
   fieldBySymbol: Map<string, ReportField>;
   bySymbol: Map<string, number | string | boolean | null>;
   jsonBySymbol: Map<string, unknown>;
@@ -124,6 +128,7 @@ function buildValueMap(
   for (const f of fields) fieldBySymbol.set(f.symbol, f);
 
   const numByField = new Map<string, number | null>();
+  const strByField = new Map<string, string | null>();
   const bySymbol = new Map<string, number | string | boolean | null>();
   const jsonBySymbol = new Map<string, unknown>();
 
@@ -136,9 +141,11 @@ function buildValueMap(
         if (p.valueNumber != null) bySymbol.set(f.symbol, p.valueNumber);
         break;
       case 'text':
+        strByField.set(p.fieldId, p.valueText);
         if (p.valueText != null) bySymbol.set(f.symbol, p.valueText);
         break;
       case 'enum':
+        strByField.set(p.fieldId, p.valueEnum);
         if (p.valueEnum != null) bySymbol.set(f.symbol, p.valueEnum);
         break;
       case 'boolean':
@@ -152,7 +159,7 @@ function buildValueMap(
         break;
     }
   }
-  return { numByField, fieldBySymbol, bySymbol, jsonBySymbol };
+  return { numByField, strByField, fieldBySymbol, bySymbol, jsonBySymbol };
 }
 
 /**
@@ -196,7 +203,7 @@ export function evaluateWorksheetEquations(
     hiddenSymbols?: ReadonlySet<string>;
   },
 ): EquationReportResult[] {
-  const { numByField, fieldBySymbol, bySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
+  const { numByField, strByField, fieldBySymbol, bySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
 
   // ONE hidden-aware accessor family (withHidden) — every read below goes
   // through these; nothing re-implements the "hidden ⇒ null" rule.
@@ -205,6 +212,7 @@ export function evaluateWorksheetEquations(
   const valueOf = withHidden((sym: string) => bySymbol.get(sym), hiddenSymbols);
   const jsonOf = withHidden((sym: string) => jsonBySymbol.get(sym), hiddenSymbols);
   const numOf = withHidden((fieldId: string) => numByField.get(fieldId), hiddenFieldIds);
+  const strOf = withHidden((fieldId: string) => strByField.get(fieldId), hiddenFieldIds);
   const paramOf = withHidden((fieldId: string) => parameters.find((x) => x.fieldId === fieldId), hiddenFieldIds);
 
   // Plan 2a — generic registers (mirror of the client hook). Every json field
@@ -352,8 +360,13 @@ export function evaluateWorksheetEquations(
 
     const evalInputs = neededSymbols.map((sym) => {
       const f = fieldBySymbol.get(aliasFor(sym));
-      const num = f ? (numOf(f.id) ?? null) : null;
-      return { symbol: sym, value: num, unit: f?.unit ?? null };
+      // Plan 3 Task 1b: number → number; enum/text → the string verbatim; ''/null → missing.
+      const value = f
+        ? f.dataType === 'text' || f.dataType === 'enum'
+          ? engineInputValue({ type: f.dataType, value: strOf(f.id) ?? null })
+          : engineInputValue({ type: 'number', value: numOf(f.id) ?? null })
+        : null;
+      return { symbol: sym, value, unit: f?.unit ?? null };
     });
 
     const expectedUnits: Record<string, string | null> = {};

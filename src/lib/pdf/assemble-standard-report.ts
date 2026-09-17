@@ -1,4 +1,5 @@
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
+import { engineInputValue } from '@/lib/eval/engine-input';
 import { buildRegisters } from '@/lib/eval/register-rows';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
@@ -454,6 +455,9 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
     value: number | string | boolean | null;
     unit: string | null;
     source: ReportField['valueSource'];
+    /** Plan 3 Task 1b: the field's data type — decides whether the value is a formula input
+     * (number → number, enum/text → verbatim string; see engineInputValue). */
+    dataType: string;
   };
   const resolvedByFieldId = new Map<string, ResolvedValue>();
   const resolvedBySymbol = new Map<string, ResolvedValue>();
@@ -487,7 +491,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         source = 'site_profile';
       }
     }
-    const entry: ResolvedValue = { value, unit: f.unit, source };
+    const entry: ResolvedValue = { value, unit: f.unit, source, dataType: f.dataType };
     resolvedByFieldId.set(f.id, entry);
     if (value != null) {
       resolvedBySymbol.set(f.symbol, entry);
@@ -687,10 +691,10 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           };
         }
         const inputs = (eq.inputSymbols ?? []).map((sym) => {
+          // Plan 3 Task 1b: number → number; enum/text → the string verbatim; ''/null → missing.
           const r = resolvedFor(sym);
-          const num =
-            r && typeof r.value === 'number' && Number.isFinite(r.value) ? r.value : null;
-          return { symbol: sym, value: num, unit: r?.unit ?? null };
+          const value = r ? engineInputValue({ type: r.dataType, value: r.value }) : null;
+          return { symbol: sym, value, unit: r?.unit ?? null };
         });
         const expectedUnits: Record<string, string | null> = {};
         for (const sym of eq.inputSymbols ?? []) {

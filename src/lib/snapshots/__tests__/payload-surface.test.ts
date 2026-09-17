@@ -179,3 +179,36 @@ describe('buildSnapshotPayload — A138-07 surface aggregator', () => {
     expect(ac.kind).toBe('manual_required');
   });
 });
+
+// Plan 3 Task 1b (a138-I-1): enum/text parameters reach formulas as strings in the snapshot.
+describe('buildSnapshotPayload — enum/text inputs (Task 1b)', () => {
+  const fields = [
+    mkField({ symbol: 'schutzkategorie', dataType: 'enum' }),
+    mkField({ symbol: 'A_C', dataType: 'number', unit: 'm²' }),
+    mkField({ symbol: 'n_limit', dataType: 'number', unit: '1/a' }),
+    mkField({ symbol: 'note', dataType: 'text' }),
+    mkField({ symbol: 'y', dataType: 'number' }),
+  ];
+  const equations = [
+    mkEquation({ id: 'eq-nl', equationNumber: 'A138-08-D1', formula: "n_limit = lookup('TAB8', schutzkategorie, if(A_C <= 800, 'le800', 'gt800'), 'n_max')", inputSymbols: ['schutzkategorie', 'A_C'], outputSymbol: 'n_limit' }),
+    mkEquation({ id: 'eq-nan', equationNumber: 'T-NAN', formula: 'y = note + 1', inputSymbols: ['note'], outputSymbol: 'y' }),
+  ];
+  const enumParam = (fieldId: string, valueEnum: string): ParameterRow => ({ ...mkParam(fieldId, {}), valueEnum });
+  const textParam = (fieldId: string, valueText: string): ParameterRow => ({ ...mkParam(fieldId, {}), valueText });
+
+  it('value_enum keys the lookup and lands in substituted verbatim; value_text in arithmetic is manual_required', () => {
+    const payload = buildSnapshotPayload({
+      worksheetCode: 'A138-08',
+      standardCode: 'DWA-A-138-1',
+      fields,
+      equations,
+      complianceRequirements: [],
+      parameters: [enumParam('field-schutzkategorie', 'gering'), mkParam('field-A_C', { num: 500 }), textParam('field-note', 'BK_I')],
+    });
+    expect(payload.equationOutputs['A138-08-D1']).toMatchObject({ kind: 'computed', value: 0.33, substituted: { schutzkategorie: 'gering', A_C: 500 } });
+    expect(payload.equationOutputs['T-NAN']).toMatchObject({ kind: 'manual_required', manualRequiredReason: 'Operand ist keine Zahl: BK_I' });
+    // unset select ⇒ manual_required, never a number
+    const unset = buildSnapshotPayload({ worksheetCode: 'A138-08', standardCode: 'DWA-A-138-1', fields, equations, complianceRequirements: [], parameters: [mkParam('field-A_C', { num: 500 })] });
+    expect(unset.equationOutputs['A138-08-D1']).toMatchObject({ kind: 'manual_required', manualRequiredReason: 'Fehlende oder leere Eingaben: schutzkategorie' });
+  });
+});

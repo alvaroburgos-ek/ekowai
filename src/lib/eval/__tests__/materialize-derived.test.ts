@@ -143,3 +143,68 @@ describe('parametersToFieldValues', () => {
     });
   });
 });
+
+// Plan 3 Task 1b (a138-I-1): enum/text scalar inputs reach the server materialiser's evaluateFormula as strings.
+describe('materializeDerivedOutputs — Task 1b: enum/text inputs through the server save path', () => {
+  // A register-fed equation keyed by the A138-08 Schutzkategorie select (a138 TS fallback TAB8 via resolveRegulationTable):
+  // n_limit_check = n_limit(Tab. 8) · count of complete surface_inventory rows — the register keeps the equation inside the
+  // materialiser's scope (it materialises register-fed equations only, see its docblock); the enum key is the point.
+  const tab8Fields = [
+    { id: 'f-sites', symbol: 'surface_inventory', dataType: 'json', unit: null },
+    { id: 'f-sk', symbol: 'schutzkategorie', dataType: 'enum', unit: null },
+    { id: 'f-ac', symbol: 'A_C', dataType: 'number', unit: 'm²' },
+    { id: 'f-note', symbol: 'note', dataType: 'text', unit: null },
+    { id: 'f-out', symbol: 'n_limit_x', dataType: 'number', unit: '1/a' },
+  ];
+  const tab8Eq = [{
+    id: 'eq-t1b', equationNumber: 'T1B-1',
+    formula: "n_limit_x = lookup('TAB8', schutzkategorie, if(A_C <= 800, 'le800', 'gt800'), 'n_max') * count_rows(surface_inventory)",
+    inputSymbols: ['schutzkategorie', 'A_C', 'surface_inventory'], outputSymbol: 'n_limit_x',
+  }];
+  const sites = { 'f-sites': { type: 'json' as const, value: { rows: [
+    { id: '1', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false },
+    { id: '2', tab9_value: 'park_flach', area_m2: 200, c_i: 0.1, c_s: 0.2, coeff_override: false },
+  ] } } };
+
+  it('an enum value is passed as its token — the Tab. 8 row resolves and the output materialises', () => {
+    const { writes } = materializeDerivedOutputs({ standardCode: 'DWA-A-138-1', worksheetCode: 'A138-08', equations: tab8Eq, fields: tab8Fields, valuesByFieldId: {
+      ...sites, 'f-sk': { type: 'enum', value: 'gering' }, 'f-ac': { type: 'number', value: 500 },
+    } });
+    expect(writes).toHaveLength(1);
+    expect(writes[0].fieldId).toBe('f-out');
+    expect(writes[0].value).toBeCloseTo(0.66, 9);
+    expect(writes[0].state).toMatchObject({ kind: 'computed', substituted: { schutzkategorie: 'gering', A_C: 500 } });
+    // A_C > 800 flips the band
+    const gt = materializeDerivedOutputs({ standardCode: 'DWA-A-138-1', worksheetCode: 'A138-08', equations: tab8Eq, fields: tab8Fields, valuesByFieldId: {
+      ...sites, 'f-sk': { type: 'enum', value: 'gering' }, 'f-ac': { type: 'number', value: 900 },
+    } });
+    expect(gt.writes[0].value).toBeCloseTo(1.0, 9);
+  });
+
+  it('an unset / empty enum is a MISSING input ⇒ manual_required ⇒ the output is written as null (clears stale values)', () => {
+    for (const sk of [{ type: 'enum' as const, value: null }, { type: 'enum' as const, value: '' }]) {
+      const { writes } = materializeDerivedOutputs({ standardCode: 'DWA-A-138-1', worksheetCode: 'A138-08', equations: tab8Eq, fields: tab8Fields, valuesByFieldId: {
+        ...sites, 'f-sk': sk, 'f-ac': { type: 'number', value: 500 },
+      } });
+      expect(writes[0].value).toBeNull();
+      expect(writes[0].state).toMatchObject({ kind: 'manual_required', missing: ['schutzkategorie'] });
+    }
+  });
+
+  it('a hidden enum input (visible_when) resolves to no value — manual_required, never a number computed from a hidden select', () => {
+    const { writes } = materializeDerivedOutputs({ standardCode: 'DWA-A-138-1', worksheetCode: 'A138-08', equations: tab8Eq, fields: tab8Fields, valuesByFieldId: {
+      ...sites, 'f-sk': { type: 'enum', value: 'gering' }, 'f-ac': { type: 'number', value: 500 },
+    }, hiddenSymbols: new Set(['schutzkategorie']) });
+    expect(writes[0].value).toBeNull();
+    expect(writes[0].state).toMatchObject({ kind: 'manual_required', missing: ['schutzkategorie'] });
+  });
+
+  it('a text value reaching an arithmetic operator is manual_required with a German reason — never NaN persisted', () => {
+    const eqs = [{ id: 'eq-t1b-nan', equationNumber: 'T1B-2', formula: 'n_limit_x = note + count_rows(surface_inventory)', inputSymbols: ['note', 'surface_inventory'], outputSymbol: 'n_limit_x' }];
+    const { writes } = materializeDerivedOutputs({ standardCode: 'DWA-A-138-1', worksheetCode: 'A138-08', equations: eqs, fields: tab8Fields, valuesByFieldId: {
+      ...sites, 'f-note': { type: 'text', value: 'BK_I' },
+    } });
+    expect(writes[0].value).toBeNull();
+    expect(writes[0].state).toMatchObject({ kind: 'manual_required', reason: 'Operand ist keine Zahl: BK_I' });
+  });
+});

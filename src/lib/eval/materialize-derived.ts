@@ -28,6 +28,7 @@
  * time") and the whole save would roll back.
  */
 import { evaluateFormula, type EvalState } from './formula';
+import { engineInputValue } from './engine-input';
 import { hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
 import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
@@ -164,8 +165,9 @@ export function materializeDerivedOutputs(args: {
     writtenFieldIds.add(outField.id);
     const inputs = [...consumed].filter((s) => !registerSymbols.has(s)).map((sym) => {
       const f = fieldBySymbol.get(sym);
+      // Plan 3 Task 1b: number → number; enum/text → the string verbatim; ''/null → missing.
       const v = f ? valueOf(f.id) : undefined;
-      return { symbol: sym, value: v?.type === 'number' ? v.value : null, unit: f?.unit ?? null };
+      return { symbol: sym, value: engineInputValue(v), unit: f?.unit ?? null };
     });
     const state = evaluateFormula({
       equationId: eq.id,

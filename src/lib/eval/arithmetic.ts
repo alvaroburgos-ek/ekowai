@@ -2,7 +2,7 @@
  * Numeric adapter over the unified expression engine (`src/lib/expr`).
  *
  * `evalExpression(expression, scope, extras)` evaluates a formula RHS in
- * STRICT numeric mode: it builds an expr `Scope` from the number map (with
+ * STRICT numeric mode: it builds an expr `Scope` from the number/string map (with
  * `e`/`pi` as fallback constants — a field of that name always wins), the
  * prepared registers, the regulation-table lookup and the raw carriers, then
  * delegates to `evalNumber`. The grammar itself — precedence climbing over
@@ -51,7 +51,9 @@ export type EvalExtras = {
 
 export function evalExpression(
   expression: string,
-  scope: Record<string, number>,
+  // Plan 3 Task 1b: enum/text inputs are string entries — `symbol()` hands the
+  // string to the evaluator verbatim (lookup keys, if/== operands).
+  scope: Record<string, number | string>,
   extra?: EvalExtras,
 ): number {
   const values = new Map(Object.entries(scope));

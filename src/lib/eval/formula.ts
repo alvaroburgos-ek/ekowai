@@ -57,7 +57,10 @@ const PARSE_FAILURE =
 export type EvalInputValue = {
   /** the symbol the formula is expecting (already remapped if a rewrite applies) */
   symbol: string;
-  value: number | null;
+  /** Plan 3 Task 1b: a `number` field value, or the VERBATIM string of an
+   * `enum`/`text` field (never coerced to a number); `null` = missing.
+   * Build it with `engineInputValue()` (engine-input.ts). */
+  value: number | string | null;
   /** unit as stored on the wizard field; null/undefined when the symbol is dimensionless */
   unit: string | null;
 };
@@ -91,8 +94,10 @@ export type EvalState =
   | {
       kind: 'computed';
       value: number;
-      /** the values used as inputs, by symbol-after-rewrite */
-      substituted: Record<string, number>;
+      /** the values used as inputs, by symbol-after-rewrite. Plan 3 Task 1b:
+       * an enum/text input is recorded as its VERBATIM string — renderers
+       * quote it (`schutzkategorie = 'gering'`) and never format it as a number. */
+      substituted: Record<string, number | string>;
       /** the formula RHS actually fed to mathjs (after rewrite + LHS stripping) */
       formulaEvaluated: string;
       /** present when a rewrite was applied */
@@ -195,7 +200,7 @@ export function evaluateFormula(req: EvalRequest): EvalState {
   const profile = equationProfiles[req.equationId];
 
   // 2. Resolve each needed symbol from the supplied inputs.
-  const substituted: Record<string, number> = {};
+  const substituted: Record<string, number | string> = {};
   const missing: string[] = [];
   const unitConflicts: UnitConflict[] = [];
   const valueBySymbol = new Map(req.inputs.map((i) => [i.symbol, i]));
@@ -205,19 +210,29 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     // by the expression evaluator itself and never enter `substituted`.
     if (req.registers?.[sym] !== undefined || req.carriers?.[sym] !== undefined) continue;
     const found = valueBySymbol.get(sym);
-    if (!found || found.value === null || !Number.isFinite(found.value)) {
+    // Missing rule (Plan 3 Task 1b): null, a non-finite number, or an empty
+    // string. A non-empty string (enum token / text) is PRESENT and is passed
+    // verbatim — `lookup()` / `if()` / `==` consume it; an arithmetic operator
+    // rejects it in the evaluator (`Operand ist keine Zahl`, manual_required).
+    if (
+      !found ||
+      found.value === null ||
+      (typeof found.value === 'number' ? !Number.isFinite(found.value) : found.value === '')
+    ) {
       missing.push(sym);
       continue;
     }
     // Profile expected unit wins over caller-supplied expected unit. This
     // lets the engine catch a drift between a field's stored unit and the
     // equation's dimensional expectations (e.g. d_i stored as 'mm' on a
-    // field when §6.4.2 specifies 'm').
+    // field when §6.4.2 specifies 'm'). Strings carry no dimension — the
+    // check applies to numeric inputs only.
     const expected =
       profile?.expectedUnits?.[sym] !== undefined
         ? profile.expectedUnits[sym]
         : req.expectedUnits?.[sym] ?? null;
     if (
+      typeof found.value === 'number' &&
       expected != null &&
       expected !== '' &&
       found.unit != null &&
@@ -284,7 +299,7 @@ export function evaluateFormula(req: EvalRequest): EvalState {
   // input values. They are NOT recorded as substituted inputs in the
   // returned state — the engineer-facing UI surfaces variable substitutions,
   // not language-level constants.
-  const scope: Record<string, number> = profile?.constants
+  const scope: Record<string, number | string> = profile?.constants
     ? { ...substituted, ...profile.constants }
     : substituted;
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { EvalState } from '@/lib/eval/formula';
+import { quoteStringInput } from '@/lib/eval/engine-input';
 import { KatexFormula } from '@/components/math/katex-formula';
 
 type Props = {
@@ -102,7 +103,7 @@ export function EquationEngineCard({
           <ul className="text-xs font-mono space-y-0.5">
             {Object.entries(state.substituted).map(([sym, v]) => (
               <li key={sym} className="text-ink">
-                {sym} = {formatNumber(v)}
+                {sym} = {formatInput(v)}
               </li>
             ))}
           </ul>
@@ -191,7 +192,7 @@ export function EquationEngineCard({
                             <SymbolButton symbol={sym} />
                           </td>
                           <td className="py-1 pr-3 text-right font-mono tabular-nums text-ink">
-                            {formatNumber(v)}
+                            {formatInput(v)}
                           </td>
                           <td className="py-1 pr-3 font-mono text-ink-2">
                             {unit ?? '—'}
@@ -275,6 +276,12 @@ export function EquationEngineCard({
   );
 }
 
+/** Plan 3 Task 1b: a string input (enum token / text) renders QUOTED and verbatim —
+ * never through the numeric formatter. */
+function formatInput(v: number | string): string {
+  return typeof v === 'string' ? quoteStringInput(v) : formatNumber(v);
+}
+
 function formatNumber(v: number): string {
   if (Math.abs(v) >= 1000 || (v !== 0 && Math.abs(v) < 0.01)) {
     return v.toPrecision(6);
@@ -299,13 +306,13 @@ function formatNumberWide(v: number): string {
 
 /**
  * Render a substituted form of the formula: each symbol token replaced by
- * its numeric value. Operates on the already-normalised RHS string the
- * engine returns in `formulaEvaluated`. Longest symbol first so e.g.
- * `A_C_b` is not partially overwritten by `A_C`.
+ * its numeric value (a string input by its quoted literal). Operates on the
+ * already-normalised RHS string the engine returns in `formulaEvaluated`.
+ * Longest symbol first so e.g. `A_C_b` is not partially overwritten by `A_C`.
  */
 function substituteFormula(
   formula: string,
-  substituted: Record<string, number>,
+  substituted: Record<string, number | string>,
 ): string {
   const symbols = Object.keys(substituted).sort((a, b) => b.length - a.length);
   let out = formula;
@@ -315,7 +322,10 @@ function substituteFormula(
     // \b because identifier chars include underscore — use a manual
     // negative lookbehind/lookahead for [A-Za-z0-9_].
     const re = new RegExp(`(?<![A-Za-z0-9_])${escaped}(?![A-Za-z0-9_])`, 'g');
-    out = out.replace(re, formatNumberWide(substituted[sym]));
+    const v = substituted[sym];
+    const literal = typeof v === 'string' ? quoteStringInput(v) : formatNumberWide(v);
+    // function replacer: a text value containing `$` must not be read as a replacement pattern
+    out = out.replace(re, () => literal);
   }
   return out;
 }

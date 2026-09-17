@@ -20,6 +20,7 @@
 import { useEffect, useMemo } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateFormula, type EvalState } from './formula';
+import { engineInputValue } from './engine-input';
 import { rewriteRules } from './rewrites';
 import type {
   KostraCarrier,
@@ -493,9 +494,10 @@ export function useEquationEngine({
         // Plan 2a (Task 10): `storeValue` reads a hidden field as "no value" —
         // the evaluator then reports manual_required (missing input), never a
         // number computed from a value the engineer cannot see.
+        // Plan 3 Task 1b: number → number; enum/text → the string verbatim;
+        // ''/null → missing (engineInputValue — the ONE rule all callers share).
         const v = f ? storeValue(f.id) : undefined;
-        const num = v?.type === 'number' ? v.value : null;
-        return { symbol: sym, value: num, unit: f?.unit ?? null };
+        return { symbol: sym, value: engineInputValue(v), unit: f?.unit ?? null };
       });
 
       const expectedUnits: Record<string, string | null> = {};

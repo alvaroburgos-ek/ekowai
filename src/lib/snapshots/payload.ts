@@ -7,6 +7,7 @@
  */
 
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
+import { engineInputValue } from '@/lib/eval/engine-input';
 import { evaluateCondition } from '@/lib/compliance/evaluate';
 import { computeVisibility, hiddenFieldIdsOf, withHidden, type VisibilitySection } from '@/lib/compliance/visibility';
 import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
@@ -59,7 +60,8 @@ export type SnapshotEquationOutput =
       kind: 'computed';
       value: number;
       formula: string;
-      substituted: Record<string, number>;
+      /** Plan 3 Task 1b: enum/text inputs are recorded as their verbatim strings. */
+      substituted: Record<string, number | string>;
     }
   | {
       kind: 'manual_required';
@@ -464,9 +466,10 @@ export function buildSnapshotPayload(args: {
 
     const evalInputs = neededSymbols.map((sym) => {
       const f = fieldBySymbol.get(aliasFor(sym));
+      // Plan 3 Task 1b: number → number; enum/text → the string verbatim; ''/null → missing.
       const p = f ? paramForEngine(f.id) : undefined;
-      const num = p ? readNumber(p) : null;
-      return { symbol: sym, value: num, unit: f?.unit ?? null };
+      const value = f && p ? engineInputValue(readValue(p, f.dataType)) : null;
+      return { symbol: sym, value, unit: f?.unit ?? null };
     });
 
     const expectedUnits: Record<string, string | null> = {};

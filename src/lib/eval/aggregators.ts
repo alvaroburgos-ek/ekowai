@@ -431,7 +431,8 @@ const a138_16_gl11_balance: Aggregator = {
     const vals: Record<string, number> = {};
     for (const sym of GL11_INPUT_SYMBOLS) {
       const found = inputs.get(sym);
-      if (!found || found.value === null || !Number.isFinite(found.value)) {
+      // numeric-only aggregator: a string input (enum/text, Task 1b) counts as missing
+      if (!found || typeof found.value !== 'number' || !Number.isFinite(found.value)) {
         missing.push(sym);
         continue;
       }
@@ -499,7 +500,8 @@ function makeConditionAggregator(
       const vals: Record<string, number> = {};
       for (const sym of inputSymbols) {
         const found = inputs.get(sym);
-        if (!found || found.value === null || !Number.isFinite(found.value)) {
+        // numeric-only aggregator: a string input (enum/text, Task 1b) counts as missing
+        if (!found || typeof found.value !== 'number' || !Number.isFinite(found.value)) {
           missing.push(sym);
           continue;
         }

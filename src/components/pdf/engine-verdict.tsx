@@ -1,6 +1,7 @@
 import { View, Text } from '@react-pdf/renderer';
 import { styles } from './styles';
 import type { ReportEquation } from '@/lib/pdf/load-standard-report';
+import { quoteStringInput } from '@/lib/eval/engine-input';
 
 /**
  * Renders the engine's verdict for ONE equation. This component IS the
@@ -73,7 +74,7 @@ export function EngineVerdict({ equation }: { equation: ReportEquation }) {
             <Text style={styles.smallCaps}>Eingaben</Text>
             {substitutedEntries.map(([sym, v]) => (
               <Text key={sym} style={styles.engineSubsRow}>
-                {sym} = {formatNumber(v)}
+                {sym} = {formatInput(v)}
               </Text>
             ))}
           </View>
@@ -148,6 +149,12 @@ export function EngineVerdict({ equation }: { equation: ReportEquation }) {
       </Text>
     </View>
   );
+}
+
+/** Plan 3 Task 1b: a string input (enum token / text) prints QUOTED and verbatim —
+ * never through the numeric formatter. */
+function formatInput(v: number | string): string {
+  return typeof v === 'string' ? quoteStringInput(v) : formatNumber(v);
 }
 
 function formatNumber(v: number): string {

@@ -192,3 +192,114 @@ describe('evaluateFormula — non-aggregator, non-rewrite paths still work', () 
     expect(r.kind).toBe('error');
   });
 });
+
+// Plan 3 Task 1b (a138-I-1): enum/text field values reach formulas as strings.
+describe('evaluateFormula — Task 1b: enum/text inputs reach formulas as strings', () => {
+  // A138-08-D1 (src/lib/eval/equations/a138.ts) — Tab. 8 keyed by the Schutzkategorie select.
+  const N_LIMIT = "n_limit = lookup('TAB8', schutzkategorie, if(A_C <= 800, 'le800', 'gt800'), 'n_max')";
+  const nLimit = (inputs: EvalRequest['inputs'], extra?: Partial<EvalRequest>): EvalRequest => ({
+    equationId: 't1b-n-limit',
+    formula: N_LIMIT,
+    inputSymbols: ['schutzkategorie', 'A_C'],
+    outputSymbol: 'n_limit',
+    inputs,
+    tableLookup: TABLE,
+    ...extra,
+  });
+
+  it('rule 1: a non-empty string input is PRESENT — passed verbatim to lookup() and recorded in substituted', () => {
+    const r = evaluateFormula(nLimit([
+      { symbol: 'schutzkategorie', value: 'gering', unit: null },
+      { symbol: 'A_C', value: 500, unit: 'm²' },
+    ]));
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.value).toBe(0.33);
+    expect(r.substituted).toEqual({ schutzkategorie: 'gering', A_C: 500 });
+    expect(typeof r.substituted.schutzkategorie).toBe('string');
+  });
+
+  it("rule 1: '' and null string inputs are MISSING (manual_required naming the symbol); numbers behave as before", () => {
+    for (const value of ['', null] as const) {
+      const r = evaluateFormula(nLimit([
+        { symbol: 'schutzkategorie', value, unit: null },
+        { symbol: 'A_C', value: 500, unit: 'm²' },
+      ]));
+      expect(r.kind).toBe('manual_required');
+      if (r.kind !== 'manual_required') return;
+      expect(r.missing).toEqual(['schutzkategorie']);
+      expect(r.reason).toBe('Fehlende oder leere Eingaben: schutzkategorie');
+    }
+    const numMissing = evaluateFormula(nLimit([
+      { symbol: 'schutzkategorie', value: 'gering', unit: null },
+      { symbol: 'A_C', value: null, unit: 'm²' },
+    ]));
+    expect(numMissing.kind).toBe('manual_required');
+    if (numMissing.kind === 'manual_required') expect(numMissing.missing).toEqual(['A_C']);
+  });
+
+  it('rule 1: an unknown enum token never yields a number — lookup() reports the missing row as manual_required', () => {
+    const r = evaluateFormula(nLimit([
+      { symbol: 'schutzkategorie', value: 'unbekannt', unit: null },
+      { symbol: 'A_C', value: 500, unit: 'm²' },
+    ]));
+    expect(r.kind).toBe('manual_required');
+    if (r.kind === 'manual_required') expect(r.reason).toMatch(/^lookup\(\): keine Zeile in TAB8/);
+  });
+
+  it('rule 1: unit-conflict checks skip string inputs; numeric inputs are still checked', () => {
+    const ok = evaluateFormula(nLimit(
+      [
+        { symbol: 'schutzkategorie', value: 'gering', unit: 'foo' },
+        { symbol: 'A_C', value: 500, unit: 'm²' },
+      ],
+      { expectedUnits: { schutzkategorie: 'bar', A_C: 'm²' } },
+    ));
+    expect(ok.kind).toBe('computed');
+    const conflict = evaluateFormula(nLimit(
+      [
+        { symbol: 'schutzkategorie', value: 'gering', unit: null },
+        { symbol: 'A_C', value: 500, unit: 'm²' },
+      ],
+      { expectedUnits: { A_C: 'ha' } },
+    ));
+    expect(conflict.kind).toBe('manual_required');
+    if (conflict.kind === 'manual_required') {
+      expect(conflict.unitConflicts).toEqual([{ symbol: 'A_C', expected: 'ha', actual: 'm²' }]);
+    }
+  });
+
+  it('rule 2: a string reaching an arithmetic operator ⇒ manual_required with a German reason, never computed NaN', () => {
+    const run = (formula: string) =>
+      evaluateFormula({
+        equationId: 't1b-nan-guard',
+        formula,
+        inputSymbols: ['x'],
+        outputSymbol: 'y',
+        inputs: [{ symbol: 'x', value: 'BK_I', unit: null }],
+      });
+    const plus = run('y = x + 1');
+    expect(plus.kind).toBe('manual_required');
+    if (plus.kind === 'manual_required') expect(plus.reason).toBe('Operand ist keine Zahl: BK_I');
+    for (const f of ['y = x - 1', 'y = x * 2', 'y = 1 / x', 'y = x ^ 2', 'y = -x', 'y = sqrt(x)', 'y = max(x, 1)', 'y = x']) {
+      const s = run(f);
+      expect(s.kind, f).toBe('manual_required');
+      expect((s as { value?: number }).value, f).toBeUndefined();
+      if (s.kind === 'manual_required') expect(s.reason, f).toMatch(/keine Zahl|Nicht-endliches Ergebnis/);
+    }
+  });
+
+  it('rule 2: a string is a legitimate if()/comparison operand — the enum branch computes', () => {
+    const r = evaluateFormula({
+      equationId: 't1b-enum-branch',
+      formula: "y = if(bauklasse == 'BK_I', 10, 20) * a",
+      inputSymbols: ['bauklasse', 'a'],
+      outputSymbol: 'y',
+      inputs: [
+        { symbol: 'bauklasse', value: 'BK_I', unit: null },
+        { symbol: 'a', value: 2, unit: null },
+      ],
+    });
+    expect(r).toMatchObject({ kind: 'computed', value: 20, substituted: { bauklasse: 'BK_I', a: 2 } });
+  });
+});

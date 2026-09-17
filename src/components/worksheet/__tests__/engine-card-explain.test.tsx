@@ -370,3 +370,43 @@ describe('EquationEngineCard — Feature 3 (warnings caveat block)', () => {
 
 // Quiet the unused-import warning for fireEvent — we may want it in the future.
 void fireEvent;
+
+// Plan 3 Task 1b (a138-I-1): string inputs (enum/text field values) render QUOTED and verbatim —
+// in the "Eingaben" list, the per-input table and the substituted formula ("Eingesetzte Formel").
+describe('EquationEngineCard — Task 1b (string inputs render quoted, verbatim)', () => {
+  const computed: EvalState = {
+    kind: 'computed',
+    value: 0.33,
+    substituted: { schutzkategorie: 'gering', A_C: 500 },
+    formulaEvaluated: "lookup('TAB8', schutzkategorie, if(A_C <= 800, 'le800', 'gt800'), 'n_max')",
+  };
+
+  it("renders `schutzkategorie = 'gering'` in the Eingaben list and substitutes the quoted string into the formula", async () => {
+    const user = userEvent.setup();
+    render(
+      <EquationEngineCard
+        equationNumber="A138-08-D1"
+        sourceFormula="n_limit = lookup('TAB8', schutzkategorie, …, 'n_max')"
+        state={computed}
+        outputSymbol="n_limit"
+        outputUnit="1/a"
+        unitBySymbol={{ schutzkategorie: null, A_C: 'm²' }}
+      />,
+    );
+    const card = screen.getByTestId('engine-card-gl-A138-08-D1');
+    expect(card).toHaveAttribute('data-engine-state', 'computed');
+    // Eingaben list: the string quoted, the number formatted as before
+    const items = within(card).getAllByRole('listitem').map((li) => li.textContent);
+    expect(items).toContain("schutzkategorie = 'gering'");
+    expect(items).toContain('A_C = 500');
+
+    await user.click(within(card).getByRole('button', { name: 'Rechnung anzeigen' }));
+    expect(within(card).getByTestId('engine-card-gl-A138-08-D1-substituted-formula').textContent).toBe(
+      "lookup('TAB8', 'gering', if(500 <= 800, 'le800', 'gt800'), 'n_max')",
+    );
+    const row = within(card).getByTestId('engine-card-gl-A138-08-D1-input-schutzkategorie');
+    expect(row.textContent).toMatch(/'gering'/);
+    // never run through the numeric formatter (no "NaN", no "—")
+    expect(row.textContent).not.toMatch(/NaN/);
+  });
+});

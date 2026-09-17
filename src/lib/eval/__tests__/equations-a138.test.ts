@@ -2,9 +2,9 @@
  * Plan 3 Task 1 — DWA-A-138-1 derived-value equations: the emitter accepts every
  * entry, the committed migration equals a fresh emit, and each formula computes
  * the printed rule through the Plan-2a evaluator (register formulas through the
- * real `evaluateFormula`; enum-keyed formulas through `evalNumber` with a full
- * scope — `evaluateFormula` feeds NUMERIC inputs only today, pinned below as
- * the a138-I-1 interface gap).
+ * real `evaluateFormula`; the enum-keyed formulas through `evalNumber` with a
+ * full scope AND through the real `evaluateFormula` with enum/text inputs —
+ * Task 1b closed the a138-I-1 interface gap; the flipped pin is below).
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -85,11 +85,31 @@ describe('DWA-A-138-1 Plan-3 equations', () => {
     expect(() => evalNumber(f, scopeOf({ schutzkategorie: 'unknown', A_C: 100 }))).toThrow();
   });
 
-  it('a138-I-1 pin: evaluateFormula feeds numeric inputs only, so the enum-keyed formulas report the enum symbols as missing (visible manual_required, never a wrong number)', () => {
+  it('a138-I-1 pin (flipped by Task 1b): evaluateFormula passes enum/text inputs as strings, so the select-keyed formulas COMPUTE', () => {
     const e = eq('A138-08-D1');
-    const s = evaluateFormula({ equationId: 'x', formula: e.formula, inputSymbols: e.input_symbols, outputSymbol: e.output_symbol, inputs: [{ symbol: 'A_C', value: 500, unit: 'm²' }], tableLookup: table });
-    expect(s.kind).toBe('manual_required');
-    if (s.kind === 'manual_required') expect(s.missing).toEqual(['schutzkategorie']);
+    const run = (schutzkategorie: string | null, A_C: number | null) =>
+      evaluateFormula({ equationId: 'x', formula: e.formula, inputSymbols: e.input_symbols, outputSymbol: e.output_symbol, inputs: [{ symbol: 'schutzkategorie', value: schutzkategorie, unit: null }, { symbol: 'A_C', value: A_C, unit: 'm²' }], tableLookup: table });
+    expect(run('gering', 500)).toMatchObject({ kind: 'computed', value: 0.33, substituted: { schutzkategorie: 'gering', A_C: 500 } });
+    expect(run('maessig', 2000)).toMatchObject({ kind: 'computed', value: 0.33 });
+    expect(run('sehr_stark', 3000)).toMatchObject({ kind: 'computed', value: 0.1 });
+    // an unset select is still a visible missing input, never a wrong number
+    const unset = run(null, 500);
+    expect(unset.kind).toBe('manual_required');
+    if (unset.kind === 'manual_required') expect(unset.missing).toEqual(['schutzkategorie']);
+    // an unknown token reports the missing Tab. 8 row (manual_required), never a number
+    expect(run('unbekannt', 500).kind).toBe('manual_required');
+
+    const d1 = eq('A138-02-D1');
+    const feas = (over: Record<string, string | number | null>) => {
+      const base: Record<string, string | number | null> = { gw_clearance: 1.2, contaminated_land_status: 'none', water_protection_zone: 'none', kf_initial_estimate: 2e-6, geotech_hazards: 'none', building_clearance_status: 'met', slope_risk: 'none', ...over };
+      return evaluateFormula({ equationId: 'y', formula: d1.formula, inputSymbols: d1.input_symbols, outputSymbol: d1.output_symbol, inputs: d1.input_symbols.map((symbol) => ({ symbol, value: base[symbol], unit: null })), tableLookup: table });
+    };
+    expect(feas({})).toMatchObject({ kind: 'computed', value: 1 });
+    expect(feas({ water_protection_zone: 'zone_III' })).toMatchObject({ kind: 'computed', value: 2 });
+    expect(feas({ geotech_hazards: 'at_site' })).toMatchObject({ kind: 'computed', value: 3 });
+    const missing = feas({ slope_risk: null });
+    expect(missing.kind).toBe('manual_required');
+    if (missing.kind === 'manual_required') expect(missing.missing).toEqual(['slope_risk']);
   });
 
   it('A138-05-D1 / -D3: min over complete register rows through the real evaluateFormula; empty register ⇒ manual_required', () => {

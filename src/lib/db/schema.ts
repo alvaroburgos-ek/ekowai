@@ -501,7 +501,7 @@ export const projectDocuments = pgTable(
 //   parameters:         { [fieldId]: { type, value, unit, citationSources } }
 //   equation_outputs:   { [equationNumber]: { kind: 'computed'|'manual_required'|'error',
 //                                             value?: number, formula?: string,
-//                                             substituted?: Record<string, number>,
+//                                             substituted?: Record<string, number | string>,  (string = enum/text input, Plan 3 Task 1b)
 //                                             manualRequiredReason?: string } }
 //   compliance_results: { [requirementId]: 'pass' | 'fail' | 'open' | 'not_applicable' }
 //                       ('not_applicable' since Plan 2a Task 11 — gate references a

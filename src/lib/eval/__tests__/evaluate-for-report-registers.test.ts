@@ -67,3 +67,38 @@ describe('evaluateWorksheetEquations — register-fed equations on the PDF path'
     expect(out[0].state).toMatchObject({ kind: 'computed', value: 100 });
   });
 });
+
+// Plan 3 Task 1b (a138-I-1): enum/text parameters reach formulas as strings on the report path.
+describe('evaluateWorksheetEquations — enum/text inputs (Task 1b)', () => {
+  const fields = [
+    { id: 'f-sk', symbol: 'schutzkategorie', unit: null, dataType: 'enum' },
+    { id: 'f-ac', symbol: 'A_C', unit: 'm²', dataType: 'number' },
+    { id: 'f-nl', symbol: 'n_limit', unit: '1/a', dataType: 'number' },
+    { id: 'f-note', symbol: 'note', unit: null, dataType: 'text' },
+    { id: 'f-y', symbol: 'y', unit: null, dataType: 'number' },
+  ];
+  const blank = { valueNumber: null, valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null };
+  const nLimit = { id: 'eq-nl', equationNumber: 'A138-08-D1', formula: "n_limit = lookup('TAB8', schutzkategorie, if(A_C <= 800, 'le800', 'gt800'), 'n_max')", inputSymbols: ['schutzkategorie', 'A_C'], outputSymbol: 'n_limit', outputUnit: '1/a' };
+
+  it('a persisted value_enum keys the Tab. 8 lookup; unset ⇒ manual_required naming the symbol', () => {
+    const out = evaluateWorksheetEquations('A138-08', [nLimit], fields, [
+      { fieldId: 'f-sk', ...blank, valueEnum: 'gering' },
+      { fieldId: 'f-ac', ...blank, valueNumber: 500 },
+    ], { standardCode: 'DWA-A-138-1' });
+    expect(out[0].state).toMatchObject({ kind: 'computed', value: 0.33, substituted: { schutzkategorie: 'gering', A_C: 500 } });
+    const unset = evaluateWorksheetEquations('A138-08', [nLimit], fields, [{ fieldId: 'f-ac', ...blank, valueNumber: 500 }], { standardCode: 'DWA-A-138-1' });
+    expect(unset[0].state).toMatchObject({ kind: 'manual_required', missing: ['schutzkategorie'] });
+    // hidden by visible_when ⇒ no value ⇒ manual_required (parity with the form)
+    const hidden = evaluateWorksheetEquations('A138-08', [nLimit], fields, [
+      { fieldId: 'f-sk', ...blank, valueEnum: 'gering' },
+      { fieldId: 'f-ac', ...blank, valueNumber: 500 },
+    ], { standardCode: 'DWA-A-138-1', hiddenSymbols: new Set(['schutzkategorie']) });
+    expect(hidden[0].state).toMatchObject({ kind: 'manual_required', missing: ['schutzkategorie'] });
+  });
+
+  it('a persisted value_text reaching arithmetic ⇒ manual_required with a German reason (never NaN)', () => {
+    const eq = { id: 'eq-nan', equationNumber: 'T-NAN', formula: 'y = note + 1', inputSymbols: ['note'], outputSymbol: 'y', outputUnit: null };
+    const out = evaluateWorksheetEquations('X-01', [eq], fields, [{ fieldId: 'f-note', ...blank, valueText: 'BK_I' }], { standardCode: 'X' });
+    expect(out[0].state).toMatchObject({ kind: 'manual_required', reason: 'Operand ist keine Zahl: BK_I' });
+  });
+});

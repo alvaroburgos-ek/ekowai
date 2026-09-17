@@ -451,6 +451,13 @@ S-2a-6). It never blocks approval and never gets a "Warum?" explanation.
 - `formula.ts`: `EvalRequest.registers/tableLookup/carriers`; register symbols never enter
   `substituted` or `missing`; a formula containing a non-math call is classified by parse
   (`isConditionNode`) as criterion vs value.
+- **Enum/text inputs reach formulas as strings (Plan 3 Task 1b, a138-I-1).** `EvalInputValue.value`
+  is `number | string | null`; every caller builds it through ONE rule, `engineInputValue()`
+  (`engine-input.ts`): `number` → the finite number, `enum`/`text` → the non-empty string
+  VERBATIM (never coerced), `''`/null/other types → missing (`manual_required`); unit checks skip
+  strings; `substituted` records the string and the card/PDF render it quoted (`x = 'V3'`).
+  A string that reaches `+ - * / ^` / a math call is the evaluator's `Operand ist keine Zahl: …`
+  → `manual_required` (German), never `computed: NaN`; `lookup()`, `if()` and `==` consume it.
 - `materializeDerivedOutputs` (`materialize-derived.ts`) replaces the surface + pollutant blocks
   in `saveWorksheet`: every register-fed, non-displayOnly equation (DB rows + fallback rows)
   whose output has a field on the template → one `source_type='derived'` write, `null` when not

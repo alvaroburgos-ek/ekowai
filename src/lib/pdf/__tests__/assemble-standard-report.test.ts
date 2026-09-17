@@ -529,3 +529,54 @@ describe('dossier upgrade — unverified fields, gate explanations, approve snap
     expect(assembleStandardReport(baseInput()).approveSnapshots).toEqual([]);
   });
 });
+
+// Plan 3 Task 1b (a138-I-1): enum/text parameters reach formulas as strings on the PDF path.
+// A non-138 template code is used on purpose: A138-* stays on its frozen curated subset
+// (PDF_138_FROZEN_GATE), every other standard routes through the evaluator.
+describe('assembleStandardReport — enum/text inputs (Task 1b)', () => {
+  const withEnumEquation = (): AssemblerInput => {
+    const input = baseInput();
+    input.standard = { id: 'std-x', code: 'X-STD', titleDe: 'Test', version: '1' };
+    input.templates = [{ id: 'tpl-x', code: 'X-01', titleDe: 'Enum', orderIndex: 1 }];
+    input.instances = [{ id: 'inst-x', worksheetTemplateId: 'tpl-x', status: 'draft' }];
+    input.sections = [{ id: 'sec-x', worksheetTemplateId: 'tpl-x', titleDe: 'Eingaben', orderIndex: 1 }];
+    input.fields = [
+      { id: 'f-bk', worksheetTemplateId: 'tpl-x', sectionId: 'sec-x', symbol: 'bauklasse', labelDe: 'Bauklasse', unit: null, dataType: 'enum', isRequired: true, clauseReference: null, orderIndex: 1 },
+      { id: 'f-a', worksheetTemplateId: 'tpl-x', sectionId: 'sec-x', symbol: 'a', labelDe: 'a', unit: 'm', dataType: 'number', isRequired: true, clauseReference: null, orderIndex: 2 },
+      { id: 'f-y', worksheetTemplateId: 'tpl-x', sectionId: 'sec-x', symbol: 'y', labelDe: 'y', unit: 'm', dataType: 'number', isRequired: false, clauseReference: null, orderIndex: 3 },
+      { id: 'f-note', worksheetTemplateId: 'tpl-x', sectionId: 'sec-x', symbol: 'note', labelDe: 'Notiz', unit: null, dataType: 'text', isRequired: false, clauseReference: null, orderIndex: 4 },
+      { id: 'f-z', worksheetTemplateId: 'tpl-x', sectionId: 'sec-x', symbol: 'z', labelDe: 'z', unit: null, dataType: 'number', isRequired: false, clauseReference: null, orderIndex: 5 },
+    ];
+    input.equations = [
+      { id: 'eq-x-1', worksheetTemplateId: 'tpl-x', equationNumber: 'X-1', formula: "y = if(bauklasse == 'BK_I', 10, 20) * a", formulaLatex: null, inputSymbols: ['bauklasse', 'a'], outputSymbol: 'y', outputUnit: 'm', clauseReference: null },
+      { id: 'eq-x-2', worksheetTemplateId: 'tpl-x', equationNumber: 'X-2', formula: 'z = note + 1', formulaLatex: null, inputSymbols: ['note'], outputSymbol: 'z', outputUnit: null, clauseReference: null },
+    ];
+    input.compliance = [];
+    const blank = { valueNumber: null, valueText: null, valueEnum: null, valueDate: null, valueBoolean: null, valueJson: null, sourceType: 'entered' as const, citationSources: [] };
+    input.parameters = [
+      { fieldId: 'f-bk', ...blank, valueEnum: 'BK_I' },
+      { fieldId: 'f-a', ...blank, valueNumber: 2 },
+      { fieldId: 'f-note', ...blank, valueText: 'BK_I' },
+    ];
+    input.approvals = [];
+    input.audits = [];
+    return input;
+  };
+
+  it('value_enum reaches the enum comparison (computed, string recorded verbatim); value_text in arithmetic ⇒ manual_required', () => {
+    const out = assembleStandardReport(withEnumEquation());
+    const ws = out.worksheets.find((w) => w.code === 'X-01')!;
+    const x1 = ws.equations.find((e) => e.equationNumber === 'X-1')!;
+    expect(x1.evalState).toMatchObject({ kind: 'computed', value: 20, substituted: { bauklasse: 'BK_I', a: 2 } });
+    const x2 = ws.equations.find((e) => e.equationNumber === 'X-2')!;
+    expect(x2.evalState).toMatchObject({ kind: 'manual_required', reason: 'Operand ist keine Zahl: BK_I' });
+  });
+
+  it('an unset enum is a missing input (manual_required naming it) — never a number', () => {
+    const input = withEnumEquation();
+    input.parameters = input.parameters.filter((p) => p.fieldId !== 'f-bk');
+    const out = assembleStandardReport(input);
+    const x1 = out.worksheets.find((w) => w.code === 'X-01')!.equations.find((e) => e.equationNumber === 'X-1')!;
+    expect(x1.evalState).toMatchObject({ kind: 'manual_required', missing: ['bauklasse'] });
+  });
+});
