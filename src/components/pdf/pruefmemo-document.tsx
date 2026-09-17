@@ -5,12 +5,6 @@ import { ReportFooter } from './footer';
 import type { StandardReportData } from '@/lib/pdf/load-standard-report';
 
 /**
- * Prüf-Memo (Stage 4 — the Plausibilitätsprüfung product): a condensed
- * engineer's memo over one (project, standard) pair — gate results with
- * explanations, verification state, snapshot binding, verdict paragraph,
- * signature block. Derived from the SAME data as the full report.
- */
-/**
  * Gate tally for the Prüfergebnis line. `notApplicable` (Plan 2a) — gates
  * whose condition references a field hidden by `visible_when` — is counted
  * on its own: neither "erfüllt" (nothing was checked) nor "offen/manuell"
@@ -24,6 +18,12 @@ export function summarizeCompliance<T extends { result: { kind: string } }>(all:
   return { total: all.length, passed, failed, open, notApplicable };
 }
 
+/**
+ * Prüf-Memo (Stage 4 — the Plausibilitätsprüfung product): a condensed
+ * engineer's memo over one (project, standard) pair — gate results with
+ * explanations, verification state, snapshot binding, verdict paragraph,
+ * signature block. Derived from the SAME data as the full report.
+ */
 export function PruefmemoDocument({ data }: { data: StandardReportData }) {
   const allCompliance = data.worksheets.flatMap((w) =>
     w.compliance.map((c) => ({ ws: w.code, ...c })),

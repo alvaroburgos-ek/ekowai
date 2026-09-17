@@ -503,7 +503,9 @@ export const projectDocuments = pgTable(
 //                                             value?: number, formula?: string,
 //                                             substituted?: Record<string, number>,
 //                                             manualRequiredReason?: string } }
-//   compliance_results: { [requirementId]: 'pass' | 'fail' | 'open' }
+//   compliance_results: { [requirementId]: 'pass' | 'fail' | 'open' | 'not_applicable' }
+//                       ('not_applicable' since Plan 2a Task 11 — gate references a
+//                        field hidden by visible_when; older rows carry only the first three)
 export const calculationSnapshots = pgTable(
   'calculation_snapshots',
   {
