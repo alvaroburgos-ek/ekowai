@@ -92,11 +92,11 @@ const PHASE4_SUMMARY_INPUT_SYMBOLS = [
 ] as const;
 
 // ---- 138-SPECIFIC: A138-23 has NO equation. ownerTrigger is a template-code
-// marker (`templateCode === 'A138-23'`) — mirroring how `surface` handles a
+// marker (`templateCode === 'A138-23'`) — mirroring how `register` handles a
 // no-equation owner. The equation-topology predicate can never match A138-23, so
 // the registry entry exposes the template code and the dispatch loop gates the
 // owner-path on `savedTemplateCode === 'A138-23'` (see worksheet.ts). Here the
-// equation-based ownerTrigger returns false (identical shape to `surface`).
+// equation-based ownerTrigger returns false (identical shape to `register`).
 export const PHASE4_SUMMARY_CONSUMER_CODE = 'A138-23';
 
 // ---- 138-SPECIFIC: facility governing-volume producer inputs (MRE/Schacht/Becken) ----
@@ -135,7 +135,7 @@ export type MaterializeEntry = {
    * saveWorksheet uses this code to look up the consumer template id — ensuring
    * derived rows land on the CONSUMER's field ids, not the producer's.
    *
-   * For surface: producer == consumer (surface_inventory is on A138-07 itself),
+   * For register (surface_inventory): producer == consumer (surface_inventory is on A138-07 itself),
    * so this is still the saved template code. The consumer-template resolution
    * is a no-op in that case, but the field is required for structural consistency.
    *
@@ -156,7 +156,7 @@ export type MaterializeEntry = {
  * 138-SPECIFIC: the three entries below are DWA-A 138 specific.
  *   Loading entry:  A138-06 → A138-12 (flaechengruppe/bbz_thickness → ac_as_ratio*)
  *   Basin  entry:   A138-08/10/12 → A138-13 (scalars → r_D_n/D_min)
- *   Surface entry:  A138-07 self  (surface_inventory -> A_C, C_m, A_E_ba, A_E_nba, A_C_sealed, A_C_unsealed)
+ *   Register entry: A138-07 self  (surface_inventory -> A_C, C_m, A_E_ba, A_E_nba, A_C_sealed, A_C_unsealed)
  *
  * GENERAL: for any other standard, push additional entries here with a different
  * consumerTemplateCode, inputSymbols, and ownerTrigger.
@@ -198,25 +198,20 @@ export const MATERIALIZE_REGISTRY: ReadonlyArray<MaterializeEntry> = [
     consumerTemplateCode: 'A138-13',
   },
 
-  // ── Surface outputs (A138-07) ────────────────────────────────────────────
-  // Surface is self-referential: the producer IS the consumer (surface_inventory
-  // lives on A138-07, and the outputs A_C/C_m/A_E_* are on A138-07 too).
-  // ownerTrigger is covered by the surface_inventory presence check in the save
-  // batch — we express it here for registry completeness, but the dispatch loop
-  // does NOT use this entry to fire the surface block (it has its own in-batch check).
-  // The surface entry is included so the registry is complete and a future generic
-  // dispatch loop can handle it uniformly.
-  // 138-SPECIFIC: 'surface_inventory' is the A138-07-specific carrier symbol.
+  // ── Generic register materialisation (Plan 2a) ───────────────────────────
+  // generic register materialisation — fires on in-batch presence (Plan 2a); listed for
+  // registry completeness. Producer == consumer: a register carrier (A138-07
+  // `surface_inventory`, VSME-B04.100 `pollutant_register`, any DB-configured
+  // `widget='register'` field) lives on the worksheet whose register-fed equations
+  // produce the derived outputs. The dispatch loop does NOT use this entry to fire
+  // the block — saveWorksheet's generic block has its own in-batch presence check
+  // (registerFieldIds ∩ batch), so ownerTrigger stays "always false".
   {
-    id: 'surface',
-    inputSymbols: new Set<string>(['surface_inventory']),
-    // Surface fires when surface_inventory is in the save batch — ownerTrigger
-    // approximated as "always false" here because the dispatch loop handles
-    // surface via its own in-batch presence check (not via this registry entry).
-    // If the dispatch loop is ever unified, replace with:
-    //   ownerTrigger: (eqs) => eqs.some((e) => e.outputSymbol === 'surface_inventory'),
+    id: 'register',
+    inputSymbols: new Set<string>(['surface_inventory', 'pollutant_register']),
     ownerTrigger: () => false,
-    // 138-SPECIFIC: outputs land on A138-07 field ids.
+    // Outputs land on the SAVED worksheet's own field ids (self-referential); the
+    // A138-07 code is kept as the documented representative consumer.
     consumerTemplateCode: 'A138-07',
   },
 
@@ -240,7 +235,7 @@ export const MATERIALIZE_REGISTRY: ReadonlyArray<MaterializeEntry> = [
   // ── Phase-4 summary (A138-23) ─────────────────────────────────────────────
   // 138-SPECIFIC data: inputSymbols + consumerTemplateCode. A138-23 owns NO
   // equation (it is a pure reconciliation/summary worksheet), so its ownerTrigger
-  // CANNOT be an equation-id predicate. Like `surface`, the equation-based
+  // CANNOT be an equation-id predicate. Like `register`, the equation-based
   // ownerTrigger is `() => false`; the OWNER path is driven in worksheet.ts by a
   // template-code marker (savedTemplateCode === 'A138-23'). Producer-fire still
   // works normally: any PHASE4_SUMMARY_INPUT_SYMBOLS change on another worksheet

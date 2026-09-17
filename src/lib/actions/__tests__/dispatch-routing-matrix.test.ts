@@ -9,7 +9,7 @@ import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
  *
  * These model the SAME two-stage dispatch that saveWorksheet runs:
  *   owner-dispatch gates (worksheet.ts:137-144): isBasinSave / isLoadingSave /
- *     isAsmSave (equation-topology on the SAVED worksheet), surface = in-batch.
+ *     isAsmSave (equation-topology on the SAVED worksheet), register = in-batch.
  *   ownerFiredIds     (worksheet.ts:499-503): registry entries whose ownerTrigger fires.
  *   producerFiredEntries(changedSymbols, ownerFiredIds) (worksheet.ts:509).
  *   A materialize M runs iff owner-dispatch(M) OR M ∈ producerFiredEntries.
@@ -28,7 +28,7 @@ function ownerDispatchFires(entryId: string, eqs: ReadonlyArray<{ id: string }>,
     case 'loading': return eqs.some((e) => e.id === A138_12_ASM_EQUATION_ID);
     case 'basin':   return eqs.some((e) => e.id === BASIN_GL8_EQUATION_ID);
     case 'asm':     return eqs.some((e) => e.id === ASM_GL7_EQUATION_ID);
-    case 'surface': return surfaceInBatch;
+    case 'register': return surfaceInBatch;
     default:        return false;
   }
 }

@@ -22,10 +22,10 @@
  *     savedCount=0 + neither → no transaction (no-op).
  *
  * Option A — producer-side registry tests:
- *   - MATERIALIZE_REGISTRY contains loading, basin, surface entries.
+ *   - MATERIALIZE_REGISTRY contains loading, basin, register entries.
  *   - producerFiredEntries: flaechengruppe changed → loading fires.
  *   - producerFiredEntries: belastungskategorie changed (non-input) → loading does NOT fire.
- *   - producerFiredEntries: A_C changed → loading fires; basin fires; surface does NOT.
+ *   - producerFiredEntries: A_C changed → loading fires; basin fires; register does NOT.
  *   - producerFiredEntries: already-fired-by-owner guard prevents double-fire.
  *   - consumerTemplateCode: loading entry has 'A138-12'; basin entry has 'A138-13'.
  *   - Transaction-guard extended: shouldOpenTransaction returns true when any registry
@@ -175,11 +175,11 @@ import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { MATERIALIZE_REGISTRY, producerFiredEntries } from '@/lib/actions/materialize-registry';
 
 describe('MATERIALIZE_REGISTRY structure — Option A producer-side registry', () => {
-  it('registry contains at least loading, basin, and surface entries', () => {
+  it('registry contains at least loading, basin, and register entries', () => {
     const ids = MATERIALIZE_REGISTRY.map((e) => e.id);
     expect(ids).toContain('loading');
     expect(ids).toContain('basin');
-    expect(ids).toContain('surface');
+    expect(ids).toContain('register');
   });
 
   it('loading entry has consumerTemplateCode = A138-12', () => {
@@ -243,25 +243,25 @@ describe('producerFiredEntries — scope-guard + no-double-fire logic', () => {
     expect(result.map((e) => e.id)).not.toContain('loading');
   });
 
-  it('A_C changed → loading fires AND basin fires; surface does NOT fire (scope guard)', () => {
+  it('A_C changed → loading fires AND basin fires; register does NOT fire (scope guard)', () => {
     const changed = new Set(['A_C']);
     const result = producerFiredEntries(changed, new Set());
     const ids = result.map((e) => e.id);
     expect(ids).toContain('loading');
     expect(ids).toContain('basin');
-    expect(ids).not.toContain('surface');
+    expect(ids).not.toContain('register');
   });
 
-  it('surface_inventory changed → surface fires (but surface ownerTrigger=false, handled by in-batch check)', () => {
-    // Surface entry's inputSymbols includes surface_inventory.
-    // The producer-fire of surface is a no-op in practice (producer == consumer),
+  it('surface_inventory changed → register fires (but register ownerTrigger=false, handled by in-batch check)', () => {
+    // Register entry's inputSymbols includes surface_inventory.
+    // The producer-fire of register is a no-op in practice (producer == consumer),
     // but the registry correctly identifies it.
     const changed = new Set(['surface_inventory']);
     const result = producerFiredEntries(changed, new Set());
-    // surface entry IS in the registry, but whether it fires in the dispatch loop
-    // depends on the in-batch surface check. Here we only test the registry logic.
+    // register entry IS in the registry, but whether it fires in the dispatch loop
+    // depends on the in-batch register check. Here we only test the registry logic.
     // The entry will appear in producerFiredEntries if not in alreadyFiredIds.
-    expect(result.map((e) => e.id)).toContain('surface');
+    expect(result.map((e) => e.id)).toContain('register');
   });
 
   it('no-double-fire: flaechengruppe changed + loading already fired by ownerTrigger → NOT in producer list', () => {

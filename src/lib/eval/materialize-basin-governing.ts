@@ -1,7 +1,7 @@
 /**
  * Server-side materialization for the basin governing duration + intensity.
  *
- * Mirrors materialize-surfaces.ts: pure function, no DB, no side-effects.
+ * Mirrors materialize-derived.ts: pure function, no DB, no side-effects.
  * Called from saveWorksheet when the saved instance is A138-13, to persist
  * the governing { r_D_n, D_min } pair to project_parameters so A138-10 can
  * inherit them (same-symbol producer/consumer relationship).

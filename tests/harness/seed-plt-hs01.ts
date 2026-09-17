@@ -5,7 +5,7 @@
  * uses) exactly the rows a Mulde geometry materialize + A138-23 summary need:
  *   - profile + org + org_members (so BYPASS_AUTH user is an internal member)
  *   - project + DWA-A-138-1 standard
- *   - worksheet templates A138-04 (rainfall carrier), A138-07 (A_C), A138-12
+ *   - worksheet templates A138-04 (rainfall carrier), A138-07 (A_C + surface_inventory register, six register-fed producers), A138-12
  *     (A_S,m owner — Gl.7), A138-15 (facility_type_selected), A138-17 (Mulde
  *     producer — Gl.14/15/16, h_M, V_M, A_S_m), A138-23 (summary)
  *   - fields + equations + project_parameters
@@ -21,6 +21,7 @@
  * exactly as on prod.
  */
 import type postgres from 'postgres';
+import { A138_07_REGISTER_FORMULAS } from '@/lib/eval/rewrites';
 
 // Verified 138 equation ids (must match src/lib/eval/asm-source.ts + equation-profiles.ts).
 const GL7_A138_12 = '55151cb1-4a5a-48d1-b5c0-2312ef7b78ac'; // A_S,m direct owner (ASM_GL7_EQUATION_ID)
@@ -55,6 +56,7 @@ export type SeededFixture = {
   projectId: string;
   userId: string;
   standardId: string;
+  ws07InstanceId: string;
   ws17InstanceId: string;
   ws12InstanceId: string;
   ws15InstanceId: string;
@@ -66,6 +68,9 @@ export type SeededFixture = {
   qSacFieldId: string;
   tEFieldId: string;
   acFieldId: string;
+  // A138-07 register carrier + the six register-fed outputs (Plan 2a)
+  surfaceInventoryFieldId: string;
+  a138_07: Record<'A_C' | 'C_m' | 'A_E_ba' | 'A_E_nba' | 'A_C_sealed' | 'A_C_unsealed', string>;
   // A138-12 owner fields (method + A_S_m owner) — for the baseline-restore step
   methodFieldId: string;
   aSmOwnerFieldId: string;
@@ -117,11 +122,11 @@ export async function seedPltHs01(
     return f.id;
   };
   const mkEquation = async (
-    templateId: string, id: string, num: string, formula: string, outputSymbol: string,
+    templateId: string, id: string, num: string, formula: string, outputSymbol: string, inputSymbols: string[] | null = null,
   ) => {
     await sql`
-      INSERT INTO equations (id, worksheet_template_id, equation_number, formula, output_symbol)
-      VALUES (${id}, ${templateId}, ${num}, ${formula}, ${outputSymbol})`;
+      INSERT INTO equations (id, worksheet_template_id, equation_number, formula, output_symbol, input_symbols)
+      VALUES (${id}, ${templateId}, ${num}, ${formula}, ${outputSymbol}, ${inputSymbols})`;
   };
   const insParam = async (
     fieldId: string, instanceId: string, cols: Record<string, unknown>,
@@ -141,9 +146,26 @@ export async function seedPltHs01(
   const t04 = await mkTemplate('A138-04', 'Rainfall');
   const rdnFieldId = await mkField(t04.templateId, t04.sectionId, 'r_D_n_table', 'json', 1);
 
-  // ── A138-07 A_C ──
+  // ── A138-07 A_C + the surface_inventory register (Plan 2a) ──
+  // The six producers are seeded with their PROD UUIDs and the sum_rows formula strings
+  // (= the post-migration state of scripts/migrations/20260916100000_a138_07_register_equations.sql),
+  // so the rewrite bridge (rewrites.ts, keyed by id) and the migration both address them and the
+  // generic register block of saveWorksheet materialises A_C/C_m/A_E_ba/A_E_nba/A_C_sealed/A_C_unsealed
+  // through the real save path (register-materialise.integration.test.ts).
   const t07 = await mkTemplate('A138-07', 'Surface');
   const acFieldId = await mkField(t07.templateId, t07.sectionId, 'A_C', 'number', 1);
+  const surfaceInventoryFieldId = await mkField(t07.templateId, t07.sectionId, 'surface_inventory', 'json', 2);
+  const a138_07 = {
+    A_C: acFieldId,
+    C_m: await mkField(t07.templateId, t07.sectionId, 'C_m', 'number', 3),
+    A_E_ba: await mkField(t07.templateId, t07.sectionId, 'A_E_ba', 'number', 4),
+    A_E_nba: await mkField(t07.templateId, t07.sectionId, 'A_E_nba', 'number', 5),
+    A_C_sealed: await mkField(t07.templateId, t07.sectionId, 'A_C_sealed', 'number', 6),
+    A_C_unsealed: await mkField(t07.templateId, t07.sectionId, 'A_C_unsealed', 'number', 7),
+  };
+  for (const [id, r] of Object.entries(A138_07_REGISTER_FORMULAS)) {
+    await mkEquation(t07.templateId, id, r.outputSymbol, r.formula, r.outputSymbol, ['surface_inventory']);
+  }
 
   // ── A138-12 A_S,m owner (Gl.7) — producer branch resolves A_S_m here ──
   const t12 = await mkTemplate('A138-12', 'A_S,m owner');
@@ -225,6 +247,7 @@ export async function seedPltHs01(
     projectId: proj.id,
     userId,
     standardId: std.id,
+    ws07InstanceId: t07.instanceId,
     ws17InstanceId: t17.instanceId,
     ws12InstanceId: t12.instanceId,
     ws15InstanceId: t15.instanceId,
@@ -235,6 +258,8 @@ export async function seedPltHs01(
     qSacFieldId,
     tEFieldId,
     acFieldId,
+    surfaceInventoryFieldId,
+    a138_07,
     methodFieldId,
     aSmOwnerFieldId,
     aSminFieldId,

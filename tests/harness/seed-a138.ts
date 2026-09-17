@@ -177,22 +177,26 @@ export const A138_WARN_GATES: ReadonlyArray<{ ws: string; code: string; cond: st
 export const A138_EQUATIONS: ReadonlyArray<{
   ws: string; out: string; formula: string; need: string[];
   kind: 'computed' | 'manual_required' | 'error'; anchor: string; expect?: number;
+  /** Prod equation UUID where the harness row must be addressable by the rewrite bridge / migration (A138-07 register producers). */
+  id?: string;
 }> = [
   { ws: 'A138-16', out: '(balance)', formula: '(A_C + A_S) * r_D(n) * 10^-7 = A_S * k_i', need: ['A_C', 'A_S', 'r_D_n', 'k_i'], kind: 'error', anchor: '§6.2.2 Gl.(11)' },
   { ws: 'A138-16', out: '(condition)', formula: 'k_i > r_D(n) * 10^-7', need: ['k_i', 'r_D_n'], kind: 'computed', anchor: '§6.2.2 Gl.(13)', expect: 1e-5 },
   { ws: 'A138-18', out: '(condition)', formula: 'L_VS * q_VS >= r_5(n) * A_C * 10^-4', need: ['L_VS', 'q_VS', 'r_5_n', 'A_C'], kind: 'manual_required', anchor: '§6.4.2 Gl.(25)' },
   { ws: 'A138-21', out: '(condition)', formula: 'A_S_FS * k_f_FS >= A_S_Schacht * k_i', need: ['A_S_FS', 'k_f_FS', 'A_S_Schacht', 'k_i'], kind: 'manual_required', anchor: '§6.7.2 Gl.(38)' },
-  { ws: 'A138-07', out: 'A_C', formula: 'A_C_preliminary = Σ_i (A_E,i · C_i)', need: ['surface_inventory'], kind: 'manual_required', anchor: 'Σ-aggregator' },
-  { ws: 'A138-07', out: 'A_C_sealed', formula: 'A_C_sealed = Σ_i (A_E,b,a,i · C_i)', need: ['surface_inventory'], kind: 'manual_required', anchor: 'Σ-aggregator' },
-  { ws: 'A138-07', out: 'A_C_unsealed', formula: 'A_C_unsealed = Σ_i (A_E,nb,a,i · C_i)', need: ['surface_inventory'], kind: 'manual_required', anchor: 'Σ-aggregator' },
-  { ws: 'A138-07', out: 'A_E_ba', formula: 'A_E_ba = Σ A_E,i (befestigt)', need: ['surface_inventory'], kind: 'manual_required', anchor: 'Σ-aggregator' },
-  { ws: 'A138-07', out: 'A_E_nba', formula: 'A_E_nba = Σ A_E,i (unbefestigt)', need: ['surface_inventory'], kind: 'manual_required', anchor: 'Σ-aggregator' },
+  // Plan 2a: register-fed; the scalar verify harness cannot feed a carrier — computed in register-materialise.integration.test.ts
+  { ws: 'A138-07', out: 'A_C', id: 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0', formula: 'A_C = sum_rows(surface_inventory, area_m2 * c_i)', need: ['surface_inventory'], kind: 'manual_required', anchor: 'sum_rows (Plan 2a)' },
+  { ws: 'A138-07', out: 'A_C_sealed', id: 'a1380702-0000-4000-8000-000000000005', formula: "A_C_sealed = sum_rows(surface_inventory, if(kind == 'paved', area_m2 * c_i, 0))", need: ['surface_inventory'], kind: 'manual_required', anchor: 'sum_rows (Plan 2a)' },
+  { ws: 'A138-07', out: 'A_C_unsealed', id: 'a1380702-0000-4000-8000-000000000006', formula: "A_C_unsealed = sum_rows(surface_inventory, if(kind == 'unpaved', area_m2 * c_i, 0))", need: ['surface_inventory'], kind: 'manual_required', anchor: 'sum_rows (Plan 2a)' },
+  { ws: 'A138-07', out: 'A_E_ba', id: 'a1380702-0000-4000-8000-000000000003', formula: "A_E_ba = sum_rows(surface_inventory, if(kind == 'paved', area_m2, 0))", need: ['surface_inventory'], kind: 'manual_required', anchor: 'sum_rows (Plan 2a)' },
+  { ws: 'A138-07', out: 'A_E_nba', id: 'a1380702-0000-4000-8000-000000000004', formula: "A_E_nba = sum_rows(surface_inventory, if(kind == 'unpaved', area_m2, 0))", need: ['surface_inventory'], kind: 'manual_required', anchor: 'sum_rows (Plan 2a)' },
   { ws: 'A138-16', out: 'A_S', formula: 'A_S = A_C / (k_i * 10^7 / r_D(n) - 1)', need: ['A_C', 'k_i', 'r_D_n'], kind: 'computed', anchor: '§6.2.2 Gl.(12)' },
   { ws: 'A138-21', out: 'A_S', formula: 'A_S = pi * d_a^2 / 4 + pi * d_a * h_S / 2', need: ['d_a', 'h_S'], kind: 'computed', anchor: '§6.7.2 Gl.(34)' },
   { ws: 'A138-17', out: 'A_S_m', formula: 'A_S_m = (A_C * 10^-7 * r_D(n)) / (h_M / (D * 60 * f_Z) + k_i)', need: ['A_C', 'r_D_n', 'h_M', 'D', 'f_Z', 'k_i'], kind: 'computed', anchor: '§6.3.2 Gl.(16)' },
   { ws: 'A138-12', out: 'A_S_m', formula: 'A_S_m = (A_S_min + A_S_max) / 2', need: ['A_S_min', 'A_S_max'], kind: 'computed', anchor: '§5.3.3.6 Gl.(7)', expect: 30 },
   { ws: 'A138-18', out: 'A_S_m', formula: 'A_S_m = (b_R + h_R) * L_R + b_R * h_R', need: ['b_R', 'h_R', 'L_R'], kind: 'computed', anchor: '§6.4.2 Gl.(17)' },
-  { ws: 'A138-07', out: 'C_m', formula: 'C_m = A_C / A_E', need: ['A_C', 'A_E'], kind: 'computed', anchor: 'C_m' },
+  // Plan 2a: register-fed; the scalar verify harness cannot feed a carrier — computed in register-materialise.integration.test.ts
+  { ws: 'A138-07', out: 'C_m', id: 'a1380702-0000-4000-8000-000000000002', formula: 'C_m = sum_rows(surface_inventory, area_m2 * c_i) / sum_rows(surface_inventory, area_m2)', need: ['surface_inventory'], kind: 'manual_required', anchor: 'sum_rows (Plan 2a)' },
   { ws: 'A138-21', out: 'erf_k_f_FS', formula: 'erf_k_f_FS >= ((d_a^2 + 2 * h_S * d_a) / d_i^2) * k_i', need: ['d_a', 'h_S', 'd_i', 'k_i'], kind: 'computed', anchor: '§6.7.2 Gl.(39)' },
   { ws: 'A138-11', out: 'f_K', formula: 'f_K = min(f_ort * f_methode, 1)', need: ['f_ort', 'f_methode'], kind: 'computed', anchor: '§5.3.3.6 Gl.(6)', expect: 0.9 },
   { ws: 'A138-21', out: 'h_S', formula: 'h_S = (A_C * 10^-7 * r_D(n) - (pi * d_a^2 / 4) * k_i) / (pi * d_i^2 / (4 * D * 60 * f_Z) + d_a * pi * k_i / 2)', need: ['A_C', 'r_D_n', 'd_a', 'd_i', 'k_i', 'D', 'f_Z'], kind: 'computed', anchor: '§6.7.2 Gl.(37)' },

@@ -127,11 +127,14 @@ describe('DWA-A-138-1 — B. all 46 equations through the REAL evaluateFormula',
       }
     }
   });
-  it('classification totals: 37 computed / 8 manual_required / 1 error (reference-clean)', () => {
+  // Plan 2a: C_m moved from the scalar form (A_C / A_E) to its register form (sum_rows / sum_rows) —
+  // 37/8/1 → 36/9/1. The six A138-07 producers are computed through the real save path in
+  // register-materialise.integration.test.ts; here they are manual_required by construction (no carrier).
+  it('classification totals: 36 computed / 9 manual_required / 1 error (reference-clean)', () => {
     const c = (k: string) => A138_EQUATIONS.filter((e) => e.kind === k).length;
     expect(A138_EQUATIONS.length).toBe(46);
-    expect(c('computed')).toBe(37);
-    expect(c('manual_required')).toBe(8);
+    expect(c('computed')).toBe(36);
+    expect(c('manual_required')).toBe(9);
     expect(c('error')).toBe(1);
   });
 });

@@ -13,16 +13,8 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
-import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
-import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
-import {
-  normalizePollutantCarrier,
-  summarizePollutants,
-  POLLUTANT_REGISTER_SYMBOL,
-  POLLUTANT_OUTPUT_SYMBOLS,
-  POLLUTANT_MEDIA,
-  type PollutantMedium,
-} from '@/lib/eval/pollutant-register';
+import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '@/lib/eval/materialize-derived';
+import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { materializeBasinGoverning } from '@/lib/eval/materialize-basin-governing';
@@ -136,20 +128,23 @@ export async function saveWorksheet(
   // Single-source integrity: a value this worksheet's equations PRODUCE must be
   // persisted as `derived`, never as an engineer `entered` input — even when it
   // arrives via the client engine's write-back auto-save rather than the
-  // surface-materialization path below. Compute the produced-symbol set from the
+  // register-materialisation path below. Compute the produced-symbol set from the
   // template's equations (displayOnly outputs stay `entered` — they're engineer
-  // iteration variables). See @/lib/eval/derived-output-symbols.
+  // iteration variables). See @/lib/eval/derived-output-symbols; the set itself is
+  // computed below once the template code is known (fallback register equations).
   //
   // Loaded BEFORE the early-return check so topology-driven triggers
   // (isBasinSave, isLoadingSave) are available even on empty-batch saves.
   const templateEquations = await db
-    .select({ id: equations.id, outputSymbol: equations.outputSymbol })
+    .select({
+      id: equations.id,
+      equationNumber: equations.equationNumber,
+      formula: equations.formula,
+      inputSymbols: equations.inputSymbols,
+      outputSymbol: equations.outputSymbol,
+    })
     .from(equations)
     .where(eq(equations.worksheetTemplateId, instance.worksheetTemplateId));
-  // r_D_n / D_min are governing-iteration outputs (never hand-entered) — inherited
-  // onto consumers like A138-10 where no equation produces them. Stamp them
-  // `derived`, not `entered` (gap-class 6 inverse). (E1-D)
-  const derivedSymbols = derivedOutputSymbols(templateEquations, BASIN_GOVERNING_SYMBOLS);
 
   // Topology-based trigger flags — computed at function scope so the outer
   // transaction guard can use them on empty-batch saves (savedCount === 0).
@@ -176,6 +171,18 @@ export async function saveWorksheet(
     .limit(1);
   const savedStandardId = savedTemplateRow?.standardId ?? null;
   const savedTemplateCode = savedTemplateRow?.code ?? null;
+
+  // r_D_n / D_min are governing-iteration outputs (never hand-entered) — inherited
+  // onto consumers like A138-10 where no equation produces them. Stamp them
+  // `derived`, not `entered` (gap-class 6 inverse). (E1-D)
+  // Plan 2a: the produced-symbol set includes the FALLBACK register equations of
+  // this template (register-configs.ts, e.g. the VSME-B04.100 per-medium sums) so
+  // their outputs are stamped `derived` even before migration 20260916110000 is
+  // applied — hence computed here, after the template code is known.
+  const derivedSymbols = derivedOutputSymbols(
+    withFallbackRegisterEquations(savedTemplateCode ?? '', templateEquations),
+    BASIN_GOVERNING_SYMBOLS,
+  );
 
   // Server-side registration of DB-backed regulation reference tables
   // (Tab.9/5/6/13 …) into the eval-layer registry. materializeLoadingCheck()
@@ -217,7 +224,7 @@ export async function saveWorksheet(
   // A138-23 Phase-4 summary owner: A138-23 owns NO equation (pure reconciliation
   // worksheet), so its OWNER-path trigger cannot be an equation-topology flag like
   // isBasinSave/isAsmSave. Gate on the template code instead — mirroring how the
-  // `surface` registry entry is a no-equation owner (see materialize-registry.ts).
+  // `register` registry entry is a no-equation owner (see materialize-registry.ts).
   // A save OF the A138-23 worksheet re-materializes its summary from the current
   // cross-worksheet state.
   const isPhase4SummarySave = savedTemplateCode === PHASE4_SUMMARY_CONSUMER_CODE;
@@ -617,9 +624,9 @@ export async function saveWorksheet(
   //   (c) a producer-side input symbol changed → a downstream materialize must fire, OR
   //   (d) isPhase4SummarySave — a deliberate no-dirty A138-23 re-save must re-run the
   //       aggregator even with no dirty field (Finding G1 manual fallback).
-  //   The SURFACE block is excluded from the guard because surface_inventory being
-  //   in the save batch is what identifies a surface save — it only fires when
-  //   savedCount > 0, so adding surfacePresence here would be redundant.
+  //   The generic REGISTER block is excluded from the guard because a register carrier being
+  //   in the save batch is what identifies a register save — it only fires when
+  //   savedCount > 0, so adding its presence here would be redundant.
   //   Predicate extracted to shouldOpenTransaction (materialize-registry) — unit-tested.
   if (shouldOpenTransaction({
     savedCount,
@@ -658,50 +665,56 @@ export async function saveWorksheet(
           });
       }
 
-      // Materialize derived surface outputs when A138-07's surface_inventory was saved.
-      // Runs inside the same transaction so derived rows are always consistent with
-      // the entered carrier value.
-      //
-      // Optimization: first do a cheap indexed lookup — only if the saved batch
-      // actually contains a surface_inventory field for this template do we proceed
-      // to the full sibling-fields query + materialization.
-      // Guard inArray against an empty batch — empty-array inArray is fragile across
-      // drizzle versions (provably safe on 0.45.2 today, but don't rely on it). An
-      // empty fieldIds means no surface_inventory in the batch, so the block is a no-op.
-      const [surfacePresence] = fieldIds.length > 0
+      // Plan 2a — generic register materialisation (replaces the A138-07 surface and VSME-B04 pollutant blocks).
+      // Fires when the save batch contains a register carrier of this template; evaluates every register-fed
+      // equation (DB rows + fallback rows) through the same evaluateFormula the form uses and upserts the
+      // outputs as source_type='derived' (null when not computable → clears stale downstream values).
+      // Runs inside the same transaction so derived rows are always consistent with the entered carrier.
+      // Batch values overlay the persisted rows so a scalar input an equation also reads (G-13) is current;
+      // values a validation strip rejected (rejectedFieldIds) are NOT overlaid — they will not persist.
+      // An empty batch (topology-triggered recompute) can never carry a register → skip the field load.
+      const templateFields = fieldIds.length > 0
         ? await tx
-            .select({ id: fields.id })
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, unit: fields.unit, widget: fields.widget, uiConfig: fields.uiConfig })
             .from(fields)
-            .where(
-              and(
-                inArray(fields.id, fieldIds),
-                eq(fields.symbol, 'surface_inventory'),
-                eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
-              ),
-            )
-            .limit(1)
+            .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)))
         : [];
-
-      if (surfacePresence) {
-        const surfaceFieldId = surfacePresence.id;
-        const wsFields = await tx
-          .select({ id: fields.id, symbol: fields.symbol })
-          .from(fields)
-          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
-        const carrier = input.values[surfaceFieldId]?.type === 'json' ? input.values[surfaceFieldId].value : null;
-        const outputs = materializeSurfaceOutputs(carrier);
-        const idBySymbol = new Map(wsFields.map((f) => [f.symbol, f.id]));
-        const derivedRows = (SURFACE_DERIVED_SYMBOLS as readonly string[])
-          .map((sym) => ({ sym, fieldId: idBySymbol.get(sym) }))
-          .filter((x): x is { sym: string; fieldId: string } => x.fieldId != null)
-          .map((x) => ({
-            projectId: instance.projectId,
-            fieldId: x.fieldId,
-            valueNumber: outputs[x.sym as keyof typeof outputs] == null ? null : String(outputs[x.sym as keyof typeof outputs]),
-            sourceType: 'derived' as const,
-            enteredBy: userId,
-            enteredAt: now,
-          }));
+      const batchValues = Object.fromEntries(Object.entries(input.values).filter(([id]) => !rejectedFieldIds.has(id)));
+      const batchRegisterIds = registerFieldIds(templateFields, batchValues).filter((id) => fieldIds.includes(id));
+      if (batchRegisterIds.length > 0 && savedTemplateRow?.standardCode && savedTemplateCode) {
+        const persisted = await tx
+          .select({
+            fieldId: projectParameters.fieldId,
+            valueNumber: projectParameters.valueNumber,
+            valueText: projectParameters.valueText,
+            valueEnum: projectParameters.valueEnum,
+            valueDate: projectParameters.valueDate,
+            valueBoolean: projectParameters.valueBoolean,
+            valueJson: projectParameters.valueJson,
+          })
+          .from(projectParameters)
+          .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, templateFields.map((f) => f.id))));
+        const valuesByFieldId = { ...parametersToFieldValues(persisted, templateFields), ...batchValues };
+        const { writes, diagnostics } = materializeDerivedOutputs({
+          standardCode: savedTemplateRow.standardCode,
+          worksheetCode: savedTemplateCode,
+          equations: templateEquations,
+          fields: templateFields,
+          valuesByFieldId,
+        });
+        // A misconfigured register `derived` column expression is an engineer-visible warning, not a silent null.
+        for (const d of new Set(diagnostics)) {
+          const w = `Register: ${d}`;
+          if (!warnings.includes(w)) warnings.push(w);
+        }
+        const derivedRows = writes.map((w) => ({
+          projectId: instance.projectId,
+          fieldId: w.fieldId,
+          valueNumber: w.value == null ? null : String(w.value),
+          sourceType: 'derived' as const,
+          enteredBy: userId,
+          enteredAt: now,
+        }));
         if (derivedRows.length > 0) {
           await tx.insert(projectParameters).values(derivedRows).onConflictDoUpdate({
             target: [projectParameters.projectId, projectParameters.fieldId],
@@ -713,65 +726,6 @@ export async function saveWorksheet(
             },
           });
           // Collect for client-side apply (Task B display-fix)
-          for (const r of derivedRows) {
-            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
-          }
-        }
-      }
-
-      // Materialize the VSME-B04.100 per-medium pollutant sums when the
-      // pollutant_register carrier was saved. Same in-batch presence pattern
-      // as the surface block above (producer == consumer on the same
-      // worksheet; normalizePollutantCarrier is the single parse path shared
-      // with the editor). The three AmountOfEmissionTo{Air,Water,Soil}
-      // scalars stay the taxonomy-faithful facts — derived sums of the
-      // register, never hand-entered (single-source rule).
-      const [pollutantPresence] = fieldIds.length > 0
-        ? await tx
-            .select({ id: fields.id })
-            .from(fields)
-            .where(
-              and(
-                inArray(fields.id, fieldIds),
-                eq(fields.symbol, POLLUTANT_REGISTER_SYMBOL),
-                eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
-              ),
-            )
-            .limit(1)
-        : [];
-
-      if (pollutantPresence) {
-        const wsFields = await tx
-          .select({ id: fields.id, symbol: fields.symbol })
-          .from(fields)
-          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
-        const carrierValue = input.values[pollutantPresence.id];
-        const carrier = normalizePollutantCarrier(
-          carrierValue?.type === 'json' ? carrierValue.value : null,
-        );
-        const summary = summarizePollutants(carrier);
-        const idBySymbol = new Map(wsFields.map((f) => [f.symbol, f.id]));
-        const derivedRows = POLLUTANT_MEDIA
-          .map((medium) => ({ medium, fieldId: idBySymbol.get(POLLUTANT_OUTPUT_SYMBOLS[medium]) }))
-          .filter((x): x is { medium: PollutantMedium; fieldId: string } => x.fieldId != null)
-          .map((x) => ({
-            projectId: instance.projectId,
-            fieldId: x.fieldId,
-            valueNumber: summary[x.medium] == null ? null : String(summary[x.medium]),
-            sourceType: 'derived' as const,
-            enteredBy: userId,
-            enteredAt: now,
-          }));
-        if (derivedRows.length > 0) {
-          await tx.insert(projectParameters).values(derivedRows).onConflictDoUpdate({
-            target: [projectParameters.projectId, projectParameters.fieldId],
-            set: {
-              valueNumber: sql`excluded.value_number`,
-              sourceType: sql`excluded.source_type`,
-              enteredBy: sql`excluded.entered_by`,
-              enteredAt: now,
-            },
-          });
           for (const r of derivedRows) {
             writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
           }
@@ -2786,10 +2740,10 @@ export async function saveWorksheet(
             }
           }
         }
-        // NOTE: 'basin' and 'surface' producer-fire paths not yet implemented.
+        // NOTE: 'basin' and 'register' producer-fire paths not yet implemented.
         // Basin producer-fire would require the same consumer-template resolution fix
         // (resolve A138-13 by code), then run materializeBasinGoverning.
-        // Surface is self-referential (producer == consumer) and already handled above.
+        // The generic register block is self-referential (producer == consumer) and already handled above.
         // Both are left as registry entries (for structural completeness + future extension)
         // but the dispatch here is a no-op for them.
       }
