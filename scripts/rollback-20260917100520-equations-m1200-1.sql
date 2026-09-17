@@ -1,0 +1,11 @@
+-- Generated rollback for m1200_1 equations (scripts/regulation-tables/emit-equations-sql.ts). Deletes only the 'Plan 3:' rows this migration inserted. Regenerate, do not hand-edit.
+BEGIN;
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-08' AND e.equation_number = 'M12001-08-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-07' AND e.equation_number = 'M12001-07-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-07' AND e.equation_number = 'M12001-07-D2' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-14' AND e.equation_number = 'M12001-14-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-16' AND e.equation_number = 'M12001-16-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-16' AND e.equation_number = 'M12001-16-D2' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-09' AND e.equation_number = 'M12001-09-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-09' AND e.equation_number = 'M12001-09-D2' AND e.description LIKE 'Plan 3:%';
+COMMIT;

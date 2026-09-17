@@ -1,0 +1,261 @@
+-- DWA-M-1200-1 — Plan 3 Task 5 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the EQ-001 row, gate ids / severities /
+-- conditions) were captured read-only on 2026-09-17 (src/lib/eval/field-configs/m1200_1.prior.json;
+-- prod-query.mjs for the 21 compliance_requirements rows and the one equations row quoted below).
+-- Transcript lines refer to C:\Users\Ekowai\Desktop\Guidelines\DWA-M-1200-1\DWA-M_1200-1_GD.md (Gelbdruck Juli 2025).
+--
+-- Conventions: `s.code = 'DWA-M-1200-1'`, worksheets by code, never by id (gates by their captured uuid + condition
+-- guard); every UPDATE is guarded by the prior value it replaces so a re-run is a no-op; each block names its
+-- rollback. The Plan-3 DATA migrations (20260917100500 seed · 20260917100510 field configs · 20260917100520
+-- equations) must be applied BEFORE any block that reads a created symbol (kulturen_tab7, gueteklasse_code,
+-- risiko_zeilen, ausgangsrisiko_max_code, restrisiko_max_code, stoerfaelle, stoerfall_max_code, flaechenverzeichnis,
+-- anwendungsbereich_count_calc, zusatzwasserbedarf_jahr_calc, e_coli_limit … nematoden_limit, log10_*_ziel,
+-- validierung_min_share_pct, routine_min_share_pct, truebung_*_limit, toc_korrelation_nachgewiesen,
+-- truebung_kontinuierlich_ueberwacht, routineproben, compliance_quote_calc, pfas20_limit_ng_l,
+-- beprobung_frequenz_*_tab27, messstellen). Consumer edits append to `fields.consumer_worksheets` (text[]); the
+-- guard `NOT (… = ANY(consumer_worksheets))` keeps a re-run idempotent. The Plan-1 schema migration renames the
+-- LEGACY prod regulation_tables first (plan1-D-3-1) — apply order in the playbook.
+
+-- =====================================================================================================================
+-- m1200_1-C-1 · M12001-08 anwendungsbereich_kategorie → M12001-19; anwendung_weide_oder_futterpflanzen → M12001-12
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: capture — anwendungsbereich_kategorie (M12001-08, enum landwirtschaft/urban) is consumed by -09, -11, -16
+-- only; CR-021 (M12001-19, warn, id bfa7f0dd-070d-4e2a-9d8b-dbabbf6a4b55) reads "beschilderung_urbane_flaechen IN
+-- {'ja','nicht_zutreffend'}" without the driver. anwendung_weide_oder_futterpflanzen (M12001-08, ja/nein) is
+-- consumed by -09 and -11 — the Tab.-27 Nematoden fill on -12 cannot be hidden by it today. L1158 "intestinale
+-- Nematoden (Eier von Helminthen): ≤ 1 Ei pro Liter für die Bewässerung von Weideflächen oder Futterpflanzen".
+-- Why staged: consumer edits are the owner's (spec: created fields / rules never set consumer_worksheets).
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(f.consumer_worksheets, 'M12001-19') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-08' AND f.symbol = 'anwendungsbereich_kategorie' AND f.active AND NOT ('M12001-19' = ANY(COALESCE(f.consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(f.consumer_worksheets, 'M12001-12') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-08' AND f.symbol = 'anwendung_weide_oder_futterpflanzen' AND f.active AND NOT ('M12001-12' = ANY(COALESCE(f.consumer_worksheets, '{}')));
+-- -- then the two rules (Plan-3 columns present):
+-- UPDATE fields f SET visible_when = 'anwendungsbereich_kategorie == ''urban''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-19' AND f.symbol = 'beschilderung_urbane_flaechen' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'anwendung_weide_oder_futterpflanzen == ''ja''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-12' AND f.symbol = 'beprobung_frequenz_nematoden_tab27' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: array_remove(consumer_worksheets, '<code>') on the two rows; SET visible_when = NULL on the two rule rows.
+
+-- =====================================================================================================================
+-- m1200_1-C-2 · created outputs → their consumers (gueteklasse_code, compliance_quote_calc, restrisiko_max_code, ausgangsrisiko_max_code, anwendungsbereich_count_calc, zusatzwasserbedarf_jahr_calc)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: capture — gueteklasse_zugeordnet (M12001-08) consumed by -09, -10, -11, -12, -15, -16; compliance_quote_pct
+-- (M12001-12) by -15; restrisiko_niveau (M12001-07) by -20; risikoniveau_ausgangs by -10; anwendungsbereich_count
+-- (M12001-08) by nobody; zusatzwasserbedarf_jahr (M12001-03) by -15, -16, -18. The created outputs mirror those
+-- consumer lists so the STAGED derivations (D-1 / D-2) and gate rewrites (G-5 / G-7 / G-8) can evaluate where the
+-- manual fields are read today.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M12001-09','M12001-10','M12001-11','M12001-12','M12001-15','M12001-16']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-08' AND f.symbol = 'gueteklasse_code' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = '{}');
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M12001-12','M12001-15']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-09' AND f.symbol = 'compliance_quote_calc' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = '{}');
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M12001-20']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-07' AND f.symbol = 'restrisiko_max_code' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = '{}');
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M12001-10']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-07' AND f.symbol = 'ausgangsrisiko_max_code' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = '{}');
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M12001-15','M12001-08']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-16' AND f.symbol = 'anwendungsbereich_count_calc' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = '{}');
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M12001-03','M12001-15','M12001-18']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-16' AND f.symbol = 'zusatzwasserbedarf_jahr_calc' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = '{}');
+-- COMMIT;
+-- Rollback: SET consumer_worksheets = NULL for the same six rows.
+
+-- =====================================================================================================================
+-- m1200_1-C-3 · visibility rules of the brief that land on CONSUMED producers (transitive emitter guard) — withheld
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence (verbatim): L1157 "Legionella spp.： $<1.000 \mathrm{KBE} / \mathrm{L}$ ， wenn das Risiko der Aerosol－ bildung
+-- besteht；"; L1158 "intestinale Nematoden （Eier von Helminthen）： $\leq 1$ Ei pro Liter für die Bewäs－ serung von
+-- Weideflächen oder Futterpflanzen"; L1161–L1166 "B－2： －" / "C－2：－" (no log10 targets); L1217 note d); L1218 note e);
+-- L1219 / L1220 note f); L1953 "Dort wo ein erhöhtes Risiko … (Szenario I), erfolgt ein regelmäßiger Nachweis der
+-- Entfernungsleistung durch ein Monitoringprogramm für ausgewählte und prozessspezifische Indikatorchemikalien
+-- (Tabelle 19)". Capture: legionella_value, nematoden_value, log10_e_coli, log10_coliphagen, log10_clostridium,
+-- truebung_max_value, bsb5_value, afs_value → consumed by M12001-12; pfas20_value → -12, -13; validierungs_compliance_pct
+-- (M12001-12) → -15; indikatorchemikalien_kat1 / _kat2 (M12001-10) → -13 (and the pending I-1 pair, m1200_1-E-1);
+-- spurenstoffentfernung_szenario (M12001-10) → -13 only.
+-- Rules withheld (would be):
+--   M12001-09 legionella_value                ← aerosolrisiko == 'ja'
+--   M12001-09 nematoden_value                 ← anwendung_weide_oder_futterpflanzen == 'ja'
+--   M12001-09 log10_e_coli, log10_coliphagen, log10_clostridium, clostridium_log10_value, sulfat_sporenbildner_log10_value
+--                                             ← gueteklasse_zugeordnet IN {'A','B-1','C-1'}
+--   M12001-12 validierungs_compliance_pct     ← gueteklasse_zugeordnet IN {'A','B-1','C-1'}
+--   M12001-09 bsb5_value                      ← NOT (toc_korrelation_nachgewiesen == true)          (note d, G-2)
+--   M12001-09 afs_value                       ← NOT (truebung_kontinuierlich_ueberwacht == true)    (note e, G-2)
+--   M12001-10 indikatorchemikalien_kat1/_kat2 ← spurenstoffentfernung_szenario == 'szenario_i'
+--   M12001-09 pfas20_value                    ← (never: L1955 "In allen Fällen muss regelmäßig nachgewiesen werden, dass der Beurteilungswert für die Summe der PFAS-20 … sicher eingehalten werden kann" — PFAS-20 applies to BOTH scenarios; the brief's rule is REJECTED on the text)
+-- Owner options: (a) accept N.A. on the consumer side (a hidden producer reports not_applicable in every -12 / -13 / -15
+-- gate that references it) and apply the rules; (b) keep visible (the created *_limit / *_ziel fills next to them already
+-- hide, so the engineer sees which inputs are without a requirement). Proposed after (a):
+-- UPDATE fields f SET visible_when = '<rule above>' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = '<ws>' AND f.symbol = '<symbol>' AND f.active AND f.visible_when IS NULL;
+-- Rollback: SET visible_when = NULL for the same rows.
+
+-- =====================================================================================================================
+-- m1200_1-G-1 · M12001-19 · CR-021 (warn, id bfa7f0dd-070d-4e2a-9d8b-dbabbf6a4b55) guard on the urban category
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: prod condition "beschilderung_urbane_flaechen IN {'ja','nicht_zutreffend'}" (description "Bei Bewaesserung
+-- urbaner Gruen-/Parkflaechen … Beschilderung erforderlich"); L977 "Urbane Anwendungen, die in Tabelle 7 ebenfalls
+-- berücksichtigt werden, sind bisher in Deutschland nicht rechtlich geregelt." — the guideline prints no signage
+-- sentence in the read ranges; the guard only scopes the existing gate to the urban category. Needs C-1 first.
+-- BEGIN;
+-- UPDATE compliance_requirements SET condition = 'IF anwendungsbereich_kategorie == ''urban'' THEN beschilderung_urbane_flaechen IN {''ja'',''nicht_zutreffend''}'
+--  WHERE id = 'bfa7f0dd-070d-4e2a-9d8b-dbabbf6a4b55' AND condition = 'beschilderung_urbane_flaechen IN {''ja'',''nicht_zutreffend''}';
+-- COMMIT;
+-- Rollback: SET condition = 'beschilderung_urbane_flaechen IN {''ja'',''nicht_zutreffend''}' WHERE id = … AND condition LIKE 'IF anwendungsbereich_kategorie%'.
+
+-- =====================================================================================================================
+-- m1200_1-G-2 · M12001-09 · bsb5_value / afs_value optional under the note-d / note-e substitutions
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1217 "d）Auf die Bestimmung des $\mathrm{BSB}_{5}$ kann bei Anwendung einer TOC－Messung verzichtet werden，wenn
+-- die Korrelation zwischen $\mathrm{BSB}_{5}$ und TOC nachgewiesen wird．"; L1218 "e）Wenn die Anforderungen an die Trübung
+-- kontinuierlich überwacht und eingehalten werden，kann davon ausgegan－ gen werden，dass auch die Anforderungen an die AFS
+-- eingehalten werden und die Messung der AFS somit nicht zusätzlich erforderlich ist．" The two created attestation
+-- booleans (toc_korrelation_nachgewiesen, truebung_kontinuierlich_ueberwacht) carry the facts; bsb5_value / afs_value are
+-- consumed by M12001-12 (guard refusal) and is_required is a sign-off class. Options: (a) visible_when as in C-3 (N.A. on
+-- -12); (b) is_required = false on both plus a warn gate. Proposed (b):
+-- BEGIN;
+-- UPDATE fields f SET is_required = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND w.code = 'M12001-09' AND f.symbol IN ('bsb5_value','afs_value') AND f.active AND f.is_required = true;
+-- COMMIT;
+-- Rollback: SET is_required = true for the same rows (capture the prior value before applying — the prior snapshot does not carry is_required).
+
+-- =====================================================================================================================
+-- m1200_1-G-3 · M12001-09 · CR-004 (block, id 23adcbc3-d92e-4c71-99d9-82817c59083b) onto the Tab.-8 limit symbol
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: prod condition (204 chars, read in-session) "IF gueteklasse_zugeordnet == 'A' THEN e_coli_value <= 10 AND IF
+-- gueteklasse_zugeordnet IN {'B-1','B-2','C-1','C-2'} THEN e_coli_value <= 100 AND IF gueteklasse_zugeordnet == 'D' THEN
+-- e_coli_value <= 10000" — the plan's premise "CR-004 class-D limit ≤ 1" is REFUTED by the capture: prod already prints
+-- 10000, which equals Tab. 8 L1205 "$\leq 10.000^{\mathrm{a})}$". The rewrite only re-points the gate at the seeded
+-- limit (one source: TAB8.e_coli_max via e_coli_limit); no number changes.
+-- BEGIN;
+-- UPDATE compliance_requirements SET condition = 'e_coli_value <= e_coli_limit'
+--  WHERE id = '23adcbc3-d92e-4c71-99d9-82817c59083b' AND condition LIKE 'IF gueteklasse_zugeordnet == ''A'' THEN e_coli_value <= 10 AND%';
+-- COMMIT;
+-- Rollback: SET condition = '<the 204-char prod text above, verbatim>' WHERE id = … AND condition = 'e_coli_value <= e_coli_limit'.
+
+-- =====================================================================================================================
+-- m1200_1-G-4 · M12001-08 · CR-006 (warn, id b958fc4e-49fd-4e3e-8dd2-6bf3188d681b, EMPTY condition) onto the log10 targets
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1147 "Für die Wassergüteklasse A müssen mindestens $90 \%$, für die Wassergüteklassen B-1 und C-1 mindestens
+-- $50 \%$ der Validierungsproben die Leistungsziele erreichen oder übersteigen"; L1135 (targets ≥ 5,0 / ≥ 6,0 / ≥ 4,0 /
+-- ≥ 5,0). The gate sits on M12001-08 while the targets and the measured log10_* live on M12001-09 (log10_e_coli /
+-- log10_coliphagen / log10_clostridium consumed by -12) and validierungs_compliance_pct on -12 — the gate must move to
+-- the worksheet that sees both (owner's choice: -09 with a consumer edit of validierungs_compliance_pct, or -12 after C-2).
+-- Proposed condition (on the chosen worksheet):
+--   IF gueteklasse_zugeordnet IN {'A','B-1','C-1'} THEN validierungs_compliance_pct >= validierung_min_share_pct
+-- BEGIN;
+-- UPDATE compliance_requirements SET condition = 'IF gueteklasse_zugeordnet IN {''A'',''B-1'',''C-1''} THEN validierungs_compliance_pct >= validierung_min_share_pct'
+--  WHERE id = 'b958fc4e-49fd-4e3e-8dd2-6bf3188d681b' AND condition = '';
+-- COMMIT;
+-- Rollback: SET condition = '' WHERE id = … .
+
+-- =====================================================================================================================
+-- m1200_1-G-5 · M12001-07 · CR-014 (block, id 3782e6ef-6aa1-446c-a1a2-0572f67d9ad8) onto the register maximum
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: prod "restrisiko_niveau IN {'sehr_niedrig','niedrig'}" (one scalar for the whole RMP); L2061 "… durch die alle
+-- identifizierten Risiken auf ein sehr niedriges oder niedriges Risikoniveau reduziert werden können." — ALL rows.
+-- restrisiko_max_code (M12001-07-D1) is the max over the Arbeitshilfe-C rows (1 = Sehr niedrig, 2 = Niedrig).
+-- BEGIN;
+-- UPDATE compliance_requirements SET condition = 'restrisiko_max_code <= 2'
+--  WHERE id = '3782e6ef-6aa1-446c-a1a2-0572f67d9ad8' AND condition = 'restrisiko_niveau IN {''sehr_niedrig'',''niedrig''}';
+-- COMMIT;
+-- Rollback: SET condition = 'restrisiko_niveau IN {''sehr_niedrig'',''niedrig''}' WHERE id = … AND condition = 'restrisiko_max_code <= 2'.
+
+-- =====================================================================================================================
+-- m1200_1-G-6 · CR-013 (block, 'pfas20_value < 100') onto pfas20_limit_ng_l
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 19 L1968 "Summe PFAS-20<100 ng/l"; L1955 "Beurteilungswert für die Summe der PFAS-20 von $0,10 \mu
+-- \mathrm{~g} / \mathrm{l}$". The prod literal equals the printed value; the rewrite re-points at the seeded TAB19 cell
+-- (M12001-09-D2, scalar, hook/report/snapshot/PDF only — not materialised). The gate's worksheet was not re-read in-session
+-- beyond the code list (CR-013 appears once); guard by condition text.
+-- BEGIN;
+-- UPDATE compliance_requirements cr SET condition = 'pfas20_value < pfas20_limit_ng_l' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE cr.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-1' AND cr.code = 'CR-013' AND cr.condition = 'pfas20_value < 100';
+-- COMMIT;
+-- Rollback: SET condition = 'pfas20_value < 100' WHERE … AND condition = 'pfas20_value < pfas20_limit_ng_l'.
+
+-- =====================================================================================================================
+-- m1200_1-G-7 · M12001-12 · CR-008 (block, id 7836521a-2fa1-46a9-af9c-b365e9290ab1) onto the computed share
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: prod 'compliance_quote_pct >= 90' (typed by hand on -12); L1143 "müssen die vorgegebenen Werte für E. coli,
+-- Legionella spp. und intestinale Nematoden in Tabelle 8 in mindestens $90 \%$ der Proben eingehalten werden."; L1145 (BSB5,
+-- AFS, Trübung, A…C). compliance_quote_calc (M12001-09-D1) over routineproben; routine_min_share_pct = 90 from TAB8.
+-- Needs C-2 (compliance_quote_calc → -12) unless the gate moves to -09. The log10 deviation limit stays un-encoded.
+-- BEGIN;
+-- UPDATE compliance_requirements SET condition = 'compliance_quote_calc >= routine_min_share_pct'
+--  WHERE id = '7836521a-2fa1-46a9-af9c-b365e9290ab1' AND condition = 'compliance_quote_pct >= 90';
+-- COMMIT;
+-- Rollback: SET condition = 'compliance_quote_pct >= 90' WHERE id = … AND condition = 'compliance_quote_calc >= routine_min_share_pct'.
+
+-- =====================================================================================================================
+-- m1200_1-G-8 · M12001-15 · CR-015 (block, id e7294b1a-bac4-4a2f-bdb7-947ed6be9837) onto the Flächenverzeichnis rows
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: prod 'flaechenverzeichnis_vorhanden == true AND anwendungsbereich_kategorie IS NOT NULL AND gueteklasse_zugeordnet
+-- IS NOT NULL'; L2465 "… den potenziellen Verbrauchsstellen linkl. eines Flächenverzeichnisses der zu bewässernden
+-- Flächen), … der geschätzten jährlichen Menge des aufzubereitenden Wassers, dem Zustand sowie der Nutzung der Flächen
+-- einschließlich der Bewässerungsmethode;". anwendungsbereich_count_calc (M12001-16-D1) counts complete rows (each row
+-- carries Kultur, Güteklasse, Methode, Menge). Needs C-2 (→ -15).
+-- BEGIN;
+-- UPDATE compliance_requirements SET condition = 'anwendungsbereich_count_calc >= 1 AND anwendungsbereich_kategorie IS NOT NULL AND gueteklasse_zugeordnet IS NOT NULL'
+--  WHERE id = 'e7294b1a-bac4-4a2f-bdb7-947ed6be9837' AND condition = 'flaechenverzeichnis_vorhanden == true AND anwendungsbereich_kategorie IS NOT NULL AND gueteklasse_zugeordnet IS NOT NULL';
+-- COMMIT;
+-- Rollback: SET condition = '<prior text above>' WHERE id = … AND condition LIKE 'anwendungsbereich_count_calc >= 1%'.
+
+-- =====================================================================================================================
+-- m1200_1-G-9 · M12001-08 · CR-003 (warn, id 080e27dc-007b-4e23-9fc0-ed146e967c49, EMPTY condition) "Strengste anwendbare Klasse bei Mehrfachzuordnung"
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L918 "(*) Wenn eine bewässerte Kulturpflanzenart in mehrere der oben genannten Kategorien fällt, gelten die
+-- Anforderungen der strengsten Kategorie."; gueteklasse_code (M12001-08-D1) = min rank over kulturen_tab7. Until D-2 is
+-- ratified the manual gueteklasse_zugeordnet must not be LESS strict than the computed one: the proposed condition
+-- compares the manual token's rank with the computed rank via TAB7_CLASS.
+-- BEGIN;
+-- UPDATE compliance_requirements SET condition = 'lookup(''TAB7_CLASS'', gueteklasse_zugeordnet, ''rank'') <= gueteklasse_code'
+--  WHERE id = '080e27dc-007b-4e23-9fc0-ed146e967c49' AND condition = '';
+-- COMMIT;
+-- Rollback: SET condition = '' WHERE id = … .
+
+-- =====================================================================================================================
+-- m1200_1-D-1 · M12001-07 · restrisiko_niveau ← restrisiko_max_code; risikoniveau_ausgangs ← ausgangsrisiko_max_code
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2075 "… und das Ausgangsrisiko bewertet (siehe Tabelle 23 und Tabelle 24)"; L2077 "Anschließend erfolgt
+-- nochmals die Risikobewertung zur Ermittlung des Restrisikos (siehe Tabelle 23 und Tabelle 24)." — per hazard × Schutzgut,
+-- not one scalar. Prod: both scalars are manual enums (restrisiko_niveau consumed by -20, risikoniveau_ausgangs by -10 and
+-- produced by EQ-001). Proposed: the two scalars become derived from the register maxima through TAB23's level tokens
+-- (the label of the code), i.e. new equation rows on M12001-07:
+--   restrisiko_niveau = lookup('TAB23_LEVEL', restrisiko_max_code, 'token')   -- needs a 5-row code→token table (not seeded: no printed source beyond the caption order, J-block)
+-- Alternative without a new table: keep the scalars manual and add the G-5 gate. Written for the record; nothing applied.
+
+-- =====================================================================================================================
+-- m1200_1-D-2 · M12001-08 · gueteklasse_zugeordnet ← gueteklasse_code
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L918 (strictest category); Tab. 7 rows L984–L1105. Prod: gueteklasse_zugeordnet is a manual enum consumed by
+-- six worksheets (CR-004 / -005 / -007 / -015 read it). Proposed: an equation row mapping the rank back to the token
+-- (`gueteklasse_zugeordnet = lookup('TAB7_RANK', gueteklasse_code, 'klasse')`, a 6-row table keyed by rank — the inverse
+-- of TAB7_CLASS.rank; seedable from the same printed rows) and `enum` → engine-owned. Until ratified, G-9 keeps the
+-- manual choice honest. Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_1-R-1 · M12001-07 · EQ-001 (id 978ac484-ac6c-4611-9a87-359c900b88dc) — the scalar Tab.-23 lookup is superseded by the rows
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: prod EQ-001 'risikoniveau_ausgangs = lookup(eintrittswahrscheinlichkeit, schadensausmass)', inputs
+-- ["eintrittswahrscheinlichkeit","schadensausmass"], verified_against_standard; L2073 "Sie muss für jede Gefahr gesondert
+-- bearbeitet werden, d. h. für mikrobiologische Pathogene, chemische Gefahren (nach Untergruppen) und für gefährliche
+-- Ereignisse und Störfälle." The register computes the same matrix per row (derived columns). Proposed after D-1: retire
+-- EQ-001 (equations has no `active` column → DELETE with the full INSERT below as rollback) and the two scalar inputs.
+-- Captured row (read-only 2026-09-17; columns beyond the ones listed were not read — capture the full row before deleting):
+--   id 978ac484-ac6c-4611-9a87-359c900b88dc · equation_number EQ-001 · formula 'risikoniveau_ausgangs = lookup(eintrittswahrscheinlichkeit, schadensausmass)'
+--   · input_symbols ["eintrittswahrscheinlichkeit","schadensausmass"] · output_symbol risikoniveau_ausgangs · verification_status verified_against_standard
+-- Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_1-E-3 · M12001-12 · beprobung_frequenz_e_coli (enum 1x_pro_woche / 2x_pro_monat, consumed by -13) vs the lifted Tab.-27 text
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2383–L2386 print "1x pro Woche" (A, B) / EMPTY (C, U-2) / "2x pro Monat" (D) for E. coli; CR-007 (block, id
+-- 408a8dba-9368-4334-aa20-86f0ac317e6b) "IF gueteklasse_zugeordnet IN {'A','B-1','B-2'} THEN beprobung_frequenz_e_coli ==
+-- '1x_pro_woche'". The created text fill beprobung_frequenz_e_coli_tab27 carries the printed string; the enum keeps its prod
+-- options (D-1). Options: (a) keep both (fill = reference, enum = the engineer's declared plan, CR-007 unchanged);
+-- (b) add a `token` column (1x_pro_woche / 2x_pro_monat) to TAB27 and re-bind the enum as lookup_fill (class C stays
+-- without a fill until the PDF page settles U-2). Recommended (a) until U-2 is resolved. Nothing applied.

@@ -991,3 +991,217 @@ Report: `reports/plan-3-m277e.md` · STAGED SQL: `scripts/verification/m277e-STA
 - **`sum_rows` over an EMPTY register is `manual_required`** ("Keine vollständigen Zeilen"), so a formula summing two registers needs `if(count_rows(reg) > 0, sum_rows(reg, …), 0)` on the optional one (M277E-16-D1); `if()` short-circuits, so the unused branch may be null. Pinned; playbook trap added.
 - **Scalar-only equations are not server-materialised** (2a design) — M277E-05-D1 and M277E-19-D1 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
 - **Register cells render with the de-DE thousands separator** (`1.375`) — the render test pins the rendered string, the engine value stays 1375.
+
+## Task 5 — DWA-M-1200-1 (m1200_1)
+
+Report: `reports/plan-3-m1200_1.md` · STAGED SQL: `scripts/verification/m1200_1-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-1200-1\DWA-M_1200-1_GD.md` (Gelbdruck Juli 2025; lines cited; the DWA-M-1200-2 transcript `…\DWA-M-1200-2\DWA-M_1200-2_GD.md` was read ONLY to cross-check the OCR-damaged Tab. 8 class column, U-1) · prod capture `src/lib/eval/field-configs/m1200_1.prior.json` (2026-09-17, read-only; 126 fields, 180 sections, 1 equation) · the 21 compliance rows and the EQ-001 row read with `prod-query.mjs`. Ids follow the Task-5 brief (P/J letters are the brief's). Nothing below is applied.
+
+### m1200_1-C-1 · DWA-M-1200-1 · M12001-08 anwendungsbereich_kategorie → M12001-19 · anwendung_weide_oder_futterpflanzen → M12001-12
+- Class: consumer-edit
+- Chosen now (fail-safe): no rule on `beschilderung_urbane_flaechen` (its driver is not in scope on -19 — a rule would stay `pending` and never hide) and no WEIDE rule on the created `beprobung_frequenz_nematoden_tab27` (-12); both fields stay visible.
+- Evidence (verbatim, transcript line): "intestinale Nematoden （Eier von Helminthen）： $\leq 1$ Ei pro Liter für die Bewäs－ serung von Weideflächen oder Futterpflanzen" (L1158); capture: `anwendungsbereich_kategorie` consumed by -09, -11, -16; `anwendung_weide_oder_futterpflanzen` by -09, -11; CR-021 (-19) reads `beschilderung_urbane_flaechen IN {'ja','nicht_zutreffend'}` without the driver.
+- Proposed SQL / config: STAGED block m1200_1-C-1 (two `consumer_worksheets` appends + the two `visible_when` rules).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-C-2 · DWA-M-1200-1 · created outputs → consumers (gueteklasse_code, compliance_quote_calc, restrisiko_max_code, ausgangsrisiko_max_code, anwendungsbereich_count_calc, zusatzwasserbedarf_jahr_calc)
+- Class: consumer-edit
+- Chosen now (fail-safe): the six created outputs compute on their register worksheets only (a `create` never sets `consumer_worksheets`); the manual `gueteklasse_zugeordnet`, `compliance_quote_pct`, `restrisiko_niveau`, `anwendungsbereich_count`, `zusatzwasserbedarf_jahr` keep feeding every consumer and gate.
+- Evidence (verbatim, transcript line): "gelten die Anforderungen der strengsten Kategorie" (L918); "in mindestens $90 \%$ der Proben eingehalten werden" (L1143); "auf ein sehr niedriges oder niedriges Risikoniveau reduziert" (L2061); "inkl. eines Flächenverzeichnisses der zu bewässernden Flächen … der geschätzten jährlichen Menge des aufzubereitenden Wassers" (L2465). Capture: consumer lists of the manual fields as quoted in the STAGED block.
+- Proposed SQL / config: STAGED block m1200_1-C-2 (six `consumer_worksheets` writes mirroring the manual fields' lists).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-C-3 · DWA-M-1200-1 · M12001-09 legionella_value, nematoden_value, log10_*, bsb5_value, afs_value, pfas20_value · M12001-12 validierungs_compliance_pct · M12001-10 indikatorchemikalien_kat1/_kat2 · visible_when withheld
+- Class: consumer-edit
+- Chosen now (fail-safe): every Step-4 rule of the brief that targets an EXISTING field is withheld — each target is consumed by M12001-12 / -13 / -15 (transitive producer guard); the CREATED twins (`legionella_limit`, `nematoden_limit`, the five `log10_*_ziel`, `validierung_min_share_pct`, `beprobung_frequenz_legionella_tab27`) carry the rules instead, so the engineer sees which requirement applies. The brief's rule on `pfas20_value` (Szenario I only) is REJECTED on the text: PFAS-20 applies "In allen Fällen" (L1955).
+- Evidence (verbatim, transcript line): "Legionella spp．： $<1.000 \mathrm{KBE} / \mathrm{L}$ ， wenn das Risiko der Aerosol－ bildung besteht；" (L1157); "B－2： －" (L1162–L1163), "C－2：－" (L1166); "In allen Fällen muss regelmäßig nachgewiesen werden, dass der Beurteilungswert für die Summe der PFAS-20 von $0,10 \mu \mathrm{~g} / \mathrm{l}$ sicher eingehalten werden kann." (L1955); capture: consumer lists as listed in the STAGED block.
+- Proposed SQL / config: STAGED block m1200_1-C-3 (rules listed; owner options a/b).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-G-1 · DWA-M-1200-1 · M12001-19 · CR-021 guard on `anwendungsbereich_kategorie == 'urban'`
+- Class: gate-guard
+- Chosen now (fail-safe): CR-021 unchanged (warn, unguarded).
+- Evidence (verbatim, transcript line): "Urbane Anwendungen, die in Tabelle 7 ebenfalls berücksichtigt werden, sind bisher in Deutschland nicht rechtlich geregelt." (L977); prod CR-021 `beschilderung_urbane_flaechen IN {'ja','nicht_zutreffend'}` (id bfa7f0dd-…). No signage sentence was found in the read ranges — the guard scopes the existing gate only.
+- Proposed SQL / config: STAGED block m1200_1-G-1 (needs C-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-G-2 · DWA-M-1200-1 · M12001-09 · bsb5_value / afs_value optional under notes d) / e)
+- Class: is_required / gate-guard
+- Chosen now (fail-safe): two created attestation booleans (`toc_korrelation_nachgewiesen`, `truebung_kontinuierlich_ueberwacht`) record the substitution; `bsb5_value` / `afs_value` stay as in prod (consumed by -12 — a `visible_when` is refused; `is_required` is a sign-off class).
+- Evidence (verbatim, transcript line): "d）Auf die Bestimmung des $\mathrm{BSB}_{5}$ kann bei Anwendung einer TOC－Messung verzichtet werden，wenn die Korrelation zwischen $\mathrm{BSB}_{5}$ und TOC nachgewiesen wird．" (L1217); "e）Wenn die Anforderungen an die Trübung kontinuierlich überwacht und eingehalten werden，kann davon ausgegan－ gen werden，dass auch die Anforderungen an die AFS eingehalten werden und die Messung der AFS somit nicht zusätzlich erforderlich ist．" (L1218).
+- Proposed SQL / config: STAGED block m1200_1-G-2 (option b: `is_required = false` on both; option a: the C-3 rules).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-G-3 · DWA-M-1200-1 · M12001-09 · CR-004 onto `e_coli_value <= e_coli_limit`
+- Class: gate-guard
+- Chosen now (fail-safe): CR-004 unchanged. NOTE: the plan's / inventory's premise "CR-004 class-D limit ≤ 1 contradicts Tab. 8 ≤ 10.000" is REFUTED by the in-session capture — prod's 204-char condition ends `… IF gueteklasse_zugeordnet == 'D' THEN e_coli_value <= 10000`, which equals Tab. 8. No contradiction; the rewrite is single-source hygiene only.
+- Evidence (verbatim, transcript line): "$\leq 10^{\text {a）}}$ & $\leq 100$" (L1156, class A); "$\leq 100^{\mathrm{a})}$ & $\leq 100$" (L1160, B); "$\leq 100$ … $\leq 400$" (L1165, C); "$\leq 10.000^{\mathrm{a})}$ & －al，c）" (L1205, D); prod CR-004 (id 23adcbc3-…) as quoted in the STAGED block.
+- Proposed SQL / config: STAGED block m1200_1-G-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-G-4 · DWA-M-1200-1 · M12001-08 · CR-006 (empty condition) onto the log10 targets / validation share
+- Class: gate-guard
+- Chosen now (fail-safe): CR-006 unchanged (warn, empty condition — never fires); the targets are visible as created fills (`log10_*_ziel`, `validierung_min_share_pct`, hidden for B-2 / C-2 / D).
+- Evidence (verbatim, transcript line): "Für die Wassergüteklasse A müssen mindestens $90 \%$, für die Wassergüteklassen B-1 und C-1 mindestens $50 \%$ der Validierungsproben die Leistungsziele erreichen oder übersteigen" (L1147); "E. coli $\geqslant 5,0$; Coliphagen, insg. $\geqslant 6,0$; Clostridium-perfringens-Sporen $\geqslant 4,0$ bzw. sulfatreduzierende Sporenbildner $\geqslant 5,0$" (L1135).
+- Proposed SQL / config: STAGED block m1200_1-G-4 (`IF gueteklasse_zugeordnet IN {'A','B-1','C-1'} THEN validierungs_compliance_pct >= validierung_min_share_pct`; the gate's worksheet is the owner's choice — -08 sees neither symbol).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-G-5 · DWA-M-1200-1 · M12001-07 · CR-014 onto `restrisiko_max_code <= 2`
+- Class: gate-guard
+- Chosen now (fail-safe): CR-014 keeps reading the manual scalar `restrisiko_niveau`; the register's max is a visible footer value.
+- Evidence (verbatim, transcript line): "… durch die alle identifizierten Risiken auf ein sehr niedriges oder niedriges Risikoniveau reduziert werden können." (L2061); prod CR-014 `restrisiko_niveau IN {'sehr_niedrig','niedrig'}` (block, id 3782e6ef-…).
+- Proposed SQL / config: STAGED block m1200_1-G-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-G-6 · DWA-M-1200-1 · CR-013 onto `pfas20_value < pfas20_limit_ng_l`
+- Class: gate-guard
+- Chosen now (fail-safe): CR-013 unchanged (`pfas20_value < 100` — equals the printed value).
+- Evidence (verbatim, transcript line): "\hline Amisulprid & Benzotriazol & Summe PFAS-20<100 ng/l \\" (L1968); "Beurteilungswert für die Summe der PFAS-20 von $0,10 \mu \mathrm{~g} / \mathrm{l}$" (L1955).
+- Proposed SQL / config: STAGED block m1200_1-G-6 (scalar equation M12001-09-D2 is hook/report/snapshot/PDF only — not materialised; the gate evaluates through the same engine paths).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-G-7 · DWA-M-1200-1 · M12001-12 · CR-008 onto `compliance_quote_calc >= routine_min_share_pct`
+- Class: gate-guard
+- Chosen now (fail-safe): CR-008 keeps reading the hand-typed `compliance_quote_pct` (-12); the computed share lives on -09 (register worksheet) until C-2.
+- Evidence (verbatim, transcript line): "In Anlehnung an die EU-WasserWVVO müssen die vorgegebenen Werte für E. coli, Legionella spp. und intestinale Nematoden in Tabelle 8 in mindestens $90 \%$ der Proben eingehalten werden." (L1143); "Die vorgegebenen Werte für $\mathrm{BSB}_{5}$, AFS und Trübung bei Güteklasse A bis C müssen in mindestens $90 \%$ der Proben eingehalten werden." (L1145).
+- Proposed SQL / config: STAGED block m1200_1-G-7 (needs C-2). Residue: the second sentence of each rule (max deviation one log10 step / 100 %) is NOT encoded — needs per-parameter deviation rows.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-G-8 · DWA-M-1200-1 · M12001-15 · CR-015 onto `anwendungsbereich_count_calc >= 1`
+- Class: gate-guard
+- Chosen now (fail-safe): CR-015 keeps reading the boolean `flaechenverzeichnis_vorhanden`.
+- Evidence (verbatim, transcript line): "… den potenziellen Verbrauchsstellen linkl. eines Flächenverzeichnisses der zu bewässernden Flächen), den Aufbereitungseinrichtungen und der geschätzten jährlichen Menge des aufzubereitenden Wassers, dem Zustand sowie der Nutzung der Flächen einschließlich der Bewässerungsmethode;" (L2465).
+- Proposed SQL / config: STAGED block m1200_1-G-8 (needs C-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-G-9 · DWA-M-1200-1 · M12001-08 · CR-003 (empty condition) "Strengste anwendbare Klasse bei Mehrfachzuordnung"
+- Class: gate-guard
+- Chosen now (fail-safe): CR-003 unchanged (warn, never fires); `gueteklasse_code` is a visible footer / derived field.
+- Evidence (verbatim, transcript line): "(*) Wenn eine bewässerte Kulturpflanzenart in mehrere der oben genannten Kategorien fällt, gelten die Anforderungen der strengsten Kategorie." (L918).
+- Proposed SQL / config: STAGED block m1200_1-G-9 (`lookup('TAB7_CLASS', gueteklasse_zugeordnet, 'rank') <= gueteklasse_code` — the manual class may be stricter, never laxer, than the rows).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-D-1 · DWA-M-1200-1 · M12001-07 · restrisiko_niveau ← restrisiko_max_code · risikoniveau_ausgangs ← ausgangsrisiko_max_code
+- Class: equation-replacement
+- Chosen now (fail-safe): the two scalar enums stay manual; the register maxima are new symbols (codes).
+- Evidence (verbatim, transcript line): "Nachdem pro Gefahr die relevanten Expositionswege sowie Exposition und Schaden erfasst wurden, erfolgt die Bewertung des Ausgangsrisikos." (L2075); "Anschließend erfolgt nochmals die Risikobewertung zur Ermittlung des Restrisikos (siehe Tabelle 23 und Tabelle 24)." (L2077).
+- Proposed SQL / config: STAGED block m1200_1-D-1 (code → token needs a 5-row level table whose only printed source is the Tab. 23 caption order — J-class; alternative: keep manual + G-5).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-D-2 · DWA-M-1200-1 · M12001-08 · gueteklasse_zugeordnet ← gueteklasse_code
+- Class: equation-replacement
+- Chosen now (fail-safe): `gueteklasse_zugeordnet` stays the manual driver of every class-keyed fill and gate; `gueteklasse_code` (M12001-08-D1) is displayed next to it.
+- Evidence (verbatim, transcript line): "(*) Wenn eine bewässerte Kulturpflanzenart in mehrere der oben genannten Kategorien fällt, gelten die Anforderungen der strengsten Kategorie." (L918); Tab. 7 rows L984–L1105.
+- Proposed SQL / config: STAGED block m1200_1-D-2 (rank → token via a 6-row inverse table seeded from the same printed rows; `enum` becomes engine-owned).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-R-1 · DWA-M-1200-1 · M12001-07 · EQ-001 (scalar Tab.-23 lookup) superseded by the register rows
+- Class: equation-replacement
+- Chosen now (fail-safe): EQ-001 untouched (it keeps producing `risikoniveau_ausgangs` from the two consumer-free scalars); no second equation outputs that symbol; the rows compute the same matrix per row.
+- Evidence (verbatim, transcript line): "Sie muss für jede Gefahr gesondert bearbeitet werden, d. h. für mikrobiologische Pathogene, chemische Gefahren (nach Untergruppen) und für gefährliche Ereignisse und Störfälle." (L2073); prod EQ-001 (id 978ac484-…) as quoted in the STAGED block.
+- Proposed SQL / config: STAGED block m1200_1-R-1 (retire after D-1; full-row INSERT as rollback — capture the complete row first).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-E-1 · DWA-M-1200-1 · M12001-10 · indikatorchemikalien_kat1 / indikatorchemikalien_kat2 (pending I-1 pair)
+- Class: interface-gap
+- Chosen now (fail-safe): untouched (non-null prod `enum_values`, D-1); TAB19 is seeded as data and consumed by `pfas20_limit_ng_l` only.
+- Evidence (verbatim, transcript line): Tab. 19 body L1967–L1976 (the printed substance lists per category: 9 / 5 / "Summe PFAS-20<100 ng/l"); capture: both fields json with 9 / 5 enum values equal to the printed substances (snake_case tokens).
+- Proposed SQL / config: none here — the Plan-1 I-1 ruling (value/label checklist) decides; TAB19.substanzen carries the printed list for the comparison.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-E-2 · DWA-M-1200-1 · TAB8_NOTE_F · filtration_typ token mapping (generic `membran` + four specific membrane tokens)
+- Class: interface-gap
+- Chosen now (fail-safe): the printed group "Membranverfahren (Mikrofiltration, Ultrafiltration, Nanofiltration, Umkehrosmose)" is seeded for `membran` AND `mikrofiltration` / `ultrafiltration` / `nanofiltration` / `umkehrosmose`; the group "Polstofffiltern, Mikrosieben und Raumfiltern" for `polstoff` / `mikrosieb` / `raumfilter`; no 24-h average for membranes (not printed → null).
+- Evidence (verbatim, transcript line): "f）Gemäß DWA（2023b）．Bei Polstofffiltern，Mikrosieben und Raumfiltern sollten die Trübungswerte im filtrierten Wasser keinen der folgenden Werte überschreiten：Ein Durchschnittswert von 2 NTU innerhalb eines Zeitraums von $24 \mathrm{~h}, 5 \mathrm{NTU}$ in mehr als $5 \%$ der Zeit innerhalb eines Zeitraums von 24 h und 10 NTU zu keiner Zeit．" (L1219); "Wird die Filtration durch Membranverfahren gewährleistet（Mikrofiltration，Ultrafiltration，Nanofiltration， Umkehrosmose），sollten die Trübungswerte im filtrierten Wasser keinen der folgenden Werte überschreiten： $0,2 \mathrm{NTU}$ in mehr als $5 \%$ der Zeit innerhalb eines Zeitraums von 24 h und 0，5 NTU zu keiner Zeit．" (L1220).
+- Proposed SQL / config: none (the prod enum's `membran` generic token is redundant with the four specific ones — retirement is the owner's).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-E-3 · DWA-M-1200-1 · M12001-12 · beprobung_frequenz_e_coli (enum) vs the lifted Tab.-27 strings
+- Class: interface-gap
+- Chosen now (fail-safe): the existing consumed enum is NOT re-bound (a lookup_fill over it would remove the engineer's input for class C, whose printed cell is empty — U-2); a created text fill `beprobung_frequenz_e_coli_tab27` shows the printed cell next to it; CR-007 unchanged.
+- Evidence (verbatim, transcript line): "1x pro Woche" (L2383 / L2384), "2x pro Monat" (L2386), EMPTY class-C cell (L2385 "\hline & & 2x pro Monat & & & \multirow{2}{*}{} & & \\"); prod enum `1x_pro_woche` / `2x_pro_monat`, CR-007 (id 408a8dba-…).
+- Proposed SQL / config: STAGED block m1200_1-E-3 (options a/b).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-U-1 · DWA-M-1200-1 · TAB8 · class column OCR-damaged (A / C / D cells are images or glyphs)
+- Class: unreadable-cell
+- Chosen now (fail-safe): rows assigned from the caption order "A, B (B-1/B-2), C (C-1/C-2), D" and the in-text prose (L1131 class C E. coli 100; L1135 log10 targets A/B-1/C-1; L1139 Trübung ≤ 2 NTU for A, B, C); cross-checked against DWA-M-1200-2 Tab. 3 (its L549 "く", L553 "ம （B－1／B－2）", L555 "ن نコ نコ", L570 "ロ" print the same OCR damage and the same cells); TAB8 stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline ![](https://cdn.mathpix.com/cropped/d364d6eb-1293-4e7b-8e5d-07ab790c7976-039.jpg?height=34\&width=47\&top_left_y=990\&top_left_x=376) & Mechanisch－ biologische Behandlung， Filtration， Desinfektion & $\leq 10^{\text {a）}}$ & $\leq 100$ &" (L1156); "\hline \multirow{2}{*}{ம （B－1／B－2）}" (L1160); "\hline \multirow{2}{*}{ن ن⿱士⿴囗十介⿰亻丨⿱中⿰㇀丶}" (L1165); "Die Anforderungen für E. coli für die Güteklasse C wurde auf $100 \mathrm{KBE} / 100 \mathrm{ml}$ abgesenkt." (L1131).
+- Proposed SQL / config: after the owner's PDF look (SR-3, p. 39–40): `verification_status = 'md_verified'` for TAB8.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-U-2 · DWA-M-1200-1 · TAB27 · class column images; class-C E. coli cell EMPTY; C/D Trübung, D Legionella empty
+- Class: unreadable-cell
+- Chosen now (fail-safe): rows assigned from the caption order (the B row prints "D (B-1/B-2)" — "D" is OCR for "B"); the class-C E. coli cell, the C / D Trübung cells and the D Legionella cell are seeded `null` (never guessed); TAB27 stays `imported_unverified`; the created `beprobung_frequenz_e_coli_tab27` fill reads "— " for C-1 / C-2.
+- Evidence (verbatim, transcript line): "\hline D (B-1/B-2) & 1x pro Woche & 1x pro Woche & \multirow{3}{*}{Gemäß Richtlinie 91/271/EWG (Anhang I Abschnitt D)} & …" (L2384); "\hline & & 2x pro Monat & & & \multirow{2}{*}{} & & \\" (L2385); "\hline ![](…080.jpg…) & 2x pro Monat & - & & & & & \\" (L2386).
+- Proposed SQL / config: after the PDF look (p. 80): seed the class-C E. coli cell and flip TAB27 to `md_verified`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-U-3 · DWA-M-1200-1 · TAB8 · D-row chemical-parameter cell is an image; sulfate-reducer targets print "25，0" / "？5，0"; D Zielvorgabe garbled
+- Class: unreadable-cell
+- Chosen now (fail-safe): D `bsb5_max` / `afs_max` / `truebung_max` / `bsb5_note` / `zielvorgabe` = null (DWA-M-1200-2 Tab. 3 L570/L573 print "Mechanischbiologische Behandlung, Desinfektion" and "BSB5 und AFS gemäß Richtlinie 91/271/EWG" — consistent, not copied); `log10_sulfatreduzierer` = 5.0 from the legible prose L1135.
+- Evidence (verbatim, transcript line): "& ![](https://cdn.mathpix.com/cropped/d364d6eb-1293-4e7b-8e5d-07ab790c7976-040.jpg?height=435\&width=223\&top_left_y=677\&top_left_x=1230) &" (L1208); "sulfatreduzierende Sporenbildner 25，0" (L1159), "sulfatreduzierende Sporenbildner ？5，0" (L1160); "Clostridium-perfringens-Sporen $\geqslant 4,0$ bzw. sulfatreduzierende Sporenbildner $\geqslant 5,0$" (L1135).
+- Proposed SQL / config: after the PDF look: seed the D chemical cells (expected "BSB5 und AFS gemäß Richtlinie 91/271/EWG") and the D Zielvorgabe string.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-U-4 · DWA-M-1200-1 · TAB18 · Oberflächenwasser code prints the glyph "0" (Tab. 18 and Tab. 24)
+- Class: unreadable-cell
+- Chosen now (fail-safe): keyed "O" (the letter the other codes follow — B Boden, N Nutztiere, K Kulturen, G Grundwasser, S Schutzgebiet); the printed glyph is kept in `code_printed`; TAB18 stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline 0 & Oberflächenwasser & Wasser Oberflächenwasser & hoch - mittel gering - nicht vorhanden & …" (L1898); "\hline 0 & Oberflächenwasser & Wasser - Oberflächenwasser & …" (L2093).
+- Proposed SQL / config: after the PDF look: `md_verified` for TAB18 (or re-key to "0" if the print really is a zero).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-P-1 · DWA-M-1200-1 · TAB8 · notes d) / e) — documented substitution, not a value override
+- Class: override-policy
+- Chosen now (fail-safe): TAB8 `locked` ("Mindestanforderungen"); the substitutions are two created attestation booleans, no override control on the limit fills.
+- Evidence (verbatim, transcript line): "Für die in Tabelle 7 spezifizierten Wassergüteklassen sind diese Mindestanforderungen in Tabelle 8 zusammengestellt." (L1129); note d) (L1217) and note e) (L1218) as quoted under G-2.
+- Proposed SQL / config: none (`locked` stands); the optionality is G-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-J-1 · DWA-M-1200-1 · M12001-08 · the 12 yes/no crop questions → Tab.-7 rows
+- Class: interface-gap
+- Chosen now (fail-safe): the questions stay as captured; the class is derived from the engineer's Tab.-7 row picks in `kulturen_tab7` (lookup_key over TAB7_CLASS), not from the questions.
+- Evidence (verbatim, transcript line): Tab. 7 A row L984–L995 ("Alle roh verzehrten Nahrungsmittelpflanzen, deren essbarer Teil unmittelbar mit dem aufbereiteten Wasser in Kontakt kommt …"), B-1 L996–L1008, B-2 L1018–L1026, C-1 L1027–L1055, C-2 L1056–L1065, D L1066–L1105.
+- Proposed SQL / config: a later mapping `question → TAB7_CLASS row` (e.g. rohverzehr_wasserkontakt = ja ⇒ A; kein_kontakt_essbarteil + Tropf ⇒ C-1; industrie_energie_saatgut ⇒ D) as derived columns — owner's ruling on the mapping table.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-J-2 · DWA-M-1200-1 · TAB7_CLASS · rank order, composed Karenzzeit texts, lactating-cattle flags
+- Class: interface-gap
+- Chosen now (fail-safe): `rank` = printed caption order (A 1 … D 6; "strengste" read as the order of the Tab. 7 / Tab. 8 rows — the E. coli / Enterokokken limits are monotone in it); `karenzzeit_text` for D composes three printed bullets (L1074 / L1075 / L1089) with " · "; `laktierend_ausgeschlossen` true for C-1 AND C-2 (L1053 names "Güteklasse C"), false for A / B-1, null for B-2 / D.
+- Evidence (verbatim, transcript line): "- Eine Beweidung durch laktierendes Vieh bei der Verwendung der Güteklasse C wird grundsätzlich ausgeschlossen. \\" (L1053); "- Bei einer Beweidung durch laktierendes Milchvieh muss eine vollständige Abtrocknung des Bestands vor dem Weidegang erfolgt sein ${ }^{\text {al }}$. Empfohlen wird ein Bewässerungsstopp mit aufbereitetem Wasser von 2 Wochen ${ }^{\text {b) }}$ vor dem Weidegang durch laktierendes Vieh \\" (L1006); "- Bewässerung von Weiden, Grünland oder anderen frischen Feldfutterpflanzen (z. B. Kleegras) mit aufbereitetem Wasser bis 4 Wochen vor dem Schnitt oder Weidegang durch nicht laktierendes Vieh …" (L1074).
+- Proposed SQL / config: none unless the owner wants per-crop Karenzzeit rows (a `TAB7_KARENZ` keyed class × crop group) — then the D composition splits into three rows.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-J-3 · DWA-M-1200-1 · M12001-14 stoerfaelle · "Art der Gefährdung" as free text (no printed list)
+- Class: interface-gap
+- Chosen now (fail-safe): text column; `teilelement` text with the printed row codes as placeholder (EZ-1, EZ-2, Abw-1…4, AWT-1…3, S-1, S-2, BW-1).
+- Evidence (verbatim, transcript line): "\hline \multirow[t]{2}{*}{Teilelement des Systems} & \multirow[t]{2}{*}{Teilprozess} & \multirow[t]{2}{*}{Austöser / Ereignis} & \multirow[t]{2}{*}{Art der Gefährdung} & \multicolumn{5}{|c|}{Ausgangsrisiko} \\" (L2129); the Tab. 26 body rows L2131–L2140 / L2155–L2156 print the codes and EMPTY cells.
+- Proposed SQL / config: none (the brief's "lifted list" does not exist in the transcript; Tab. 20's five "Bereich" rows L1993–L2001 could seed a `teilelement` enum if the owner wants one).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-F-1 · DWA-M-1200-1 · M12001-16 · zusatzwasserbedarf_jahr_calc = Σ menge_m3 (text-only)
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted as `M12001-16-D2` (`imported_unverified`), outputs a CREATED field; the manual `zusatzwasserbedarf_jahr` (M12001-03) untouched.
+- Evidence (verbatim, transcript line): "… der geschätzten jährlichen Menge des aufzubereitenden Wassers …" (L2465); "I Ermittlung des Zusatzwasserbedarfs;" (L2553); the guideline prints no formula (DWA-M 590 is referenced — bare pointer, not expanded).
+- Proposed SQL / config: C-2 for the re-point; nothing else.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_1-X-1 · DWA-M-1200-1 · cross-standard re-typed fields (DWA-M-1200-2 / -3)
+- Class: cross-standard
+- Chosen now (fail-safe): nothing touched; the inventory §4 list stands (`gueteklasse_zugeordnet` ↔ `wassergueteklasse` (1200-2) / `gueteklasse` (1200-3); `aerosolrisiko` ↔ `aerosol_risk`; `anwendung_weide_oder_futterpflanzen` ↔ `weide_oder_futter` / `weidegang_laktierend`; `pfas20_value` ng/l ↔ `pfas_summe_20` µg/l — unit mismatch; `zusatzwasserbedarf_jahr` ↔ `zusatzwasserbedarf`).
+- Evidence (verbatim, transcript line): "Zu den Wassergüteklassen A bis D werden im Merkblatt DWA-M 1200-1:2025 in Tabelle 8, die aus den europäischen und deutschen Vorgaben zusammengeführten Mindestanforderungen an die Qualität des aufbereiteten Wassers dargestellt. Diese werden in Tabelle 3 wiedergegeben." (DWA-M-1200-2 L532).
+- Proposed SQL / config: Tasks for m1200_2 / m1200_3 key their tables on the SAME six class tokens and inherit rather than re-type (Phase 6 cross-standard inheritance).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 5, no signature needed)
+
+- **The plan's CR-004 "class-D ≤ 1" contradiction does not exist in prod** — the captured condition ends with `e_coli_value <= 10000` (G-3 is single-source hygiene, not a correction).
+- **Prod has 21 compliance rows** (the brief said 22); every CR code named in the brief exists; the codes CR-003 / CR-006 / CR-012 carry EMPTY conditions (never fire).
+- **The yes/no drivers `aerosolrisiko` / `anwendung_weide_oder_futterpflanzen` are prod ENUMS (`ja`/`nein`)**, so every rule reads `== 'ja'` (a `== true` rule would never hide).
+- **The Tab. 8 / Tab. 27 tables key on the six prod tokens directly** (one row per sub-class, shared printed span) — the brief's `TAB8_CLASSMAP` + `gueteklasse_group` chain was not built (amendment B; the a262e trap-3 precedent).
+- **`TAB8` / `TAB27` are single-key tables with one value column per parameter** (the m277e TABLE4_LIMITS pattern), not the brief's per-parameter split; a `lookup_fill` selects the column.
+- **Row-scope `visible_when` may read a same-row `derived` column** (`massnahmen ← ausgangsrisiko_code >= 3`) — pinned by the render test; a null derived code leaves the condition `pending` (visible).
+- **`if(limit IS NULL, …)` works inside a row `derived` expr** — used to exclude samples without a printed requirement from the compliance share; `count_rows(...) * 100 / count_rows(...)` over no relevant sample is "Division durch Null" → `manual_required` (never 0 / 100).
+- **Register `lookup_value.lookup.key_column` names the REGISTER column that holds the key** (e.g. `klasse_sub`), not the table's key column — the first RED of the equations test.
+- **The `$'` replacement-pattern trap struck the quote generator** (`String.replace(/\$\{/g, "${'$'}{")` expanded `$'` to the text after the match and emitted no escapes) — fixed with `split/join`; the seed file was assembled by `cat` from head + generated fragment + tail, never spliced.
+- **Edition token `'2025-07'`** is printed on the title page ("Juli 2025", L9, under "Entwurf" L12) and prod `standards.version` reads "Gelbdruck (Entwurf), Juli 2025" — no I-block needed.
+- **Scalar-only equations are not server-materialised** (2a design) — M12001-09-D2 computes on the hook / report / snapshot / PDF paths only (controller amendment D).

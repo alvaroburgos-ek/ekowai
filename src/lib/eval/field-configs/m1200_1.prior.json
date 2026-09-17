@@ -1,0 +1,3621 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-1200-1 m1200_1",
+    "captured_at": "2026-09-17T18:41:35.935Z",
+    "standard": "DWA-M-1200-1",
+    "slug": "m1200_1",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 126,
+    "section_rows": 180,
+    "sections_total": 180,
+    "equation_rows": 1
+  },
+  "M12001-01 antragsteller_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15",
+      "M12001-17"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-01 endnutzer_id": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-16"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-01 klaeranlage_id": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-03",
+      "M12001-06",
+      "M12001-15"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-01 project_id": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-02",
+      "M12001-03",
+      "M12001-15",
+      "M12001-16",
+      "M12001-17",
+      "M12001-20"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-02 heilquellenschutzgebiet": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Lage in Heilquellenschutzgebiet",
+        "label_en": "Yes, located in medicinal spring protection area",
+        "order_index": 1,
+        "regulation_reference": "§61a Abs. 1 WHG-RefE"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§61a Abs. 1 WHG-RefE"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15",
+      "M12001-16"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-02 industrielle_reuse": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, industrielle Wiederverwendung (außerhalb Geltungsbereich)",
+        "label_en": "Yes, industrial water reuse (out of scope)",
+        "order_index": 1,
+        "regulation_reference": "§1 DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§1 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-02 schutzzone_status": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Lage in Wasserschutzgebietszone I oder II",
+        "label_en": "Yes, located in water protection zone I or II",
+        "order_index": 1,
+        "regulation_reference": "§61a Abs. 1 WHG-RefE"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§61a Abs. 1 WHG-RefE"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15",
+      "M12001-16"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-03 hq_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-03 indirekteinleiter_branchen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-06",
+      "M12001-10"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-03 klarwasseranteil_vorfluter_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-06",
+      "M12001-15"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-03 mindestabfluss_beeintraechtigt": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, ökologischer Mindestabfluss bei Reuse beeinträchtigt",
+        "label_en": "Yes, ecological minimum flow impaired by reuse",
+        "order_index": 1,
+        "regulation_reference": "§33 WHG; §6.2.1.3 DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§33 WHG; §6.2.1.3 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-03 mnq_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-03 mq_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-03 trennkanalisation": {
+    "enum_values": [
+      {
+        "value": "trennsystem",
+        "label_de": "Trennsystem",
+        "label_en": "Separate sewer system",
+        "order_index": 1,
+        "regulation_reference": "§6.2.1.3 DWA-M 1200-1"
+      },
+      {
+        "value": "mischsystem",
+        "label_de": "Mischsystem",
+        "label_en": "Combined sewer system",
+        "order_index": 2,
+        "regulation_reference": "§6.2.1.3 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-06"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-03 zusatzwasserbedarf_jahr": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15",
+      "M12001-16",
+      "M12001-18"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-04 betreiber_aufbereitung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15",
+      "M12001-20"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-04 betreiber_speicher": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-17"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-04 betreiber_verteilung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-17"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-04 fachbehoerden_konsultiert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15",
+      "M12001-16"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-04 rmp_team_besetzung": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, RMP-Team-Besetzung dokumentiert",
+        "label_en": "Yes, RMP team composition documented",
+        "order_index": 1,
+        "regulation_reference": "§6.1 DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§6.1 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-20"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-04 zustaendige_behoerde": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15",
+      "M12001-16",
+      "M12001-17"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-05 expositionsweg_1_relevant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-05 expositionsweg_2_relevant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-05 expositionsweg_3_relevant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-05 schutzgut_boden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07",
+      "M12001-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-05 schutzgut_mensch_betroffen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-05 schutzgut_pflanzen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-05 schutzgut_tiere": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-05 schutzgut_wasserressourcen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-06 aerosolrisiko": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Aerosolrisiko bei der Bewässerung besteht",
+        "label_en": "Yes, aerosol formation risk present",
+        "order_index": 1,
+        "regulation_reference": "Tab. 8 Anm.; Tab. 27 DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 8 Anm.; Tab. 27 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09",
+      "M12001-12"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-06 ammonium_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "M12001-06 chlorid_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "M12001-06 fluorid_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "M12001-06 gefahr_mikrobiologisch": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07",
+      "M12001-09",
+      "M12001-12"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-06 gefahr_mikroplastik": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-06 gefahr_organische_spurenstoffe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07",
+      "M12001-10",
+      "M12001-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-06 gefahr_pfas": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07",
+      "M12001-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-06 gefahr_salze": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-06 gefahr_schwermetalle": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07",
+      "M12001-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-06 gesamtphosphor_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "M12001-06 k_bio": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-06 kalium_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "M12001-06 natrium_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "M12001-07 eintrittswahrscheinlichkeit": {
+    "enum_values": [
+      {
+        "value": "A",
+        "label_de": "A – Selten",
+        "label_en": "A – Rare",
+        "order_index": 1,
+        "regulation_reference": "Tab. 21 DWA-M 1200-1"
+      },
+      {
+        "value": "B",
+        "label_de": "B – Unwahrscheinlich",
+        "label_en": "B – Unlikely",
+        "order_index": 2,
+        "regulation_reference": "Tab. 21 DWA-M 1200-1"
+      },
+      {
+        "value": "C",
+        "label_de": "C – Möglich",
+        "label_en": "C – Possible",
+        "order_index": 3,
+        "regulation_reference": "Tab. 21 DWA-M 1200-1"
+      },
+      {
+        "value": "D",
+        "label_de": "D – Wahrscheinlich",
+        "label_en": "D – Likely",
+        "order_index": 4,
+        "regulation_reference": "Tab. 21 DWA-M 1200-1"
+      },
+      {
+        "value": "E",
+        "label_de": "E – Sehr gewiss",
+        "label_en": "E – Almost certain",
+        "order_index": 5,
+        "regulation_reference": "Tab. 21 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-07 restrisiko_niveau": {
+    "enum_values": [
+      {
+        "value": "sehr_niedrig",
+        "label_de": "Sehr niedrig",
+        "label_en": "Very low",
+        "order_index": 1,
+        "regulation_reference": "Tab. 25 DWA-M 1200-1"
+      },
+      {
+        "value": "niedrig",
+        "label_de": "Niedrig",
+        "label_en": "Low",
+        "order_index": 2,
+        "regulation_reference": "Tab. 25 DWA-M 1200-1"
+      },
+      {
+        "value": "moderat",
+        "label_de": "Moderat",
+        "label_en": "Moderate",
+        "order_index": 3,
+        "regulation_reference": "Tab. 25 DWA-M 1200-1"
+      },
+      {
+        "value": "hoch",
+        "label_de": "Hoch",
+        "label_en": "High",
+        "order_index": 4,
+        "regulation_reference": "Tab. 25 DWA-M 1200-1"
+      },
+      {
+        "value": "sehr_hoch",
+        "label_de": "Sehr hoch",
+        "label_en": "Very high",
+        "order_index": 5,
+        "regulation_reference": "Tab. 25 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-20"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-07 risikoniveau_ausgangs": {
+    "enum_values": [
+      {
+        "value": "sehr_niedrig",
+        "label_de": "Sehr niedrig",
+        "label_en": "Very low",
+        "order_index": 1,
+        "regulation_reference": "Tab. 23 DWA-M 1200-1"
+      },
+      {
+        "value": "niedrig",
+        "label_de": "Niedrig",
+        "label_en": "Low",
+        "order_index": 2,
+        "regulation_reference": "Tab. 23 DWA-M 1200-1"
+      },
+      {
+        "value": "moderat",
+        "label_de": "Moderat",
+        "label_en": "Moderate",
+        "order_index": 3,
+        "regulation_reference": "Tab. 23 DWA-M 1200-1"
+      },
+      {
+        "value": "hoch",
+        "label_de": "Hoch",
+        "label_en": "High",
+        "order_index": 4,
+        "regulation_reference": "Tab. 23 DWA-M 1200-1"
+      },
+      {
+        "value": "sehr_hoch",
+        "label_de": "Sehr hoch",
+        "label_en": "Very high",
+        "order_index": 5,
+        "regulation_reference": "Tab. 23 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-10"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-07 schadensausmass": {
+    "enum_values": [
+      {
+        "value": "1",
+        "label_de": "1 – Nicht signifikant",
+        "label_en": "1 – Insignificant",
+        "order_index": 1,
+        "regulation_reference": "Tab. 22 DWA-M 1200-1"
+      },
+      {
+        "value": "2",
+        "label_de": "2 – Niedrig",
+        "label_en": "2 – Low",
+        "order_index": 2,
+        "regulation_reference": "Tab. 22 DWA-M 1200-1"
+      },
+      {
+        "value": "3",
+        "label_de": "3 – Moderat",
+        "label_en": "3 – Moderate",
+        "order_index": 3,
+        "regulation_reference": "Tab. 22 DWA-M 1200-1"
+      },
+      {
+        "value": "4",
+        "label_de": "4 – Ernst",
+        "label_en": "4 – Serious",
+        "order_index": 4,
+        "regulation_reference": "Tab. 22 DWA-M 1200-1"
+      },
+      {
+        "value": "5",
+        "label_de": "5 – Katastrophal",
+        "label_en": "5 – Catastrophic",
+        "order_index": 5,
+        "regulation_reference": "Tab. 22 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 anwendung_heu_silage_oel_industrie": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Heu-/Silage-/Öl-/Industriepflanzen",
+        "label_en": "Yes, hay/silage/oil/industrial crops",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 D DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 D DWA-M 1200-1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-11"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-08 anwendung_saatgut_oder_essbare_samen": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Pflanzen zur Saatgut-/Samenproduktion",
+        "label_en": "Yes, seed/seed-production crops",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 D DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 D DWA-M 1200-1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-11"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-08 anwendung_weide_oder_futterpflanzen": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Anwendung auf Weide oder Futterpflanzen",
+        "label_en": "Yes, application on pasture or fodder crops",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7/8 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7/8 DWA-M 1200-1; 5.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09",
+      "M12001-11"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 anwendungsbereich_count": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-08 anwendungsbereich_kategorie": {
+    "enum_values": [
+      {
+        "value": "landwirtschaft",
+        "label_de": "Landwirtschaftliche Bewässerung (Kulturpflanzen)",
+        "label_en": "Agricultural irrigation (crops)",
+        "order_index": 1,
+        "regulation_reference": "Tab. 4 EU-WasserWVVO; Tab. 7 DWA-M 1200-1"
+      },
+      {
+        "value": "urban",
+        "label_de": "Urbane Nutzung (Grün- und Freiflächen)",
+        "label_en": "Urban use (green/open spaces)",
+        "order_index": 2,
+        "regulation_reference": "Tab. 4 EU-WasserWVVO; Tab. 7 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09",
+      "M12001-11",
+      "M12001-16"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 arzneipflanzen_industrie": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "M12001-08 attest_m12001_08_cr_016": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-08 bewaesserungsmethode": {
+    "enum_values": [
+      {
+        "value": "alle_methoden",
+        "label_de": "Alle Bewässerungsmethoden",
+        "label_en": "All irrigation methods",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; ISO 16075-2:2020"
+      },
+      {
+        "value": "tropfbewaesserung",
+        "label_de": "Tropfbewässerung",
+        "label_en": "Drip irrigation",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; ISO 16075-2:2020"
+      },
+      {
+        "value": "mikrospruehbewaesserung",
+        "label_de": "Mikrosprühbewässerung",
+        "label_en": "Micro-spray irrigation",
+        "order_index": 3,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; ISO 16075-2:2020"
+      },
+      {
+        "value": "andere_kein_kontakt",
+        "label_de": "Andere Methode ohne Kontakt mit dem essbaren Pflanzenteil",
+        "label_en": "Other method avoiding contact with edible part",
+        "order_index": 4,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; ISO 16075-2:2020"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09",
+      "M12001-11"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 futter_milch_fleisch": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Futterkulturen für milch- und fleischerzeugende Tiere",
+        "label_en": "Yes, fodder for dairy/meat livestock",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-08"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 gueteklasse_zugeordnet": {
+    "enum_values": [
+      {
+        "value": "A",
+        "label_de": "Güteklasse A",
+        "label_en": "Quality class A",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1"
+      },
+      {
+        "value": "B-1",
+        "label_de": "Güteklasse B-1",
+        "label_en": "Quality class B-1",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1"
+      },
+      {
+        "value": "B-2",
+        "label_de": "Güteklasse B-2",
+        "label_en": "Quality class B-2",
+        "order_index": 3,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1"
+      },
+      {
+        "value": "C-1",
+        "label_de": "Güteklasse C-1",
+        "label_en": "Quality class C-1",
+        "order_index": 4,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1"
+      },
+      {
+        "value": "C-2",
+        "label_de": "Güteklasse C-2",
+        "label_en": "Quality class C-2",
+        "order_index": 5,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1"
+      },
+      {
+        "value": "D",
+        "label_de": "Güteklasse D",
+        "label_en": "Quality class D",
+        "order_index": 6,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09",
+      "M12001-10",
+      "M12001-11",
+      "M12001-12",
+      "M12001-15",
+      "M12001-16"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-08 industrie_energie_saatgut_oder_unzugaenglich": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Industrie-/Energiepflanzen, Saatgut oder unzugängliche Flächen",
+        "label_en": "Yes, industrial/energy/seed crops or inaccessible areas",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-08"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 kein_kontakt_essbarteil": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Bewässerungsmethode vermeidet Kontakt mit essbarem Pflanzenteil",
+        "label_en": "Yes, irrigation avoids contact with edible plant part",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-11"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 laktierendes_milchvieh": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Beweidung durch laktierendes (Milch-)Vieh",
+        "label_en": "Yes, lactating dairy livestock grazing",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-11"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 pasteurisiert": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Nahrungsmittel werden pasteurisiert (wärmebehandelt)",
+        "label_en": "Yes, food is pasteurized",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-08"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 rohverzehr_ueberboden": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, roh verzehrt, essbarer Teil über Boden, kein Wasserkontakt",
+        "label_en": "Yes, raw food above soil, no water contact",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-08"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 rohverzehr_wasserkontakt": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, roh verzehrte Nahrungsmittel mit Wasserkontakt am essbaren Teil",
+        "label_en": "Yes, raw-consumed food with water contact on edible part",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-08"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 urban_eingeschraenkt": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, urbane Anwendung mit Zugangsbeschränkung/Steuerung",
+        "label_en": "Yes, urban use with restricted access",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-08"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 wurzelgemuese_rohverzehr": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, roh verzehrtes Wurzelgemüse (essbarer Teil im Boden)",
+        "label_en": "Yes, raw-consumed root vegetables",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 DWA-M 1200-1; 5.1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-08"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-08 zuckerruebe_kartoffel_industrie": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "M12001-09 afs_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 bsb5_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 clostridium_log10_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-09 csb_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09",
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 doc_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 e_coli_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 intestinale_enterokokken": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 legionella_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 leitfaehigkeit_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 log10_clostridium": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-09 log10_coliphagen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-09 log10_e_coli": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-09 nematoden_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 pfas20_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12",
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 ph_wert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 sulfat_sporenbildner_log10_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-09 toc_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09",
+      "M12001-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 truebung_max_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-09 truebung_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-09 tss_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-10 aufbereitungsstufen": {
+    "enum_values": [
+      {
+        "value": "mechanisch_biologisch",
+        "label_de": "Mechanisch-biologische Behandlung",
+        "label_en": "Mechanical-biological treatment",
+        "order_index": 1,
+        "regulation_reference": "Tab. 8 DWA-M 1200-1"
+      },
+      {
+        "value": "filtration",
+        "label_de": "Filtration",
+        "label_en": "Filtration",
+        "order_index": 2,
+        "regulation_reference": "Tab. 8 DWA-M 1200-1"
+      },
+      {
+        "value": "desinfektion",
+        "label_de": "Desinfektion",
+        "label_en": "Disinfection",
+        "order_index": 3,
+        "regulation_reference": "Tab. 8 DWA-M 1200-1"
+      },
+      {
+        "value": "spurenstoffentfernung",
+        "label_de": "Weitergehende Spurenstoffentfernung",
+        "label_en": "Advanced trace-substance removal",
+        "order_index": 4,
+        "regulation_reference": "Tab. 8 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09",
+      "M12001-12",
+      "M12001-15"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-10 filtration_typ": {
+    "enum_values": [
+      {
+        "value": "polstoff",
+        "label_de": "Polstofffilter",
+        "label_en": "Cloth-media filter",
+        "order_index": 1,
+        "regulation_reference": "Tab. 8 Anm. f) DWA-M 1200-1"
+      },
+      {
+        "value": "mikrosieb",
+        "label_de": "Mikrosieb",
+        "label_en": "Microscreen",
+        "order_index": 2,
+        "regulation_reference": "Tab. 8 Anm. f) DWA-M 1200-1"
+      },
+      {
+        "value": "raumfilter",
+        "label_de": "Raumfilter",
+        "label_en": "Depth filter",
+        "order_index": 3,
+        "regulation_reference": "Tab. 8 Anm. f) DWA-M 1200-1"
+      },
+      {
+        "value": "membran",
+        "label_de": "Membranverfahren (allgemein)",
+        "label_en": "Membrane process (general)",
+        "order_index": 4,
+        "regulation_reference": "Tab. 8 Anm. f) DWA-M 1200-1"
+      },
+      {
+        "value": "mikrofiltration",
+        "label_de": "Mikrofiltration",
+        "label_en": "Microfiltration",
+        "order_index": 5,
+        "regulation_reference": "Tab. 8 Anm. f) DWA-M 1200-1"
+      },
+      {
+        "value": "ultrafiltration",
+        "label_de": "Ultrafiltration",
+        "label_en": "Ultrafiltration",
+        "order_index": 6,
+        "regulation_reference": "Tab. 8 Anm. f) DWA-M 1200-1"
+      },
+      {
+        "value": "nanofiltration",
+        "label_de": "Nanofiltration",
+        "label_en": "Nanofiltration",
+        "order_index": 7,
+        "regulation_reference": "Tab. 8 Anm. f) DWA-M 1200-1"
+      },
+      {
+        "value": "umkehrosmose",
+        "label_de": "Umkehrosmose",
+        "label_en": "Reverse osmosis",
+        "order_index": 8,
+        "regulation_reference": "Tab. 8 Anm. f) DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-12",
+      "M12001-09"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-10 indikatorchemikalien_kat1": {
+    "enum_values": [
+      {
+        "value": "amisulprid",
+        "label_de": "Amisulprid",
+        "label_en": null,
+        "order_index": 1,
+        "regulation_reference": "Tab. 19 Kat. 1"
+      },
+      {
+        "value": "carbamazepin",
+        "label_de": "Carbamazepin",
+        "label_en": null,
+        "order_index": 2,
+        "regulation_reference": "Tab. 19 Kat. 1"
+      },
+      {
+        "value": "citalopram",
+        "label_de": "Citalopram",
+        "label_en": null,
+        "order_index": 3,
+        "regulation_reference": "Tab. 19 Kat. 1"
+      },
+      {
+        "value": "clarithromycin",
+        "label_de": "Clarithromycin",
+        "label_en": null,
+        "order_index": 4,
+        "regulation_reference": "Tab. 19 Kat. 1"
+      },
+      {
+        "value": "diclofenac",
+        "label_de": "Diclofenac",
+        "label_en": null,
+        "order_index": 5,
+        "regulation_reference": "Tab. 19 Kat. 1"
+      },
+      {
+        "value": "hydrochlorothiazid",
+        "label_de": "Hydrochlorothiazid",
+        "label_en": null,
+        "order_index": 6,
+        "regulation_reference": "Tab. 19 Kat. 1"
+      },
+      {
+        "value": "metoprolol",
+        "label_de": "Metoprolol",
+        "label_en": null,
+        "order_index": 7,
+        "regulation_reference": "Tab. 19 Kat. 1"
+      },
+      {
+        "value": "venlafaxin",
+        "label_de": "Venlafaxin",
+        "label_en": null,
+        "order_index": 8,
+        "regulation_reference": "Tab. 19 Kat. 1"
+      },
+      {
+        "value": "valsartansaeure",
+        "label_de": "Valsartansäure",
+        "label_en": null,
+        "order_index": 9,
+        "regulation_reference": "Tab. 19 Kat. 1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "json",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-10 indikatorchemikalien_kat2": {
+    "enum_values": [
+      {
+        "value": "benzotriazol",
+        "label_de": "Benzotriazol",
+        "label_en": null,
+        "order_index": 1,
+        "regulation_reference": "Tab. 19 Kat. 2"
+      },
+      {
+        "value": "methylbenzotriazol_4_5",
+        "label_de": "4- und 5-Methylbenzotriazol",
+        "label_en": null,
+        "order_index": 2,
+        "regulation_reference": "Tab. 19 Kat. 2"
+      },
+      {
+        "value": "gabapentin",
+        "label_de": "Gabapentin",
+        "label_en": null,
+        "order_index": 3,
+        "regulation_reference": "Tab. 19 Kat. 2"
+      },
+      {
+        "value": "candesartan",
+        "label_de": "Candesartan",
+        "label_en": null,
+        "order_index": 4,
+        "regulation_reference": "Tab. 19 Kat. 2"
+      },
+      {
+        "value": "irbesartan",
+        "label_de": "Irbesartan",
+        "label_en": null,
+        "order_index": 5,
+        "regulation_reference": "Tab. 19 Kat. 2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "json",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-10 spurenstoffentfernung_szenario": {
+    "enum_values": [
+      {
+        "value": "szenario_i",
+        "label_de": "Szenario I – mit zusätzlicher Spurenstoffentfernung (Monitoring Indikatorchemikalien)",
+        "label_en": "Scenario I – with additional trace-substance removal",
+        "order_index": 1,
+        "regulation_reference": "§6.6.1 / Tab. 19 / Bild 6 DWA-M 1200-1"
+      },
+      {
+        "value": "szenario_ii",
+        "label_de": "Szenario II – ohne zusätzliche Spurenstoffentfernung",
+        "label_en": "Scenario II – without additional trace-substance removal",
+        "order_index": 2,
+        "regulation_reference": "§6.6.1 / Tab. 19 / Bild 6 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-11 emitterabstand_dauerkulturen_cm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-11 karenzzeit_tage": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-16"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-11 schweinefutter_bewertung": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, beherrschbares Risiko bei Schweinefutter dokumentiert",
+        "label_en": "Yes, manageable risk for pig feed documented",
+        "order_index": 1,
+        "regulation_reference": "Tab. 7 (*) DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 7 (*) DWA-M 1200-1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-07"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-12 abweichung_chempar_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-12 abweichung_log10_max": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-12 abweichung_nematoden_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-12 beprobung_frequenz_e_coli": {
+    "enum_values": [
+      {
+        "value": "1x_pro_woche",
+        "label_de": "1x pro Woche (Güteklasse A / B-1 / B-2)",
+        "label_en": "Once per week (class A / B-1 / B-2)",
+        "order_index": 1,
+        "regulation_reference": "Tab. 27 DWA-M 1200-1"
+      },
+      {
+        "value": "2x_pro_monat",
+        "label_de": "2x pro Monat (Güteklasse C / D)",
+        "label_en": "Twice per month (class C / D)",
+        "order_index": 2,
+        "regulation_reference": "Tab. 27 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-13"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-12 compliance_quote_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-12 probenahme_norm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-12 validierungs_compliance_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-13 boden_vorbelastung_dokumentiert": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Bodenhintergrund vor Inbetriebnahme dokumentiert",
+        "label_en": "Yes, soil baseline documented before commissioning",
+        "order_index": 1,
+        "regulation_reference": "§6.6.3 DWA-M 1200-1; BBodSchV"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§6.6.3 DWA-M 1200-1; BBodSchV"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15",
+      "M12001-16"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 cd_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 cr_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 cu_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 gfs_orientierung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 hg_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 jahresbericht_umweltmonitoring": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-15",
+      "M12001-20"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 max_zusatzfracht_anteil_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 ni_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 pb_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-13 zn_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-14 notfall_verteiler_existent": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-20"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-14 stoerfall_meldewege": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-15 attest_m12001_15_cr_019": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12001-15 genehmigung_aktualisierung_trigger": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-20"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-15 genehmigungs_inhalt_komplett": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-20"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-15 rmp_aktualisierungs_intervall_jahre": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-20"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-16 aufbringungserlaubnis_antragsteller": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-16 flaechenverzeichnis_vorhanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-20"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-18 gebuehrenfaehigkeit_aufbereitung": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Gebührenfähigkeit weitergehende Aufbereitung gegeben",
+        "label_en": "Yes, fee eligibility for advanced treatment",
+        "order_index": 1,
+        "regulation_reference": "§57 WHG; §8.2 DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§57 WHG; §8.2 DWA-M 1200-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-19 beschilderung_urbane_flaechen": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, Beschilderung urbaner Flächen vorhanden",
+        "label_en": "Yes, signage on urban irrigated areas present",
+        "order_index": 1,
+        "regulation_reference": "Tab. 10 DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "Tab. 10 DWA-M 1200-1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-19 informationspflicht_abnehmer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12001-20"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-20 alle_genehmigungen": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja, alle erforderlichen Genehmigungen vorhanden",
+        "label_en": "Yes, all required permits in place",
+        "order_index": 1,
+        "regulation_reference": "7 DWA-M 1200-1"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "7 DWA-M 1200-1"
+      },
+      {
+        "value": "nicht_zutreffend",
+        "label_de": "Nicht zutreffend",
+        "label_en": "Not applicable",
+        "order_index": 99,
+        "regulation_reference": "N/A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M12001-20 rmp_letzte_aktualisierung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "date",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M12001-20 rmp_vollstaendig": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "sections": {
+    "M12001-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-01 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-01 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-02 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-02 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-03 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-03 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-04 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-05 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-05 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-05 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-06 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-07 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-07 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-07 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-08 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-08 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-08 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-08 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-08 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-08 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-08 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-08 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-08 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-09 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-09 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-09 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-09 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-09 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-09 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-09 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-09 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-09 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-10 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-10 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-10 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-10 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-10 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-10 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-10 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-10 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-10 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-11 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-11 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-11 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-11 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-11 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-11 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-11 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-11 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-11 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-12 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-12 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-12 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-12 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-12 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-12 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-12 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-12 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-12 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-13 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-13 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-13 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-13 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-13 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-13 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-13 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-13 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-13 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-14 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-14 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-14 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-14 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-14 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-14 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-14 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-14 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-14 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-15 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-15 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-15 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-15 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-15 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-15 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-15 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-15 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-15 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-16 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-16 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-16 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-16 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-16 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-16 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-16 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-16 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-16 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-17 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-17 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-17 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-17 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-17 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-17 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-17 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-17 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-17 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-18 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-18 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-18 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-18 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-18 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-18 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-18 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-18 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-18 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-19 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-19 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-19 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-19 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-19 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-19 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-19 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-19 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-19 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-20 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-20 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-20 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-20 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-20 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-20 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-20 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-20 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12001-20 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "M12001-07 EQ-001": {
+      "id": "978ac484-ac6c-4611-9a87-359c900b88dc",
+      "output_symbol": "risikoniveau_ausgangs",
+      "input_symbols": [
+        "eintrittswahrscheinlichkeit",
+        "schadensausmass"
+      ]
+    }
+  }
+}

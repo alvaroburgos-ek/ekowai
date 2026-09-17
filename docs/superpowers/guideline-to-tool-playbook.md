@@ -412,6 +412,21 @@ table first). (6) Never splice SQL or docs with `String.prototype.replace` and a
 backticks under a shell — `$$` collapses to `$` (dollar-quote tags), backticks are command-substituted; write the replacement
 from a file or use `split/join` (Task 4 fix round 1: the `DO $$` block became `DO $` and only the embedded-PG run caught it).
 
+**Encoding traps (Plan 3 Task 5, DWA-M-1200-1).** (1) A register `lookup_value` column's `lookup.key_column` names the
+REGISTER column that holds the key (`klasse_sub`), not the table's key column — a wrong name yields silent `null` cells, no
+diagnostic. (2) A row-scope `visible_when` may read a same-row `derived` column (`massnahmen ← ausgangsrisiko_code >= 3`);
+a null derived value leaves the condition `pending` (visible, required still counts). (3) `if(x IS NULL, …)` works inside a
+row `derived` expr — use it to keep samples without a printed requirement out of a compliance share; `a / count_rows(…)` over
+zero rows is "Division durch Null" → `manual_required` (never 0 or 100). (4) Yes/no drivers are often prod ENUMS (`ja` /
+`nein`), not booleans — check the capture before writing `== true`. (5) An OCR-damaged KEY column (Tab. 8 / Tab. 27 class
+cells as images) is assigned from the caption order plus in-text prose that repeats the cells, cross-checked against a
+sibling standard that reprints the table — but the table stays `imported_unverified` and every assignment gets a U-block.
+(6) Two sub-classes sharing one printed row (B-1/B-2) are seeded as two rows with identical cells and the same span, keyed
+by the prod tokens — no mapping table / chained fill. (7) Never re-bind an existing consumed enum as `lookup_fill` when one
+of its table cells is unreadable/empty: the widget renders a read-only "—" for that key and the engineer loses the input —
+create a text twin instead (m1200_1-E-3). (8) Generating quote constants with `String.replace(re, "${'$'}{")` silently
+emits nothing (`$'` is a replacement pattern) — use `split('${').join(…)` in the generator too, not only in file splices.
+
 ## Token budget note
 
 Plan 1 was the expensive corpus-wide pass. Per-standard cost through this playbook is still
