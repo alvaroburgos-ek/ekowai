@@ -35,8 +35,8 @@ const run = (n: string, opts: { inputs?: Array<{ symbol: string; value: number |
 const computed = (r: EvalState): number => { expect(r.kind, JSON.stringify(r)).toBe('computed'); return r.kind === 'computed' ? r.value : NaN; };
 
 describe('FLL-GAR-2023 Plan-3 equations', () => {
-  it('twenty entries; every output is a created field of its worksheet; no prod producer duplicated (g_prime, Delta_u, Q_NOT); emitter accepts them', () => {
-    expect(EQUATIONS.map((e) => e.equation_number)).toEqual(['FLL-GAR-02-D1', 'FLL-GAR-05-D1', 'FLL-GAR-05-D2', 'FLL-GAR-05-D3', 'FLL-GAR-07-D1', 'FLL-GAR-07-D2', 'FLL-GAR-09-D1', 'FLL-GAR-09-D2', 'FLL-GAR-11-D1', 'FLL-GAR-12-D1', 'FLL-GAR-14-D1', 'FLL-GAR-16-D1', 'FLL-GAR-16-D2', 'FLL-GAR-18-D1', 'FLL-GAR-18-D2', 'FLL-GAR-23-D1', 'FLL-GAR-24-D1', 'FLL-GAR-24-D2', 'FLL-GAR-27-D1', 'FLL-GAR-27-D2']);
+  it('nineteen entries; every output is a created field of its worksheet; no prod producer duplicated (g_prime, Delta_u, Q_NOT); emitter accepts them', () => {
+    expect(EQUATIONS.map((e) => e.equation_number)).toEqual(['FLL-GAR-02-D1', 'FLL-GAR-05-D1', 'FLL-GAR-05-D2', 'FLL-GAR-07-D1', 'FLL-GAR-07-D2', 'FLL-GAR-09-D1', 'FLL-GAR-09-D2', 'FLL-GAR-11-D1', 'FLL-GAR-12-D1', 'FLL-GAR-14-D1', 'FLL-GAR-16-D1', 'FLL-GAR-16-D2', 'FLL-GAR-18-D1', 'FLL-GAR-18-D2', 'FLL-GAR-23-D1', 'FLL-GAR-24-D1', 'FLL-GAR-24-D2', 'FLL-GAR-27-D1', 'FLL-GAR-27-D2']);
     const created = new Set(FIELD_CONFIGS.filter((f) => f.create).map((f) => `${f.worksheet} ${f.symbol}`));
     for (const e of EQUATIONS) {
       expect(created.has(`${e.worksheet} ${e.output_symbol}`), `${e.worksheet} ${e.output_symbol}`).toBe(true);
@@ -55,7 +55,7 @@ describe('FLL-GAR-2023 Plan-3 equations', () => {
     const files = equationFilesFor('fll_gar', '20260917100720');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/ON CONFLICT \(worksheet_template_id, equation_number\) DO NOTHING/g) ?? []).length).toBe(20);
+    expect((up.match(/ON CONFLICT \(worksheet_template_id, equation_number\) DO NOTHING/g) ?? []).length).toBe(19);
   });
 
   it('FLL-GAR-02-D1: the four §1.1 exclusions → 0, every listed use → 1', () => {
@@ -64,7 +64,7 @@ describe('FLL-GAR-2023 Plan-3 equations', () => {
     expect(run('FLL-GAR-02-D1', {}).kind).toBe('manual_required');
   });
 
-  it('FLL-GAR-05-D1 / -D2 / -D3: Tab. 18 — W1-B ≤ 5 m, W2-B ≤ 10 m, W3-B > 10 m; R0…R3 with the 0,2 / 0,5 / 1,0 mm bounds and the R3 Versatz ≤ 0,5 mm; S1-B / S2-B', () => {
+  it('FLL-GAR-05-D1 / -D2: Tab. 18 — W1-B ≤ 5 m, W2-B ≤ 10 m, W3-B > 10 m; R0…R3 with the 0,2 / 0,5 / 1,0 mm bounds and the R3 Versatz ≤ 0,5 mm (the S-class is not derived — no independent input printed, fll_gar-D-4)', () => {
     expect([5, 5.01, 10, 10.5].map((h) => computed(run('FLL-GAR-05-D1', { inputs: inp({ fuellhoehe_m: h }) })))).toEqual([1, 2, 2, 3]); // L3673–L3675
     const r = (neurissbildung: string, rb: number, rv: number) => computed(run('FLL-GAR-05-D2', { inputs: inp({ neurissbildung, rissbreite_erwartet_mm: rb, rissversatz_erwartet_mm: rv }) }));
     expect(r('ausgeschlossen', 0, 0)).toBe(0);   // L3677
@@ -74,9 +74,7 @@ describe('FLL-GAR-2023 Plan-3 equations', () => {
     expect(r('moeglich', 1.0, 0.6)).toBe(9);      // Versatz over 0,5 mm → outside Tab. 18 (fll_gar-J-2)
     expect(r('moeglich', 1.2, 0)).toBe(9);
     expect(run('FLL-GAR-05-D2', { inputs: inp({ neurissbildung: 'moeglich', rissbreite_erwartet_mm: 0.1 }) }).kind).toBe('manual_required'); // every named input is checked before evaluation
-    expect(computed(run('FLL-GAR-05-D3', { inputs: inp({ standort_tab18: 'aussen_frei' }) }))).toBe(1);   // L3692–L3693
-    expect(computed(run('FLL-GAR-05-D3', { inputs: inp({ standort_tab18: 'aussen_bauwerk' }) }))).toBe(2); // L3695–L3696
-    expect(computed(run('FLL-GAR-05-D3', { inputs: inp({ standort_tab18: 'innen' }) }))).toBe(2);
+    expect(EQUATIONS.some((e) => e.equation_number === 'FLL-GAR-05-D3')).toBe(false);
   });
 
   it('FLL-GAR-07-D1 / -D2 over boeschungsabschnitte: Tab. 1 per row on the (not yet inherited) abdichtungs_art — steepest 1:1 vs limit 1:1,5 for Kunststoffbahnen (L1408); undecidable without the driver (fll_gar-C-1)', () => {
@@ -105,7 +103,7 @@ describe('FLL-GAR-2023 Plan-3 equations', () => {
       { id: '5', position: 5, rolle: 'auflast', dicke_mm: 300 },
     ];
     const L = prep('FLL-GAR-09', 'abdichtungslagen', rows);
-    expect(L.rows.map((r) => [r.values.neigung_limit, r.values.sand_min_cm, r.values.fg_min, r.values.fg_ok, r.complete])).toEqual([[0, 5, null, 1, true], [3, null, null, 1, true], [3, null, null, 1, true], [0, null, 500, 0, true], [0, null, null, 1, true]]);
+    expect(L.rows.map((r) => [r.values.neigung_limit, r.values.sand_min_cm, r.values.fg_min, r.values.fg_ok, r.complete])).toEqual([[null, 5, null, 1, true], [3, null, null, 1, true], [3, null, null, 1, true], [null, null, 500, 0, true], [null, null, null, 1, true]]); // non-sealing rows: no Tab.-1 limit (null → "—", fix round 1)
     expect(L.rows[0].values.werkstoffe_tab26).toContain('Vliesstoffe bzw. Geo- textilien ≥ 300 g/m2, GRK 5');
     expect(L.diagnostics).toBeUndefined();
     expect(computed(run('FLL-GAR-09-D1', { registers: { abdichtungslagen: L } }))).toBe(8);

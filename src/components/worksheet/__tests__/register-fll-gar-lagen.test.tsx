@@ -62,7 +62,7 @@ describe('abdichtungslagen through the generic RegisterEditor (Plan 3 Task 7)', 
     expect(within(rows[0]).getByTestId('lookup-value-werkstoffe_tab26')).toHaveTextContent('Vliesstoffe bzw. Geo- textilien ≥ 300 g/m2, GRK 5');
     expect(within(rows[0]).queryByLabelText('Abdichtungsart (Tab. 1)')).toBeNull();
     expect(within(rows[0]).queryByLabelText('SWK (Tab. 27)')).toBeNull();
-    expect(within(rows[0]).getByTestId('derived-neigung_limit')).toHaveTextContent('0');
+    expect(within(rows[0]).getByTestId('derived-neigung_limit')).toHaveTextContent('—'); // non-sealing row: no Tab.-1 limit (fix round 1)
     // row 2 — Abdichtung
     expect(within(rows[1]).queryByLabelText('Abdichtungsart (Tab. 1)')).not.toBeNull();
     expect(within(rows[1]).queryByLabelText('Baugrund DIN 18196 (Tab. 26)')).toBeNull();

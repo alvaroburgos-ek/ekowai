@@ -2,7 +2,7 @@
  * Plan 3 Task 7 — FLL-GAR-2023 field configs: every entry parses through the zod
  * contract, the key-string equality rule (G-A3) holds against the captured prod
  * enums and the seeded tables, the emitter accepts the module against the
- * captured prior (two UPDATE entries, 61 `create`), the withheld rules of the
+ * captured prior (one UPDATE entry, 59 `create`), the withheld rules of the
  * brief are pinned as REFUSED by the transitive guard (fll_gar-C-2 … -C-4), the
  * master switch `abdichtungs_art` is pinned as NOT inherited (fll_gar-C-1), and
  * the committed migration equals a fresh emit.
@@ -50,22 +50,22 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
     for (const s of SECTION_VISIBILITY) expect(parseCondition(s.visible_when), `${s.worksheet} ${s.section_code}`).not.toBeNull();
   });
 
-  it('counts: 63 entries — 61 create (9 registers, 8 select_one, 20 lookup_fill, 20 derived outputs, 3 scalar inputs, 1 attestation) + 2 UPDATE (nahtbreite_min_mm lookup_fill, verzinkung_dicke_um scalar); 4 field rules; 104 section rules', () => {
-    expect(FIELD_CONFIGS).toHaveLength(63);
-    expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(61);
-    expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['FLL-GAR-16 nahtbreite_min_mm', 'FLL-GAR-19 verzinkung_dicke_um']);
+  it('counts: 60 entries — 59 create (9 registers, 7 select_one, 20 lookup_fill, 19 derived outputs, 3 scalar inputs, 1 attestation) + 1 UPDATE (verzinkung_dicke_um scalar; the nahtbreite_min_mm re-bind is STAGED, E-2); 4 field rules; 104 section rules', () => {
+    expect(FIELD_CONFIGS).toHaveLength(60);
+    expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(59);
+    expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['FLL-GAR-19 verzinkung_dicke_um']);
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('register')).toEqual(['FLL-GAR-07 boeschungsabschnitte', 'FLL-GAR-09 abdichtungslagen', 'FLL-GAR-16 naehte', 'FLL-GAR-23 randabschnitte', 'FLL-GAR-24 durchdringungen', 'FLL-GAR-24 pflanzenarten', 'FLL-GAR-25 pruefungen', 'FLL-GAR-27 einzugsflaechen_not', 'FLL-GAR-28 wartungsmassnahmen']);
-    expect(byWidget('select_one')).toEqual(['FLL-GAR-05 neurissbildung', 'FLL-GAR-05 standort_tab18', 'FLL-GAR-10 mineral_typ', 'FLL-GAR-13 mischgutart', 'FLL-GAR-16 bahn_vorkonfektioniert', 'FLL-GAR-18 pe_werkstoff', 'FLL-GAR-22 baugrund_klasse_18196', 'FLL-GAR-22 swk_klasse']);
+    expect(byWidget('select_one')).toEqual(['FLL-GAR-05 neurissbildung', 'FLL-GAR-10 mineral_typ', 'FLL-GAR-13 mischgutart', 'FLL-GAR-16 bahn_vorkonfektioniert', 'FLL-GAR-18 pe_werkstoff', 'FLL-GAR-22 baugrund_klasse_18196', 'FLL-GAR-22 swk_klasse']);
     expect(byWidget('lookup_fill')).toEqual([
       'FLL-GAR-07 boeschungsneigung_limit', 'FLL-GAR-10 schichtdicke_abdichtung_min', 'FLL-GAR-10 schichtdicke_auflast_min',
       'FLL-GAR-12 festigkeitsklasse_soll', 'FLL-GAR-12 expositionsklassen_soll', 'FLL-GAR-12 feuchtigkeitsklasse_soll', 'FLL-GAR-12 c_nom_min', 'FLL-GAR-12 bauteildicke_min',
       'FLL-GAR-13 asph_dicke_min', 'FLL-GAR-13 asph_dicke_max', 'FLL-GAR-13 asph_neigung_max_1m',
       'FLL-GAR-14 bentonit_flaecheneinheit_min', 'FLL-GAR-14 quellvermoegen_min', 'FLL-GAR-14 gtd_auflast_min_m',
-      'FLL-GAR-16 nahtbreite_min_mm', 'FLL-GAR-16 naht_ueberlappung_min_mm', 'FLL-GAR-18 peld_nenndicke_min_mm', 'FLL-GAR-18 pehd_nenndicke_min_mm',
+      'FLL-GAR-16 naht_ueberlappung_min_mm', 'FLL-GAR-18 peld_nenndicke_min_mm', 'FLL-GAR-18 pehd_nenndicke_min_mm',
       'FLL-GAR-22 sl_schutzlage_unten_sand_min_cm', 'FLL-GAR-22 sl_schutzlage_unten_werkstoffe_tab26', 'FLL-GAR-22 sl_schutzlage_oben_flaechengewicht_min',
     ]);
-    expect(byWidget('derived')).toHaveLength(20);
+    expect(byWidget('derived')).toHaveLength(19);
     expect(byWidget('scalar')).toEqual(['FLL-GAR-05 rissbreite_erwartet_mm', 'FLL-GAR-05 rissversatz_erwartet_mm', 'FLL-GAR-14 ungleichfoermigkeit_u', 'FLL-GAR-19 verzinkung_dicke_um']);
     expect(byWidget('attestation')).toEqual(['FLL-GAR-05 eisdruck_randschutz_vorgesehen']);
     const rules = FIELD_CONFIGS.filter((e) => e.visible_when).map((e) => `${e.worksheet} ${e.symbol} :: ${e.visible_when}`);
@@ -82,7 +82,7 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
       expect(own.map((s) => s.section_code)).toEqual(['A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M'].filter((c) => !PRODUCER_SECTIONS.some(([w, cc]) => w === ws && cc === c)));
     }
     // never touched: the consumed producers of the brief's Step 4 (fll_gar-C-3 / -C-4), the prod inputs the fills sit next to, the Anhang-2 symbols
-    for (const sym of ['wassereinwirkungsklasse', 'rissklasse', 'standortklasse', 'anzahl_lagen', 'wurzel_rhizomfestigkeit_required', 'abdichtungs_art', 'gewaesser_in_scope', 'schichtdicke_abdichtung_cm', 'schichtdicke_auflast_cm', 'bauteildicke_cm', 'naht_ueberlappung_kunststoff_mm', 'bahnendicke_mm', 'groesstkorn_auflast_mm', 'A', 'C', 'Q_NOT', 'g_prime', 'freibord_zu_gelaende_cm', 'freibord_zu_bauwerk_cm', 'bep_durchdringungen_anzahl', 'baugrund_typ']) {
+    for (const sym of ['wassereinwirkungsklasse', 'rissklasse', 'standortklasse', 'anzahl_lagen', 'wurzel_rhizomfestigkeit_required', 'abdichtungs_art', 'nahtbreite_min_mm', 'standort_tab18', 's_klasse_code', 'gewaesser_in_scope', 'schichtdicke_abdichtung_cm', 'schichtdicke_auflast_cm', 'bauteildicke_cm', 'naht_ueberlappung_kunststoff_mm', 'bahnendicke_mm', 'groesstkorn_auflast_mm', 'A', 'C', 'Q_NOT', 'g_prime', 'freibord_zu_gelaende_cm', 'freibord_zu_bauwerk_cm', 'bep_durchdringungen_anzahl', 'baugrund_typ']) {
       expect(FIELD_CONFIGS.find((e) => e.symbol === sym), sym).toBeUndefined();
     }
   });
@@ -118,16 +118,14 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
     expect(opts('FLL-GAR-22', 'swk_klasse')).toEqual([...SWK_TOKENS]);
     expect(opts('FLL-GAR-22', 'swk_klasse')).toEqual(tab27AsTable().rows.map((r) => r.row_key));
     expect(opts('FLL-GAR-05', 'neurissbildung')).toEqual(['ausgeschlossen', 'moeglich']);
-    expect(opts('FLL-GAR-05', 'standort_tab18')).toEqual(['aussen_frei', 'aussen_bauwerk', 'innen']);
     expect(opts('FLL-GAR-18', 'pe_werkstoff')).toEqual(['PELD', 'PEHD']);
     expect(opts('FLL-GAR-16', 'bahn_vorkonfektioniert')).toEqual(['ja', 'nein']);
     // lifted labels
     expect((byKey('FLL-GAR-05', 'neurissbildung').enum_values as Array<{ label_de: string }>)[0].label_de).toBe('keine Rissbreitenveränderung bzw. Neurissbildung'); // L3677
     expect((byKey('FLL-GAR-18', 'pe_werkstoff').enum_values as Array<{ label_de: string }>).map((e) => e.label_de)).toEqual(['Polyethylen mit geringer Dichte (PELD)', 'Polyethylen mit hoher Dichte (PEHD)']); // L4455–L4456
-    expect((byKey('FLL-GAR-05', 'standort_tab18').enum_values as Array<{ label_de: string }>)[0].label_de).toBe('Behälter im Außenbereich, der nicht mit einem Bauwerk verbun- den ist.'); // L3692–L3693
   });
 
-  it('lookup_fill bindings: keys[].column equal the table key_columns in order; the driving symbols exist on the fill worksheet (prod or created); data types number|text', () => {
+  it('lookup_fill bindings: keys[].column equal the table key_columns in order; the driving symbols exist on the fill worksheet (prod or created); data types number|text; the Tab.-22 re-bind of the consumed Mindestnahtbreite is NOT emitted (E-2)', () => {
     const created = new Set(FIELD_CONFIGS.filter((e) => e.create).map((e) => `${e.worksheet} ${e.symbol}`));
     for (const e of FIELD_CONFIGS.filter((x) => x.widget === 'lookup_fill')) {
       expect(e.lookup!.keys.map((k) => k.column), e.symbol).toEqual(tableKeyColumns[e.lookup!.table_code]);
@@ -152,9 +150,10 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
     expect(tab25AsTable().rows.map((r) => r.keys.beanspruchung)).toEqual(enumValues('FLL-GAR-18 pe_beanspruchung_klasse'));
     expect(new Set(tab22AsTable().rows.map((r) => r.keys.material))).toEqual(new Set(enumValues('FLL-GAR-16 bahn_material_naht')));
     expect(tab1AsTable().rows.every((r) => (ABDICHTUNGS_ART_TOKENS as readonly string[]).includes(r.keys.abdichtungs_art))).toBe(true);
-    // the re-bound existing limit: number, is the consumed "Mindestnahtbreite" (fll_gar-E-2)
+    // the consumed "Mindestnahtbreite" stays untouched — its re-bind is a ruling (fll_gar-E-2, STAGED)
     expect(priorRow('FLL-GAR-16 nahtbreite_min_mm')).toMatchObject({ data_type: 'number', widget: null });
     expect(cons('FLL-GAR-16 nahtbreite_min_mm')).toEqual(['FLL-GAR-15', 'FLL-GAR-18']);
+    expect(FIELD_CONFIGS.some((e) => e.symbol === 'nahtbreite_min_mm')).toBe(false);
   });
 
   it('the master switch is NOT inherited (fll_gar-C-1): abdichtungs_art consumer_worksheets is the unresolvable range string; rules keyed on it are inert until the consumer edit', () => {
@@ -199,11 +198,11 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
     const files = fieldConfigFilesFor('fll_gar', '20260917100710');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(2);
-    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(61);
+    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(1);
+    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(59);
     expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(104);
     expect(up).not.toMatch(/SET [^\n]*enum_values = /); // D-1: no prod enum touched (created rows carry their own lists)
-    expect(down).toMatch(/UPDATE fields f SET widget = NULL, ui_config = NULL, lookup = NULL, visible_when = NULL .* AND f.symbol = 'nahtbreite_min_mm' AND w.code = 'FLL-GAR-16'/);
+    expect(down).not.toMatch(/nahtbreite_min_mm/);
     expect(down).toMatch(/AND f.symbol = 'verzinkung_dicke_um' AND w.code = 'FLL-GAR-19'/);
   });
 });

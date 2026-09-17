@@ -849,6 +849,23 @@ export const Q_L6495_6503 = String.raw`5 Das erforderliche Flächengewicht g' de
 10 cos ß  
 11 mit der Gleichung:  
 12 ∆u=(∆hW \+ za) ɣw  `;
+/** L1479–L1480 */
+export const Q_L1479_1480 = String.raw`den baulichen Vorgaben (z. B. Randausbildung, Anschlüsse, Durchdringungen und  
+technische Einbauten);  `;
+/** L1483 */
+export const Q_L1483 = String.raw`dem Instandhaltungsaufwand (z. B. Reinigungsart, Inspektionsintervalle);  `;
+/** L2385–L2393 */
+export const Q_L2385_2393 = String.raw`5.2.3.2 Eigen- und Fremdüberwachung  
+Die Einhaltung der technischen Eigenschaften der gelieferten Zusatzstoffe werden durch die  
+eigene Werkskontrolle des Herstellers (Eigenprüfung) sichergestellt. Eine gesetzliche Pflicht  
+zur Fremdüberwachung besteht nicht.
+
+5.2.3.3 Kontrollprüfung
+
+Nach Einbau der Dichtungsschicht sind seitens des Auftraggebers Kontrollprüfungen zu ver-  
+anlassen. Sie können den Erfordernissen entsprechend folgende Untersuchungen umfassen:`;
+/** L2410 */
+export const Q_L2410 = String.raw`Die Ergebnisse der Kontrollprüfung werden der Abnahme und Abrechnung zugrunde gelegt.`;
 
 // ---------------------------------------------------------------------------
 // Helpers: every cell is cut out of a lifted span (never retyped). `norm` collapses the transcript's line breaks /

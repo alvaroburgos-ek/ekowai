@@ -10,11 +10,18 @@
 --
 -- Conventions: `s.code = 'FLL-GAR-2023'`, worksheets by code, never by id (gates / equations by their captured uuid + a
 -- guard on md5(condition) / md5(formula) of the text they replace so a re-run is a no-op); each block names its rollback.
--- NO block deletes a row: gates and equations are UPDATEd with their captured text as the rollback; a field retirement is
--- `active = false` (reversible). The Plan-3 DATA migrations (20260917100700 seed · 20260917100710 field configs ·
+-- The blocks that replace long or verified text (E-2, G-5, G-8, G-9, R-1, R-2) follow the amendment-I archive pattern (fix
+-- round 1); the other gate re-points (G-2, G-3, G-4, G-6, G-7, G-12, G-13, D-2) replace a SHORT or EMPTY captured condition
+-- that is quoted in full in the block, so their rollback restores that quoted text (column-exact, the m277e-accepted form). Archive pattern: the affected rows are copied into `compliance_requirements_archive_fll_gar` /
+-- `equations_archive_fll_gar` / `fields_archive_fll_gar` in the SAME transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT *
+-- … WHERE false; INSERT … SELECT * … WHERE (id = … AND md5(<content>) = …)`), the UPDATE is guarded on md5(condition) /
+-- md5(formula) read read-only from prod, and the rollback DELETEs the changed row by id + md5 of the NEW text and re-INSERTs the
+-- archived row with an EXPLICIT column list (never `SELECT *`, never retyped — prod-query.mjs truncates cells at 120 chars);
+-- the archive table is dropped by the rollback or on the owner's sign-off that the change is final. A field retirement is
+-- `active = false` (reversible). New gates (G-1, G-10, G-11) are INSERTs with a DELETE-by-description rollback. The Plan-3 DATA migrations (20260917100700 seed · 20260917100710 field configs ·
 -- 20260917100720 equations) must be applied BEFORE any block that reads a created symbol (boeschungsabschnitte,
 -- boeschung_steilste_1m, boeschung_verletzungen, boeschungsneigung_limit, abdichtungslagen, abdichtungslagen_count,
--- w_klasse_code, r_klasse_code, s_klasse_code, eisdruck_randschutz_vorgesehen, gewaesser_in_scope_code, wz_max,
+-- w_klasse_code, r_klasse_code, eisdruck_randschutz_vorgesehen, gewaesser_in_scope_code, wz_max,
 -- bauteildicke_min, schichtdicke_abdichtung_min, schichtdicke_auflast_min, asph_dicke_min, bentonit_flaecheneinheit_min,
 -- quellvermoegen_min, groesstkorn_max_mm, naehte, naht_verletzungen, naht_ueberlappung_min_mm, bahnendicke_min_mm,
 -- pehd_tab24_code, pe_rhizom_nachweis_code, sl_schutzlage_unten_sand_min_cm, sl_schutzlage_oben_flaechengewicht_min,
@@ -36,6 +43,8 @@
 -- Abdichtungsstoffe aus Bitumen und Kunststoffen sowie Flüssigkunststoffe).
 -- Why staged: a consumer_worksheets edit is an always-sign-off class; the resolved list (-04 REQ-05, -05 Tab. 18 scope,
 -- -07 Tab. 1, the twelve material worksheets, -22 Schutzlagen, -23 / -24 REQ-11) is the executor's reading of §4–§8.
+-- Note: even after C-1 the rules / fills on -04, -05 and -07 read the inherited value and stay `pending` (visible) /
+-- "Schlüssel fehlt" until FLL-GAR-09 is filled — the selector lives on -09, downstream of those worksheets in the numbering.
 -- Option:
 -- BEGIN;
 -- UPDATE fields f SET consumer_worksheets = ARRAY['FLL-GAR-04','FLL-GAR-05','FLL-GAR-07','FLL-GAR-10','FLL-GAR-11','FLL-GAR-12','FLL-GAR-13','FLL-GAR-14','FLL-GAR-15','FLL-GAR-16','FLL-GAR-17','FLL-GAR-18','FLL-GAR-19','FLL-GAR-20','FLL-GAR-21','FLL-GAR-22','FLL-GAR-23','FLL-GAR-24']
@@ -95,6 +104,36 @@
 --  WHERE id = '30c7b625-9cac-4569-9c72-bf907ce79fde' AND md5(condition) = '9ef43962852d96f62aca6f0a5f29b3e2';
 -- COMMIT;
 -- Rollback: SET visible_when = NULL on anzahl_lagen; SET condition = 'IF abdichtungs_art == bahn_bitumen THEN anzahl_lagen >= 2' WHERE id = '30c7b625-…'.
+
+-- =====================================================================================================================
+-- fll_gar-E-2 · FLL-GAR-16 nahtbreite_min_mm — re-bind the existing "Mindestnahtbreite" limit as a Tab.-22 lookup_fill (withdrawn from 20260917100710 in fix round 1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: nahtbreite_min_mm (FLL-GAR-16, number, mm, is_required, consumed by -15 / -18, validation_rules.raw
+-- '>= 20/30/40/60 per Tab.22', widget / ui_config / lookup / visible_when all NULL). Its two keys fuegeverfahren ×
+-- bahn_material_naht are own fields of -16; TAB22 (12 rows, locked) is seeded by 20260917100700.
+-- Evidence: L4101–L4102 "Je nach Stoffart der Kunststoff- und Elastomerbahn sind unterschiedliche Fügeverfahren und
+-- Mindestfügebreiten einzuhalten."; Tab. 22 L4104–L4135. FLL-revision GAR16-F1 (the '60' in the raw rule is the Überlappung).
+-- Why staged: a widget change on a consumed, required producer is a ruling (the fill writes the Tab.-22 value once per key
+-- change; a typed deviation stays; a non-printed combination shows "keine Zeile" and leaves the engineer's value) — not a
+-- fail-safe default. The register naehte (per-row limits) and the created naht_ueberlappung_min_mm are unaffected.
+-- Option (after 20260917100700; Plan-3 columns present) — archive pattern on `fields`:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_fll_gar AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_fll_gar SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE f.symbol = 'nahtbreite_min_mm' AND w.code = 'FLL-GAR-16' AND s.code = 'FLL-GAR-2023' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"Tab. 22 (Mindestfügebreite)"}'::jsonb,
+--        lookup = '{"table_code":"TAB22","role":"limit","keys":[{"column":"fuegeverfahren","from_symbol":"fuegeverfahren"},{"column":"material","from_symbol":"bahn_material_naht"}],"value":"nahtbreite_min_mm"}'::jsonb,
+--        visible_when = NULL
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'nahtbreite_min_mm' AND w.code = 'FLL-GAR-16' AND s.code = 'FLL-GAR-2023' AND f.active AND f.widget IS NULL;
+-- COMMIT;
+-- Rollback (the four Plan-1 columns back from the archive row by id — explicit columns, never retyped):
+-- BEGIN;
+-- UPDATE fields f SET widget = a.widget, ui_config = a.ui_config, lookup = a.lookup, visible_when = a.visible_when
+--   FROM fields_archive_fll_gar a WHERE f.id = a.id AND f.widget = 'lookup_fill';
+-- DELETE FROM fields_archive_fll_gar a USING fields f WHERE f.id = a.id AND f.widget IS NOT DISTINCT FROM a.widget;
+-- COMMIT;
+-- The archive table `fields_archive_fll_gar` is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
 
 -- =====================================================================================================================
 -- fll_gar-G-1 · new gate: Größtkorn der Auflast ≤ groesstkorn_max_mm (FLL-GAR-14, §5.5.2.1)
@@ -163,10 +202,24 @@
 -- mineralisch_hydraulisch THEN ((bauteildicke_cm <= 40 AND wasserzementwert <= 0.60 AND zementgehalt_kg_m3 >= 280) OR
 -- (bauteildicke_cm > 40 AND wasserzementwert <= 0.70))' — the Tab.-6 values as literals (correct today; single-source hygiene
 -- only). No gate reads Tab. 8 (FLL-revision GAR-12 F1); bauteildicke_cm is cm, Tab. 8 mm (GAR-12 F2).
--- Option (single-source; same behaviour): SET condition = 'IF abdichtungs_art == mineralisch_hydraulisch THEN wasserzementwert <= wz_max AND (bauteildicke_cm > 40 OR zementgehalt_kg_m3 >= 280)'
+-- Option (single-source; same behaviour) — archive pattern:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_fll_gar AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_fll_gar SELECT * FROM compliance_requirements
 --  WHERE id = '1918d21c-f84e-462e-be7f-dc1c718a7b04' AND md5(condition) = '6767d23ffd935972371983e6a8219be3';
--- Option (new gate, FLL-GAR-12): 'IF abdichtungs_art == mineralisch_hydraulisch THEN bauteildicke_cm * 10 >= bauteildicke_min' (severity — owner).
--- Rollback: restore the captured condition text above.
+-- UPDATE compliance_requirements SET condition = 'IF abdichtungs_art == mineralisch_hydraulisch THEN wasserzementwert <= wz_max AND (bauteildicke_cm > 40 OR zementgehalt_kg_m3 >= 280)'
+--  WHERE id = '1918d21c-f84e-462e-be7f-dc1c718a7b04' AND md5(condition) = '6767d23ffd935972371983e6a8219be3';
+-- COMMIT;
+-- Option (new gate, FLL-GAR-12): INSERT 'IF abdichtungs_art == mineralisch_hydraulisch THEN bauteildicke_cm * 10 >= bauteildicke_min' (severity — owner; rollback DELETE by its Plan-3 description prefix).
+-- Rollback (full row from the archive, explicit column list, never retyped):
+-- BEGIN;
+-- DELETE FROM compliance_requirements WHERE id = '1918d21c-f84e-462e-be7f-dc1c718a7b04' AND md5(condition) = md5('IF abdichtungs_art == mineralisch_hydraulisch THEN wasserzementwert <= wz_max AND (bauteildicke_cm > 40 OR zementgehalt_kg_m3 >= 280)');
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_fll_gar WHERE id = '1918d21c-f84e-462e-be7f-dc1c718a7b04' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM compliance_requirements_archive_fll_gar WHERE id = '1918d21c-f84e-462e-be7f-dc1c718a7b04';
+-- COMMIT;
+-- The archive table `compliance_requirements_archive_fll_gar` is dropped (DROP TABLE) once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
 
 -- =====================================================================================================================
 -- fll_gar-G-6 · REQ-08 (66b9e6bd-3278-4b55-8bbc-b5dc754dad06, FLL-GAR-07, warn, EMPTY condition) onto the Tab.-1 comparison
@@ -193,11 +246,26 @@
 -- =====================================================================================================================
 -- fll_gar-G-8 · REQ-16 (5e2a7232-a69b-437d-b42d-a392ce525c65, FLL-GAR-10, block, md5 98e6acfc4e634ea708d6393620e860d2) onto the Tab.-13 fills
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Evidence: Tab. 13 L3124–L3128 (Mclay ≥ 3.600 / ≥ 8.000 g/m2; Quellvermögen ≥ 24 / ≥ 8 ml). prod REQ-16 carries the same values
--- as literals per bentonit_type (correct today; single-source hygiene only) plus the overlap clauses ≥ 30 / ≥ 50 cm (§5.5.2).
--- Option: SET condition = 'IF abdichtungs_art == verbundwerkstoff_gtd THEN bentonit_flaecheneinheit_g_m2 >= bentonit_flaecheneinheit_min AND quellvermoegen_ml >= quellvermoegen_min AND gtd_ueberlappung_laengs_cm >= 30 AND gtd_ueberlappung_quer_cm >= 50'
+-- Evidence: Tab. 13 L3124–L3128 (Mclay ≥ 3.600 / ≥ 8.000 g/m2; Quellvermögen ≥ 24 / ≥ 8 ml). prod REQ-16 (311 chars, read in
+-- 110-char chunks — never retyped here) carries the same values as literals per bentonit_type (correct today; single-source
+-- hygiene only) plus the overlap clauses ≥ 30 / ≥ 50 cm (§5.5.2).
+-- Option — archive pattern (the captured 311-char text lives in the archive row, not in this file):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_fll_gar AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_fll_gar SELECT * FROM compliance_requirements
 --  WHERE id = '5e2a7232-a69b-437d-b42d-a392ce525c65' AND md5(condition) = '98e6acfc4e634ea708d6393620e860d2';
--- Rollback: restore the captured 311-char condition (read in 110-char chunks 2026-09-17; re-read before applying).
+-- UPDATE compliance_requirements SET condition = 'IF abdichtungs_art == verbundwerkstoff_gtd THEN bentonit_flaecheneinheit_g_m2 >= bentonit_flaecheneinheit_min AND quellvermoegen_ml >= quellvermoegen_min AND gtd_ueberlappung_laengs_cm >= 30 AND gtd_ueberlappung_quer_cm >= 50'
+--  WHERE id = '5e2a7232-a69b-437d-b42d-a392ce525c65' AND md5(condition) = '98e6acfc4e634ea708d6393620e860d2';
+-- COMMIT;
+-- Rollback (full row from the archive, explicit column list, never retyped):
+-- BEGIN;
+-- DELETE FROM compliance_requirements WHERE id = '5e2a7232-a69b-437d-b42d-a392ce525c65' AND md5(condition) = md5('IF abdichtungs_art == verbundwerkstoff_gtd THEN bentonit_flaecheneinheit_g_m2 >= bentonit_flaecheneinheit_min AND quellvermoegen_ml >= quellvermoegen_min AND gtd_ueberlappung_laengs_cm >= 30 AND gtd_ueberlappung_quer_cm >= 50');
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_fll_gar WHERE id = '5e2a7232-a69b-437d-b42d-a392ce525c65' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM compliance_requirements_archive_fll_gar WHERE id = '5e2a7232-a69b-437d-b42d-a392ce525c65';
+-- COMMIT;
+-- The archive table is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
 
 -- =====================================================================================================================
 -- fll_gar-G-9 · REQ-20 (ffb62b93-b294-4bd6-b700-e5887d0662c9, FLL-GAR-10, block, md5 d5d4a026429daa263401b981f1cd054f) onto pehd_tab24_code
@@ -206,9 +274,23 @@
 -- 'IF abdichtungs_art == bahn_pe THEN peeh_dichte_g_cm3 > 0.940 AND peeh_mfr >= 1.0 AND peeh_mfr <= 3.0 AND peeh_russgehalt_pct >= 2
 -- AND peeh_russgehalt_pct <= 3' — the same values as literals (single-source hygiene only). The gate applies to PEHD sheets;
 -- with the created pe_werkstoff a PELD project could be excluded ("Für PELD-Bahnen bestehen Anforderungen nur herstellerseits", L4460).
--- Option: SET condition = 'IF abdichtungs_art == bahn_pe AND pe_werkstoff == PEHD THEN pehd_tab24_code == 1'
+-- Option — archive pattern:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_fll_gar AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_fll_gar SELECT * FROM compliance_requirements
 --  WHERE id = 'ffb62b93-b294-4bd6-b700-e5887d0662c9' AND md5(condition) = 'd5d4a026429daa263401b981f1cd054f';
--- Rollback: restore the captured condition text above.
+-- UPDATE compliance_requirements SET condition = 'IF abdichtungs_art == bahn_pe AND pe_werkstoff == PEHD THEN pehd_tab24_code == 1'
+--  WHERE id = 'ffb62b93-b294-4bd6-b700-e5887d0662c9' AND md5(condition) = 'd5d4a026429daa263401b981f1cd054f';
+-- COMMIT;
+-- Rollback (full row from the archive, explicit column list, never retyped):
+-- BEGIN;
+-- DELETE FROM compliance_requirements WHERE id = 'ffb62b93-b294-4bd6-b700-e5887d0662c9' AND md5(condition) = md5('IF abdichtungs_art == bahn_pe AND pe_werkstoff == PEHD THEN pehd_tab24_code == 1');
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_fll_gar WHERE id = 'ffb62b93-b294-4bd6-b700-e5887d0662c9' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM compliance_requirements_archive_fll_gar WHERE id = 'ffb62b93-b294-4bd6-b700-e5887d0662c9';
+-- COMMIT;
+-- The archive table is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
 
 -- =====================================================================================================================
 -- fll_gar-G-10 · new gates on FLL-GAR-16: Tab. 22 seams and the §6.2.2.1 overlap
@@ -259,17 +341,29 @@
 -- verified_against_standard. Created: einzugsflaechen_not, sum_a_m2 (FLL-GAR-27-D1), sum_ac (FLL-GAR-27-D2).
 -- Why staged: replacing a VERIFIED equation; the summed form Σ_i A_i (r5,100 − r5,5·C_i) = r5,100·ΣA − r5,5·ΣA·C is the
 -- executor's algebra (identical for one row; a per-area C is the reading of "Abflussbeiwert C" over several sub-areas).
--- Option:
+-- Option — archive pattern (equations has no `active` column; the full captured row travels in the archive):
 -- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_fll_gar AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_fll_gar SELECT * FROM equations
+--  WHERE id = '02387918-c243-4a7e-b38d-993c65f79754' AND md5(formula) = 'eb7a0594d3b72b9a7fce7d56fab5adb0';
 -- UPDATE equations SET formula = 'Q_NOT = (r_5_100 * sum_a_m2 - r_5_5 * sum_ac) / 10000', input_symbols = ARRAY['r_5_100','r_5_5','sum_a_m2','sum_ac'],
---        verification_status = 'imported_unverified'
+--        verification_status = 'imported_unverified', output_unit = 'l/s'
 --  WHERE id = '02387918-c243-4a7e-b38d-993c65f79754' AND md5(formula) = 'eb7a0594d3b72b9a7fce7d56fab5adb0';
 -- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
 --  WHERE f.worksheet_template_id = w.id AND f.symbol IN ('A', 'C') AND w.code = 'FLL-GAR-27' AND s.code = 'FLL-GAR-2023' AND f.active;
 -- COMMIT;
--- Rollback: SET formula = 'Q_NOT = (r_5_100 - r_5_5 * C) * (A / 10000)', input_symbols = ARRAY['r_5_100','r_5_5','C','A'],
---   verification_status = 'verified_against_standard' WHERE id = '02387918-…'; SET active = true on A / C.
--- Note: GAR-27 F3 — output_unit is NULL on the row while the Q_NOT field prints 'l/s' (L6485 "l/sec"); set output_unit = 'l/s' with this block.
+-- Rollback (full row from the archive, explicit column list, never retyped; A / C back to active):
+-- BEGIN;
+-- DELETE FROM equations WHERE id = '02387918-c243-4a7e-b38d-993c65f79754' AND md5(formula) = md5('Q_NOT = (r_5_100 * sum_a_m2 - r_5_5 * sum_ac) / 10000');
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_fll_gar WHERE id = '02387918-c243-4a7e-b38d-993c65f79754' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM equations_archive_fll_gar WHERE id = '02387918-c243-4a7e-b38d-993c65f79754';
+-- UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol IN ('A', 'C') AND w.code = 'FLL-GAR-27' AND s.code = 'FLL-GAR-2023' AND NOT f.active;
+-- COMMIT;
+-- The archive table `equations_archive_fll_gar` is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
+-- Note: GAR-27 F3 — output_unit is NULL on the row while the Q_NOT field prints 'l/s' (L6485 "l/sec"); set with this block (the archive keeps the NULL).
 
 -- =====================================================================================================================
 -- fll_gar-R-2 · Anhang 2 Gl. 2b (c7dc584b-0f65-476d-935a-d5306d885a65, FLL-GAR-22, md5 82075797e6125765cf8713c277f8563f) — split g_prime / g_prime_required
@@ -279,8 +373,11 @@
 -- 'g_prime >= (Delta_u * gamma_A - (gamma_F_prime * d_F + gamma_Di_prime * d_Di)) / cos(beta)' BOTH output g_prime; Gl. 2b is
 -- displayOnly in equation-profiles.ts (FLL-revision GAR-22 F-05 — mitigated, no second producer writes). Inventory §4: split.
 -- Why staged: replacing a verified equation + a new field + a new gate.
--- Option:
+-- Option — archive pattern:
 -- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_fll_gar AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_fll_gar SELECT * FROM equations
+--  WHERE id = 'c7dc584b-0f65-476d-935a-d5306d885a65' AND md5(formula) = '82075797e6125765cf8713c277f8563f';
 -- INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status, order_index, active)
 -- SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'D'), 'g_prime_required', 'Erforderliches Flächengewicht der Auflast gegen Abheben g''_erf', 'number', 'kN/m^2', false, 'Anhang 2, Gl. 2b', 'Plan 3 (fll_gar-R-2): rechte Seite von Gl. 2b', 'imported_unverified', (SELECT COALESCE(MAX(order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = w.id), true
 --   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLL-GAR-22' AND s.code = 'FLL-GAR-2023'
@@ -291,8 +388,17 @@
 -- SELECT w.id, 'REQ-32', 'Auflast gegen Abheben (Anhang 2)', 'g_prime >= g_prime_required', 'Anhang 2, Gl. 2b', '<severity — owner>', 'Plan 3 (fll_gar-R-2)'
 --   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLL-GAR-22' AND s.code = 'FLL-GAR-2023';
 -- COMMIT;
--- Rollback: SET output_symbol = 'g_prime', formula = 'g_prime >= (Delta_u * gamma_A - (gamma_F_prime * d_F + gamma_Di_prime * d_Di)) / cos(beta)'
---   WHERE id = 'c7dc584b-…'; DELETE the REQ-32 row; SET active = false on g_prime_required (or DELETE it, it is a Plan-3 create).
+-- Rollback (full row from the archive, explicit column list, never retyped):
+-- BEGIN;
+-- DELETE FROM compliance_requirements WHERE code = 'REQ-32' AND description = 'Plan 3 (fll_gar-R-2)';
+-- DELETE FROM equations WHERE id = 'c7dc584b-0f65-476d-935a-d5306d885a65' AND md5(formula) = md5('g_prime_required = (Delta_u * gamma_A - (gamma_F_prime * d_F + gamma_Di_prime * d_Di)) / cos(beta)');
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_fll_gar WHERE id = 'c7dc584b-0f65-476d-935a-d5306d885a65' ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM equations_archive_fll_gar WHERE id = 'c7dc584b-0f65-476d-935a-d5306d885a65';
+-- DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'FLL-GAR-2023' AND w.code = 'FLL-GAR-22' AND f.symbol = 'g_prime_required' AND f.description = 'Plan 3 (fll_gar-R-2): rechte Seite von Gl. 2b';
+-- COMMIT;
+-- The archive table `equations_archive_fll_gar` is dropped once every archived row of this file is rolled back, or by the owner once the changes are signed off as final.
 -- Note: after the split, the displayOnly profile entry for c7dc584b-… in src/lib/eval/equation-profiles.ts must be retired (code).
 
 -- =====================================================================================================================
@@ -302,11 +408,16 @@
 --     needs an enum-valued equation (if(fuellhoehe_m <= 5, 'W1-B', …)) and REQ-05 unchanged; the code is the fail-safe now.
 -- D-2 gewaesser_in_scope (FLL-GAR-02, boolean, REQ-01 'gewaesser_in_scope == true', md5 52b4ac9d3483439f63f32ff8cf28d2b7) ← gewaesser_in_scope_code:
 --     Option: SET condition = 'gewaesser_in_scope_code == 1' WHERE id = 'ba8e1b20-1a67-4a87-a537-dc0f6ee9837e' AND md5(condition) = '52b4ac9d3483439f63f32ff8cf28d2b7'; then active = false on the boolean.
--- D-3 rissklasse ← r_klasse_code (FLL-GAR-05-D2; code 9 = outside Tab. 18, fll_gar-J-2). D-4 standortklasse ← s_klasse_code (FLL-GAR-05-D3).
--- D-5 wurzel_rhizomfestigkeit_required (FLL-GAR-09, consumed by 'FLL-GAR-10..21' / -24) ← the material sentences: Nachweis "zu erbringen"
+-- D-3 rissklasse ← r_klasse_code (FLL-GAR-05-D2; code 9 = outside Tab. 18, fll_gar-J-2).
+-- D-4 standortklasse: NOT derived (fix round 1) — Tab. 18 prints no independent S input (L3692–L3696 are the two class
+--     descriptions themselves); a created select would duplicate the manual enum 1:1, so `standortklasse` stays the manual
+--     input and this block only records that a retirement needs a printed driver first (nothing to apply).
+-- D-5 wurzel_rhizomfestigkeit_required (FLL-GAR-09, consumed by 'FLL-GAR-10..21' / -24) and its second manual carrier
+--     bep_rhizomfestigkeit_erforderlich (FLL-GAR-24, boolean, no consumer) ← the material sentences: Nachweis "zu erbringen"
 --     for Beton-Fugenabdichtungen (L2485–L2486), Asphalt (L2902–L2903), Bitumenbahnen (L3732–L3733), Kunststoff-/Elastomerbahnen
 --     (L3924–L3925), Flüssigkunststoff (L4212–L4213), PELD (L4514–L4515); "kann verzichtet werden" only for PEHD (L4511–L4513);
---     nothing printed for mineral / GTD / Stahl / Alkalisilikat / GUP → a blanket rule is NOT source-settled; FLL-GAR-18-D1 covers PE only.
+--     nothing printed for mineral / GTD / Stahl / Alkalisilikat / GUP → a blanket rule is NOT source-settled; FLL-GAR-18-D1 covers PE only
+--     (three carriers of one fact: -09 boolean, -24 boolean, -18 code — the owner picks the survivor).
 -- D-6 bep_durchdringungen_anzahl (FLL-GAR-24) ← durchdringungen_count (FLL-GAR-24-D1): SET active = false on the manual counter after ratification.
 -- Rollbacks: restore the captured condition text / active = true.
 

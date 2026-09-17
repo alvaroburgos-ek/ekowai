@@ -24,11 +24,13 @@
  * consumer edit fll_gar-C-1 lands. `evaluateFormula` checks every named scalar
  * input BEFORE evaluating (an `if()` branch does not exempt its inputs) — so
  * FLL-GAR-05-D2 needs all three inputs, and FLL-GAR-18-D2 all three PEHD values.
+ * The S-class (Tab. 18 S1-B / S2-B) is NOT derived (fix round 1): no independent S input
+ * is printed — a select would duplicate the manual `standortklasse` (fll_gar-D-4).
  */
 import type { EquationEntry, EquationModule } from '../field-configs/types';
 import {
   Q_L509_513, Q_L1313_1317, Q_L1383_1384, Q_T1_HEAD, Q_L1415_1418, Q_L1487_1489, Q_L2221_2222, Q_T5_2, Q_T6_LE40, Q_T6_GT40, Q_L3435_3438,
-  Q_T18_HEAD, Q_T18_W1, Q_T18_W2, Q_T18_W3, Q_T18_R0, Q_T18_R1, Q_T18_R2, Q_T18_R3, Q_T18_S1, Q_T18_S2, Q_L3765_3766, Q_L4064_4068, Q_L4098_4102, Q_T22_HEAD,
+  Q_T18_HEAD, Q_T18_W1, Q_T18_W2, Q_T18_W3, Q_T18_R0, Q_T18_R1, Q_T18_R2, Q_T18_R3, Q_L3765_3766, Q_L4064_4068, Q_L4098_4102, Q_T22_HEAD,
   Q_L4460_4462, Q_T24_DICHTE, Q_T24_MFR, Q_T24_RUSS, Q_L4511_4515, Q_T28_HEAD, Q_L5748, Q_L6477_6485, Q_L6484,
 } from '../regulation-tables-seed-fll_gar';
 
@@ -60,14 +62,6 @@ export const EQUATIONS: EquationEntry[] = [
     clause_reference: '§6, Tab. 18',
     description: 'Plan 3: Rissklasse aus den Tab.-18-Kriterien — R0-B "keine Rissbreitenveränderung bzw. Neurissbildung" (L3677) ⇒ 0; R1-B bis max. 0,2 mm (L3680) ⇒ 1; R2-B bis max. 0,5 mm (L3684) ⇒ 2; R3-B bis max. 1,0 mm, Rissversatz bis 0,5 mm (L3688) ⇒ 3; außerhalb der gedruckten Klassen ⇒ 9 (fll_gar-J-2); alle drei Eingaben sind erforderlich (0 eintragen, wenn keine); die manuelle rissklasse bleibt Produzent (fll_gar-D-3).',
     verification_quote: `${Q_T18_R0} — ${Q_T18_R1} — ${Q_T18_R2} — ${Q_T18_R3}`,
-  },
-  {
-    standard: STD, worksheet: 'FLL-GAR-05', equation_number: 'FLL-GAR-05-D3',
-    formula: "s_klasse_code = if(standort_tab18 == 'aussen_frei', 1, 2)",
-    input_symbols: ['standort_tab18'], output_symbol: 's_klasse_code', output_unit: null,
-    clause_reference: '§6, Tab. 18',
-    description: 'Plan 3: Standortklasse — S1-B "Behälter im Außenbereich, der nicht mit einem Bauwerk verbunden ist." (L3692–L3693) ⇒ 1; S2-B "Behälter im Außenbereich, der an ein Bauwerk angrenzt und mit diesem verbunden ist sowie Behälter im Innenbereich." (L3695–L3696) ⇒ 2; die manuelle standortklasse bleibt Produzent (fll_gar-D-4).',
-    verification_quote: `${Q_T18_S1} — ${Q_T18_S2}`,
   },
   // ---- FLL-GAR-07: slope sections ----
   {
@@ -153,7 +147,7 @@ export const EQUATIONS: EquationEntry[] = [
     formula: "pe_rhizom_nachweis_code = if(pe_werkstoff == 'PEHD', 0, 1)",
     input_symbols: ['pe_werkstoff'], output_symbol: 'pe_rhizom_nachweis_code', output_unit: null,
     clause_reference: '§6.4.1.1',
-    description: 'Plan 3: Nachweis der Wurzel-/Rhizomfestigkeit — PEHD "Auf eine Prüfung der Wurzel- und Rhizomfestigkeit kann verzichtet werden." (L4512) ⇒ 0; PELD "ist vom Hersteller zusätzlich ein Nachweis der Wurzel- bzw. Rhizomfestigkeit gemäß FLL zu erbringen." (L4514–L4515) ⇒ 1; der Boolean wurzel_rhizomfestigkeit_required (-09) bleibt Produzent (fll_gar-D-5); skalare Gleichung, nicht materialisiert.',
+    description: 'Plan 3: Nachweis der Wurzel-/Rhizomfestigkeit — PEHD "Auf eine Prüfung der Wurzel- und Rhizomfestigkeit kann verzichtet werden." (L4512) ⇒ 0; PELD "ist vom Hersteller zusätzlich ein Nachweis der Wurzel- bzw. Rhizomfestigkeit gemäß FLL zu erbringen." (L4514–L4515) ⇒ 1; die Booleans wurzel_rhizomfestigkeit_required (-09) und bep_rhizomfestigkeit_erforderlich (-24) bleiben (fll_gar-D-5); skalare Gleichung, nicht materialisiert.',
     verification_quote: Q_L4511_4515,
   },
   {

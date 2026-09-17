@@ -25,12 +25,6 @@ max. 1,0 mm, Rissversatz bis 0,5 mm'
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLL-GAR-05' AND s.code = 'FLL-GAR-2023'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'FLL-GAR-05-D3', 's_klasse_code = if(standort_tab18 == ''aussen_frei'', 1, 2)', ARRAY['standort_tab18']::text[], 's_klasse_code', NULL, '§6, Tab. 18', 'Plan 3: Standortklasse — S1-B "Behälter im Außenbereich, der nicht mit einem Bauwerk verbunden ist." (L3692–L3693) ⇒ 1; S2-B "Behälter im Außenbereich, der an ein Bauwerk angrenzt und mit diesem verbunden ist sowie Behälter im Innenbereich." (L3695–L3696) ⇒ 2; die manuelle standortklasse bleibt Produzent (fll_gar-D-4).', 'imported_unverified', '12 S1-B Behälter im Außenbereich, der nicht mit einem Bauwerk verbun-  
-den ist. — 13 S2-B Behälter im Außenbereich, der an ein Bauwerk angrenzt und mit  
-diesem verbunden ist sowie Behälter im Innenbereich.'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLL-GAR-05' AND s.code = 'FLL-GAR-2023'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
 SELECT w.id, 'FLL-GAR-07-D1', 'boeschung_steilste_1m = min_rows(boeschungsabschnitte, neigung_1m)', ARRAY['boeschungsabschnitte']::text[], 'boeschung_steilste_1m', 'm (1:m)', '§4.5', 'Plan 3: die steilste Böschung über die Abschnitte = kleinstes m der Schreibweise 1:m (Zonierung Sumpf-, Flach-, Tiefwasserzone, L1415–L1418) — Text-Ableitung ohne gedruckte Formel; Vergleichswert zum Tab.-1-Fill boeschungsneigung_limit (Gate STAGED fll_gar-G-6).', 'imported_unverified', 'Wird eine naturnahe Gestaltung des Gewässers für Flora und Fauna angestrebt, ist eine ent-  
 sprechende Modellierung und Profilierung des Baugrundes erforderlich (z. B. Zonierung mit
 
@@ -107,7 +101,7 @@ Abdichtungen mit Kunststoff- und Elastomerbahnen sind i. d. R. einlagig.'
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLL-GAR-16' AND s.code = 'FLL-GAR-2023'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'FLL-GAR-18-D1', 'pe_rhizom_nachweis_code = if(pe_werkstoff == ''PEHD'', 0, 1)', ARRAY['pe_werkstoff']::text[], 'pe_rhizom_nachweis_code', NULL, '§6.4.1.1', 'Plan 3: Nachweis der Wurzel-/Rhizomfestigkeit — PEHD "Auf eine Prüfung der Wurzel- und Rhizomfestigkeit kann verzichtet werden." (L4512) ⇒ 0; PELD "ist vom Hersteller zusätzlich ein Nachweis der Wurzel- bzw. Rhizomfestigkeit gemäß FLL zu erbringen." (L4514–L4515) ⇒ 1; der Boolean wurzel_rhizomfestigkeit_required (-09) bleibt Produzent (fll_gar-D-5); skalare Gleichung, nicht materialisiert.', 'imported_unverified', 'Kunststoffbahnen aus PEHD besitzen eine ausreichende Widerstandsfähigkeit gegenüber  
+SELECT w.id, 'FLL-GAR-18-D1', 'pe_rhizom_nachweis_code = if(pe_werkstoff == ''PEHD'', 0, 1)', ARRAY['pe_werkstoff']::text[], 'pe_rhizom_nachweis_code', NULL, '§6.4.1.1', 'Plan 3: Nachweis der Wurzel-/Rhizomfestigkeit — PEHD "Auf eine Prüfung der Wurzel- und Rhizomfestigkeit kann verzichtet werden." (L4512) ⇒ 0; PELD "ist vom Hersteller zusätzlich ein Nachweis der Wurzel- bzw. Rhizomfestigkeit gemäß FLL zu erbringen." (L4514–L4515) ⇒ 1; die Booleans wurzel_rhizomfestigkeit_required (-09) und bep_rhizomfestigkeit_erforderlich (-24) bleiben (fll_gar-D-5); skalare Gleichung, nicht materialisiert.', 'imported_unverified', 'Kunststoffbahnen aus PEHD besitzen eine ausreichende Widerstandsfähigkeit gegenüber  
 Wurzeln und Rhizomen. Auf eine Prüfung der Wurzel- und Rhizomfestigkeit kann verzichtet  
 werden. Weitere stoffspezifische Anforderungen enthält Tabelle 24\.  
 Bei Kunststoffbahnen aus PELD ist vom Hersteller zusätzlich ein Nachweis der Wurzel- bzw.  

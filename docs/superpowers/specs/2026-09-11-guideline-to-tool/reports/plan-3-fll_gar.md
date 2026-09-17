@@ -10,9 +10,9 @@
 
 | slug | tables | rows lifted | rows unreadable | registers | select_one | select_many | lookup_fill | field visible_when | section visible_when | equations new | equations staged | sign-off entries | tokens in | minutes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `fll_gar` | 20 | 107 (107/107 verbatim) | 0 rows skipped; 2 CELLS seeded null (TAB28 `zero|freiflaeche` / `zero|schwimmteich` — the printed row "0" carries one cell, U-4); 2 tables kept `imported_unverified` (TAB26 U-1 alignment → PDF, TAB28 U-4); Tab. 2 garbled (U-2), Tab. 3 a requirement list (J-1), Tab. 9–11/14/15/17/19/20/21/23/29 + Anhang 3 out of scope (U-3) | 9 (all `create`) | 8 (all `create`) | 0 | 21 (20 `create` + 1 UPDATE `nahtbreite_min_mm`, E-2) | 4 (3 on created fields + 1 UPDATE `verzinkung_dicke_um`) | 104 (12 material worksheets × 9 sections − 4 producer sections, C-2) | 20 | 0 replacements emitted; R-1 (Gl. 1 onto Σ), R-2 (Gl. 2b split) STAGED; 13 gate blocks (G-1…G-13), 4 consumer blocks (C-1…C-4), 6 derivation blocks (D-1…D-6) STAGED | 46 (+10 observations) | ≈ 0.75 M (tool-marker delta 15.00 M → 14.26 M at report time) | ≈ 95 |
+| `fll_gar` | 20 | 107 (107/107 verbatim) | 0 rows skipped; 2 CELLS seeded null (TAB28 `zero|freiflaeche` / `zero|schwimmteich` — the printed row "0" carries one cell, U-4); 2 tables kept `imported_unverified` (TAB26 U-1 alignment → PDF, TAB28 U-4); Tab. 2 garbled (U-2), Tab. 3 a requirement list (J-1), Tab. 9–11/14/15/17/19/20/21/23/29 + Anhang 3 out of scope (U-3) | 9 (all `create`) | 7 (all `create`; fix round 1 removed `standort_tab18`) | 0 | 20 (all `create`; the `nahtbreite_min_mm` re-bind is STAGED, E-2 — fix round 1) | 4 (3 on created fields + 1 UPDATE `verzinkung_dicke_um`) | 104 (12 material worksheets × 9 sections − 4 producer sections, C-2) | 19 (fix round 1 removed FLL-GAR-05-D3) | 0 replacements emitted; R-1 (Gl. 1 onto Σ), R-2 (Gl. 2b split), E-2 STAGED; 13 gate blocks (G-1…G-13), 4 consumer blocks (C-1…C-4), 6 derivation blocks (D-1…D-6) STAGED | 46 (+10 observations) | ≈ 0.80 M (incl. fix round 1) | ≈ 115 |
 
-Field entries: 63 = 61 `create` (9 registers, 8 select_one, 20 lookup_fill, 20 derived outputs, 3 scalar inputs, 1 attestation) + 2 UPDATE (`nahtbreite_min_mm` re-bound as the Tab.-22 fill on its own two keys; `verzinkung_dicke_um` ← `stahl_typ == 'unlegiert'`). Every other Step-4 target of the brief is a consumed producer (transitive guard) or driver-less on its worksheet → C-2 / C-3 / C-4 (STAGED).
+Field entries (after fix round 1): 60 = 59 `create` (9 registers, 7 select_one, 20 lookup_fill, 19 derived outputs, 3 scalar inputs, 1 attestation) + 1 UPDATE (`verzinkung_dicke_um` ← `stahl_typ == 'unlegiert'`) — 4 scalar (3 created + 1 UPDATE). The first commit's `nahtbreite_min_mm` re-bind (E-2) and `standort_tab18` / `s_klasse_code` / FLL-GAR-05-D3 (D-4) were withdrawn in fix round 1. Every other Step-4 target of the brief is a consumed producer (transitive guard) or driver-less on its worksheet → C-2 / C-3 / C-4 (STAGED).
 
 ## 2. Raw test output
 
@@ -170,3 +170,41 @@ Untouched: every a138 / din1989_1 / a262e / m277e / m1200_1 / m1200_3 file; the 
 ## 11. Residue (what the guideline demands that the worksheets still do not ask)
 
 Tab. 2 kf / water-loss classes (U-2); Tab. 3's Einbauwassergehalt / Luftporenanteil (no prod field, J-1); the Tab.-6 footnotes 1–4 (Wassereindringwiderstand test agreements); Tab. 7's Wasserwechselzone switch (J-3); Tab. 8 footnote 1 (Fertigplatten 6–7 cm + Ortbeton ≥ 10 / 12 cm) as inputs; Tab. 9–11 (concrete curing), 14 (geotextile MA), 15 / 17 (GTD properties / raw materials), 19 / 20 / 21 / 23 (product-type lists behind free-text fields), 29 (plant list — the `pflanzenarten.art` datalist), Anhang 3 (Flüssigkunststoff classes) — U-3; the §5.5.2 Auflast ≥ 5 kN/m² ↔ 30 cm sentence (L3435–L3437) and the two-day placement rule for coated GTD (L3439–L3442); §4.5's "natürlicher Schüttwinkel ≤ 1:3" for systems with Auflast (L1375–L1378); the §6.2.2 substrate rules (Fehlstellen ≥ 5 mm, Risse > 1 mm — L4077–L4081); the §7.1.3.2 coating thickness ≥ 320 µm (L4822–L4825) beside the 100-µm galvanisation; the Kapillarsperre / Notüberlauf duties of §4.8 (L5715–L5717, L5749–L5760) beyond the register's boolean; DIN 1986-100 r5,100 / r5,5 (external — reference only, L5716); Anhang 2's β from the slope (no `atan`, X-2). Each is listed here with its line and stays outside this encoding (content-boundary rule) or on the sign-off sheet.
+
+---
+
+# Fix round 1 (review verdict on `c8c5453`: APPROVED with three Important items and minors)
+
+- **Commit:** see the reply (one commit, Fable trailer; `git checkout -- scripts/reasoning-map/` before staging; tree clean after). **Nothing applied to prod** — no new prod read; every md5 / id in the STAGED blocks is from the 2026-09-17 capture.
+- **Date:** 2026-09-18 · CLI claude 2.1.260 (no update taken) · model Claude Opus 5 (`claude-opus-5[1m]`).
+
+## IMPORTANT
+
+1. **Archive pattern on every long / verified text change** (`scripts/verification/fll_gar-STAGED-plan3-rulings.sql`): G-5 (REQ-14), G-8 (REQ-16 — the 311-char condition is no longer "re-read before applying": it travels in the archive row), G-9 (REQ-20), R-1 (Gl. 1) and R-2 (Gl. 2b) now (a) copy the row into `compliance_requirements_archive_fll_gar` / `equations_archive_fll_gar` in the same transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE false; INSERT … SELECT * … WHERE id = … AND md5(<content>) = <captured md5>`), (b) guard the UPDATE on the captured md5, (c) roll back by DELETE of the changed row by id + md5 of the NEW text and re-INSERT of the archived row with the EXPLICIT 18-column (compliance_requirements) / 22-column (equations) list, (d) state that the archive table is dropped once every archived row is rolled back or on the owner's sign-off. The preamble names exactly these blocks as archive-pattern; the gate re-points whose captured condition is short or EMPTY (G-2, G-3, G-4, G-6, G-7, G-12, G-13, D-2) quote that text in full and restore it column-exact (the m277e-accepted form). No long text is retyped anywhere.
+2. **E-2 withdrawn from the migration.** The `nahtbreite_min_mm` UPDATE entry was removed from `field-configs/fll_gar.ts` (module header rewritten); `20260917100710` re-emitted (now 59 `INSERT … WHERE NOT EXISTS` + 1 `UPDATE fields` + 104 sections; rollback carries no `nahtbreite_min_mm` line — pinned). The full UPDATE (widget / ui_config / lookup, guarded `widget IS NULL`) and its archive-pattern rollback (`fields_archive_fll_gar`, restore of the four Plan-1 columns by id) sit in the new STAGED block fll_gar-E-2; the sheet block says NOT emitted and why. The field-config test pins that no entry names `nahtbreite_min_mm` and that the prod row is untouched.
+3. **`standort_tab18` / `s_klasse_code` / FLL-GAR-05-D3 removed** (module, equations module, both migrations re-emitted and re-pinned): selects 7, derived outputs 19, equations 19, field entries 60 = 59 create + 1 UPDATE. Sheet: D-4 now records that the S-class is NOT derived because Tab. 18 prints no independent S input (L3692–L3696 are the two class descriptions themselves) — a select would duplicate `standortklasse` 1:1; the STAGED D-4 line says the same and applies nothing. The module / equations headers carry the sentence too.
+
+## MINOR
+
+4. **Cues lifted:** four new spans appended to the seed module by the generator — `Q_L1479_1480` ("den baulichen Vorgaben (z. B. Randausbildung, Anschlüsse, Durchdringungen und technische Einbauten);"), `Q_L1483` ("dem Instandhaltungsaufwand (z. B. Reinigungsart, Inspektionsintervalle);"), `Q_L2385_2393` (§5.2.3.2 Eigen-/Fremdüberwachung + §5.2.3.3 Kontrollprüfung) and `Q_L2410` ("Die Ergebnisse der Kontrollprüfung werden der Abnahme und Abrechnung zugrunde gelegt."); `durchdringungen` quotes L1479–L1480, `wartungsmassnahmen` L1483, `pruefungen` L2385–L2393 + L2410 (its description now cites those lines instead of the rhizome sentence). The seed migration is byte-identical (the spans are cues, not table rows; verifier still 107/107).
+5. **D-5** names `bep_rhizomfestigkeit_erforderlich` (-24) as the third carrier (sheet, STAGED file, the -18 field description and equation description).
+6. **C-1** (sheet + STAGED): one sentence that the rules / fills on -04, -05 and -07 stay `pending` / "Schlüssel fehlt" even after C-1 until FLL-GAR-09 is filled.
+7. **`LAGE_NEIGUNG_EXPR`** is now `lookup('TAB1', material, 'neigung_max_1m')` — a hidden / empty `material` (non-sealing rows) yields null → "—" (checked through `prepareRegisterRows` before editing: null, `complete: true`, no diagnostics); equations test and render test re-pinned (`[null, 5, null, 1, true]` for the lower protection layer; `derived-neigung_limit` renders "—").
+8. **Report §1** counts line now says "4 scalar (3 created + 1 UPDATE)" and the table columns carry the post-fix numbers.
+
+## Raw output
+
+```
+pnpm vitest run --project unit src/lib/eval/__tests__/field-configs-fll_gar.test.ts src/lib/eval/__tests__/equations-fll_gar.test.ts src/lib/eval/__tests__/regulation-tables-seed-fll_gar.test.ts src/components/worksheet/__tests__/register-fll-gar-lagen.test.tsx scripts/__tests__/generated-sql-freshness.test.ts
+ Test Files  5 passed (5)
+      Tests  38 passed (38)
+pnpm -s tsx scripts/regulation-tables/verify-regulation-tables.ts fll_gar "<transcript>"
+ 107/107 quotes verbatim in C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\FLL-Gewässerabdichtungsrichtlinien.md
+pnpm test
+ Test Files  270 passed | 1 skipped (271)
+      Tests  2575 passed | 1 expected fail | 1 skipped (2577)
+   Start at  00:38:37
+   Duration  41.22s
+pnpm -s typecheck → exit 0 · pnpm -s eslint <7 touched .ts/.tsx files> → exit 0 (two unused-import warnings from the removed S-class fixed before the run)
+```
+(2575 unchanged: the removed S-class pins were replaced by "not present" pins; the count of test cases is the same.) Re-emit check: `emit-seed-sql.ts fll_gar` → seed + rollback byte-identical to `c8c5453`; `emit-field-configs-sql.ts fll_gar 20260917100710` → 60 entries + 104 sections; `emit-equations-sql.ts fll_gar 20260917100720` → 19 equations; all three freshness pins green. **The integration harness was not re-run:** the fix round changed emitted DATA only (fewer created rows, one withdrawn UPDATE, a register `derived` expr, cue strings, STAGED SQL comments) — no engine, harness seed, or prod-shaped row the FLL-GAR harness reads; the 30-file / 119-test run recorded above stands.

@@ -25,11 +25,11 @@
  * until the consumer edit fll_gar-C-1 is ratified — they are emitted now so
  * that ratifying C-1 lights them up without a second migration.
  *
- * UPDATE entries: exactly two — FLL-GAR-16 `nahtbreite_min_mm` (the existing
- * "Mindestnahtbreite" limit, consumed by -15 / -18, re-bound as a lookup_fill on
- * TAB22 from its own two keys — fll_gar-E-2) and FLL-GAR-19 `verzinkung_dicke_um`
+ * UPDATE entries: exactly one — FLL-GAR-19 `verzinkung_dicke_um`
  * (`visible_when stahl_typ == 'unlegiert'`, §7.1.3.2; not consumed, no equation
- * on -19). Every other Step-4 target of the brief is a consumed producer
+ * on -19). Re-binding the existing "Mindestnahtbreite" `nahtbreite_min_mm` (consumed by
+ * -15 / -18, is_required) as a Tab.-22 lookup_fill is a RULING, not a fail-safe default —
+ * the full UPDATE + rollback sits in the STAGED file under fll_gar-E-2 (fix round 1). Every other Step-4 target of the brief is a consumed producer
  * (`wassereinwirkungsklasse` / `rissklasse` / `standortklasse` → -15/-16/-17;
  * `anzahl_lagen` → -15) → refused by the guard → fll_gar-C-3 / -C-4 (STAGED); the
  * section C of FLL-GAR-10 / -12 / -14 / -16 holds consumed producers → fll_gar-C-2.
@@ -39,15 +39,18 @@
  * TAB22_UEBERLAPPUNG key on 'false' / 'true' (fll_gar-I-1). Booleans never reach
  * `evaluateFormula` (engine-input.ts), so every yes/no driver of a NEW equation is
  * a created enum (`neurissbildung`, `bahn_vorkonfektioniert`, `pe_werkstoff`).
+ * The S-class is NOT derived (fix round 1): Tab. 18 prints no independent S input —
+ * a created `standort_tab18` select would duplicate the manual `standortklasse` 1:1
+ * (fll_gar-D-4 stays a retirement ruling, no equation).
  */
 import type { FieldConfigEntry, FieldConfigEnumValue, FieldConfigModule, SectionVisibilityEntry } from './types';
 import {
   ABDICHTUNGS_ART_TOKENS, MATERIAL_WORKSHEET, MISCHGUTART_TOKENS, MINERAL_TYP_TOKENS, ANWENDUNGSFALL_CONCRETE_TOKENS, BAUTEIL_TOKENS, AUSFUEHRUNG_TOKENS, BENTONIT_TOKENS, AUFLAST_FUNKTION_TOKENS,
   FUEGEVERFAHREN_TOKENS, BAHN_MATERIAL_TOKENS, PE_BEANSPRUCHUNG_TOKENS, BAUGRUND_GRUPPEN, BAUGRUND_KLASSE_TOKENS, SWK_TOKENS, ABSCHLUSS_ANWENDUNGSFALL_TOKENS,
   tab1AsTable, tab4AsTable, tab12AsTable, tab18RAsTable, tab18SAsTable, tab27AsTable, frag, norm,
-  Q_L509_513, Q_L1313_1317, Q_L1367_1368, Q_L1383_1384, Q_L1390_1394, Q_T1_HEAD, Q_L1412_1413, Q_L1415_1418, Q_L1487_1489, Q_L1921_1922, Q_T4_2, Q_T4_3, Q_L1953, Q_L2221_2222, Q_T5_2,
+  Q_L509_513, Q_L1313_1317, Q_L1367_1368, Q_L1479_1480, Q_L1483, Q_L2385_2393, Q_L2410, Q_L1383_1384, Q_L1390_1394, Q_T1_HEAD, Q_L1412_1413, Q_L1415_1418, Q_L1487_1489, Q_L1921_1922, Q_T4_2, Q_T4_3, Q_L1953, Q_L2221_2222, Q_T5_2,
   Q_L2428_2433, Q_T6_LE40, Q_T6_GT40, Q_L2502, Q_T7_HEAD, Q_L2563_2565, Q_T8_HEAD, Q_L2580_2581, Q_L2909_2911, Q_L2915_2916, Q_T12_HEAD, Q_L3106_3107, Q_T13, Q_L3276_3280, Q_T16_HEAD, Q_L3318_3321, Q_L3435_3438,
-  Q_L3662_3665, Q_T18_HEAD, Q_T18_W1, Q_T18_W2, Q_T18_W3, Q_T18_R0, Q_T18_R1, Q_T18_R2, Q_T18_R3, Q_T18_S1, Q_T18_S2, Q_L3717_3719, Q_L3765_3766, Q_L4064_4068, Q_L4098_4102, Q_T22_HEAD,
+  Q_L3662_3665, Q_T18_HEAD, Q_T18_W1, Q_T18_W2, Q_T18_W3, Q_T18_R0, Q_T18_R1, Q_T18_R2, Q_T18_R3, Q_L3717_3719, Q_L3765_3766, Q_L4064_4068, Q_L4098_4102, Q_T22_HEAD,
   Q_L4455_4456, Q_L4460_4462, Q_T24_HEAD, Q_L4511_4515, Q_L4531_4534, Q_T25_HEAD, Q_L4817_4819, Q_L5218_5219, Q_L5338_5339, Q_L5416_5423, Q_L5472_5473, Q_L5494_5496, Q_L5703_5710, Q_L5715_5717, Q_L5719_5727, Q_T28_HEAD, Q_L5748, Q_L5749_5753,
   Q_L6462_6467, Q_L6477_6485, Q_L6484,
 } from '../regulation-tables-seed-fll_gar';
@@ -91,7 +94,7 @@ export const HOEHE_BAND_EXPR = "if(hoehe_cm >= 15, 'ge15', if(hoehe_cm >= 10, 'g
 export const ZULAESSIG_EXPR = "lookup('TAB28', hoehe_band, anwendungsfall, 'zulaessig')";
 export const NAHT_MIN_EXPR = "lookup('TAB22', fuegeverfahren, material, 'nahtbreite_min_mm')";
 export const FG_OK_EXPR = "if(rolle == 'schutzlage_oben', if(flaechengewicht_g_m2 >= fg_min, 1, 0), 1)";
-export const LAGE_NEIGUNG_EXPR = "if(rolle == 'abdichtung', lookup('TAB1', material, 'neigung_max_1m'), 0)";
+export const LAGE_NEIGUNG_EXPR = "lookup('TAB1', material, 'neigung_max_1m')"; // a hidden/empty material (non-sealing rows) yields null → "—", never a 0 limit
 
 /** Tab.-7 fill on FLL-GAR-12 keyed on the own `anwendungsfall_concrete`. */
 const tab7Fill = (symbol: string, value: string, label: string, data_type: 'text' | 'number', unit: string | null, printed: string): FieldConfigEntry => WS12({
@@ -136,20 +139,6 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS05({ symbol: 'r_klasse_code', widget: 'derived', ui_config: null, verification_quote: `${Q_T18_R0} — ${Q_T18_R1} — ${Q_T18_R2} — ${Q_T18_R3}`,
     create: { section_code: 'D', label_de: 'Rissklasse nach Tab. 18 als Code (0 = R0-B · 1 = R1-B ≤ 0,2 mm · 2 = R2-B ≤ 0,5 mm · 3 = R3-B ≤ 1,0 mm mit Versatz ≤ 0,5 mm · 9 = außerhalb Tab. 18)', data_type: 'number', unit: null, clause_reference: '§6, Tab. 18',
       description: 'Plan 3: Ausgabe der Gleichung FLL-GAR-05-D2 aus neurissbildung, rissbreite_erwartet_mm und rissversatz_erwartet_mm (L3677–L3688); Code 9 = die gedruckten Klassen decken den Wert nicht (> 1,0 mm oder Versatz > 0,5 mm) — kein Klassen-Erfinden (fll_gar-J-2); die manuelle rissklasse bleibt Produzent (Ablösung STAGED fll_gar-D-3).' } }),
-  WS05({
-    symbol: 'standort_tab18', widget: 'select_one', ui_config: null,
-    enum_values: enumList([
-      ['aussen_frei', frag(Q_T18_S1, 'Behälter im Außenbereich')],                                             // L3692–L3693
-      ['aussen_bauwerk', frag(Q_T18_S2, 'Behälter im Außenbereich', ' sowie')],                               // L3695–L3696
-      ['innen', frag(Q_T18_S2, 'Behälter im Innenbereich')],                                                   // L3696
-    ]),
-    verification_quote: `${Q_T18_S1} — ${Q_T18_S2}`,
-    create: { section_code: 'C', label_de: 'Standort des Behälters (Tab. 18)', data_type: 'enum', unit: null, clause_reference: '§6, Tab. 18',
-      description: 'Plan 3: die drei gedruckten Standortbeschreibungen der Tab. 18 (S1-B: L3692–L3693; S2-B: L3695–L3696 — zwei Fälle); Eingang der Gleichung FLL-GAR-05-D3.' },
-  }),
-  WS05({ symbol: 's_klasse_code', widget: 'derived', ui_config: null, verification_quote: `${Q_T18_S1} — ${Q_T18_S2}`,
-    create: { section_code: 'D', label_de: 'Standortklasse nach Tab. 18 als Code (1 = S1-B · 2 = S2-B)', data_type: 'number', unit: null, clause_reference: '§6, Tab. 18',
-      description: 'Plan 3: Ausgabe der Gleichung FLL-GAR-05-D3 aus standort_tab18 (nicht mit einem Bauwerk verbunden ⇒ S1-B, sonst S2-B — L3692–L3696); die manuelle standortklasse bleibt Produzent (Ablösung STAGED fll_gar-D-4).' } }),
   WS05({ symbol: 'eisdruck_randschutz_vorgesehen', widget: 'attestation', ui_config: null, visible_when: EIS, verification_quote: Q_L1367_1368,
     create: { section_code: 'C', label_de: 'Randbereich (An-/Abschlüsse, Übergänge) vor Eisdruck geschützt', data_type: 'boolean', unit: null, clause_reference: '§4.4',
       description: 'Plan 3: Nachweis-Boolean für REQ-06 (leere Bedingung, requires_attestation — FLL-Revision GAR-04 F1); nur sichtbar bei eisbildung_moeglich = ja (L1367 "Ist eine Eisbildung nicht auszuschließen, ist der Randbereich … ggf. vor Eisdruck zu schützen."); die REQ-06-Bedingung selbst ist STAGED (fll_gar-G-3).' } }),
@@ -314,11 +303,6 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
 
   // ---- FLL-GAR-16 (Kunststoff-/Elastomerbahnen): the Tab.-22 limit as a fill, the overlap limit, seam rows, the §6.2.1.2 thickness ----
   WS16({
-    symbol: 'nahtbreite_min_mm', widget: 'lookup_fill', ui_config: { source_label: 'Tab. 22 (Mindestfügebreite)' },
-    lookup: { table_code: 'TAB22', role: 'limit', keys: [{ column: 'fuegeverfahren', from_symbol: 'fuegeverfahren' }, { column: 'material', from_symbol: 'bahn_material_naht' }], value: 'nahtbreite_min_mm' },
-    verification_quote: `${Q_L4098_4102} — ${Q_T22_HEAD}`,
-  }),
-  WS16({
     symbol: 'naht_ueberlappung_min_mm', widget: 'lookup_fill', ui_config: { source_label: '§6.2.2.1 (Mindestbreite der Überlappung)' },
     lookup: { table_code: 'TAB22_UEBERLAPPUNG', role: 'limit', keys: [{ column: 'polymerbitumen', from_symbol: 'polymerbitumen_beschichtung' }], value: 'ueberlappung_min_mm' },
     verification_quote: Q_L4098_4102,
@@ -383,7 +367,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   }),
   WS18({ symbol: 'pe_rhizom_nachweis_code', widget: 'derived', ui_config: null, verification_quote: Q_L4511_4515,
     create: { section_code: 'D', label_de: 'Nachweis der Wurzel-/Rhizomfestigkeit gemäß FLL erforderlich (1 = PELD: zu erbringen · 0 = PEHD: kann verzichtet werden)', data_type: 'number', unit: null, clause_reference: '§6.4.1.1',
-      description: 'Plan 3: Ausgabe der Gleichung FLL-GAR-18-D1 aus pe_werkstoff (L4511–L4515); der Boolean wurzel_rhizomfestigkeit_required auf -09 bleibt Produzent (Ablösung STAGED fll_gar-D-5 — die Materialsätze L2486 / L2902 / L3732 / L3924 / L4212 fordern den Nachweis für Beton-Fugen, Asphalt, Bitumen-, Kunststoffbahnen und Flüssigkunststoff); skalare Gleichung, nicht materialisiert.' } }),
+      description: 'Plan 3: Ausgabe der Gleichung FLL-GAR-18-D1 aus pe_werkstoff (L4511–L4515); die Booleans wurzel_rhizomfestigkeit_required (-09) und bep_rhizomfestigkeit_erforderlich (-24) bleiben (Ablösung STAGED fll_gar-D-5 — die Materialsätze L2486 / L2902 / L3732 / L3924 / L4212 fordern den Nachweis für Beton-Fugen, Asphalt, Bitumen-, Kunststoffbahnen und Flüssigkunststoff); skalare Gleichung, nicht materialisiert.' } }),
   WS18({ symbol: 'pehd_tab24_code', widget: 'derived', ui_config: null, verification_quote: `${Q_L4460_4462} — ${Q_T24_HEAD}`,
     create: { section_code: 'D', label_de: 'Tab.-24-Anforderungen Dichte / MFR / Rußgehalt erfüllt (1 = ja · 0 = nein)', data_type: 'number', unit: null, clause_reference: '§6.4.1, Tab. 24',
       description: 'Plan 3: Ausgabe der Gleichung FLL-GAR-18-D2 (peeh_dichte_g_cm3 > 0,940 AND 1,0 ≤ peeh_mfr ≤ 3,0 AND 2 ≤ peeh_russgehalt_pct ≤ 3 — die TAB24-Zellen L4471 / L4474 / L4476); dieselben drei Werte, die REQ-20 als Literale prüft (Re-Point STAGED fll_gar-G-9); skalare Gleichung, nicht materialisiert.' } }),
@@ -466,9 +450,9 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
       ],
       footer: ['durchdringungen_count'],
     },
-    verification_quote: `${Q_L1313_1317} — ${Q_L1487_1489}`,
+    verification_quote: `${Q_L1479_1480} — ${Q_L1487_1489}`,
     create: { section_code: 'C', label_de: 'Durchdringungen und Einbauten (Typ, Lage, Fugenabdichtung, Rhizomfestigkeitsnachweis)', data_type: 'json', unit: null, clause_reference: '§4.7; §4.12',
-      description: 'Plan 3: Zeilen je Durchdringung / Einbau (L1479 "Randausbildung, Anschlüsse, Durchdringungen und technische Einbauten"); Anzahl → durchdringungen_count (FLL-GAR-24-D1) neben dem manuellen bep_durchdringungen_anzahl (Ablösung STAGED fll_gar-D-6); bep_einbauten_typen bleibt.' },
+      description: 'Plan 3: Zeilen je Durchdringung / Einbau (L1479–L1480 "den baulichen Vorgaben (z. B. Randausbildung, Anschlüsse, Durchdringungen und technische Einbauten)"); Anzahl → durchdringungen_count (FLL-GAR-24-D1) neben dem manuellen bep_durchdringungen_anzahl (Ablösung STAGED fll_gar-D-6); bep_einbauten_typen bleibt.' },
   }),
   WS24({
     symbol: 'pflanzenarten', widget: 'register',
@@ -504,9 +488,9 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'bestanden', label: 'bestanden', type: 'boolean' },
       ],
     },
-    verification_quote: Q_L1313_1317,
+    verification_quote: `${Q_L2385_2393} — ${Q_L2410}`,
     create: { section_code: 'C', label_de: 'Prüfungen (Art, Werkstoff, Datum, Zertifikat, bestanden)', data_type: 'json', unit: null, clause_reference: '§5.x.3; §6.x.3; §7.x.3',
-      description: 'Plan 3: Zeilen je Prüfung (die prod-Attestation attest_fll_gar_25_req_26 "Nachweis: Sec.5.x.3/6.x.3/7.x.3" und die drei Booleans bleiben; REQ-26 unverändert); Dokumentation, keine Gleichung.' },
+      description: 'Plan 3: Zeilen je Prüfung — Eigenprüfung / Fremdüberwachung (L2385–L2388), Kontrollprüfungen seitens des Auftraggebers (L2390–L2393), "Die Ergebnisse der Kontrollprüfung werden der Abnahme und Abrechnung zugrunde gelegt." (L2410); die prod-Attestation attest_fll_gar_25_req_26 "Nachweis: Sec.5.x.3/6.x.3/7.x.3" und die drei Booleans bleiben; REQ-26 unverändert; Dokumentation, keine Gleichung.' },
   }),
 
   // ---- FLL-GAR-27 (Inbetriebnahme / Notüberlauf): catchment sub-areas for Anhang 1 Gl. 1 ----
@@ -545,7 +529,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'qualifikation', label: 'Qualifikation', type: 'text' },
       ],
     },
-    verification_quote: Q_L1487_1489,
+    verification_quote: `${Q_L1483} — ${Q_L1487_1489}`,
     create: { section_code: 'C', label_de: 'Inspektions- und Wartungsmaßnahmen (Maßnahme, Intervall, Qualifikation)', data_type: 'json', unit: null, clause_reference: 'Abschnitt 13',
       description: 'Plan 3: Zeilen je Maßnahme (L1483 "dem Instandhaltungsaufwand (z. B. Reinigungsart, Inspektionsintervalle)"); REQ-29 (inspektion_intervall_jahr ≤ 1) und die vier inst_*-Textfelder bleiben (FLL-Revision GAR-28 F-1 / F-2); Dokumentation, keine Gleichung.' },
   }),

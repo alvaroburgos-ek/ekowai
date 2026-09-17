@@ -1415,13 +1415,13 @@ Report: `reports/plan-3-m1200_3.md` · STAGED SQL: `scripts/verification/m1200_3
 
 ## Task 7 — FLL-GAR-2023 (fll_gar)
 
-Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\FLL-Gewässerabdichtungsrichtlinien.md` (Ausgabe 2023, lines cited; plain text — hyphenated line breaks appear as "Gruben- tone" inside collapsed quotes) · prod capture `src/lib/eval/field-configs/fll_gar.prior.json` (2026-09-17, read-only; 174 fields, 261 sections, 4 equations; the 30 compliance rows and 4 equation formulas via `prod-query.mjs`). FLL-revision overlap (branch `feat/fll-revision`, `.superpowers/sdd/fll-m2/FLL-GAR-2023__FLL-GAR-NN.json`) is cross-referenced by finding id; NO gate severity is touched by this task. Nothing below is applied.
+Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\FLL-Gewässerabdichtungsrichtlinien.md` (Ausgabe 2023, lines cited; plain text — hyphenated line breaks appear as "Gruben- tone" inside collapsed quotes) · prod capture `src/lib/eval/field-configs/fll_gar.prior.json` (2026-09-17, read-only; 174 fields, 261 sections, 4 equations; the 30 compliance rows and 4 equation formulas via `prod-query.mjs`). Fix round 1 (2026-09-18): E-2 withdrawn to STAGED, the S-class select/equation removed (D-4), archive-pattern rollbacks on E-2 / G-5 / G-8 / G-9 / R-1 / R-2. FLL-revision overlap (branch `feat/fll-revision`, `.superpowers/sdd/fll-m2/FLL-GAR-2023__FLL-GAR-NN.json`) is cross-referenced by finding id; NO gate severity is touched by this task. Nothing below is applied.
 
 ### fll_gar-C-1 · FLL-GAR-2023 · FLL-GAR-09 · abdichtungs_art consumer_worksheets (the master switch is not inherited)
 - Class: consumer-edit
 - Chosen now (fail-safe): the 104 section rules on FLL-GAR-10…21, the Tab.-1 fill `boeschungsneigung_limit` (-07) and the register column `boeschungsabschnitte.limit_1m` are emitted keyed on `abdichtungs_art` but INERT (`pending` = visible; `manual_required`) because prod's `consumer_worksheets = ["FLL-GAR-10..21"]` is a range string that `loadInheritedFields` (`code = ANY(consumer_worksheets)`) never matches — no worksheet inherits the selector today; REQ-05 and REQ-12 … REQ-22 are `pending` for the same reason (FLL-revision GAR-10 F1-DISCRIMINATOR-MISSING, GAR-04 F2, GAR-07 F-1).
 - Evidence (verbatim, transcript line): "Die Art der Abdichtungsstoffe, die Anzahl der Lagen und deren Anordnung sowie die Verfahren zur Herstellung der Abdichtungsschicht müssen in ihrem Zusammenwirken die Funktion der Abdichtung sicherstellen." (L1487–L1489); "Für die Neigung der Abdichtung von Böschungen bestehen werkstoffspezifische Einschränkungen (s. Tab. 1)." (L1372–L1373); capture `abdichtungs_art.consumer_worksheets = {FLL-GAR-10..21}`.
-- Proposed SQL / config: STAGED block fll_gar-C-1 — replace the range string by the 18 resolvable codes (-04, -05, -07, -10 … -21, -22, -23, -24).
+- Proposed SQL / config: STAGED block fll_gar-C-1 — replace the range string by the 18 resolvable codes (-04, -05, -07, -10 … -21, -22, -23, -24). Even after C-1 the rules / fills on -04, -05 and -07 stay `pending` (visible) / "Schlüssel fehlt" until FLL-GAR-09 is filled — the selector lives downstream of those worksheets in the numbering.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### fll_gar-C-2 · FLL-GAR-2023 · FLL-GAR-10 / -12 / -14 / -16 · section C (consumed producers — rule withheld)
@@ -1452,11 +1452,11 @@ Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar
 - Proposed SQL / config: none — the owner decides whether -07 gets a `mischgutart` twin (or inherits -13's) so the asphalt case fills there; Stahl / Alkalisilikat / GUP stay without a printed limit.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### fll_gar-E-2 · FLL-GAR-2023 · FLL-GAR-16 · nahtbreite_min_mm re-bound as a Tab.-22 lookup_fill (UPDATE on a consumed producer)
+### fll_gar-E-2 · FLL-GAR-2023 · FLL-GAR-16 · nahtbreite_min_mm re-bound as a Tab.-22 lookup_fill (UPDATE on a consumed, required producer — STAGED)
 - Class: equation-replacement (widget on an existing consumed limit)
-- Chosen now (fail-safe): EMITTED (20260917100710): the existing number "Mindestnahtbreite" (consumed by -15 / -18, is_required) gets `widget = 'lookup_fill'` on TAB22 keyed on its own two fields `fuegeverfahren` × `bahn_material_naht` (role limit, locked — no override control); the value is filled from the printed row once and the consumers read the same row; a non-printed combination shows "keine Zeile" and leaves the engineer's typed value untouched (the widget never writes a null). Recorded because it changes a consumed producer's widget (not its data_type, not its consumers).
+- Chosen now (fail-safe): NOT emitted (fix round 1 — controller ruling: a widget change on a consumed, `is_required` producer with its own prod validation rule is a ruling, not a fail-safe default). `nahtbreite_min_mm` stays the manual "Mindestnahtbreite" (consumed by -15 / -18); the full UPDATE (`widget = 'lookup_fill'` on TAB22 keyed on the own `fuegeverfahren` × `bahn_material_naht`, role limit, locked) and its archive-pattern rollback sit in the STAGED file. The per-row Tab.-22 limit in `naehte` and the created `naht_ueberlappung_min_mm` are unaffected.
 - Evidence (verbatim, transcript line): "Je nach Stoffart der Kunststoff- und Elastomerbahn sind unterschiedliche Fügeverfahren und Mindestfügebreiten einzuhalten." (L4101–L4102); prod validation_rules.raw '>= 20/30/40/60 per Tab.22' (the 60 is the Überlappung — FLL-revision GAR16-F1).
-- Proposed SQL / config: as emitted; rollback restores the captured NULLs.
+- Proposed SQL / config: STAGED block fll_gar-E-2 (UPDATE fields … guarded `widget IS NULL`; rollback from `fields_archive_fll_gar` by id, explicit columns).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### fll_gar-J-1 · FLL-GAR-2023 · FLL-GAR-10 · Tab. 3 (requirement list — not seeded)
@@ -1557,16 +1557,16 @@ Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar
 - Proposed SQL / config: STAGED block fll_gar-D-1 … D-6.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### fll_gar-D-4 · FLL-GAR-2023 · FLL-GAR-05 · standortklasse ← s_klasse_code
+### fll_gar-D-4 · FLL-GAR-2023 · FLL-GAR-05 · standortklasse (S-class not derived)
 - Class: deactivation
-- Chosen now (fail-safe): `standort_tab18` (select) + `s_klasse_code` (FLL-GAR-05-D3) created beside the manual enum (consumed by -15 / -16 / -17).
+- Chosen now (fail-safe): the manual enum stays the only S carrier; the created `standort_tab18` select and `s_klasse_code` (FLL-GAR-05-D3) of the first commit were REMOVED in fix round 1 — Tab. 18 prints no independent S input (L3692–L3696 are the two class descriptions themselves), so a select would have duplicated `standortklasse` 1:1 (not in the brief). This block only records that retiring the manual enum needs a printed driver first.
 - Evidence (verbatim, transcript line): "12 S1-B Behälter im Außenbereich, der nicht mit einem Bauwerk verbun- den ist." (L3692–L3693); "13 S2-B Behälter im Außenbereich, der an ein Bauwerk angrenzt und mit diesem verbunden ist sowie Behälter im Innenbereich." (L3695–L3696).
-- Proposed SQL / config: STAGED block fll_gar-D-1 … D-6.
+- Proposed SQL / config: none (nothing to apply); see the STAGED D-4 line.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### fll_gar-D-5 · FLL-GAR-2023 · FLL-GAR-09 / -18 · wurzel_rhizomfestigkeit_required ← the material sentences (PE only encoded)
+### fll_gar-D-5 · FLL-GAR-2023 · FLL-GAR-09 / -18 / -24 · wurzel_rhizomfestigkeit_required (and bep_rhizomfestigkeit_erforderlich) ← the material sentences (PE only encoded)
 - Class: deactivation (partial derivation)
-- Chosen now (fail-safe): FLL-GAR-18-D1 `pe_rhizom_nachweis_code` (PEHD 0 / PELD 1) on -18 only; the -09 boolean stays manual — the brief's `if(abdichtungs_art == '<pehd token>', 0, 1)` is not encodable (prod has one token `bahn_pe` for PELD and PEHD) and a blanket "1 for every other material" is not printed (no sentence for mineral / GTD / Stahl / Alkalisilikat / GUP).
+- Chosen now (fail-safe): FLL-GAR-18-D1 `pe_rhizom_nachweis_code` (PEHD 0 / PELD 1) on -18 only; the -09 boolean `wurzel_rhizomfestigkeit_required` (consumed by 'FLL-GAR-10..21' / -24) AND its second manual carrier `bep_rhizomfestigkeit_erforderlich` (-24, boolean, no consumer) stay manual — three carriers of one fact, the owner picks the survivor; — the brief's `if(abdichtungs_art == '<pehd token>', 0, 1)` is not encodable (prod has one token `bahn_pe` for PELD and PEHD) and a blanket "1 for every other material" is not printed (no sentence for mineral / GTD / Stahl / Alkalisilikat / GUP).
 - Evidence (verbatim, transcript line): "Kunststoffbahnen aus PEHD besitzen eine ausreichende Widerstandsfähigkeit gegenüber Wurzeln und Rhizomen. Auf eine Prüfung der Wurzel- und Rhizomfestigkeit kann verzichtet werden." (L4511–L4513); "Bei Kunststoffbahnen aus PELD ist vom Hersteller zusätzlich ein Nachweis der Wurzel- bzw. Rhizomfestigkeit gemäß FLL zu erbringen." (L4514–L4515); the same "zu erbringen" sentence for Beton-Fugenabdichtungen (L2485–L2486), Asphalt (L2902–L2903), Bitumenbahnen (L3732–L3733), Kunststoff-/Elastomerbahnen (L3924–L3925), Flüssigkunststoff (L4212–L4213).
 - Proposed SQL / config: STAGED block fll_gar-D-1 … D-6 (a -09 equation needs `pe_werkstoff` consumed on -09 and the owner's ruling for the unprinted materials).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -1748,6 +1748,6 @@ Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar
 - **`evaluateFormula` checks every named scalar input BEFORE evaluating** (an `if()` branch does not exempt its inputs, unlike `sum_rows`/`count_rows` over an optional register) — FLL-GAR-05-D2 needs all three inputs (0 when none) and FLL-GAR-18-D2 all three PEHD values.
 - **A `lookup()` on a non-printed key combination yields null in the row** (Quellschweißen × ECB) — `count_rows(naehte, ok == 0)` is then `manual_required`, never a silent count (the m1200_3 trap 2).
 - **Edition token `'2023-12'`** is printed ("Ausgabe 2023" L7; "2. Ausgabe, 1.000 Exemplare, Bonn, Dezember 2023" L133) and prod `standards.version` reads "Dezember 2023 (2. Ausgabe; Erstauflage 2005)" — no I-block needed.
-- **Scalar-only equations are not server-materialised** (2a design) — FLL-GAR-02-D1, -05-D1/-D2/-D3, -11-D1, -12-D1, -14-D1, -16-D2, -18-D1/-D2 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
+- **Scalar-only equations are not server-materialised** (2a design) — FLL-GAR-02-D1, -05-D1/-D2, -11-D1, -12-D1, -14-D1, -16-D2, -18-D1/-D2 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
 - **cm vs mm**: `bauteildicke_cm` / `asph_dicke` / `schichtdicke_*_cm` are cm in prod while Tab. 8 / Tab. 12 print mm — the created fills carry the printed unit (mm) and say so in the label; comparisons need × 10 (GAR-12 F2).
 - **The transcript is plain text with hyphenated line breaks**; whitespace-collapsed fragments keep the hyphen ("Gruben- tone", "Geo- textilien") — presentation strings in the seed (labels, `werkstoffe_text`) carry them verbatim rather than a guessed de-hyphenation.
