@@ -118,7 +118,7 @@ describe('DWA-M-1200-1 Plan-3 seed tables', () => {
     expect(String(t.rows[5].values.karenzzeit_text)).toContain('bis 4 Wochen vor dem Schnitt oder Weidegang'); // L1074
     expect(String(t.rows[5].values.karenzzeit_text)).toContain('bis 30 Tage vor der Ernte'); // L1089
     expect(t.rows.map((r) => [r.values.emitter_tropf_cm, r.values.emitter_mikro_cm])).toEqual([[null, null], [null, null], [null, null], [25, 50], [null, null], [null, null]]); // L1035 / L1036
-    expect(t.rows.map((r) => r.values.laktierend_ausgeschlossen)).toEqual([false, false, null, true, true, null]); // L1053
+    expect(t.rows.map((r) => r.values.laktierend_ausgeschlossen)).toEqual([null, false, null, true, true, null]); // L1053 (C); L1006 (B-1); A / B-2 / D print nothing → null
     expect(t.rows.map((r) => r.values.laktierend_abtrocknung)).toEqual([null, true, null, null, null, null]);      // L1006
     expect(t.override_policy).toBe('locked');
     expect(t.override_quote).toBe('(*) Wenn eine bewässerte Kulturpflanzenart in mehrere der oben genannten Kategorien fällt, gelten die Anforderungen der strengsten Kategorie.'); // L918

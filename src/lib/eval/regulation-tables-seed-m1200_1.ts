@@ -504,7 +504,8 @@ export function tab8NoteFAsTable(): RegulationTable {
 // printed bullet(s) carrying a waiting period (composed of verbatim bullets joined with " · " where a class prints several
 // — D: L1074 / L1075 / L1089); `emitter_tropf_cm` / `emitter_mikro_cm` = C-1 L1035 / L1036 ("mindestens 25 cm" /
 // "mindestens 50 cm"); `laktierend_ausgeschlossen` = C-1/C-2 true (L1053 "bei der Verwendung der Güteklasse C wird
-// grundsätzlich ausgeschlossen"), A / B-1 false (printed without exclusion), B-2 / D null (not printed either way);
+// grundsätzlich ausgeschlossen"), B-1 false (L1006 presupposes grazing by lactating cattle — with drying), A / B-2 / D null
+// (the printed rows say nothing about lactating cattle — never inferred; review fix round 1);
 // `laktierend_abtrocknung` = B-1 true (L1006). The C-1 row spans two printed tables (L1027–L1040 + L1050–L1055) and D
 // too (L1066–L1077 + L1087–L1105): the first span is the row quote, the continuation lines feed the text columns.
 // Policy `locked` (Tab. 4 note (*) L918 — the strictest category rule).
@@ -514,7 +515,7 @@ export function tab7ClassAsTable(): RegulationTable {
   const TROPF = frag(Q_T7_C1, 'Tropfbewässerung oder eine andere', ' \\\\');
   type R = { klasse: Gueteklasse; quote: string; methode: string; eu: string | null; karenz: string | null; tropf: number | null; mikro: number | null; lakt: boolean | null; abtrocknung: boolean | null; vorsorge: string | null };
   const R: R[] = [
-    { klasse: 'A',   quote: Q_T7_A,  methode: ALLE,  eu: frag(Q_T7_A, 'Alle roh verzehrten', ' \\\\'),  karenz: frag(Q_T7_A, '(Bewässerung ohne Einschränkungen', ')') + ')', tropf: null, mikro: null, lakt: false, abtrocknung: null, vorsorge: null },
+    { klasse: 'A',   quote: Q_T7_A,  methode: ALLE,  eu: frag(Q_T7_A, 'Alle roh verzehrten', ' \\\\'),  karenz: frag(Q_T7_A, '(Bewässerung ohne Einschränkungen', ')') + ')', tropf: null, mikro: null, lakt: null, abtrocknung: null, vorsorge: null },
     { klasse: 'B-1', quote: Q_T7_B1, methode: ALLE,  eu: frag(Q_T7_B1, 'Roh verzehrte', ' \\\\'),       karenz: bullet(Q_L1006), tropf: null, mikro: null, lakt: false, abtrocknung: true, vorsorge: bullet(Q_L1006) },
     { klasse: 'B-2', quote: Q_T7_B2, methode: ALLE,  eu: null,                                            karenz: null, tropf: null, mikro: null, lakt: null, abtrocknung: null, vorsorge: null },
     { klasse: 'C-1', quote: Q_T7_C1, methode: TROPF, eu: frag(Q_T7_C1, 'Roh verzehrte', ' \\\\'),       karenz: bullet(Q_L1038), tropf: 25, mikro: 50, lakt: true, abtrocknung: null, vorsorge: bullet(Q_L1053) },

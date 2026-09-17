@@ -94,7 +94,7 @@ const tab8Fill = (symbol: string, value: string, label: string, unit: string, qu
   lookup: { table_code: 'TAB8', role: 'limit', keys: [{ column: 'klasse', from_symbol: 'gueteklasse_zugeordnet' }], value },
   visible_when, verification_quote: quote,
   create: { section_code: 'B', label_de: `${label} — Tab. 8 (${printed})`, data_type: 'number', unit, clause_reference: '§5.2, Tab. 8',
-    description: `Plan 3: Wert aus TAB8 zur zugeordneten Wassergüteklasse (locked — Mindestanforderung); die Routineproben-Zeilen vergleichen dagegen (M12001-09-D1)${note}; Gates auf diesem Symbol STAGED (m1200_1-G-3 / -G-4).` },
+    description: `Plan 3: Wert aus TAB8 zur zugeordneten Wassergüteklasse (locked — Mindestanforderung); die Routineproben-Zeilen vergleichen dagegen (M12001-09-D1)${note}.` },
 });
 /** Tab. 27 frequency fill on M12001-12 (text, the printed cell verbatim), keyed on the inherited class. */
 const tab27Fill = (symbol: string, value: string, label: string, quote: string, visible_when: string | null = null, note: string = ''): FieldConfigEntry => WS12({
@@ -232,11 +232,11 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   tab8Fill('legionella_limit', 'legionella_max', 'Legionella spp. — Grenzwert (strikt "<")', 'KBE/l', Q_T8_A, '< 1.000, wenn das Risiko der Aerosolbildung besteht', AEROSOL, '; nur bei Aerosolrisiko (aerosolrisiko = ja) sichtbar — die bestehende Eingabe legionella_value bleibt immer sichtbar (m1200_1-C-3)'),
   tab8Fill('nematoden_limit', 'nematoden_max', 'Intestinale Nematoden — Grenzwert', 'Eier/l', Q_T8_A, '≤ 1 Ei pro Liter für Weideflächen oder Futterpflanzen', WEIDE, '; nur bei Weide-/Futterpflanzenbewässerung sichtbar — nematoden_value bleibt immer sichtbar (m1200_1-C-3)'),
   tab8Fill('log10_e_coli_ziel', 'log10_e_coli', 'Leistungsziel log10-Reduktion E. coli', 'log10', `${Q_L1135} — ${Q_T8_A}`, 'A / B-1 / C-1 ≥ 5,0', LEISTUNGSZIELE, '; CR-006 auf die Leistungsziele STAGED (m1200_1-G-4)'),
-  tab8Fill('log10_somatische_coliphagen_ziel', 'log10_somatische_coliphagen', 'Leistungsziel log10-Reduktion somatische Coliphagen', 'log10', `${Q_L1135} — ${Q_T8_A}`, 'A / B-1 / C-1 ≥ 6,0', LEISTUNGSZIELE),
-  tab8Fill('log10_f_coliphagen_ziel', 'log10_f_coliphagen', 'Leistungsziel log10-Reduktion f-spezifische Coliphagen', 'log10', `${Q_L1135} — ${Q_T8_A}`, 'A / B-1 / C-1 ≥ 6,0', LEISTUNGSZIELE),
-  tab8Fill('log10_clostridium_ziel', 'log10_clostridium', 'Leistungsziel log10-Reduktion Clostridium-perfringens-Sporen', 'log10', `${Q_L1135} — ${Q_T8_A}`, 'A / B-1 / C-1 ≥ 4,0', LEISTUNGSZIELE),
-  tab8Fill('log10_sulfatreduzierer_ziel', 'log10_sulfatreduzierer', 'Leistungsziel log10-Reduktion sulfatreduzierende Sporenbildner', 'log10', `${Q_L1135} — ${Q_T8_A}`, 'A / B-1 / C-1 ≥ 5,0', LEISTUNGSZIELE, '; die Tabellenzelle druckt "25，0" / "？5，0" — 5,0 nach L1135 (m1200_1-U-3)'),
-  tab8Fill('validierung_min_share_pct', 'validierung_pass_share_pct', 'Mindestanteil der Validierungsproben, die die Leistungsziele erreichen', '%', `${Q_L1215} — ${Q_L1147}`, 'A 90 % · B-1 / C-1 50 %', LEISTUNGSZIELE, '; Vergleichswert für validierungs_compliance_pct (M12001-12, m1200_1-C-3)'),
+  tab8Fill('log10_somatische_coliphagen_ziel', 'log10_somatische_coliphagen', 'Leistungsziel log10-Reduktion somatische Coliphagen', 'log10', `${Q_L1135} — ${Q_T8_A}`, 'A / B-1 / C-1 ≥ 6,0', LEISTUNGSZIELE, '; CR-006 STAGED (m1200_1-G-4)'),
+  tab8Fill('log10_f_coliphagen_ziel', 'log10_f_coliphagen', 'Leistungsziel log10-Reduktion f-spezifische Coliphagen', 'log10', `${Q_L1135} — ${Q_T8_A}`, 'A / B-1 / C-1 ≥ 6,0', LEISTUNGSZIELE, '; CR-006 STAGED (m1200_1-G-4)'),
+  tab8Fill('log10_clostridium_ziel', 'log10_clostridium', 'Leistungsziel log10-Reduktion Clostridium-perfringens-Sporen', 'log10', `${Q_L1135} — ${Q_T8_A}`, 'A / B-1 / C-1 ≥ 4,0', LEISTUNGSZIELE, '; CR-006 STAGED (m1200_1-G-4)'),
+  tab8Fill('log10_sulfatreduzierer_ziel', 'log10_sulfatreduzierer', 'Leistungsziel log10-Reduktion sulfatreduzierende Sporenbildner', 'log10', `${Q_L1135} — ${Q_T8_A}`, 'A / B-1 / C-1 ≥ 5,0', LEISTUNGSZIELE, '; die Tabellenzelle druckt "25，0" / "？5，0" — 5,0 nach L1135 (m1200_1-U-3); CR-006 STAGED (m1200_1-G-4)'),
+  tab8Fill('validierung_min_share_pct', 'validierung_pass_share_pct', 'Mindestanteil der Validierungsproben, die die Leistungsziele erreichen', '%', `${Q_L1215} — ${Q_L1147}`, 'A 90 % · B-1 / C-1 50 %', LEISTUNGSZIELE, '; Vergleichswert für validierungs_compliance_pct (M12001-12, m1200_1-C-3); CR-006 STAGED (m1200_1-G-4)'),
   tab8Fill('routine_min_share_pct', 'routine_pass_share_pct', 'Mindestanteil der Routineproben, die die Werte einhalten', '%', `${Q_L1143} — ${Q_L1145}`, '90 % für jede Klasse', null, '; CR-008 auf compliance_quote_calc >= routine_min_share_pct STAGED (m1200_1-G-7)'),
   ...(['truebung_avg_limit', 'truebung_5pct_limit', 'truebung_never_limit'] as const).map((symbol, i) => {
     const value = ['ntu_avg_24h', 'ntu_5pct', 'ntu_never'][i];
