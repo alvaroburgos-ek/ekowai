@@ -337,6 +337,7 @@ export default async function WorksheetPage({
           sections={ws.sections.map((s) => ({
             id: s.id, code: s.code, titleDe: s.titleDe, titleEn: s.titleEn,
             orderIndex: s.orderIndex, parentSectionId: s.parentSectionId,
+            visibleWhen: s.visibleWhen ?? null,
           }))}
           fields={mergedFields.map((f) => {
             const verifiedByUserId = (f as typeof f & { verifiedByUserId?: string | null }).verifiedByUserId ?? null;

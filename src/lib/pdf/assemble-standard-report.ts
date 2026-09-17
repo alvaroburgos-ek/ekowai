@@ -3,6 +3,7 @@ import { buildRegisters } from '@/lib/eval/register-rows';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
+import { computeVisibility } from '@/lib/compliance/visibility';
 import { explainCondition, type ExplainLeaf } from '@/lib/compliance/explain';
 import { blocksVerificationGate } from '@/lib/verification-status';
 import { resolveFromSiteProfile, SITE_PROFILE_ENTRIES } from '@/lib/site-profile/symbol-map';
@@ -262,6 +263,10 @@ export type AssemblerSection = {
   worksheetTemplateId: string;
   titleDe: string;
   orderIndex: number;
+  /** Plan 2a (Task 10): visible_when inputs — optional so fixtures stay
+   * lightweight; the production loader's `select()` supplies both. */
+  parentSectionId?: string | null;
+  visibleWhen?: string | null;
 };
 
 export type AssemblerField = {
@@ -284,6 +289,9 @@ export type AssemblerField = {
    * back to the TS register config by symbol. */
   widget?: string | null;
   uiConfig?: unknown;
+  /** Plan 2a (Task 10): field-level `visible_when` (NULL ⇒ LEGACY_VISIBLE_WHEN
+   * by symbol). Optional — the loader's `select()` supplies it. */
+  visibleWhen?: string | null;
 };
 
 export type AssemblerEquation = {
@@ -692,13 +700,23 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         };
       });
 
+      const gateLookup = (sym: string) => {
+        const r = resolvedBySymbol.get(sym);
+        if (!r || r.value == null) return undefined;
+        return r.value as number | string | boolean;
+      };
+      // Plan 2a (Task 10): fields/sections of THIS worksheet hidden by
+      // `visible_when` under the resolved values — same pure helper and same
+      // lookup the gates below evaluate against; a hidden-symbol condition
+      // reports `not_applicable` in the dossier instead of a false verdict.
+      const { hiddenSymbols } = computeVisibility(
+        tplFields.map((f) => ({ id: f.id, symbol: f.symbol, sectionId: f.sectionId, visibleWhen: f.visibleWhen ?? null })),
+        tplSecs.map((s) => ({ id: s.id, parentSectionId: s.parentSectionId ?? null, visibleWhen: s.visibleWhen ?? null })),
+        gateLookup,
+      );
+
       const evaluatedCompliance: ReportCompliance[] = tplCReqs.map((c) => {
-        const gateLookup = (sym: string) => {
-          const r = resolvedBySymbol.get(sym);
-          if (!r || r.value == null) return undefined;
-          return r.value as number | string | boolean;
-        };
-        const result = evaluateCondition(c.condition, gateLookup);
+        const result = evaluateCondition(c.condition, gateLookup, { hiddenSymbols });
         // Stage-3: failed gates carry the per-leaf explanation (same AST as
         // the evaluator) so the dossier shows actual · required · wouldPass.
         let explanation: ExplainLeaf[] | undefined;

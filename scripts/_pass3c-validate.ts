@@ -39,6 +39,27 @@ export function validateFieldConfigColumns(f: {
   }
 }
 
+/**
+ * Plan 2a (Task 10): `visible_when` is forbidden on a field that other worksheets consume
+ * (`consumer_worksheets` non-empty). A hidden field resolves to `null` in the engine and
+ * to `not_applicable` in the gates — on the CONSUMER worksheet that would silently blank an
+ * inherited value the engineer there never sees the reason for. Structural rule, no DSL parse.
+ * `consumer_worksheets` may be the workbook's comma-separated string or the DB's text[].
+ */
+export function validateVisibleWhenNotOnProducer(f: {
+  symbol: string;
+  visible_when?: string | null;
+  consumer_worksheets?: string[] | string | null;
+}): string[] {
+  if (!f.visible_when || !f.visible_when.trim()) return [];
+  const consumers = (Array.isArray(f.consumer_worksheets)
+    ? f.consumer_worksheets
+    : (f.consumer_worksheets ?? '').split(',')
+  ).map((c) => c.trim()).filter(Boolean);
+  if (consumers.length === 0) return [];
+  return [`field ${f.symbol}: visible_when on a symbol consumed by ${consumers.join(', ')} is not allowed (hidden ⇒ null would blank the consumer)`];
+}
+
 /** A FieldRow as parsed today, plus the optional widget/ui_config/lookup/visible_when
  *  columns a future Fields-sheet extension (or a hand-authored row) may carry. Not part
  *  of the current xlsx contract — see the comment on `validateFieldConfigColumns`. */
@@ -141,6 +162,9 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
     }
     fieldKeys.add(fieldKey);
     for (const message of validateFieldConfigColumns(f as FieldRowWithConfig)) {
+      errors.push({ sheet: 'Fields', row, message });
+    }
+    for (const message of validateVisibleWhenNotOnProducer(f as FieldRowWithConfig)) {
       errors.push({ sheet: 'Fields', row, message });
     }
   });

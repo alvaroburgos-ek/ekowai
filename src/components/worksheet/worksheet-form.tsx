@@ -34,6 +34,8 @@ import { SourceFormReferencePanel } from '@/components/form-templates/SourceForm
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { visibleFields } from './visible-fields';
+import { makeSymbolLookup } from './symbol-lookup';
+import { computeVisibility } from '@/lib/compliance/visibility';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
 import { computeComputedSymbols } from '@/lib/eval/computed-symbols';
@@ -398,6 +400,21 @@ export function WorksheetForm({
     () => withFallbackRegisterEquations(worksheet.template.code, sortedEquations),
     [worksheet.template.code, sortedEquations],
   );
+  // Plan 2a (Task 10): `visible_when` on fields and sections. One symbol
+  // lookup over the store (shared with ComplianceBlock via makeSymbolLookup),
+  // one pure visibility pass over the CURRENT values. Only this worksheet's
+  // own fields take part — inherited fields render in the read-only panel and
+  // are governed by their origin worksheet (the importer forbids visible_when
+  // on a produced symbol). hiddenSymbols feed the engine (hidden ⇒ null) and
+  // the compliance block (hidden ⇒ not_applicable); hiddenFieldIds /
+  // hiddenSectionIds drop the rows from the grid below.
+  const symbolLookup = useMemo(() => makeSymbolLookup(fields, values), [fields, values]);
+  const ownFields = useMemo(() => fields.filter((f) => !f.inheritedFromWorksheet), [fields]);
+  const visibility = useMemo(
+    () => computeVisibility(ownFields, sections, symbolLookup),
+    [ownFields, sections, symbolLookup],
+  );
+
   const { engineEquationIds, engineStates } = useEquationEngine({
     worksheetCode: worksheet.template.code,
     standardCode,
@@ -405,6 +422,7 @@ export function WorksheetForm({
     equations: engineEquations,
     ambiguousSymbols,
     suppressWriteBackSymbols: engineSuppressedSymbols,
+    hiddenSymbols: visibility.hiddenSymbols,
   });
 
   // Symbol → unit lookup for the engine-card drill-down "Eingaben im Detail".
@@ -592,6 +610,9 @@ export function WorksheetForm({
     const map = new Map<string | null, FieldDef[]>();
     for (const f of visibleFields(fields)) {
       if (f.inheritedFromWorksheet) continue;
+      // Plan 2a (Task 10): hidden by `visible_when` (own rule or hidden
+      // section) — leaves the grid entirely; the engine sees it as null.
+      if (visibility.hiddenFieldIds.has(f.id)) continue;
       // rainfall_table_ref is rendered by its dedicated RainfallTableSelector
       // section (table-id picker), not as a raw text input in the field grid.
       if (f.symbol === 'rainfall_table_ref') continue;
@@ -614,7 +635,7 @@ export function WorksheetForm({
       arr.sort((a, b) => a.orderIndex - b.orderIndex);
     }
     return map;
-  }, [fields, selectionFieldIds]);
+  }, [fields, selectionFieldIds, visibility]);
 
   // The inherited-values panel content. Built once from `fields` + the
   // store's resolved values.
@@ -628,6 +649,9 @@ export function WorksheetForm({
   // worksheets carry many scaffold sections (Output Transfer Table, Notes &
   // Assumptions, Approval, Workflow Connection …) that collect nothing in this
   // form — we hide those empty headers instead of listing blank sections.
+  // Plan 2a (Task 10): a section hidden by `visible_when` (own rule or hidden
+  // ancestor) never renders, even if a child would — its fields are already
+  // gone from fieldsBySectionId, and the ancestor walk skips it too.
   const visibleSectionIds = useMemo(() => {
     const parentBySection = new Map(sections.map((s) => [s.id, s.parentSectionId]));
     const result = new Set<string>();
@@ -635,12 +659,13 @@ export function WorksheetForm({
       if (!sid || arr.length === 0) continue;
       let cur: string | null = sid;
       while (cur && !result.has(cur)) {
+        if (visibility.hiddenSectionIds.has(cur)) break;
         result.add(cur);
         cur = parentBySection.get(cur) ?? null;
       }
     }
     return result;
-  }, [fieldsBySectionId, sections]);
+  }, [fieldsBySectionId, sections, visibility]);
 
   const topSections = sections.filter((s) => s.parentSectionId === null);
   const orphanFields = fieldsBySectionId.get(null) ?? [];
@@ -992,6 +1017,7 @@ export function WorksheetForm({
         fields={fields.map((f) => ({ id: f.id, symbol: f.symbol }))}
         locale={locale}
         projectId={projectId}
+        hiddenSymbols={visibility.hiddenSymbols}
       />
       <ApprovalBar
         instanceId={instance.id}

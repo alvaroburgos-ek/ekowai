@@ -8,6 +8,7 @@
 
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
 import { evaluateCondition } from '@/lib/compliance/evaluate';
+import { computeVisibility, type VisibilitySection } from '@/lib/compliance/visibility';
 import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
@@ -180,6 +181,12 @@ export function buildSnapshotPayload(args: {
    *  producer. Mirrors the live hook's ambiguity guard so the snapshot
    *  doesn't silently pick a winner and label it `computed`. */
   ambiguousSymbols?: Map<string, string[]>;
+  /** Plan 2a (Task 10): this worksheet's sections (own `visible_when` + parent
+   * chain). With them, fields/sections hidden by `visible_when` under the saved
+   * parameters make every compliance condition that references a hidden
+   * symbol `not_applicable` (flattened to `open`). Optional — without it only
+   * field-level rules (DB `visible_when` / LEGACY_VISIBLE_WHEN) apply. */
+  sections?: readonly VisibilitySection[];
 }): SnapshotPayload {
   const { fields: fieldList, complianceRequirements: crList } = args;
   // Plan 2a: fallback register equations (VSME-B04.100 per-medium sums) are
@@ -543,9 +550,17 @@ export function buildSnapshotPayload(args: {
     return v.value as number | string | boolean | null;
   };
 
+  // Plan 2a (Task 10): visibility over the SAME lookup the conditions use.
+  // Only this worksheet's own fields take part — inherited rows (merged in by
+  // capture.ts, `inheritedFromWorksheet` set) are governed by their origin.
+  const ownFields = (fieldList as Array<FieldRow & { inheritedFromWorksheet?: string }>).filter(
+    (f) => !f.inheritedFromWorksheet,
+  );
+  const { hiddenSymbols } = computeVisibility(ownFields, args.sections ?? [], lookupForCompliance);
+
   const complianceResults: Record<string, SnapshotComplianceVerdict> = {};
   for (const req of crList) {
-    const res = evaluateCondition(req.condition, lookupForCompliance);
+    const res = evaluateCondition(req.condition, lookupForCompliance, { hiddenSymbols });
     switch (res.kind) {
       case 'pass':
         complianceResults[req.id] = 'pass';
@@ -555,6 +570,10 @@ export function buildSnapshotPayload(args: {
         break;
       case 'pending':
       case 'manual':
+      // Plan 2a (Task 10): a hidden-symbol gate is flattened to `open` like
+      // the other non-verdicts — the stored JSONB shape ('pass'|'fail'|'open')
+      // is unchanged; a distinct snapshot verdict is Task 11's call.
+      case 'not_applicable':
         complianceResults[req.id] = 'open';
         break;
     }

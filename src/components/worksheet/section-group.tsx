@@ -8,6 +8,10 @@ type Section = {
   titleEn: string | null;
   orderIndex: number;
   parentSectionId: string | null;
+  /** Compliance-DSL condition; NULL = always visible. Evaluated by
+   * WorksheetForm's computeVisibility (Plan 2a, Task 10) — a section whose
+   * rule fails is dropped from `visibleSectionIds` with all its descendants. */
+  visibleWhen?: string | null;
 };
 
 type Props = {

@@ -13,6 +13,7 @@
  */
 import { evaluateFormula, type EvalState } from './formula';
 import { evaluateCondition, type EvalResult } from '../compliance/evaluate';
+import { computeVisibility, type Visibility, type VisibilitySection } from '../compliance/visibility';
 import { equationProfiles } from './equation-profiles';
 import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
@@ -47,6 +48,11 @@ export type ReportField = {
   symbol: string;
   unit: string | null;
   dataType: string;
+  /** Plan 2a (Task 10): visible_when inputs — optional so legacy callers and
+   * fixtures stay valid; absent ⇒ never hidden by section / no DB rule
+   * (LEGACY_VISIBLE_WHEN still applies by symbol). */
+  sectionId?: string | null;
+  visibleWhen?: string | null;
   /** Plan 2a: DB register config (`widget='register'` + ui_config). Optional —
    * NULL widget + json dataType falls back to the TS register config by symbol. */
   widget?: string | null;
@@ -147,6 +153,25 @@ function buildValueMap(
     }
   }
   return { numByField, fieldBySymbol, bySymbol, jsonBySymbol };
+}
+
+/**
+ * Plan 2a (Task 10): fields/sections hidden by `visible_when` under the saved
+ * parameters — the SAME pure helper the form and the approval gate use, over
+ * the same symbol map `evaluateWorksheetCompliance` evaluates against. Feed
+ * the result's `hiddenSymbols` to `evaluateWorksheetCompliance(…, { hiddenSymbols })`.
+ */
+export function reportVisibility(
+  fields: ReportField[],
+  sections: readonly VisibilitySection[],
+  parameters: ReportParameter[],
+): Visibility {
+  const { bySymbol } = buildValueMap(fields, parameters);
+  return computeVisibility(
+    fields.map((f) => ({ id: f.id, symbol: f.symbol, sectionId: f.sectionId ?? null, visibleWhen: f.visibleWhen ?? null })),
+    sections,
+    (sym) => bySymbol.get(sym) ?? undefined,
+  );
 }
 
 /**
@@ -423,6 +448,10 @@ export function evaluateWorksheetCompliance(
   fields: ReportField[],
   parameters: ReportParameter[],
   engineResults: EquationReportResult[],
+  /** Plan 2a (Task 10): symbols hidden by `visible_when` (computed by the
+   * caller via `computeVisibility` over the same parameters) — a condition
+   * referencing one reports `not_applicable`. */
+  opts?: { hiddenSymbols?: ReadonlySet<string> },
 ): ComplianceReportResult[] {
   const { bySymbol } = buildValueMap(fields, parameters);
 
@@ -435,9 +464,10 @@ export function evaluateWorksheetCompliance(
   }
 
   const lookup = (sym: string) => bySymbol.get(sym) ?? undefined;
+  const evalOpts = opts?.hiddenSymbols ? { hiddenSymbols: opts.hiddenSymbols } : undefined;
 
   return rows.map((row) => {
-    const result = evaluateCondition(row.condition, lookup);
+    const result = evaluateCondition(row.condition, lookup, evalOpts);
     return {
       code: row.code,
       worksheetCode,

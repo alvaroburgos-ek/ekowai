@@ -3,7 +3,8 @@ import { useMemo, useTransition, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
-import { evaluateCondition, jsonConditionValue, type EvalResult } from '@/lib/compliance/evaluate';
+import { evaluateCondition, type EvalResult } from '@/lib/compliance/evaluate';
+import { makeSymbolLookup } from './symbol-lookup';
 import { explainCondition } from '@/lib/compliance/explain';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';
@@ -41,40 +42,24 @@ type Props = {
   fields: FieldRef[];
   locale: 'de' | 'en';
   projectId: string;
+  /** Symbols of fields hidden by `visible_when` (Plan 2a, Task 10). A
+   * requirement or suggestion condition referencing one evaluates to
+   * `not_applicable` — never a false pass/fail from a value the engineer
+   * cannot see. */
+  hiddenSymbols?: ReadonlySet<string>;
 };
 
-export function ComplianceBlock({ requirements, suggestions, fields, locale, projectId }: Props) {
+export function ComplianceBlock({ requirements, suggestions, fields, locale, projectId, hiddenSymbols }: Props) {
   const values = useWorksheetStore((s) => s.values);
 
-  const lookup = useMemo(() => {
-    const symbolToValue = new Map<string, number | string | boolean | null>();
-    for (const f of fields) {
-      const v = values[f.id];
-      if (!v) continue;
-      switch (v.type) {
-        case 'number': symbolToValue.set(f.symbol, v.value); break;
-        case 'text': symbolToValue.set(f.symbol, v.value); break;
-        case 'enum': symbolToValue.set(f.symbol, v.value); break;
-        case 'date': symbolToValue.set(f.symbol, v.value); break;
-        case 'boolean': symbolToValue.set(f.symbol, v.value); break;
-        case 'json': {
-          // Presence marker so `symbol IS NOT NULL`/`IS NOT EMPTY` gates work
-          // (populated carrier ⇒ 'present'; empty/null ⇒ not set → absent).
-          const m = jsonConditionValue(v.value);
-          if (m != null) symbolToValue.set(f.symbol, m);
-          break;
-        }
-      }
-    }
-    return (sym: string) => {
-      if (!symbolToValue.has(sym)) return undefined;
-      return symbolToValue.get(sym) ?? null;
-    };
-  }, [fields, values]);
+  // Plan 2a (Task 10): the same lookup WorksheetForm feeds computeVisibility,
+  // so the visibility decision and the gate verdict read one symbol map.
+  const lookup = useMemo(() => makeSymbolLookup(fields, values), [fields, values]);
 
+  const evalOpts = useMemo(() => ({ hiddenSymbols }), [hiddenSymbols]);
   const results = useMemo(
-    () => requirements.map((cr) => ({ cr, result: evaluateCondition(cr.condition, lookup) })),
-    [requirements, lookup],
+    () => requirements.map((cr) => ({ cr, result: evaluateCondition(cr.condition, lookup, evalOpts) })),
+    [requirements, lookup, evalOpts],
   );
 
   const suggestionsByReq = useMemo(() => {
@@ -112,7 +97,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
       fail: 0,
       pending: 0,
       manual: 0,
-      not_applicable: 0, // Plan 2a: EvalResult widened (hidden-symbol gates); no caller passes hiddenSymbols yet
+      not_applicable: 0, // Plan 2a: hidden-symbol gates (visible_when); header count rendering = Task 11
       failBlock: 0,
       failWarn: 0,
       attestation: 0,
@@ -156,7 +141,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
           const reqSuggestions = suggestionsByReq.get(cr.id) ?? [];
           const filteredSuggestions = reqSuggestions.filter((s) => {
             if (!s.condition) return true;
-            const r = evaluateCondition(s.condition, lookup);
+            const r = evaluateCondition(s.condition, lookup, evalOpts);
             return r.kind === 'pass';
           });
           return (
@@ -398,6 +383,18 @@ function StatusBadge({
           className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-paper-2 text-subtext text-xs font-semibold shrink-0"
         >
           ○
+        </span>
+      );
+    case 'not_applicable':
+      // Plan 2a (Task 10): minimal badge only — Task 11 completes the
+      // not_applicable rendering (header count, hidden-symbol hint).
+      return (
+        <span
+          aria-label="Nicht anwendbar"
+          title="Nicht anwendbar — referenziertes Feld ist ausgeblendet"
+          className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-paper-2 text-subtext text-xs font-semibold shrink-0"
+        >
+          –
         </span>
       );
     case 'manual':

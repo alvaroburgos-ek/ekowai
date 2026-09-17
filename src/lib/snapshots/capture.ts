@@ -37,6 +37,7 @@ import {
   worksheetTemplates,
   standards,
   calculationSnapshots,
+  worksheetSections,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { loadInheritedFields } from '@/lib/db/queries/worksheet';
@@ -79,6 +80,8 @@ async function loadCaptureInputs(args: {
   complianceRequirements: ComplianceRow[];
   parameters: ParameterRow[];
   ambiguousSymbols: Map<string, string[]>;
+  /** Plan 2a (Task 10): this worksheet's sections for computeVisibility. */
+  sections: Array<{ id: string; parentSectionId: string | null; visibleWhen: string | null }>;
 } | null> {
   const dbi = args.txDb ?? db;
 
@@ -102,7 +105,7 @@ async function loadCaptureInputs(args: {
     .limit(1);
   if (!tplRow) return null;
 
-  const [ownFields, eqList, crList, inherited] = await Promise.all([
+  const [ownFields, eqList, crList, inherited, secList] = await Promise.all([
     dbi
       .select()
       .from(fields)
@@ -116,6 +119,15 @@ async function loadCaptureInputs(args: {
       .from(complianceRequirements)
       .where(eq(complianceRequirements.worksheetTemplateId, inst.worksheetTemplateId)),
     loadInheritedFields(inst.worksheetTemplateId, tplRow.standardId, tplRow.code),
+    // Plan 2a (Task 10): sections (own visible_when + parent chain).
+    dbi
+      .select({
+        id: worksheetSections.id,
+        parentSectionId: worksheetSections.parentSectionId,
+        visibleWhen: worksheetSections.visibleWhen,
+      })
+      .from(worksheetSections)
+      .where(eq(worksheetSections.worksheetTemplateId, inst.worksheetTemplateId)),
   ]);
 
   const merged = mergeInheritedFields(ownFields, inherited);
@@ -144,6 +156,7 @@ async function loadCaptureInputs(args: {
     complianceRequirements: crList,
     parameters: paramRows,
     ambiguousSymbols: merged.ambiguousSymbols,
+    sections: secList,
   };
 }
 
@@ -178,6 +191,7 @@ export async function captureSnapshot(args: {
     worksheetCode: inputs.worksheetCode,
     standardCode: inputs.standardCode,
     ambiguousSymbols: inputs.ambiguousSymbols,
+    sections: inputs.sections,
   });
 
   const dbi = args.txDb ?? db;

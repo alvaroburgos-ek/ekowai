@@ -92,6 +92,12 @@ type Args = {
    * Symbol knowledge (which symbols to suppress and why) lives in the caller;
    * the hook itself remains generic. */
   suppressWriteBackSymbols?: ReadonlySet<string>;
+  /** Plan 2a (Task 10): symbols of fields hidden by `visible_when`. A hidden
+   * symbol resolves to `null` for every equation input (and to `undefined`
+   * for a register's derived-column scalar scope) — the stored value of a
+   * field the engineer cannot see never feeds a computation. Symbol
+   * knowledge (which are hidden and why) lives in the caller. */
+  hiddenSymbols?: ReadonlySet<string>;
 };
 
 /**
@@ -127,6 +133,7 @@ export function useEquationEngine({
   equations,
   ambiguousSymbols,
   suppressWriteBackSymbols,
+  hiddenSymbols,
 }: Args): {
   engineEquationIds: Set<string>;
   engineStates: Record<string, EvalState>;
@@ -167,13 +174,14 @@ export function useEquationEngine({
   // null/'') so the var-vs-var comparison rule does not see a valued symbol.
   const scalarBySymbol = useMemo(() => {
     return (sym: string): Value | undefined => {
+      if (hiddenSymbols?.has(sym)) return undefined; // Plan 2a: hidden ⇒ no value
       const f = fieldBySymbol.get(sym);
       if (!f) return undefined;
       const v = values[f.id];
       if (!v || v.type === 'json' || v.value === null || v.value === undefined) return undefined;
       return v.value;
     };
-  }, [fieldBySymbol, values]);
+  }, [fieldBySymbol, values, hiddenSymbols]);
   // Shared builder (register-rows.ts buildRegisters); the client's only
   // specifics are the store as json source and the store-backed symbol scope.
   // TODO(Task 8): surface register.diagnostics — the client hook ignores it.
@@ -470,7 +478,11 @@ export function useEquationEngine({
 
       const evalInputs = neededSymbols.map((sym) => {
         const f = fieldBySymbol.get(aliasFor(sym));
-        const v = f ? values[f.id] : undefined;
+        // Plan 2a (Task 10): a symbol hidden by `visible_when` resolves to
+        // null — the evaluator then reports manual_required (missing input),
+        // never a number computed from a value the engineer cannot see.
+        const hidden = hiddenSymbols?.has(sym) || hiddenSymbols?.has(aliasFor(sym));
+        const v = f && !hidden ? values[f.id] : undefined;
         const num = v?.type === 'number' ? v.value : null;
         return { symbol: sym, value: num, unit: f?.unit ?? null };
       });
@@ -549,6 +561,7 @@ export function useEquationEngine({
     r_D_30_field,
     floodColResolution,
     ambiguousSymbols,
+    hiddenSymbols,
   ]);
 
   // Write computed value back into the output field, clear it otherwise.

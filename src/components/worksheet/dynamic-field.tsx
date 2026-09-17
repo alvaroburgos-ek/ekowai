@@ -156,23 +156,17 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
 
   // --- A_S,m determination-method gating -----------------------------------
   //
-  // Three fields are conditionally visible or locked depending on the sibling
-  // `a_s_m_determination_method` value (passed as `asmMethod`).
+  // A_S_m is locked / provenance is required depending on the sibling
+  // `a_s_m_determination_method` value (passed as `asmMethod`):
   //
-  // soil_bodenart_tab13 — only shown when method='soil_estimate'
-  // a_s_m_provenance    — only shown when method='manual'
   // A_S_m               — read-only UNLESS method='manual'; when manual the
   //                        provenance field is dynamically required.
   //
-  // The hiding is implemented by returning null early — same pattern used for
-  // other conditional fields in the sheet (rainfall_table_ref, etc.).
-
-  if (field.symbol === 'soil_bodenart_tab13' && asmMethod !== 'soil_estimate') {
-    return null;
-  }
-  if (field.symbol === 'a_s_m_provenance' && asmMethod !== 'manual') {
-    return null;
-  }
+  // Plan 2a (Task 10): the VISIBILITY of soil_bodenart_tab13 (method =
+  // 'soil_estimate') and a_s_m_provenance (method = 'manual') is no longer
+  // decided here. WorksheetForm's computeVisibility (LEGACY_VISIBLE_WHEN in
+  // src/lib/compliance/visibility.ts while fields.visible_when IS NULL) drops
+  // hidden fields from the grid before DynamicField ever renders them.
 
   // When method is not 'manual', A_S_m is server-derived (read-only).
   // We add this on top of the existing isComputed/readOnly path.

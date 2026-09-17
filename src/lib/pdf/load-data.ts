@@ -13,11 +13,13 @@ import {
   profiles,
   equations,
   complianceRequirements,
+  worksheetSections,
 } from '@/lib/db/schema';
 import { and, eq, inArray, desc } from 'drizzle-orm';
 import {
   evaluateWorksheetEquations,
   evaluateWorksheetCompliance,
+  reportVisibility,
   type EquationReportResult,
   type ComplianceReportResult,
 } from '@/lib/eval/evaluate-for-report';
@@ -137,9 +139,30 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       // registers carry widget='register' + ui_config).
       widget: fields.widget,
       uiConfig: fields.uiConfig,
+      // Plan 2a (Task 10): visible_when inputs for reportVisibility.
+      sectionId: fields.sectionId,
+      visibleWhen: fields.visibleWhen,
     })
     .from(fields)
     .where(inArray(fields.worksheetTemplateId, templateIds));
+
+  // Plan 2a (Task 10): sections per template (own visible_when + parent chain)
+  // — one batched select, grouped below like the fields.
+  const allSections = templateIds.length === 0 ? [] : await db
+    .select({
+      id: worksheetSections.id,
+      worksheetTemplateId: worksheetSections.worksheetTemplateId,
+      parentSectionId: worksheetSections.parentSectionId,
+      visibleWhen: worksheetSections.visibleWhen,
+    })
+    .from(worksheetSections)
+    .where(inArray(worksheetSections.worksheetTemplateId, templateIds));
+  const sectionsByTemplateId = new Map<string, typeof allSections>();
+  for (const s of allSections) {
+    const arr = sectionsByTemplateId.get(s.worksheetTemplateId) ?? [];
+    arr.push(s);
+    sectionsByTemplateId.set(s.worksheetTemplateId, arr);
+  }
 
   // Equations + compliance per template, batched in one query each.
   const allEquations = templateIds.length === 0 ? [] : await db
@@ -276,6 +299,9 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       tmplFields,
       tmplParameters,
       equationResults,
+      // Plan 2a (Task 10): a condition over a symbol hidden by visible_when
+      // (saved values) reports not_applicable — same helper as the form/gate.
+      { hiddenSymbols: reportVisibility(tmplFields, sectionsByTemplateId.get(inst.templateId) ?? [], tmplParameters).hiddenSymbols },
     );
 
     return {

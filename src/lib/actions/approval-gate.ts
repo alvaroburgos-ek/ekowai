@@ -5,9 +5,11 @@ import {
   complianceRequirements,
   projectParameters,
   worksheetInstances,
+  worksheetSections,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { evaluateCondition, jsonConditionValue } from '@/lib/compliance/evaluate';
+import { computeVisibility } from '@/lib/compliance/visibility';
 
 /**
  * Result of the engineer-approve readiness check. The transition is
@@ -132,11 +134,24 @@ export async function checkApprovalGate(
       labelDe: fields.labelDe,
       dataType: fields.dataType,
       isRequired: fields.isRequired,
+      // Plan 2a (Task 10): visible_when inputs.
+      sectionId: fields.sectionId,
+      visibleWhen: fields.visibleWhen,
     })
     .from(fields)
     .where(
       and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)),
     );
+  // Sections carry their own visible_when and the parent chain a hidden
+  // ancestor propagates through (same pure helper as the form).
+  const tmplSections = await db
+    .select({
+      id: worksheetSections.id,
+      parentSectionId: worksheetSections.parentSectionId,
+      visibleWhen: worksheetSections.visibleWhen,
+    })
+    .from(worksheetSections)
+    .where(eq(worksheetSections.worksheetTemplateId, instance.worksheetTemplateId));
 
   const fieldIds = tmplFields.map((f) => f.id);
   const params = fieldIds.length === 0
@@ -204,12 +219,20 @@ export async function checkApprovalGate(
 
   const lookup = makeGateLookup(localSymbols, bySymbol, fallback);
 
+  // Plan 2a (Task 10): fields/sections hidden by `visible_when` under the
+  // SAVED values — same pure helper and same lookup the form uses, so the
+  // gate cannot disagree with what the engineer saw. A block condition that
+  // references a hidden symbol reports `not_applicable` (does not block); a
+  // hidden required field is not "missing" (it cannot be filled in).
+  const { hiddenFieldIds, hiddenSymbols } = computeVisibility(tmplFields, tmplSections, lookup);
+
   // Missing required-field check: a field with is_required=true must
   // have a non-null value of its declared type. JSON fields are
   // satisfied when valueJson is non-null.
   const missingRequiredFields: Array<{ symbol: string; labelDe: string }> = [];
   for (const f of tmplFields) {
     if (!f.isRequired) continue;
+    if (hiddenFieldIds.has(f.id)) continue;
     const p = paramByFieldId.get(f.id);
     let hasValue = false;
     if (p) {
@@ -246,7 +269,7 @@ export async function checkApprovalGate(
 
   const failingBlockConditions: ApprovalGateResult['failingBlockConditions'] = [];
   for (const r of rows) {
-    const result = evaluateCondition(r.condition, lookup);
+    const result = evaluateCondition(r.condition, lookup, { hiddenSymbols });
     if (result.kind === 'fail') {
       failingBlockConditions.push({
         code: r.code,
