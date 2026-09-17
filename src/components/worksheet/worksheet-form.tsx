@@ -534,16 +534,15 @@ export function WorksheetForm({
   // The gate runs under the register's own config (carrierSourceState, Plan 2a
   // Task 9) so the banner, the read-only mirror and the engine agree on
   // "complete". The config comes from the SOURCE entry's own `{ widget, uiConfig }`
-  // first (I-3: the owner field's DB row — a `register` widget wins; widget NULL
-  // falls through resolveRegisterConfig to the symbol-keyed TS fallback), then
-  // from the consumer's own field row for that symbol when it carries one; no
+  // (I-3: the owner field's DB row — a `register` widget wins; widget NULL
+  // falls through resolveRegisterConfig to the symbol-keyed TS fallback). Sources
+  // always resolve via the owner row (loadRegisterSources), so there is no second
+  // lookup through the consumer's own field row (2b final review, F-3); no
   // config at all ⇒ state=null → nothing renders.
   const registerSourceStates = useMemo(
     () =>
       (registerSources ?? []).map((src) => {
-        const f = fieldBySymbol.get(src.symbol);
-        const cfg = resolveRegisterConfig({ symbol: src.symbol, dataType: 'json', widget: src.widget ?? null, uiConfig: src.uiConfig ?? null })
-          ?? (f ? resolveRegisterConfig({ symbol: f.symbol, dataType: f.dataType, widget: f.widget ?? null, uiConfig: f.uiConfig }) : null);
+        const cfg = resolveRegisterConfig({ symbol: src.symbol, dataType: 'json', widget: src.widget ?? null, uiConfig: src.uiConfig ?? null });
         // Round 2: the banner may only claim "abgeleitete Werte ausgeblendet" when this consumer actually carries a
         // produced symbol inherited from the owner (that is what the page withholds — carrierWithholdFieldIds).
         const withholds = (src.producedSymbols ?? []).some((sym) => fields.some((f) => f.symbol === sym && f.inheritedFromWorksheet === src.ownerCode));
@@ -561,7 +560,7 @@ export function WorksheetForm({
           : null;
         return { ...src, cfg, state };
       }),
-    [registerSources, fieldBySymbol, fields, standardCode],
+    [registerSources, fields, standardCode],
   );
 
   // (Retired) The legacy naive sum-evaluator lived here — it ignored `formula`

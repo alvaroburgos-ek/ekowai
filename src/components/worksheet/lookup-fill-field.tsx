@@ -133,7 +133,8 @@ function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: Works
   const tableScalar = state.kind === 'resolved' ? cellScalar(state.tableValue, scalarType, enumValues) : null;
   const enumMismatch = scalarType === 'enum' && state.kind === 'resolved' && state.tableValue != null && tableScalar === null;
   // Round 2: compare against the dataType-COERCED cell, never the raw cell — a text field over a numeric cell
-  // ("5" vs 5) is not a deviation (isOverridden() in lookup-fill.ts compares raw cells and is kept for the engine).
+  // ("5" vs 5) is not a deviation. A stored value over an UNREPRESENTABLE cell (tableScalar === null: non-numeric cell on a
+  // number field, enum cell outside the options) is not "abweichend" either — there is no table figure to deviate from.
   const overridden = mode === 'fill' && state.kind === 'resolved' && stored != null && tableScalar != null && stored !== tableScalar;
   const policy = state.kind === 'resolved' ? state.policy : null;
 

@@ -495,4 +495,21 @@ describe('LookupFillField — I-1: fill honours field.dataType (text / enum), ne
     expect(setField).not.toHaveBeenCalled();
     expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 2: B');
   });
+
+  it('Plan 3 Task 0 (2b review F-4): a STORED value over an unrepresentable cell (tableScalar === null) is not "abweichend" — nothing to deviate from', () => {
+    registerTables([stringTable()]);
+    const setField = vi.fn();
+    const NUM = makeField({ id: 'f-n2', symbol: 'n_test2', labelDe: 'n_test2', dataType: 'number', widget: 'lookup_fill', lookup: BIND });
+    render(<Harness field={NUM} fields={[NUM, K]} initial={{ 'f-k2': { type: 'enum', value: 'a' }, 'f-n2': { type: 'number', value: 7 } }} over={over} onSet={setField} />);
+    expect(setField).not.toHaveBeenCalled();
+    expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 2: B');
+    expect(screen.queryByText('abweichend')).toBeNull();
+    expect(screen.queryByTestId('lookup-reason-missing')).toBeNull();
+    // the enum twin: stored 'A' while the cell 'Z' is outside the options ⇒ mismatch badge, still no "abweichend"
+    render(<Harness field={ENUM} fields={[ENUM, K]} initial={{ 'f-k2': { type: 'enum', value: 'z' }, 'f-e': { type: 'enum', value: 'A' } }} over={over} onSet={setField} />);
+    expect(setField).not.toHaveBeenCalled();
+    expect(screen.getByText(/nicht in den zulässigen Optionen/)).toBeInTheDocument();
+    expect(screen.queryByText('abweichend')).toBeNull();
+    expect(screen.queryByTestId('lookup-reason-missing')).toBeNull();
+  });
 });

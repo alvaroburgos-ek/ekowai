@@ -113,7 +113,3 @@ function resolveTable(binding: LookupBinding, standardCode: string): RegulationT
   return t?.edition === binding.edition ? t : undefined;
 }
 
-/** Derived, never stored: the engineer's stored value differs from the table's. */
-export function isOverridden(state: LookupFillState, stored: number | string | null): boolean {
-  return state.kind === 'resolved' && stored != null && stored !== state.tableValue;
-}

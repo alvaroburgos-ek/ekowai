@@ -4,8 +4,10 @@
  *
  * `resolveRegulationTable` reads the registry first (rows the page/server
  * registered from the DB `regulation_tables`, latest edition) and falls back
- * to the A138 TS seed builders so behaviour is identical while the seed
- * migration is not yet applied. `makeTableLookup` adapts that to the
+ * to the TS seed builders (every `SEED_BUILDERS` entry of
+ * `regulation-tables-seed-index.ts` — slug-driven since Plan 3 Task 0) so
+ * behaviour is identical while a standard's seed migration is not yet
+ * applied. `makeTableLookup` adapts that to the
  * evaluator's `Scope.table` contract (keys matched positionally in
  * `key_columns` order); `makeTableRows` exposes whole tables for the legacy
  * replay's unique-pair matching.
@@ -17,7 +19,7 @@
  * resolves to nothing — never to a guessed standard.
  */
 import { findTableByCode, getTable, type RegulationRow, type RegulationTable } from './regulation-tables';
-import { a138SeedTables } from './regulation-tables-seed-a138';
+import { allSeedTables } from './regulation-tables-seed-index';
 import type { Scope, Value } from '@/lib/expr';
 
 let seedCache: Map<string, RegulationTable> | null = null; // key `${standard_code}|${table_code}`
@@ -25,7 +27,7 @@ let seedCache: Map<string, RegulationTable> | null = null; // key `${standard_co
 function seedTables(): Map<string, RegulationTable> {
   if (!seedCache) {
     seedCache = new Map();
-    for (const t of a138SeedTables()) seedCache.set(`${t.standard_code}|${t.table_code}`, t);
+    for (const t of allSeedTables()) seedCache.set(`${t.standard_code}|${t.table_code}`, t);
   }
   return seedCache;
 }

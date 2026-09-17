@@ -10,7 +10,6 @@ import {
   resolveLookupFill,
   resolveLookupFillBinding,
   resolveLookupFillConfig,
-  isOverridden,
   tableLabel,
   LOOKUP_BINDINGS_FALLBACK,
 } from '../lookup-fill';
@@ -115,17 +114,6 @@ describe('binding resolution: DB wins, fallback only while widget IS NULL', () =
     expect(resolveLookupFillConfig({ symbol: 'e', widget: 'lookup_fill', uiConfig: { reason_min_length: 0 }, lookup })).toBeNull();
     expect(resolveLookupFillConfig({ symbol: 'e', widget: 'lookup_fill', uiConfig: { reason_min_length: 5 }, lookup })).toBeNull();
     expect(resolveLookupFillConfig({ symbol: 'e', widget: 'lookup_fill', uiConfig: { reason_min_length: 10 }, lookup })?.ui).toEqual({ reason_min_length: 10 });
-  });
-});
-
-describe('isOverridden is derived, never stored', () => {
-  it('resolved && stored != null && stored !== tableValue', () => {
-    const s = { kind: 'resolved' as const, tableValue: 0.8, row: {} as never, policy: 'anhaltswert' as const, label: 'Tab. 3', valueColumn: undefined };
-    expect(isOverridden(s, 0.8)).toBe(false);
-    expect(isOverridden(s, 0.6)).toBe(true);
-    expect(isOverridden(s, null)).toBe(false);
-    expect(isOverridden({ kind: 'no_table', label: 'Tab. 3' }, 0.6)).toBe(false);
-    expect(isOverridden({ kind: 'keys_missing', missing: ['k'], label: 'Tab. 3' }, 0.6)).toBe(false);
   });
 });
 

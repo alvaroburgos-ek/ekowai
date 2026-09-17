@@ -1,6 +1,15 @@
 import { writeFileSync } from 'node:fs';
-import { a138SeedTables } from '../../src/lib/eval/regulation-tables-seed-a138';
+import { SEED_BUILDERS } from '../../src/lib/eval/regulation-tables-seed-index';
 import type { RegulationTable } from '../../src/lib/eval/regulation-tables';
+
+/**
+ * Slug → seed builder + migration file stamp (Plan 3 Task 0). The map itself
+ * lives in the pure module `src/lib/eval/regulation-tables-seed-index.ts` so
+ * the deploy-before-seed fallback (`regulation-tables-fallback.ts`) reads the
+ * same set; it is re-exported here for the emitter's callers. Each Plan-3
+ * standard task appends one line THERE, never here.
+ */
+export { SEED_BUILDERS };
 
 const q = (s: string | null) => (s == null ? 'NULL' : `'${s.replace(/'/g, "''")}'`);
 const j = (v: unknown) => `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb`;
@@ -24,9 +33,22 @@ ON CONFLICT (table_id, row_key) DO UPDATE SET keys = EXCLUDED.keys, group_label 
   return { up: up.join('\n') + '\n', down: down.join('\n') + '\n' };
 }
 
+/** Migration + rollback file paths for a seed slug (relative to the repo root). */
+export function seedFilesFor(slug: string): { migration: string; rollback: string } {
+  const b = SEED_BUILDERS[slug];
+  if (!b) throw new Error(`unknown seed slug ${JSON.stringify(slug)} — known: ${Object.keys(SEED_BUILDERS).join(', ')}`);
+  return {
+    migration: `scripts/migrations/${b.ts}_regulation_tables_seed_${b.slugFile}.sql`,
+    rollback: `scripts/rollback-${b.ts}-regulation-tables-seed-${b.slugFile.replace(/_/g, '-')}.sql`,
+  };
+}
+
 if (process.argv[1]?.endsWith('emit-seed-sql.ts')) {
-  const { up, down } = emitSeedSql(a138SeedTables());
-  writeFileSync('scripts/migrations/20260911110000_regulation_tables_seed_a138.sql', up);
-  writeFileSync('scripts/rollback-20260911110000-regulation-tables-seed-a138.sql', down);
-  console.log('wrote seed + rollback');
+  // CLI: tsx scripts/regulation-tables/emit-seed-sql.ts <slug>
+  const slug = process.argv[2] ?? '';
+  const files = seedFilesFor(slug);
+  const { up, down } = emitSeedSql(SEED_BUILDERS[slug].build());
+  writeFileSync(files.migration, up);
+  writeFileSync(files.rollback, down);
+  console.log('wrote seed + rollback for', slug, '->', files.migration, files.rollback);
 }
