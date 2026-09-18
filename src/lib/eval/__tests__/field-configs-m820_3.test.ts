@@ -167,7 +167,14 @@ describe('DWA-M-820-3 field configs (Plan 3 Task 9)', () => {
   });
 
   it('the committed migration + rollback equal a fresh emit against the committed prior (freshness pin)', () => {
-    const { up, down } = emitFieldConfigSql('m820_3', FIELD_CONFIGS, SECTION_VISIBILITY, prior);
+    // Task 12c: the re-captured prior carries `gates`; the module still holds 3 rules the gate-aware guard refuses
+    // (M8203-22 gesamt_anhang_a_items_total_calc / gesamt_anhang_a_items_rated / projektstopp_code_a ← REQ-31 (empty condition, parse_error)) — listed in
+    // .superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-12c-refusals.md for the fix round
+    // (move to STAGED or sign off as a G-block). Until then the pin emits in warn mode and pins the EXACT count so a
+    // fix round that clears them must flip this back to the default (refuse) mode.
+    expect(() => emitFieldConfigSql('m820_3', FIELD_CONFIGS, SECTION_VISIBILITY, prior)).toThrow(/read by gate .* — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block/);
+    const { up, down, warnings } = emitFieldConfigSql('m820_3', FIELD_CONFIGS, SECTION_VISIBILITY, prior, { gate_guard: 'warn' });
+    expect(warnings.filter((w) => w.startsWith('GATE-REFUSAL (warn mode) '))).toHaveLength(3);
     const files = fieldConfigFilesFor('m820_3', '20260917100910');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));

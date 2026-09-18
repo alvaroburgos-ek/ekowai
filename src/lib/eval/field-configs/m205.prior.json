@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-205 m205",
-    "captured_at": "2026-09-18T02:10:42.040Z",
+    "captured_at": "2026-09-18T06:57:39.392Z",
     "standard": "DWA-M-205",
     "slug": "m205",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 237,
     "section_rows": 234,
     "sections_total": 234,
-    "equation_rows": 24
+    "equation_rows": 24,
+    "gate_rows": 72
   },
   "M205-01 anlagen_id": {
     "enum_values": null,
@@ -5367,6 +5368,538 @@
       "output_symbol": "restchlor_betrieb",
       "input_symbols": [
         "restchlor_betrieb"
+      ]
+    }
+  },
+  "gates": {
+    "M205-01 CR-01": {
+      "condition": "biologische_vorbehandlung == True",
+      "severity": "block",
+      "symbols": [
+        "biologische_vorbehandlung"
+      ]
+    },
+    "M205-02 CR-02": {
+      "condition": "behoerdliche_freigabe == True",
+      "severity": "block",
+      "symbols": [
+        "behoerdliche_freigabe"
+      ]
+    },
+    "M205-02 CR-18": {
+      "condition": "eignungsklasse_bewaesserung IN {1, 2, 3, 4}",
+      "severity": "block",
+      "symbols": [
+        "eignungsklasse_bewaesserung"
+      ]
+    },
+    "M205-02 CR-19": {
+      "condition": "daly_wert <= 1e-6",
+      "severity": "block",
+      "symbols": [
+        "daly_wert"
+      ]
+    },
+    "M205-03 CR-06": {
+      "condition": "afs <= 20",
+      "severity": "block",
+      "symbols": [
+        "afs"
+      ]
+    },
+    "M205-03 CR-06-2": {
+      "condition": "afs <= 20",
+      "severity": "block",
+      "symbols": [
+        "afs"
+      ]
+    },
+    "M205-03 CR-28": {
+      "condition": "durchfluss_max <= 1000 OR mehrstrassige_anlage == True",
+      "severity": "block",
+      "symbols": [
+        "durchfluss_max",
+        "mehrstrassige_anlage"
+      ]
+    },
+    "M205-05 CR-07": {
+      "condition": "uv_dosis >= 300 AND uv_dosis <= 700",
+      "severity": "block",
+      "symbols": [
+        "uv_dosis"
+      ]
+    },
+    "M205-05 CR-29": {
+      "condition": "ip_schutzart IN {IP54, IP55, IP56, IP65, IP66, IP67}",
+      "severity": "block",
+      "symbols": [
+        "ip_schutzart"
+      ]
+    },
+    "M205-06 CR-34": {
+      "condition": "afs > 0 AND vorsiebung_erforderlich IN {ja, nein}",
+      "severity": "block",
+      "symbols": [
+        "afs",
+        "vorsiebung_erforderlich"
+      ]
+    },
+    "M205-07 CR-08": {
+      "condition": "restozon_abluft <= 0.02",
+      "severity": "block",
+      "symbols": [
+        "restozon_abluft"
+      ]
+    },
+    "M205-07 CR-09": {
+      "condition": "ozon_konz >= 2 AND ozon_konz <= 10",
+      "severity": "block",
+      "symbols": [
+        "ozon_konz"
+      ]
+    },
+    "M205-07 CR-10": {
+      "condition": "ozon_aufenthaltszeit >= 5",
+      "severity": "block",
+      "symbols": [
+        "ozon_aufenthaltszeit"
+      ]
+    },
+    "M205-07 CR-21": {
+      "condition": "ozon_pro_doc < 0.8",
+      "severity": "block",
+      "symbols": [
+        "ozon_pro_doc"
+      ]
+    },
+    "M205-07 CR-31": {
+      "condition": "wiederverkeimungsbeurteilung == True",
+      "severity": "block",
+      "symbols": [
+        "wiederverkeimungsbeurteilung"
+      ]
+    },
+    "M205-07 CR-31-2": {
+      "condition": "wiederverkeimungsbeurteilung == True",
+      "severity": "block",
+      "symbols": [
+        "wiederverkeimungsbeurteilung"
+      ]
+    },
+    "M205-07 CR-32": {
+      "condition": "gefaehrdungsbeurteilung_biostoffv == True AND betriebsanweisung_biostoffv == True",
+      "severity": "block",
+      "symbols": [
+        "betriebsanweisung_biostoffv",
+        "gefaehrdungsbeurteilung_biostoffv"
+      ]
+    },
+    "M205-07 CR-32-2": {
+      "condition": "gefaehrdungsbeurteilung_biostoffv == True AND betriebsanweisung_biostoffv == True",
+      "severity": "block",
+      "symbols": [
+        "betriebsanweisung_biostoffv",
+        "gefaehrdungsbeurteilung_biostoffv"
+      ]
+    },
+    "M205-07 REQ-M205-ES1-04": {
+      "condition": "ozon_pro_doc < 0.8",
+      "severity": "warn",
+      "symbols": [
+        "ozon_pro_doc"
+      ]
+    },
+    "M205-07 REQ-M205-ES1-04-2": {
+      "condition": "ozon_pro_doc < 0.8",
+      "severity": "warn",
+      "symbols": [
+        "ozon_pro_doc"
+      ]
+    },
+    "M205-08 CR-11": {
+      "condition": "ph_chlorung >= 6 AND ph_chlorung <= 8",
+      "severity": "block",
+      "symbols": [
+        "ph_chlorung"
+      ]
+    },
+    "M205-08 CR-12": {
+      "condition": "restchlor <= 0.005",
+      "severity": "block",
+      "symbols": [
+        "restchlor"
+      ]
+    },
+    "M205-08 CR-22": {
+      "condition": "entchlorungsstufe == True",
+      "severity": "block",
+      "symbols": [
+        "entchlorungsstufe"
+      ]
+    },
+    "M205-08 CR-23": {
+      "condition": "restchlor_betrieb >= 0.2",
+      "severity": "block",
+      "symbols": [
+        "restchlor_betrieb"
+      ]
+    },
+    "M205-08 CR-23-2": {
+      "condition": "restchlor_betrieb >= 0.2",
+      "severity": "block",
+      "symbols": [
+        "restchlor_betrieb"
+      ]
+    },
+    "M205-08 CR-24": {
+      "condition": "kontaktzeit_chlor >= 15 AND kontaktzeit_chlor <= 30",
+      "severity": "block",
+      "symbols": [
+        "kontaktzeit_chlor"
+      ]
+    },
+    "M205-08 REQ-M205-ES1-11": {
+      "condition": "restchlor_betrieb >= 0.2",
+      "severity": "block",
+      "symbols": [
+        "restchlor_betrieb"
+      ]
+    },
+    "M205-08 REQ-M205-ES1-11-2": {
+      "condition": "restchlor_betrieb >= 0.2",
+      "severity": "block",
+      "symbols": [
+        "restchlor_betrieb"
+      ]
+    },
+    "M205-09 CR-13": {
+      "condition": "monatlicher_nachweis == True",
+      "severity": "block",
+      "symbols": [
+        "monatlicher_nachweis"
+      ]
+    },
+    "M205-09 CR-13-2": {
+      "condition": "monatlicher_nachweis == True",
+      "severity": "block",
+      "symbols": [
+        "monatlicher_nachweis"
+      ]
+    },
+    "M205-09 CR-27": {
+      "condition": "kalibrierintervall_sensor <= 6 AND reinigungsintervall_sensor <= 4",
+      "severity": "block",
+      "symbols": [
+        "kalibrierintervall_sensor",
+        "reinigungsintervall_sensor"
+      ]
+    },
+    "M205-09 CR-27-2": {
+      "condition": "kalibrierintervall_sensor <= 6 AND reinigungsintervall_sensor <= 4",
+      "severity": "block",
+      "symbols": [
+        "kalibrierintervall_sensor",
+        "reinigungsintervall_sensor"
+      ]
+    },
+    "M205-09 CR-30": {
+      "condition": "chlorung_routine == False",
+      "severity": "block",
+      "symbols": [
+        "chlorung_routine"
+      ]
+    },
+    "M205-09 CR-30-2": {
+      "condition": "chlorung_routine == False",
+      "severity": "block",
+      "symbols": [
+        "chlorung_routine"
+      ]
+    },
+    "M205-10 CR-03": {
+      "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-03-2": {
+      "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-04": {
+      "condition": "e_coli_ablauf <= 250 AND enterokokken_ablauf <= 100",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-04-2": {
+      "condition": "e_coli_ablauf <= 250 AND enterokokken_ablauf <= 100",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-05": {
+      "condition": "e_coli_ablauf == 0 AND enterokokken_ablauf == 0",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-05-2": {
+      "condition": "e_coli_ablauf == 0 AND enterokokken_ablauf == 0",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-07": {
+      "condition": "uv_dosis >= 300 AND uv_dosis <= 700",
+      "severity": "block",
+      "symbols": [
+        "uv_dosis"
+      ]
+    },
+    "M205-10 CR-08": {
+      "condition": "restozon_abluft <= 0.02",
+      "severity": "block",
+      "symbols": [
+        "restozon_abluft"
+      ]
+    },
+    "M205-10 CR-09": {
+      "condition": "ozon_konz >= 2 AND ozon_konz <= 10",
+      "severity": "block",
+      "symbols": [
+        "ozon_konz"
+      ]
+    },
+    "M205-10 CR-10": {
+      "condition": "ozon_aufenthaltszeit >= 5",
+      "severity": "block",
+      "symbols": [
+        "ozon_aufenthaltszeit"
+      ]
+    },
+    "M205-10 CR-11": {
+      "condition": "ph_chlorung >= 6 AND ph_chlorung <= 8",
+      "severity": "block",
+      "symbols": [
+        "ph_chlorung"
+      ]
+    },
+    "M205-10 CR-12": {
+      "condition": "restchlor <= 0.005",
+      "severity": "block",
+      "symbols": [
+        "restchlor"
+      ]
+    },
+    "M205-10 CR-14": {
+      "condition": "e_coli_ablauf <= 1000 AND enterokokken_ablauf <= 400",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-14-2": {
+      "condition": "e_coli_ablauf <= 1000 AND enterokokken_ablauf <= 400",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-15": {
+      "condition": "e_coli_ablauf <= 900 AND enterokokken_ablauf <= 330",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-15-2": {
+      "condition": "e_coli_ablauf <= 900 AND enterokokken_ablauf <= 330",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-16": {
+      "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-16-2": {
+      "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-17": {
+      "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 185",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-17-2": {
+      "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 185",
+      "severity": "block",
+      "symbols": [
+        "e_coli_ablauf",
+        "enterokokken_ablauf"
+      ]
+    },
+    "M205-10 CR-20": {
+      "condition": "log_reduktion >= 3",
+      "severity": "block",
+      "symbols": [
+        "log_reduktion"
+      ]
+    },
+    "M205-10 CR-20-2": {
+      "condition": "log_reduktion >= 3",
+      "severity": "block",
+      "symbols": [
+        "log_reduktion"
+      ]
+    },
+    "M205-10 CR-21": {
+      "condition": "ozon_pro_doc < 0.8",
+      "severity": "block",
+      "symbols": [
+        "ozon_pro_doc"
+      ]
+    },
+    "M205-10 CR-22": {
+      "condition": "entchlorungsstufe == True",
+      "severity": "block",
+      "symbols": [
+        "entchlorungsstufe"
+      ]
+    },
+    "M205-10 CR-24": {
+      "condition": "kontaktzeit_chlor >= 15 AND kontaktzeit_chlor <= 30",
+      "severity": "block",
+      "symbols": [
+        "kontaktzeit_chlor"
+      ]
+    },
+    "M205-10 CR-26": {
+      "condition": "temperatur_ozonentfernung >= 350 OR katalytisch == True",
+      "severity": "block",
+      "symbols": [
+        "katalytisch",
+        "temperatur_ozonentfernung"
+      ]
+    },
+    "M205-10 CR-28": {
+      "condition": "durchfluss_max <= 1000 OR mehrstrassige_anlage == True",
+      "severity": "block",
+      "symbols": [
+        "durchfluss_max",
+        "mehrstrassige_anlage"
+      ]
+    },
+    "M205-10 CR-29": {
+      "condition": "ip_schutzart IN {IP54, IP55, IP56, IP65, IP66, IP67}",
+      "severity": "block",
+      "symbols": [
+        "ip_schutzart"
+      ]
+    },
+    "M205-10 CR-34": {
+      "condition": "afs > 0 AND vorsiebung_erforderlich IN {ja, nein}",
+      "severity": "block",
+      "symbols": [
+        "afs",
+        "vorsiebung_erforderlich"
+      ]
+    },
+    "M205-12 CR-33": {
+      "condition": "hg_strahler_sonderentsorgung == True",
+      "severity": "block",
+      "symbols": [
+        "hg_strahler_sonderentsorgung"
+      ]
+    },
+    "M205-12 CR-33-2": {
+      "condition": "hg_strahler_sonderentsorgung == True",
+      "severity": "block",
+      "symbols": [
+        "hg_strahler_sonderentsorgung"
+      ]
+    },
+    "M205-14 CR-25": {
+      "condition": "pilotierung == True",
+      "severity": "block",
+      "symbols": [
+        "pilotierung"
+      ]
+    },
+    "M205-14 CR-25-2": {
+      "condition": "pilotierung == True",
+      "severity": "block",
+      "symbols": [
+        "pilotierung"
+      ]
+    },
+    "M205-17 CR-35": {
+      "condition": "reaktor_gasdicht == True",
+      "severity": "block",
+      "symbols": [
+        "reaktor_gasdicht"
+      ]
+    },
+    "M205-17 CR-35-2": {
+      "condition": "reaktor_gasdicht == True",
+      "severity": "block",
+      "symbols": [
+        "reaktor_gasdicht"
+      ]
+    },
+    "M205-18 CR-26": {
+      "condition": "temperatur_ozonentfernung >= 350 OR katalytisch == True",
+      "severity": "block",
+      "symbols": [
+        "katalytisch",
+        "temperatur_ozonentfernung"
+      ]
+    },
+    "M205-22 CR-36": {
+      "condition": "bgv_b4_konformitaet == True AND sicherheitsdatenblatt_pes == True",
+      "severity": "block",
+      "symbols": [
+        "bgv_b4_konformitaet",
+        "sicherheitsdatenblatt_pes"
+      ]
+    },
+    "M205-22 CR-36-2": {
+      "condition": "bgv_b4_konformitaet == True AND sicherheitsdatenblatt_pes == True",
+      "severity": "block",
+      "symbols": [
+        "bgv_b4_konformitaet",
+        "sicherheitsdatenblatt_pes"
       ]
     }
   }

@@ -88,8 +88,25 @@ export type PriorEquationRow = {
   output_symbol: string;
   input_symbols: string[];
 };
+/**
+ * One captured `compliance_requirements` row of the standard, keyed `"<worksheet> <req_code>"` (Task 12c).
+ * `symbols` = the free symbols the gate condition reads at evaluation time, extracted AT CAPTURE TIME with
+ * the engine's own walk (`extractConditionSymbols`, `src/lib/compliance/evaluate.ts` — never re-implemented);
+ * a condition the engine cannot parse (prose ⇒ `manual` at runtime) carries `symbols: []` + `parse_error: true`.
+ * The emitter's gate-aware guard refuses a `visible_when` that hides a symbol a same-worksheet gate reads:
+ * a hidden symbol is `null` for the engine (`withHidden`) and the gate silently stops enforcing
+ * (`hiddenReferences` ⇒ `not_applicable`) — an enforcement change that must be a sign-off (G-block), never an
+ * emitted default. Exemption: a gate of the form `IF <driver> <op> <value> THEN …` whose guard is exactly the
+ * rule's `visible_when` (same driver, op, literal) — the gate never fires while the field is hidden anyway.
+ */
+export type PriorGateRow = {
+  condition: string;
+  severity: string;
+  symbols: string[];
+  parse_error?: true;
+};
 export type PriorSnapshot = { [key: PriorFieldKey]: PriorFieldRow }
-  & { sections?: Record<string, PriorSectionRow>; equations?: Record<string, PriorEquationRow>; _meta?: Record<string, unknown> };
+  & { sections?: Record<string, PriorSectionRow>; equations?: Record<string, PriorEquationRow>; gates?: Record<string, PriorGateRow>; _meta?: Record<string, unknown> };
 
 /** What one `src/lib/eval/field-configs/<slug>.ts` module exports. */
 export type FieldConfigModule = { FIELD_CONFIGS: FieldConfigEntry[]; SECTION_VISIBILITY: SectionVisibilityEntry[] };

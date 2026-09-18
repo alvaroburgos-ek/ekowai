@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DIN-18130-1 din18130_1",
-    "captured_at": "2026-09-18T01:02:59.912Z",
+    "captured_at": "2026-09-18T06:57:38.204Z",
     "standard": "DIN-18130-1",
     "slug": "din18130_1",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 54,
     "section_rows": 22,
     "sections_total": 22,
-    "equation_rows": 8
+    "equation_rows": 8,
+    "gate_rows": 7
   },
   "DIN-18130-1-01 A_min": {
     "enum_values": null,
@@ -1174,6 +1175,61 @@
         "t",
         "h_1",
         "h_2"
+      ]
+    }
+  },
+  "gates": {
+    "DIN-18130-1-01 DIN-18130-1-CR-01": {
+      "condition": "max_d IS NOT NULL AND A_min IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "A_min",
+        "max_d"
+      ]
+    },
+    "DIN-18130-1-02 DIN-18130-1-CR-02": {
+      "condition": "umlaeufigkeit_verhindert == true",
+      "severity": "block",
+      "symbols": [
+        "umlaeufigkeit_verhindert"
+      ]
+    },
+    "DIN-18130-1-02 DIN-18130-1-CR-03": {
+      "condition": "saettigung_aufgebracht == true OR versuchsklasse IN {2,3}",
+      "severity": "block",
+      "symbols": [
+        "saettigung_aufgebracht",
+        "versuchsklasse"
+      ]
+    },
+    "DIN-18130-1-03 DIN-18130-1-CR-04": {
+      "condition": "V_w > 0 AND t > 0",
+      "severity": "block",
+      "symbols": [
+        "V_w",
+        "t"
+      ]
+    },
+    "DIN-18130-1-04 DIN-18130-1-CR-05": {
+      "condition": "k_10 > 0",
+      "severity": "block",
+      "symbols": [
+        "k_10"
+      ]
+    },
+    "DIN-18130-1-05 DIN-18130-1-CR-06": {
+      "condition": "versuchsbericht_vollstaendig == true AND k_10 > 0",
+      "severity": "block",
+      "symbols": [
+        "k_10",
+        "versuchsbericht_vollstaendig"
+      ]
+    },
+    "DIN-18130-1-05 DIN-18130-1-CR-07": {
+      "condition": "k_f IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "k_f"
       ]
     }
   }

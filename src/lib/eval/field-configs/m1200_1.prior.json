@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-1200-1 m1200_1",
-    "captured_at": "2026-09-17T18:41:35.935Z",
+    "captured_at": "2026-09-18T06:57:32.545Z",
     "standard": "DWA-M-1200-1",
     "slug": "m1200_1",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 126,
     "section_rows": 180,
     "sections_total": 180,
-    "equation_rows": 1
+    "equation_rows": 1,
+    "gate_rows": 21
   },
   "M12001-01 antragsteller_name": {
     "enum_values": null,
@@ -3616,6 +3617,160 @@
         "eintrittswahrscheinlichkeit",
         "schadensausmass"
       ]
+    }
+  },
+  "gates": {
+    "M12001-02 CR-001": {
+      "condition": "schutzzone_status IN {'nein'} AND heilquellenschutzgebiet IN {'nein'}",
+      "severity": "block",
+      "symbols": [
+        "heilquellenschutzgebiet",
+        "schutzzone_status"
+      ]
+    },
+    "M12001-03 CR-018": {
+      "condition": "indirekteinleiter_branchen IS NOT NULL AND indirekteinleiter_branchen IS NOT EMPTY",
+      "severity": "warn",
+      "symbols": [
+        "indirekteinleiter_branchen"
+      ]
+    },
+    "M12001-07 CR-014": {
+      "condition": "restrisiko_niveau IN {'sehr_niedrig','niedrig'}",
+      "severity": "block",
+      "symbols": [
+        "restrisiko_niveau"
+      ]
+    },
+    "M12001-08 CR-003": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12001-08 CR-006": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12001-08 CR-016": {
+      "condition": "attest_m12001_08_cr_016 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m12001_08_cr_016"
+      ]
+    },
+    "M12001-09 CR-004": {
+      "condition": "IF gueteklasse_zugeordnet == 'A' THEN e_coli_value <= 10 AND IF gueteklasse_zugeordnet IN {'B-1','B-2','C-1','C-2'} THEN e_coli_value <= 100 AND IF gueteklasse_zugeordnet == 'D' THEN e_coli_value <= 10000",
+      "severity": "block",
+      "symbols": [
+        "e_coli_value",
+        "gueteklasse_zugeordnet"
+      ]
+    },
+    "M12001-09 CR-005": {
+      "condition": "IF gueteklasse_zugeordnet IN {'A','B-1','B-2','C-1','C-2'} THEN truebung_value <= 2",
+      "severity": "block",
+      "symbols": [
+        "gueteklasse_zugeordnet",
+        "truebung_value"
+      ]
+    },
+    "M12001-09 CR-013": {
+      "condition": "pfas20_value < 100",
+      "severity": "block",
+      "symbols": [
+        "pfas20_value"
+      ]
+    },
+    "M12001-12 CR-007": {
+      "condition": "IF gueteklasse_zugeordnet IN {'A','B-1','B-2'} THEN beprobung_frequenz_e_coli == '1x_pro_woche'",
+      "severity": "block",
+      "symbols": [
+        "beprobung_frequenz_e_coli",
+        "gueteklasse_zugeordnet"
+      ]
+    },
+    "M12001-12 CR-008": {
+      "condition": "compliance_quote_pct >= 90",
+      "severity": "block",
+      "symbols": [
+        "compliance_quote_pct"
+      ]
+    },
+    "M12001-13 CR-009": {
+      "condition": "boden_vorbelastung_dokumentiert == 'ja'",
+      "severity": "warn",
+      "symbols": [
+        "boden_vorbelastung_dokumentiert"
+      ]
+    },
+    "M12001-13 CR-020": {
+      "condition": "jahresbericht_umweltmonitoring == true",
+      "severity": "warn",
+      "symbols": [
+        "jahresbericht_umweltmonitoring"
+      ]
+    },
+    "M12001-14 CR-017": {
+      "condition": "notfall_verteiler_existent == true AND stoerfall_meldewege == true",
+      "severity": "block",
+      "symbols": [
+        "notfall_verteiler_existent",
+        "stoerfall_meldewege"
+      ]
+    },
+    "M12001-15 CR-010": {
+      "condition": "genehmigungs_inhalt_komplett == true",
+      "severity": "block",
+      "symbols": [
+        "genehmigungs_inhalt_komplett"
+      ]
+    },
+    "M12001-15 CR-015": {
+      "condition": "flaechenverzeichnis_vorhanden == true AND anwendungsbereich_kategorie IS NOT NULL AND gueteklasse_zugeordnet IS NOT NULL AND bewaesserungsmethode IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "anwendungsbereich_kategorie",
+        "bewaesserungsmethode",
+        "flaechenverzeichnis_vorhanden",
+        "gueteklasse_zugeordnet"
+      ]
+    },
+    "M12001-15 CR-019": {
+      "condition": "attest_m12001_15_cr_019 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m12001_15_cr_019"
+      ]
+    },
+    "M12001-16 CR-011": {
+      "condition": "flaechenverzeichnis_vorhanden == true",
+      "severity": "block",
+      "symbols": [
+        "flaechenverzeichnis_vorhanden"
+      ]
+    },
+    "M12001-19 CR-021": {
+      "condition": "beschilderung_urbane_flaechen IN {'ja','nicht_zutreffend'}",
+      "severity": "warn",
+      "symbols": [
+        "beschilderung_urbane_flaechen"
+      ]
+    },
+    "M12001-20 CR-002": {
+      "condition": "rmp_vollstaendig == true",
+      "severity": "block",
+      "symbols": [
+        "rmp_vollstaendig"
+      ]
+    },
+    "M12001-20 CR-012": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
     }
   }
 }

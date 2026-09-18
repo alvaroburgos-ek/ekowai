@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs FLL-Naturteich fll_naturteich",
-    "captured_at": "2026-09-17T22:51:34.096Z",
+    "captured_at": "2026-09-18T06:57:35.996Z",
     "standard": "FLL-Naturteich",
     "slug": "fll_naturteich",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 130,
     "section_rows": 135,
     "sections_total": 135,
-    "equation_rows": 6
+    "equation_rows": 6,
+    "gate_rows": 33
   },
   "FLLNT-01 attest_fllnt_01_req_03": {
     "enum_values": null,
@@ -3182,6 +3183,290 @@
       "output_symbol": "splash_water_tank_volume",
       "input_symbols": [
         "pool_underwater_surface"
+      ]
+    }
+  },
+  "gates": {
+    "FLLNT-01 REQ-01": {
+      "condition": "pool_use_type IN {private_single_household,private_multi_household}",
+      "severity": "block",
+      "symbols": [
+        "pool_use_type"
+      ]
+    },
+    "FLLNT-01 REQ-02": {
+      "condition": "consultation_checklist_completed == true",
+      "severity": "block",
+      "symbols": [
+        "consultation_checklist_completed"
+      ]
+    },
+    "FLLNT-01 REQ-03": {
+      "condition": "attest_fllnt_01_req_03 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fllnt_01_req_03"
+      ]
+    },
+    "FLLNT-01 REQ-04": {
+      "condition": "attest_fllnt_01_req_04 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fllnt_01_req_04"
+      ]
+    },
+    "FLLNT-02 REQ-05": {
+      "condition": "operating_manual_provided == true",
+      "severity": "block",
+      "symbols": [
+        "operating_manual_provided"
+      ]
+    },
+    "FLLNT-03 REQ-06": {
+      "condition": "natural_pool_type IN {type_I,type_II,type_III,type_IV,type_V}",
+      "severity": "block",
+      "symbols": [
+        "natural_pool_type"
+      ]
+    },
+    "FLLNT-03 REQ-07": {
+      "condition": "(IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50) AND (IF natural_pool_type == type_III THEN regeneration_area_share > 30)",
+      "severity": "block",
+      "symbols": [
+        "natural_pool_type",
+        "regeneration_area_share"
+      ]
+    },
+    "FLLNT-03 REQ-10": {
+      "condition": "swimming_test_ammonium <= 0.3 AND swimming_test_hardness >= 1.0 AND swimming_test_conductivity <= 1000 AND swimming_test_nitrate <= 30.0 AND swimming_test_nitrite <= 0.01 AND swimming_test_ph >= 7.0 AND swimming_test_ph <= 9.0 AND swimming_test_acid_capacity_ks43 >= 2 AND (IF natural_pool_type IN {type_I,type_II,type_III} THEN (swimming_test_p_total <= 0.03 AND swimming_test_orthophosphate <= 0.03)) AND (IF natural_pool_type IN {type_IV,type_V} THEN (swimming_test_p_total <= 0.01 AND swimming_test_orthophosphate <= 0.01))",
+      "severity": "block",
+      "symbols": [
+        "natural_pool_type",
+        "swimming_test_acid_capacity_ks43",
+        "swimming_test_ammonium",
+        "swimming_test_conductivity",
+        "swimming_test_hardness",
+        "swimming_test_nitrate",
+        "swimming_test_nitrite",
+        "swimming_test_orthophosphate",
+        "swimming_test_p_total",
+        "swimming_test_ph"
+      ]
+    },
+    "FLLNT-04 REQ-09": {
+      "condition": "water_test_ammonium <= 0.5 AND water_test_iron <= 0.2 AND water_test_p_total <= 0.03 AND water_test_hardness >= 1.0 AND water_test_conductivity <= 1000 AND water_test_manganese <= 0.05 AND water_test_nitrate <= 50.0 AND water_test_orthophosphate <= 0.01 AND water_test_ph >= 6.0 AND water_test_ph <= 9.0 AND water_test_acid_capacity_ks43 >= 2",
+      "severity": "block",
+      "symbols": [
+        "water_test_acid_capacity_ks43",
+        "water_test_ammonium",
+        "water_test_conductivity",
+        "water_test_hardness",
+        "water_test_iron",
+        "water_test_manganese",
+        "water_test_nitrate",
+        "water_test_orthophosphate",
+        "water_test_p_total",
+        "water_test_ph"
+      ]
+    },
+    "FLLNT-05 REQ-11": {
+      "condition": "concrete_spec_compliant == true AND wood_treatment_compliant == true AND materials_biocide_free == true AND plant_substrate_compliant == true",
+      "severity": "block",
+      "symbols": [
+        "concrete_spec_compliant",
+        "materials_biocide_free",
+        "plant_substrate_compliant",
+        "wood_treatment_compliant"
+      ]
+    },
+    "FLLNT-05 REQ-12": {
+      "condition": "filter_substrate_elutable_p <= 5",
+      "severity": "block",
+      "symbols": [
+        "filter_substrate_elutable_p"
+      ]
+    },
+    "FLLNT-06 REQ-13": {
+      "condition": "total_pool_area_m2 IS NOT NULL AND regeneration_area_m2 IS NOT NULL AND swimming_area_m2 IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "regeneration_area_m2",
+        "swimming_area_m2",
+        "total_pool_area_m2"
+      ]
+    },
+    "FLLNT-06 REQ-14": {
+      "condition": "attest_fllnt_06_req_14 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fllnt_06_req_14"
+      ]
+    },
+    "FLLNT-06 REQ-18": {
+      "condition": "attest_fllnt_06_req_18 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fllnt_06_req_18"
+      ]
+    },
+    "FLLNT-07 REQ-15": {
+      "condition": "area_separation_method IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "area_separation_method"
+      ]
+    },
+    "FLLNT-07 REQ-16": {
+      "condition": "sealing_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "sealing_type"
+      ]
+    },
+    "FLLNT-07 REQ-17": {
+      "condition": "edge_design IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "edge_design"
+      ]
+    },
+    "FLLNT-07 REQ-31": {
+      "condition": "freeboard_water_to_seal >= 5 AND edge_height_tolerance_mm <= 10",
+      "severity": "block",
+      "symbols": [
+        "edge_height_tolerance_mm",
+        "freeboard_water_to_seal"
+      ]
+    },
+    "FLLNT-07 REQ-32": {
+      "condition": "sealing_biocide_free_biofilm_ok == true",
+      "severity": "block",
+      "symbols": [
+        "sealing_biocide_free_biofilm_ok"
+      ]
+    },
+    "FLLNT-09 REQ-08": {
+      "condition": "if filter_flow_type == 'slow' then p_binding_required == true",
+      "severity": "block",
+      "symbols": [
+        "filter_flow_type",
+        "p_binding_required"
+      ]
+    },
+    "FLLNT-09 REQ-19": {
+      "condition": "hydrobot_grain_size_max <= 8 AND hydrobot_feed_rate <= 5 AND (IF hydrobot_type == submergent THEN (hydrobot_water_column >= 80 AND hydrobot_substrate_thickness >= 10 AND hydrobot_substrate_thickness <= 20)) AND (IF hydrobot_type == emersed THEN (hydrobot_water_column >= 10 AND hydrobot_water_column <= 50 AND hydrobot_substrate_thickness >= 10 AND hydrobot_substrate_thickness <= 30))",
+      "severity": "block",
+      "symbols": [
+        "hydrobot_feed_rate",
+        "hydrobot_grain_size_max",
+        "hydrobot_substrate_thickness",
+        "hydrobot_type",
+        "hydrobot_water_column"
+      ]
+    },
+    "FLLNT-09 REQ-20": {
+      "condition": "(IF filter_flow_direction IN {vertical_continuous_overflow, vertical_no_overflow} THEN (filter_layer_thickness >= 40 AND filter_grain_size_max <= 16 AND filter_substrate_oversize_pct <= 15 AND filter_substrate_elutriated_pct <= 2 AND filter_frost_resistance == true AND filter_layer_tolerance_pct <= 10 AND filter_kf >= 0.0001)) AND (IF filter_flow_direction == vertical_continuous_overflow THEN (filter_water_column >= 10 AND filter_feed_rate_slow_qmax <= 5)) AND (IF filter_flow_direction == vertical_no_overflow THEN filter_feed_rate_slow_qmax <= 8)",
+      "severity": "block",
+      "symbols": [
+        "filter_feed_rate_slow_qmax",
+        "filter_flow_direction",
+        "filter_frost_resistance",
+        "filter_grain_size_max",
+        "filter_kf",
+        "filter_layer_thickness",
+        "filter_layer_tolerance_pct",
+        "filter_substrate_elutriated_pct",
+        "filter_substrate_oversize_pct",
+        "filter_water_column"
+      ]
+    },
+    "FLLNT-09 REQ-21": {
+      "condition": "IF filter_flow_direction IN {vertical_continuous_overflow,vertical_no_overflow} THEN (filter_layer_thickness >= 50 AND filter_grain_size_max <= 32 AND filter_substrate_oversize_pct <= 15 AND filter_substrate_elutriated_pct <= 0.5 AND filter_frost_resistance == true AND filter_layer_tolerance_pct <= 10 AND filter_kf >= 0.001 AND filter_feed_rate_quick_qmin >= 15)",
+      "severity": "block",
+      "symbols": [
+        "filter_feed_rate_quick_qmin",
+        "filter_flow_direction",
+        "filter_frost_resistance",
+        "filter_grain_size_max",
+        "filter_kf",
+        "filter_layer_thickness",
+        "filter_layer_tolerance_pct",
+        "filter_substrate_elutriated_pct",
+        "filter_substrate_oversize_pct"
+      ]
+    },
+    "FLLNT-09 REQ-23": {
+      "condition": "attest_fllnt_09_req_23 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fllnt_09_req_23"
+      ]
+    },
+    "FLLNT-09 REQ-33": {
+      "condition": "IF rigid_overflow_used == true THEN splash_water_tank_volume >= 150 * pool_underwater_surface",
+      "severity": "block",
+      "symbols": [
+        "pool_underwater_surface",
+        "rigid_overflow_used",
+        "splash_water_tank_volume"
+      ]
+    },
+    "FLLNT-10 REQ-22": {
+      "condition": "filter_50x_rule_met == true",
+      "severity": "block",
+      "symbols": [
+        "filter_50x_rule_met"
+      ]
+    },
+    "FLLNT-10 REQ-30": {
+      "condition": "aerobic_filtration_confirmed == true",
+      "severity": "block",
+      "symbols": [
+        "aerobic_filtration_confirmed"
+      ]
+    },
+    "FLLNT-11 REQ-24": {
+      "condition": "IF physical_chemical_used == true THEN NOT (regeneration_technique IN {physical_chemical})",
+      "severity": "block",
+      "symbols": [
+        "physical_chemical_used",
+        "regeneration_technique"
+      ]
+    },
+    "FLLNT-11 REQ-29": {
+      "condition": "treatment_impermissible_used == false",
+      "severity": "block",
+      "symbols": [
+        "treatment_impermissible_used"
+      ]
+    },
+    "FLLNT-12 REQ-25": {
+      "condition": "attest_fllnt_12_req_25 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fllnt_12_req_25"
+      ]
+    },
+    "FLLNT-13 REQ-26": {
+      "condition": "acceptance_passed == true OR defects_noted IS EMPTY",
+      "severity": "block",
+      "symbols": [
+        "acceptance_passed",
+        "defects_noted"
+      ]
+    },
+    "FLLNT-13 REQ-28": {
+      "condition": "attest_fllnt_13_req_28 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fllnt_13_req_28"
+      ]
+    },
+    "FLLNT-14 REQ-27": {
+      "condition": "maintenance_contract_in_place == true",
+      "severity": "block",
+      "symbols": [
+        "maintenance_contract_in_place"
       ]
     }
   }

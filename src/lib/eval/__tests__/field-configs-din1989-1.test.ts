@@ -141,7 +141,14 @@ describe('DIN-1989-1 field configs (Plan 3 Task 2)', () => {
   });
 
   it('the committed migration + rollback equal a fresh emit against the committed prior (freshness pin)', () => {
-    const { up, down } = emitFieldConfigSql('din1989_1', FIELD_CONFIGS, SECTION_VISIBILITY, prior);
+    // Task 12c: the re-captured prior carries `gates`; the module still holds 1 rule the gate-aware guard refuses
+    // (DIN-1989-1-05 versickerung_bemessung_a138 ← CR-11) — listed in
+    // .superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-12c-refusals.md for the fix round
+    // (move to STAGED or sign off as a G-block). Until then the pin emits in warn mode and pins the EXACT count so a
+    // fix round that clears them must flip this back to the default (refuse) mode.
+    expect(() => emitFieldConfigSql('din1989_1', FIELD_CONFIGS, SECTION_VISIBILITY, prior)).toThrow(/read by gate .* — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block/);
+    const { up, down, warnings } = emitFieldConfigSql('din1989_1', FIELD_CONFIGS, SECTION_VISIBILITY, prior, { gate_guard: 'warn' });
+    expect(warnings.filter((w) => w.startsWith('GATE-REFUSAL (warn mode) '))).toHaveLength(1);
     const files = fieldConfigFilesFor('din1989_1', '20260917100210');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));

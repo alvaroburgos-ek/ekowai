@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-A-262E a262e",
-    "captured_at": "2026-09-17T16:47:11.974Z",
+    "captured_at": "2026-09-18T06:57:30.207Z",
     "standard": "DWA-A-262E",
     "slug": "a262e",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 215,
     "section_rows": 297,
     "sections_total": 297,
-    "equation_rows": 18
+    "equation_rows": 18,
+    "gate_rows": 60
   },
   "A262-01 client_owner": {
     "enum_values": null,
@@ -5334,6 +5335,439 @@
       "input_symbols": [
         "d_60",
         "d_10"
+      ]
+    }
+  },
+  "gates": {
+    "A262-01 REQ-02a": {
+      "condition": "wastewater_significantly_different == False",
+      "severity": "block",
+      "symbols": [
+        "wastewater_significantly_different"
+      ]
+    },
+    "A262-01 REQ-22": {
+      "condition": "climate_zone != \"permafrost\"",
+      "severity": "block",
+      "symbols": [
+        "climate_zone"
+      ]
+    },
+    "A262-02 REQ-01": {
+      "condition": "system_size_category IN {small_wwts, municipal_wwtp}",
+      "severity": "block",
+      "symbols": [
+        "system_size_category"
+      ]
+    },
+    "A262-05 REQ-03": {
+      "condition": "x_Q_max == 8",
+      "severity": "block",
+      "symbols": [
+        "x_Q_max"
+      ]
+    },
+    "A262-05 REQ-04a": {
+      "condition": "q_F >= 0.05 AND q_F <= 0.15",
+      "severity": "warn",
+      "symbols": [
+        "q_F"
+      ]
+    },
+    "A262-05 REQ-04b": {
+      "condition": "q_R_Tr >= 0.2 AND q_R_Tr <= 0.7",
+      "severity": "warn",
+      "symbols": [
+        "q_R_Tr"
+      ]
+    },
+    "A262-05 REQ-05": {
+      "condition": "m_multiplier >= 1",
+      "severity": "block",
+      "symbols": [
+        "m_multiplier"
+      ]
+    },
+    "A262-06 REQ-06": {
+      "condition": "f_S_QM >= 6 AND f_S_QM <= 9",
+      "severity": "warn",
+      "symbols": [
+        "f_S_QM"
+      ]
+    },
+    "A262-06 REQ-07": {
+      "condition": "m_T_aM >= 0.25 AND m_T_aM <= 1",
+      "severity": "warn",
+      "symbols": [
+        "m_T_aM"
+      ]
+    },
+    "A262-07 REQ-08": {
+      "condition": "pretreatment_selected != none",
+      "severity": "block",
+      "symbols": [
+        "pretreatment_selected"
+      ]
+    },
+    "A262-07 REQ-30": {
+      "condition": "aufenthaltszeit >= 2",
+      "severity": "block",
+      "symbols": [
+        "aufenthaltszeit"
+      ]
+    },
+    "A262-08 REQ-19eff-a": {
+      "condition": "effluent_BOD5_mg_l <= 40",
+      "severity": "block",
+      "symbols": [
+        "effluent_BOD5_mg_l"
+      ]
+    },
+    "A262-08 REQ-19eff-b": {
+      "condition": "effluent_COD_mg_l <= 150",
+      "severity": "block",
+      "symbols": [
+        "effluent_COD_mg_l"
+      ]
+    },
+    "A262-08 REQ-20": {
+      "condition": "IF nitrification_required == True THEN effluent_S_NH4_mg_l <= 10",
+      "severity": "block",
+      "symbols": [
+        "effluent_S_NH4_mg_l",
+        "nitrification_required"
+      ]
+    },
+    "A262-08 REQ-20b": {
+      "condition": "IF nitrification_required == True THEN effluent_temperature_C >= 12",
+      "severity": "block",
+      "symbols": [
+        "effluent_temperature_C",
+        "nitrification_required"
+      ]
+    },
+    "A262-10 REQ-09": {
+      "condition": "attest_a262_10_req_09 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a262_10_req_09"
+      ]
+    },
+    "A262-10 REQ-33": {
+      "condition": "IF filter_type == raw_wastewater_filter THEN f_A_F_CSB <= 100",
+      "severity": "block",
+      "symbols": [
+        "f_A_F_CSB",
+        "filter_type"
+      ]
+    },
+    "A262-10 REQ-34": {
+      "condition": "IF filter_type == raw_wastewater_filter THEN q_F_T <= 250",
+      "severity": "block",
+      "symbols": [
+        "filter_type",
+        "q_F_T"
+      ]
+    },
+    "A262-10 REQ-35": {
+      "condition": "IF filter_type == raw_wastewater_filter THEN q_Beschickung_Fo >= 10",
+      "severity": "block",
+      "symbols": [
+        "filter_type",
+        "q_Beschickung_Fo"
+      ]
+    },
+    "A262-10 REQ-36": {
+      "condition": "IF filter_type == raw_wastewater_filter THEN h_Beschickung_Fo >= 20 AND h_Beschickung_Fo <= 50",
+      "severity": "block",
+      "symbols": [
+        "filter_type",
+        "h_Beschickung_Fo"
+      ]
+    },
+    "A262-11 REQ-40": {
+      "condition": "A_Fo_spez_VFS_KA >= 4",
+      "severity": "block",
+      "symbols": [
+        "A_Fo_spez_VFS_KA"
+      ]
+    },
+    "A262-11 REQ-41": {
+      "condition": "A_Fo_min_VFS_KA >= 16",
+      "severity": "block",
+      "symbols": [
+        "A_Fo_min_VFS_KA"
+      ]
+    },
+    "A262-12 REQ-50": {
+      "condition": "A_Fo1_spez >= 1",
+      "severity": "block",
+      "symbols": [
+        "A_Fo1_spez"
+      ]
+    },
+    "A262-12 REQ-51": {
+      "condition": "A_Fo2_spez >= 1",
+      "severity": "block",
+      "symbols": [
+        "A_Fo2_spez"
+      ]
+    },
+    "A262-13 REQ-60": {
+      "condition": "A_Fo_spez_VFG_KA >= 1",
+      "severity": "block",
+      "symbols": [
+        "A_Fo_spez_VFG_KA"
+      ]
+    },
+    "A262-13 REQ-61": {
+      "condition": "A_Fo_min_VFG_KA >= 4",
+      "severity": "block",
+      "symbols": [
+        "A_Fo_min_VFG_KA"
+      ]
+    },
+    "A262-14 REQ-70": {
+      "condition": "A_Fu_spez >= 1",
+      "severity": "block",
+      "symbols": [
+        "A_Fu_spez"
+      ]
+    },
+    "A262-14 REQ-71": {
+      "condition": "A_Fu_min >= 4",
+      "severity": "block",
+      "symbols": [
+        "A_Fu_min"
+      ]
+    },
+    "A262-15 REQ-81": {
+      "condition": "l_Rieselr >= 6",
+      "severity": "block",
+      "symbols": [
+        "l_Rieselr"
+      ]
+    },
+    "A262-15 REQ-82": {
+      "condition": "L_Rieselr <= 18",
+      "severity": "block",
+      "symbols": [
+        "L_Rieselr"
+      ]
+    },
+    "A262-15 REQ-83": {
+      "condition": "B_FGR >= 0.5",
+      "severity": "block",
+      "symbols": [
+        "B_FGR"
+      ]
+    },
+    "A262-15 REQ-84": {
+      "condition": "h_Beschickung_Fu >= 20",
+      "severity": "block",
+      "symbols": [
+        "h_Beschickung_Fu"
+      ]
+    },
+    "A262-16 REQ-90": {
+      "condition": "A_F_spez_HFK_KA >= 1",
+      "severity": "block",
+      "symbols": [
+        "A_F_spez_HFK_KA"
+      ]
+    },
+    "A262-16 REQ-91": {
+      "condition": "f_A_ANF_CSB <= 200",
+      "severity": "block",
+      "symbols": [
+        "f_A_ANF_CSB"
+      ]
+    },
+    "A262-16 REQ-92": {
+      "condition": "L_HF_min >= 2",
+      "severity": "block",
+      "symbols": [
+        "L_HF_min"
+      ]
+    },
+    "A262-18 REQ-10": {
+      "condition": "attest_a262_18_req_10 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a262_18_req_10"
+      ]
+    },
+    "A262-18 REQ-103": {
+      "condition": "f_A_F_CSB_KomKA_in <= 20",
+      "severity": "block",
+      "symbols": [
+        "f_A_F_CSB_KomKA_in"
+      ]
+    },
+    "A262-18 REQ-104": {
+      "condition": "q_F_T_KomKA_in <= 80",
+      "severity": "block",
+      "symbols": [
+        "q_F_T_KomKA_in"
+      ]
+    },
+    "A262-19 REQ-101": {
+      "condition": "f_A_F_CSB_Betrieb <= 27",
+      "severity": "block",
+      "symbols": [
+        "f_A_F_CSB_Betrieb"
+      ]
+    },
+    "A262-19 REQ-102": {
+      "condition": "t_Sicker_min_aM >= 6",
+      "severity": "block",
+      "symbols": [
+        "t_Sicker_min_aM"
+      ]
+    },
+    "A262-20 REQ-110": {
+      "condition": "A_Fo1_spez_KomKA >= 1",
+      "severity": "block",
+      "symbols": [
+        "A_Fo1_spez_KomKA"
+      ]
+    },
+    "A262-20 REQ-111": {
+      "condition": "A_Fo2_spez_KomKA >= 1",
+      "severity": "block",
+      "symbols": [
+        "A_Fo2_spez_KomKA"
+      ]
+    },
+    "A262-20 REQ-112": {
+      "condition": "f_A_F01_CSB <= 80",
+      "severity": "block",
+      "symbols": [
+        "f_A_F01_CSB"
+      ]
+    },
+    "A262-22 REQ-130": {
+      "condition": "A_Fu_spez_VFK_KomKA >= 1",
+      "severity": "block",
+      "symbols": [
+        "A_Fu_spez_VFK_KomKA"
+      ]
+    },
+    "A262-22 REQ-131": {
+      "condition": "f_V_CSB_VFK_KomKA <= 100",
+      "severity": "block",
+      "symbols": [
+        "f_V_CSB_VFK_KomKA"
+      ]
+    },
+    "A262-23 REQ-141": {
+      "condition": "q_F_T_Betrieb <= 240",
+      "severity": "block",
+      "symbols": [
+        "q_F_T_Betrieb"
+      ]
+    },
+    "A262-23 REQ-142": {
+      "condition": "q_AWF_aM <= 500",
+      "severity": "block",
+      "symbols": [
+        "q_AWF_aM"
+      ]
+    },
+    "A262-25 REQ-11": {
+      "condition": "f_red >= 0.5",
+      "severity": "block",
+      "symbols": [
+        "f_red"
+      ]
+    },
+    "A262-25 REQ-11b": {
+      "condition": "t_Reg <= 6",
+      "severity": "block",
+      "symbols": [
+        "t_Reg"
+      ]
+    },
+    "A262-25 REQ-12": {
+      "condition": "if wastewater_type == greywater_only then w_s_d >= 75",
+      "severity": "block",
+      "symbols": [
+        "w_s_d",
+        "wastewater_type"
+      ]
+    },
+    "A262-25 REQ-13": {
+      "condition": "B_d_TKN <= B_A_TKN_zul",
+      "severity": "warn",
+      "symbols": [
+        "B_A_TKN_zul",
+        "B_d_TKN"
+      ]
+    },
+    "A262-26 REQ-02c": {
+      "condition": "Q_GW_taeglich >= 75",
+      "severity": "block",
+      "symbols": [
+        "Q_GW_taeglich"
+      ]
+    },
+    "A262-27 REQ-150": {
+      "condition": "f_A_Fu_CSB <= 16",
+      "severity": "block",
+      "symbols": [
+        "f_A_Fu_CSB"
+      ]
+    },
+    "A262-28 REQ-14": {
+      "condition": "RV <= 2",
+      "severity": "warn",
+      "symbols": [
+        "RV"
+      ]
+    },
+    "A262-29 REQ-15": {
+      "condition": "fines_fraction <= 2",
+      "severity": "block",
+      "symbols": [
+        "fines_fraction"
+      ]
+    },
+    "A262-29 REQ-16": {
+      "condition": "U < 5",
+      "severity": "warn",
+      "symbols": [
+        "U"
+      ]
+    },
+    "A262-29 REQ-17": {
+      "condition": "IF lining_type IN {mineral_seal_clay, unsealed_subsoil} THEN k_f_subsoil_m_s <= 1e-8",
+      "severity": "block",
+      "symbols": [
+        "k_f_subsoil_m_s",
+        "lining_type"
+      ]
+    },
+    "A262-29 REQ-18a": {
+      "condition": "IF lining_type == geomembrane THEN geomembrane_thickness_mm >= 1.5",
+      "severity": "block",
+      "symbols": [
+        "geomembrane_thickness_mm",
+        "lining_type"
+      ]
+    },
+    "A262-29 REQ-18c": {
+      "condition": "IF lining_type == geomembrane THEN geotextile_robustness_class IN {GRK4, GRK5}",
+      "severity": "warn",
+      "symbols": [
+        "geotextile_robustness_class",
+        "lining_type"
+      ]
+    },
+    "A262-32 REQ-21": {
+      "condition": "maintenance_plan_documented == True",
+      "severity": "block",
+      "symbols": [
+        "maintenance_plan_documented"
       ]
     }
   }

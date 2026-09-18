@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DIN-276 din276",
-    "captured_at": "2026-09-18T05:05:31.774Z",
+    "captured_at": "2026-09-18T06:57:41.679Z",
     "standard": "DIN-276",
     "slug": "din276",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 544,
     "section_rows": 429,
     "sections_total": 429,
-    "equation_rows": 53
+    "equation_rows": 53,
+    "gate_rows": 32
   },
   "DIN-276-01 cadastral_reference": {
     "enum_values": null,
@@ -10706,6 +10707,236 @@
       "input_symbols": [
         "current_stage_total",
         "previous_stage_total"
+      ]
+    }
+  },
+  "gates": {
+    "DIN-276-01 REQ-01": {
+      "condition": "project_type IN {building,civil_engineering,infrastructure,open_space}",
+      "severity": "block",
+      "symbols": [
+        "project_type"
+      ]
+    },
+    "DIN-276-01 REQ-09": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "DIN-276-02 REQ-06": {
+      "condition": "project_scope_description IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "project_scope_description"
+      ]
+    },
+    "DIN-276-02 REQ-08": {
+      "condition": "IF multi_building THEN separate_calculations_per_building",
+      "severity": "block",
+      "symbols": [
+        "multi_building",
+        "separate_calculations_per_building"
+      ]
+    },
+    "DIN-276-03 REQ-04": {
+      "condition": "cost_status_date IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "cost_status_date"
+      ]
+    },
+    "DIN-276-03 REQ-05": {
+      "condition": "input_documents_register IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "input_documents_register"
+      ]
+    },
+    "DIN-276-03 REQ-07": {
+      "condition": "cost_calculation_method IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "cost_calculation_method"
+      ]
+    },
+    "DIN-276-03 REQ-15": {
+      "condition": "vat_treatment IN {gross,net,mixed}",
+      "severity": "block",
+      "symbols": [
+        "vat_treatment"
+      ]
+    },
+    "DIN-276-04 REQ-27": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "DIN-276-04 REQ-28": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "DIN-276-04 REQ-29": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "DIN-276-08 REQ-10": {
+      "condition": "IF existing_substance_value > 0 THEN separately_shown_existing_substance == true",
+      "severity": "block",
+      "symbols": [
+        "existing_substance_value",
+        "separately_shown_existing_substance"
+      ]
+    },
+    "DIN-276-08 REQ-11": {
+      "condition": "IF contributed_goods_value > 0 THEN separately_shown_contributed_goods == true",
+      "severity": "block",
+      "symbols": [
+        "contributed_goods_value",
+        "separately_shown_contributed_goods"
+      ]
+    },
+    "DIN-276-08 REQ-12": {
+      "condition": "IF special_costs_value > 0 THEN separately_shown_special_costs == true",
+      "severity": "block",
+      "symbols": [
+        "separately_shown_special_costs",
+        "special_costs_value"
+      ]
+    },
+    "DIN-276-08 REQ-13": {
+      "condition": "IF forecasted_costs_value > 0 THEN forecasted_costs_assumptions_stated == true",
+      "severity": "block",
+      "symbols": [
+        "forecasted_costs_assumptions_stated",
+        "forecasted_costs_value"
+      ]
+    },
+    "DIN-276-08 REQ-14": {
+      "condition": "IF risk_costs_value > 0 THEN separately_shown_risk_costs == true",
+      "severity": "block",
+      "symbols": [
+        "risk_costs_value",
+        "separately_shown_risk_costs"
+      ]
+    },
+    "DIN-276-09 REQ-02": {
+      "condition": "attest_din_276_09_req_02 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_09_req_02"
+      ]
+    },
+    "DIN-276-18 REQ-16": {
+      "condition": "attest_din_276_18_req_16 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_18_req_16"
+      ]
+    },
+    "DIN-276-18 REQ-17": {
+      "condition": "attest_din_276_18_req_17 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_18_req_17"
+      ]
+    },
+    "DIN-276-18 REQ-18": {
+      "condition": "attest_din_276_18_req_18 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_18_req_18"
+      ]
+    },
+    "DIN-276-18 REQ-19": {
+      "condition": "attest_din_276_18_req_19 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_18_req_19"
+      ]
+    },
+    "DIN-276-18 REQ-20": {
+      "condition": "attest_din_276_18_req_20 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_18_req_20"
+      ]
+    },
+    "DIN-276-18 REQ-30": {
+      "condition": "attest_din_276_18_req_30 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_18_req_30"
+      ]
+    },
+    "DIN-276-23 REQ-03": {
+      "condition": "GK_total IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "GK_total"
+      ]
+    },
+    "DIN-276-23 REQ-26": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "DIN-276-25 REQ-25": {
+      "condition": "building_costs == kg_300_total + kg_400_total",
+      "severity": "block",
+      "symbols": [
+        "building_costs",
+        "kg_300_total",
+        "kg_400_total"
+      ]
+    },
+    "DIN-276-26 REQ-21": {
+      "condition": "attest_din_276_26_req_21 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_26_req_21"
+      ]
+    },
+    "DIN-276-26 REQ-22": {
+      "condition": "attest_din_276_26_req_22 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_26_req_22"
+      ]
+    },
+    "DIN-276-26 REQ-23": {
+      "condition": "attest_din_276_26_req_23 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_26_req_23"
+      ]
+    },
+    "DIN-276-26 REQ-31": {
+      "condition": "attest_din_276_26_req_31 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_26_req_31"
+      ]
+    },
+    "DIN-276-26 REQ-32": {
+      "condition": "attest_din_276_26_req_32 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_din_276_26_req_32"
+      ]
+    },
+    "DIN-276-28 REQ-24": {
+      "condition": "cost_target_value IS NOT NULL AND feasibility_checked == true",
+      "severity": "block",
+      "symbols": [
+        "cost_target_value",
+        "feasibility_checked"
       ]
     }
   }

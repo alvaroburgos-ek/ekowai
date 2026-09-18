@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-820-3 m820_3",
-    "captured_at": "2026-09-18T00:00:43.867Z",
+    "captured_at": "2026-09-18T06:57:37.152Z",
     "standard": "DWA-M-820-3",
     "slug": "m820_3",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 250,
     "section_rows": 216,
     "sections_total": 216,
-    "equation_rows": 0
+    "equation_rows": 0,
+    "gate_rows": 32
   },
   "M8203-01 applicable_lph": {
     "enum_values": [
@@ -7219,5 +7220,327 @@
       "parent_code": null
     }
   },
-  "equations": {}
+  "equations": {},
+  "gates": {
+    "M8203-01 REQ-01": {
+      "condition": "(sector_wasserwirtschaft == true OR sector_wasserbau == true OR sector_abwasser == true OR sector_abfall == true) AND client_auftraggeber IS NOT EMPTY AND contractor_auftragnehmer IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "client_auftraggeber",
+        "contractor_auftragnehmer",
+        "sector_abfall",
+        "sector_abwasser",
+        "sector_wasserbau",
+        "sector_wasserwirtschaft"
+      ]
+    },
+    "M8203-01 REQ-02": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M8203-01 REQ-03": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M8203-03 REQ-04": {
+      "condition": "bild1_acknowledged == true",
+      "severity": "warn",
+      "symbols": [
+        "bild1_acknowledged"
+      ]
+    },
+    "M8203-04 REQ-05": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M8203-04 REQ-06": {
+      "condition": "(pz_52_1_status == \"erreicht\" OR pz_52_1_status == \"teilweise_erreicht\" OR pz_52_1_status == \"nicht_zutreffend\") AND (pz_52_2_status == \"erreicht\" OR pz_52_2_status == \"teilweise_erreicht\" OR pz_52_2_status == \"nicht_zutreffend\") AND (pz_52_3_status == \"erreicht\" OR pz_52_3_status == \"teilweise_erreicht\" OR pz_52_3_status == \"nicht_zutreffend\") AND (pz_52_4_status == \"erreicht\" OR pz_52_4_status == \"teilweise_erreicht\" OR pz_52_4_status == \"nicht_zutreffend\") AND (pz_52_5_status == \"erreicht\" OR pz_52_5_status == \"teilweise_erreicht\" OR pz_52_5_status == \"nicht_zutreffend\")",
+      "severity": "block",
+      "symbols": [
+        "pz_52_1_status",
+        "pz_52_2_status",
+        "pz_52_3_status",
+        "pz_52_4_status",
+        "pz_52_5_status"
+      ]
+    },
+    "M8203-05 REQ-07": {
+      "condition": "(pz_53_1_status == \"erreicht\" OR pz_53_1_status == \"teilweise_erreicht\" OR pz_53_1_status == \"nicht_zutreffend\") AND (pz_53_2_status == \"erreicht\" OR pz_53_2_status == \"teilweise_erreicht\" OR pz_53_2_status == \"nicht_zutreffend\") AND (pz_53_3_status == \"erreicht\" OR pz_53_3_status == \"teilweise_erreicht\" OR pz_53_3_status == \"nicht_zutreffend\") AND (pz_53_4_status == \"erreicht\" OR pz_53_4_status == \"teilweise_erreicht\" OR pz_53_4_status == \"nicht_zutreffend\") AND (pz_53_5_status == \"erreicht\" OR pz_53_5_status == \"teilweise_erreicht\" OR pz_53_5_status == \"nicht_zutreffend\")",
+      "severity": "block",
+      "symbols": [
+        "pz_53_1_status",
+        "pz_53_2_status",
+        "pz_53_3_status",
+        "pz_53_4_status",
+        "pz_53_5_status"
+      ]
+    },
+    "M8203-06 REQ-08": {
+      "condition": "(pz_54_1_status == \"erreicht\" OR pz_54_1_status == \"teilweise_erreicht\" OR pz_54_1_status == \"nicht_zutreffend\") AND (pz_54_2_status == \"erreicht\" OR pz_54_2_status == \"teilweise_erreicht\" OR pz_54_2_status == \"nicht_zutreffend\") AND (pz_54_3_status == \"erreicht\" OR pz_54_3_status == \"teilweise_erreicht\" OR pz_54_3_status == \"nicht_zutreffend\")",
+      "severity": "block",
+      "symbols": [
+        "pz_54_1_status",
+        "pz_54_2_status",
+        "pz_54_3_status"
+      ]
+    },
+    "M8203-07 REQ-15": {
+      "condition": "qe52_items_y + qe52_items_p + qe52_items_n + qe52_items_na == qe52_items_total",
+      "severity": "warn",
+      "symbols": [
+        "qe52_items_n",
+        "qe52_items_na",
+        "qe52_items_p",
+        "qe52_items_total",
+        "qe52_items_y"
+      ]
+    },
+    "M8203-08 REQ-16": {
+      "condition": "qe53_items_y + qe53_items_p + qe53_items_n + qe53_items_na == qe53_items_total",
+      "severity": "warn",
+      "symbols": [
+        "qe53_items_n",
+        "qe53_items_na",
+        "qe53_items_p",
+        "qe53_items_total",
+        "qe53_items_y"
+      ]
+    },
+    "M8203-09 REQ-17": {
+      "condition": "qe54_items_y + qe54_items_p + qe54_items_n + qe54_items_na == qe54_items_total",
+      "severity": "warn",
+      "symbols": [
+        "qe54_items_n",
+        "qe54_items_na",
+        "qe54_items_p",
+        "qe54_items_total",
+        "qe54_items_y"
+      ]
+    },
+    "M8203-10 REQ-18": {
+      "condition": "qe55_items_y + qe55_items_p + qe55_items_n + qe55_items_na == qe55_items_total",
+      "severity": "warn",
+      "symbols": [
+        "qe55_items_n",
+        "qe55_items_na",
+        "qe55_items_p",
+        "qe55_items_total",
+        "qe55_items_y"
+      ]
+    },
+    "M8203-11 REQ-09": {
+      "condition": "(pz_62_1_status == \"erreicht\" OR pz_62_1_status == \"teilweise_erreicht\" OR pz_62_1_status == \"nicht_zutreffend\") AND (pz_62_2_status == \"erreicht\" OR pz_62_2_status == \"teilweise_erreicht\" OR pz_62_2_status == \"nicht_zutreffend\") AND (pz_62_3_status == \"erreicht\" OR pz_62_3_status == \"teilweise_erreicht\" OR pz_62_3_status == \"nicht_zutreffend\") AND (pz_62_4_status == \"erreicht\" OR pz_62_4_status == \"teilweise_erreicht\" OR pz_62_4_status == \"nicht_zutreffend\") AND (pz_62_5_status == \"erreicht\" OR pz_62_5_status == \"teilweise_erreicht\" OR pz_62_5_status == \"nicht_zutreffend\")",
+      "severity": "block",
+      "symbols": [
+        "pz_62_1_status",
+        "pz_62_2_status",
+        "pz_62_3_status",
+        "pz_62_4_status",
+        "pz_62_5_status"
+      ]
+    },
+    "M8203-11 REQ-19": {
+      "condition": "qe62_items_y + qe62_items_p + qe62_items_n + qe62_items_na == qe62_items_total",
+      "severity": "warn",
+      "symbols": [
+        "qe62_items_n",
+        "qe62_items_na",
+        "qe62_items_p",
+        "qe62_items_total",
+        "qe62_items_y"
+      ]
+    },
+    "M8203-11 REQ-20": {
+      "condition": "qe63a_items_total + qe63b_items_total == 40",
+      "severity": "warn",
+      "symbols": [
+        "qe63a_items_total",
+        "qe63b_items_total"
+      ]
+    },
+    "M8203-11 REQ-21": {
+      "condition": "qe64a_items_total + qe64b_items_total == 50",
+      "severity": "warn",
+      "symbols": [
+        "qe64a_items_total",
+        "qe64b_items_total"
+      ]
+    },
+    "M8203-12 REQ-10": {
+      "condition": "(pz_63_1_status == \"erreicht\" OR pz_63_1_status == \"teilweise_erreicht\" OR pz_63_1_status == \"nicht_zutreffend\") AND (pz_63_2_status == \"erreicht\" OR pz_63_2_status == \"teilweise_erreicht\" OR pz_63_2_status == \"nicht_zutreffend\") AND (pz_63_3_status == \"erreicht\" OR pz_63_3_status == \"teilweise_erreicht\" OR pz_63_3_status == \"nicht_zutreffend\") AND (pz_63_4_status == \"erreicht\" OR pz_63_4_status == \"teilweise_erreicht\" OR pz_63_4_status == \"nicht_zutreffend\") AND (pz_63_5_status == \"erreicht\" OR pz_63_5_status == \"teilweise_erreicht\" OR pz_63_5_status == \"nicht_zutreffend\") AND (pz_63_6_status == \"erreicht\" OR pz_63_6_status == \"teilweise_erreicht\" OR pz_63_6_status == \"nicht_zutreffend\") AND (pz_63_7_status == \"erreicht\" OR pz_63_7_status == \"teilweise_erreicht\" OR pz_63_7_status == \"nicht_zutreffend\") AND (pz_63_8_status == \"erreicht\" OR pz_63_8_status == \"teilweise_erreicht\" OR pz_63_8_status == \"nicht_zutreffend\")",
+      "severity": "block",
+      "symbols": [
+        "pz_63_1_status",
+        "pz_63_2_status",
+        "pz_63_3_status",
+        "pz_63_4_status",
+        "pz_63_5_status",
+        "pz_63_6_status",
+        "pz_63_7_status",
+        "pz_63_8_status"
+      ]
+    },
+    "M8203-14 REQ-11": {
+      "condition": "(pz_64_1_status == \"erreicht\" OR pz_64_1_status == \"teilweise_erreicht\" OR pz_64_1_status == \"nicht_zutreffend\") AND (pz_64_2_status == \"erreicht\" OR pz_64_2_status == \"teilweise_erreicht\" OR pz_64_2_status == \"nicht_zutreffend\") AND (pz_64_3_status == \"erreicht\" OR pz_64_3_status == \"teilweise_erreicht\" OR pz_64_3_status == \"nicht_zutreffend\") AND (pz_64_4_status == \"erreicht\" OR pz_64_4_status == \"teilweise_erreicht\" OR pz_64_4_status == \"nicht_zutreffend\") AND (pz_64_5_status == \"erreicht\" OR pz_64_5_status == \"teilweise_erreicht\" OR pz_64_5_status == \"nicht_zutreffend\") AND (pz_64_6_status == \"erreicht\" OR pz_64_6_status == \"teilweise_erreicht\" OR pz_64_6_status == \"nicht_zutreffend\") AND (pz_64_7_status == \"erreicht\" OR pz_64_7_status == \"teilweise_erreicht\" OR pz_64_7_status == \"nicht_zutreffend\") AND (pz_64_8_status == \"erreicht\" OR pz_64_8_status == \"teilweise_erreicht\" OR pz_64_8_status == \"nicht_zutreffend\") AND (pz_64_9_status == \"erreicht\" OR pz_64_9_status == \"teilweise_erreicht\" OR pz_64_9_status == \"nicht_zutreffend\") AND (pz_64_10_status == \"erreicht\" OR pz_64_10_status == \"teilweise_erreicht\" OR pz_64_10_status == \"nicht_zutreffend\") AND (pz_64_11_status == \"erreicht\" OR pz_64_11_status == \"teilweise_erreicht\" OR pz_64_11_status == \"nicht_zutreffend\") AND (pz_64_12_status == \"erreicht\" OR pz_64_12_status == \"teilweise_erreicht\" OR pz_64_12_status == \"nicht_zutreffend\")",
+      "severity": "block",
+      "symbols": [
+        "pz_64_10_status",
+        "pz_64_11_status",
+        "pz_64_12_status",
+        "pz_64_1_status",
+        "pz_64_2_status",
+        "pz_64_3_status",
+        "pz_64_4_status",
+        "pz_64_5_status",
+        "pz_64_6_status",
+        "pz_64_7_status",
+        "pz_64_8_status",
+        "pz_64_9_status"
+      ]
+    },
+    "M8203-16 REQ-12": {
+      "condition": "(pz_65_1_status == \"erreicht\" OR pz_65_1_status == \"teilweise_erreicht\" OR pz_65_1_status == \"nicht_zutreffend\") AND (pz_65_2_status == \"erreicht\" OR pz_65_2_status == \"teilweise_erreicht\" OR pz_65_2_status == \"nicht_zutreffend\") AND (pz_65_3_status == \"erreicht\" OR pz_65_3_status == \"teilweise_erreicht\" OR pz_65_3_status == \"nicht_zutreffend\") AND (pz_65_4_status == \"erreicht\" OR pz_65_4_status == \"teilweise_erreicht\" OR pz_65_4_status == \"nicht_zutreffend\") AND (pz_65_5_status == \"erreicht\" OR pz_65_5_status == \"teilweise_erreicht\" OR pz_65_5_status == \"nicht_zutreffend\") AND (pz_65_6_status == \"erreicht\" OR pz_65_6_status == \"teilweise_erreicht\" OR pz_65_6_status == \"nicht_zutreffend\") AND (pz_65_7_status == \"erreicht\" OR pz_65_7_status == \"teilweise_erreicht\" OR pz_65_7_status == \"nicht_zutreffend\") AND (pz_65_8_status == \"erreicht\" OR pz_65_8_status == \"teilweise_erreicht\" OR pz_65_8_status == \"nicht_zutreffend\") AND (pz_65_9_status == \"erreicht\" OR pz_65_9_status == \"teilweise_erreicht\" OR pz_65_9_status == \"nicht_zutreffend\") AND (pz_65_10_status == \"erreicht\" OR pz_65_10_status == \"teilweise_erreicht\" OR pz_65_10_status == \"nicht_zutreffend\") AND (pz_65_11_status == \"erreicht\" OR pz_65_11_status == \"teilweise_erreicht\" OR pz_65_11_status == \"nicht_zutreffend\") AND (pz_65_12_status == \"erreicht\" OR pz_65_12_status == \"teilweise_erreicht\" OR pz_65_12_status == \"nicht_zutreffend\")",
+      "severity": "block",
+      "symbols": [
+        "pz_65_10_status",
+        "pz_65_11_status",
+        "pz_65_12_status",
+        "pz_65_1_status",
+        "pz_65_2_status",
+        "pz_65_3_status",
+        "pz_65_4_status",
+        "pz_65_5_status",
+        "pz_65_6_status",
+        "pz_65_7_status",
+        "pz_65_8_status",
+        "pz_65_9_status"
+      ]
+    },
+    "M8203-16 REQ-22": {
+      "condition": "qe65_items_y + qe65_items_p + qe65_items_n + qe65_items_na == qe65_items_total",
+      "severity": "warn",
+      "symbols": [
+        "qe65_items_n",
+        "qe65_items_na",
+        "qe65_items_p",
+        "qe65_items_total",
+        "qe65_items_y"
+      ]
+    },
+    "M8203-17 REQ-13": {
+      "condition": "(pz_66_1_status == \"erreicht\" OR pz_66_1_status == \"teilweise_erreicht\" OR pz_66_1_status == \"nicht_zutreffend\") AND (pz_66_2_status == \"erreicht\" OR pz_66_2_status == \"teilweise_erreicht\" OR pz_66_2_status == \"nicht_zutreffend\") AND (pz_66_3_status == \"erreicht\" OR pz_66_3_status == \"teilweise_erreicht\" OR pz_66_3_status == \"nicht_zutreffend\") AND (pz_66_4_status == \"erreicht\" OR pz_66_4_status == \"teilweise_erreicht\" OR pz_66_4_status == \"nicht_zutreffend\") AND (pz_66_5_status == \"erreicht\" OR pz_66_5_status == \"teilweise_erreicht\" OR pz_66_5_status == \"nicht_zutreffend\") AND (pz_66_6_status == \"erreicht\" OR pz_66_6_status == \"teilweise_erreicht\" OR pz_66_6_status == \"nicht_zutreffend\") AND (pz_66_7_status == \"erreicht\" OR pz_66_7_status == \"teilweise_erreicht\" OR pz_66_7_status == \"nicht_zutreffend\") AND (pz_66_8_status == \"erreicht\" OR pz_66_8_status == \"teilweise_erreicht\" OR pz_66_8_status == \"nicht_zutreffend\") AND (pz_66_9_status == \"erreicht\" OR pz_66_9_status == \"teilweise_erreicht\" OR pz_66_9_status == \"nicht_zutreffend\") AND (pz_66_10_status == \"erreicht\" OR pz_66_10_status == \"teilweise_erreicht\" OR pz_66_10_status == \"nicht_zutreffend\") AND (pz_66_11_status == \"erreicht\" OR pz_66_11_status == \"teilweise_erreicht\" OR pz_66_11_status == \"nicht_zutreffend\")",
+      "severity": "block",
+      "symbols": [
+        "pz_66_10_status",
+        "pz_66_11_status",
+        "pz_66_1_status",
+        "pz_66_2_status",
+        "pz_66_3_status",
+        "pz_66_4_status",
+        "pz_66_5_status",
+        "pz_66_6_status",
+        "pz_66_7_status",
+        "pz_66_8_status",
+        "pz_66_9_status"
+      ]
+    },
+    "M8203-17 REQ-23": {
+      "condition": "qe66_items_y + qe66_items_p + qe66_items_n + qe66_items_na == qe66_items_total",
+      "severity": "warn",
+      "symbols": [
+        "qe66_items_n",
+        "qe66_items_na",
+        "qe66_items_p",
+        "qe66_items_total",
+        "qe66_items_y"
+      ]
+    },
+    "M8203-18 REQ-14": {
+      "condition": "(pz_67_1_status == \"erreicht\" OR pz_67_1_status == \"teilweise_erreicht\" OR pz_67_1_status == \"nicht_zutreffend\") AND (pz_67_2_status == \"erreicht\" OR pz_67_2_status == \"teilweise_erreicht\" OR pz_67_2_status == \"nicht_zutreffend\") AND (pz_67_3_status == \"erreicht\" OR pz_67_3_status == \"teilweise_erreicht\" OR pz_67_3_status == \"nicht_zutreffend\") AND (pz_67_4_status == \"erreicht\" OR pz_67_4_status == \"teilweise_erreicht\" OR pz_67_4_status == \"nicht_zutreffend\") AND (pz_67_5_status == \"erreicht\" OR pz_67_5_status == \"teilweise_erreicht\" OR pz_67_5_status == \"nicht_zutreffend\") AND (pz_67_6_status == \"erreicht\" OR pz_67_6_status == \"teilweise_erreicht\" OR pz_67_6_status == \"nicht_zutreffend\")",
+      "severity": "block",
+      "symbols": [
+        "pz_67_1_status",
+        "pz_67_2_status",
+        "pz_67_3_status",
+        "pz_67_4_status",
+        "pz_67_5_status",
+        "pz_67_6_status"
+      ]
+    },
+    "M8203-18 REQ-24": {
+      "condition": "qe67_items_y + qe67_items_p + qe67_items_n + qe67_items_na == qe67_items_total",
+      "severity": "warn",
+      "symbols": [
+        "qe67_items_n",
+        "qe67_items_na",
+        "qe67_items_p",
+        "qe67_items_total",
+        "qe67_items_y"
+      ]
+    },
+    "M8203-19 REQ-25": {
+      "condition": "bim_project_definition_complete == true AND aia_available == true AND bap_defined == true AND cde_platform_defined == true",
+      "severity": "warn",
+      "symbols": [
+        "aia_available",
+        "bap_defined",
+        "bim_project_definition_complete",
+        "cde_platform_defined"
+      ]
+    },
+    "M8203-19 REQ-26": {
+      "condition": "digital_twin_after_project == true",
+      "severity": "warn",
+      "symbols": [
+        "digital_twin_after_project"
+      ]
+    },
+    "M8203-19 REQ-27": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M8203-19 REQ-29": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M8203-19 REQ-30": {
+      "condition": "digital_twin_after_project == true",
+      "severity": "warn",
+      "symbols": [
+        "digital_twin_after_project"
+      ]
+    },
+    "M8203-20 REQ-28": {
+      "condition": "digital_rights_clarified == true",
+      "severity": "warn",
+      "symbols": [
+        "digital_rights_clarified"
+      ]
+    },
+    "M8203-22 REQ-31": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M8203-24 REQ-32": {
+      "condition": "signoff_engineer IS NOT EMPTY AND signoff_client IS NOT EMPTY AND (overall_quality_verdict == \"gruen\" OR overall_quality_verdict == \"gelb\" OR overall_quality_verdict == \"rot\")",
+      "severity": "block",
+      "symbols": [
+        "overall_quality_verdict",
+        "signoff_client",
+        "signoff_engineer"
+      ]
+    }
+  }
 }

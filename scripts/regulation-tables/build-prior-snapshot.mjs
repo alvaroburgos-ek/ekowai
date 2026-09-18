@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // Plan 3 Task 0 (fix round 1) — READ-ONLY prior-snapshot capture for the field-config emitter.
 //
 // Usage: node scripts/regulation-tables/build-prior-snapshot.mjs <STANDARD CODE> <slug>
@@ -8,7 +7,13 @@
 //   { "_meta": { … }, "<worksheet> <symbol>": { enum_values, widget, ui_config, lookup, visible_when,
 //     consumer_worksheets, data_type, section_code, section_id_is_null, section_path },
 //     "sections": { "<worksheet> <section_code>": { visible_when, parent_code } },
-//     "equations": { "<worksheet> <equation_number>": { id, output_symbol, input_symbols } } }
+//     "equations": { "<worksheet> <equation_number>": { id, output_symbol, input_symbols } },
+//     "gates": { "<worksheet> <req_code>": { condition, severity, symbols[, parse_error] } } }
+// gates (Task 12c) = EVERY compliance_requirements row of the standard (the table has no active flag); `symbols`
+// are the free symbols the condition reads, extracted with the ENGINE's own walk (extractConditionSymbols in
+// src/lib/compliance/evaluate.ts, loaded through tsx at runtime — never re-implemented here); a condition the
+// engine cannot parse carries symbols: [] + parse_error: true. The emitter's gate-aware guard refuses a
+// visible_when that hides a symbol a same-worksheet gate reads (hidden ⇒ null ⇒ the gate stops enforcing).
 // equations (Task 3 fix round 1) = EVERY equation row of the standard; the emitter's producer guard walks
 // input_symbols → output_symbol chains per worksheet so a rule can never hide an input of a consumed output.
 // section_path = codes of the field's section ancestors root → own section (null for a null-coded section, [] for
@@ -28,7 +33,8 @@
 // `worksheet_sections.visible_when` may not exist in prod yet. The script detects the present columns
 // via information_schema and writes null for the absent ones (recorded in _meta.columns_present).
 //
-// The pure parts (column detection → SQL, row folding) are exported and unit-tested
+// The pure parts (column detection → SQL, row folding — the fold takes the symbol extractor as a parameter so the
+// test passes the real one and main() loads it via tsx) are exported and unit-tested
 // (scripts/regulation-tables/__tests__/build-prior-snapshot.test.mjs); only main() touches the network.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -46,7 +52,7 @@ export function detectColumns(informationSchemaRows) {
   };
 }
 
-/** The three capture queries, with `null as <col>` for every optional column prod does not have yet. `$1` = standards.code. */
+/** The four capture queries, with `null as <col>` for every optional column prod does not have yet. `$1` = standards.code. */
 export function buildQueries(columnsPresent) {
   const fieldSelect = OPTIONAL_FIELD_COLUMNS.map((c) => (columnsPresent.fields[c] ? `f.${c}` : `null as ${c}`)).join(', ');
   const sectionSelect = OPTIONAL_SECTION_COLUMNS.map((c) => (columnsPresent.worksheet_sections[c] ? `ws.${c}` : `null as ${c}`)).join(', ');
@@ -62,6 +68,10 @@ where s.code = $1 order by w.code, ws.order_index, ws.code`,
     equations: `select w.code as worksheet, e.id, e.equation_number, e.output_symbol, e.input_symbols
 from equations e join worksheet_templates w on w.id = e.worksheet_template_id join standards s on s.id = w.standard_id
 where s.code = $1 order by w.code, e.equation_number`,
+    // Task 12c: every gate of the standard (compliance_requirements carries no active flag — all rows are live).
+    gates: `select w.code as worksheet, cr.code as req_code, cr.condition, cr.severity
+from compliance_requirements cr join worksheet_templates w on w.id = cr.worksheet_template_id join standards s on s.id = w.standard_id
+where s.code = $1 order by w.code, cr.code`,
   };
 }
 
@@ -80,12 +90,17 @@ export function sectionPath(sectionId, byId) {
  * Folds the row sets into the `PriorSnapshot` object (throws on a duplicate key). `sectionRows` is EVERY
  * section of the standard (id, parent_section_id, code, parent_code, visible_when); the coded ones become the
  * `sections` map, all of them feed each field's `section_path`. `equationRows` (optional, Task 3 fix round 1)
- * is every equation of the standard → the `equations` map keyed "<worksheet> <equation_number>".
+ * is every equation of the standard → the `equations` map keyed "<worksheet> <equation_number>". `gateRows`
+ * (optional, Task 12c) is every compliance_requirements row → the `gates` map keyed "<worksheet> <req_code>",
+ * each with the symbols its condition reads per `extractConditionSymbols` (the engine's own walk, injected — a
+ * null return = the engine cannot parse the condition ⇒ `symbols: []` + `parse_error: true`). Passing gate rows
+ * without the extractor is an error: the map must never be built with a re-implemented symbol walk.
  */
-export function foldSnapshot(fieldRows, sectionRows, meta, equationRows = []) {
+export function foldSnapshot(fieldRows, sectionRows, meta, equationRows = [], gateRows = [], extractConditionSymbols = null) {
   const byId = new Map(sectionRows.filter((r) => r.id != null).map((r) => [r.id, r]));
   const coded = sectionRows.filter((r) => r.section_code != null);
-  const snapshot = { _meta: { ...meta, field_rows: fieldRows.length, section_rows: coded.length, sections_total: sectionRows.length, equation_rows: equationRows.length } };
+  if (gateRows.length && typeof extractConditionSymbols !== 'function') throw new Error('foldSnapshot: gate rows need the engine extractor (extractConditionSymbols from src/lib/compliance/evaluate.ts)');
+  const snapshot = { _meta: { ...meta, field_rows: fieldRows.length, section_rows: coded.length, sections_total: sectionRows.length, equation_rows: equationRows.length, gate_rows: gateRows.length } };
   for (const r of fieldRows) {
     const key = `${r.worksheet} ${r.symbol}`;
     if (snapshot[key]) throw new Error(`duplicate field key ${key}`);
@@ -114,7 +129,37 @@ export function foldSnapshot(fieldRows, sectionRows, meta, equationRows = []) {
     if (snapshot.equations[key]) throw new Error(`duplicate equation key ${key}`);
     snapshot.equations[key] = { id: r.id ?? null, output_symbol: r.output_symbol, input_symbols: Array.isArray(r.input_symbols) ? [...r.input_symbols] : [] };
   }
+  snapshot.gates = {};
+  for (const r of gateRows) {
+    const key = `${r.worksheet} ${r.req_code}`;
+    if (snapshot.gates[key]) throw new Error(`duplicate gate key ${key}`);
+    const condition = r.condition ?? '';
+    const symbols = condition.trim() ? extractConditionSymbols(condition) : null;
+    snapshot.gates[key] = symbols
+      ? { condition, severity: r.severity ?? null, symbols: [...symbols].sort() }
+      : { condition, severity: r.severity ?? null, symbols: [], parse_error: true };
+  }
   return snapshot;
+}
+
+/**
+ * Loads the engine's condition-symbol walk (`extractConditionSymbols`, src/lib/compliance/evaluate.ts) from this
+ * plain-node script: registers tsx's ESM + CJS hooks for the dynamic import (the repo has no "type": "module", so
+ * tsx serves the .ts as CJS — the named exports then sit on `default`). Only main() calls this; the fold is pure.
+ */
+async function loadConditionSymbolExtractor(root) {
+  // Opaque specifiers: vitest imports this module for the pure parts, and vite's import analysis would otherwise
+  // inject a header ahead of the shebang for a literal dynamic import.
+  const tsxEsm = 'tsx/esm/api';
+  const tsxCjs = 'tsx/cjs/api';
+  const [{ register: registerEsm }, { register: registerCjs }] = await Promise.all([import(/* @vite-ignore */ tsxEsm), import(/* @vite-ignore */ tsxCjs)]);
+  const unregisterCjs = registerCjs();
+  const unregisterEsm = registerEsm();
+  const evaluatePath = pathToFileURL(path.join(root, 'src', 'lib', 'compliance', 'evaluate.ts')).href;
+  const mod = await import(/* @vite-ignore */ evaluatePath);
+  const api = typeof mod.extractConditionSymbols === 'function' ? mod : mod.default;
+  if (typeof api?.extractConditionSymbols !== 'function') throw new Error('could not load extractConditionSymbols from src/lib/compliance/evaluate.ts');
+  return { extractConditionSymbols: api.extractConditionSymbols, dispose: async () => { await unregisterEsm(); unregisterCjs(); } };
 }
 
 async function main() {
@@ -147,10 +192,12 @@ async function main() {
     const fieldRows = await ro(queries.fields, [code]);
     const sectionRows = await ro(queries.sections, [code]);
     const equationRows = await ro(queries.equations, [code]);
+    const gateRows = await ro(queries.gates, [code]);
     if (fieldRows.length === 0) {
       console.error(`no active fields found for standards.code = ${JSON.stringify(code)} — check the code (nothing written)`);
       process.exit(2);
     }
+    const extractor = await loadConditionSymbolExtractor(root);
     const snapshot = foldSnapshot(fieldRows, sectionRows, {
       command: `node scripts/regulation-tables/build-prior-snapshot.mjs ${code} ${slug}`,
       captured_at: new Date().toISOString(),
@@ -158,11 +205,13 @@ async function main() {
       slug,
       source: 'prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)',
       columns_present: columnsPresent,
-    }, equationRows);
+    }, equationRows, gateRows, extractor.extractConditionSymbols);
+    await extractor.dispose();
+    const parseErrors = Object.entries(snapshot.gates).filter(([, g]) => g.parse_error).map(([k]) => k);
     const out = path.join(root, 'src', 'lib', 'eval', 'field-configs', `${slug}.prior.json`);
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.writeFileSync(out, JSON.stringify(snapshot, null, 2) + '\n');
-    console.log(`wrote ${path.relative(root, out)}: ${fieldRows.length} field rows (${fieldRows.filter((r) => r.section_id == null).length} orphan), ${snapshot._meta.section_rows} coded sections of ${sectionRows.length}, ${equationRows.length} equations; optional columns present: ${JSON.stringify(columnsPresent)}`);
+    console.log(`wrote ${path.relative(root, out)}: ${fieldRows.length} field rows (${fieldRows.filter((r) => r.section_id == null).length} orphan), ${snapshot._meta.section_rows} coded sections of ${sectionRows.length}, ${equationRows.length} equations, ${gateRows.length} gates (${parseErrors.length} unparseable — symbols: [] + parse_error; the emitter refuses conservatively on those worksheets); optional columns present: ${JSON.stringify(columnsPresent)}`);
   } finally {
     await sql.end();
   }

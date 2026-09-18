@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DIN-1989-1 din1989_1",
-    "captured_at": "2026-09-17T16:47:11.242Z",
+    "captured_at": "2026-09-18T06:57:28.962Z",
     "standard": "DIN-1989-1",
     "slug": "din1989_1",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 60,
     "section_rows": 36,
     "sections_total": 36,
-    "equation_rows": 4
+    "equation_rows": 4,
+    "gate_rows": 14
   },
   "DIN-1989-1-01 anlagen_id": {
     "enum_values": null,
@@ -1522,6 +1523,111 @@
       "input_symbols": [
         "BW_a",
         "E_R"
+      ]
+    }
+  },
+  "gates": {
+    "DIN-1989-1-01 DIN-1989-1-CR-01": {
+      "condition": "meldepflicht_erfuellt == true",
+      "severity": "block",
+      "symbols": [
+        "meldepflicht_erfuellt"
+      ]
+    },
+    "DIN-1989-1-01 DIN-1989-1-CR-02": {
+      "condition": "trinkwasser_getrennt == true",
+      "severity": "block",
+      "symbols": [
+        "trinkwasser_getrennt"
+      ]
+    },
+    "DIN-1989-1-02 DIN-1989-1-CR-03": {
+      "condition": "filter_genormt == true",
+      "severity": "block",
+      "symbols": [
+        "filter_genormt"
+      ]
+    },
+    "DIN-1989-1-02 DIN-1989-1-CR-04": {
+      "condition": "speicheroeffnung_dn >= 200",
+      "severity": "block",
+      "symbols": [
+        "speicheroeffnung_dn"
+      ]
+    },
+    "DIN-1989-1-03 DIN-1989-1-CR-05": {
+      "condition": "nachspeisung_vorhanden == true",
+      "severity": "block",
+      "symbols": [
+        "nachspeisung_vorhanden"
+      ]
+    },
+    "DIN-1989-1-03 DIN-1989-1-CR-06": {
+      "condition": "nachspeisung_medium != trinkwasser OR sicherungseinrichtung_typ IN {AA,AB}",
+      "severity": "block",
+      "symbols": [
+        "nachspeisung_medium",
+        "sicherungseinrichtung_typ"
+      ]
+    },
+    "DIN-1989-1-03 DIN-1989-1-CR-07": {
+      "condition": "trockenlaufschutz == true",
+      "severity": "block",
+      "symbols": [
+        "trockenlaufschutz"
+      ]
+    },
+    "DIN-1989-1-03 DIN-1989-1-CR-08": {
+      "condition": "fuellstandueberwachung == true",
+      "severity": "block",
+      "symbols": [
+        "fuellstandueberwachung"
+      ]
+    },
+    "DIN-1989-1-03 DIN-1989-1-CR-09": {
+      "condition": "leitungskennzeichnung == true",
+      "severity": "block",
+      "symbols": [
+        "leitungskennzeichnung"
+      ]
+    },
+    "DIN-1989-1-04 DIN-1989-1-CR-10": {
+      "condition": "V_n IS NOT NULL AND E_R IS NOT NULL AND BW_a IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "BW_a",
+        "E_R",
+        "V_n"
+      ]
+    },
+    "DIN-1989-1-05 DIN-1989-1-CR-11": {
+      "condition": "ueberlauf_versickerung != true OR versickerung_bemessung_a138 == true",
+      "severity": "block",
+      "symbols": [
+        "ueberlauf_versickerung",
+        "versickerung_bemessung_a138"
+      ]
+    },
+    "DIN-1989-1-05 DIN-1989-1-CR-12": {
+      "condition": "rueckstauschutz_art IN {rueckstaufrei,hebeanlage,rueckstauverschluss,nicht_erforderlich}",
+      "severity": "block",
+      "symbols": [
+        "rueckstauschutz_art"
+      ]
+    },
+    "DIN-1989-1-05 DIN-1989-1-CR-13": {
+      "condition": "inbetriebnahme_fachkundig == true AND inbetriebnahmeprotokoll == true",
+      "severity": "block",
+      "symbols": [
+        "inbetriebnahme_fachkundig",
+        "inbetriebnahmeprotokoll"
+      ]
+    },
+    "DIN-1989-1-06 DIN-1989-1-CR-14": {
+      "condition": "wartung_fachkundig == true",
+      "severity": "block",
+      "symbols": [
+        "wartung_fachkundig"
       ]
     }
   }

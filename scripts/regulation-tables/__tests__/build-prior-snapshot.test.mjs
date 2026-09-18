@@ -3,12 +3,14 @@
  * optional-column detection (Plan-1 schema unapplied ⇒ `null as <col>`), the
  * capture queries (fields incl. section_id; EVERY section with id/parent),
  * the ancestor walk and the fold into the exact `PriorSnapshot` shape the
- * emitter accepts (`assertPriorSnapshot` is run on the folded result).
+ * emitter accepts (`assertPriorSnapshot` is run on the folded result); the Task 12c
+ * `gates` map is folded with the REAL engine extractor (`extractConditionSymbols`).
  * No network: main() only runs when the file is the CLI entry.
  */
 import { describe, it, expect } from 'vitest';
 import { detectColumns, buildQueries, foldSnapshot, sectionPath, OPTIONAL_FIELD_COLUMNS } from '../build-prior-snapshot.mjs';
-import { assertPriorSnapshot, emitFieldConfigSql } from '../emit-field-configs-sql';
+import { assertPriorSnapshot, emitFieldConfigSql, PRIOR_SQL } from '../emit-field-configs-sql';
+import { extractConditionSymbols } from '../../../src/lib/compliance/evaluate';
 
 const schemaRows = (cols) => cols.map(([table_name, column_name]) => ({ table_name, column_name }));
 
@@ -60,8 +62,9 @@ describe('sectionPath / foldSnapshot', () => {
   it('produces the PriorSnapshot shape (keys "<ws> <sym>", coded sections with parent_code, _meta) that assertPriorSnapshot accepts, with full JSON values and section paths', () => {
     const snap = foldSnapshot(fieldRows, sectionRows, { standard: 'DWA-A-138-1', slug: 'a138' });
     expect(() => assertPriorSnapshot(snap)).not.toThrow();
-    expect(snap._meta).toEqual({ standard: 'DWA-A-138-1', slug: 'a138', field_rows: 3, section_rows: 3, sections_total: 4, equation_rows: 0 });
+    expect(snap._meta).toEqual({ standard: 'DWA-A-138-1', slug: 'a138', field_rows: 3, section_rows: 3, sections_total: 4, equation_rows: 0, gate_rows: 0 });
     expect(snap.equations).toEqual({});
+    expect(snap.gates).toEqual({});
     expect(snap['A138-07 A_C']).toEqual({ enum_values: null, widget: null, ui_config: null, lookup: null, visible_when: null, consumer_worksheets: ['A138-12'], data_type: 'number', section_code: null, section_id_is_null: false, section_path: ['A', 'A.1', null] });
     expect(snap['A138-07 orphan']).toMatchObject({ section_code: null, section_id_is_null: true, section_path: [] });
     expect(snap['A138-07 surface_inventory']).toMatchObject({ section_code: 'B', section_id_is_null: false, section_path: ['B'] });
@@ -119,5 +122,43 @@ describe('sectionPath / foldSnapshot', () => {
     expect(() => emitFieldConfigSql('a262e', [], [rule], snap)).toThrow("m_T_aM → Gl.10 Q_F_d_aM → Gl.9 Q_T_d_aM (consumed by A262-07, A262-09)");
     expect(() => foldSnapshot([], [], {}, [{ worksheet: 'W', equation_number: '1', output_symbol: 'x', input_symbols: [] }, { worksheet: 'W', equation_number: '1', output_symbol: 'y', input_symbols: [] }])).toThrow(/duplicate equation key W 1/);
     expect(foldSnapshot([], [], {}, [{ worksheet: 'W', equation_number: '1', output_symbol: 'x', input_symbols: null }]).equations['W 1']).toEqual({ id: null, output_symbol: 'x', input_symbols: [] });
+  });
+  it('gates (Task 12c): the query selects every compliance_requirements row per worksheet; the fold keys "<ws> <req_code>" with the ENGINE-extracted symbols (parse_error for prose), and the emitter refuses through them', () => {
+    const q = buildQueries(detectColumns([]));
+    expect(q.gates).toContain('select w.code as worksheet, cr.code as req_code, cr.condition, cr.severity');
+    expect(q.gates).toContain('from compliance_requirements cr join worksheet_templates w on w.id = cr.worksheet_template_id');
+    expect(q.gates).toContain('where s.code = $1 order by w.code, cr.code');
+    expect(q.gates).not.toContain('active'); // the table has no active flag — every row is live
+    expect(PRIOR_SQL.gates).toContain('cr.code as req_code, cr.condition, cr.severity from compliance_requirements cr');
+    const fields = [
+      { worksheet: 'A138-12', symbol: 'A_min', data_type: 'number', consumer_worksheets: null, section_id: 's-B', section_code: 'B' },
+      { worksheet: 'A138-12', symbol: 'd_S', data_type: 'number', consumer_worksheets: null, section_id: 's-B', section_code: 'B' },
+    ];
+    const secs = [{ worksheet: 'A138-12', id: 's-B', parent_section_id: null, section_code: 'B', parent_code: null, visible_when: null }];
+    const gates = [
+      { worksheet: 'A138-12', req_code: 'CR-01', condition: 'max_d IS NOT NULL AND A_min IS NOT NULL', severity: 'block' },
+      { worksheet: 'A138-12', req_code: 'CR-02', condition: "IF shaft_type == 'typ_B' THEN d_S >= 1 AND status == ok", severity: 'warn' },
+      { worksheet: 'A138-12', req_code: 'CR-03', condition: 'Engineer attestation', severity: 'block' },
+      { worksheet: 'A138-12', req_code: 'CR-04', condition: '', severity: 'info' },
+      { worksheet: 'A138-12', req_code: 'CR-05', condition: 'count_rows(reg, v > lim) > 0 AND lookup(t, k) == x', severity: 'block' },
+    ];
+    const snap = foldSnapshot(fields, secs, { slug: 'a138' }, [], gates, extractConditionSymbols);
+    expect(() => assertPriorSnapshot(snap)).not.toThrow();
+    expect(snap._meta.gate_rows).toBe(5);
+    expect(snap.gates).toEqual({
+      'A138-12 CR-01': { condition: 'max_d IS NOT NULL AND A_min IS NOT NULL', severity: 'block', symbols: ['A_min', 'max_d'] },
+      'A138-12 CR-02': { condition: "IF shaft_type == 'typ_B' THEN d_S >= 1 AND status == ok", severity: 'warn', symbols: ['d_S', 'shaft_type', 'status'] }, // enum-literal RHS `ok` is not a symbol
+      'A138-12 CR-03': { condition: 'Engineer attestation', severity: 'block', symbols: [], parse_error: true },
+      'A138-12 CR-04': { condition: '', severity: 'info', symbols: [], parse_error: true },
+      'A138-12 CR-05': { condition: 'count_rows(reg, v > lim) > 0 AND lookup(t, k) == x', severity: 'block', symbols: ['k', 'reg', 't'] }, // row-scoped idents are column names (C-2)
+    });
+    // the emitter consumes it: A_min is refused through CR-01 (and CR-03 / CR-04 conservatively); d_S only through the parse_error rows
+    const rule = (symbol) => ({ standard: 'DWA-A-138-1', worksheet: 'A138-12', symbol, widget: 'scalar', visible_when: "shaft_type == 'typ_B'", verification_quote: 'q' });
+    expect(() => emitFieldConfigSql('a138', [rule('A_min')], [], snap)).toThrow('hides A_min read by gate CR-01 (block: "max_d IS NOT NULL AND A_min IS NOT NULL"), CR-03 (block: "Engineer attestation" — parse_error, symbols unknown), CR-04 (info: "" — parse_error, symbols unknown)');
+    expect(() => emitFieldConfigSql('a138', [rule('d_S')], [], snap)).toThrow(/hides d_S read by gate CR-03 .*parse_error.*, CR-04 .*parse_error/);
+    expect(() => emitFieldConfigSql('a138', [rule('d_S')], [], snap)).not.toThrow(/CR-02/);
+    // gate rows without the engine extractor are refused (never a re-implemented walk); duplicate keys too
+    expect(() => foldSnapshot([], [], {}, [], gates)).toThrow(/gate rows need the engine extractor/);
+    expect(() => foldSnapshot([], [], {}, [], [gates[0], gates[0]], extractConditionSymbols)).toThrow(/duplicate gate key A138-12 CR-01/);
   });
 });

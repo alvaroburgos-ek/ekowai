@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-187 m187",
-    "captured_at": "2026-09-18T03:35:07.865Z",
+    "captured_at": "2026-09-18T06:57:40.558Z",
     "standard": "DWA-M-187",
     "slug": "m187",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 139,
     "section_rows": 225,
     "sections_total": 225,
-    "equation_rows": 4
+    "equation_rows": 4,
+    "gate_rows": 15
   },
   "M187-01 sonderanwendung": {
     "enum_values": [
@@ -3300,6 +3301,129 @@
         "A_b_a",
         "b_krit"
       ]
+    }
+  },
+  "gates": {
+    "M187-01 REQ-01": {
+      "condition": "sonderanwendung IN {p_rueckhalt,spurenstoffe,mikroorganismen,organische_belastung,klein_rbf}",
+      "severity": "block",
+      "symbols": [
+        "sonderanwendung"
+      ]
+    },
+    "M187-04 REQ-07": {
+      "condition": "attest_m187_04_req_07 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m187_04_req_07"
+      ]
+    },
+    "M187-05 REQ-02": {
+      "condition": "h_FK >= 1.0",
+      "severity": "block",
+      "symbols": [
+        "h_FK"
+      ]
+    },
+    "M187-05 REQ-02-2": {
+      "condition": "beta_wert >= 4",
+      "severity": "block",
+      "symbols": [
+        "beta_wert"
+      ]
+    },
+    "M187-05 REQ-07": {
+      "condition": "attest_m187_05_req_07 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m187_05_req_07"
+      ]
+    },
+    "M187-06 REQ-03": {
+      "condition": "q_Dr_RBF <= 0.03",
+      "severity": "block",
+      "symbols": [
+        "q_Dr_RBF"
+      ]
+    },
+    "M187-06 REQ-04": {
+      "condition": "q_Dr_RBF == 0.01 AND h_FK >= 1.0",
+      "severity": "block",
+      "symbols": [
+        "h_FK",
+        "q_Dr_RBF"
+      ]
+    },
+    "M187-07 REQ-03": {
+      "condition": "q_Dr_RBF <= 0.03",
+      "severity": "block",
+      "symbols": [
+        "q_Dr_RBF"
+      ]
+    },
+    "M187-07 REQ-04": {
+      "condition": "q_Dr_RBF == 0.01 AND h_FK >= 1.0",
+      "severity": "block",
+      "symbols": [
+        "h_FK",
+        "q_Dr_RBF"
+      ]
+    },
+    "M187-08 REQ-05": {
+      "condition": "B_CSB <= 20 AND A_F_pro_AEb >= 750 AND q_krit == 60 AND q_A_max <= 4",
+      "severity": "block",
+      "symbols": [
+        "A_F_pro_AEb",
+        "B_CSB",
+        "q_A_max",
+        "q_krit"
+      ]
+    },
+    "M187-08 REQ-05-2": {
+      "condition": "B_CSB <= 20 AND A_F_pro_AEb >= 750 AND q_krit == 60 AND q_A_max <= 4",
+      "severity": "block",
+      "symbols": [
+        "A_F_pro_AEb",
+        "B_CSB",
+        "q_A_max",
+        "q_krit"
+      ]
+    },
+    "M187-09 REQ-06": {
+      "condition": "A_b_a < 1 AND A_F_anteil_Aba == 1.0 AND A_F >= 1.0 AND h_RR >= 0.2 AND h_RBF >= 0.6 AND h_Draen >= 0.1",
+      "severity": "block",
+      "symbols": [
+        "A_F",
+        "A_F_anteil_Aba",
+        "A_b_a",
+        "h_Draen",
+        "h_RBF",
+        "h_RR"
+      ]
+    },
+    "M187-09 REQ-06-2": {
+      "condition": "A_b_a < 1 AND A_F_anteil_Aba == 1.0 AND A_F >= 1.0 AND h_RR >= 0.2 AND h_RBF >= 0.6 AND h_Draen >= 0.1",
+      "severity": "block",
+      "symbols": [
+        "A_F",
+        "A_F_anteil_Aba",
+        "A_b_a",
+        "h_Draen",
+        "h_RBF",
+        "h_RR"
+      ]
+    },
+    "M187-10 REQ-08": {
+      "condition": "engineer-verified",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M187-23 REQ-08": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
     }
   }
 }

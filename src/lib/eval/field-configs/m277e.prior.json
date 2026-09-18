@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-277E m277e",
-    "captured_at": "2026-09-17T17:20:37.278Z",
+    "captured_at": "2026-09-18T06:57:31.378Z",
     "standard": "DWA-M-277E",
     "slug": "m277e",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 198,
     "section_rows": 216,
     "sections_total": 216,
-    "equation_rows": 22
+    "equation_rows": 22,
+    "gate_rows": 63
   },
   "M277E-01 A": {
     "enum_values": null,
@@ -4358,6 +4359,478 @@
       "output_symbol": "V_buffer",
       "input_symbols": [
         "Q_GWT"
+      ]
+    }
+  },
+  "gates": {
+    "M277E-01 REQ-01": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M277E-01 REQ-29": {
+      "condition": "(storage_capacity_m3 <= 50 AND MBO_notification_only == true) OR (storage_capacity_m3 > 50 AND MBO_authorisation_required == true)",
+      "severity": "block",
+      "symbols": [
+        "MBO_authorisation_required",
+        "MBO_notification_only",
+        "storage_capacity_m3"
+      ]
+    },
+    "M277E-02 REQ-02": {
+      "condition": "greywater_type IN {A1, A2, B1, B2}",
+      "severity": "block",
+      "symbols": [
+        "greywater_type"
+      ]
+    },
+    "M277E-02 REQ-02-2": {
+      "condition": "greywater_type IN {A1, A2, B1, B2}",
+      "severity": "block",
+      "symbols": [
+        "greywater_type"
+      ]
+    },
+    "M277E-02 REQ-03": {
+      "condition": "(quality_category == C1 AND greywater_type IN {A1, A2}) OR quality_category == C2",
+      "severity": "block",
+      "symbols": [
+        "greywater_type",
+        "quality_category"
+      ]
+    },
+    "M277E-03 REQ-24": {
+      "condition": "attest_m277e_03_req_24 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m277e_03_req_24"
+      ]
+    },
+    "M277E-03 REQ-30": {
+      "condition": "IF building_type == rented_apartment THEN drinking_water_option_available == true",
+      "severity": "block",
+      "symbols": [
+        "building_type",
+        "drinking_water_option_available"
+      ]
+    },
+    "M277E-04 REQ-09": {
+      "condition": "IF quality_category == C2 THEN BOD5 < 5",
+      "severity": "block",
+      "symbols": [
+        "BOD5",
+        "quality_category"
+      ]
+    },
+    "M277E-04 REQ-24": {
+      "condition": "DIN_19650_class_documented == true",
+      "severity": "block",
+      "symbols": [
+        "DIN_19650_class_documented"
+      ]
+    },
+    "M277E-04 REQ-32": {
+      "condition": "IF use_category == laundry_private THEN quality_category == C2",
+      "severity": "block",
+      "symbols": [
+        "quality_category",
+        "use_category"
+      ]
+    },
+    "M277E-04 REQ-32-2": {
+      "condition": "IF use_category == laundry_private THEN quality_category == C2",
+      "severity": "block",
+      "symbols": [
+        "quality_category",
+        "use_category"
+      ]
+    },
+    "M277E-06 REQ-04": {
+      "condition": "Q_SW = SUM(Q_SW_P_i * P_i) + SUM(Q_SW_A_j * A_j)",
+      "severity": "warn",
+      "symbols": [
+        "A_j",
+        "P_i",
+        "Q_SW",
+        "Q_SW_A_j",
+        "Q_SW_P_i"
+      ]
+    },
+    "M277E-06 REQ-05": {
+      "condition": "Q_GW = SUM(Q_GW_P_i * P_i)",
+      "severity": "warn",
+      "symbols": [
+        "P_i",
+        "Q_GW",
+        "Q_GW_P_i"
+      ]
+    },
+    "M277E-06 REQ-06": {
+      "condition": "Q_GWT eq MIN(Q_SW, Q_GW)",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M277E-06 REQ-07": {
+      "condition": "Q_WB == (Q_GW - Q_SW)",
+      "severity": "block",
+      "symbols": [
+        "Q_GW",
+        "Q_SW",
+        "Q_WB"
+      ]
+    },
+    "M277E-06 REQ-30": {
+      "condition": "IF building_type == rented_apartment THEN drinking_water_option_available == true",
+      "severity": "block",
+      "symbols": [
+        "building_type",
+        "drinking_water_option_available"
+      ]
+    },
+    "M277E-08 REQ-11": {
+      "condition": "pH_value >= 6.5 AND pH_value <= 9.5",
+      "severity": "block",
+      "symbols": [
+        "pH_value"
+      ]
+    },
+    "M277E-08 REQ-11-2": {
+      "condition": "pH_value >= 6.5 AND pH_value <= 9.5",
+      "severity": "block",
+      "symbols": [
+        "pH_value"
+      ]
+    },
+    "M277E-09 REQ-12": {
+      "condition": "automatic_backfeed_present == True",
+      "severity": "block",
+      "symbols": [
+        "automatic_backfeed_present"
+      ]
+    },
+    "M277E-09 REQ-12-2": {
+      "condition": "automatic_backfeed_present == true",
+      "severity": "block",
+      "symbols": [
+        "automatic_backfeed_present"
+      ]
+    },
+    "M277E-09 REQ-16": {
+      "condition": "network_separation_per_DIN_EN_1717 == True",
+      "severity": "block",
+      "symbols": [
+        "network_separation_per_DIN_EN_1717"
+      ]
+    },
+    "M277E-09 REQ-16-2": {
+      "condition": "network_separation_per_DIN_EN_1717 == true",
+      "severity": "block",
+      "symbols": [
+        "network_separation_per_DIN_EN_1717"
+      ]
+    },
+    "M277E-09 REQ-17": {
+      "condition": "service_water_labelled == True AND service_water_isolated_from_drinking_water == True",
+      "severity": "block",
+      "symbols": [
+        "service_water_isolated_from_drinking_water",
+        "service_water_labelled"
+      ]
+    },
+    "M277E-09 REQ-17-2": {
+      "condition": "service_water_labelled == true AND service_water_isolated_from_drinking_water == true",
+      "severity": "block",
+      "symbols": [
+        "service_water_isolated_from_drinking_water",
+        "service_water_labelled"
+      ]
+    },
+    "M277E-09 REQ-18": {
+      "condition": "installation_frost_free == True",
+      "severity": "block",
+      "symbols": [
+        "installation_frost_free"
+      ]
+    },
+    "M277E-09 REQ-18-2": {
+      "condition": "installation_frost_free == true",
+      "severity": "block",
+      "symbols": [
+        "installation_frost_free"
+      ]
+    },
+    "M277E-09 REQ-19": {
+      "condition": "V_buffer >= Q_GWT",
+      "severity": "warn",
+      "symbols": [
+        "Q_GWT",
+        "V_buffer"
+      ]
+    },
+    "M277E-09 REQ-21": {
+      "condition": "auto_switch_to_backfeed == True AND auto_fault_report == True",
+      "severity": "warn",
+      "symbols": [
+        "auto_fault_report",
+        "auto_switch_to_backfeed"
+      ]
+    },
+    "M277E-09 REQ-21-2": {
+      "condition": "auto_switch_to_backfeed == true AND auto_fault_report == true",
+      "severity": "block",
+      "symbols": [
+        "auto_fault_report",
+        "auto_switch_to_backfeed"
+      ]
+    },
+    "M277E-09 REQ-26": {
+      "condition": "attest_m277e_09_req_26 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m277e_09_req_26"
+      ]
+    },
+    "M277E-09 REQ-26-2": {
+      "condition": "automatic_backfeed_present == true",
+      "severity": "block",
+      "symbols": [
+        "automatic_backfeed_present"
+      ]
+    },
+    "M277E-09 REQ-27": {
+      "condition": "attest_m277e_09_req_27 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m277e_09_req_27"
+      ]
+    },
+    "M277E-09 REQ-27-2": {
+      "condition": "automatic_backfeed_present == true",
+      "severity": "block",
+      "symbols": [
+        "automatic_backfeed_present"
+      ]
+    },
+    "M277E-09 REQ-28": {
+      "condition": "auto_switch_to_backfeed == True",
+      "severity": "warn",
+      "symbols": [
+        "auto_switch_to_backfeed"
+      ]
+    },
+    "M277E-09 REQ-28-2": {
+      "condition": "auto_switch_to_backfeed == true",
+      "severity": "block",
+      "symbols": [
+        "auto_switch_to_backfeed"
+      ]
+    },
+    "M277E-09 REQ-31": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M277E-10 REQ-08": {
+      "condition": "IF quality_category == C2 THEN turbidity_NTU < 2",
+      "severity": "block",
+      "symbols": [
+        "quality_category",
+        "turbidity_NTU"
+      ]
+    },
+    "M277E-10 REQ-10": {
+      "condition": "o2_saturation_pct > 50",
+      "severity": "block",
+      "symbols": [
+        "o2_saturation_pct"
+      ]
+    },
+    "M277E-10 REQ-10-2": {
+      "condition": "o2_saturation_pct > 50",
+      "severity": "block",
+      "symbols": [
+        "o2_saturation_pct"
+      ]
+    },
+    "M277E-10 REQ-14": {
+      "condition": "IF quality_category == C2 THEN total_coliforms_treated < 10000",
+      "severity": "block",
+      "symbols": [
+        "quality_category",
+        "total_coliforms_treated"
+      ]
+    },
+    "M277E-10 REQ-14E": {
+      "condition": "IF quality_category == C2 THEN e_coli < 1000",
+      "severity": "block",
+      "symbols": [
+        "e_coli",
+        "quality_category"
+      ]
+    },
+    "M277E-10 REQ-15": {
+      "condition": "IF quality_category == C2 THEN p_aeruginosa < 100",
+      "severity": "block",
+      "symbols": [
+        "p_aeruginosa",
+        "quality_category"
+      ]
+    },
+    "M277E-10 REQ-20": {
+      "condition": "attest_m277e_10_req_20 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m277e_10_req_20"
+      ]
+    },
+    "M277E-10 REQ-22": {
+      "condition": "attest_m277e_10_req_22 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m277e_10_req_22"
+      ]
+    },
+    "M277E-10 REQ-23": {
+      "condition": "IF discharge_into_water_body == True THEN WHG_permit_present == True",
+      "severity": "block",
+      "symbols": [
+        "WHG_permit_present",
+        "discharge_into_water_body"
+      ]
+    },
+    "M277E-10 REQ-25": {
+      "condition": "attest_m277e_10_req_25 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m277e_10_req_25"
+      ]
+    },
+    "M277E-11 REQ-13": {
+      "condition": "authority_notification_sent == True",
+      "severity": "block",
+      "symbols": [
+        "authority_notification_sent"
+      ]
+    },
+    "M277E-11 REQ-13-2": {
+      "condition": "authority_notification_sent == true",
+      "severity": "block",
+      "symbols": [
+        "authority_notification_sent"
+      ]
+    },
+    "M277E-11 REQ-20": {
+      "condition": "handover_certificate_present == true AND user_manual_handed_over == true",
+      "severity": "block",
+      "symbols": [
+        "handover_certificate_present",
+        "user_manual_handed_over"
+      ]
+    },
+    "M277E-11 REQ-22": {
+      "condition": "maintenance_contract_present == true",
+      "severity": "block",
+      "symbols": [
+        "maintenance_contract_present"
+      ]
+    },
+    "M277E-14 REQ-03": {
+      "condition": "(quality_category == C1 AND greywater_type IN {A1, A2}) OR quality_category == C2",
+      "severity": "block",
+      "symbols": [
+        "greywater_type",
+        "quality_category"
+      ]
+    },
+    "M277E-14 REQ-04": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M277E-14 REQ-05": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M277E-14 REQ-06": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M277E-14 REQ-07": {
+      "condition": "Q_WB == (Q_GW - Q_SW)",
+      "severity": "block",
+      "symbols": [
+        "Q_GW",
+        "Q_SW",
+        "Q_WB"
+      ]
+    },
+    "M277E-19 REQ-19": {
+      "condition": "V_buffer >= Q_GWT",
+      "severity": "warn",
+      "symbols": [
+        "Q_GWT",
+        "V_buffer"
+      ]
+    },
+    "M277E-19 REQ-31": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M277E-23 REQ-08": {
+      "condition": "IF quality_category == C2 THEN turbidity_NTU < 2",
+      "severity": "block",
+      "symbols": [
+        "quality_category",
+        "turbidity_NTU"
+      ]
+    },
+    "M277E-23 REQ-09": {
+      "condition": "IF quality_category == C2 THEN BOD5 < 5",
+      "severity": "block",
+      "symbols": [
+        "BOD5",
+        "quality_category"
+      ]
+    },
+    "M277E-23 REQ-14": {
+      "condition": "IF quality_category == C2 THEN total_coliforms_treated < 10000",
+      "severity": "block",
+      "symbols": [
+        "quality_category",
+        "total_coliforms_treated"
+      ]
+    },
+    "M277E-23 REQ-15": {
+      "condition": "IF quality_category == C2 THEN p_aeruginosa < 100",
+      "severity": "block",
+      "symbols": [
+        "p_aeruginosa",
+        "quality_category"
+      ]
+    },
+    "M277E-23 REQ-23": {
+      "condition": "IF discharge_into_water_body == true THEN WHG_permit_present == true",
+      "severity": "block",
+      "symbols": [
+        "WHG_permit_present",
+        "discharge_into_water_body"
+      ]
+    },
+    "M277E-23 REQ-25": {
+      "condition": "attest_m277e_23_req_25 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m277e_23_req_25"
       ]
     }
   }

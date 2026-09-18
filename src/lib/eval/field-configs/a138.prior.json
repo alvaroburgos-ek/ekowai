@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-A-138-1 a138",
-    "captured_at": "2026-09-17T16:47:10.485Z",
+    "captured_at": "2026-09-18T06:57:27.850Z",
     "standard": "DWA-A-138-1",
     "slug": "a138",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 262,
     "section_rows": 252,
     "sections_total": 252,
-    "equation_rows": 46
+    "equation_rows": 46,
+    "gate_rows": 35
   },
   "A138-01 a138_applicable": {
     "enum_values": null,
@@ -6291,6 +6292,263 @@
         "Q_Dr",
         "D",
         "V_VA"
+      ]
+    }
+  },
+  "gates": {
+    "A138-01 A138-REQ-01": {
+      "condition": "a138_applicable == TRUE",
+      "severity": "block",
+      "symbols": [
+        "a138_applicable"
+      ]
+    },
+    "A138-01 A138-REQ-25": {
+      "condition": "attest_a138_01_a138_req_25 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a138_01_a138_req_25"
+      ]
+    },
+    "A138-01 A138-REQ-27": {
+      "condition": "attest_a138_01_a138_req_27 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a138_01_a138_req_27"
+      ]
+    },
+    "A138-01 A138-REQ-29": {
+      "condition": "attest_a138_01_a138_req_29 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a138_01_a138_req_29"
+      ]
+    },
+    "A138-01 A138-REQ-COV-01": {
+      "condition": "water_protection_zone != zone_I AND water_protection_zone != zone_II",
+      "severity": "block",
+      "symbols": [
+        "water_protection_zone"
+      ]
+    },
+    "A138-02 A138-REQ-02": {
+      "condition": "feasibility_determination IN {feasible, conditional}",
+      "severity": "block",
+      "symbols": [
+        "feasibility_determination"
+      ]
+    },
+    "A138-02 A138-REQ-04": {
+      "condition": "gw_clearance >= 1.0",
+      "severity": "block",
+      "symbols": [
+        "gw_clearance"
+      ]
+    },
+    "A138-02 A138-REQ-COV-02": {
+      "condition": "direct_gw_injection == false",
+      "severity": "block",
+      "symbols": [
+        "direct_gw_injection"
+      ]
+    },
+    "A138-04 A138-REQ-03": {
+      "condition": "k_f IS NOT NULL AND permeability_test_method IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "k_f",
+        "permeability_test_method"
+      ]
+    },
+    "A138-04 A138-REQ-05": {
+      "condition": "r_D_n_table IS NOT NULL AND kostra_grid_cell IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "kostra_grid_cell",
+        "r_D_n_table"
+      ]
+    },
+    "A138-04 A138-REQ-28": {
+      "condition": "attest_a138_04_a138_req_28 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a138_04_a138_req_28"
+      ]
+    },
+    "A138-06 A138-REQ-07": {
+      "condition": "belastungskategorie IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "belastungskategorie"
+      ]
+    },
+    "A138-07 A138-REQ-06": {
+      "condition": "surface_inventory IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "surface_inventory"
+      ]
+    },
+    "A138-08 A138-REQ-08": {
+      "condition": "n IN {0.1, 0.2, 0.33, 0.5}",
+      "severity": "block",
+      "symbols": [
+        "n"
+      ]
+    },
+    "A138-09 A138-REQ-09": {
+      "condition": "phase_2_gate_result IN {PASS, CONDITIONAL}",
+      "severity": "block",
+      "symbols": [
+        "phase_2_gate_result"
+      ]
+    },
+    "A138-10 A138-REQ-10": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A138-10 A138-REQ-11": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A138-10 A138-REQ-12": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A138-10 A138-REQ-13": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A138-10 A138-REQ-14": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A138-10 A138-REQ-15": {
+      "condition": "q_S_AC >= 2 AND (q_S_AC > 5 OR f_Z == 1.2)",
+      "severity": "block",
+      "symbols": [
+        "f_Z",
+        "q_S_AC"
+      ]
+    },
+    "A138-14 A138-REQ-16": {
+      "condition": "phase_3_gate_result IN {PASS, CONDITIONAL}",
+      "severity": "block",
+      "symbols": [
+        "phase_3_gate_result"
+      ]
+    },
+    "A138-15 A138-REQ-17": {
+      "condition": "facility_type_selected IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "facility_type_selected"
+      ]
+    },
+    "A138-15 A138-REQ-18": {
+      "condition": "attest_a138_15_a138_req_18 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a138_15_a138_req_18"
+      ]
+    },
+    "A138-16 A138-REQ-31": {
+      "condition": "k_i > r_D_n_used * 0.0000001",
+      "severity": "block",
+      "symbols": [
+        "k_i",
+        "r_D_n_used"
+      ]
+    },
+    "A138-18 A138-REQ-32": {
+      "condition": "L_VS * q_VS >= r_5_n * A_C * 0.0001",
+      "severity": "block",
+      "symbols": [
+        "A_C",
+        "L_VS",
+        "q_VS",
+        "r_5_n"
+      ]
+    },
+    "A138-21 A138-REQ-33": {
+      "condition": "IF shaft_type == typ_B THEN A_S_FS * k_f_FS >= A_S_Schacht * k_i",
+      "severity": "block",
+      "symbols": [
+        "A_S_FS",
+        "A_S_Schacht",
+        "k_f_FS",
+        "k_i",
+        "shaft_type"
+      ]
+    },
+    "A138-23 A138-REQ-19": {
+      "condition": "phase_4_gate_result IN {PASS, CONDITIONAL}",
+      "severity": "block",
+      "symbols": [
+        "phase_4_gate_result"
+      ]
+    },
+    "A138-24 A138-REQ-20": {
+      "condition": "attest_a138_24_a138_req_20 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a138_24_a138_req_20"
+      ]
+    },
+    "A138-25 A138-REQ-21": {
+      "condition": "design_adequacy_result IN {PASS, NA}",
+      "severity": "block",
+      "symbols": [
+        "design_adequacy_result"
+      ]
+    },
+    "A138-26 A138-REQ-22": {
+      "condition": "IF flood_check_trigger == TRUE THEN V_Rueck IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "V_Rueck",
+        "flood_check_trigger"
+      ]
+    },
+    "A138-26 A138-REQ-23": {
+      "condition": "flood_check_result IN {PASS, NA}",
+      "severity": "block",
+      "symbols": [
+        "flood_check_result"
+      ]
+    },
+    "A138-26 A138-REQ-24": {
+      "condition": "attest_a138_26_a138_req_24 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a138_26_a138_req_24"
+      ]
+    },
+    "A138-26 A138-REQ-26": {
+      "condition": "attest_a138_26_a138_req_26 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a138_26_a138_req_26"
+      ]
+    },
+    "A138-28 A138-REQ-30": {
+      "condition": "phase_2_gate_result IN {PASS, CONDITIONAL} AND phase_3_gate_result IN {PASS, CONDITIONAL} AND phase_4_gate_result IN {PASS, CONDITIONAL} AND final_compliance_verdict IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "final_compliance_verdict",
+        "phase_2_gate_result",
+        "phase_3_gate_result",
+        "phase_4_gate_result"
       ]
     }
   }

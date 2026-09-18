@@ -34,6 +34,23 @@
  *     `visible_when` whose section — or any descendant section, coded or
  *     not, since the runtime hides descendants of a hidden section — contains
  *     such a producer (walked via the captured `section_path`);
+ *   - GATE-AWARE (Task 12c): a field / section `visible_when` is REFUSED when a hidden
+ *     symbol is read by a SAME-worksheet `compliance_requirements.condition` (the
+ *     captured `prior.gates[…].symbols`, extracted at capture time with the engine's own
+ *     `extractConditionSymbols`) — a hidden symbol is `null` for the engine (`withHidden`)
+ *     and the gate silently stops enforcing (`hiddenReferences` ⇒ `not_applicable`), an
+ *     enforcement change that must be a sign-off (G-block), never an emitted default;
+ *     a gate whose condition the engine cannot parse (`parse_error`) is refused
+ *     CONSERVATIVELY for every hidden symbol of its worksheet (its symbols are unknown);
+ *     the ONE exemption is a gate of the form `IF <driver> <op> <value> THEN …` whose
+ *     guard is exactly the rule's `visible_when` (`<driver> <op> <value>` — same driver
+ *     symbol, same op, same literal incl. quotedness; `guardExempts`): the gate never
+ *     fires while the field is hidden anyway; anything else refuses. `create` entries run
+ *     the same check for uniformity (a created field cannot be in an existing gate).
+ *     A legacy prior without `gates` degrades to the producer-only guard (the CLI warns);
+ *     `gate_guard: 'warn'` (CLI `--gate-guard=warn`, the Task 12c re-audit + the freshness
+ *     pins of standards whose modules still carry refused rules) turns each refusal into a
+ *     `GATE-REFUSAL` warning line instead — the SQL is identical either way;
  *   - `UPDATE worksheet_sections` per section entry, keyed by worksheet code +
  *     section code, refused when the key is absent from the captured
  *     `prior.sections` (its UPDATE would touch 0 rows); a section whose prod
@@ -68,14 +85,14 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseFieldConfig, type RegisterUiConfig } from '../../src/lib/eval/field-config';
 import { parseCondition, parseNumeric, quotedComparisonLiterals, type Expr } from '../../src/lib/expr';
-import type { FieldConfigEntry, SectionVisibilityEntry, PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorSnapshot } from '../../src/lib/eval/field-configs/types';
+import type { FieldConfigEntry, SectionVisibilityEntry, PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorGateRow, PriorSnapshot } from '../../src/lib/eval/field-configs/types';
 import { FIELD_CONFIG_MODULES } from '../../src/lib/eval/field-configs';
 import { rewriteRules } from '../../src/lib/eval/rewrites';
 import { normalizeSymbol } from '../../src/lib/eval/normalize-formula';
 import { q, j, JOIN, SCHEMA_MIGRATION, gatedHeaderLines } from './emit-widget-configs-sql';
 
 /** The prior-snapshot types live in src/lib/eval/field-configs/types.ts (re-exported for the tests and the CLI). */
-export type { PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorSnapshot };
+export type { PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorGateRow, PriorSnapshot };
 
 /** File-level header options (the Plan-2b `gated` / `gated_note` / `provenance` pattern, one file per slug). */
 export type FieldConfigHeader = {
@@ -85,12 +102,19 @@ export type FieldConfigHeader = {
   gated?: string;
   /** Free-text rationale emitted as SQL comment lines after the GATED line. */
   gated_note?: string;
+  /**
+   * Task 12c gate-aware guard mode (default `'refuse'`). `'warn'` (CLI `--gate-guard=warn`) turns every gate
+   * refusal into a `GATE-REFUSAL` line in `warnings` — used ONLY for the re-audit run and for the freshness pins
+   * of standards whose modules still carry refused rules (each pin asserts its exact refusal count); the SQL is
+   * byte-identical in both modes.
+   */
+  gate_guard?: 'refuse' | 'warn';
 };
 
 export const SIGN_OFF_DOC_PLAN_3 = 'docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md';
 const LOOKUP_FILL_DATA_TYPES: ReadonlySet<string> = new Set(['number', 'text', 'enum']);
 const JSON_COLUMNS = ['enum_values', 'ui_config', 'lookup'] as const;
-const RESERVED_KEYS: ReadonlySet<string> = new Set(['sections', 'equations', '_meta']);
+const RESERVED_KEYS: ReadonlySet<string> = new Set(['sections', 'equations', 'gates', '_meta']);
 
 /**
  * The read-only prod capture (full-schema form) that `build-prior-snapshot.mjs`
@@ -105,6 +129,8 @@ export const PRIOR_SQL = {
   sections: "select w.code as worksheet, ws.id, ws.parent_section_id, ws.code as section_code, p.code as parent_code, ws.visible_when from worksheet_sections ws join worksheet_templates w on w.id=ws.worksheet_template_id join standards s on s.id=w.standard_id left join worksheet_sections p on p.id=ws.parent_section_id where s.code='<CODE>'",
   // Every equation of the standard (Task 3 fix round 1): the producer guard walks input_symbols → output_symbol chains per worksheet.
   equations: "select w.code as worksheet, e.id, e.equation_number, e.output_symbol, e.input_symbols from equations e join worksheet_templates w on w.id=e.worksheet_template_id join standards s on s.id=w.standard_id where s.code='<CODE>'",
+  // Every gate of the standard (Task 12c; compliance_requirements has no active flag): the capture adds `symbols` per row via the engine's extractConditionSymbols.
+  gates: "select w.code as worksheet, cr.code as req_code, cr.condition, cr.severity from compliance_requirements cr join worksheet_templates w on w.id=cr.worksheet_template_id join standards s on s.id=w.standard_id where s.code='<CODE>'",
 };
 
 /** Every captured field row (skips `sections` / `_meta`). */
@@ -144,6 +170,73 @@ export function assertPriorSnapshot(prior: PriorSnapshot): void {
     if (!Array.isArray(row.input_symbols) || row.input_symbols.some((x) => typeof x !== 'string')) throw new Error(`prior.equations "${key}".input_symbols must be a string array`);
     if (row.id != null && typeof row.id !== 'string') throw new Error(`prior.equations "${key}".id must be a string/null`);
   }
+  for (const [key, row] of Object.entries(prior.gates ?? {})) {
+    if (!key.includes(' ')) throw new Error(`prior.gates "${key}": keys are "<worksheet> <req_code>"`);
+    if (row == null || typeof row !== 'object' || Array.isArray(row)) throw new Error(`prior.gates "${key}": row must be an object`);
+    if (typeof row.condition !== 'string') throw new Error(`prior.gates "${key}".condition must be a string`);
+    if (typeof row.severity !== 'string') throw new Error(`prior.gates "${key}".severity must be a string`);
+    if (!Array.isArray(row.symbols) || row.symbols.some((x) => typeof x !== 'string')) throw new Error(`prior.gates "${key}".symbols must be a string array`);
+    if (row.parse_error != null && row.parse_error !== true) throw new Error(`prior.gates "${key}".parse_error must be true or absent`);
+    if (row.parse_error && row.symbols.length) throw new Error(`prior.gates "${key}": a parse_error row carries no symbols`);
+  }
+}
+
+/** Legacy-prior degradations the CLI prints to stderr (never part of `warnings` — the SQL and the lint are unaffected). */
+export function priorSnapshotWarnings(slug: string, prior: PriorSnapshot): string[] {
+  const out: string[] = [];
+  if (!prior.equations) out.push(`warning: ${slug}.prior.json carries no "equations" map — the producer guard is direct-only; re-capture with build-prior-snapshot.mjs for the transitive check`);
+  if (!prior.gates) out.push(`warning: ${slug}.prior.json carries no "gates" map — the gate-aware guard (Task 12c) is OFF, a visible_when may silently stop a same-worksheet gate enforcing; re-capture with build-prior-snapshot.mjs`);
+  return out;
+}
+
+/**
+ * Task 12c — the ONE exemption of the gate-aware guard, checked conservatively: the gate condition is
+ * `IF <driver> <op> <value> THEN …` (a top-level `guard` node whose guard is a plain `compare`) and the rule's
+ * `visible_when` is exactly `<driver> <op> <value>` — same driver symbol, same comparison op, same literal
+ * (value AND quotedness: `'x'` vs bare `x` differ for the engine). Then the field is hidden exactly when the
+ * guard is false, i.e. when the gate would not fire anyway — hiding turns a `pass` into `not_applicable`, never
+ * a `fail` into a non-fail. Anything else (a compound guard, an `exists` / `IN` guard, a different driver, op
+ * or literal, an unparseable side) refuses.
+ */
+export function guardExempts(condition: string, visibleWhen: string): boolean {
+  const gate = parseCondition(condition);
+  const rule = parseCondition(visibleWhen);
+  if (!gate || !rule || gate.kind !== 'guard' || gate.guard.kind !== 'compare' || rule.kind !== 'compare') return false;
+  const g = gate.guard;
+  return g.symbol === rule.symbol && g.op === rule.op && g.rhs.value === rule.rhs.value && !!g.rhs.quoted === !!rule.rhs.quoted;
+}
+
+/** One gate the guard names in a refusal. */
+export type GateReader = { code: string; gate: PriorGateRow; reason: 'reads' | 'parse_error' };
+
+/**
+ * The same-worksheet gates that read `symbol` (captured `prior.gates[…].symbols`, matched through
+ * `normalizeSymbol` like the producer walk) — or whose condition the engine could not parse (`parse_error`:
+ * symbols unknown ⇒ counted conservatively) — minus the ones `guardExempts` for this `visibleWhen`.
+ * Empty when the prior carries no `gates` map (legacy prior — the CLI warns).
+ */
+export function gateReaders(prior: PriorSnapshot, worksheet: string, symbol: string, visibleWhen: string): GateReader[] {
+  if (!prior.gates) return [];
+  const prefix = `${worksheet} `;
+  const sym = normalizeSymbol(symbol);
+  const out: GateReader[] = [];
+  for (const [key, gate] of Object.entries(prior.gates)) {
+    if (!key.startsWith(prefix)) continue;
+    const reason: GateReader['reason'] | null = gate.parse_error ? 'parse_error' : gate.symbols.some((s) => normalizeSymbol(s) === sym) ? 'reads' : null;
+    if (!reason) continue;
+    if (reason === 'reads' && guardExempts(gate.condition, visibleWhen)) continue;
+    out.push({ code: key.slice(prefix.length), gate, reason });
+  }
+  return out;
+}
+
+const gateRefusalText = (symbol: string, readers: GateReader[]): string =>
+  `hides ${symbol} read by gate ${readers.map((r) => `${r.code} (${r.gate.severity}: ${JSON.stringify(r.gate.condition)}${r.reason === 'parse_error' ? ' — parse_error, symbols unknown' : ''})`).join(', ')}`;
+
+/** Refusal text of the gate-aware guard for one hidden symbol (null = accepted). */
+function fieldGateRefusal(prior: PriorSnapshot, worksheet: string, symbol: string, visibleWhen: string): string | null {
+  const readers = gateReaders(prior, worksheet, symbol, visibleWhen);
+  return readers.length ? gateRefusalText(symbol, readers) : null;
 }
 
 /**
@@ -206,7 +299,8 @@ const jsonOrNull = (v: unknown) => (v == null ? 'NULL' : j(v));
 const textOrNull = (v: string | null | undefined) => (v == null ? 'NULL' : q(v));
 const NO_PRIOR_NOTE = (key: string) => `-- ${key}: no prior snapshot row captured — restore assumes prod had NULL in these columns; re-capture before applying the rollback.`;
 
-function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior: PriorSnapshot): void {
+/** `gate`: receives each Task 12c gate refusal (the caller throws or collects it per `gate_guard`). */
+function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior: PriorSnapshot, gate: (msg: string) => void): void {
   const id = `${e.worksheet} ${e.symbol}`;
   const cfg = parseFieldConfig({ widget: e.widget, uiConfig: e.ui_config ?? null, lookup: e.lookup ?? null, visibleWhen: e.visible_when ?? null }); // throws FieldConfigError
   if (e.visible_when != null && parseCondition(e.visible_when) === null) throw new Error(`${id}: visible_when does not parse: ${e.visible_when}`);
@@ -220,6 +314,9 @@ function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior:
     // A created field has no consumers of its own (direct check skipped) but may complete a dangling input of a consumed equation.
     const chain = producerChain(prior, e.worksheet, e.symbol, { skipDirect: !!e.create });
     if (chain) throw new Error(`${id}: visible_when on a symbol consumed by another worksheet — hides ${chain} (hiding a producer, or an input of a producer, hides the inherited value; STAGE the consumer edit instead)`);
+    // Task 12c: a same-worksheet gate reading the hidden symbol would silently stop enforcing. Runs for create entries too (uniformity).
+    const refusal = fieldGateRefusal(prior, e.worksheet, e.symbol, e.visible_when);
+    if (refusal) gate(`${id}: visible_when ${refusal} — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`);
   }
   if (e.widget === 'lookup_fill') {
     const dt = e.create?.data_type ?? p?.data_type;
@@ -307,7 +404,7 @@ function inSectionTree(r: PriorFieldRow, sectionCode: string): boolean {
   return path.includes(sectionCode);
 }
 
-function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot): void {
+function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot, gate: (msg: string) => void): void {
   const key = `${s.worksheet} ${s.section_code}`;
   if (parseCondition(s.visible_when) === null) throw new Error(`section ${key}: visible_when does not parse: ${s.visible_when}`);
   if (prior.sections && !(key in prior.sections)) throw new Error(`section ${key}: not a captured section (its UPDATE would touch 0 rows) — check worksheet_sections.code`);
@@ -316,11 +413,26 @@ function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot): void 
     .map(([k]) => producerChain(prior, s.worksheet, k.slice(s.worksheet.length + 1)))
     .filter((chain): chain is string => chain != null);
   if (producers.length) throw new Error(`section ${key}: visible_when on a section (or a descendant of it) containing a symbol consumed by another worksheet: ${producers.join('; ')} (hiding a producer, or an input of a producer, hides the inherited value; STAGE the consumer edit instead)`);
+  // Task 12c: every field of the section tree is hidden with it — a same-worksheet gate reading any of them stops enforcing.
+  const gated = priorFieldRows(prior)
+    .filter(([k, r]) => k.startsWith(`${s.worksheet} `) && inSectionTree(r, s.section_code))
+    .map(([k]) => fieldGateRefusal(prior, s.worksheet, k.slice(s.worksheet.length + 1), s.visible_when))
+    .filter((m): m is string => m != null);
+  if (gated.length) gate(`section ${key}: visible_when on a section (or a descendant of it) ${gated.join('; ')} — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`);
 }
 
-/** `warnings`: the Task 13b quoted-literal collision lint (never a refusal) — the CLI prints them to stderr. */
+/**
+ * `warnings`: the Task 13b quoted-literal collision lint (never a refusal) — the CLI prints them to stderr — plus,
+ * under `header.gate_guard === 'warn'`, one `GATE-REFUSAL (warn mode) …` line per Task 12c refusal that would
+ * have thrown in the default `'refuse'` mode.
+ */
 export function emitFieldConfigSql(slug: string, entries: FieldConfigEntry[], sections: SectionVisibilityEntry[], prior: PriorSnapshot, header: FieldConfigHeader = {}): { up: string; down: string; warnings: string[] } {
   assertPriorSnapshot(prior);
+  const gateWarnings: string[] = [];
+  const gate = (msg: string): void => {
+    if (header.gate_guard === 'warn') gateWarnings.push(`GATE-REFUSAL (warn mode) ${msg}`);
+    else throw new Error(msg);
+  };
   const up = [
     ...(header.provenance ? [`-- ${header.provenance}`] : []),
     `-- Generated by scripts/regulation-tables/emit-field-configs-sql.ts for ${slug} (Plan 3). Regenerate, do not hand-edit.`,
@@ -338,7 +450,7 @@ export function emitFieldConfigSql(slug: string, entries: FieldConfigEntry[], se
     if (seen.has(key)) throw new Error(`${key}: duplicate entry`);
     seen.add(key);
     const p = prior[key];
-    validateEntry(e, p, prior);
+    validateEntry(e, p, prior, gate);
     if (e.create) {
       const section = e.create.section_code
         ? `(SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = ${q(e.create.section_code)})`
@@ -370,14 +482,14 @@ ${JOIN} WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id
     const key = `${s.worksheet} ${s.section_code}`;
     if (seenSections.has(key)) throw new Error(`section ${key}: duplicate entry`);
     seenSections.add(key);
-    validateSection(s, prior);
+    validateSection(s, prior, gate);
     up.push(`UPDATE worksheet_sections ws SET visible_when = ${q(s.visible_when)} ${sectionWhere(s)};`);
     const ps = prior.sections?.[key];
     if (!ps) down.push(NO_PRIOR_NOTE(`section ${key}`));
     down.push(`UPDATE worksheet_sections ws SET visible_when = ${textOrNull(ps?.visible_when)} ${sectionWhere(s)};`);
   }
   up.push('COMMIT;'); down.push('COMMIT;');
-  return { up: up.join('\n') + '\n', down: down.join('\n') + '\n', warnings: quotedLiteralCollisionWarnings(entries, sections, prior) };
+  return { up: up.join('\n') + '\n', down: down.join('\n') + '\n', warnings: [...quotedLiteralCollisionWarnings(entries, sections, prior), ...gateWarnings] };
 }
 
 /** Migration + rollback file paths for a slug and timestamp (relative to the repo root). */
@@ -389,11 +501,17 @@ export function fieldConfigFilesFor(slug: string, ts: string): { migration: stri
   };
 }
 
-/** Parses `[--gated <id>] [--provenance "<line>"]`; a flag without a value is an error. */
+/** Parses `[--gated <id>] [--provenance "<line>"] [--gate-guard=warn|refuse]`; a flag without a value is an error. */
 export function parseHeaderArgs(rest: readonly string[]): FieldConfigHeader {
   const header: FieldConfigHeader = {};
   for (let i = 0; i < rest.length; i++) {
     const flag = rest[i];
+    const gateGuard = flag.match(/^--gate-guard=(.*)$/);
+    if (gateGuard) {
+      if (gateGuard[1] !== 'warn' && gateGuard[1] !== 'refuse') throw new Error(`--gate-guard takes warn|refuse, got ${JSON.stringify(gateGuard[1])}`);
+      header.gate_guard = gateGuard[1];
+      continue;
+    }
     if (flag !== '--gated' && flag !== '--provenance') throw new Error(`unknown argument ${flag}`);
     const value = rest[i + 1];
     if (value == null || value.startsWith('--')) throw new Error(`${flag} needs a value`);
@@ -412,7 +530,7 @@ export function loadPriorSnapshot(path: string): PriorSnapshot {
 }
 
 if (process.argv[1]?.endsWith('emit-field-configs-sql.ts')) {
-  // CLI: tsx scripts/regulation-tables/emit-field-configs-sql.ts <slug> <ts> [--gated <sign-off id>] [--provenance "<line 1>"]
+  // CLI: tsx scripts/regulation-tables/emit-field-configs-sql.ts <slug> <ts> [--gated <sign-off id>] [--provenance "<line 1>"] [--gate-guard=warn]
   // Reads src/lib/eval/field-configs/<slug>.ts (via FIELD_CONFIG_MODULES) + <slug>.prior.json.
   const [slug = '', ts = '', ...rest] = process.argv.slice(2);
   const load = FIELD_CONFIG_MODULES[slug];
@@ -420,7 +538,8 @@ if (process.argv[1]?.endsWith('emit-field-configs-sql.ts')) {
   const files = fieldConfigFilesFor(slug, ts);
   const header = parseHeaderArgs(rest);
   const prior = loadPriorSnapshot(`src/lib/eval/field-configs/${slug}.prior.json`);
-  if (!prior.equations) console.error(`warning: ${slug}.prior.json carries no "equations" map — the producer guard is direct-only; re-capture with build-prior-snapshot.mjs for the transitive check`);
+  for (const w of priorSnapshotWarnings(slug, prior)) console.error(w);
+  if (header.gate_guard === 'warn') console.error('warning: --gate-guard=warn — Task 12c gate refusals are printed as GATE-REFUSAL lines, not enforced (re-audit / pinned-debt runs only)');
   // Task 12b: a self-entry in a field's own consumer_worksheets is a prod data oddity (the runtime
   // never inherits a field from its own owner worksheet) — the guard ignores it, but it is worth
   // recording so the executor can file it as an X-class observation when it next touches the standard.
@@ -430,7 +549,8 @@ if (process.argv[1]?.endsWith('emit-field-configs-sql.ts')) {
   if (selfConsumed.length) console.error(`NOTICE: prod data oddity — self-consumer ignored: ${selfConsumed.join(', ')}`);
   load().then((m) => {
     const { up, down, warnings } = emitFieldConfigSql(slug, m.FIELD_CONFIGS, m.SECTION_VISIBILITY, prior, header);
-    // Task 13b: quoted-literal ↔ column-key / worksheet-symbol collisions are a WARNING (stderr), never a refusal.
+    // Task 13b: quoted-literal ↔ column-key / worksheet-symbol collisions are a WARNING (stderr), never a refusal;
+    // Task 12c warn-mode gate refusals print the same way (GATE-REFUSAL prefix).
     for (const w of warnings) console.error(w);
     writeFileSync(files.migration, up);
     writeFileSync(files.rollback, down);

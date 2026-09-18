@@ -175,7 +175,14 @@ describe('DWA-M-277E field configs (Plan 3 Task 4)', () => {
   });
 
   it('the committed migration + rollback equal a fresh emit against the committed prior (freshness pin)', () => {
-    const { up, down } = emitFieldConfigSql('m277e', FIELD_CONFIGS, SECTION_VISIBILITY, prior);
+    // Task 12c: the re-captured prior carries `gates`; the module still holds 6 rules the gate-aware guard refuses
+    // (M277E-10 turbidity_NTU / total_coliforms_treated / e_coli / p_aeruginosa ← REQ-08/-14/-14E/-15 (bare vs quoted C2); M277E-19 selected_hygienisation + M277E-09 pump_station_capacity ← REQ-31 (empty condition, parse_error)) — listed in
+    // .superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-12c-refusals.md for the fix round
+    // (move to STAGED or sign off as a G-block). Until then the pin emits in warn mode and pins the EXACT count so a
+    // fix round that clears them must flip this back to the default (refuse) mode.
+    expect(() => emitFieldConfigSql('m277e', FIELD_CONFIGS, SECTION_VISIBILITY, prior)).toThrow(/read by gate .* — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block/);
+    const { up, down, warnings } = emitFieldConfigSql('m277e', FIELD_CONFIGS, SECTION_VISIBILITY, prior, { gate_guard: 'warn' });
+    expect(warnings.filter((w) => w.startsWith('GATE-REFUSAL (warn mode) '))).toHaveLength(6);
     const files = fieldConfigFilesFor('m277e', '20260917100410');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));

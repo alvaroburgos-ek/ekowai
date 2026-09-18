@@ -320,6 +320,39 @@ a self-only symbol feeding a further equation whose output IS consumed elsewhere
 one NOTICE line per affected symbol so an executor touching that standard can check whether the now-unblocked
 rule is safe to re-emit (see SIGN-OFF-plan-3.md `plan3-T-12b`).
 
+**The guard is GATE-AWARE (Task 12c).** The producer guard only protects other worksheets' inherited values; a
+`visible_when` can also silently disarm a gate on the SAME worksheet — a hidden symbol is `null` for the engine
+(`withHidden`) and every `compliance_requirements.condition` that reads it reports `not_applicable`
+(`hiddenReferences`). That is an enforcement change and must be a sign-off (G-block), never an emitted default.
+So `build-prior-snapshot.mjs` now captures every gate of the standard into `prior.gates` (`"<ws> <req_code>":
+{ condition, severity, symbols[, parse_error] }`, `symbols` extracted AT CAPTURE TIME with the engine's own
+`extractConditionSymbols` — loaded through tsx, never re-implemented; a condition the engine cannot parse gets
+`symbols: []` + `parse_error: true`), and `emit-field-configs-sql.ts` refuses a field rule — or a section rule,
+over every field of the section tree — whose hidden symbol appears in a same-worksheet gate's `symbols`. The
+message names the gate(s): `hides A_min read by gate CR-01 (block: "max_d IS NOT NULL AND A_min IS NOT NULL")
+— hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`. Rules:
+- **The IF-guard exemption** — the ONE way a rule passes over a gate that reads its symbol: the gate is
+  `IF <driver> <op> <value> THEN …` and the rule's `visible_when` is exactly `<driver> <op> <value>` (same
+  driver symbol, same op, same literal — a quoted `'C2'` and a bare `C2` are NOT the same literal). Then the
+  field is hidden precisely when the gate would not fire anyway. A compound guard, an `IS NOT NULL` / `IN`
+  guard, a different driver, or a rule that adds `AND …` all refuse — write the gate guard to match the rule
+  (a gate edit is itself a G-block) or STAGE the rule.
+- **`parse_error` gates refuse conservatively** — their symbols are unknown, so every rule on that worksheet is
+  refused naming `parse_error`. An empty `condition` counts (runtime `manual`; the fix is on the gate side).
+- **`create` entries** run the same check (a created field cannot be in an existing gate; uniformity).
+- **Legacy priors** without `gates` degrade to the producer-only guard; the CLI prints
+  `warning: <slug>.prior.json carries no "gates" map …` — re-capture before emitting.
+- **`--gate-guard=warn`** (library: `gate_guard: 'warn'`) turns each refusal into a `GATE-REFUSAL (warn mode) …`
+  stderr line with byte-identical SQL. It exists for the Task 12c re-audit and for the freshness pins of
+  standards whose modules still carry refused rules — each such pin asserts the exact refusal count, so a fix
+  round that clears the list must flip the pin back to the default (refuse) mode. Never use it to emit a new
+  standard.
+- **The refusal file** `.superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-12c-refusals.md`
+  lists every rule the re-audit refused on the 13 encoded standards (standard · worksheet · symbol/section ·
+  gate · condition · why, three classes: real unguarded read / bare-vs-quoted IF guard / empty-condition gate).
+  An executor's fix round on one of those standards works its rows: move the rule to STAGED, or file the G-block
+  and keep it; nothing in the modules or migrations was changed by the audit itself.
+
 **`visible_when` is evaluated since Plan 2a** (`src/lib/compliance/visibility.ts`,
 `computeVisibility`) — on the form, the approval gate, the report, the snapshot, the PDF
 assembler and the save-path materialiser, all through the one pure helper. Semantics you are

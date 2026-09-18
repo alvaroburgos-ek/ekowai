@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-1200-3 m1200_3",
-    "captured_at": "2026-09-17T19:38:11.087Z",
+    "captured_at": "2026-09-18T06:57:33.748Z",
     "standard": "DWA-M-1200-3",
     "slug": "m1200_3",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 208,
     "section_rows": 225,
     "sections_total": 225,
-    "equation_rows": 10
+    "equation_rows": 10,
+    "gate_rows": 32
   },
   "M12003-01 alle_hygieneanforderungen_erfuellt": {
     "enum_values": null,
@@ -4888,6 +4889,277 @@
       "input_symbols": [
         "frostschutz_menge",
         "flaeche_groesse"
+      ]
+    }
+  },
+  "gates": {
+    "M12003-01 CR-01": {
+      "condition": "wasserquelle_typ == 'kommunal_haeuslich'",
+      "severity": "block",
+      "symbols": [
+        "wasserquelle_typ"
+      ]
+    },
+    "M12003-01 CR-02": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12003-01 CR-11": {
+      "condition": "alle_hygieneanforderungen_erfuellt",
+      "severity": "warn",
+      "symbols": [
+        "alle_hygieneanforderungen_erfuellt"
+      ]
+    },
+    "M12003-01 CR-12": {
+      "condition": "filter_und_desinfektion_gemaess_gueteklasse",
+      "severity": "warn",
+      "symbols": [
+        "filter_und_desinfektion_gemaess_gueteklasse"
+      ]
+    },
+    "M12003-01 CR-13": {
+      "condition": "beide_punkte_dokumentiert",
+      "severity": "warn",
+      "symbols": [
+        "beide_punkte_dokumentiert"
+      ]
+    },
+    "M12003-03 CR-03": {
+      "condition": "bewaesserungsbeduerftigkeit_nachgewiesen == True",
+      "severity": "warn",
+      "symbols": [
+        "bewaesserungsbeduerftigkeit_nachgewiesen"
+      ]
+    },
+    "M12003-03 CR-04": {
+      "condition": "bewaesserungswuerdigkeit_bewertet == True",
+      "severity": "warn",
+      "symbols": [
+        "bewaesserungswuerdigkeit_bewertet"
+      ]
+    },
+    "M12003-05 CR-05": {
+      "condition": "k_konz <= 200 AND na_konz <= 100 AND no3_konz <= 300 AND so4_konz <= 1200 AND ph_wert >= 5.0 AND ph_wert <= 9.5 AND pb_konz <= 100 AND cd_konz <= 2 AND cr_konz <= 100 AND fe_konz <= 1500 AND cu_konz <= 100 AND mn_konz <= 1500 AND ni_konz <= 40 AND hg_konz <= 0.5 AND zn_konz <= 300",
+      "severity": "warn",
+      "symbols": [
+        "cd_konz",
+        "cr_konz",
+        "cu_konz",
+        "fe_konz",
+        "hg_konz",
+        "k_konz",
+        "mn_konz",
+        "na_konz",
+        "ni_konz",
+        "no3_konz",
+        "pb_konz",
+        "ph_wert",
+        "so4_konz",
+        "zn_konz"
+      ]
+    },
+    "M12003-05 CR-05-2": {
+      "condition": "k_konz <= 200 AND na_konz <= 100 AND no3_konz <= 300 AND so4_konz <= 1200 AND ph_wert >= 5.0 AND ph_wert <= 9.5 AND pb_konz <= 100 AND cd_konz <= 2 AND cr_konz <= 100 AND fe_konz <= 1500 AND cu_konz <= 100 AND mn_konz <= 1500 AND ni_konz <= 40 AND hg_konz <= 0.5 AND zn_konz <= 300",
+      "severity": "warn",
+      "symbols": [
+        "cd_konz",
+        "cr_konz",
+        "cu_konz",
+        "fe_konz",
+        "hg_konz",
+        "k_konz",
+        "mn_konz",
+        "na_konz",
+        "ni_konz",
+        "no3_konz",
+        "pb_konz",
+        "ph_wert",
+        "so4_konz",
+        "zn_konz"
+      ]
+    },
+    "M12003-05 CR-06": {
+      "condition": "speichertyp == 'geschlossen' OR (speichertyp == 'offen' AND gueteklasse IN {'C', 'C-1', 'C-2', 'D'}) OR speichertyp == 'transportbehaelter'",
+      "severity": "block",
+      "symbols": [
+        "gueteklasse",
+        "speichertyp"
+      ]
+    },
+    "M12003-05 CR-06-2": {
+      "condition": "speichertyp == 'geschlossen' OR (speichertyp == 'offen' AND gueteklasse IN {'C', 'C-1', 'C-2', 'D'}) OR speichertyp == 'transportbehaelter'",
+      "severity": "block",
+      "symbols": [
+        "gueteklasse",
+        "speichertyp"
+      ]
+    },
+    "M12003-05 CR-07": {
+      "condition": "kennzeichnung_farbe IN {pantone_purple_522c,pantone_purple_512c,vergleichbar_violett} AND markierung_oberflaeche_anteil >= 60",
+      "severity": "warn",
+      "symbols": [
+        "kennzeichnung_farbe",
+        "markierung_oberflaeche_anteil"
+      ]
+    },
+    "M12003-05 CR-07-2": {
+      "condition": "kennzeichnung_farbe IN {pantone_purple_522c,pantone_purple_512c,vergleichbar_violett} AND markierung_oberflaeche_anteil >= 60",
+      "severity": "warn",
+      "symbols": [
+        "kennzeichnung_farbe",
+        "markierung_oberflaeche_anteil"
+      ]
+    },
+    "M12003-05 CR-08": {
+      "condition": "rueckflussverhinderer_vorhanden == True OR systemtrenner_vorhanden == True OR freier_auslauf == True",
+      "severity": "warn",
+      "symbols": [
+        "freier_auslauf",
+        "rueckflussverhinderer_vorhanden",
+        "systemtrenner_vorhanden"
+      ]
+    },
+    "M12003-05 CR-08-2": {
+      "condition": "rueckflussverhinderer_vorhanden == True OR systemtrenner_vorhanden == True OR freier_auslauf == True",
+      "severity": "warn",
+      "symbols": [
+        "freier_auslauf",
+        "rueckflussverhinderer_vorhanden",
+        "systemtrenner_vorhanden"
+      ]
+    },
+    "M12003-05 CR-09": {
+      "condition": "gueteklasse != 'D' OR spritzschutz_vorhanden == True OR abstand_zu_sensitiv >= 2 * wurfweite",
+      "severity": "warn",
+      "symbols": [
+        "abstand_zu_sensitiv",
+        "gueteklasse",
+        "spritzschutz_vorhanden",
+        "wurfweite"
+      ]
+    },
+    "M12003-05 CR-09-2": {
+      "condition": "gueteklasse != 'D' OR abstand_zu_sensitiv >= 2 * wurfweite",
+      "severity": "warn",
+      "symbols": [
+        "abstand_zu_sensitiv",
+        "gueteklasse",
+        "wurfweite"
+      ]
+    },
+    "M12003-05 CR-14": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12003-05 CR-15": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12003-05 CR-17": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12003-05 CR-17-2": {
+      "condition": "volumenverlust_pct <= 1 AND (druckabfall_unbeabsichtigt == false OR abschaltung_automatisch == true)",
+      "severity": "block",
+      "symbols": [
+        "abschaltung_automatisch",
+        "druckabfall_unbeabsichtigt",
+        "volumenverlust_pct"
+      ]
+    },
+    "M12003-05 CR-18": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12003-05 CR-18-2": {
+      "condition": "schwermetall_fracht_pa <= bbodschv_anlage1_tab3 / 3",
+      "severity": "block",
+      "symbols": [
+        "bbodschv_anlage1_tab3",
+        "schwermetall_fracht_pa"
+      ]
+    },
+    "M12003-06 CR-10": {
+      "condition": "attest_m12003_06_cr_10 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m12003_06_cr_10"
+      ]
+    },
+    "M12003-07 CR-11": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12003-07 CR-12": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12003-07 CR-16": {
+      "condition": "saison_reinigung_durchgefuehrt == True AND reinigung_dokumentiert == True AND (desinfektion_methode != 'thermisch' OR (temp_thermisch >= 70 AND dauer_thermisch_min >= 3))",
+      "severity": "warn",
+      "symbols": [
+        "dauer_thermisch_min",
+        "desinfektion_methode",
+        "reinigung_dokumentiert",
+        "saison_reinigung_durchgefuehrt",
+        "temp_thermisch"
+      ]
+    },
+    "M12003-07 CR-16-2": {
+      "condition": "saison_reinigung_durchgefuehrt == True AND reinigung_dokumentiert == True AND (desinfektion_methode != 'thermisch' OR (temp_thermisch >= 70 AND dauer_thermisch_min >= 3))",
+      "severity": "warn",
+      "symbols": [
+        "dauer_thermisch_min",
+        "desinfektion_methode",
+        "reinigung_dokumentiert",
+        "saison_reinigung_durchgefuehrt",
+        "temp_thermisch"
+      ]
+    },
+    "M12003-08 CR-13": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12003-08 CR-14": {
+      "condition": "NOT (desinfektion_methode IN {'Chlorung', 'H2O2', 'PES'}) OR abstand_oberflaechengewaesser_eingehalten == true",
+      "severity": "block",
+      "symbols": [
+        "abstand_oberflaechengewaesser_eingehalten",
+        "desinfektion_methode"
+      ]
+    },
+    "M12003-08 CR-15": {
+      "condition": "anwendungsbereich != 'frostschutzberegnung' OR (gueteklasse == 'D' AND schulung_durchgefuehrt == True)",
+      "severity": "warn",
+      "symbols": [
+        "anwendungsbereich",
+        "gueteklasse",
+        "schulung_durchgefuehrt"
+      ]
+    },
+    "M12003-19 CR-10": {
+      "condition": "attest_m12003_19_cr_10 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_m12003_19_cr_10"
       ]
     }
   }

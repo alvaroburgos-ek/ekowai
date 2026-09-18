@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs FLL-GAR-2023 fll_gar",
-    "captured_at": "2026-09-17T20:47:02.901Z",
+    "captured_at": "2026-09-18T06:57:34.885Z",
     "standard": "FLL-GAR-2023",
     "slug": "fll_gar",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -19,7 +19,8 @@
     "field_rows": 174,
     "section_rows": 261,
     "sections_total": 261,
-    "equation_rows": 4
+    "equation_rows": 4,
+    "gate_rows": 30
   },
   "FLL-GAR-01 ausfuehrungsbetrieb": {
     "enum_values": null,
@@ -4223,6 +4224,246 @@
         "r_5_5",
         "C",
         "A"
+      ]
+    }
+  },
+  "gates": {
+    "FLL-GAR-02 REQ-01": {
+      "condition": "gewaesser_in_scope == true",
+      "severity": "block",
+      "symbols": [
+        "gewaesser_in_scope"
+      ]
+    },
+    "FLL-GAR-03 REQ-02": {
+      "condition": "lbo_genehmigung_erforderlich == True",
+      "severity": "block",
+      "symbols": [
+        "lbo_genehmigung_erforderlich"
+      ]
+    },
+    "FLL-GAR-03 REQ-03": {
+      "condition": "whg_einleitung_genehmigung == True",
+      "severity": "block",
+      "symbols": [
+        "whg_einleitung_genehmigung"
+      ]
+    },
+    "FLL-GAR-04 REQ-04": {
+      "condition": "gewaesser_tiefe_m IS NOT NULL AND gewaesser_volumen_m3 IS NOT NULL AND nutzung_funktion IS NOT EMPTY AND hoechstwasserstand_m IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "gewaesser_tiefe_m",
+        "gewaesser_volumen_m3",
+        "hoechstwasserstand_m",
+        "nutzung_funktion"
+      ]
+    },
+    "FLL-GAR-04 REQ-05": {
+      "condition": "IF abdichtungs_art IN {bahn_bitumen,bahn_kunststoff_elastomer,fluessigkunststoff,bahn_pe} THEN wassereinwirkungsklasse IS NOT NULL AND rissklasse IS NOT NULL AND standortklasse IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "abdichtungs_art",
+        "rissklasse",
+        "standortklasse",
+        "wassereinwirkungsklasse"
+      ]
+    },
+    "FLL-GAR-04 REQ-06": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "FLL-GAR-06 REQ-07": {
+      "condition": "setzungen_zu_erwarten IS NOT NULL AND baugrund_typ IS NOT EMPTY AND baugrund_tragfaehig IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "baugrund_tragfaehig",
+        "baugrund_typ",
+        "setzungen_zu_erwarten"
+      ]
+    },
+    "FLL-GAR-07 REQ-08": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "FLL-GAR-07 REQ-09": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "FLL-GAR-09 REQ-10": {
+      "condition": "ce_kennzeichnung_geprueft == true",
+      "severity": "block",
+      "symbols": [
+        "ce_kennzeichnung_geprueft"
+      ]
+    },
+    "FLL-GAR-09 REQ-17": {
+      "condition": "IF abdichtungs_art == bahn_bitumen THEN anzahl_lagen >= 2",
+      "severity": "warn",
+      "symbols": [
+        "abdichtungs_art",
+        "anzahl_lagen"
+      ]
+    },
+    "FLL-GAR-10 REQ-12": {
+      "condition": "IF abdichtungs_art == mineralisch_ohne_zusatzstoffe THEN kornanteil_unter_2micron >= 15 AND organische_substanz_VGL <= 5 AND kalkgehalt_VCA <= 15 AND kf_abdichtung <= 0.000000001 AND verdichtungsgrad_Dpr >= 97",
+      "severity": "block",
+      "symbols": [
+        "abdichtungs_art",
+        "kalkgehalt_VCA",
+        "kf_abdichtung",
+        "kornanteil_unter_2micron",
+        "organische_substanz_VGL",
+        "verdichtungsgrad_Dpr"
+      ]
+    },
+    "FLL-GAR-10 REQ-13": {
+      "condition": "IF abdichtungs_art == mineralisch_mit_zusatzstoffen THEN mz_durchlaessigkeit_kf <= 0.000000001 AND mz_dichtungswirkung_nachgewiesen == true",
+      "severity": "block",
+      "symbols": [
+        "abdichtungs_art",
+        "mz_dichtungswirkung_nachgewiesen",
+        "mz_durchlaessigkeit_kf"
+      ]
+    },
+    "FLL-GAR-10 REQ-14": {
+      "condition": "IF abdichtungs_art == mineralisch_hydraulisch THEN ((bauteildicke_cm <= 40 AND wasserzementwert <= 0.60 AND zementgehalt_kg_m3 >= 280) OR (bauteildicke_cm > 40 AND wasserzementwert <= 0.70))",
+      "severity": "block",
+      "symbols": [
+        "abdichtungs_art",
+        "bauteildicke_cm",
+        "wasserzementwert",
+        "zementgehalt_kg_m3"
+      ]
+    },
+    "FLL-GAR-10 REQ-15": {
+      "condition": "IF abdichtungs_art == mineralisch_bitumen THEN hohlraumgehalt_asphaltbeton_vol_pct <= 3",
+      "severity": "block",
+      "symbols": [
+        "abdichtungs_art",
+        "hohlraumgehalt_asphaltbeton_vol_pct"
+      ]
+    },
+    "FLL-GAR-10 REQ-16": {
+      "condition": "IF abdichtungs_art == verbundwerkstoff_gtd THEN ((bentonit_type == \"Na\" AND bentonit_flaecheneinheit_g_m2 >= 3600 AND quellvermoegen_ml >= 24) OR (bentonit_type == \"Ca\" AND bentonit_flaecheneinheit_g_m2 >= 8000 AND quellvermoegen_ml >= 8)) AND gtd_ueberlappung_laengs_cm >= 30 AND gtd_ueberlappung_quer_cm >= 50",
+      "severity": "block",
+      "symbols": [
+        "abdichtungs_art",
+        "bentonit_flaecheneinheit_g_m2",
+        "bentonit_type",
+        "gtd_ueberlappung_laengs_cm",
+        "gtd_ueberlappung_quer_cm",
+        "quellvermoegen_ml"
+      ]
+    },
+    "FLL-GAR-10 REQ-18": {
+      "condition": "IF abdichtungs_art == bahn_kunststoff_elastomer THEN bahnendicke_mm >= 1.2",
+      "severity": "block",
+      "symbols": [
+        "abdichtungs_art",
+        "bahnendicke_mm"
+      ]
+    },
+    "FLL-GAR-10 REQ-19": {
+      "condition": "attest_fll_gar_10_req_19 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fll_gar_10_req_19"
+      ]
+    },
+    "FLL-GAR-10 REQ-20": {
+      "condition": "IF abdichtungs_art == bahn_pe THEN peeh_dichte_g_cm3 > 0.940 AND peeh_mfr >= 1.0 AND peeh_mfr <= 3.0 AND peeh_russgehalt_pct >= 2 AND peeh_russgehalt_pct <= 3",
+      "severity": "block",
+      "symbols": [
+        "abdichtungs_art",
+        "peeh_dichte_g_cm3",
+        "peeh_mfr",
+        "peeh_russgehalt_pct"
+      ]
+    },
+    "FLL-GAR-10 REQ-21": {
+      "condition": "attest_fll_gar_10_req_21 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fll_gar_10_req_21"
+      ]
+    },
+    "FLL-GAR-10 REQ-22": {
+      "condition": "IF abdichtungs_art == alkalisilikat THEN schichtdicke_abdichtung_cm >= 25 AND feinkornanteil_063_pct >= 20",
+      "severity": "warn",
+      "symbols": [
+        "abdichtungs_art",
+        "feinkornanteil_063_pct",
+        "schichtdicke_abdichtung_cm"
+      ]
+    },
+    "FLL-GAR-22 REQ-11": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "FLL-GAR-22 REQ-24": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "FLL-GAR-22 REQ-25": {
+      "condition": "attest_fll_gar_22_req_25 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fll_gar_22_req_25"
+      ]
+    },
+    "FLL-GAR-23 REQ-23": {
+      "condition": "freibord_zu_gelaende_cm >= 5 AND freibord_zu_bauwerk_cm >= 30",
+      "severity": "warn",
+      "symbols": [
+        "freibord_zu_bauwerk_cm",
+        "freibord_zu_gelaende_cm"
+      ]
+    },
+    "FLL-GAR-25 REQ-26": {
+      "condition": "attest_fll_gar_25_req_26 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_fll_gar_25_req_26"
+      ]
+    },
+    "FLL-GAR-26 REQ-27": {
+      "condition": "abnahme_datum IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "abnahme_datum"
+      ]
+    },
+    "FLL-GAR-27 REQ-28": {
+      "condition": "ibn_datum IS NOT NULL AND ibn_befuellung_methode IS NOT EMPTY",
+      "severity": "warn",
+      "symbols": [
+        "ibn_befuellung_methode",
+        "ibn_datum"
+      ]
+    },
+    "FLL-GAR-28 REQ-29": {
+      "condition": "inspektion_intervall_jahr <= 1",
+      "severity": "warn",
+      "symbols": [
+        "inspektion_intervall_jahr"
+      ]
+    },
+    "FLL-GAR-29 REQ-30": {
+      "condition": "compliance_verdict_final in {compliant, compliant_with_conditions}",
+      "severity": "block",
+      "symbols": [
+        "compliance_verdict_final"
       ]
     }
   }
