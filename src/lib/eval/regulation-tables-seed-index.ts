@@ -53,7 +53,7 @@ export const SEED_BUILDERS: Record<string, SeedBuilder> = {
   din276: { build: din276SeedTables, ts: '20260917101300', slugFile: 'din276' }, // Plan 3 Task 13: DIN-276 (four tables — Table 1 KG catalogue, Tables 2 / 3 / 4 reference units)
   a178: { build: a178SeedTables, ts: '20260917101400', slugFile: 'a178' }, // Plan 3 Task 14: DWA-A-178 (seven tables — Tab. 1 split η / η_VS, §6.1.4.5 h_FK, three text-limit tables, Tab. 2 indicators)
   din16941_2: { build: din169412SeedTables, ts: '20260917101500', slugFile: 'din16941_2' }, // Plan 3 Task 15: DIN-EN-16941-2 (nine tables — Tab. A.1 / A.2 / A.3, Gl.-1 legend, Tab. D.1 / D.2 / D.3 / D.4, Anhang B)
-  // Plan-3 tasks append one line each, e.g. din16941_2: { build: din169412SeedTables, ts: '20260917101500', slugFile: 'din16941_2' }
+  // Plan-3 tasks append one line each, e.g. m1200_2: { build: m12002SeedTables, ts: '20260917101600', slugFile: 'm1200_2' }
 };
 
 /** Slugs that no other builder supersedes — the set the runtime fallback serves. */

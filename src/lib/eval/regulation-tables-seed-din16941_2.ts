@@ -365,29 +365,30 @@ export function tabD2AsTable(): RegulationTable {
 // Tab. D.3 (L881–L893) / Tab. D.4 (L897–L906): status bands. `code` 1 / 2 / 3 is the register's numeric status
 // (grün / gelb / rot); `status` = the prod `bewertung_status` tokens (gruen / gelb / rot, capture).
 // ---------------------------------------------------------------------------
-type BandRow = { band: string; ergebnis: string; status: 'gruen' | 'gelb' | 'rot'; status_text: string; auswertung: string; code: number; line: keyof typeof Q };
-const BAND_COLUMNS: ValueColumn[] = [{ name: 'ergebnis', type: 'string' }, { name: 'status', type: 'string' }, { name: 'status_text', type: 'string' }, { name: 'auswertung', type: 'string' }, { name: 'code', type: 'number' }];
+type BandRow = { band: string; ergebnis: string; ergebnis_text: string; status: 'gruen' | 'gelb' | 'rot'; status_text: string; auswertung: string; code: number; line: keyof typeof Q };
+/** `ergebnis` = the printed cell verbatim (LaTeX where the transcript has it, e.g. `>10 \mathrm{G}`); `ergebnis_text` = the plain rendering for labels / badges (fix round 1). */
+const BAND_COLUMNS: ValueColumn[] = [{ name: 'ergebnis', type: 'string' }, { name: 'ergebnis_text', type: 'string' }, { name: 'status', type: 'string' }, { name: 'status_text', type: 'string' }, { name: 'auswertung', type: 'string' }, { name: 'code', type: 'number' }];
 function bandTable(code: string, title: string, clause: string, rows: ReadonlyArray<BandRow>, overrideQuote: string): RegulationTable {
   const out: RegulationRow[] = rows.map((r, i) => {
     const quote = Q[r.line];
     inSpan(quote, r.ergebnis, `${code} ${r.band} ergebnis`);
     inSpan(quote, r.status_text, `${code} ${r.band} status`);
     inSpan(quote, r.auswertung, `${code} ${r.band} auswertung`);
-    return { row_key: r.band, keys: { band: r.band }, group_label: null, label_de: `${r.ergebnis} → ${r.status_text}: ${r.auswertung}`, order_index: i, values: { ergebnis: r.ergebnis, status: r.status, status_text: r.status_text, auswertung: r.auswertung, code: r.code }, verbatim_quote: quote };
+    return { row_key: r.band, keys: { band: r.band }, group_label: null, label_de: `${r.ergebnis_text} → ${r.status_text}: ${r.auswertung}`, order_index: i, values: { ergebnis: r.ergebnis, ergebnis_text: r.ergebnis_text, status: r.status, status_text: r.status_text, auswertung: r.auswertung, code: r.code }, verbatim_quote: quote };
   });
   return { standard_code: STD, edition: ED, table_code: code, title_de: title, clause_reference: clause, page_ref: null, key_columns: ['band'], value_columns: BAND_COLUMNS, override_policy: 'locked', override_quote: overrideQuote, verification_status: 'md_verified', rows: out };
 }
 export const TABD3_BAENDER: ReadonlyArray<BandRow> = [
-  { band: 'lt_g', ergebnis: '< G', status: 'gruen', status_text: 'grün', auswertung: 'System unter Kontrolle', code: 1, line: 'L884' },
-  { band: 'g_bis_10g', ergebnis: 'G bis 10 G', status: 'gelb', status_text: 'gelb', auswertung: 'erneute Probenahme zur Bestätigung des Ergebnisses und Prüfen des Systembetriebs', code: 2, line: 'L885' },
-  { band: 'gt_10g', ergebnis: '>10 \\mathrm{G}', status: 'rot', status_text: 'rot', auswertung: 'Nutzung des Grauwassers ausschließen, bis Problem gelöst ist', code: 3, line: 'L886' },
+  { band: 'lt_g', ergebnis: '< G', ergebnis_text: '< G', status: 'gruen', status_text: 'grün', auswertung: 'System unter Kontrolle', code: 1, line: 'L884' },
+  { band: 'g_bis_10g', ergebnis: 'G bis 10 G', ergebnis_text: 'G bis 10 G', status: 'gelb', status_text: 'gelb', auswertung: 'erneute Probenahme zur Bestätigung des Ergebnisses und Prüfen des Systembetriebs', code: 2, line: 'L885' },
+  { band: 'gt_10g', ergebnis: '>10 \\mathrm{G}', ergebnis_text: '> 10 G', status: 'rot', status_text: 'rot', auswertung: 'Nutzung des Grauwassers ausschließen, bis Problem gelöst ist', code: 3, line: 'L886' },
 ];
 export function tabD3AsTable(): RegulationTable {
   return bandTable('TABD3', 'Auswertung der bakteriologischen Überwachung — Statusbänder (Tabelle D.3)', 'Anhang D, Tab. D.3; §11', TABD3_BAENDER, `${Q.L681} — ${Q.L889}`);
 }
 export const TABD4_BAENDER: ReadonlyArray<BandRow> = [
-  { band: 'lt_g', ergebnis: '< G', status: 'gruen', status_text: 'grün', auswertung: 'System unter Kontrolle', code: 1, line: 'L900' },
-  { band: 'gt_g', ergebnis: '> G', status: 'gelb', status_text: 'gelb', auswertung: 'erneute Probenahme zur Bestätigung des Ergebnisses und Prüfen des Systembetriebs', code: 2, line: 'L901' },
+  { band: 'lt_g', ergebnis: '< G', ergebnis_text: '< G', status: 'gruen', status_text: 'grün', auswertung: 'System unter Kontrolle', code: 1, line: 'L900' },
+  { band: 'gt_g', ergebnis: '> G', ergebnis_text: '> G', status: 'gelb', status_text: 'gelb', auswertung: 'erneute Probenahme zur Bestätigung des Ergebnisses und Prüfen des Systembetriebs', code: 2, line: 'L901' },
 ];
 export function tabD4AsTable(): RegulationTable {
   return bandTable('TABD4', 'Auswertung der Systemüberwachung — Statusbänder (Tabelle D.4)', 'Anhang D, Tab. D.4; §11', TABD4_BAENDER, `${Q.L681} — ${Q.L902}`);

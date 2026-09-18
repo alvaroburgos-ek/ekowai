@@ -3911,7 +3911,7 @@ Report: `reports/plan-3-din16941_2.md` · STAGED SQL: `scripts/verification/din1
 - Class: new gate
 - Chosen now (fail-safe): the created boolean `personenzugang` and `visible_when personenzugang == false` on `zugang_oeffnung_mm` are emitted (no gate reads it; its `raw` rule is display-dead, G-1); no gate is added.
 - Evidence (verbatim, transcript line): "Für den Personenzugang müssen die Maße nach EN 476 berücksichtigt werden. Wenn kein Personenzugang vorgesehen ist, muss eine Öffnung (d.h. Breite einer rechtwinkligen oder Durchmesser einer runden Öffnung) mit mindestens 400 mm vorhanden sein." (L327)
-- Proposed SQL / config: STAGED block G-4 — `IF personenzugang == false THEN zugang_oeffnung_mm >= 400` (block; EN 476 stays a bare reference).
+- Proposed SQL / config: STAGED block G-4 — `IF personenzugang == false THEN zugang_oeffnung_mm >= 400` (block; EN 476 stays a bare reference). **Storage semantics (fix round 1):** the boolean is the Ja / Nein segmented control (`dynamic-field.tsx` L611–L623) — it stores `true` / `false` only when a segment is clicked; untouched = nothing stored (null) ⇒ `personenzugang == false` is `pending` (field visible, IF guard pending, gate does not fire). The gate fires only after an explicit "Nein"; "Ja" passes vacuously. An engineer who never touches the control is not blocked — enforcing by default needs `is_required` on `personenzugang`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din16941_2-G-5 · DIN-EN-16941-2 · -03 · new warn gate: `nennkapazitaet <= speicher_max_50` (bis zu 50 % des Tagesbedarfs)
@@ -3946,21 +3946,21 @@ Report: `reports/plan-3-din16941_2.md` · STAGED SQL: `scripts/verification/din1
 - Class: enforcement change (invisible to both guards)
 - Chosen now (fail-safe): the 23 scalars stay visible. They are consumer-free (both guards accept a rule on them) but feed Y_G / D_G, which the block gate CR-12 reads (`Y_G IS NOT NULL AND D_G IS NOT NULL AND bemessungswert_massgebend IS NOT NULL`): hidden inputs ⇒ Gl. 1 / 2 null ⇒ CR-12 fails for every vereinfacht project, whereas today an engineer can still type them. The method switch is emitted on the created registers / outputs (`berechnungsverfahren == 'differenziert'`) and the Tab.-A.1 twins (`== 'vereinfacht'`) only.
 - Evidence (verbatim, transcript line): "Das vereinfachte Verfahren beruht auf der Abwägung folgender Annahmen und ist nur für Wohngebäude anwendbar:" (L543); "b) ein differenziertes Verfahren, bei dem das im Bad anfallende Grauwasser z. B. zur Toilettenspülung, zum Reinigen der Wäsche und zur Gartenbewässerung in Wohn-, Gewerbe-, Industrie- und öffentlichen Gebäuden verwendet wird (siehe 6.2.4)." (L519)
-- Proposed SQL / config: STAGED block G-9 — apply only together with R-1 / R-2.
+- Proposed SQL / config: STAGED block G-9 — moot once R-1 / R-2 land with their atomic retirements D-7 / D-8 (retired scalars need no rule); relevant only if the owner ratifies R-1 / R-2 without D-7 / D-8; never before R-1 / R-2. Since Task 12c round 4 the guard reaches this class through same-worksheet equation chains (a rule on the scalars is now refused, not merely withheld).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din16941_2-R-1 · DIN-EN-16941-2 · -03 · Gl. (1) `Y_G` over the 16 typed scalars → `Y_G_rows` (register) / `Y_G_vereinfacht` (Tab. A.1)
 - Class: equation-replacement (verified equation)
 - Chosen now (fail-safe): Gl. 1 (`verified_against_standard`) unchanged; `Y_G_rows` (-03-D1, register-fed, materialised on save) and `Y_G_vereinfacht` (-03-D5) are visible twins; CR-12 keeps reading Y_G. A method-switch formula cannot read a null twin (`evaluateFormula` requires every named input), so the ratified form is `Y_G = Y_G_rows` with the vereinfacht figure entered as one row (60 l/(p·d)), or two method-guarded rows.
 - Evidence (verbatim, transcript line): "Die folgende Gleichung (1) muss zur Bestimmung des Grauwasserertrags, $Y_{\mathrm{G}}$, in Liter je Tag (l/d), angewendet werden:" (L557); "Y_{\mathrm{G}}=n \cdot\left(Q_{\mathrm{S}} \cdot t_{\mathrm{S}} \cdot u_{\mathrm{S}}+V_{\mathrm{BT}} \cdot u_{\mathrm{BT}}+Q_{\mathrm{HWB}} \cdot t_{\mathrm{HWB}} \cdot u_{\mathrm{HWB}}+V_{\mathrm{WM}} \cdot u_{\mathrm{WM}}+Q_{\mathrm{KS}} \cdot t_{\mathrm{KS}} \cdot u_{\mathrm{KS}}+V_{\mathrm{DW}}\right.  \tag{1}\\" (L560)
-- Proposed SQL / config: STAGED block R-1 (archive + md5-guarded UPDATE; rollback from the archive).
+- Proposed SQL / config: STAGED block R-1 (archive + md5-guarded UPDATE; rollback from the archive). **Fix round 1:** the block now clears, in the SAME transaction, the emitted `visible_when berechnungsverfahren == 'differenziert'` on `grauwasserquellen_16941` / `Y_G_rows` / `quellen_count` (with rollback) — without it `Y_G = Y_G_rows` reads a hidden (null) twin and CR-12 is unpassable for every vereinfacht project. The two-row method-guarded form (`Y_G = if(berechnungsverfahren == 'differenziert', Y_G_rows, Y_G_vereinfacht)`) was rejected: `evaluateFormula` requires every named input and one twin is always hidden by the method. Retirement of the 16 scalars (D-7) is atomic with this block; G-9 is moot once D-7 lands.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din16941_2-R-2 · DIN-EN-16941-2 · -03 · Gl. (2) `D_G` over the 7 typed scalars → `D_G_rows` (register + V_misc) / `D_G_vereinfacht` (Tab. A.1)
 - Class: equation-replacement (verified equation)
 - Chosen now (fail-safe): Gl. 2 unchanged; `D_G_rows` (-03-D3) and `D_G_vereinfacht` (-03-D6) are visible twins.
 - Evidence (verbatim, transcript line): "Die folgende Gleichung (2) muss für die Bestimmung des Grauwasserbedarfs, $D_{\mathrm{G}}$, in Liter je Tag (l/d) angewendet werden, wenn das behandelte Grauwasser z. B. für die Toiletten- und Urinalspülung, zum Reinigen von Wäsche, zur Gartenbewässerung, für Reinigungsarbeiten usw. genutzt wird." (L595); "D_{\mathrm{G}}=n \cdot\left(V_{\mathrm{T}} \cdot u_{\mathrm{T}}+V_{\mathrm{U}} \cdot u_{\mathrm{U}}+V_{\mathrm{WM}} \cdot u_{\mathrm{WM}}\right)+V_{\mathrm{misc}} \tag{2}" (L600)
-- Proposed SQL / config: STAGED block R-2.
+- Proposed SQL / config: STAGED block R-2 — same shape as R-1 (fix round 1: the transaction also clears the `differenziert` visibility on `bedarfsstellen` / `D_G_rows` / `bedarfsstellen_count`, with rollback; D-8 atomic).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din16941_2-D-1 · DIN-EN-16941-2 · -04 · `bewertung_status` (manual enum gruen / gelb / rot, consumed by -05, read by CR-17) ↔ `status_letzte_probe` / `probenahmen_rot` / `probenahmen_gelb`
@@ -3986,7 +3986,7 @@ Report: `reports/plan-3-din16941_2.md` · STAGED SQL: `scripts/verification/din1
 
 ### din16941_2-D-4 · DIN-EN-16941-2 · -04 · the eight single-sample scalars (`ecoli_kbe`, `enterokokken_kbe`, `legionella_kbe`, `gesamt_coliforme_kbe`, `truebung_ntu`, `ph_wert`, `rest_chlor`, `rest_brom`) ↔ `probenahmen` columns
 - Class: derivation (N-instances register vs single scalars — one block for the eight pairs, amendment K)
-- Chosen now (fail-safe): all eight stay (optional numbers, no consumers, no gate); the register carries N samples with per-parameter statuses. On ratification (with D-1) retire the eight.
+- Chosen now (fail-safe): all eight stay (optional numbers, no consumers, no gate); the register carries N samples with per-parameter statuses. On ratification (with D-1) retire the eight. Grouped on purpose (amendment K): the eight are one measurement set of one sample and the retirement is atomic with D-1 — a partial retirement would leave a half sample neither the enum nor the register can evaluate.
 - Evidence (verbatim, transcript line): "Die Probenahmestelle muss im Verteilungssystem für das behandelte Grauwasser eingebaut sein. Alle Proben müssen als Stichproben während der laufenden Behandlung im Grauwassersystem entnommen werden." (L697); "\hline G bis 10 G & gelb & erneute Probenahme zur Bestätigung des Ergebnisses und Prüfen des Systembetriebs \\" (L885)
 - Proposed SQL / config: STAGED block D-4.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -4007,14 +4007,14 @@ Report: `reports/plan-3-din16941_2.md` · STAGED SQL: `scripts/verification/din1
 
 ### din16941_2-D-7 · DIN-EN-16941-2 · -03 · the 16 Gl.-1 scalars (all `is_required`) ↔ `grauwasserquellen_16941` rows
 - Class: derivation (N-instances register vs typed scalars — one block for the 16 pairs)
-- Chosen now (fail-safe): all 16 stay (Gl. 1 reads them; a project without a dishwasher must still type V_DW / u_DW today). Retire with R-1.
+- Chosen now (fail-safe): all 16 stay (Gl. 1 reads them; a project without a dishwasher must still type V_DW / u_DW today). Retire with R-1. Grouped on purpose (amendment K): the 16 are the inputs of ONE equation and the retirement is atomic with R-1 (same transaction or none) — a subset retired while Gl. 1 still reads them would null Y_G and CR-12.
 - Evidence (verbatim, transcript line): "Menge und Verschmutzung der unterschiedlichen Arten von Grauwasser hängen von dessen Herkunft ab." (L219); "\hline $u_{\mathrm{s}}$ & die Häufigkeit des Duschvorgangs je Person und je Tag (1/(p ⋅ d)); \\" (L575)
 - Proposed SQL / config: STAGED block D-7.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din16941_2-D-8 · DIN-EN-16941-2 · -03 · the 6 Gl.-2 scalars (`V_T`, `u_T` required; `V_U`, `u_U`, `V_WM_d`, `u_WM_d`) ↔ `bedarfsstellen` rows; `V_misc` stays a scalar
 - Class: derivation (one block for the six pairs)
-- Chosen now (fail-safe): all six stay. Retire with R-2.
+- Chosen now (fail-safe): all six stay. Retire with R-2. Grouped on purpose (amendment K): the six are the inputs of ONE equation and the retirement is atomic with R-2 — a subset retired while Gl. 2 still reads them would null D_G and CR-12.
 - Evidence (verbatim, transcript line): "ANMERKUNG Wenn mehr als ein WC-Typ angeschlossen ist, kann der Bedarf für jedes einzelne WC berechnet werden, oder es kann angenommen werden, dass alle WCs gleich benutzt werden. In dem Fall kann ein Standardbedarf für jeden Typ berechnet und für diese Ergebnisse der Durchschnittswert ermittelt werden." (L597); "\hline $V_{\text {misc }}$ & ist das für andere Zwecke erforderliche Wasservolumen (z. B. Gartenbewässerung, Reinigung) in Liter je Tag (l/d). \\" (L619)
 - Proposed SQL / config: STAGED block D-8.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -4037,7 +4037,7 @@ Report: `reports/plan-3-din16941_2.md` · STAGED SQL: `scripts/verification/din1
 - Class: judgment
 - Chosen now (fail-safe): `n · (35 | 15 | 10)` by the one selected token (WC → 35, Wäsche → 15, Gartenbewässerung / Reinigung → 10 "Andere Nicht-Trinkwasser-Nutzungen", footnote c names Gartenbewässerung as the example); a WC + Wäsche household reads 35 · n, never 50 · n. Alternatives: a `select_many` use carrier (S-class on `vorgesehene_nutzung`), or the vereinfacht demand typed as rows in `bedarfsstellen`.
 - Evidence (verbatim, transcript line): "a) ein vereinfachtes Verfahren, bei dem das im Bad anfallende Grauwasser zur Toilettenspülung und/oder zum Reinigen der Wäsche innerhalb einer Wohneinheit verwendet wird (siehe 6.2.3);" (L518); "\hline 1 Person & 60 & 35 & 15 & 10 \\" (L741); "c Zum Beispiel Gartenbewässerung." (L745)
-- Proposed SQL / config: none until S-class ruling.
+- Proposed SQL / config: none until S-class ruling. Note (fix round 1): `Y_G_vereinfacht` / `D_G_vereinfacht` read TABA1 (policy `anhaltswert`) through `lookup()` in a scalar equation — display-only twins with NO override path (the `anhaltswert` affordance exists on `lookup_fill` / register lookups only); a project whose per-person figures differ from Tab. A.1 enters them as register rows.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din16941_2-J-2 · DIN-EN-16941-2 · `probenahmen.status_*` · a printed "Nicht nachweisbar" Richtwert: 0 KBE → grün, any detection → rot

@@ -154,6 +154,11 @@
 -- muss eine Öffnung (d.h. Breite einer rechtwinkligen oder Durchmesser einer runden Öffnung) mit mindestens 400 mm vorhanden sein."
 -- Capture: zugang_oeffnung_mm (-02 D, number, not required, validation_rules.raw 'zugang_oeffnung_mm >= 400' — display-dead, G-1);
 -- no gate reads it. Emitted: personenzugang (created boolean) and visible_when 'personenzugang == false' on zugang_oeffnung_mm.
+-- Storage semantics (fix round 1; code fact dynamic-field.tsx L611–L623): a boolean renders as the Ja / Nein segmented control and stores
+-- { type: 'boolean', value: true | false } ONLY when a segment is clicked — an untouched control stores NOTHING (null): 'personenzugang ==
+-- false' is then `pending` (visible_when keeps the field visible; the IF guard reports pending, the gate does not fire). The gate fires
+-- only after an explicit "Nein" (stored false) — "Ja" (stored true) makes it vacuously pass. So an engineer who never touches the control
+-- is NOT blocked; if the owner wants the 400 mm enforced by default, personenzugang must become is_required (approval gate demands a value).
 -- Proposal (block — "muss … vorhanden sein"; EN 476 is a bare reference, not encoded):
 -- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
 -- SELECT gen_random_uuid(), w.id, 'DIN-EN-16941-2-CR-20', 'Zugangsoeffnung mindestens 400 mm ohne Personenzugang',
@@ -237,20 +242,35 @@
 -- (Tabelle A.1) enthalten."; L543 (vereinfacht nur Wohngebäude). Capture: Gl. 1 (verified_against_standard) reads the 16 required scalars
 -- Q_S … u_DW, all consumer-free; CR-12 reads Y_G. Plan 3 emits Y_G_rows (-03-D1, register-fed, materialised on save) and Y_G_vereinfacht
 -- (-03-D5, scalar-only). Chosen now: Gl. 1 unchanged; both twins are visible next to it.
--- Why staged: replacing a verified equation is an always-sign-off class; the method switch needs both twins present
--- (`evaluateFormula` requires every named input — a switch formula cannot read a null twin), so the ratified form is TWO rows guarded
--- by the method, or ONE row 'Y_G = Y_G_rows' with the vereinfacht path typed into the register (60 l/(p·d) as one Dusche/Badewanne row).
--- Proposal (one producer: Gl. 1 reads the register Σ; vereinfacht projects enter the Tab.-A.1 figure as a row — J-1 names the alternative):
+-- Why staged: replacing a verified equation is an always-sign-off class. Ratifiable shape (fix round 1): ONE row 'Y_G = Y_G_rows'
+-- AND, in the SAME transaction, the emitted 'differenziert' visibility on the register + its outputs cleared — the twins are emitted with
+-- visible_when 'berechnungsverfahren == ''differenziert''' (20260917101510), and a hidden symbol is null for the engine, so 'Y_G = Y_G_rows'
+-- alone would make CR-12 unpassable for every vereinfacht project. The alternative two-row method-guarded form
+-- ('Y_G = if(berechnungsverfahren == ''differenziert'', Y_G_rows, Y_G_vereinfacht)') is NOT viable: `evaluateFormula` requires every named
+-- input present, and one of the two twins is always hidden by the method rule — it would only work with BOTH twins always visible, i.e. with
+-- the same visibility clear plus the vereinfacht rule on Y_G_vereinfacht cleared too; the one-row form keeps one producer and one path.
+-- Consequence: vereinfacht projects enter the Tab.-A.1 figure as one register row (60 l/(p·d) — J-1 names the alternative); the
+-- Tab.-A.1 twin Y_G_vereinfacht stays a display-only reference.
 -- BEGIN;
 -- CREATE TABLE IF NOT EXISTS equations_archive_din16941_2 AS SELECT * FROM equations WHERE false;
 -- INSERT INTO equations_archive_din16941_2 SELECT * FROM equations WHERE id = '72c7d660-c4c2-42a5-a67f-702dd6de6706' AND md5(formula) = '1e66d9d4b0078ea97a806c1e1680b97b';
 -- UPDATE equations SET formula = 'Y_G = Y_G_rows', input_symbols = ARRAY['Y_G_rows']::text[], verification_status = 'imported_unverified'
 --  WHERE id = '72c7d660-c4c2-42a5-a67f-702dd6de6706' AND md5(formula) = '1e66d9d4b0078ea97a806c1e1680b97b';
+-- UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2' AND f.active
+--    AND f.symbol IN ('grauwasserquellen_16941','Y_G_rows','quellen_count') AND f.visible_when = 'berechnungsverfahren == ''differenziert''';
 -- COMMIT;
--- Rollback: UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, verification_status = a.verification_status
---             FROM equations_archive_din16941_2 a WHERE e.id = a.id AND e.id = '72c7d660-c4c2-42a5-a67f-702dd6de6706';
---           DROP TABLE equations_archive_din16941_2 (once R-1 / R-2 are final / rolled back).
--- After ratification the 16 scalars are retired (D-7) and the 'differenziert' visibility on the register is dropped (G-9).
+-- Rollback:
+-- BEGIN;
+-- UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, verification_status = a.verification_status
+--   FROM equations_archive_din16941_2 a WHERE e.id = a.id AND e.id = '72c7d660-c4c2-42a5-a67f-702dd6de6706';
+-- UPDATE fields f SET visible_when = 'berechnungsverfahren == ''differenziert''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2' AND f.active
+--    AND f.symbol IN ('grauwasserquellen_16941','Y_G_rows','quellen_count') AND f.visible_when IS NULL;
+-- COMMIT;
+-- DROP TABLE equations_archive_din16941_2 once R-1 / R-2 are final / rolled back.
+-- After ratification the 16 scalars are retired atomically (D-7 — same transaction or none). G-9 (hiding the scalars under vereinfacht)
+-- is then MOOT: retired scalars need no visibility rule; G-9 only matters if the owner ratifies R-1 WITHOUT D-7.
 
 -- =====================================================================================================================
 -- din16941_2-R-2 · -03 · Gl. (2) D_G over the 7 typed scalars → D_G_rows (differenziert) / D_G_vereinfacht (vereinfacht)
@@ -258,15 +278,28 @@
 -- Evidence: L595 "Die folgende Gleichung (2) muss für die Bestimmung des Grauwasserbedarfs, $D_{\mathrm{G}}$, in Liter je Tag (l/d) angewendet
 -- werden, wenn das behandelte Grauwasser z. B. für die Toiletten- und Urinalspülung, zum Reinigen von Wäsche, zur Gartenbewässerung, für
 -- Reinigungsarbeiten usw. genutzt wird."; L600 (Gl. 2); L597 (WC types). Capture: Gl. 2 reads V_T, u_T, V_U, u_U, V_WM_d, u_WM_d, V_misc.
--- Plan 3 emits D_G_rows (-03-D3, register-fed + V_misc) and D_G_vereinfacht (-03-D6). Same shape as R-1:
+-- Plan 3 emits D_G_rows (-03-D3, register-fed + V_misc) and D_G_vereinfacht (-03-D6). Same shape and same reasoning as R-1 (fix round 1):
+-- the register / outputs carry the 'differenziert' visibility, so the SAME transaction clears it — otherwise 'D_G = D_G_rows' reads a
+-- hidden (null) twin and CR-12 is unpassable for vereinfacht projects; the two-row method-guarded form is not viable (every named input
+-- must be present). Vereinfacht projects enter the Tab.-A.1 demand as rows (WC 35 / Wäsche 15 l/(p·d) with u = 1 — J-1).
 -- BEGIN;
 -- CREATE TABLE IF NOT EXISTS equations_archive_din16941_2 AS SELECT * FROM equations WHERE false;
 -- INSERT INTO equations_archive_din16941_2 SELECT * FROM equations WHERE id = '4e9bae2a-d1b9-43d9-975f-b56e99395557' AND md5(formula) = 'cb3ebecbed0ac64307f3b99dcde38a99';
 -- UPDATE equations SET formula = 'D_G = D_G_rows', input_symbols = ARRAY['D_G_rows']::text[], verification_status = 'imported_unverified'
 --  WHERE id = '4e9bae2a-d1b9-43d9-975f-b56e99395557' AND md5(formula) = 'cb3ebecbed0ac64307f3b99dcde38a99';
+-- UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2' AND f.active
+--    AND f.symbol IN ('bedarfsstellen','D_G_rows','bedarfsstellen_count') AND f.visible_when = 'berechnungsverfahren == ''differenziert''';
 -- COMMIT;
--- Rollback: UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, verification_status = a.verification_status
---             FROM equations_archive_din16941_2 a WHERE e.id = a.id AND e.id = '4e9bae2a-d1b9-43d9-975f-b56e99395557'.
+-- Rollback:
+-- BEGIN;
+-- UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, verification_status = a.verification_status
+--   FROM equations_archive_din16941_2 a WHERE e.id = a.id AND e.id = '4e9bae2a-d1b9-43d9-975f-b56e99395557';
+-- UPDATE fields f SET visible_when = 'berechnungsverfahren == ''differenziert''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2' AND f.active
+--    AND f.symbol IN ('bedarfsstellen','D_G_rows','bedarfsstellen_count') AND f.visible_when IS NULL;
+-- COMMIT;
+-- The 6 Gl.-2 scalars are retired atomically with this block (D-8).
 
 -- =====================================================================================================================
 -- din16941_2-G-9 · -03 · hide the 23 Gl.-1 / Gl.-2 scalars under berechnungsverfahren == 'vereinfacht' (NOT emitted: CR-12 chain)
@@ -276,7 +309,10 @@
 -- AND D_G IS NOT NULL AND bemessungswert_massgebend IS NOT NULL' (block) reads: hidden inputs ⇒ Gl. 1 / 2 null ⇒ CR-12 FAILS for every
 -- vereinfacht project (today an engineer can still type the scalars and pass). That is an enforcement change the guards cannot see.
 -- Chosen now: the scalars stay visible; the created registers / outputs carry the differenziert rule and the Tab.-A.1 twins the
--- vereinfacht rule. Apply only together with R-1 / R-2 (then Gl. 1 / 2 read the register Σ and the scalars have no reader):
+-- vereinfacht rule. Fix round 1: this block is MOOT once R-1 / R-2 are ratified with their atomic retirements D-7 / D-8 (retired scalars
+-- need no visibility rule) — it matters only if the owner ratifies R-1 / R-2 WITHOUT D-7 / D-8 (Gl. 1 / 2 then read the register Σ, the
+-- scalars have no reader, and hiding them is safe). Never apply it before R-1 / R-2. Since Task 12c round 4 the emitter's gate-aware guard
+-- reaches this class through same-worksheet equation chains, so a rule on these scalars is now REFUSED, not merely withheld:
 -- UPDATE fields f SET visible_when = 'berechnungsverfahren == ''differenziert''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
 --  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2' AND f.active AND f.visible_when IS NULL
 --    AND f.symbol IN ('Q_S','t_S','u_S','V_BT','u_BT','Q_HWB','t_HWB','u_HWB','V_WM_y','u_WM_y','Q_KS','t_KS','u_KS','V_DW','u_DW','V_T','u_T','V_U','u_U','V_WM_d','u_WM_d','V_misc');
@@ -338,8 +374,10 @@
 -- Evidence: L697 "Alle Proben müssen als Stichproben während der laufenden Behandlung im Grauwassersystem entnommen werden."; L885 "erneute
 -- Probenahme zur Bestätigung des Ergebnisses" (several samples over time). Capture: the eight scalars are optional numbers on -04 E with no
 -- consumers and no gate (CR-17 reads bewertung_status and probenahmestelle_im_verteilsystem). Chosen now: all eight stay (the emitted rules
--- hide legionella_kbe outside Sprühanwendung and truebung_ntu for Gartenbewässerung). On ratification (with D-1): retire the eight
--- (active = false) — the register carries every sample:
+-- hide legionella_kbe outside Sprühanwendung and truebung_ntu for Gartenbewässerung). On ratification: retire the eight (active = false)
+-- — the register carries every sample. Grouped on purpose (amendment K, fix round 1): the eight are one measurement set of one sample and
+-- the retirement is ATOMIC with D-1 (CR-17 re-pointed to the register counts) — retiring some of them alone would leave a half sample
+-- neither the enum nor the register can evaluate:
 -- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
 --  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-04' AND s.code = 'DIN-EN-16941-2' AND f.active
 --    AND f.symbol IN ('ecoli_kbe','enterokokken_kbe','legionella_kbe','gesamt_coliforme_kbe','truebung_ntu','ph_wert','rest_chlor','rest_brom');
@@ -372,7 +410,9 @@
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Evidence: L560–L561 (Gl. 1 — one term per source); L219 "Menge und Verschmutzung der unterschiedlichen Arten von Grauwasser hängen von
 -- dessen Herkunft ab." Chosen now: all 16 stay (Gl. 1 reads them; every one is_required today, so a project without a dishwasher must still
--- type V_DW / u_DW). On ratification of R-1: retire the 16 (active = false) — the register carries only the connected sources:
+-- type V_DW / u_DW). On ratification of R-1: retire the 16 (active = false) — the register carries only the connected sources. Grouped on
+-- purpose (amendment K, fix round 1): the 16 are the inputs of ONE equation and the retirement is ATOMIC with R-1 (same transaction or
+-- none) — retiring a subset while Gl. 1 still reads them would null Y_G and CR-12 for every project:
 -- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
 --  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2' AND f.active
 --    AND f.symbol IN ('Q_S','t_S','u_S','V_BT','u_BT','Q_HWB','t_HWB','u_HWB','V_WM_y','u_WM_y','Q_KS','t_KS','u_KS','V_DW','u_DW');
@@ -384,4 +424,5 @@
 -- Evidence: L600 (Gl. 2); L597 "Wenn mehr als ein WC-Typ angeschlossen ist, kann der Bedarf für jedes einzelne WC berechnet werden, oder es
 -- kann angenommen werden, dass alle WCs gleich benutzt werden."; L619 "$V_{\text {misc }}$ & ist das für andere Zwecke erforderliche
 -- Wasservolumen (z. B. Gartenbewässerung, Reinigung) in Liter je Tag (l/d)." Chosen now: all six stay. On ratification of R-2: retire the six
--- (active = false); rollback active = true.
+-- (active = false); rollback active = true. Grouped on purpose (amendment K, fix round 1): the six are the inputs of ONE equation and the
+-- retirement is ATOMIC with R-2 — a subset retired while Gl. 2 still reads them would null D_G and CR-12.

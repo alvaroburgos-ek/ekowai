@@ -127,10 +127,13 @@ describe('DIN-EN-16941-2 Plan-3 seed tables', () => {
   it('TABD3 (L884–L886) / TABD4 (L900–L901): the status bands with codes 1 / 2 / 3 and the printed Auswertung; the coliform footnote b and the pH note travel as override_quote', () => {
     const d3 = tabD3AsTable();
     expect(d3.rows.map((r) => [r.keys.band, r.values.status, r.values.code])).toEqual([['lt_g', 'gruen', 1], ['g_bis_10g', 'gelb', 2], ['gt_10g', 'rot', 3]]);
+    expect(d3.rows.map((r) => [r.values.ergebnis, r.values.ergebnis_text])).toEqual([['< G', '< G'], ['G bis 10 G', 'G bis 10 G'], ['>10 \\mathrm{G}', '> 10 G']]); // verbatim cell + plain rendering (fix round 1)
+    expect(d3.rows[2].label_de).toBe('> 10 G → rot: Nutzung des Grauwassers ausschließen, bis Problem gelöst ist');
     expect(d3.rows.map((r) => r.values.auswertung)).toEqual(['System unter Kontrolle', 'erneute Probenahme zur Bestätigung des Ergebnisses und Prüfen des Systembetriebs', 'Nutzung des Grauwassers ausschließen, bis Problem gelöst ist']);
     expect(d3.override_quote).toContain('Bei Abwesenheit von E. coli, intestinalen Enterokokken und Legionella'); // L889 footnote b
     const d4 = tabD4AsTable();
     expect(d4.rows.map((r) => [r.keys.band, r.values.status, r.values.code])).toEqual([['lt_g', 'gruen', 1], ['gt_g', 'gelb', 2]]);
+    expect(d4.rows.map((r) => r.values.ergebnis_text)).toEqual(['< G', '> G']);
     expect(d4.override_quote).toContain('Bei der Überwachung des pH-Werts'); // L902
     expect(d3.override_policy).toBe('locked');
     expect(d4.override_policy).toBe('locked');
