@@ -1,0 +1,387 @@
+-- DIN-EN-16941-2 — Plan 3 Task 15 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens + labels, consumer_worksheets, the 2 equation rows — ids / md5(formula) —,
+-- the 19 compliance rows — ids / severities / md5(condition) —, worksheet + section titles, standards.version
+-- 'EN 16941-2:2021', field labels / units / is_required / validation_rules) were captured read-only on 2026-09-18
+-- (src/lib/eval/field-configs/din16941_2.prior.json; scripts/verification/prod-query.mjs). Transcript lines refer to
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-EN-16941-2\DIN-EN-16941-2.md. This task changes NO gate severity.
+--
+-- Conventions: `s.code = 'DIN-EN-16941-2'`, worksheets by code, never by id (equations and gates by their captured uuid +
+-- a guard on md5(formula) / md5(condition) of the text they replace so a re-run is a no-op); each block names its
+-- rollback. Every block that DELETEs or rewrites an equation / gate row follows the amendment-I archive pattern: the
+-- affected rows are copied into `equations_archive_din16941_2` / `compliance_requirements_archive_din16941_2` /
+-- `fields_archive_din16941_2` in the SAME transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE false;
+-- INSERT … SELECT * … WHERE (id = … AND md5(…) = …)`), the DELETE / UPDATE is guarded on the md5 read read-only from
+-- prod, and the rollback restores from the archive by id with an EXPLICIT column list (never `SELECT *`, never retyped —
+-- prod-query.mjs truncates cells at 120 chars); the archive table is dropped by the rollback or on the owner's sign-off
+-- that the change is final. A field retirement is `active = false` (reversible). New gates are INSERTs with a
+-- DELETE-by-description rollback. The Plan-3 DATA migrations (20260917101500 seed · 20260917101510 field configs ·
+-- 20260917101520 equations) must be applied BEFORE any block that reads a created symbol (speicher_lage,
+-- speichereinrichtungen, nennkapazitaet_sum, speicher_count, personenzugang, nachspeisung_medium_16941,
+-- geruchsverschluss_nachspeisung, D_zulauf, freier_auslauf_A_min, ventilgesteuerte_zulaeufe, wohngebaeude_bestaetigt,
+-- Y_G_vereinfacht, grauwasserquellen_16941, Y_G_rows, quellen_count, D_G_vereinfacht, bedarfsstellen, D_G_rows,
+-- bedarfsstellen_count, bemessungswert_massgebend_calc, speicher_max_50, richtwert_spalte, e_coli_G … rest_brom_G,
+-- probenahmen, probenahmen_count, probenahmen_rot, probenahmen_gelb, status_letzte_probe, anlagentyp_beschreibung,
+-- anlagentyp_nutzungsbeschraenkung, direktnutzung_scope_bestaetigt).
+-- Consumer edits write `fields.consumer_worksheets` (text[]); the guards keep a re-run idempotent.
+--
+-- Captured equation rows (both verification_status verified_against_standard; md5 = md5(formula)):
+--   Gl. 1  72c7d660-c4c2-42a5-a67f-702dd6de6706 (-03) 'Y_G = n * (Q_S*t_S*u_S + V_BT*u_BT + Q_HWB*t_HWB*u_HWB + V_WM_y*u_WM_y + Q_KS*t_KS*u_KS + V_DW*u_DW)'
+--                                                                                                                   1e66d9d4b0078ea97a806c1e1680b97b
+--   Gl. 2  4e9bae2a-d1b9-43d9-975f-b56e99395557 (-03) 'D_G = n * (V_T*u_T + V_U*u_U + V_WM_d*u_WM_d) + V_misc'      cb3ebecbed0ac64307f3b99dcde38a99
+-- Captured compliance rows this file touches (all severity block; md5 = md5(condition)):
+--   CR-08 abde6298-8210-450f-aeaa-db74eb9f12d2 (-02) 'rueckflusssicherung_typ IN {AA,AB}'                            39592755f916f12c7dc48efafa991e9d
+--   CR-09 84ad74ba-a74d-4292-8e90-ec48196ef67f (-02) 'pumpe_trockenlaufschutz == true'                               3cd3afe4eb61a04e8242638f45f040b1
+--   CR-12 7fa81ba8-ed08-478c-8c26-dac2ee09bca1 (-03) 'Y_G IS NOT NULL AND D_G IS NOT NULL AND bemessungswert_massgebend IS NOT NULL'
+--                                                                                                                   da78fbd95bfe96a37493f8657a39d285
+--   CR-13 f8a982cf-367b-49fe-b3a4-cd2c99f97e9d (-04) 'abstand_wurzeln_m >= 3'                                        d081629d125f374b1687ef8b4fff48ff
+--   CR-17 fee8488b-73c9-4221-9252-52fb40b12ab3 (-04) 'probenahmestelle_im_verteilsystem IS NOT NULL AND bewertung_status IS NOT NULL'
+--                                                                                                                   3cdacd1e92ae5bc8533de7dbc98381fb
+-- Explicit column lists (information_schema, read-only 2026-09-18):
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   fields: id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote
+--   (the four Plan-1 columns widget / ui_config / lookup / visible_when are absent in prod until the schema migration — every block below assumes it applied)
+
+-- =====================================================================================================================
+-- din16941_2-S-1 · -01 grauwasser_herkunft / -02 behandlungsstufen · single enum → select_many (data_type enum → json + widget + ui_config + value migration)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L531–L535 "Zur Reduktion des Behandlungsaufwands sollte die Sammlung wie folgt präferiert werden: e) Duschen und Badewannen;
+-- f) Handwaschbecken; g) Waschmaschinen; h) Küchenspülen und/oder Geschirrspüler." (several sources); L268 "Behandlungsarten müssen
+-- einen oder mehrere der folgenden Teilschritte einschließen:" (stages a)–f), L269–L274). Capture: both fields are data_type enum with
+-- non-null enum_values (6 tokens each — D-1 keep_prod), grauwasser_herkunft is consumed by -02, behandlungsstufen has no consumer.
+-- Why NOT emitted (amendment J): a DB widget='select_many' on an ENUM field renders ChecklistEditor (src/components/worksheet/
+-- checklist-editor.tsx L21 writes `{ type: 'json', value: { selected } }`) while the load path reads `extractValue(p, 'enum')` =
+-- valueEnum (src/lib/actions/worksheet.ts) — the selections would be lost on reload and the -02 consumer would inherit null. The
+-- widget switch is only correct together with the data_type change and a value migration; a data_type change is an always-sign-off
+-- class. Chosen now: nothing changes; both stay single selects.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_din16941_2 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_din16941_2 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DIN-EN-16941-2' AND f.active AND ((w.code = 'DIN-EN-16941-2-01' AND f.symbol = 'grauwasser_herkunft') OR (w.code = 'DIN-EN-16941-2-02' AND f.symbol = 'behandlungsstufen'))
+--    AND f.data_type = 'enum';
+-- -- existing single values → the json carrier shape the ChecklistEditor reads ({ "selected": ["<token>"] })
+-- UPDATE project_parameters p SET value_json = jsonb_build_object('selected', jsonb_build_array(p.value_enum)), value_enum = NULL
+--   FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE p.field_id = f.id AND s.code = 'DIN-EN-16941-2' AND f.symbol IN ('grauwasser_herkunft', 'behandlungsstufen') AND p.value_enum IS NOT NULL AND p.value_json IS NULL;
+-- UPDATE fields f SET data_type = 'json', widget = 'select_many',
+--        ui_config = '{"title": "Herkunft des Grauwassers (eine oder mehrere Quellen)", "subtitle": "Bevorzugte Sammlung nach §6.2.2: e) Duschen und Badewannen; f) Handwaschbecken; g) Waschmaschinen; h) Küchenspülen und/oder Geschirrspüler", "note": "Der Verschmutzungsgrad von Grauwasser aus Küchenspüle oder Geschirrspüler ist höher, als der von gering verschmutztem Grauwasser und kann eine intensivere Behandlung erfordern (§4)."}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-01' AND s.code = 'DIN-EN-16941-2' AND f.symbol = 'grauwasser_herkunft' AND f.active AND f.data_type = 'enum' AND f.widget IS NULL;
+-- UPDATE fields f SET data_type = 'json', widget = 'select_many',
+--        ui_config = '{"title": "Vorgesehene Behandlungsstufen (einen oder mehrere Teilschritte)", "subtitle": "§5.3: a) Sedimentation/Flotation; b) Siebung; c) mechanische Filtration von Feinpartikeln; d) biologische Behandlung; e) chemische Behandlung; f) Desinfektion", "note": "Das gesammelte Grauwasser muss mindestens in dem Maße behandelt werden, wie es für die Erreichung der Wasserqualitätsanforderungen der angestrebten Nutzung notwendig ist (siehe Anhang D)."}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-02' AND s.code = 'DIN-EN-16941-2' AND f.symbol = 'behandlungsstufen' AND f.active AND f.data_type = 'enum' AND f.widget IS NULL;
+-- -- enum_values stay untouched (D-1: keep_prod — the checklist reads its options from them); validation_rules.raw ("… IN {…}") is display-dead (G-1).
+-- COMMIT;
+-- Rollback:
+-- BEGIN;
+-- UPDATE fields f SET data_type = a.data_type, widget = NULL, ui_config = NULL FROM fields_archive_din16941_2 a WHERE f.id = a.id AND f.symbol IN ('grauwasser_herkunft', 'behandlungsstufen') AND f.data_type = 'json';
+-- UPDATE project_parameters p SET value_enum = p.value_json->'selected'->>0, value_json = NULL FROM fields f WHERE p.field_id = f.id AND f.symbol IN ('grauwasser_herkunft', 'behandlungsstufen')
+--    AND p.value_json IS NOT NULL AND jsonb_array_length(p.value_json->'selected') = 1;  -- a multi-selection cannot be folded back into one enum value: keep value_json for review
+-- DROP TABLE fields_archive_din16941_2;  -- once every block using it (S-1, E-blocks) is rolled back or final
+-- COMMIT;
+
+-- =====================================================================================================================
+-- din16941_2-G-1 · -03 / -04 · validation_rules hard-limit the informative Tab.-A.2 / A.3 ranges and use-blind Tab.-D.2 values (data hygiene)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L753 "Die folgende Tabelle A. 2 und Tabelle A. 3 enthalten typische Größenordnungen des Wasserverbrauchs zur Bestimmung des
+-- Grauwasserertrags und -bedarfs." (Anhang A is "(informativ)", L729); L870 "Trübung (NTU) & < 10 & < 10 & N/A & < 10"; L872
+-- "Rest-Chlor (mg/l) & < 2,0 & < 2,0 & < 0,5 & < 2,0"; L873 "Rest-Brom (mg/l) & 0,0 & < 5,0 & 0,0 & < 5,0".
+-- Capture: validation_rules.raw = 'Q_S >= 5 AND Q_S <= 15', 'V_BT >= 70 AND V_BT <= 200', 'V_WM_y >= 30 AND V_WM_y <= 60',
+-- 'Q_KS >= 5 AND Q_KS <= 15', 'V_DW >= 10 AND V_DW <= 20', 'V_T >= 3 AND V_T <= 8', 'V_U >= 1 AND V_U <= 2', 'V_WM_d >= 30 AND
+-- V_WM_d <= 60' (-03) and 'truebung_ntu < 10', 'rest_chlor < 2.0', 'rest_brom < 5.0', 'ph_wert >= 5 AND ph_wert <= 9.5' (-04).
+-- Code fact (this session): src/components/worksheet/dynamic-field.tsx reads validation_rules.min / .max / .maxLength / .extensible
+-- only — the `raw` strings are NOT enforced anywhere (no gate reads them), so today this is text hygiene, not a live limit.
+-- Chosen now: nothing changes; the register hint badges (SR-2) carry the ranges as hints. Proposal: clear the eight range `raw` rules
+-- (keep `>= 0` where printed) and the three use-blind D.2 rules before any future enforcement of `raw`:
+-- UPDATE fields f SET validation_rules = jsonb_build_object('raw', f.symbol || ' >= 0') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2' AND f.active
+--    AND f.symbol IN ('Q_S','V_BT','V_WM_y','Q_KS','V_DW','V_T','V_U','V_WM_d') AND f.validation_rules->>'raw' LIKE '% AND %';
+-- UPDATE fields f SET validation_rules = jsonb_build_object('raw', f.symbol || ' >= 0') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-04' AND s.code = 'DIN-EN-16941-2' AND f.active
+--    AND f.symbol IN ('truebung_ntu','rest_chlor','rest_brom') AND f.validation_rules->>'raw' LIKE '% < %';
+-- Rollback: restore the eleven captured `raw` strings listed above (each ≤ 40 chars, captured exactly).
+
+-- =====================================================================================================================
+-- din16941_2-G-2 · -02 · CR-08 'rueckflusssicherung_typ IN {AA,AB}' (block, unconditional) → conditional on Nachspeisung mit Trinkwasser + the visibility rule (REFUSED by the gate-aware guard)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L350 "Im Falle einer Nachspeisung mit Trinkwasser muss das Trinkwassersystem mit einer geeigneten Sicherungseinrichtung
+-- ausgestattet sein (siehe 5.5.2)."; L364 "Um zu verhindern, dass Nicht-Trinkwasser in die Trinkwasser- oder öffentliche Wasserversorgung
+-- eindringt, muss die Nachspeisung mit einer Sicherungseinrichtung ausgestattet sein, die gegen Verunreinigung durch Flüssigkeiten der
+-- Kategorie 5 (freier Auslauf) nach EN 1717 absichert"; L345 "Die Grauwasserbehandlungsanlage muss eine Nachspeisung haben, wenn
+-- kontinuierlich Wasser benötigt wird." Chosen now: CR-08 unchanged (blocks every project, also without Nachspeisung / without
+-- Trinkwasser); the created select nachspeisung_medium_16941 (visible when nachspeisung_vorhanden) is emitted. Proposal:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din16941_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din16941_2 SELECT * FROM compliance_requirements WHERE id = 'abde6298-8210-450f-aeaa-db74eb9f12d2' AND md5(condition) = '39592755f916f12c7dc48efafa991e9d';
+-- UPDATE compliance_requirements SET condition = 'IF nachspeisung_medium_16941 == ''trinkwasser'' THEN rueckflusssicherung_typ IN {AA,AB}'
+--  WHERE id = 'abde6298-8210-450f-aeaa-db74eb9f12d2' AND md5(condition) = '39592755f916f12c7dc48efafa991e9d';
+-- UPDATE fields f SET visible_when = 'nachspeisung_medium_16941 == ''trinkwasser''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-02' AND s.code = 'DIN-EN-16941-2' AND f.symbol = 'rueckflusssicherung_typ' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- (the IF guard equals the rule's driver / op / literal, so the guard exemption then admits the rule.)
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition FROM compliance_requirements_archive_din16941_2 a WHERE c.id = a.id AND c.id = 'abde6298-8210-450f-aeaa-db74eb9f12d2';
+--           UPDATE fields … SET visible_when = NULL … WHERE f.symbol = 'rueckflusssicherung_typ' AND f.visible_when = 'nachspeisung_medium_16941 == ''trinkwasser''';
+--           DROP TABLE compliance_requirements_archive_din16941_2 (once G-2 / G-3 / G-7 / G-9 are final / rolled back).
+
+-- =====================================================================================================================
+-- din16941_2-G-3 · -04 / -02 · CR-13 'abstand_wurzeln_m >= 3' (block, unconditional) → conditional on speicher_lage == unterirdisch + consumer edit + visibility (REFUSED by the gate-aware guard)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L633 "Die Position der unterirdischen Speichereinrichtung muss einen Mindestabstand von 3 m von Bäumen oder Pflanzen einhalten,
+-- die ein größeres Wurzelsystem ausbilden. Eine Rasenfläche ist erlaubt. Pflanzen mit weniger als 3 m Abstand von der Speichereinrichtung
+-- können den Einbau von Wurzelschutz erfordern."; L306 / L308 (unterirdisch / oberirdisch). Capture: abstand_wurzeln_m is a required
+-- number on -04 B read by CR-13; speicher_lage is CREATED on -02 D (a create never sets consumer_worksheets). Chosen now: CR-13 and
+-- abstand_wurzeln_m unchanged (an above-ground tank is blocked by an inapplicable check). Proposal (three statements, one transaction):
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-EN-16941-2-04']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-02' AND s.code = 'DIN-EN-16941-2' AND f.symbol = 'speicher_lage' AND f.active
+--    AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din16941_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din16941_2 SELECT * FROM compliance_requirements WHERE id = 'f8a982cf-367b-49fe-b3a4-cd2c99f97e9d' AND md5(condition) = 'd081629d125f374b1687ef8b4fff48ff';
+-- UPDATE compliance_requirements SET condition = 'IF speicher_lage == ''unterirdisch'' THEN abstand_wurzeln_m >= 3'
+--  WHERE id = 'f8a982cf-367b-49fe-b3a4-cd2c99f97e9d' AND md5(condition) = 'd081629d125f374b1687ef8b4fff48ff';
+-- UPDATE fields f SET visible_when = 'speicher_lage == ''unterirdisch''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-04' AND s.code = 'DIN-EN-16941-2' AND f.symbol = 'abstand_wurzeln_m' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: consumer_worksheets = NULL on speicher_lage; condition from the archive by id; visible_when = NULL WHERE f.symbol = 'abstand_wurzeln_m' AND f.visible_when = 'speicher_lage == ''unterirdisch'''.
+
+-- =====================================================================================================================
+-- din16941_2-G-4 · -02 · new gate: Öffnung ≥ 400 mm, wenn kein Personenzugang vorgesehen ist (§5.4.8)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L327 "Für den Personenzugang müssen die Maße nach EN 476 berücksichtigt werden. Wenn kein Personenzugang vorgesehen ist,
+-- muss eine Öffnung (d.h. Breite einer rechtwinkligen oder Durchmesser einer runden Öffnung) mit mindestens 400 mm vorhanden sein."
+-- Capture: zugang_oeffnung_mm (-02 D, number, not required, validation_rules.raw 'zugang_oeffnung_mm >= 400' — display-dead, G-1);
+-- no gate reads it. Emitted: personenzugang (created boolean) and visible_when 'personenzugang == false' on zugang_oeffnung_mm.
+-- Proposal (block — "muss … vorhanden sein"; EN 476 is a bare reference, not encoded):
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'DIN-EN-16941-2-CR-20', 'Zugangsoeffnung mindestens 400 mm ohne Personenzugang',
+--        'IF personenzugang == false THEN zugang_oeffnung_mm >= 400', '§5.4.8', 'block',
+--        'Plan 3 (din16941_2-G-4): Wenn kein Personenzugang vorgesehen ist, muss eine Öffnung mit mindestens 400 mm vorhanden sein.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-EN-16941-2-02' AND s.code = 'DIN-EN-16941-2'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'DIN-EN-16941-2-CR-20');
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'DIN-EN-16941-2-CR-20' AND description LIKE 'Plan 3 (din16941_2-G-4)%';
+
+-- =====================================================================================================================
+-- din16941_2-G-5 · -03 · new gate (warn): nennkapazitaet ≤ speicher_max_50 (50 % des Tagesbedarfs, "normalerweise … ausreichend")
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L511 "Es wird empfohlen, die Speicherung von behandeltem Grauwasser zu minimieren. Da es im Allgemeinen eine unbegrenzte
+-- Nachlieferung von nicht behandeltem Grauwasser gibt, wird normalerweise eine Speicherung in Höhe von bis zu 50 \% des Tagesbedarfs
+-- ausreichend sein." Capture: nennkapazitaet (-02 D, l, required) is consumed by -03; D_G (Gl. 2 output) lives on -03. Emitted:
+-- speicher_max_50 = 0.5 * D_G on -03 J (scalar-only — NOT server-materialised, amendment D / din16941_2-I-1: a gate on it evaluates on
+-- the form and report only until the materialisation workstream lands). Severity warn ("normalerweise", "empfohlen").
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'DIN-EN-16941-2-CR-21', 'Speicherung behandelten Grauwassers bis 50 % des Tagesbedarfs',
+--        'nennkapazitaet <= speicher_max_50', '§6.1', 'warn',
+--        'Plan 3 (din16941_2-G-5): wird normalerweise eine Speicherung in Höhe von bis zu 50 % des Tagesbedarfs ausreichend sein (Empfehlung, Speicherung minimieren).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'DIN-EN-16941-2-CR-21');
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'DIN-EN-16941-2-CR-21' AND description LIKE 'Plan 3 (din16941_2-G-5)%';
+
+-- =====================================================================================================================
+-- din16941_2-G-6 · -01 / -04 · anlagentyp = direkt: §1 excludes direct-use systems without treatment; Anhang B a) restricts uses to non-spray / subsurface irrigation
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L140 "- direkte Anwendungssysteme ohne Aufbereitung;" (under L137 "Vom Anwendungsbereich dieses Dokuments ausgenommen sind:");
+-- L794 "Ist die Behandlung nicht Teil der Grauwassernutzugsanlage, sind Nutzungen auf unterirdische Bewässerung und Anwendungen ohne
+-- Versprühen beschränkt." Capture: anlagentyp (-01 C, enum direkt/kurzzeit/physikalisch_chemisch/biologisch/biologisch_mechanisch,
+-- consumed by -02); richtwert_spalte is created on -04. Emitted: direktnutzung_scope_bestaetigt (attest, visible for direkt) and the
+-- Anhang-B restriction text fill. Two proposals (the owner rules which, if any):
+-- (a) attest gate on -01: 'IF anlagentyp == ''direkt'' THEN direktnutzung_scope_bestaetigt == true' (block);
+-- (b) no-spray gate on -04 (needs anlagentyp → -04 consumer edit): 'IF anlagentyp == ''direkt'' THEN richtwert_spalte != ''sprueh''' (block).
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'DIN-EN-16941-2-CR-22', 'Direkte Nutzung ohne Behandlung: Anwendungsbereich und Nutzungsbeschraenkung bestaetigt',
+--        'IF anlagentyp == ''direkt'' THEN direktnutzung_scope_bestaetigt == true', '§1; Anhang B a)', 'block',
+--        'Plan 3 (din16941_2-G-6): direkte Anwendungssysteme ohne Aufbereitung sind vom Anwendungsbereich ausgenommen; Nutzungen auf unterirdische Bewässerung und Anwendungen ohne Versprühen beschränkt.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-EN-16941-2-01' AND s.code = 'DIN-EN-16941-2'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'DIN-EN-16941-2-CR-22');
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'DIN-EN-16941-2-CR-22' AND description LIKE 'Plan 3 (din16941_2-G-6)%';
+
+-- =====================================================================================================================
+-- din16941_2-G-7 · -02 · CR-09 'pumpe_trockenlaufschutz == true' (block, unconditional) → conditional on pumpe_erforderlich + visibility (REFUSED by the gate-aware guard)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L401 "Bei Anlagen, bei denen gesammeltes Grauwasser nicht durch Schwerkraft verteilt wird, müssen für eine kontinuierliche
+-- Verfügbarkeit des Grauwassers eine oder mehrere Pumpen vorgesehen werden."; L413 "Die Pumpe muss mit einem Trockenlaufschutz ausgerüstet
+-- sein" …. Capture: pumpe_erforderlich / pumpe_trockenlaufschutz / pumpensteuerung_handnot are booleans on -02 F; CR-09 reads
+-- pumpe_trockenlaufschutz. Emitted: visible_when 'pumpe_erforderlich == true' on pumpensteuerung_handnot only. Proposal:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din16941_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din16941_2 SELECT * FROM compliance_requirements WHERE id = '84ad74ba-a74d-4292-8e90-ec48196ef67f' AND md5(condition) = '3cd3afe4eb61a04e8242638f45f040b1';
+-- UPDATE compliance_requirements SET condition = 'IF pumpe_erforderlich == true THEN pumpe_trockenlaufschutz == true'
+--  WHERE id = '84ad74ba-a74d-4292-8e90-ec48196ef67f' AND md5(condition) = '3cd3afe4eb61a04e8242638f45f040b1';
+-- UPDATE fields f SET visible_when = 'pumpe_erforderlich == true' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-02' AND s.code = 'DIN-EN-16941-2' AND f.symbol = 'pumpe_trockenlaufschutz' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: condition from the archive by id; visible_when = NULL WHERE f.symbol = 'pumpe_trockenlaufschutz' AND f.visible_when = 'pumpe_erforderlich == true'.
+
+-- =====================================================================================================================
+-- din16941_2-G-8 · -03 · new gate: vereinfachtes Verfahren nur für Wohngebäude (§6.2.3)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L543 "Das vereinfachte Verfahren beruht auf der Abwägung folgender Annahmen und ist nur für Wohngebäude anwendbar:"; L521 "Wenn ein
+-- Grundstück als Standort für ein Hotel, Wohnheim oder ähnliche Unterbringungsarten vorgesehen ist, oder wenn mehr als ein Grundstück durch ein
+-- Grauwassersystem versorgt werden muss, sollte das differenzierte Verfahren angewendet werden." Emitted: wohngebaeude_bestaetigt
+-- (attest, visible under vereinfacht). Proposal (block — "nur … anwendbar"):
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'DIN-EN-16941-2-CR-23', 'Vereinfachtes Verfahren nur fuer Wohngebaeude',
+--        'IF berechnungsverfahren == ''vereinfacht'' THEN wohngebaeude_bestaetigt == true', '§6.2.3', 'block',
+--        'Plan 3 (din16941_2-G-8): Das vereinfachte Verfahren … ist nur für Wohngebäude anwendbar.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'DIN-EN-16941-2-CR-23');
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'DIN-EN-16941-2-CR-23' AND description LIKE 'Plan 3 (din16941_2-G-8)%';
+
+-- =====================================================================================================================
+-- din16941_2-R-1 · -03 · Gl. (1) Y_G over the 16 typed scalars → Y_G_rows (differenziert) / Y_G_vereinfacht (vereinfacht)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L557 "Die folgende Gleichung (1) muss zur Bestimmung des Grauwasserertrags, $Y_{\mathrm{G}}$, in Liter je Tag (l/d), angewendet
+-- werden:"; L560–L561 (Gl. 1); L547 "Beispiele für typische durchschnittliche tägliche Grauwassererträge und Bedarfsmengen sind in Anhang A
+-- (Tabelle A.1) enthalten."; L543 (vereinfacht nur Wohngebäude). Capture: Gl. 1 (verified_against_standard) reads the 16 required scalars
+-- Q_S … u_DW, all consumer-free; CR-12 reads Y_G. Plan 3 emits Y_G_rows (-03-D1, register-fed, materialised on save) and Y_G_vereinfacht
+-- (-03-D5, scalar-only). Chosen now: Gl. 1 unchanged; both twins are visible next to it.
+-- Why staged: replacing a verified equation is an always-sign-off class; the method switch needs both twins present
+-- (`evaluateFormula` requires every named input — a switch formula cannot read a null twin), so the ratified form is TWO rows guarded
+-- by the method, or ONE row 'Y_G = Y_G_rows' with the vereinfacht path typed into the register (60 l/(p·d) as one Dusche/Badewanne row).
+-- Proposal (one producer: Gl. 1 reads the register Σ; vereinfacht projects enter the Tab.-A.1 figure as a row — J-1 names the alternative):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_din16941_2 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_din16941_2 SELECT * FROM equations WHERE id = '72c7d660-c4c2-42a5-a67f-702dd6de6706' AND md5(formula) = '1e66d9d4b0078ea97a806c1e1680b97b';
+-- UPDATE equations SET formula = 'Y_G = Y_G_rows', input_symbols = ARRAY['Y_G_rows']::text[], verification_status = 'imported_unverified'
+--  WHERE id = '72c7d660-c4c2-42a5-a67f-702dd6de6706' AND md5(formula) = '1e66d9d4b0078ea97a806c1e1680b97b';
+-- COMMIT;
+-- Rollback: UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, verification_status = a.verification_status
+--             FROM equations_archive_din16941_2 a WHERE e.id = a.id AND e.id = '72c7d660-c4c2-42a5-a67f-702dd6de6706';
+--           DROP TABLE equations_archive_din16941_2 (once R-1 / R-2 are final / rolled back).
+-- After ratification the 16 scalars are retired (D-7) and the 'differenziert' visibility on the register is dropped (G-9).
+
+-- =====================================================================================================================
+-- din16941_2-R-2 · -03 · Gl. (2) D_G over the 7 typed scalars → D_G_rows (differenziert) / D_G_vereinfacht (vereinfacht)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L595 "Die folgende Gleichung (2) muss für die Bestimmung des Grauwasserbedarfs, $D_{\mathrm{G}}$, in Liter je Tag (l/d) angewendet
+-- werden, wenn das behandelte Grauwasser z. B. für die Toiletten- und Urinalspülung, zum Reinigen von Wäsche, zur Gartenbewässerung, für
+-- Reinigungsarbeiten usw. genutzt wird."; L600 (Gl. 2); L597 (WC types). Capture: Gl. 2 reads V_T, u_T, V_U, u_U, V_WM_d, u_WM_d, V_misc.
+-- Plan 3 emits D_G_rows (-03-D3, register-fed + V_misc) and D_G_vereinfacht (-03-D6). Same shape as R-1:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_din16941_2 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_din16941_2 SELECT * FROM equations WHERE id = '4e9bae2a-d1b9-43d9-975f-b56e99395557' AND md5(formula) = 'cb3ebecbed0ac64307f3b99dcde38a99';
+-- UPDATE equations SET formula = 'D_G = D_G_rows', input_symbols = ARRAY['D_G_rows']::text[], verification_status = 'imported_unverified'
+--  WHERE id = '4e9bae2a-d1b9-43d9-975f-b56e99395557' AND md5(formula) = 'cb3ebecbed0ac64307f3b99dcde38a99';
+-- COMMIT;
+-- Rollback: UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, verification_status = a.verification_status
+--             FROM equations_archive_din16941_2 a WHERE e.id = a.id AND e.id = '4e9bae2a-d1b9-43d9-975f-b56e99395557'.
+
+-- =====================================================================================================================
+-- din16941_2-G-9 · -03 · hide the 23 Gl.-1 / Gl.-2 scalars under berechnungsverfahren == 'vereinfacht' (NOT emitted: CR-12 chain)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: Q_S, t_S, u_S, V_BT, u_BT, Q_HWB, t_HWB, u_HWB, V_WM_y, u_WM_y, Q_KS, t_KS, u_KS, V_DW, u_DW (-03 D) and V_T, u_T, V_U, u_U,
+-- V_WM_d, u_WM_d, V_misc (-03 E) are consumer-free (the guards accept a rule on them) but feed Y_G / D_G, which CR-12 'Y_G IS NOT NULL
+-- AND D_G IS NOT NULL AND bemessungswert_massgebend IS NOT NULL' (block) reads: hidden inputs ⇒ Gl. 1 / 2 null ⇒ CR-12 FAILS for every
+-- vereinfacht project (today an engineer can still type the scalars and pass). That is an enforcement change the guards cannot see.
+-- Chosen now: the scalars stay visible; the created registers / outputs carry the differenziert rule and the Tab.-A.1 twins the
+-- vereinfacht rule. Apply only together with R-1 / R-2 (then Gl. 1 / 2 read the register Σ and the scalars have no reader):
+-- UPDATE fields f SET visible_when = 'berechnungsverfahren == ''differenziert''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2' AND f.active AND f.visible_when IS NULL
+--    AND f.symbol IN ('Q_S','t_S','u_S','V_BT','u_BT','Q_HWB','t_HWB','u_HWB','V_WM_y','u_WM_y','Q_KS','t_KS','u_KS','V_DW','u_DW','V_T','u_T','V_U','u_U','V_WM_d','u_WM_d','V_misc');
+-- Rollback: … SET visible_when = NULL … WHERE … AND f.visible_when = 'berechnungsverfahren == ''differenziert'''.
+
+-- =====================================================================================================================
+-- din16941_2-D-1 · -04 · bewertung_status (manual enum gruen/gelb/rot, consumed by -05, read by CR-17) ↔ status_letzte_probe (register-derived)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L703 "Die Ergebnisse aus der bakteriologischen Überwachung können mit Hilfe von Tabelle D. 3 beurteilt werden. Die Ergebnisse der
+-- allgemeinen Systemüberwachung sollten mit Hilfe von Tabelle D. 4 beurteilt werden."; L884–L886 / L900–L901 (bands). Chosen now: the manual
+-- enum stays (CR-17 keeps reading it); status_letzte_probe / probenahmen_rot / probenahmen_gelb are visible twins. On ratification either
+-- (a) a new equation 'bewertung_status_code = status_letzte_probe' cannot feed an ENUM field (engine outputs are numbers) → retire
+-- bewertung_status (active = false), re-point CR-17 to 'probenahmestelle_im_verteilsystem IS NOT NULL AND probenahmen_count >= 1' and add
+-- 'probenahmen_rot == 0' (block) — or (b) keep the enum as the engineer's ruling with a warn gate 'status_letzte_probe < 3'. Owner's ruling.
+-- (a):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din16941_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din16941_2 SELECT * FROM compliance_requirements WHERE id = 'fee8488b-73c9-4221-9252-52fb40b12ab3' AND md5(condition) = '3cdacd1e92ae5bc8533de7dbc98381fb';
+-- UPDATE compliance_requirements SET condition = 'probenahmestelle_im_verteilsystem IS NOT NULL AND probenahmen_count >= 1 AND probenahmen_rot == 0'
+--  WHERE id = 'fee8488b-73c9-4221-9252-52fb40b12ab3' AND md5(condition) = '3cdacd1e92ae5bc8533de7dbc98381fb';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-04' AND s.code = 'DIN-EN-16941-2' AND f.symbol = 'bewertung_status' AND f.active;
+-- COMMIT;
+-- Rollback: condition from the archive by id; UPDATE fields … SET active = true … WHERE f.symbol = 'bewertung_status' AND NOT f.active.
+
+-- =====================================================================================================================
+-- din16941_2-D-2 · -04 / -01 · richtwert_spalte (created select) ↔ vorgesehene_nutzung (+ Sprüh) — derive on the consumer edit (C-1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L850–L851 (the four printed columns: "SprühAnwendung / Hochdruckreinigung, Gartensprenger und Autowäsche" | "WC-Spülung" |
+-- "Garten bewässerung" | "Reinigung, d. h. Waschmaschine"); L695 "Weitere Untersuchungen und die zu untersuchenden Parameter hängen von der
+-- Nutzung des Grauwassers ab ." Capture: vorgesehene_nutzung (-01 A, wc_spuelung / gartenbewaesserung / waesche / reinigung) is consumed by
+-- -02 / -03 only; prod has no Sprüh token. Chosen now: the engineer picks the column on -04 (everything computes today). On ratification:
+-- (C-1) UPDATE fields f SET consumer_worksheets = ARRAY['DIN-EN-16941-2-02','DIN-EN-16941-2-03','DIN-EN-16941-2-04']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-01' AND s.code = 'DIN-EN-16941-2' AND f.symbol = 'vorgesehene_nutzung' AND f.active
+--    AND f.consumer_worksheets = ARRAY['DIN-EN-16941-2-02','DIN-EN-16941-2-03']::text[];
+-- then either add a Sprüh boolean on -01 (also consumed by -04) and a plausibility badge on -04
+-- ('IF sprueh_anwendung == true THEN richtwert_spalte == ''sprueh''' / 'IF sprueh_anwendung == false THEN richtwert_spalte != ''sprueh''',
+-- warn), or add a fifth token 'sprueh' to vorgesehene_nutzung (D-1: never overwrite enum_values without this ruling) and retire
+-- richtwert_spalte. Rollback of C-1: consumer_worksheets back to {-02, -03}.
+
+-- =====================================================================================================================
+-- din16941_2-D-3 · -02 · nennkapazitaet (required number, consumed by -03) ↔ speichereinrichtungen / nennkapazitaet_sum
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L300 "Die Nennkapazität ist das maximale Wasservolumen, das in der Speichereinrichtung zurückgehalten werden kann, und ist vom
+-- Hersteller oder Planer anzugeben."; L296 "Einzelne Speichereinrichtungen dürfen miteinander verbunden werden." Chosen now: both stay
+-- (the scalar is what -03 inherits). On ratification: 'nennkapazitaet = nennkapazitaet_sum' as a new equation on -02 (input_symbols
+-- {nennkapazitaet_sum}; the required input becomes engine-owned) — register-fed via the twin, so it materialises on save:
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status)
+-- SELECT gen_random_uuid(), w.id, 'DIN-EN-16941-2-02-D0', 'nennkapazitaet = nennkapazitaet_sum', ARRAY['nennkapazitaet_sum']::text[], 'nennkapazitaet', 'l', '§5.4.3, §5.4.4',
+--        'Plan 3 (din16941_2-D-3): Nennkapazität = Σ der verbundenen Speichereinrichtungen (Register).', 'imported_unverified'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-EN-16941-2-02' AND s.code = 'DIN-EN-16941-2'
+--    AND NOT EXISTS (SELECT 1 FROM equations e WHERE e.worksheet_template_id = w.id AND e.equation_number = 'DIN-EN-16941-2-02-D0');
+-- Rollback: DELETE FROM equations WHERE equation_number = 'DIN-EN-16941-2-02-D0' AND description LIKE 'Plan 3 (din16941_2-D-3)%'.
+
+-- =====================================================================================================================
+-- din16941_2-D-4 · -04 · the eight single-sample scalars ecoli_kbe / enterokokken_kbe / legionella_kbe / gesamt_coliforme_kbe / truebung_ntu / ph_wert / rest_chlor / rest_brom ↔ probenahmen columns (N samples)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L697 "Alle Proben müssen als Stichproben während der laufenden Behandlung im Grauwassersystem entnommen werden."; L885 "erneute
+-- Probenahme zur Bestätigung des Ergebnisses" (several samples over time). Capture: the eight scalars are optional numbers on -04 E with no
+-- consumers and no gate (CR-17 reads bewertung_status and probenahmestelle_im_verteilsystem). Chosen now: all eight stay (the emitted rules
+-- hide legionella_kbe outside Sprühanwendung and truebung_ntu for Gartenbewässerung). On ratification (with D-1): retire the eight
+-- (active = false) — the register carries every sample:
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-04' AND s.code = 'DIN-EN-16941-2' AND f.active
+--    AND f.symbol IN ('ecoli_kbe','enterokokken_kbe','legionella_kbe','gesamt_coliforme_kbe','truebung_ntu','ph_wert','rest_chlor','rest_brom');
+-- Rollback: … SET active = true … WHERE … AND NOT f.active.
+
+-- =====================================================================================================================
+-- din16941_2-D-5 · -03 · bemessungswert_massgebend (required manual number, CR-12, consumed by -02 / -04; validation_rules.raw '== min(Y_G, D_G)') ↔ bemessungswert_massgebend_calc
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L511 "Für die Gesamtauslegung des Systems muss der niedrigste berechnete Wert für den Ertrag oder den Bedarf verwendet werden."
+-- Chosen now: the manual field stays; the twin is visible. On ratification: 'bemessungswert_massgebend = min(Y_G, D_G)' as a new equation
+-- on -03 (scalar-only — display / report / snapshot until the materialisation workstream; the inherited copies on -02 / -04 keep reading the
+-- stored parameter, din16941_2-I-1):
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status)
+-- SELECT gen_random_uuid(), w.id, 'DIN-EN-16941-2-03-D0', 'bemessungswert_massgebend = min(Y_G, D_G)', ARRAY['Y_G','D_G']::text[], 'bemessungswert_massgebend', 'l/d', '§6.1',
+--        'Plan 3 (din16941_2-D-5): der niedrigste berechnete Wert für den Ertrag oder den Bedarf.', 'imported_unverified'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2'
+--    AND NOT EXISTS (SELECT 1 FROM equations e WHERE e.worksheet_template_id = w.id AND e.equation_number = 'DIN-EN-16941-2-03-D0');
+-- Rollback: DELETE FROM equations WHERE equation_number = 'DIN-EN-16941-2-03-D0' AND description LIKE 'Plan 3 (din16941_2-D-5)%'.
+
+-- =====================================================================================================================
+-- din16941_2-D-6 · -02 · speicher_werkstoff (required enum, one value) ↔ speichereinrichtungen.werkstoff (per tank)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L292 "Die Werkstoffe (z. B. Beton, Stahl, Polyvinylchlorid (PVC-U), Polyethylen (PE), Polypropylen (PP), glasfaserverstärkter
+-- Kunststoff (GRP-UP)), die für Speichereinrichtungen verwendet werden, müssen den in EN 12566-3 beschriebenen Werkstoffeigenschaften
+-- entsprechen." Chosen now: both stay (the register column uses the same six prod tokens). On ratification: retire speicher_werkstoff
+-- (active = false); rollback active = true.
+
+-- =====================================================================================================================
+-- din16941_2-D-7 · -03 · the 16 Gl.-1 scalars Q_S, t_S, u_S, V_BT, u_BT, Q_HWB, t_HWB, u_HWB, V_WM_y, u_WM_y, Q_KS, t_KS, u_KS, V_DW, u_DW (all required) ↔ grauwasserquellen_16941 rows
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L560–L561 (Gl. 1 — one term per source); L219 "Menge und Verschmutzung der unterschiedlichen Arten von Grauwasser hängen von
+-- dessen Herkunft ab." Chosen now: all 16 stay (Gl. 1 reads them; every one is_required today, so a project without a dishwasher must still
+-- type V_DW / u_DW). On ratification of R-1: retire the 16 (active = false) — the register carries only the connected sources:
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-EN-16941-2-03' AND s.code = 'DIN-EN-16941-2' AND f.active
+--    AND f.symbol IN ('Q_S','t_S','u_S','V_BT','u_BT','Q_HWB','t_HWB','u_HWB','V_WM_y','u_WM_y','Q_KS','t_KS','u_KS','V_DW','u_DW');
+-- Rollback: … SET active = true … WHERE … AND NOT f.active. X-2: V_WM_y / u_WM_y and V_WM_d / u_WM_d type the same appliance twice.
+
+-- =====================================================================================================================
+-- din16941_2-D-8 · -03 · the 6 Gl.-2 scalars V_T, u_T (required), V_U, u_U, V_WM_d, u_WM_d ↔ bedarfsstellen rows; V_misc stays a scalar
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L600 (Gl. 2); L597 "Wenn mehr als ein WC-Typ angeschlossen ist, kann der Bedarf für jedes einzelne WC berechnet werden, oder es
+-- kann angenommen werden, dass alle WCs gleich benutzt werden."; L619 "$V_{\text {misc }}$ & ist das für andere Zwecke erforderliche
+-- Wasservolumen (z. B. Gartenbewässerung, Reinigung) in Liter je Tag (l/d)." Chosen now: all six stay. On ratification of R-2: retire the six
+-- (active = false); rollback active = true.

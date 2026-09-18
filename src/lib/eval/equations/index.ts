@@ -20,5 +20,6 @@ export const EQUATION_MODULES: Record<string, () => Promise<EquationModule>> = {
   m187: () => import('./m187'),
   din276: () => import('./din276'),
   a178: () => import('./a178'),
+  din16941_2: () => import('./din16941_2'),
   // Plan-3 tasks append one line each, e.g. din16941_2: () => import('./din16941_2'),
 };

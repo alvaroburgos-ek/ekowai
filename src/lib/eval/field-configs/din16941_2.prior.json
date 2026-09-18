@@ -1,0 +1,1774 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DIN-EN-16941-2 din16941_2",
+    "captured_at": "2026-09-18T08:45:25.277Z",
+    "standard": "DIN-EN-16941-2",
+    "slug": "din16941_2",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 76,
+    "section_rows": 36,
+    "sections_total": 36,
+    "equation_rows": 2,
+    "gate_rows": 19
+  },
+  "DIN-EN-16941-2-01 anlagen_id": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-EN-16941-2-01 anlagentyp": {
+    "enum_values": [
+      {
+        "value": "direkt",
+        "label_de": "Anlage fuer direkte Nutzung (ohne Behandlung)",
+        "label_en": "Direct use system (no treatment)",
+        "order_index": 1,
+        "regulation_reference": "Anhang B a)"
+      },
+      {
+        "value": "kurzzeit",
+        "label_de": "Anlage mit kurzzeitiger Rueckhaltung",
+        "label_en": "Short-retention system",
+        "order_index": 2,
+        "regulation_reference": "Anhang B b)"
+      },
+      {
+        "value": "physikalisch_chemisch",
+        "label_de": "Einfache physikalische/chemische Anlage",
+        "label_en": "Simple physical/chemical system",
+        "order_index": 3,
+        "regulation_reference": "Anhang B c)"
+      },
+      {
+        "value": "biologisch",
+        "label_de": "Biologische Anlage",
+        "label_en": "Biological system",
+        "order_index": 4,
+        "regulation_reference": "Anhang B d)"
+      },
+      {
+        "value": "biologisch_mechanisch",
+        "label_de": "Biologisch-mechanische Anlage",
+        "label_en": "Biological-mechanical system",
+        "order_index": 5,
+        "regulation_reference": "Anhang B e)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-02"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-EN-16941-2-01 betriebssicherheit_gewaehrleistet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-EN-16941-2-01 grauwasser_herkunft": {
+    "enum_values": [
+      {
+        "value": "dusche",
+        "label_de": "Dusche",
+        "label_en": "Shower",
+        "order_index": 1,
+        "regulation_reference": "§4"
+      },
+      {
+        "value": "badewanne",
+        "label_de": "Badewanne",
+        "label_en": "Bathtub",
+        "order_index": 2,
+        "regulation_reference": "§4"
+      },
+      {
+        "value": "waschbecken",
+        "label_de": "Handwaschbecken",
+        "label_en": "Wash basin",
+        "order_index": 3,
+        "regulation_reference": "§4"
+      },
+      {
+        "value": "waschmaschine",
+        "label_de": "Waschmaschine",
+        "label_en": "Washing machine",
+        "order_index": 4,
+        "regulation_reference": "§4"
+      },
+      {
+        "value": "kuechenspuele",
+        "label_de": "Kuechenspuele",
+        "label_en": "Kitchen sink",
+        "order_index": 5,
+        "regulation_reference": "§4"
+      },
+      {
+        "value": "geschirrspueler",
+        "label_de": "Geschirrspueler",
+        "label_en": "Dishwasher",
+        "order_index": 6,
+        "regulation_reference": "§4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-02"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-EN-16941-2-01 ueberflutungsschutz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-EN-16941-2-01 vorgesehene_nutzung": {
+    "enum_values": [
+      {
+        "value": "wc_spuelung",
+        "label_de": "WC-Spuelung",
+        "label_en": "WC flushing",
+        "order_index": 1,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "gartenbewaesserung",
+        "label_de": "Gartenbewaesserung",
+        "label_en": "Garden irrigation",
+        "order_index": 2,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "waesche",
+        "label_de": "Reinigung von Waesche",
+        "label_en": "Laundry washing",
+        "order_index": 3,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "reinigung",
+        "label_de": "Reinigung von Gegenstaenden",
+        "label_en": "Cleaning of objects",
+        "order_index": 4,
+        "regulation_reference": "§1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-02",
+      "DIN-EN-16941-2-03"
+    ],
+    "data_type": "enum",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "DIN-EN-16941-2-02 anlagensteuerung_bms_ausgang": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "G"
+    ]
+  },
+  "DIN-EN-16941-2-02 anlagensteuerung_vorhanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "G"
+    ]
+  },
+  "DIN-EN-16941-2-02 behandlung_erreicht_qualitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-04"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-EN-16941-2-02 behandlungsstufen": {
+    "enum_values": [
+      {
+        "value": "sedimentation_flotation",
+        "label_de": "Sedimentation/Flotation",
+        "label_en": "Sedimentation/flotation",
+        "order_index": 1,
+        "regulation_reference": "§5.3 a)"
+      },
+      {
+        "value": "siebung",
+        "label_de": "Siebung",
+        "label_en": "Screening",
+        "order_index": 2,
+        "regulation_reference": "§5.3 b)"
+      },
+      {
+        "value": "mechanische_filtration",
+        "label_de": "Mechanische Filtration von Feinpartikeln",
+        "label_en": "Mechanical fine-particle filtration",
+        "order_index": 3,
+        "regulation_reference": "§5.3 c)"
+      },
+      {
+        "value": "biologisch",
+        "label_de": "Biologische Behandlung",
+        "label_en": "Biological treatment",
+        "order_index": 4,
+        "regulation_reference": "§5.3 d)"
+      },
+      {
+        "value": "chemisch",
+        "label_de": "Chemische Behandlung",
+        "label_en": "Chemical treatment",
+        "order_index": 5,
+        "regulation_reference": "§5.3 e)"
+      },
+      {
+        "value": "desinfektion",
+        "label_de": "Desinfektion (z. B. UV)",
+        "label_en": "Disinfection (e.g. UV)",
+        "order_index": 6,
+        "regulation_reference": "§5.3 f)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-EN-16941-2-02 bypass_vorhanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-EN-16941-2-02 getrennte_sammlung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-EN-16941-2-02 keine_querverbindungen_verteilung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-04"
+    ],
+    "data_type": "boolean",
+    "section_code": "H",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "H"
+    ]
+  },
+  "DIN-EN-16941-2-02 nachspeisung_steuerung_auto": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-02 nachspeisung_vorhanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-02 nennkapazitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-03"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-02 pumpe_erforderlich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "F"
+    ]
+  },
+  "DIN-EN-16941-2-02 pumpe_trockenlaufschutz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "F"
+    ]
+  },
+  "DIN-EN-16941-2-02 pumpensteuerung_handnot": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "F"
+    ]
+  },
+  "DIN-EN-16941-2-02 rueckflusssicherung_typ": {
+    "enum_values": [
+      {
+        "value": "AA",
+        "label_de": "Freier Auslauf AA (ungehindert, EN 13076)",
+        "label_en": "Air gap AA (unrestricted, EN 13076)",
+        "order_index": 1,
+        "regulation_reference": "§5.5.2"
+      },
+      {
+        "value": "AB",
+        "label_de": "Freier Auslauf AB (nicht kreisfoermiger Ueberlauf, EN 13077)",
+        "label_en": "Air gap AB (non-circular overflow, EN 13077)",
+        "order_index": 2,
+        "regulation_reference": "§5.5.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-02 sammlung_bemessung_en12056": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-EN-16941-2-02 speicher_lichtundurchlaessig": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-02 speicher_werkstoff": {
+    "enum_values": [
+      {
+        "value": "beton",
+        "label_de": "Beton",
+        "label_en": "Concrete",
+        "order_index": 1,
+        "regulation_reference": "§5.4.2"
+      },
+      {
+        "value": "stahl",
+        "label_de": "Stahl",
+        "label_en": "Steel",
+        "order_index": 2,
+        "regulation_reference": "§5.4.2"
+      },
+      {
+        "value": "pvc_u",
+        "label_de": "Polyvinylchlorid (PVC-U)",
+        "label_en": "PVC-U",
+        "order_index": 3,
+        "regulation_reference": "§5.4.2"
+      },
+      {
+        "value": "pe",
+        "label_de": "Polyethylen (PE)",
+        "label_en": "PE",
+        "order_index": 4,
+        "regulation_reference": "§5.4.2"
+      },
+      {
+        "value": "pp",
+        "label_de": "Polypropylen (PP)",
+        "label_en": "PP",
+        "order_index": 5,
+        "regulation_reference": "§5.4.2"
+      },
+      {
+        "value": "grp_up",
+        "label_de": "Glasfaserverstaerkter Kunststoff (GRP-UP)",
+        "label_en": "GRP-UP",
+        "order_index": 6,
+        "regulation_reference": "§5.4.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-02 standsicherheit_nachgewiesen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-04"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-02 ueberlauf_kapazitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-02 ueberlauf_vorhanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-02 warnsystem_ventilzulauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-02 wasserdichtheit_nachgewiesen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-04"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-02 wasserzaehler_vorgesehen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "G"
+    ]
+  },
+  "DIN-EN-16941-2-02 zufluss_kapazitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-02 zugang_oeffnung_mm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 bemessungswert_massgebend": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-02",
+      "DIN-EN-16941-2-04"
+    ],
+    "data_type": "number",
+    "section_code": "J",
+    "section_id_is_null": false,
+    "section_path": [
+      "J"
+    ]
+  },
+  "DIN-EN-16941-2-03 berechnungsverfahren": {
+    "enum_values": [
+      {
+        "value": "vereinfacht",
+        "label_de": "Vereinfachtes Verfahren (nur Wohngebaeude)",
+        "label_en": "Simplified method (residential only)",
+        "order_index": 1,
+        "regulation_reference": "§6.2.3"
+      },
+      {
+        "value": "differenziert",
+        "label_de": "Differenziertes Verfahren",
+        "label_en": "Differentiated method",
+        "order_index": 2,
+        "regulation_reference": "§6.2.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-EN-16941-2-03 D_G": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-03 n": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-EN-16941-2-03 Q_HWB": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 Q_KS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 Q_S": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 t_HWB": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 t_KS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 t_S": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 u_BT": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 u_DW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 u_HWB": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 u_KS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 u_S": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 u_T": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-03 u_U": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-03 u_WM_d": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-03 u_WM_y": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 V_BT": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 V_DW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 V_misc": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-03 V_T": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-03 V_U": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-03 V_WM_d": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-03 V_WM_y": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-03 Y_G": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-04 abstand_wurzeln_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-EN-16941-2-04 bewertung_status": {
+    "enum_values": [
+      {
+        "value": "gruen",
+        "label_de": "Gruen - System unter Kontrolle (< G)",
+        "label_en": "Green - system under control (< G)",
+        "order_index": 1,
+        "regulation_reference": "Tab.D.3"
+      },
+      {
+        "value": "gelb",
+        "label_de": "Gelb - erneute Probenahme (G bis 10 G)",
+        "label_en": "Yellow - resample (G to 10 G)",
+        "order_index": 2,
+        "regulation_reference": "Tab.D.3"
+      },
+      {
+        "value": "rot",
+        "label_de": "Rot - Nutzung ausschliessen (> 10 G)",
+        "label_en": "Red - exclude use (> 10 G)",
+        "order_index": 3,
+        "regulation_reference": "Tab.D.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-05"
+    ],
+    "data_type": "enum",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-04 dichtheitspruefung_bestanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-04 ecoli_kbe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-04 enterokokken_kbe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-04 gesamt_coliforme_kbe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-04 inbetriebnahmeprotokoll_erstellt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "L",
+    "section_id_is_null": false,
+    "section_path": [
+      "L"
+    ]
+  },
+  "DIN-EN-16941-2-04 kennzeichnung_nicht_trinkwasser": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-EN-16941-2-04 legionella_kbe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-04 ph_wert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-04 probenahmestelle_im_verteilsystem": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-04 querverbindungstest_ergebnis": {
+    "enum_values": [
+      {
+        "value": "bestanden",
+        "label_de": "BESTANDEN",
+        "label_en": "PASS",
+        "order_index": 1,
+        "regulation_reference": "Anhang C"
+      },
+      {
+        "value": "nicht_bestanden",
+        "label_de": "NICHT BESTANDEN (unzulaessige Querverbindung)",
+        "label_en": "FAIL (impermissible cross-connection)",
+        "order_index": 2,
+        "regulation_reference": "Anhang C"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-EN-16941-2-05"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-EN-16941-2-04 rest_brom": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-04 rest_chlor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-04 truebung_ntu": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-EN-16941-2-05 betriebstagebuch_gefuehrt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-EN-16941-2-05 risikobewertung_durchgefuehrt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-EN-16941-2-05 wartungsanleitung_verfuegbar": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "sections": {
+    "DIN-EN-16941-2-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-01 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-01 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-01 K": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-02 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-02 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-02 D": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-02 E": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-02 F": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-02 G": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-02 H": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-02 K": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-03 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-03 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-03 D": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-03 E": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-03 K": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-04 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-04 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-04 D": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-04 E": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-04 K": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-EN-16941-2-05 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-05 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-05 K": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-EN-16941-2-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "DIN-EN-16941-2-03 1": {
+      "id": "72c7d660-c4c2-42a5-a67f-702dd6de6706",
+      "output_symbol": "Y_G",
+      "input_symbols": [
+        "n",
+        "Q_S",
+        "t_S",
+        "u_S",
+        "V_BT",
+        "u_BT",
+        "Q_HWB",
+        "t_HWB",
+        "u_HWB",
+        "V_WM_y",
+        "u_WM_y",
+        "Q_KS",
+        "t_KS",
+        "u_KS",
+        "V_DW",
+        "u_DW"
+      ]
+    },
+    "DIN-EN-16941-2-03 2": {
+      "id": "4e9bae2a-d1b9-43d9-975f-b56e99395557",
+      "output_symbol": "D_G",
+      "input_symbols": [
+        "n",
+        "V_T",
+        "u_T",
+        "V_U",
+        "u_U",
+        "V_WM_d",
+        "u_WM_d",
+        "V_misc"
+      ]
+    }
+  },
+  "gates": {
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-01": {
+      "condition": "getrennte_sammlung == true",
+      "severity": "block",
+      "symbols": [
+        "getrennte_sammlung"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-02": {
+      "condition": "bypass_vorhanden == true",
+      "severity": "block",
+      "symbols": [
+        "bypass_vorhanden"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-03": {
+      "condition": "behandlung_erreicht_qualitaet == true",
+      "severity": "block",
+      "symbols": [
+        "behandlung_erreicht_qualitaet"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-04": {
+      "condition": "speicher_lichtundurchlaessig == true",
+      "severity": "block",
+      "symbols": [
+        "speicher_lichtundurchlaessig"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-05": {
+      "condition": "standsicherheit_nachgewiesen == true",
+      "severity": "block",
+      "symbols": [
+        "standsicherheit_nachgewiesen"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-06": {
+      "condition": "wasserdichtheit_nachgewiesen == true",
+      "severity": "block",
+      "symbols": [
+        "wasserdichtheit_nachgewiesen"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-07": {
+      "condition": "ueberlauf_kapazitaet >= zufluss_kapazitaet",
+      "severity": "block",
+      "symbols": [
+        "ueberlauf_kapazitaet",
+        "zufluss_kapazitaet"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-08": {
+      "condition": "rueckflusssicherung_typ IN {AA,AB}",
+      "severity": "block",
+      "symbols": [
+        "rueckflusssicherung_typ"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-09": {
+      "condition": "pumpe_trockenlaufschutz == true",
+      "severity": "block",
+      "symbols": [
+        "pumpe_trockenlaufschutz"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-10": {
+      "condition": "anlagensteuerung_vorhanden == true",
+      "severity": "block",
+      "symbols": [
+        "anlagensteuerung_vorhanden"
+      ]
+    },
+    "DIN-EN-16941-2-02 DIN-EN-16941-2-CR-11": {
+      "condition": "keine_querverbindungen_verteilung == true",
+      "severity": "block",
+      "symbols": [
+        "keine_querverbindungen_verteilung"
+      ]
+    },
+    "DIN-EN-16941-2-03 DIN-EN-16941-2-CR-12": {
+      "condition": "Y_G IS NOT NULL AND D_G IS NOT NULL AND bemessungswert_massgebend IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "D_G",
+        "Y_G",
+        "bemessungswert_massgebend"
+      ]
+    },
+    "DIN-EN-16941-2-04 DIN-EN-16941-2-CR-13": {
+      "condition": "abstand_wurzeln_m >= 3",
+      "severity": "block",
+      "symbols": [
+        "abstand_wurzeln_m"
+      ]
+    },
+    "DIN-EN-16941-2-04 DIN-EN-16941-2-CR-14": {
+      "condition": "kennzeichnung_nicht_trinkwasser == true",
+      "severity": "block",
+      "symbols": [
+        "kennzeichnung_nicht_trinkwasser"
+      ]
+    },
+    "DIN-EN-16941-2-04 DIN-EN-16941-2-CR-15": {
+      "condition": "querverbindungstest_ergebnis == bestanden",
+      "severity": "block",
+      "symbols": [
+        "querverbindungstest_ergebnis"
+      ]
+    },
+    "DIN-EN-16941-2-04 DIN-EN-16941-2-CR-16": {
+      "condition": "inbetriebnahmeprotokoll_erstellt == true",
+      "severity": "block",
+      "symbols": [
+        "inbetriebnahmeprotokoll_erstellt"
+      ]
+    },
+    "DIN-EN-16941-2-04 DIN-EN-16941-2-CR-17": {
+      "condition": "probenahmestelle_im_verteilsystem IS NOT NULL AND bewertung_status IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "bewertung_status",
+        "probenahmestelle_im_verteilsystem"
+      ]
+    },
+    "DIN-EN-16941-2-05 DIN-EN-16941-2-CR-18": {
+      "condition": "risikobewertung_durchgefuehrt == true",
+      "severity": "block",
+      "symbols": [
+        "risikobewertung_durchgefuehrt"
+      ]
+    },
+    "DIN-EN-16941-2-05 DIN-EN-16941-2-CR-19": {
+      "condition": "betriebstagebuch_gefuehrt == true",
+      "severity": "block",
+      "symbols": [
+        "betriebstagebuch_gefuehrt"
+      ]
+    }
+  }
+}

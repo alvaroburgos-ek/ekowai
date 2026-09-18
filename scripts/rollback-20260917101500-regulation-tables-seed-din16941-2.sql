@@ -1,0 +1,11 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'DIN-EN-16941-2' AND edition = '2021' AND table_code = 'TABA1';
+DELETE FROM regulation_tables WHERE standard_code = 'DIN-EN-16941-2' AND edition = '2021' AND table_code = 'TABA2';
+DELETE FROM regulation_tables WHERE standard_code = 'DIN-EN-16941-2' AND edition = '2021' AND table_code = 'TABA3';
+DELETE FROM regulation_tables WHERE standard_code = 'DIN-EN-16941-2' AND edition = '2021' AND table_code = 'GL1_LEGENDE';
+DELETE FROM regulation_tables WHERE standard_code = 'DIN-EN-16941-2' AND edition = '2021' AND table_code = 'TABD1';
+DELETE FROM regulation_tables WHERE standard_code = 'DIN-EN-16941-2' AND edition = '2021' AND table_code = 'TABD2';
+DELETE FROM regulation_tables WHERE standard_code = 'DIN-EN-16941-2' AND edition = '2021' AND table_code = 'TABD3';
+DELETE FROM regulation_tables WHERE standard_code = 'DIN-EN-16941-2' AND edition = '2021' AND table_code = 'TABD4';
+DELETE FROM regulation_tables WHERE standard_code = 'DIN-EN-16941-2' AND edition = '2021' AND table_code = 'ANHANGB';
+COMMIT;

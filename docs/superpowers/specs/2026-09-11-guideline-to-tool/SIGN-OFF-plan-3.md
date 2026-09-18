@@ -3875,6 +3875,241 @@ Report: `reports/plan-3-a178.md` · STAGED SQL: `scripts/verification/a178-STAGE
 - **No worked numeric example is printed** (Anhang A is a flowchart) — every equation pin is hand-derived from the printed forms.
 - **`system_type` reach:** the single most valuable ratification for A-178 is C-1 — it lights up four prod gates and five emitted rules at once.
 
+## Task 15 — DIN-EN-16941-2 (din16941_2)
+
+Report: `reports/plan-3-din16941_2.md` · STAGED SQL: `scripts/verification/din16941_2-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-EN-16941-2\DIN-EN-16941-2.md` (lines cited; the LaTeX is quoted as printed) · prod capture `src/lib/eval/field-configs/din16941_2.prior.json` (2026-09-18, read-only; 76 fields / 36 sections / 2 equations / 19 gates, none with an empty or prose condition). Nothing below is applied. Class letters per the skeleton; S = data_type / carrier change, O = override-policy, J = judgment (encoding choice the text leaves open), I = interface-gap, X = cross-standard / prod observation.
+
+### din16941_2-S-1 · DIN-EN-16941-2 · -01 `grauwasser_herkunft` / -02 `behandlungsstufen` · single enum → `select_many` (carrier enum → json + widget + ui_config + value migration)
+- Class: data_type change (always sign-off)
+- Chosen now (fail-safe): NOT emitted, not even the widget/ui_config half the brief foresaw. Code fact (this session): a DB `widget = 'select_many'` on an ENUM field dispatches to `ChecklistEditor` (`src/components/worksheet/checklist-editor.tsx` L21 writes `{ type: 'json', value: { selected } }`) while the load path reads `extractValue(p, 'enum')` = `value_enum` (`src/lib/actions/worksheet.ts`) — selections would be lost on reload and the -02 consumer of `grauwasser_herkunft` would inherit null. Amendment J: not fail-safe → the whole switch is one STAGED transaction (data_type, widget, ui_config, `project_parameters` value migration, `fields_archive` rollback); `enum_values` untouched (D-1).
+- Evidence (verbatim, transcript line): "Zur Reduktion des Behandlungsaufwands sollte die Sammlung wie folgt präferiert werden:" (L531) "e) Duschen und Badewannen;" (L532) "f) Handwaschbecken;" (L533) "g) Waschmaschinen;" (L534) "h) Küchenspülen und/oder Geschirrspüler." (L535); "Behandlungsarten müssen einen oder mehrere der folgenden Teilschritte einschließen:" (L268)
+- Proposed SQL / config: STAGED block S-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-G-1 · DIN-EN-16941-2 · -03 / -04 · `validation_rules.raw` hard-limits the informative Tab. A.2 / A.3 ranges and the use-blind Tab. D.2 values
+- Class: data hygiene (gate text; not enforced today)
+- Chosen now (fail-safe): nothing changes. Code fact: `dynamic-field.tsx` reads `validation_rules.min / .max / .maxLength / .extensible` only — the eleven `raw` strings (`Q_S >= 5 AND Q_S <= 15` … `V_WM_d >= 30 AND V_WM_d <= 60`, `truebung_ntu < 10`, `rest_chlor < 2.0`, `rest_brom < 5.0`) are display-dead; the register hint badges carry the ranges as hints (SR-2).
+- Evidence (verbatim, transcript line): "Die folgende Tabelle A. 2 und Tabelle A. 3 enthalten typische Größenordnungen des Wasserverbrauchs zur Bestimmung des Grauwasserertrags und -bedarfs." (L753); "\hline Trübung (NTU) & < 10 & < 10 & N/A & < 10 & EN ISO 7027-1 & alle Systeme \\" (L870); "\hline Rest-Chlor (mg/l) & < 2,0 & < 2,0 & < 0,5 & < 2,0 & EN ISO 7393-2 & alle Systeme, wenn verwendet \\" (L872)
+- Proposed SQL / config: STAGED block G-1 — demote the eleven `raw` rules to `>= 0` before any future enforcement of `raw`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-G-2 · DIN-EN-16941-2 · -02 · CR-08 `rueckflusssicherung_typ IN {AA,AB}` (block, unconditional) + the Trinkwasser-conditional visibility of `rueckflusssicherung_typ` (refused by the gate-aware guard)
+- Class: gate condition change
+- Chosen now (fail-safe): CR-08 unchanged (it blocks projects without Nachspeisung and projects with a non-potable Nachspeisung alike); the created select `nachspeisung_medium_16941` (visible when `nachspeisung_vorhanden == true`) and the Trinkwasser-only attestation `geruchsverschluss_nachspeisung` are emitted; the rule on `rueckflusssicherung_typ` is refused (`read by gate DIN-EN-16941-2-CR-08`).
+- Evidence (verbatim, transcript line): "Im Falle einer Nachspeisung mit Trinkwasser muss das Trinkwassersystem mit einer geeigneten Sicherungseinrichtung ausgestattet sein (siehe 5.5.2)." (L350); "Die Grauwasserbehandlungsanlage muss eine Nachspeisung haben, wenn kontinuierlich Wasser benötigt wird." (L345)
+- Proposed SQL / config: STAGED block G-2 — `IF nachspeisung_medium_16941 == 'trinkwasser' THEN rueckflusssicherung_typ IN {AA,AB}` + the matching rule (the IF-guard exemption then admits it); archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-G-3 · DIN-EN-16941-2 · -04 / -02 · CR-13 `abstand_wurzeln_m >= 3` (block, unconditional) + `speicher_lage` → -04 + the unterirdisch-only visibility of `abstand_wurzeln_m` (refused by the gate-aware guard)
+- Class: gate condition change + consumer-edit
+- Chosen now (fail-safe): CR-13 and `abstand_wurzeln_m` (required) unchanged — an above-ground tank is blocked by an inapplicable check; `speicher_lage` is created on -02 D (its consumer list is empty by construction).
+- Evidence (verbatim, transcript line): "Die Position der unterirdischen Speichereinrichtung muss einen Mindestabstand von 3 m von Bäumen oder Pflanzen einhalten, die ein größeres Wurzelsystem ausbilden. Eine Rasenfläche ist erlaubt. Pflanzen mit weniger als 3 m Abstand von der Speichereinrichtung können den Einbau von Wurzelschutz erfordern." (L633); "Unterirdische Speichereinrichtungen müssen auftretenden Höchstlasten und Belastungen während Betrieb, Einbau, Nutzung und Wartung standhalten." (L306); "Oberirdische Speichereinrichtungen müssen der Wirkung von hydrostatischem Druck ohne übermäßige Verformung standhalten, ohne dass ihre Funktion nachteilig beeinflusst wird." (L308)
+- Proposed SQL / config: STAGED block G-3 — consumer edit + `IF speicher_lage == 'unterirdisch' THEN abstand_wurzeln_m >= 3` + rule; archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-G-4 · DIN-EN-16941-2 · -02 · new gate: Öffnung ≥ 400 mm when no Personenzugang is planned (§5.4.8)
+- Class: new gate
+- Chosen now (fail-safe): the created boolean `personenzugang` and `visible_when personenzugang == false` on `zugang_oeffnung_mm` are emitted (no gate reads it; its `raw` rule is display-dead, G-1); no gate is added.
+- Evidence (verbatim, transcript line): "Für den Personenzugang müssen die Maße nach EN 476 berücksichtigt werden. Wenn kein Personenzugang vorgesehen ist, muss eine Öffnung (d.h. Breite einer rechtwinkligen oder Durchmesser einer runden Öffnung) mit mindestens 400 mm vorhanden sein." (L327)
+- Proposed SQL / config: STAGED block G-4 — `IF personenzugang == false THEN zugang_oeffnung_mm >= 400` (block; EN 476 stays a bare reference).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-G-5 · DIN-EN-16941-2 · -03 · new warn gate: `nennkapazitaet <= speicher_max_50` (bis zu 50 % des Tagesbedarfs)
+- Class: new gate (warn — "normalerweise", "empfohlen")
+- Chosen now (fail-safe): `speicher_max_50 = 0.5 * D_G` is emitted on -03 J (D_G lives there; `nennkapazitaet` is inherited there) — scalar-only, so a gate on it evaluates on the form / report only (I-1); no gate is added.
+- Evidence (verbatim, transcript line): "Für die Gesamtauslegung des Systems muss der niedrigste berechnete Wert für den Ertrag oder den Bedarf verwendet werden. Es wird empfohlen, die Speicherung von behandeltem Grauwasser zu minimieren. Da es im Allgemeinen eine unbegrenzte Nachlieferung von nicht behandeltem Grauwasser gibt, wird normalerweise eine Speicherung in Höhe von bis zu 50 \% des Tagesbedarfs ausreichend sein." (L511)
+- Proposed SQL / config: STAGED block G-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-G-6 · DIN-EN-16941-2 · -01 / -04 · `anlagentyp = direkt` vs the §1 scope exclusion and the Anhang B a) use restriction
+- Class: new gate (judgment — the prod token contradicts the scope)
+- Chosen now (fail-safe): the attestation `direktnutzung_scope_bestaetigt` and the text fill `anlagentyp_nutzungsbeschraenkung` (both visible for direkt) are emitted; no gate. Two proposals: (a) attest gate on -01; (b) no-spray gate on -04 (`richtwert_spalte != 'sprueh'`, needs `anlagentyp` → -04).
+- Evidence (verbatim, transcript line): "- direkte Anwendungssysteme ohne Aufbereitung;" (L140, under "Vom Anwendungsbereich dieses Dokuments ausgenommen sind:" L137); "Ist die Behandlung nicht Teil der Grauwassernutzugsanlage, sind Nutzungen auf unterirdische Bewässerung und Anwendungen ohne Versprühen beschränkt." (L794)
+- Proposed SQL / config: STAGED block G-6 (a).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-G-7 · DIN-EN-16941-2 · -02 · CR-09 `pumpe_trockenlaufschutz == true` (block, unconditional) + the pump-conditional visibility (refused by the gate-aware guard)
+- Class: gate condition change
+- Chosen now (fail-safe): CR-09 unchanged (a gravity system is blocked by a pump check); `visible_when pumpe_erforderlich == true` is emitted on `pumpensteuerung_handnot` only (no gate reads it).
+- Evidence (verbatim, transcript line): "Bei Anlagen, bei denen gesammeltes Grauwasser nicht durch Schwerkraft verteilt wird, müssen für eine kontinuierliche Verfügbarkeit des Grauwassers eine oder mehrere Pumpen vorgesehen werden." (L401); "Pumpen müssen mit einer Pumpensteuerung zur automatischen Kontrolle des Pumpenbetriebs, einschließlich einer Handnotbetätigung, ausgestattet sein. Die Steuerung muss manuelle Bedienung ermöglichen." (L461)
+- Proposed SQL / config: STAGED block G-7 — `IF pumpe_erforderlich == true THEN pumpe_trockenlaufschutz == true` + rule; archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-G-8 · DIN-EN-16941-2 · -03 · new gate: vereinfachtes Verfahren nur für Wohngebäude
+- Class: new gate
+- Chosen now (fail-safe): the attestation `wohngebaeude_bestaetigt` (visible under vereinfacht) is emitted; no gate.
+- Evidence (verbatim, transcript line): "Das vereinfachte Verfahren beruht auf der Abwägung folgender Annahmen und ist nur für Wohngebäude anwendbar:" (L543); "Wenn ein Grundstück als Standort für ein Hotel, Wohnheim oder ähnliche Unterbringungsarten vorgesehen ist, oder wenn mehr als ein Grundstück durch ein Grauwassersystem versorgt werden muss, sollte das differenzierte Verfahren angewendet werden." (L521)
+- Proposed SQL / config: STAGED block G-8 — `IF berechnungsverfahren == 'vereinfacht' THEN wohngebaeude_bestaetigt == true` (block).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-G-9 · DIN-EN-16941-2 · -03 · hiding the 23 Gl.-1 / Gl.-2 scalars under `vereinfacht` (not emitted: CR-12 chain)
+- Class: enforcement change (invisible to both guards)
+- Chosen now (fail-safe): the 23 scalars stay visible. They are consumer-free (both guards accept a rule on them) but feed Y_G / D_G, which the block gate CR-12 reads (`Y_G IS NOT NULL AND D_G IS NOT NULL AND bemessungswert_massgebend IS NOT NULL`): hidden inputs ⇒ Gl. 1 / 2 null ⇒ CR-12 fails for every vereinfacht project, whereas today an engineer can still type them. The method switch is emitted on the created registers / outputs (`berechnungsverfahren == 'differenziert'`) and the Tab.-A.1 twins (`== 'vereinfacht'`) only.
+- Evidence (verbatim, transcript line): "Das vereinfachte Verfahren beruht auf der Abwägung folgender Annahmen und ist nur für Wohngebäude anwendbar:" (L543); "b) ein differenziertes Verfahren, bei dem das im Bad anfallende Grauwasser z. B. zur Toilettenspülung, zum Reinigen der Wäsche und zur Gartenbewässerung in Wohn-, Gewerbe-, Industrie- und öffentlichen Gebäuden verwendet wird (siehe 6.2.4)." (L519)
+- Proposed SQL / config: STAGED block G-9 — apply only together with R-1 / R-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-R-1 · DIN-EN-16941-2 · -03 · Gl. (1) `Y_G` over the 16 typed scalars → `Y_G_rows` (register) / `Y_G_vereinfacht` (Tab. A.1)
+- Class: equation-replacement (verified equation)
+- Chosen now (fail-safe): Gl. 1 (`verified_against_standard`) unchanged; `Y_G_rows` (-03-D1, register-fed, materialised on save) and `Y_G_vereinfacht` (-03-D5) are visible twins; CR-12 keeps reading Y_G. A method-switch formula cannot read a null twin (`evaluateFormula` requires every named input), so the ratified form is `Y_G = Y_G_rows` with the vereinfacht figure entered as one row (60 l/(p·d)), or two method-guarded rows.
+- Evidence (verbatim, transcript line): "Die folgende Gleichung (1) muss zur Bestimmung des Grauwasserertrags, $Y_{\mathrm{G}}$, in Liter je Tag (l/d), angewendet werden:" (L557); "Y_{\mathrm{G}}=n \cdot\left(Q_{\mathrm{S}} \cdot t_{\mathrm{S}} \cdot u_{\mathrm{S}}+V_{\mathrm{BT}} \cdot u_{\mathrm{BT}}+Q_{\mathrm{HWB}} \cdot t_{\mathrm{HWB}} \cdot u_{\mathrm{HWB}}+V_{\mathrm{WM}} \cdot u_{\mathrm{WM}}+Q_{\mathrm{KS}} \cdot t_{\mathrm{KS}} \cdot u_{\mathrm{KS}}+V_{\mathrm{DW}}\right.  \tag{1}\\" (L560)
+- Proposed SQL / config: STAGED block R-1 (archive + md5-guarded UPDATE; rollback from the archive).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-R-2 · DIN-EN-16941-2 · -03 · Gl. (2) `D_G` over the 7 typed scalars → `D_G_rows` (register + V_misc) / `D_G_vereinfacht` (Tab. A.1)
+- Class: equation-replacement (verified equation)
+- Chosen now (fail-safe): Gl. 2 unchanged; `D_G_rows` (-03-D3) and `D_G_vereinfacht` (-03-D6) are visible twins.
+- Evidence (verbatim, transcript line): "Die folgende Gleichung (2) muss für die Bestimmung des Grauwasserbedarfs, $D_{\mathrm{G}}$, in Liter je Tag (l/d) angewendet werden, wenn das behandelte Grauwasser z. B. für die Toiletten- und Urinalspülung, zum Reinigen von Wäsche, zur Gartenbewässerung, für Reinigungsarbeiten usw. genutzt wird." (L595); "D_{\mathrm{G}}=n \cdot\left(V_{\mathrm{T}} \cdot u_{\mathrm{T}}+V_{\mathrm{U}} \cdot u_{\mathrm{U}}+V_{\mathrm{WM}} \cdot u_{\mathrm{WM}}\right)+V_{\mathrm{misc}} \tag{2}" (L600)
+- Proposed SQL / config: STAGED block R-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-D-1 · DIN-EN-16941-2 · -04 · `bewertung_status` (manual enum gruen / gelb / rot, consumed by -05, read by CR-17) ↔ `status_letzte_probe` / `probenahmen_rot` / `probenahmen_gelb`
+- Class: derivation (manual field vs derived twin)
+- Chosen now (fail-safe): the manual enum stays (CR-17 keeps reading it); the register statuses are visible twins. An engine output cannot feed an ENUM field, so ratification is either (a) retire the enum + re-point CR-17 to `probenahmen_count >= 1 AND probenahmen_rot == 0`, or (b) keep the enum as the engineer's ruling plus a warn gate `status_letzte_probe < 3`.
+- Evidence (verbatim, transcript line): "Die Ergebnisse aus der bakteriologischen Überwachung können mit Hilfe von Tabelle D. 3 beurteilt werden. Die Ergebnisse der allgemeinen Systemüberwachung sollten mit Hilfe von Tabelle D. 4 beurteilt werden." (L703); "\hline $>10 \mathrm{G}^{\mathrm{b}}$ & rot & Nutzung des Grauwassers ausschließen, bis Problem gelöst ist \\" (L886)
+- Proposed SQL / config: STAGED block D-1 (a).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-D-2 · DIN-EN-16941-2 · -04 / -01 · `richtwert_spalte` (created select over the four printed Tab. D.1 / D.2 columns) ↔ `vorgesehene_nutzung` (+ a Sprüh flag) — derive on the consumer edit C-1
+- Class: derivation + consumer-edit
+- Chosen now (fail-safe): the engineer picks the column on -04 — everything on -04 (eight text fills, the register statuses, the Legionella / Trübung visibility) computes today. Capture: `vorgesehene_nutzung` (-01 A) is consumed by -02 / -03 only; prod has no Sprüh token (the brief's created Sprüh attestation on -01 could not reach -04 either — a `create` never sets consumers). The two shared tokens (`wc_spuelung`, `gartenbewaesserung`) are spelled like prod's; `reinigung_waschmaschine` covers prod's `waesche` AND `reinigung` (one printed column — J-7).
+- Evidence (verbatim, transcript line): "\hline & Hochdruckreinigung, Gartensprenger und Autowäsche & WC-Spülung & Garten bewässerung & Reinigung, d. h. Waschmaschine & Spray-Anwendung & Anwendung ohne Versprühen & \\" (L851); "Weitere Untersuchungen und die zu untersuchenden Parameter hängen von der Nutzung des Grauwassers ab ." (L695)
+- Proposed SQL / config: STAGED block D-2 — C-1 (`vorgesehene_nutzung.consumer_worksheets` += -04) then a plausibility gate or a fifth prod token (D-1 ruling on `enum_values`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-D-3 · DIN-EN-16941-2 · -02 · `nennkapazitaet` (required, consumed by -03) ↔ `speichereinrichtungen` / `nennkapazitaet_sum`
+- Class: derivation (register Σ vs typed scalar)
+- Chosen now (fail-safe): both stay (the scalar is what -03 inherits); on ratification `nennkapazitaet = nennkapazitaet_sum` (register-fed via the twin → materialised on save).
+- Evidence (verbatim, transcript line): "Die Nennkapazität ist das maximale Wasservolumen, das in der Speichereinrichtung zurückgehalten werden kann, und ist vom Hersteller oder Planer anzugeben." (L300); "Wenn vorgefertigte Teile verwendet werden, muss der Hersteller die Außenmaße, Zugangs- und Anschlussmaße sowie Grenzabmaße (Toleranzen) angeben. Einzelne Speichereinrichtungen dürfen miteinander verbunden werden." (L296)
+- Proposed SQL / config: STAGED block D-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-D-4 · DIN-EN-16941-2 · -04 · the eight single-sample scalars (`ecoli_kbe`, `enterokokken_kbe`, `legionella_kbe`, `gesamt_coliforme_kbe`, `truebung_ntu`, `ph_wert`, `rest_chlor`, `rest_brom`) ↔ `probenahmen` columns
+- Class: derivation (N-instances register vs single scalars — one block for the eight pairs, amendment K)
+- Chosen now (fail-safe): all eight stay (optional numbers, no consumers, no gate); the register carries N samples with per-parameter statuses. On ratification (with D-1) retire the eight.
+- Evidence (verbatim, transcript line): "Die Probenahmestelle muss im Verteilungssystem für das behandelte Grauwasser eingebaut sein. Alle Proben müssen als Stichproben während der laufenden Behandlung im Grauwassersystem entnommen werden." (L697); "\hline G bis 10 G & gelb & erneute Probenahme zur Bestätigung des Ergebnisses und Prüfen des Systembetriebs \\" (L885)
+- Proposed SQL / config: STAGED block D-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-D-5 · DIN-EN-16941-2 · -03 · `bemessungswert_massgebend` (required manual number, CR-12, consumed by -02 / -04; `raw` rule "== min(Y_G, D_G)") ↔ `bemessungswert_massgebend_calc`
+- Class: derivation
+- Chosen now (fail-safe): the manual field stays; `bemessungswert_massgebend_calc = min(Y_G, D_G)` is a visible twin (scalar-only, I-1).
+- Evidence (verbatim, transcript line): "Für die Gesamtauslegung des Systems muss der niedrigste berechnete Wert für den Ertrag oder den Bedarf verwendet werden." (L511)
+- Proposed SQL / config: STAGED block D-5 — `bemessungswert_massgebend = min(Y_G, D_G)` as a new equation (the required input becomes engine-owned).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-D-6 · DIN-EN-16941-2 · -02 · `speicher_werkstoff` (one value) ↔ `speichereinrichtungen.werkstoff` (per tank, same six prod tokens)
+- Class: derivation (register column vs scalar)
+- Chosen now (fail-safe): both stay.
+- Evidence (verbatim, transcript line): "Die Werkstoffe (z. B. Beton, Stahl, Polyvinylchlorid (PVC-U), Polyethylen (PE), Polypropylen (PP), glasfaserverstärkter Kunststoff (GRP-UP)), die für Speichereinrichtungen verwendet werden, müssen den in EN 12566-3 beschriebenen Werkstoffeigenschaften entsprechen. Werkstoffe für Bauteile in Kontakt mit Wasser müssen korrosionsbeständig sein." (L292)
+- Proposed SQL / config: STAGED block D-6 (retire on ratification).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-D-7 · DIN-EN-16941-2 · -03 · the 16 Gl.-1 scalars (all `is_required`) ↔ `grauwasserquellen_16941` rows
+- Class: derivation (N-instances register vs typed scalars — one block for the 16 pairs)
+- Chosen now (fail-safe): all 16 stay (Gl. 1 reads them; a project without a dishwasher must still type V_DW / u_DW today). Retire with R-1.
+- Evidence (verbatim, transcript line): "Menge und Verschmutzung der unterschiedlichen Arten von Grauwasser hängen von dessen Herkunft ab." (L219); "\hline $u_{\mathrm{s}}$ & die Häufigkeit des Duschvorgangs je Person und je Tag (1/(p ⋅ d)); \\" (L575)
+- Proposed SQL / config: STAGED block D-7.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-D-8 · DIN-EN-16941-2 · -03 · the 6 Gl.-2 scalars (`V_T`, `u_T` required; `V_U`, `u_U`, `V_WM_d`, `u_WM_d`) ↔ `bedarfsstellen` rows; `V_misc` stays a scalar
+- Class: derivation (one block for the six pairs)
+- Chosen now (fail-safe): all six stay. Retire with R-2.
+- Evidence (verbatim, transcript line): "ANMERKUNG Wenn mehr als ein WC-Typ angeschlossen ist, kann der Bedarf für jedes einzelne WC berechnet werden, oder es kann angenommen werden, dass alle WCs gleich benutzt werden. In dem Fall kann ein Standardbedarf für jeden Typ berechnet und für diese Ergebnisse der Durchschnittswert ermittelt werden." (L597); "\hline $V_{\text {misc }}$ & ist das für andere Zwecke erforderliche Wasservolumen (z. B. Gartenbewässerung, Reinigung) in Liter je Tag (l/d). \\" (L619)
+- Proposed SQL / config: STAGED block D-8.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-O-1 · DIN-EN-16941-2 · TABD1 / TABD2 / TABD3 / TABD4 · policy `locked` from L681 ("Mindestanforderungen … Vorrang") while L699 prints "können zur Orientierung dienen"
+- Class: override-policy
+- Chosen now (fail-safe): `locked` (spec §7 first hit in document order: L681 before L699 / L703). Consequence: the eight text fills show no override control; a project with STRICTER national values cannot record them beside the fill. Alternative for the owner: `messwert` / `anhaltswert` on TABD1 / TABD2 so the stricter national value can be entered with a reason (never a laxer one — the fill's typed override has no direction check).
+- Evidence (verbatim, transcript line): "Grauwassernutzungsanlagen müssen unbedingt in der Art geplant und installiert werden, dass das NichtTrinkwasser für den vorgesehenen Gebrauch taugt und keine Gefährdung der Gesundheit darstellt. Die Beispiele in Anhang D sind Mindestanforderungen. Strengere nationale oder im Rahmen der Planung festgelegte Vorgaben müssen vor den Werten in Anhang D Vorrang haben." (L681); "Die Beispiele im Anhang D können zur Orientierung dienen, wenn keine nationalen Anforderungen vorliegen." (L699)
+- Proposed SQL / config: `UPDATE regulation_tables SET override_policy = 'messwert' WHERE standard_code = 'DIN-EN-16941-2' AND table_code IN ('TABD1','TABD2')` (after the seed); no emitted change.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-O-2 · DIN-EN-16941-2 · `probenahmen.status_coliforme` · the Tab. D.3 footnote b coliform exception is not encoded (rot stays)
+- Class: override-policy / judgment
+- Chosen now (fail-safe): a coliform result > 10 G is rot like every other parameter; the footnote's exception (E. coli, Enterokokken and Legionella absent AND a confirming re-sample) is a two-sample judgment the register cannot decide per row — the footnote text rides in the register note and in `TABD3.override_quote`.
+- Evidence (verbatim, transcript line): "b Bei Abwesenheit von E. coli, intestinalen Enterokokken und Legionella, falls zutreffend, besteht keine Notwendigkeit, die Anlage außer Betrieb zu nehmen, wenn die gemessenen Werte von Coliformen den Richtwert um das 10fache überschreiten und eine erneute Probenahme zur Bestätigung der Ergebnisse durchgeführt wird." (L889)
+- Proposed SQL / config: none (a per-row `coliforme_ausnahme` boolean column that downgrades rot → gelb when the three other statuses are 1 would be a one-line config change on ratification).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-J-1 · DIN-EN-16941-2 · -03-D6 `D_G_vereinfacht` · the single-select `vorgesehene_nutzung` picks ONE Tab.-A.1 column; "Toilettenspülung und/oder Reinigen der Wäsche" cannot be summed; `reinigung` mapped to "Andere"
+- Class: judgment
+- Chosen now (fail-safe): `n · (35 | 15 | 10)` by the one selected token (WC → 35, Wäsche → 15, Gartenbewässerung / Reinigung → 10 "Andere Nicht-Trinkwasser-Nutzungen", footnote c names Gartenbewässerung as the example); a WC + Wäsche household reads 35 · n, never 50 · n. Alternatives: a `select_many` use carrier (S-class on `vorgesehene_nutzung`), or the vereinfacht demand typed as rows in `bedarfsstellen`.
+- Evidence (verbatim, transcript line): "a) ein vereinfachtes Verfahren, bei dem das im Bad anfallende Grauwasser zur Toilettenspülung und/oder zum Reinigen der Wäsche innerhalb einer Wohneinheit verwendet wird (siehe 6.2.3);" (L518); "\hline 1 Person & 60 & 35 & 15 & 10 \\" (L741); "c Zum Beispiel Gartenbewässerung." (L745)
+- Proposed SQL / config: none until S-class ruling.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-J-2 · DIN-EN-16941-2 · `probenahmen.status_*` · a printed "Nicht nachweisbar" Richtwert: 0 KBE → grün, any detection → rot
+- Class: judgment
+- Chosen now (fail-safe): the Tab.-D.3 bands (G bis 10 G) need a numeric G; "Nicht nachweisbar" has none, so a detection exceeds the Richtwert by an undefined factor — rot (exclude use) is the health-safe side. Alternative: gelb (re-sample).
+- Evidence (verbatim, transcript line): "\hline Escherichia coli & Nicht nachweisbar & 250 & 250 & Nicht nachweisbar & EN ISO 9308-1 & EN ISO 9308-3 & Einzelstandorte und kommunale Wohnbereiche \\" (L852); "\hline < G & grün & System unter Kontrolle \\" (L884)
+- Proposed SQL / config: none (config change of the `d3()` expression on ratification).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-J-3 · DIN-EN-16941-2 · TABD2 / `status_brom` · Rest-Brom "0,0" prints no comparator
+- Class: judgment
+- Chosen now (fail-safe): `rest_brom_max = 0` with the text "0,0"; status = 0,0 measured → grün, > 0 → gelb (Tab. D.4's "< G" cannot be met for G = 0).
+- Evidence (verbatim, transcript line): "\hline Rest-Brom (mg/l) & 0,0 & < 5,0 & 0,0 & < 5,0 & EN ISO 10304-1 & alle Systeme, wenn verwendet \\" (L873)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-J-4 · DIN-EN-16941-2 · TABD4 · "< G → grün, > G → gelb" leaves "= G" unprinted; Tab. D.3's "G bis 10 G" includes G
+- Class: judgment
+- Chosen now (fail-safe): a measured value equal to G is gelb for both tables (`< G` grün, otherwise gelb / the D.3 middle band); pH inside the printed range (inclusive) is grün (L902 "innerhalb").
+- Evidence (verbatim, transcript line): "\hline > G & gelb & erneute Probenahme zur Bestätigung des Ergebnisses und Prüfen des Systembetriebs \\" (L901); "\hline G bis 10 G & gelb & erneute Probenahme zur Bestätigung des Ergebnisses und Prüfen des Systembetriebs \\" (L885)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-J-5 · DIN-EN-16941-2 · GL1_LEGENDE / `grauwasserquellen_16941` · the Gl.-1 term form (Q·t·u vs V·u) is lifted from the legend as a table; Waschbecken has no Tab.-A.2 row → no hint
+- Class: judgment (representation)
+- Chosen now (fail-safe): the six sources are a plain enum column (prod `grauwasser_herkunft` tokens); `mit_dauer` (1 for the "in Liter je Minute" sources with a printed "Dauer je …" symbol) and the Tab.-A.2 hint come from `lookup()` in row scope; the Waschbecken row shows "—" and no badge (probed: a missing lookup row is a null derived cell, no diagnostic). The brief's `quelle lookup_key TABA2` would have made Q_HWB unenterable.
+- Evidence (verbatim, transcript line): "\hline $Q_{\text {HWB }}$ & der Grauwasserabfluss des Waschbeckens in Liter je Minute (l/min); \\" (L578); "a Ertrag von Dusche, Badewanne und/oder Waschbecken." (L743)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-J-6 · DIN-EN-16941-2 · `bedarfsstellen` · no `anzahl` column (Gl. 2 multiplies per-person terms by n only); WC types are rows with their own u
+- Class: judgment
+- Chosen now (fail-safe): `bedarf_row = v_x · u_x` per person (u is "je Person und je Tag" by the legend); a per-fixture count would double-count against n. The L597 note (per-WC or averaged) is the register note; `bezeichnung` labels the WC type.
+- Evidence (verbatim, transcript line): "\hline $u_{\mathrm{T}}$ & die Häufigkeit der WC-Nutzung je Person und je Tag (1/(p • d)); \\" (L610); "ANMERKUNG Wenn mehr als ein WC-Typ angeschlossen ist, kann der Bedarf für jedes einzelne WC berechnet werden, oder es kann angenommen werden, dass alle WCs gleich benutzt werden. In dem Fall kann ein Standardbedarf für jeden Typ berechnet und für diese Ergebnisse der Durchschnittswert ermittelt werden." (L597)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-J-7 · DIN-EN-16941-2 · TABD1 / TABD2 · one printed column "Reinigung, d. h. Waschmaschine" serves prod's `waesche` and `reinigung`; Tab. A.1 splits "Wäsche waschen" from "Andere"
+- Class: judgment (token mapping)
+- Chosen now (fail-safe): `richtwert_spalte` carries the printed column as ONE token `reinigung_waschmaschine`; the D-2 derivation maps both prod tokens onto it.
+- Evidence (verbatim, transcript line): "\hline & Hochdruckreinigung, Gartensprenger und Autowäsche & WCSpülung & Garten-bewässerung & Reinigung, d. h. Wasch-maschine & & \\" (L869)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-I-1 · DIN-EN-16941-2 · -02-D3, -03-D5 … D8 · scalar-only equations are not server-materialised
+- Class: interface-gap (amendment D)
+- Chosen now: `freier_auslauf_A_min`, `Y_G_vereinfacht`, `D_G_vereinfacht`, `bemessungswert_massgebend_calc`, `speicher_max_50` evaluate on the form / report / snapshot / PDF only; the ten register-fed rows materialise on save. G-5 and D-5 depend on the materialisation workstream.
+- Evidence: Plan 2a design (register-scoped materialiser); no transcript claim.
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-X-1 · DIN-EN-16941-2 · -01 `anlagen_id` · `consumer_worksheets = ["ALL"]`
+- Class: prod observation
+- Chosen now: nothing (`loadInheritedFields` matches `code = ANY(consumer_worksheets)` — "ALL" reaches no worksheet; m820_3 trap 4). No rule of this task keys on it.
+- Evidence: capture `din16941_2.prior.json`.
+- Proposed SQL / config: `UPDATE fields SET consumer_worksheets = ARRAY['DIN-EN-16941-2-02','DIN-EN-16941-2-03','DIN-EN-16941-2-04','DIN-EN-16941-2-05'] WHERE … symbol = 'anlagen_id' AND consumer_worksheets = ARRAY['ALL']` (owner).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din16941_2-X-2 · DIN-EN-16941-2 · -03 · `V_WM_y` / `u_WM_y` (Ertrag) and `V_WM_d` / `u_WM_d` (Bedarf) type the same appliance twice
+- Class: prod observation
+- Chosen now: nothing (both pairs stay; the registers let the engineer enter the washing machine once as a source row and once as a demand row — the standard itself prints V_WM in both Gl. 1 and Gl. 2 and demands a treatment step when it is both, L537).
+- Evidence (verbatim, transcript line): "Wenn Waschmaschinen Wasser sowohl aus dem Grauwassersystem entnehmen als auch in dieses einspeisen, muss ein geeigneter Behandlungsschritt im System vorgesehen werden und nur geeignetes Grauwasser verwendet werden." (L537)
+- Proposed SQL / config: none (a gate "Waschmaschine in both registers ⇒ behandlungsstufen ≠ ∅" needs S-1 first).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (no signature needed)
+
+- **Brief ↔ codebase:** the brief's `select_many` widget switch for `grauwasser_herkunft` / `behandlungsstufen` is not fail-safe on an enum field (S-1 — data loss on reload); the brief's `sprueh_anwendung` attestation on -01 and the `lookup_fill` role-limit numbers keyed on `vorgesehene_nutzung` could not reach -04 (not consumed there) and could not carry "Nicht nachweisbar" / "N/A" / "5 bis 9,5" → `richtwert_spalte` select + eight TEXT fills on -04 (D-2); the brief's `quelle lookup_key TABA2` excludes Waschbecken (J-5); the brief's `anzahl` column contradicts Gl. 2 (J-6); the brief's `nennkapazitaet_max = 0.5 * D_G` on -02 could not read D_G (-03) → `speicher_max_50` on -03; the brief's TABD1_<PARAM> × 4 tables are one transposed table each (m277e trap 3); the brief's `personenzugang == true` cue is inverted against L327 (the 400 mm applies when NO Personenzugang).
+- **Edition printed** ("EN 16941-2:2021", L5 / L101 = prod `standards.version`) → no edition block.
+- **No worked numeric example is printed** — every equation pin is hand-derived from the printed forms and the Tab.-A.1 / D.1 / D.2 cells.
+- **Anhang D test methods** (EN ISO 9308-1 … 11731) are seeded as bare reference strings (content boundary) — displayed, never expanded.
+
 ## Plan 3 tooling rulings
 
 ### plan3-T-12c · [CODE] · `emit-field-configs-sql.ts` gate-aware guard · a `visible_when` may not silently disarm a same-worksheet gate
