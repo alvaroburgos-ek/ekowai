@@ -1,0 +1,640 @@
+-- ISO-59020 — Plan 3 Task 21 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md (same ids).
+-- Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the order it appears.
+-- Prod facts (enum tokens, consumer_worksheets, gate ids / conditions / md5, equation ids / md5, column lists, the 0 stored
+-- values / 0 worksheet instances of the standard) were captured read-only on 2026-09-18 (src/lib/eval/field-configs/iso59020.prior.json;
+-- prod-query.mjs for the ids / md5 quoted below — md5 read from prod, the long cells never retyped; gate conditions below are the CAPTURED strings).
+-- Transcript lines refer to C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 59020\ISO-59020-Unlocked.txt (ISO 59020:2024(en), plain text — VC grade; the .pdf siblings are not sources).
+--
+-- Conventions: s.code = 'ISO-59020', worksheets by code (prod codes ISO-59020-NN), never by id; every UPDATE is guarded by the
+-- prior value (or md5) it replaces so a re-run is a no-op; each block names its rollback. A staged gate rewrite archives the full
+-- compliance_requirements row into compliance_requirements_archive_iso59020 in the SAME transaction (CREATE TABLE … AS SELECT * … WHERE false;
+-- INSERT … SELECT c.* WHERE c.id = … AND md5(c.condition) = …), guards the UPDATE on md5(condition), and rolls back by restoring
+-- condition / description / worksheet_template_id / severity from the archive by id with an EXPLICIT column list; the archive table is
+-- dropped by the LAST rollback that uses it OR by the owner once every gate change is signed off as final. The ONE block that DELETES
+-- prod rows (R-1: the eight verified equations A.1 … A.8 + their eight gates) archives them first (equations_archive_iso59020 /
+-- compliance_requirements_archive_iso59020), guards every DELETE on md5, and re-inserts with the explicit column list.
+-- The Plan-3 DATA migrations (20260917102100 seed · 20260917102110 field configs · 20260917102120 equations) must be applied BEFORE any
+-- block that reads a created symbol (temporal_boundary_note, na_unjustified, mandatory_core_indicators_included_code, *_indicators_selected,
+-- inflows_count / inflows_unbalanced, outflows_count / outflows_unbalanced, energy_flows_count / energy_unit_mismatch, pct_*_agg, …).
+--
+-- Column lists (information_schema, read-only 2026-09-18):
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion,
+--     audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation   (no `active` column; max code today CR-037)
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference,
+--     description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by,
+--     verified_by_user_id, verified_at, verification_note, verification_quote
+--   fields: id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference,
+--     description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at,
+--     audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote (+ widget, ui_config,
+--     lookup, visible_when after 20260911100000)
+--
+-- Shorthand:  WS(code) = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-59020' AND w.code = '<code>')
+--             FLD(ws, sym) = UPDATE fields f … FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = '<ws>' AND f.symbol = '<sym>' AND f.active
+--             RESTORE(id) = UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity
+--                             FROM compliance_requirements_archive_iso59020 a WHERE a.id = c.id AND c.id = '<id>';
+--
+-- Gates touched (read-only 2026-09-18; conditions from the capture):
+--   ISO-59020-03 CR-008 (id 16f87075-637f-44f2-a50f-01f5349ebcfc, warn, md5 d41d8cd98f00b204e9800998ecf8427e, condition '')
+--   ISO-59020-04 CR-009 (id 3fb354cb-caa3-472b-9a2e-b6064d3ef0e1, block, md5 119d6e0a38e8ca522d3dc2da70411300, condition 'mandatory_core_indicators_included == true')
+--   ISO-59020-04 CR-010 (id 7db0523f-99a1-4703-9e99-520f20b9cd0b, warn, md5 d41d8cd98f00b204e9800998ecf8427e, condition '')
+--   ISO-59020-05 CR-011 (id 1ecf3625-34f0-4a08-9f44-235af8e40954, block, md5 e3832bf2921a515104abf584e55f843b, condition 'pct_REUI_X == (mREUI_X / mTI_X) * 100')
+--   ISO-59020-05 CR-012 (id 4daf7c18-fd49-4269-9e51-6a447fe2ffea, block, md5 dc53311f74cd298d1a2be1ab630ee6c3, condition 'pct_RECI_X == (mRECI_X / mTI_X) * 100')
+--   ISO-59020-05 CR-013 (id 02e4e690-7d7a-401f-a6e7-2eac23109be2, block, md5 7a94e0941c11a444ae2f537331a49d3d, condition 'pct_RENI_X == (mRENI_X / mTI_X) * 100')
+--   ISO-59020-05 CR-014 (id 22291c1e-6e8f-4d3d-b5af-7c1b0d339c38, block, md5 c93e632fd4b7a89984c9c310da74ee93, condition 'pct_REUI_X + pct_RECI_X + pct_RENI_X + pct_linear_inflow == 100')
+--   ISO-59020-06 CR-015 (id aa5768dd-b687-4764-b28d-f4e61d8870ba, block, md5 20ed0f0b1508632904691dd9b023b015, condition 'pct_REUO_X == (mREUO_X / mTO_X) * 100')
+--   ISO-59020-06 CR-016 (id e5623abb-cfe5-4f2c-a445-8489cdaee9be, block, md5 44d9170146060a0ed1d02bbb42e4e911, condition 'pct_RECO_X == (mRECO_X / mTO_X) * 100')
+--   ISO-59020-06 CR-017 (id 4f102b24-0959-44c2-8557-595a8e332104, block, md5 04b7ceb7890e98aedf1a1218bb0e32da, condition 'pct_RENO_X == (mRENO_X / mTO_X) * 100')
+--   ISO-59020-06 CR-018 (id 3d192aa1-1924-4946-a288-275fdcae3723, block, md5 373b192092eaee7871743f219bb75308, condition 'pct_REUO_X IS NOT NULL AND pct_RECO_X IS NOT NULL AND pct_RENO_X IS NOT NULL')
+--   ISO-59020-06 CR-019 (id fbfde707-c383-4fdf-9b4b-21e6e4f1ead6, block, md5 694e8e3a6836f7e37bc6cfeefb580255, condition 'pct_REUO_X + pct_RECO_X + pct_RENO_X + pct_linear_outflow == 100')
+--   ISO-59020-07 CR-020 (id 605f2609-f6a4-49c6-9dea-7471bd932738, warn, md5 9b7b615bd749f54613277c7e91fb9006, condition 'pct_ECONRE_X == ((EIRENE_X - EORENE_X) / (EITE_X - EOTE_X)) * 100')
+--   ISO-59020-07 CR-021 (id 613d3729-2288-4208-a5d1-bea32015e69c, warn, md5 06bb04015200d6d98ee1981ae64afd6f, condition 'pct_CWW == (VCIW / VAIW) * 100')
+--   ISO-59020-07 CR-022 (id fa82fe4a-b392-4ca5-82e9-c6f224fb42dd, warn, md5 64ef3e2b157924d9bebdf597e82b1406, condition 'pct_CDW == (VCDW / VAIW) * 100')
+--   ISO-59020-07 CR-023 (id f7dc8e80-d22b-4180-93a1-56ec5fa3a223, warn, md5 7c01f77d339f2cb5c87da085c5ad07d9, condition 'RWRR == VTWU / VTWW')
+--   ISO-59020-07 CR-024 (id 6c26bf6e-446d-4d18-89e7-245673cc8258, warn, md5 d4face9326fda16c8b51b8a1b1f06821, condition 'RMP == C / D')
+--   ISO-59020-07 CR-025 (id 43fdfba0-7551-4563-9b48-cd8d27098b4c, warn, md5 7b1639e1a1974d33f64ef294b94e9e71, condition 'IRII == E / F')
+--   ISO-59020-09 CR-036 (id fc338d7e-e9fd-4a1d-9a3d-5f6b42b5af68, warn, md5 d41d8cd98f00b204e9800998ecf8427e, condition '')
+--   ISO-59020-09 CR-037 (id eea527e5-67e4-4a38-ac6b-b9ce1d52e731, warn, md5 d41d8cd98f00b204e9800998ecf8427e, condition '')
+--
+-- =====================================================================================================================
+-- iso59020-G-1 · ISO-59020-07 · CR-020 … CR-025 (the A.8 – A.13 equality checks, warn) — IF-guards on the created per-category selection counts of -04
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The six gates stay UNCONDITIONAL (warn): they check the single-X scalar equalities whether or not the indicator was selected. The created -04 outputs energy_indicator_selected / water_indicators_selected / economic_indicators_selected (ISO-59020-04-D8 … D10, register-fed, materialised on save) are the drivers once C-1 makes them reach -07; the rewrite below wraps each captured condition in IF <driver> >= 1 THEN … (conditions taken from the capture, never retyped). The -07 block visibility on the same drivers is iso59020-M-1 (register-driven ⇒ sign-off, never emitted).
+-- Evidence: "A minimum set of quantitative core circularity indicators that should be considered for circularity measurement and assessment is provided in Annex A." (L1055–L1056); "The core circularity indicators can be supplemented by additional circularity indicators to meet the goal and scope of the circularity measurement and assessment. A materiality approach can be valuable to prioritize and select relevant indicators for the measurement. Annex B provides examples of additional indicators." (L1077–L1079); "Optional A.4.2 Average per cent of Fraction of net consumed energy Recovering energy consumed that is that qualifies as renewable energy, resource Energy renewable energy taking into account both energy value inflows and energy outflows" (L1112–L1116)
+-- Note: Apply C-1 FIRST (the drivers are not inherited on -07 until then — a guard on an unresolved symbol is pending on every project, as the ISO-5667-10 G-5 probe showed). The gates read the prod single-X scalars; once R-1 retires A.8 the CR-020 operand moves to the register (energy_unit_mismatch / pct_econre_agg).
+-- Note: Water (A.5.x) and economic (A.6.x) indicators are printed Optional (Table 3) — a project that selects none of them today sees six warn gates it cannot pass without typing the site-level scalars; that is the enforcement gap this block closes.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '605f2609-f6a4-49c6-9dea-7471bd932738' AND md5(c.condition) = '9b7b615bd749f54613277c7e91fb9006';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF energy_indicator_selected >= 1 THEN pct_ECONRE_X == ((EIRENE_X - EORENE_X) / (EITE_X - EOTE_X)) * 100',
+--   description = 'Plan 3 (iso59020-G-1): nur wenn ein Indikator der Kategorie „energy“ im Indikatorregister (-04) ausgewählt ist (Tabelle 3, A.4.2 — Optional).'
+--  WHERE c.id = '605f2609-f6a4-49c6-9dea-7471bd932738' AND md5(c.condition) = '9b7b615bd749f54613277c7e91fb9006';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '613d3729-2288-4208-a5d1-bea32015e69c' AND md5(c.condition) = '06bb04015200d6d98ee1981ae64afd6f';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF water_indicators_selected >= 1 THEN pct_CWW == (VCIW / VAIW) * 100',
+--   description = 'Plan 3 (iso59020-G-1): nur wenn ein Indikator der Kategorie „water“ im Indikatorregister (-04) ausgewählt ist (Tabelle 3, A.5.2 – A.5.4 — Optional).'
+--  WHERE c.id = '613d3729-2288-4208-a5d1-bea32015e69c' AND md5(c.condition) = '06bb04015200d6d98ee1981ae64afd6f';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = 'fa82fe4a-b392-4ca5-82e9-c6f224fb42dd' AND md5(c.condition) = '64ef3e2b157924d9bebdf597e82b1406';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF water_indicators_selected >= 1 THEN pct_CDW == (VCDW / VAIW) * 100',
+--   description = 'Plan 3 (iso59020-G-1): nur wenn ein Indikator der Kategorie „water“ im Indikatorregister (-04) ausgewählt ist (Tabelle 3, A.5.2 – A.5.4 — Optional).'
+--  WHERE c.id = 'fa82fe4a-b392-4ca5-82e9-c6f224fb42dd' AND md5(c.condition) = '64ef3e2b157924d9bebdf597e82b1406';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = 'f7dc8e80-d22b-4180-93a1-56ec5fa3a223' AND md5(c.condition) = '7c01f77d339f2cb5c87da085c5ad07d9';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF water_indicators_selected >= 1 THEN RWRR == VTWU / VTWW',
+--   description = 'Plan 3 (iso59020-G-1): nur wenn ein Indikator der Kategorie „water“ im Indikatorregister (-04) ausgewählt ist (Tabelle 3, A.5.2 – A.5.4 — Optional).'
+--  WHERE c.id = 'f7dc8e80-d22b-4180-93a1-56ec5fa3a223' AND md5(c.condition) = '7c01f77d339f2cb5c87da085c5ad07d9';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '6c26bf6e-446d-4d18-89e7-245673cc8258' AND md5(c.condition) = 'd4face9326fda16c8b51b8a1b1f06821';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF economic_indicators_selected >= 1 THEN RMP == C / D',
+--   description = 'Plan 3 (iso59020-G-1): nur wenn ein Indikator der Kategorie „economic“ im Indikatorregister (-04) ausgewählt ist (Tabelle 3, A.6.2 – A.6.3 — Optional).'
+--  WHERE c.id = '6c26bf6e-446d-4d18-89e7-245673cc8258' AND md5(c.condition) = 'd4face9326fda16c8b51b8a1b1f06821';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '43fdfba0-7551-4563-9b48-cd8d27098b4c' AND md5(c.condition) = '7b1639e1a1974d33f64ef294b94e9e71';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF economic_indicators_selected >= 1 THEN IRII == E / F',
+--   description = 'Plan 3 (iso59020-G-1): nur wenn ein Indikator der Kategorie „economic“ im Indikatorregister (-04) ausgewählt ist (Tabelle 3, A.6.2 – A.6.3 — Optional).'
+--  WHERE c.id = '43fdfba0-7551-4563-9b48-cd8d27098b4c' AND md5(c.condition) = '7b1639e1a1974d33f64ef294b94e9e71';
+-- COMMIT;
+-- Rollback: RESTORE('605f2609-f6a4-49c6-9dea-7471bd932738'); RESTORE('613d3729-2288-4208-a5d1-bea32015e69c'); RESTORE('fa82fe4a-b392-4ca5-82e9-c6f224fb42dd'); RESTORE('f7dc8e80-d22b-4180-93a1-56ec5fa3a223'); RESTORE('6c26bf6e-446d-4d18-89e7-245673cc8258'); RESTORE('43fdfba0-7551-4563-9b48-cd8d27098b4c'); DROP the archive when no other block uses it. Parse-checked in-session: every rewritten condition parses; with the driver 0 ⇒ pass; driver 1 + equal scalars ⇒ pass; driver 1 + unequal ⇒ fail; driver absent ⇒ pending.
+--
+-- =====================================================================================================================
+-- iso59020-G-2 · ISO-59020-03 / -04 / -09 · the four EMPTY-condition gates CR-008 / CR-010 / CR-036 / CR-037 (warn, `manual` at runtime)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): All four stay empty (manual). Proposals: CR-008 "Document shortened temporal boundaries" MOVES to -09 (the created text temporal_boundary_note lives there, next to the report step; the archive restores worksheet_template_id) and reads IF temporal_boundary_shortened == true THEN temporal_boundary_note IS NOT NULL; CR-010 "Justify non-applicable indicators" reads the register count na_unjustified == 0 (-04, same worksheet); CR-036 "Report on hazardous substances" reads the existing -09 boolean hazardous_substances_reported == true (§8.6.4); CR-037 "Avoid simplistic comparative claims" (§8.4.6) has NO carrier field — proposal: a created attestation comparative_claims_avoided on -09 G + the gate, or keep CR-037 manual.
+-- Evidence: "There can also be challenges if the life of solutions is very long such as in construction. Because of these challenges and the constraints and uncertainty of data, the organization can choose to shorten the temporal boundaries. Shorter timescales that do not consider an entire life cycle should be documented in the assessment report. The temporal boundaries are also relevant when assessing the sustainability impacts." (L847–L850); "The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in stocks into account. If a core circularity indicator is not applicable, the organization should explain why and can count the indicator value as zero." (L1068–L1071); "A list and description of core circularity indicators that shall be considered for circularity measurement and assessment are provided in this annex. Not all of the core resource inflow circularity indicators are necessarily applicable at each system level or every type of system. In cases where an indicator is not applicable, it can be counted as zero or declared as “not applicable (N/A)”, explaining why it is not applicable. If the relevant data are not available, they should be counted as zero." (L1827–L1831); "The circular economy will only be sustainable and successful if materials can be safely reused, recycled, remanufactured or repurposed. The use or creation of a by-product of a substance considered to be hazardous can have impacts on the quality of reuse and recycling and therefore on the success of value retention." (L1791–L1794); "Variability in data sources, calculation methods or assumptions can make two systems not comparable, even with all other circularity aspects being equal. Assessment outcomes should not be used to make simplistic comparative claims, such as “region, organization or product A is more circular than region, organization or product B”, as the complexity of the outcomes precludes this type of conclusion." (L1662–L1665)
+-- Note: CR-008 / CR-010 need the DATA migrations first (temporal_boundary_note by 20260917102110, na_unjustified by 20260917102110 / 20260917102120). Parse-checked in-session: `IF temporal_boundary_shortened == true THEN temporal_boundary_note IS NOT NULL` ⇒ pass with the note, fail without, pass when not shortened.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '16f87075-637f-44f2-a50f-01f5349ebcfc' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF temporal_boundary_shortened == true THEN temporal_boundary_note IS NOT NULL',
+--   description = 'Plan 3 (iso59020-G-2): verkürzte zeitliche Systemgrenzen sind im Bewertungsbericht zu dokumentieren (§6.4.2, L849–L850); Gate auf -09 verschoben, wo temporal_boundary_note liegt und temporal_boundary_shortened ererbt wird.',
+--   worksheet_template_id = WS('ISO-59020-09')
+--  WHERE c.id = '16f87075-637f-44f2-a50f-01f5349ebcfc' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '7db0523f-99a1-4703-9e99-520f20b9cd0b' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- UPDATE compliance_requirements c SET
+--   condition = 'na_unjustified == 0',
+--   description = 'Plan 3 (iso59020-G-2): jede N/A-Erklärung im Indikatorregister trägt ihre Begründung (§7.3.1 L1070–L1071 „should explain why“; A.1 L1829–L1830).'
+--  WHERE c.id = '7db0523f-99a1-4703-9e99-520f20b9cd0b' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = 'fc338d7e-e9fd-4a1d-9a3d-5f6b42b5af68' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- UPDATE compliance_requirements c SET
+--   condition = 'hazardous_substances_reported == true',
+--   description = 'Plan 3 (iso59020-G-2): Berichterstattung über Gefahrstoffe (§8.6.4, L1791–L1794).'
+--  WHERE c.id = 'fc338d7e-e9fd-4a1d-9a3d-5f6b42b5af68' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- -- CR-037: no field carries the §8.4.6 rule — variant (a) create the attestation, then the gate:
+-- BEGIN;
+-- INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status, active, order_index) SELECT WS('ISO-59020-09'), (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = WS('ISO-59020-09') AND ws.code = 'G'), 'comparative_claims_avoided', 'Keine vereinfachenden Vergleichsaussagen aus dem Bewertungsergebnis (§8.4.6)', 'boolean', '-', false, '§8.4.6', 'Plan 3 (iso59020-G-2): „Assessment outcomes should not be used to make simplistic comparative claims“ (L1663–L1665).', 'imported_unverified', true, (SELECT COALESCE(MAX(order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = WS('ISO-59020-09')) WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = WS('ISO-59020-09') AND f2.symbol = 'comparative_claims_avoided');
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = 'eea527e5-67e4-4a38-ac6b-b9ce1d52e731' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- UPDATE compliance_requirements c SET
+--   condition = 'comparative_claims_avoided == true',
+--   description = 'Plan 3 (iso59020-G-2): keine vereinfachenden Vergleichsaussagen („A is more circular than B“, §8.4.6 L1663–L1665).'
+--  WHERE c.id = 'eea527e5-67e4-4a38-ac6b-b9ce1d52e731' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- Rollback: RESTORE('16f87075-637f-44f2-a50f-01f5349ebcfc') (restores worksheet_template_id from the archive); RESTORE('7db0523f-99a1-4703-9e99-520f20b9cd0b'); RESTORE('fc338d7e-e9fd-4a1d-9a3d-5f6b42b5af68'); RESTORE('eea527e5-67e4-4a38-ac6b-b9ce1d52e731'); UPDATE fields SET active = false … symbol = 'comparative_claims_avoided' AND description LIKE 'Plan 3 (iso59020-G-2)%'.
+--
+-- =====================================================================================================================
+-- iso59020-G-3 · ISO-59020-05 / -06 · CR-014 / CR-019 (the 100 % sums over the single-X scalars, block) → the per-row balance of the registers
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both gates stay on the single-X scalars (block). The registers carry the 100 %-balance per row (balanced badge, A.2.1 / A.3.1) and the counts inflows_unbalanced / outflows_unbalanced; the rewrite reads inflows_count >= 1 AND inflows_unbalanced == 0 (an EMPTY register would otherwise pass — the count clause is the "shall be quantified" of §7.3.1). Ratify together with R-1 (the single-X pct_linear_* inputs of the current conditions retire).
+-- Evidence: "These four types of content are intended to be mutually exclusive and add up to represent 100 % of the resource inflow (see Figure A.1). The first three types (recycled, reused and virgin, renewable content) are considered as circular; whereas the fourth type (virgin, non-renewable content) is the remaining portion that is from a non-circular source. The non-circular (linear) inflow can be calculated by subtracting the circular inflows from 100 %. For a material to be described as a “renewable material”, it shall adhere to the" (L1850–L1854); "The sum of the circular outflows and the remaining non-circular outflows represent 100 % of the resource outflows from the system in focus, see Figure A.2. The resource outflow circularity indicators specified in A.3.3, A.3.4 and A.3.5 shall be calculated and documented. In cases where the circularity indicator is not relevant, it can be counted at value zero. The circularity indicators for each outflow can be calculated and reported individually or they can be aggregated, based on goal and scope." (L2022–L2026); "The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in stocks into account. If a core circularity indicator is not applicable, the organization should explain why and can count the indicator value as zero." (L1068–L1071)
+-- Note: The current CR-014 / CR-019 conditions add three per-X percentages and the typed linear share to 100 — with the register the linear share is derived, so the sum is 100 by construction and the only remaining check is "circular ≤ total" per row (balanced).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '22291c1e-6e8f-4d3d-b5af-7c1b0d339c38' AND md5(c.condition) = 'c93e632fd4b7a89984c9c310da74ee93';
+-- UPDATE compliance_requirements c SET
+--   condition = 'inflows_count >= 1 AND inflows_unbalanced == 0',
+--   description = 'Plan 3 (iso59020-G-3): mindestens ein Zufluss X erfasst und jede Zeile bilanziert (mREUI + mRECI + mRENI ≤ mTI — A.2.1 L1850–L1854).'
+--  WHERE c.id = '22291c1e-6e8f-4d3d-b5af-7c1b0d339c38' AND md5(c.condition) = 'c93e632fd4b7a89984c9c310da74ee93';
+-- COMMIT;
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = 'fbfde707-c383-4fdf-9b4b-21e6e4f1ead6' AND md5(c.condition) = '694e8e3a6836f7e37bc6cfeefb580255';
+-- UPDATE compliance_requirements c SET
+--   condition = 'outflows_count >= 1 AND outflows_unbalanced == 0',
+--   description = 'Plan 3 (iso59020-G-3): mindestens ein Abfluss X erfasst und jede Zeile bilanziert (mREUO + mRECO + mRENO ≤ mTO — A.3.1 L2022–L2026).'
+--  WHERE c.id = 'fbfde707-c383-4fdf-9b4b-21e6e4f1ead6' AND md5(c.condition) = '694e8e3a6836f7e37bc6cfeefb580255';
+-- COMMIT;
+-- Rollback: RESTORE('22291c1e-6e8f-4d3d-b5af-7c1b0d339c38'); RESTORE('fbfde707-c383-4fdf-9b4b-21e6e4f1ead6'). Pinned in-session (equations test): 2 balanced rows ⇒ unbalanced 0; an over-balanced row ⇒ 1; empty register ⇒ count 0 (gate fails, never a phantom pass).
+--
+-- =====================================================================================================================
+-- iso59020-G-4 · ISO-59020-04 · CR-009 (mandatory_core_indicators_included == true, block) → the register-derived code
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): CR-009 stays on the typed boolean (block). The register derives mandatory_core_indicators_included_code (ISO-59020-04-D5: no mandatory row missing AND all six Mandatory rows of Table 3 present as selected or justified N/A — iso59020-J-2); the rewrite reads the code; the boolean retires under D-4 on ratification.
+-- Evidence: "The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in stocks into account. If a core circularity indicator is not applicable, the organization should explain why and can count the indicator value as zero." (L1068–L1071); "Table 3 — Core circularity indicators" (L1081)
+-- Note: Apply after 20260917102110 / 20260917102120. The typed boolean is consumed by -05 / -06 (consumer_worksheets) — D-4 names the consumer edit if the code is to replace it there too.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '3fb354cb-caa3-472b-9a2e-b6064d3ef0e1' AND md5(c.condition) = '119d6e0a38e8ca522d3dc2da70411300';
+-- UPDATE compliance_requirements c SET
+--   condition = 'mandatory_core_indicators_included_code == 1',
+--   description = 'Plan 3 (iso59020-G-4): alle sechs verbindlichen Kernindikatoren von Tabelle 3 (A.2.2 – A.2.4, A.3.3 – A.3.5) ausgewählt oder begründet nicht anwendbar (§7.3.1 L1068–L1071).'
+--  WHERE c.id = '3fb354cb-caa3-472b-9a2e-b6064d3ef0e1' AND md5(c.condition) = '119d6e0a38e8ca522d3dc2da70411300';
+-- COMMIT;
+-- Rollback: RESTORE('3fb354cb-caa3-472b-9a2e-b6064d3ef0e1'). Pinned in-session: 5 of 6 covered ⇒ code 0; all six ⇒ 1; empty register ⇒ 0.
+--
+-- =====================================================================================================================
+-- iso59020-G-5 · ISO-59020-07 · NEW gate CR-038: one common energy unit across the energy-flow rows (A.4.2 "shall")
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): No gate emitted; the created derived energy_unit_mismatch (ISO-59020-07-D7: rows whose unit differs from energy_unit_common, or every row while no common unit is chosen) shows the count in the register footer. Severity proposed BLOCK ("shall be selected"); guarded on the register being used (IF energy_flows_count > 0).
+-- Evidence: "A common suitable measurement unit (e.g. MJ, kWh) shall be selected for the quantification of all relevant energies (e.g. thermal, electrical) that are involved in the measurement." (L2271–L2272)
+-- Note: Apply AFTER 20260917102110 / 20260917102120 (the gate reads the created outputs). Max prod code today CR-037 (read-only count 37).
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT WS('ISO-59020-07'), 'CR-038', 'Gemeinsame Energieeinheit für alle Energieflüsse (A.4.2)', 'IF energy_flows_count > 0 THEN energy_unit_mismatch == 0', 'A.4.2', 'block',
+--   'Plan 3 (iso59020-G-5): „A common suitable measurement unit (e.g. MJ, kWh) shall be selected for the quantification of all relevant energies“ (L2271–L2272) — jede Zeile des Energieregisters in energy_unit_common.'
+-- WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements x WHERE x.worksheet_template_id = WS('ISO-59020-07') AND x.code = 'CR-038');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE worksheet_template_id = WS('ISO-59020-07') AND code = 'CR-038' AND description LIKE 'Plan 3 (iso59020-G-5)%'. Pinned in-session: MJ worksheet + one kWh row ⇒ mismatch 1; no common unit ⇒ every row; no rows ⇒ count 0 (guard passes).
+--
+-- =====================================================================================================================
+-- iso59020-C-1 · ISO-59020-04 · the five created selection counts (*_indicators_selected, -04-D6 … D10).consumer_worksheets += ISO-59020-05 / -06 / -07
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Not applied (a create never sets consumers). Until ratified nothing on -05 / -06 / -07 reads the indicator selection; G-1 and M-1 depend on this block.
+-- Evidence: "The calculation of the circularity indicators for each inflow can be performed and reported individually or can be aggregated, based on the goal of the circularity measurement and assessment and allowing for attributed content from a mass balance chain of custody model as defined in ISO 22095. Maintaining separate calculations for each resource inflow (X) enables characteristics such as per cent reused content to be tracked through use and processing stages within the system in focus. It also provides flexibility in applying complementary methods for circularity assessment." (L1895–L1900); "Optional A.4.2 Average per cent of Fraction of net consumed energy Recovering energy consumed that is that qualifies as renewable energy, resource Energy renewable energy taking into account both energy value inflows and energy outflows" (L1112–L1116)
+-- Note: Apply after 20260917102110 (the fields must exist).
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-05') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'inflow_indicators_selected' AND f.active AND NOT ('ISO-59020-05' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-06') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'inflow_indicators_selected' AND f.active AND NOT ('ISO-59020-06' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-07') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'inflow_indicators_selected' AND f.active AND NOT ('ISO-59020-07' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-05') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'outflow_indicators_selected' AND f.active AND NOT ('ISO-59020-05' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-06') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'outflow_indicators_selected' AND f.active AND NOT ('ISO-59020-06' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-07') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'outflow_indicators_selected' AND f.active AND NOT ('ISO-59020-07' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-05') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'energy_indicator_selected' AND f.active AND NOT ('ISO-59020-05' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-06') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'energy_indicator_selected' AND f.active AND NOT ('ISO-59020-06' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-07') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'energy_indicator_selected' AND f.active AND NOT ('ISO-59020-07' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-05') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'water_indicators_selected' AND f.active AND NOT ('ISO-59020-05' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-06') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'water_indicators_selected' AND f.active AND NOT ('ISO-59020-06' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-07') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'water_indicators_selected' AND f.active AND NOT ('ISO-59020-07' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-05') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'economic_indicators_selected' AND f.active AND NOT ('ISO-59020-05' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-06') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'economic_indicators_selected' AND f.active AND NOT ('ISO-59020-06' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-07') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'economic_indicators_selected' AND f.active AND NOT ('ISO-59020-07' = ANY(coalesce(consumer_worksheets, '{}')));
+-- COMMIT;
+-- Rollback: array_remove on each of the five fields (guarded by the target being present).
+--
+-- =====================================================================================================================
+-- iso59020-R-1 · ISO-59020-05 / -06 / -07 · retire the eight single-X prod equations A.1 … A.8 (verified) and their equality gates CR-011 … CR-013 / CR-015 … CR-018 / CR-020 in favour of the per-row registers; re-point the -09 consumers to the aggregates
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing retired: A.1 … A.8 keep their verified rows and outputs (pct_REUI_X … pct_ECONRE_X, consumed by -09), the equality gates keep enforcing the single-X arithmetic, the scalar inputs stay typeable. The registers reproduce the same printed forms per row (pinned) and add the mass-weighted aggregates. Retirement = archive the eight equation rows (ids / md5 captured) + the eight gates, deactivate the 14 single-X input scalars (D-6 … D-9, D-11 … D-16, D-18 … D-21) and add ISO-59020-09 to the consumers of the aggregates that replace the consumed outputs (pct_reui_agg ↔ pct_REUI_X, pct_reci_agg ↔ pct_RECI_X, pct_reni_agg ↔ pct_RENI_X, pct_reuo_agg ↔ pct_REUO_X, pct_reco_agg ↔ pct_RECO_X, pct_reno_agg ↔ pct_RENO_X, pct_econre_agg ↔ pct_ECONRE_X; RLP_X has no aggregate — J-8).
+-- Evidence: "Different types of inflow resources or those that have different circularity characteristics (e.g. have different amounts of recycled content) should be measured and recorded separately. In Figure A.1, the “X” in inflow (X) represents a specific resource inflow." (L1892–L1894); "The calculation of the circularity indicators for each inflow can be performed and reported individually or can be aggregated, based on the goal of the circularity measurement and assessment and allowing for attributed content from a mass balance chain of custody model as defined in ISO 22095. Maintaining separate calculations for each resource inflow (X) enables characteristics such as per cent reused content to be tracked through use and processing stages within the system in focus. It also provides flexibility in applying complementary methods for circularity assessment." (L1895–L1900); "The sum of the circular outflows and the remaining non-circular outflows represent 100 % of the resource outflows from the system in focus, see Figure A.2. The resource outflow circularity indicators specified in A.3.3, A.3.4 and A.3.5 shall be calculated and documented. In cases where the circularity indicator is not relevant, it can be counted at value zero. The circularity indicators for each outflow can be calculated and reported individually or they can be aggregated, based on goal and scope." (L2022–L2026)
+-- Note: Equations touched (read-only 2026-09-18): A.1 (ISO-59020-05, id 62e2cbfd-f530-4450-a9b7-1982fa1f955b, md5 0c29c379b6994ea25d6501112c45f793, output pct_REUI_X); A.2 (ISO-59020-05, id 3d0e7b99-83ba-447d-9101-df3ab06c11c2, md5 40be2dfd282cf733b41e27eca530d1fc, output pct_RECI_X); A.3 (ISO-59020-05, id 77f9ac60-2373-41f5-aa09-071b9e311ff2, md5 a4619303c75d22118c67d8bf374bc48e, output pct_RENI_X); A.4 (ISO-59020-06, id 36c2e3ea-1c39-458c-b1ab-0568b515e4ec, md5 644c6d1d4cad9f15e11555e021aa7dd2, output RLP_X); A.5 (ISO-59020-06, id b96ecbfd-5f01-4c9b-af8a-864ebe15982a, md5 4e0237f0cc16e2cdc47a17f30ca17ab5, output pct_REUO_X); A.6 (ISO-59020-06, id 1e0f3bf1-e489-4678-9fa3-84394512a64c, md5 d8d018f6e5934c9e60ce301350fedd28, output pct_RECO_X); A.7 (ISO-59020-06, id 3fc5b480-968f-4176-bd3b-6eb91f1f6f3b, md5 b60f431d6d3889b75f60bc4c63c85ba9, output pct_RENO_X); A.8 (ISO-59020-07, id 16e117aa-9d53-4f91-8323-4cb016a18a3d, md5 6341f3e3e07341e9b8c7a6d964a5a904, output pct_ECONRE_X).
+-- Note: The -09 worksheet inherits the seven pct outputs today; a consumer edit is a data-shape change for -09 (the inherited symbol names change) — the owner rules whether -09 reads the aggregates or the per-X rows.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_iso59020 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_iso59020 SELECT e.* FROM equations e WHERE e.id = '62e2cbfd-f530-4450-a9b7-1982fa1f955b' AND md5(e.formula) = '0c29c379b6994ea25d6501112c45f793';
+-- INSERT INTO equations_archive_iso59020 SELECT e.* FROM equations e WHERE e.id = '3d0e7b99-83ba-447d-9101-df3ab06c11c2' AND md5(e.formula) = '40be2dfd282cf733b41e27eca530d1fc';
+-- INSERT INTO equations_archive_iso59020 SELECT e.* FROM equations e WHERE e.id = '77f9ac60-2373-41f5-aa09-071b9e311ff2' AND md5(e.formula) = 'a4619303c75d22118c67d8bf374bc48e';
+-- INSERT INTO equations_archive_iso59020 SELECT e.* FROM equations e WHERE e.id = '36c2e3ea-1c39-458c-b1ab-0568b515e4ec' AND md5(e.formula) = '644c6d1d4cad9f15e11555e021aa7dd2';
+-- INSERT INTO equations_archive_iso59020 SELECT e.* FROM equations e WHERE e.id = 'b96ecbfd-5f01-4c9b-af8a-864ebe15982a' AND md5(e.formula) = '4e0237f0cc16e2cdc47a17f30ca17ab5';
+-- INSERT INTO equations_archive_iso59020 SELECT e.* FROM equations e WHERE e.id = '1e0f3bf1-e489-4678-9fa3-84394512a64c' AND md5(e.formula) = 'd8d018f6e5934c9e60ce301350fedd28';
+-- INSERT INTO equations_archive_iso59020 SELECT e.* FROM equations e WHERE e.id = '3fc5b480-968f-4176-bd3b-6eb91f1f6f3b' AND md5(e.formula) = 'b60f431d6d3889b75f60bc4c63c85ba9';
+-- INSERT INTO equations_archive_iso59020 SELECT e.* FROM equations e WHERE e.id = '16e117aa-9d53-4f91-8323-4cb016a18a3d' AND md5(e.formula) = '6341f3e3e07341e9b8c7a6d964a5a904';
+-- DELETE FROM equations e WHERE e.id = '62e2cbfd-f530-4450-a9b7-1982fa1f955b' AND md5(e.formula) = '0c29c379b6994ea25d6501112c45f793';
+-- DELETE FROM equations e WHERE e.id = '3d0e7b99-83ba-447d-9101-df3ab06c11c2' AND md5(e.formula) = '40be2dfd282cf733b41e27eca530d1fc';
+-- DELETE FROM equations e WHERE e.id = '77f9ac60-2373-41f5-aa09-071b9e311ff2' AND md5(e.formula) = 'a4619303c75d22118c67d8bf374bc48e';
+-- DELETE FROM equations e WHERE e.id = '36c2e3ea-1c39-458c-b1ab-0568b515e4ec' AND md5(e.formula) = '644c6d1d4cad9f15e11555e021aa7dd2';
+-- DELETE FROM equations e WHERE e.id = 'b96ecbfd-5f01-4c9b-af8a-864ebe15982a' AND md5(e.formula) = '4e0237f0cc16e2cdc47a17f30ca17ab5';
+-- DELETE FROM equations e WHERE e.id = '1e0f3bf1-e489-4678-9fa3-84394512a64c' AND md5(e.formula) = 'd8d018f6e5934c9e60ce301350fedd28';
+-- DELETE FROM equations e WHERE e.id = '3fc5b480-968f-4176-bd3b-6eb91f1f6f3b' AND md5(e.formula) = 'b60f431d6d3889b75f60bc4c63c85ba9';
+-- DELETE FROM equations e WHERE e.id = '16e117aa-9d53-4f91-8323-4cb016a18a3d' AND md5(e.formula) = '6341f3e3e07341e9b8c7a6d964a5a904';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '1ecf3625-34f0-4a08-9f44-235af8e40954' AND md5(c.condition) = 'e3832bf2921a515104abf584e55f843b';
+-- DELETE FROM compliance_requirements c WHERE c.id = '1ecf3625-34f0-4a08-9f44-235af8e40954' AND md5(c.condition) = 'e3832bf2921a515104abf584e55f843b';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '4daf7c18-fd49-4269-9e51-6a447fe2ffea' AND md5(c.condition) = 'dc53311f74cd298d1a2be1ab630ee6c3';
+-- DELETE FROM compliance_requirements c WHERE c.id = '4daf7c18-fd49-4269-9e51-6a447fe2ffea' AND md5(c.condition) = 'dc53311f74cd298d1a2be1ab630ee6c3';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '02e4e690-7d7a-401f-a6e7-2eac23109be2' AND md5(c.condition) = '7a94e0941c11a444ae2f537331a49d3d';
+-- DELETE FROM compliance_requirements c WHERE c.id = '02e4e690-7d7a-401f-a6e7-2eac23109be2' AND md5(c.condition) = '7a94e0941c11a444ae2f537331a49d3d';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = 'aa5768dd-b687-4764-b28d-f4e61d8870ba' AND md5(c.condition) = '20ed0f0b1508632904691dd9b023b015';
+-- DELETE FROM compliance_requirements c WHERE c.id = 'aa5768dd-b687-4764-b28d-f4e61d8870ba' AND md5(c.condition) = '20ed0f0b1508632904691dd9b023b015';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = 'e5623abb-cfe5-4f2c-a445-8489cdaee9be' AND md5(c.condition) = '44d9170146060a0ed1d02bbb42e4e911';
+-- DELETE FROM compliance_requirements c WHERE c.id = 'e5623abb-cfe5-4f2c-a445-8489cdaee9be' AND md5(c.condition) = '44d9170146060a0ed1d02bbb42e4e911';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '4f102b24-0959-44c2-8557-595a8e332104' AND md5(c.condition) = '04b7ceb7890e98aedf1a1218bb0e32da';
+-- DELETE FROM compliance_requirements c WHERE c.id = '4f102b24-0959-44c2-8557-595a8e332104' AND md5(c.condition) = '04b7ceb7890e98aedf1a1218bb0e32da';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '3d192aa1-1924-4946-a288-275fdcae3723' AND md5(c.condition) = '373b192092eaee7871743f219bb75308';
+-- DELETE FROM compliance_requirements c WHERE c.id = '3d192aa1-1924-4946-a288-275fdcae3723' AND md5(c.condition) = '373b192092eaee7871743f219bb75308';
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59020 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59020 SELECT c.* FROM compliance_requirements c WHERE c.id = '605f2609-f6a4-49c6-9dea-7471bd932738' AND md5(c.condition) = '9b7b615bd749f54613277c7e91fb9006';
+-- DELETE FROM compliance_requirements c WHERE c.id = '605f2609-f6a4-49c6-9dea-7471bd932738' AND md5(c.condition) = '9b7b615bd749f54613277c7e91fb9006';
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-09') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-05' AND f.symbol = 'pct_reui_agg' AND f.active AND NOT ('ISO-59020-09' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-09') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-05' AND f.symbol = 'pct_reci_agg' AND f.active AND NOT ('ISO-59020-09' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-09') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-05' AND f.symbol = 'pct_reni_agg' AND f.active AND NOT ('ISO-59020-09' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-09') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'pct_reuo_agg' AND f.active AND NOT ('ISO-59020-09' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-09') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'pct_reco_agg' AND f.active AND NOT ('ISO-59020-09' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-09') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'pct_reno_agg' AND f.active AND NOT ('ISO-59020-09' = ANY(coalesce(consumer_worksheets, '{}')));
+-- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-59020-09') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-07' AND f.symbol = 'pct_econre_agg' AND f.active AND NOT ('ISO-59020-09' = ANY(coalesce(consumer_worksheets, '{}')));
+-- -- then the D-6 … D-9 / D-11 … D-16 / D-18 … D-21 retirement statements (UPDATE fields SET active = false … guarded by symbol AND active).
+-- COMMIT;
+-- Rollback: INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote) SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote FROM equations_archive_iso59020 WHERE id IN (…); the same explicit-column INSERT from compliance_requirements_archive_iso59020 for the eight gates; array_remove the seven consumer entries; UPDATE fields SET active = true for the retired scalars; DROP both archives on rollback or on the owner's sign-off that the deletion is final.
+--
+-- =====================================================================================================================
+-- iso59020-M-1 · ISO-59020-07 · energy / water / economic block visibility keyed on the -04 indicator selection (register-driven — the brief's "block gating")
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Not emitted; the three -07 blocks stay visible. A visible_when driven by a register (or by the derived selection counts, which are its aggregates) is the multi-select-driver class; in addition the -07 inputs are gate-read (CR-020 … CR-025) and feed the consumed A.8 … A.13 outputs (producer chain) — asserted through the guards in field-configs-iso59020.test.ts. After C-1 + G-1 the rules below are exempt by the IF-guard (same driver / op / literal) but still refused by the producer guard until R-1 re-points the -09 consumers.
+-- Evidence: "Table 3 — Core circularity indicators Indicator Mandatory/ Circularity indicator Summary description Additional category optional (see Annex A for technical information specifications)" (L1081–L1084); "Optional A.4.2 Average per cent of Fraction of net consumed energy Recovering energy consumed that is that qualifies as renewable energy, resource Energy renewable energy taking into account both energy value inflows and energy outflows" (L1112–L1116); "Optional A.5.2 Per cent water Per cent of annual water demand Maintains a withdrawal from that is derived from circular sources circular flow of inflow circular sources resources Optional A.5.3 Per cent water Per cent (by volume) of total water Maintains a discharged in withdrawn that is discharged in ac- circular flow of Water accordance with cordance with circularity principles resources quality requirements Optional A.5.4 Ratio (on-site or Reuse cycles of on-site water Maintains a internal) water reuse or circular flow of recirculation resources" (L1131–L1141); "Optional A.6.2 Material productivity Ratio of revenue generated by total Indicates mass of all linear resource inflows resource reduction Economic Optional A.6.3 Resource intensity Quantitative measure of economic Indicates index growth versus total resource use resource reduction" (L1142–L1148)
+-- Note: Order: C-1 → G-1 → R-1 → the hides below.
+-- -- after C-1 + G-1 + R-1:
+-- FLD(ISO-59020-07, EIRENE_X) SET visible_when = 'energy_indicator_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, EORENE_X) SET visible_when = 'energy_indicator_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, EITE_X) SET visible_when = 'energy_indicator_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, EOTE_X) SET visible_when = 'energy_indicator_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, energy_unit_common) SET visible_when = 'energy_indicator_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, energy_flows) SET visible_when = 'energy_indicator_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, VCIW) SET visible_when = 'water_indicators_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, VAIW) SET visible_when = 'water_indicators_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, VCDW) SET visible_when = 'water_indicators_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, VTWU) SET visible_when = 'water_indicators_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, VTWW) SET visible_when = 'water_indicators_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, C) SET visible_when = 'economic_indicators_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, D) SET visible_when = 'economic_indicators_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, E) SET visible_when = 'economic_indicators_selected >= 1' … AND f.visible_when IS NULL;
+-- FLD(ISO-59020-07, F) SET visible_when = 'economic_indicators_selected >= 1' … AND f.visible_when IS NULL;
+-- Rollback: FLD(ISO-59020-07, <sym>) SET visible_when = NULL … AND f.visible_when = '<rule>' per statement.
+--
+-- =====================================================================================================================
+-- iso59020-D-1 · ISO-59020-04 · `selected_core_indicator` ↔ `indicators.indicator (lookup_key TABLE3)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the enum (13 tokens = the TABLE3 keys) stays the single-indicator picker; the register row is the N-instances shape.
+-- Evidence: "Table 3 lists the name and a brief description of each core circularity indicator along with a reference to the subclause in Annex A that provides additional specifications or recommendations for measurement and calculation formulae. These core circularity indicators are in active use as part of circularity indicator systems and are recognized as providing an effective and practical measure of circularity performance." (L1057–L1060)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'selected_core_indicator' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-2 · ISO-59020-04 · `indicator_category` ↔ `indicators.category (lookup_value TABLE3.category)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the enum (consumed by -05 / -06 / -07) stays; the register fills the printed category per row.
+-- Evidence: "The circularity indicators are organized into categories such that material, water and energy are treated separately. This separation is because water and energy both have unique aspects that should be measured to determine the circularity performance. The reference to “material” includes all physical resources except those that are explicitly addressed in other circularity indicator categories. “Material” includes manufactured products given that they are composed of materials." (L1072–L1076)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'indicator_category' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-3 · ISO-59020-04 · `indicator_not_applicable_justified` ↔ `indicators.not_applicable + justification (per row) → na_unjustified (-04-D3)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the boolean (consumed by -09) stays; proposal after G-2: retire in favour of na_unjustified == 0.
+-- Evidence: "The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in stocks into account. If a core circularity indicator is not applicable, the organization should explain why and can count the indicator value as zero." (L1068–L1071)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'indicator_not_applicable_justified' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-4 · ISO-59020-04 · `mandatory_core_indicators_included` ↔ `mandatory_core_indicators_included_code (-04-D5)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the boolean (consumed by -05 / -06, read by CR-009) stays typeable; proposal: G-4 first, then retire with a consumer edit adding the code to -05 / -06.
+-- Evidence: "The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in stocks into account. If a core circularity indicator is not applicable, the organization should explain why and can count the indicator value as zero." (L1068–L1071)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'mandatory_core_indicators_included' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-5 · ISO-59020-04 · `additional_indicator` ↔ `additional_indicators.name`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the text stays; the register holds N additional indicators with definition / value / unit.
+-- Evidence: "The core circularity indicators can be supplemented by additional circularity indicators to meet the goal and scope of the circularity measurement and assessment. A materiality approach can be valuable to prioritize and select relevant indicators for the measurement. Annex B provides examples of additional indicators." (L1077–L1079)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-04' AND f.symbol = 'additional_indicator' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-6 · ISO-59020-05 · `mTI_X` ↔ `inflows.m_ti`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.1 – A.3 and CR-011 … CR-013 — retire only inside R-1.
+-- Evidence: "The calculation of the circularity indicator is performed by applying Formula (A.1):  mREUI( X )  %REUI( X ) =   ⋅100 (A.1)  mTI X   ( )  where %REUI( X ) is the average reused content of an inflow (X), in %; mREUI( X ) is the mass of reused components and products of an inflow (X), in kg or other mass unit; mTI( X ) is the mass of total input material of an inflow (X), in kg or other mass unit." (L1926–L1938)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-05' AND f.symbol = 'mTI_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-7 · ISO-59020-05 · `mREUI_X` ↔ `inflows.m_reui`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.1 / CR-011 — retire only inside R-1.
+-- Evidence: "The calculation of the circularity indicator is performed by applying Formula (A.1):  mREUI( X )  %REUI( X ) =   ⋅100 (A.1)  mTI X   ( )  where %REUI( X ) is the average reused content of an inflow (X), in %; mREUI( X ) is the mass of reused components and products of an inflow (X), in kg or other mass unit; mTI( X ) is the mass of total input material of an inflow (X), in kg or other mass unit." (L1926–L1938)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-05' AND f.symbol = 'mREUI_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-8 · ISO-59020-05 · `mRECI_X` ↔ `inflows.m_reci`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.2 / CR-012 — retire only inside R-1.
+-- Evidence: "The calculation of the circularity indicator is performed by applying Formula (A.2):  mRECI( X )  %RECI( X ) =   ⋅100 (A.2)  mTI X   ( )  where %RECI( X ) is the average recycled content of an inflow (X), in %; mRECI( X ) is the mass of recycled material of an inflow (X), in kg or other mass unit; mTI( X ) is the mass of total input material of an inflow (X), in kg or other mass unit." (L1950–L1962)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-05' AND f.symbol = 'mRECI_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-9 · ISO-59020-05 · `mRENI_X` ↔ `inflows.m_reni`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.3 / CR-013 — retire only inside R-1.
+-- Evidence: "The calculation of the circularity indicator is performed by applying Formula (A.3):  mRENI( X )  PRENI( X ) =   ⋅100 (A.3)  mTI X   ( )  where PRENI( X ) is the average renewable content of an inflow (X), in %; mRENI( X ) is the mass of renewable material of an inflow (X), in kg or other mass unit; mTI( X ) is the mass of total input material of an inflow (X), in kg or other mass unitg." (L1992–L2004)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-05' AND f.symbol = 'mRENI_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-10 · ISO-59020-05 · `pct_linear_inflow` ↔ `inflows.pct_linear (per row) / pct_linear_agg (-05-D10)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the typed share (consumed by -09, read by CR-014) stays; G-3 + R-1 first — inventory win 3 (derive instead of type).
+-- Evidence: "These four types of content are intended to be mutually exclusive and add up to represent 100 % of the resource inflow (see Figure A.1). The first three types (recycled, reused and virgin, renewable content) are considered as circular; whereas the fourth type (virgin, non-renewable content) is the remaining portion that is from a non-circular source. The non-circular (linear) inflow can be calculated by subtracting the circular inflows from 100 %. For a material to be described as a “renewable material”, it shall adhere to the" (L1850–L1854)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-05' AND f.symbol = 'pct_linear_inflow' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-11 · ISO-59020-06 · `mTO_X` ↔ `outflows.m_to`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.5 – A.7 and CR-015 … CR-017 — retire only inside R-1.
+-- Evidence: "where PREUO( X ) is the actual reused products and components derived from outflow (X), in %; mREUO( X ) is the mass of outflow (X) that is reused, in kg or other mass unit; mTO( X ) is the total mass of outflow (X), in kg or other mass unit." (L2140–L2146)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'mTO_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-12 · ISO-59020-06 · `mREUO_X` ↔ `outflows.m_reuo`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.5 / CR-015 — retire only inside R-1.
+-- Evidence: "where PREUO( X ) is the actual reused products and components derived from outflow (X), in %; mREUO( X ) is the mass of outflow (X) that is reused, in kg or other mass unit; mTO( X ) is the total mass of outflow (X), in kg or other mass unit." (L2140–L2146)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'mREUO_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-13 · ISO-59020-06 · `mRECO_X` ↔ `outflows.m_reco (hidden per row unless traceable_recycling)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.6 / CR-016 — retire only inside R-1.
+-- Evidence: "If traceable recyclability data are not available for a specific resource outflow, 0 % should be recorded." (L2175); "The calculation of the circularity indicator is performed by applying Formula (A.6):  mRECO( X )  PRECO( X ) =   ⋅100 (A.6)  mTO X   ( )  where PRECO( X ) is the per cent actual recycled material derived from outflow (X), in %; mRECO( X ) is the mass of recycled material derived from outflow (X), in kg or other mass unit; mTO( X ) is the total mass of outflow (X), in kg or other mass unit." (L2176–L2188)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'mRECO_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-14 · ISO-59020-06 · `mRENO_X` ↔ `outflows.m_reno`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.7 / CR-017 — retire only inside R-1.
+-- Evidence: "The calculation of the circularity indicator is performed by applying Formula (A.7):  mRENO( X )  PRENO( X ) =   ⋅100 (A.7)  mTO X   ( )  where PRENO( X ) is the per cent actual recirculation of outflow (X) in the biological cycle, in %; mRENO( X ) is the mass of outflow (X) that is renewable recirculation, in kg or other mass unit; mTO( X ) is the total mass of outflow (X), in kg or other mass unit." (L2228–L2240)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'mRENO_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-15 · ISO-59020-06 · `tLP_X` ↔ `outflows.t_lp (optional)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.4 (RLP_X consumed by -09); no aggregate replaces RLP_X (J-8) — retire only inside R-1 with an -09 ruling.
+-- Evidence: "The calculation of the circularity indicator is performed by applying Formula (A.4): t LP( X ) RLP( X ) = (A.4) t IALP( X ) where RLP( X ) is the lifetime ratio of a product or material (X); it is dimensionless; t LP( X ) is the lifetime of a product or material (X), in, for example, years; t IALP( X ) is the industry average lifetime of a product or material (X), in, for example, years;" (L2100–L2110)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'tLP_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-16 · ISO-59020-06 · `tIALP_X` ↔ `outflows.t_ialp (optional)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.4 — as tLP_X.
+-- Evidence: "The calculation of the circularity indicator is performed by applying Formula (A.4): t LP( X ) RLP( X ) = (A.4) t IALP( X ) where RLP( X ) is the lifetime ratio of a product or material (X); it is dimensionless; t LP( X ) is the lifetime of a product or material (X), in, for example, years; t IALP( X ) is the industry average lifetime of a product or material (X), in, for example, years;" (L2100–L2110)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'tIALP_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-17 · ISO-59020-06 · `pct_linear_outflow` ↔ `outflows.pct_linear (per row) / pct_linear_out_agg (-06-D10)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the typed share (consumed by -09, read by CR-019) stays; G-3 + R-1 first — inventory win 3.
+-- Evidence: "The following three core circularity indicators are intended to represent outflows that are mutually exclusive and represent the circular outflows: — components and products that are reused (see A.3.3); — per cent recycled material derived from outflow (see A.3.4), — products and materials for renewable recirculation (see A.3.5). The remaining outflows are considered as linear and do not count towards circularity. The linear (non- circular) outflow can be calculated by subtracting the circular outflows from 100 %." (L2015–L2021)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-06' AND f.symbol = 'pct_linear_outflow' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-18 · ISO-59020-07 · `EIRENE_X` ↔ `energy_flows.ei_rene`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.8 / CR-020 — retire only inside R-1.
+-- Evidence: "PECONRE( X ) is the average energy (X) consumed that is renewable energy, in %; E IRENE( X ) is the renewable energy (X) inflow, in MJ (or in kWh); EORENE( X ) is the renewable energy (X) outflow, in MJ (or in kWh); E ITE( X ) is the total energy (X) inflow, in MJ (or in kWh); EOTE( X ) is the total energy (X) outflow, in MJ (or in kWh)." (L2284–L2292)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-07' AND f.symbol = 'EIRENE_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-19 · ISO-59020-07 · `EORENE_X` ↔ `energy_flows.eo_rene`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.8 / CR-020 — retire only inside R-1.
+-- Evidence: "PECONRE( X ) is the average energy (X) consumed that is renewable energy, in %; E IRENE( X ) is the renewable energy (X) inflow, in MJ (or in kWh); EORENE( X ) is the renewable energy (X) outflow, in MJ (or in kWh); E ITE( X ) is the total energy (X) inflow, in MJ (or in kWh); EOTE( X ) is the total energy (X) outflow, in MJ (or in kWh)." (L2284–L2292)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-07' AND f.symbol = 'EORENE_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-20 · ISO-59020-07 · `EITE_X` ↔ `energy_flows.ei_te`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.8 / CR-020 — retire only inside R-1.
+-- Evidence: "PECONRE( X ) is the average energy (X) consumed that is renewable energy, in %; E IRENE( X ) is the renewable energy (X) inflow, in MJ (or in kWh); EORENE( X ) is the renewable energy (X) outflow, in MJ (or in kWh); E ITE( X ) is the total energy (X) inflow, in MJ (or in kWh); EOTE( X ) is the total energy (X) outflow, in MJ (or in kWh)." (L2284–L2292)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-07' AND f.symbol = 'EITE_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-21 · ISO-59020-07 · `EOTE_X` ↔ `energy_flows.eo_te`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. input of A.8 / CR-020 — retire only inside R-1.
+-- Evidence: "PECONRE( X ) is the average energy (X) consumed that is renewable energy, in %; E IRENE( X ) is the renewable energy (X) inflow, in MJ (or in kWh); EORENE( X ) is the renewable energy (X) outflow, in MJ (or in kWh); E ITE( X ) is the total energy (X) inflow, in MJ (or in kWh); EOTE( X ) is the total energy (X) outflow, in MJ (or in kWh)." (L2284–L2292)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-07' AND f.symbol = 'EOTE_X' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-22 · ISO-59020-08 · `system_breakdown_done` ↔ `data_sources (rows) → data_sources_count (-08-D1)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the boolean (read by CR-026) stays; proposal: CR-026 reads data_sources_count >= 1 once ratified.
+-- Evidence: "To enable a systematic data acquisition, and to provide transparency to the acquired data, it is recommended that the system in focus is subdivided into its elementary components for which data acquisition can be practically executed, such as the identification of data sources for general inflows and outflows." (L1274–L1276)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-08' AND f.symbol = 'system_breakdown_done' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-23 · ISO-59020-08 · `data_category` ↔ `data_sources.origin / scope / specificity (the three printed pairs, J-4)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the flat 6-token enum stays; the register classifies every source on all three axes.
+-- Evidence: "— strive towards being specific data based on primary data; — be categorized as foreground or background, primary or secondary, specific or generic (secondary and generic data should be conservatively applied and not overstate the circularity);" (L1339–L1341)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-08' AND f.symbol = 'data_category' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-24 · ISO-59020-08 · `data_traceability` ↔ `data_sources.traceable → data_sources_untraceable (-08-D2)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the boolean (consumed by -09, read by CR-028 / CR-029) stays; proposal: CR-029 reads data_sources_untraceable == 0.
+-- Evidence: "— be acquired and supplied with sufficient documentation to enable verification of how well the data represent the above criteria, the reliability of its data source, any known data gaps, and other information of significance to the interpretation of the data; — be supplied with justification with regards to how well the above criteria are met." (L1342–L1345)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-08' AND f.symbol = 'data_traceability' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-D-25 · ISO-59020-09 · `complementary_method` ↔ `complementary_methods.method`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per flow X / indicator / data source / method), the prod scalar stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-59020 (read-only count 2026-09-18) — any retirement is data-free. the text stays; the register holds N methods with aspect / reference / result.
+-- Evidence: "3.3.7 complementary method method, approach or standard that is used together with circularity measurement (3.3.2) to provide a circularity assessment (3.3.3)" (L375–L378)
+-- -- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-59020' AND w.code = 'ISO-59020-09' AND f.symbol = 'complementary_method' AND f.active;
+-- Rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives (R-1).
+--
+-- =====================================================================================================================
+-- iso59020-J-1 · ISO-59020-05 / -06 / -07 · the cross-X aggregation rule (mass-weighted Σ share / Σ total — pct_*_agg, pct_econre_agg)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Emitted as DISPLAY outputs only (register footers; nothing consumes or gates them): §7.5 prints no formula ("The organization should ensure reliable aggregation"), Annex G (informative) prints the sum-then-divide as EXAMPLE c) and A.2.3 prints "can be calculated and then aggregated with other similar resources". The mass-weighted form is the printed example; an unweighted mean of the per-row percentages is the alternative. The owner ratifies whether Σ/Σ · 100 IS the aggregation of §7.5 (then R-1 may point -09 at it).
+-- Evidence: "7.5 Aggregation of circularity indicators Complex systems can necessitate an aggregation of data from multiple systems or subsystems. Complex products or product portfolios often require data from various constituent components. Measurement can require data aggregation from external sources as well as internal sources. Aggregation can also be needed for higher system levels. The organization should ensure reliable aggregation in terms of the system boundaries, the indicators used, the source of data, the estimations and assumptions made. See Annex G for additional information." (L1239–L1245); "c) representative data of technical performance, e.g. when adding data for similar recycling systems for, for example, aluminium cans to: 1) form a total amount of material recycled by the sector; 2) divide the sum with the total amount aluminium of aluminium cans to calculate an average for the recycling rate of aluminium can recycling." (L3783–L3789); "If a resource flowing through the system boundary into the system in focus contains a portion of recycled material, the portion can be used directly as the calculated circularity indicator value for the resource. Alternately, the mass that is recycled material can be calculated and then aggregated with other similar resources to calculate the recycled content for all similar resources." (L1964–L1967); "The calculation of the circularity indicators for each inflow can be performed and reported individually or can be aggregated, based on the goal of the circularity measurement and assessment and allowing for attributed content from a mass balance chain of custody model as defined in ISO 22095. Maintaining separate calculations for each resource inflow (X) enables characteristics such as per cent reused content to be tracked through use and processing stages within the system in focus. It also provides flexibility in applying complementary methods for circularity assessment." (L1895–L1900)
+-- -- alternative: replace the seven pct_*_agg formulas by mean_rows(<reg>, pct_<x>) (unweighted) — UPDATE equations SET formula = … WHERE equation_number = … AND description LIKE ''Plan 3:%''.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-J-2 · ISO-59020-04 · mandatory_core_indicators_included_code requires count == 6 (the number of "Mandatory" rows printed in Table 3)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The 6 is typed into ISO-59020-04-D5 and pinned against the seed (exactly six rows print "Mandatory": A.2.2, A.2.3, A.2.4, A.3.3, A.3.4, A.3.5); without it an empty or partial register would read a phantom "included". Alternative: drop the count and rely on mandatory_missing == 0 alone (weaker), or a [CODE] table-row-count function.
+-- Evidence: "The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in stocks into account. If a core circularity indicator is not applicable, the organization should explain why and can count the indicator value as zero." (L1068–L1071); "Table 3 — Core circularity indicators" (L1081)
+-- -- alternative: UPDATE equations SET formula = ''mandatory_core_indicators_included_code = if(count_rows(indicators, ok == 0) == 0, 1, 0)'' WHERE equation_number = ''ISO-59020-04-D5'' AND description LIKE ''Plan 3:%''.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-J-3 · ISO-59020-04 · TABLE3.category_token — a structural column mapping the printed category cells to prod's indicator_category tokens
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Seeded beside the printed `category` (Resource Inflows / Resource outflows / Energy / Water / Economic → resource_inflow / resource_outflow / energy / water / economic, the captured enum); read by the per-category selection counts (-04-D6 … D10) through the register's derived category_code. A lookup argument only — never displayed as a printed value.
+-- Evidence: "Table 3 — Core circularity indicators Indicator Mandatory/ Circularity indicator Summary description Additional category optional (see Annex A for technical information specifications)" (L1081–L1084); "The circularity indicators are organized into categories such that material, water and energy are treated separately. This separation is because water and energy both have unique aspects that should be measured to determine the circularity performance. The reference to “material” includes all physical resources except those that are explicitly addressed in other circularity indicator categories. “Material” includes manufactured products given that they are composed of materials." (L1072–L1076)
+-- -- alternative: key the counts on the printed strings (category == ''Energy'') and drop the column.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-J-4 · ISO-59020-08 · data_sources — prod's flat data_category enum (6 tokens) split into the three printed pairs (origin / scope / specificity), each required
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): §7.6.2 prints three independent classifications ("foreground or background, primary or secondary, specific or generic"); one row carries all three, each required so the conservative-use badge and the counts are decidable. The prod scalar keeps its six-token list (D-23).
+-- Evidence: "— strive towards being specific data based on primary data; — be categorized as foreground or background, primary or secondary, specific or generic (secondary and generic data should be conservatively applied and not overstate the circularity);" (L1339–L1341)
+-- -- alternative: one enum column over the six prod tokens (one axis per row).
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-J-5 · ISO-59020-09 · information_verifiable — hide under internal_or_external_use == external_communication (brief Step 4)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): NOT emitted (fail-safe: visible): §8.6.2 prints verifiability as a key criterion of ALL data documentation with no external-use condition, and CR-035 reads the field (gate-aware refusal asserted in the test). The brief's premise is not printed — see the report's grep (amendment O).
+-- Evidence: "Verifiability of all data documentation is a key criterion to ensure transparency." (L1760); "This verification is carried out to ensure a proper interpretation of the results and to give explicit reasons for any extrapolations, simplifications or modelling performed, considering the confidentiality of information, if required. In addition, any volatility or uncertainty should be disclosed. When using a chain of custody model to allocate resources, the organization should report the chosen model alongside the resource flows" (L1761–L1764)
+-- -- none (the rule would be a G-block on CR-035 with a condition the text does not carry).
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-J-6 · ISO-59020-04 · aggregation_method / consolidation — hide under a multi-organisation system_level (brief Step 4, §6.5)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): NOT emitted: aggregation_method is consumed by -05 / -06 / -07 (producer guard), system_level reaches no worksheet (consumer_worksheets ["ALL"] — the fll_gar trap-1 token), and §7.5 makes aggregation a matter of complex systems and "also" higher system levels, not of one level. The field stays visible and free text.
+-- Evidence: "7.5 Aggregation of circularity indicators Complex systems can necessitate an aggregation of data from multiple systems or subsystems. Complex products or product portfolios often require data from various constituent components. Measurement can require data aggregation from external sources as well as internal sources. Aggregation can also be needed for higher system levels. The organization should ensure reliable aggregation in terms of the system boundaries, the indicators used, the source of data, the estimations and assumptions made. See Annex G for additional information." (L1239–L1245); "6.5 System perspective at different levels" (L879)
+-- -- none; if wanted: expand system_level.consumer_worksheets from [''ALL''] to the nine codes first (C-block), then a J ruling on the levels.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-J-7 · ISO-59020-06 · outflows.traceable_recycling — an UNSET checkbox reads as "no traceable data" ⇒ PRECO(X) = 0 %
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): A.3.4 says 0 % "should be recorded" when traceable recyclability data are not available; the boolean's unset state is that case (the mRECO input is hidden and the row is complete). A row WITH data must tick the box before mRECO appears — said in the register subtitle / note.
+-- Evidence: "If traceable recyclability data are not available for a specific resource outflow, 0 % should be recorded." (L2175); "releases, losses and non-recoverable products. If any of these resource outflows are known to be recycled, reused or subject to renewable recirculation, then the applicable core circularity indicators described in A.3.3, A.3.4 and A.3.5 shall be calculated. Otherwise, these outflows are considered linear (recorded as 0 %) as they are non-circular outflows incurred by the system in focus." (L2048–L2051)
+-- -- alternative: make traceable_recycling required (an unset row incomplete) — UPDATE fields SET ui_config = jsonb_set(…) on the register column.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-J-8 · ISO-59020-06 · RLP(X) — per row only; no rlp_mean (the brief's -06-D1 mean_rows)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): RLP(X) = tLP / tIALP is derived per row (null without the optional lifetime pair); no cross-row aggregate is emitted — the standard prints no aggregation for a ratio (A.3.2 says the indicator "can be measured and calculated with a different temporal boundary"), and an unweighted mean of ratios over unlike products would be an invented rule. Alternative: mean_rows(outflows, rlp, t_lp IS NOT NULL AND t_ialp IS NOT NULL) (probed: 1,2 over one row; manual_required with none).
+-- Evidence: "The calculation of the circularity indicator is performed by applying Formula (A.4): t LP( X ) RLP( X ) = (A.4) t IALP( X ) where RLP( X ) is the lifetime ratio of a product or material (X); it is dimensionless; t LP( X ) is the lifetime of a product or material (X), in, for example, years; t IALP( X ) is the industry average lifetime of a product or material (X), in, for example, years;" (L2100–L2110); "The circularity indicator A.3.2 on average product life is applicable to only certain types of systems in focus (e.g. products manufacturing) and is not mandatory to calculate. It can be measured and calculated with a different temporal boundary (i.e. product end of life) than other resource outflow circularity indicators which are typically measured when the resource leaves the system boundary." (L2052–L2055)
+-- -- alternative: INSERT INTO equations … ''rlp_mean = mean_rows(outflows, rlp, t_lp IS NOT NULL AND t_ialp IS NOT NULL)'' (+ a derived field) — Plan 3 pattern.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-U-1 · ISO-59020-04 · TABLE3 — five line-end hyphenations inside printed cells (joined to the word the same column prints elsewhere)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): "sustainably pro-/duced" (A.2.4 description), "aver-/age" (A.3.2 description), "Recovers re-/source value" (A.3.5 principle), "recir-/culation" (A.3.5 description), "in ac-/cordance" (A.5.3 description) are printed across a line break; the seeded cells carry the joined words, the builder asserts the printed fragments (with the hyphen) against the page, and the table stays imported_unverified (amendment F).
+-- Evidence: "Mandatory A.2.4 Average renewable Fraction of material resources Add content of an inflow (X) inflow (X) that is sustainably pro- resource duced renewable material value" (L1093–L1095); "Optional A.3.2 Average lifetime of Indicator of time that an output Retaining product or material relative resource (e.g. product) will remain resource to industry average in use compared to an industry aver- value age for the resource" (L1096–L1099); "Mandatory A.3.5 Per cent actual Fraction of outflow content that is Recovers re- recirculation of recirculated at end of life for safe source outflow in the return to the biosphere and meets value biological cycle the qualifying conditions for recir- culation" (L1107–L1111); "Optional A.5.3 Per cent water Per cent (by volume) of total water Maintains a discharged in withdrawn that is discharged in ac- circular flow of Water accordance with cordance with circularity principles resources quality requirements" (L1134–L1138)
+-- -- none; the PDF page (SR-3) settles the reading before any md_verified upgrade.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-U-2 · ISO-59020-07 · Formula (A.8) block prints "⋅1000" while its legend reads "in %"
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The per-row PECONRE(X) column and the -07-D6 aggregate multiply by 100 — the legend ("is the average energy (X) consumed that is renewable energy, in %"), the seven sibling formulae (A.1 – A.7 print "⋅100") and prod's verified A.8 row (md5 captured: "… * 100") agree; the printed "⋅1000" is kept verbatim in the quote. A per-mille reading would need the PDF page (SR-3).
+-- Evidence: "The calculation of the circularity indicator is performed by applying Formula (A.8): (  E IRENE( X ) − EORENE( X ) PECONRE( X ) =  )  ⋅1000 (A.8)  E ITE( X ) − EOTE( X )  where PECONRE( X ) is the average energy (X) consumed that is renewable energy, in %; E IRENE( X ) is the renewable energy (X) inflow, in MJ (or in kWh); EORENE( X ) is the renewable energy (X) outflow, in MJ (or in kWh); E ITE( X ) is the total energy (X) inflow, in MJ (or in kWh); EOTE( X ) is the total energy (X) outflow, in MJ (or in kWh)." (L2275–L2292)
+-- -- if the PDF confirms ⋅1000: UPDATE equations SET formula = … * 1000 WHERE equation_number = ''ISO-59020-07-D6'' …; and the register column expr in ui_config.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-O-1 · ISO-59020-09 · complementary_methods.method datalist — §3.3.7 prints NO example list (inventory premise refuted); the list is Annex C.3 / C.4 / C.5
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The inventory's "§3.3.7 examples 'LCA per ISO 14044, LCC, ISO 26000'" is not printed at §3.3.7 (definition only, L375–L378; grep in the report). The datalist carries the 17 standards of C.3 / C.4 plus S-LCA / LCSA of C.5 — every designation opens its printed bullet line (pinned).
+-- Evidence: "3.3.7 complementary method method, approach or standard that is used together with circularity measurement (3.3.2) to provide a circularity assessment (3.3.3)" (L375–L378); "C.3 International Standards for measurement and assessment The following non-exhaustive list of International Standards can be applied for measurement and assessment:" (L3075–L3077); "C.5 Methods promoted by international organizations (such as the UN) — Social life cycle assessment (S-LCA)[57]: This is a method that can be used to assess the social and" (L3205–L3206)
+-- -- none.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-F-1 · ISO-59020-04 · no row prefill from Table 3 — the engineer adds the 13 indicator rows by hand
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The register editor has no "one row per table row" generator; the Table-3 rows are picked one by one (grouped by category). [CODE] candidate: a `prefill_from_table` register option.
+-- Evidence: "Table 3 lists the name and a brief description of each core circularity indicator along with a reference to the subclause in Annex A that provides additional specifications or recommendations for measurement and calculation formulae. These core circularity indicators are in active use as part of circularity indicator systems and are recognized as providing an effective and practical measure of circularity performance." (L1057–L1060)
+-- -- [CODE] candidate, no SQL.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-F-2 · ISO-59020-04 · duplicate indicator rows are not detected (the language has no distinct-count over a register)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Two rows picking the same Table-3 indicator both count in mandatory_core_covered; the "== 6" of -04-D5 can therefore be met with a duplicate while another mandatory indicator is missing only if ok == 0 for that missing one is absent — it is not (a missing indicator has no row, mandatory_missing cannot see it; that is exactly why the count is required). A `count_distinct_rows` [CODE] candidate closes the residual gap.
+-- Evidence: "The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in stocks into account. If a core circularity indicator is not applicable, the organization should explain why and can count the indicator value as zero." (L1068–L1071)
+-- -- [CODE] candidate, no SQL.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-I-1 · ISO-59020-09 · temporal_boundary_note ← temporal_boundary_shortened (inherited from -03): server-side visibility resolves own fields only
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The rule is emitted (the driver is inherited on -09, so the form / report / PDF hide the note when the boundary was not shortened); the save-path materialiser and the approval gate resolve own-worksheet fields only ⇒ the rule is `pending` there (visible; a required-field check would count it — the field is not required). Fail-safe; nothing skipped.
+-- Evidence: "There can also be challenges if the life of solutions is very long such as in construction. Because of these challenges and the constraints and uncertainty of data, the organization can choose to shorten the temporal boundaries. Shorter timescales that do not consider an entire life cycle should be documented in the assessment report. The temporal boundaries are also relevant when assessing the sustainability impacts." (L847–L850)
+-- -- none ([CODE] follow-up: inherited drivers in server-side visibility).
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-X-1 · ISO-59020-07 · water volumes VAIW / VTWW / VTWU ← ISO-46001 / VSME B06 (inventory win 4)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Typed here (prod); the water indicators A.9 – A.11 stay scalar and site-level. Cross-standard inheritance is Phase 6; A.5.1 points at ISO 14046 as an information source (a bare reference, never expanded — content-boundary rule).
+-- Evidence: "PECONRE( X ) is the average energy (X) consumed that is renewable energy, in %; E IRENE( X ) is the renewable energy (X) inflow, in MJ (or in kWh); EORENE( X ) is the renewable energy (X) outflow, in MJ (or in kWh); E ITE( X ) is the total energy (X) inflow, in MJ (or in kWh); EOTE( X ) is the total energy (X) outflow, in MJ (or in kWh)." (L2284–L2292)
+-- -- Phase 6.
+-- Rollback: —
+--
+-- =====================================================================================================================
+-- iso59020-X-2 · ISO-59020-05 · recycled content ← DIN-14021 recycled_content_pct; system_in_focus / circularity_aspect ← ISO-59004 (inventory §4 duplicates)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Typed here; A.2.3 says a material "qualifies towards recycled content if it meets the specification of recycled content in ISO 14021" — a reference, not a table to copy. Phase 6.
+-- Evidence: "A.2.3 Average recycled content of an inflow (X) The “average recycled content of an inflow (X)” circularity indicator represents the fraction of input resources that is confirmed as recycled material. A material qualifies towards recycled content if it meets the specification of recycled content in ISO 14021. This includes pre-consumer and post-consumer material." (L1940–L1943)
+-- -- Phase 6.
+-- Rollback: —
+--
+-- 49 blocks · every line of this file is a comment (nothing executes).

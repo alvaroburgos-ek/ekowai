@@ -32,5 +32,6 @@ export const FIELD_CONFIG_MODULES: Record<string, () => Promise<FieldConfigModul
   m820_1: () => import('./m820_1'),
   m820_2: () => import('./m820_2'),
   iso5667_10: () => import('./iso5667_10'),
-  // Plan-3 tasks append one line each, e.g. iso59020: () => import('./iso59020'),
+  iso59020: () => import('./iso59020'),
+  // Plan-3 tasks append one line each, e.g. iso46001: () => import('./iso46001'),
 };

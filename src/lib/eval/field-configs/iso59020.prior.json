@@ -1,0 +1,2431 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs ISO-59020 iso59020",
+    "captured_at": "2026-09-18T15:35:58.432Z",
+    "standard": "ISO-59020",
+    "slug": "iso59020",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 83,
+    "section_rows": 88,
+    "sections_total": 88,
+    "equation_rows": 13,
+    "gate_rows": 37
+  },
+  "ISO-59020-01 standard_edition": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59020-01 system_in_focus": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59020-01 system_level": {
+    "enum_values": [
+      {
+        "value": "regional",
+        "label_de": "Regional",
+        "label_en": "Regional",
+        "order_index": 1,
+        "regulation_reference": "§6.5"
+      },
+      {
+        "value": "interorganizational",
+        "label_de": "Interorganisational",
+        "label_en": "Interorganizational",
+        "order_index": 2,
+        "regulation_reference": "§6.5"
+      },
+      {
+        "value": "organizational",
+        "label_de": "Organisational",
+        "label_en": "Organizational",
+        "order_index": 3,
+        "regulation_reference": "§6.5"
+      },
+      {
+        "value": "product",
+        "label_de": "Produkt",
+        "label_en": "Product",
+        "order_index": 4,
+        "regulation_reference": "§6.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59020-02 all_stages_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-02 application_purpose": {
+    "enum_values": [
+      {
+        "value": "baseline",
+        "label_de": "Basislinie",
+        "label_en": "Establishing a baseline",
+        "order_index": 1,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "internal_monitoring",
+        "label_de": "Interne Ueberwachung",
+        "label_en": "Internal monitoring",
+        "order_index": 2,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "internal_comparative_assertion",
+        "label_de": "Interne vergleichende Aussage",
+        "label_en": "Internal comparative assertions",
+        "order_index": 3,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "information_for_interested_parties",
+        "label_de": "Information fuer beteiligte Parteien",
+        "label_en": "Information for interested parties",
+        "order_index": 4,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "internal_communication",
+        "label_de": "Interne Kommunikation",
+        "label_en": "Internal communication to users",
+        "order_index": 5,
+        "regulation_reference": "§5.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-03"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59020-02 circular_economy_principle": {
+    "enum_values": [
+      {
+        "value": "systems_thinking",
+        "label_de": "Systemdenken",
+        "label_en": "Systems thinking",
+        "order_index": 1,
+        "regulation_reference": "§4.1"
+      },
+      {
+        "value": "value_creation",
+        "label_de": "Wertschoepfung",
+        "label_en": "Value creation",
+        "order_index": 2,
+        "regulation_reference": "§4.1"
+      },
+      {
+        "value": "value_sharing",
+        "label_de": "Wertteilung",
+        "label_en": "Value sharing",
+        "order_index": 3,
+        "regulation_reference": "§4.1"
+      },
+      {
+        "value": "resource_stewardship",
+        "label_de": "Ressourcenverantwortung",
+        "label_en": "Resource stewardship",
+        "order_index": 4,
+        "regulation_reference": "§4.1"
+      },
+      {
+        "value": "resource_traceability",
+        "label_de": "Ressourcenrueckverfolgbarkeit",
+        "label_en": "Resource traceability",
+        "order_index": 5,
+        "regulation_reference": "§4.1"
+      },
+      {
+        "value": "ecosystem_resilience",
+        "label_de": "Oekosystem-Resilienz",
+        "label_en": "Ecosystem resilience",
+        "order_index": 6,
+        "regulation_reference": "§4.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-02 framework_stage": {
+    "enum_values": [
+      {
+        "value": "boundary_setting",
+        "label_de": "Stufe 1: Grenzen festlegen",
+        "label_en": "Stage 1: Boundary setting",
+        "order_index": 1,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "measurement_data_acquisition",
+        "label_de": "Stufe 2: Messung und Datenerhebung",
+        "label_en": "Stage 2: Circularity measurement and data acquisition",
+        "order_index": 2,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "assessment_reporting",
+        "label_de": "Stufe 3: Bewertung und Berichterstattung",
+        "label_en": "Stage 3: Circularity assessment and reporting",
+        "order_index": 3,
+        "regulation_reference": "§5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "enum",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-02 measurement_principle": {
+    "enum_values": [
+      {
+        "value": "ensure_relevant_boundaries",
+        "label_de": "Relevante Grenzen sicherstellen",
+        "label_en": "Ensure relevant boundaries",
+        "order_index": 1,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "ensure_meaningful_outcome",
+        "label_de": "Aussagekraeftiges Ergebnis sicherstellen",
+        "label_en": "Ensure meaningful outcome",
+        "order_index": 2,
+        "regulation_reference": "§4.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-02 spatial_boundary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-03"
+    ],
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-02 temporal_boundary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-03"
+    ],
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-03 all_flows_quantified": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-05",
+      "ISO-59020-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-03 circular_goal": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-04"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-03 circularity_aspect": {
+    "enum_values": [
+      {
+        "value": "durability",
+        "label_de": "Haltbarkeit",
+        "label_en": "Durability",
+        "order_index": 1,
+        "regulation_reference": "§3.1.4"
+      },
+      {
+        "value": "recyclability",
+        "label_de": "Recyclingfaehigkeit",
+        "label_en": "Recyclability",
+        "order_index": 2,
+        "regulation_reference": "§3.1.4"
+      },
+      {
+        "value": "reusability",
+        "label_de": "Wiederverwendbarkeit",
+        "label_en": "Reusability",
+        "order_index": 3,
+        "regulation_reference": "§3.1.4"
+      },
+      {
+        "value": "repairability",
+        "label_de": "Reparierbarkeit",
+        "label_en": "Repairability",
+        "order_index": 4,
+        "regulation_reference": "§3.1.4"
+      },
+      {
+        "value": "recoverability",
+        "label_de": "Rueckgewinnbarkeit",
+        "label_en": "Recoverability",
+        "order_index": 5,
+        "regulation_reference": "§3.1.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-04"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-03 data_quality_requirement": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-08"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-03 interested_parties": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-03 internal_or_external_use": {
+    "enum_values": [
+      {
+        "value": "internal_monitoring",
+        "label_de": "Interne Ueberwachung",
+        "label_en": "Internal monitoring",
+        "order_index": 1,
+        "regulation_reference": "§6.2"
+      },
+      {
+        "value": "external_communication",
+        "label_de": "Externe Kommunikation",
+        "label_en": "External communication",
+        "order_index": 2,
+        "regulation_reference": "§6.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-03 measurement_period": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-03 periodic_monitoring": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-03 resource_balance_applied": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-05",
+      "ISO-59020-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-03 system_boundary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-03 temporal_boundary_shortened": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-04 additional_indicator": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-04 aggregation_method": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-05",
+      "ISO-59020-06",
+      "ISO-59020-07"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-04 indicator_category": {
+    "enum_values": [
+      {
+        "value": "resource_inflow",
+        "label_de": "Ressourcenzufluss",
+        "label_en": "Resource inflow",
+        "order_index": 1,
+        "regulation_reference": "§7.1"
+      },
+      {
+        "value": "resource_outflow",
+        "label_de": "Ressourcenabfluss",
+        "label_en": "Resource outflow",
+        "order_index": 2,
+        "regulation_reference": "§7.1"
+      },
+      {
+        "value": "energy",
+        "label_de": "Energie",
+        "label_en": "Energy",
+        "order_index": 3,
+        "regulation_reference": "§7.1"
+      },
+      {
+        "value": "water",
+        "label_de": "Wasser",
+        "label_en": "Water",
+        "order_index": 4,
+        "regulation_reference": "§7.1"
+      },
+      {
+        "value": "economic",
+        "label_de": "Wirtschaftlich",
+        "label_en": "Economic",
+        "order_index": 5,
+        "regulation_reference": "§7.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-05",
+      "ISO-59020-06",
+      "ISO-59020-07"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-04 indicator_not_applicable_justified": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-04 indicator_type": {
+    "enum_values": [
+      {
+        "value": "quantitative",
+        "label_de": "Quantitativ",
+        "label_en": "Quantitative indicator",
+        "order_index": 1,
+        "regulation_reference": "§3.3.5"
+      },
+      {
+        "value": "qualitative",
+        "label_de": "Qualitativ",
+        "label_en": "Qualitative indicator",
+        "order_index": 2,
+        "regulation_reference": "§3.3.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-04 mandatory_core_indicators_included": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-05",
+      "ISO-59020-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-04 selected_core_indicator": {
+    "enum_values": [
+      {
+        "value": "A.2.2_reused_content_inflow",
+        "label_de": "A.2.2 Wiederverwendeter Anteil eines Zuflusses",
+        "label_en": "A.2.2 Average reused content of an inflow (X)",
+        "order_index": 1,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.2.3_recycled_content_inflow",
+        "label_de": "A.2.3 Recycelter Anteil eines Zuflusses",
+        "label_en": "A.2.3 Average recycled content of an inflow (X)",
+        "order_index": 2,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.2.4_renewable_content_inflow",
+        "label_de": "A.2.4 Erneuerbarer Anteil eines Zuflusses",
+        "label_en": "A.2.4 Average renewable content of an inflow (X)",
+        "order_index": 3,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.3.2_lifetime_relative",
+        "label_de": "A.3.2 Lebensdauer relativ zum Branchendurchschnitt",
+        "label_en": "A.3.2 Average lifetime of product/material relative to industry average",
+        "order_index": 4,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.3.3_reused_from_outflow",
+        "label_de": "A.3.3 Wiederverwendete Produkte aus dem Abfluss",
+        "label_en": "A.3.3 Per cent actual reused products and components from outflow (X)",
+        "order_index": 5,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.3.4_recycled_from_outflow",
+        "label_de": "A.3.4 Recyceltes Material aus dem Abfluss",
+        "label_en": "A.3.4 Per cent actual recycled material derived from outflow (X)",
+        "order_index": 6,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.3.5_biological_recirculation",
+        "label_de": "A.3.5 Rezirkulation im biologischen Kreislauf",
+        "label_en": "A.3.5 Per cent actual recirculation of outflow (X) in the biological cycle",
+        "order_index": 7,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.4.2_renewable_energy",
+        "label_de": "A.4.2 Erneuerbare Energie verbraucht",
+        "label_en": "A.4.2 Average per cent of energy consumed that is renewable energy",
+        "order_index": 8,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.5.2_water_circular_sources",
+        "label_de": "A.5.2 Wasserentnahme aus zirkulaeren Quellen",
+        "label_en": "A.5.2 Per cent water withdrawal from inflow circular sources",
+        "order_index": 9,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.5.3_water_quality_discharge",
+        "label_de": "A.5.3 Wasserableitung nach Qualitaetsanforderungen",
+        "label_en": "A.5.3 Per cent water discharged in accordance with quality requirements",
+        "order_index": 10,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.5.4_water_reuse_ratio",
+        "label_de": "A.5.4 Verhaeltnis Wasserwiederverwendung",
+        "label_en": "A.5.4 Ratio (on-site or internal) water reuse or recirculation",
+        "order_index": 11,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.6.2_material_productivity",
+        "label_de": "A.6.2 Materialproduktivitaet",
+        "label_en": "A.6.2 Material productivity",
+        "order_index": 12,
+        "regulation_reference": "Table 3"
+      },
+      {
+        "value": "A.6.3_resource_intensity_index",
+        "label_de": "A.6.3 Ressourcenintensitaetsindex",
+        "label_en": "A.6.3 Resource intensity index",
+        "order_index": 13,
+        "regulation_reference": "Table 3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-05",
+      "ISO-59020-06",
+      "ISO-59020-07"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-05 mRECI_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-05 mRENI_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-05 mREUI_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-05 mTI_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-05 pct_linear_inflow": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-59020-05 pct_RECI_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-05 pct_RENI_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-05 pct_REUI_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-06 mRECO_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-06 mRENO_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-59020-06 mREUO_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-06 mTO_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-06 pct_linear_outflow": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59020-06 pct_RECO_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-06 pct_RENO_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-59020-06 pct_REUO_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-06 RLP_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-06 tIALP_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-06 tLP_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-07 C": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59020-07 D": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59020-07 E": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "H",
+    "section_id_is_null": false,
+    "section_path": [
+      "H"
+    ]
+  },
+  "ISO-59020-07 EIRENE_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-07 EITE_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-07 energy_unit_common": {
+    "enum_values": [
+      {
+        "value": "MJ",
+        "label_de": "Megajoule",
+        "label_en": "Megajoule (MJ)",
+        "order_index": 1,
+        "regulation_reference": "§A.4.2"
+      },
+      {
+        "value": "kWh",
+        "label_de": "Kilowattstunde",
+        "label_en": "Kilowatt-hour (kWh)",
+        "order_index": 2,
+        "regulation_reference": "§A.4.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-07 EORENE_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-07 EOTE_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-07 F": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "H",
+    "section_id_is_null": false,
+    "section_path": [
+      "H"
+    ]
+  },
+  "ISO-59020-07 IRII": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "H",
+    "section_id_is_null": false,
+    "section_path": [
+      "H"
+    ]
+  },
+  "ISO-59020-07 pct_CDW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-07 pct_CWW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-07 pct_ECONRE_X": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-07 RMP": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59020-07 RWRR": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "number",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-59020-07 VAIW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-07 VCDW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-07 VCIW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-07 VTWU": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-59020-07 VTWW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-59020-08 allocation_method": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-08 data_category": {
+    "enum_values": [
+      {
+        "value": "primary",
+        "label_de": "Primaerdaten",
+        "label_en": "Primary data",
+        "order_index": 1,
+        "regulation_reference": "§7.6.2"
+      },
+      {
+        "value": "secondary",
+        "label_de": "Sekundaerdaten",
+        "label_en": "Secondary data",
+        "order_index": 2,
+        "regulation_reference": "§7.6.2"
+      },
+      {
+        "value": "foreground",
+        "label_de": "Vordergrunddaten",
+        "label_en": "Foreground data",
+        "order_index": 3,
+        "regulation_reference": "§7.6.2"
+      },
+      {
+        "value": "background",
+        "label_de": "Hintergrunddaten",
+        "label_en": "Background data",
+        "order_index": 4,
+        "regulation_reference": "§7.6.2"
+      },
+      {
+        "value": "specific",
+        "label_de": "Spezifische Daten",
+        "label_en": "Specific data",
+        "order_index": 5,
+        "regulation_reference": "§7.6.2"
+      },
+      {
+        "value": "generic",
+        "label_de": "Generische Daten",
+        "label_en": "Generic data",
+        "order_index": 6,
+        "regulation_reference": "§7.6.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-08 data_completeness_checked": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-08 data_normalized": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-08 data_traceability": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-08 documentation_complete": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59020-09"
+    ],
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-08 primary_data_preference": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-08 system_breakdown_done": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-09 circularity_performance_statement": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59020-09 complementary_method": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59020-09 criteria_review_done": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59020-09 hazardous_substances_reported": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59020-09 information_verifiable": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59020-09 interested_parties_consulted": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-59020-09 report_transparency": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59020-09 value_impact_assessed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "sections": {
+    "ISO-59020-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-02 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-02 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-04 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 G": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 G": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 H": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-08 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-08 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-08 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-08 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-08 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-08 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-08 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-08 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-08 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 G": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59020-09 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "ISO-59020-05 A.1": {
+      "id": "62e2cbfd-f530-4450-a9b7-1982fa1f955b",
+      "output_symbol": "pct_REUI_X",
+      "input_symbols": [
+        "mREUI_X",
+        "mTI_X"
+      ]
+    },
+    "ISO-59020-05 A.2": {
+      "id": "3d0e7b99-83ba-447d-9101-df3ab06c11c2",
+      "output_symbol": "pct_RECI_X",
+      "input_symbols": [
+        "mRECI_X",
+        "mTI_X"
+      ]
+    },
+    "ISO-59020-05 A.3": {
+      "id": "77f9ac60-2373-41f5-aa09-071b9e311ff2",
+      "output_symbol": "pct_RENI_X",
+      "input_symbols": [
+        "mRENI_X",
+        "mTI_X"
+      ]
+    },
+    "ISO-59020-06 A.4": {
+      "id": "36c2e3ea-1c39-458c-b1ab-0568b515e4ec",
+      "output_symbol": "RLP_X",
+      "input_symbols": [
+        "tLP_X",
+        "tIALP_X"
+      ]
+    },
+    "ISO-59020-06 A.5": {
+      "id": "b96ecbfd-5f01-4c9b-af8a-864ebe15982a",
+      "output_symbol": "pct_REUO_X",
+      "input_symbols": [
+        "mREUO_X",
+        "mTO_X"
+      ]
+    },
+    "ISO-59020-06 A.6": {
+      "id": "1e0f3bf1-e489-4678-9fa3-84394512a64c",
+      "output_symbol": "pct_RECO_X",
+      "input_symbols": [
+        "mRECO_X",
+        "mTO_X"
+      ]
+    },
+    "ISO-59020-06 A.7": {
+      "id": "3fc5b480-968f-4176-bd3b-6eb91f1f6f3b",
+      "output_symbol": "pct_RENO_X",
+      "input_symbols": [
+        "mRENO_X",
+        "mTO_X"
+      ]
+    },
+    "ISO-59020-07 A.10": {
+      "id": "55e9a431-e000-4ee9-914c-1fce534ea092",
+      "output_symbol": "pct_CDW",
+      "input_symbols": [
+        "VCDW",
+        "VAIW"
+      ]
+    },
+    "ISO-59020-07 A.11": {
+      "id": "7e69300e-af43-40b2-9f75-ef773d9ffed7",
+      "output_symbol": "RWRR",
+      "input_symbols": [
+        "VTWU",
+        "VTWW"
+      ]
+    },
+    "ISO-59020-07 A.12": {
+      "id": "e3364b07-c567-4740-882c-d87e0e636a94",
+      "output_symbol": "RMP",
+      "input_symbols": [
+        "C",
+        "D"
+      ]
+    },
+    "ISO-59020-07 A.13": {
+      "id": "fc67093c-8d64-4854-882e-a2f621059041",
+      "output_symbol": "IRII",
+      "input_symbols": [
+        "E",
+        "F"
+      ]
+    },
+    "ISO-59020-07 A.8": {
+      "id": "16e117aa-9d53-4f91-8323-4cb016a18a3d",
+      "output_symbol": "pct_ECONRE_X",
+      "input_symbols": [
+        "EIRENE_X",
+        "EORENE_X",
+        "EITE_X",
+        "EOTE_X"
+      ]
+    },
+    "ISO-59020-07 A.9": {
+      "id": "c724b258-9a2a-47b4-99b2-7907a0b006dd",
+      "output_symbol": "pct_CWW",
+      "input_symbols": [
+        "VCIW",
+        "VAIW"
+      ]
+    }
+  },
+  "gates": {
+    "ISO-59020-01 CR-001": {
+      "condition": "system_in_focus IS NOT NULL AND system_level IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "system_in_focus",
+        "system_level"
+      ]
+    },
+    "ISO-59020-02 CR-002": {
+      "condition": "circular_economy_principle IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "circular_economy_principle"
+      ]
+    },
+    "ISO-59020-02 CR-003": {
+      "condition": "measurement_principle IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "measurement_principle"
+      ]
+    },
+    "ISO-59020-02 CR-004": {
+      "condition": "all_stages_documented == true",
+      "severity": "warn",
+      "symbols": [
+        "all_stages_documented"
+      ]
+    },
+    "ISO-59020-03 CR-005": {
+      "condition": "all_flows_quantified == true",
+      "severity": "block",
+      "symbols": [
+        "all_flows_quantified"
+      ]
+    },
+    "ISO-59020-03 CR-006": {
+      "condition": "resource_balance_applied == true",
+      "severity": "block",
+      "symbols": [
+        "resource_balance_applied"
+      ]
+    },
+    "ISO-59020-03 CR-007": {
+      "condition": "circular_goal IS NOT NULL AND system_boundary IS NOT NULL AND data_quality_requirement IS NOT NULL AND interested_parties IS NOT NULL AND internal_or_external_use IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "circular_goal",
+        "data_quality_requirement",
+        "interested_parties",
+        "internal_or_external_use",
+        "system_boundary"
+      ]
+    },
+    "ISO-59020-03 CR-008": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59020-04 CR-009": {
+      "condition": "mandatory_core_indicators_included == true",
+      "severity": "block",
+      "symbols": [
+        "mandatory_core_indicators_included"
+      ]
+    },
+    "ISO-59020-04 CR-010": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59020-05 CR-011": {
+      "condition": "pct_REUI_X == (mREUI_X / mTI_X) * 100",
+      "severity": "block",
+      "symbols": [
+        "mREUI_X",
+        "mTI_X",
+        "pct_REUI_X"
+      ]
+    },
+    "ISO-59020-05 CR-012": {
+      "condition": "pct_RECI_X == (mRECI_X / mTI_X) * 100",
+      "severity": "block",
+      "symbols": [
+        "mRECI_X",
+        "mTI_X",
+        "pct_RECI_X"
+      ]
+    },
+    "ISO-59020-05 CR-013": {
+      "condition": "pct_RENI_X == (mRENI_X / mTI_X) * 100",
+      "severity": "block",
+      "symbols": [
+        "mRENI_X",
+        "mTI_X",
+        "pct_RENI_X"
+      ]
+    },
+    "ISO-59020-05 CR-014": {
+      "condition": "pct_REUI_X + pct_RECI_X + pct_RENI_X + pct_linear_inflow == 100",
+      "severity": "block",
+      "symbols": [
+        "pct_RECI_X",
+        "pct_RENI_X",
+        "pct_REUI_X",
+        "pct_linear_inflow"
+      ]
+    },
+    "ISO-59020-06 CR-015": {
+      "condition": "pct_REUO_X == (mREUO_X / mTO_X) * 100",
+      "severity": "block",
+      "symbols": [
+        "mREUO_X",
+        "mTO_X",
+        "pct_REUO_X"
+      ]
+    },
+    "ISO-59020-06 CR-016": {
+      "condition": "pct_RECO_X == (mRECO_X / mTO_X) * 100",
+      "severity": "block",
+      "symbols": [
+        "mRECO_X",
+        "mTO_X",
+        "pct_RECO_X"
+      ]
+    },
+    "ISO-59020-06 CR-017": {
+      "condition": "pct_RENO_X == (mRENO_X / mTO_X) * 100",
+      "severity": "block",
+      "symbols": [
+        "mRENO_X",
+        "mTO_X",
+        "pct_RENO_X"
+      ]
+    },
+    "ISO-59020-06 CR-018": {
+      "condition": "pct_REUO_X IS NOT NULL AND pct_RECO_X IS NOT NULL AND pct_RENO_X IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "pct_RECO_X",
+        "pct_RENO_X",
+        "pct_REUO_X"
+      ]
+    },
+    "ISO-59020-06 CR-019": {
+      "condition": "pct_REUO_X + pct_RECO_X + pct_RENO_X + pct_linear_outflow == 100",
+      "severity": "block",
+      "symbols": [
+        "pct_RECO_X",
+        "pct_RENO_X",
+        "pct_REUO_X",
+        "pct_linear_outflow"
+      ]
+    },
+    "ISO-59020-07 CR-020": {
+      "condition": "pct_ECONRE_X == ((EIRENE_X - EORENE_X) / (EITE_X - EOTE_X)) * 100",
+      "severity": "warn",
+      "symbols": [
+        "EIRENE_X",
+        "EITE_X",
+        "EORENE_X",
+        "EOTE_X",
+        "pct_ECONRE_X"
+      ]
+    },
+    "ISO-59020-07 CR-021": {
+      "condition": "pct_CWW == (VCIW / VAIW) * 100",
+      "severity": "warn",
+      "symbols": [
+        "VAIW",
+        "VCIW",
+        "pct_CWW"
+      ]
+    },
+    "ISO-59020-07 CR-022": {
+      "condition": "pct_CDW == (VCDW / VAIW) * 100",
+      "severity": "warn",
+      "symbols": [
+        "VAIW",
+        "VCDW",
+        "pct_CDW"
+      ]
+    },
+    "ISO-59020-07 CR-023": {
+      "condition": "RWRR == VTWU / VTWW",
+      "severity": "warn",
+      "symbols": [
+        "RWRR",
+        "VTWU",
+        "VTWW"
+      ]
+    },
+    "ISO-59020-07 CR-024": {
+      "condition": "RMP == C / D",
+      "severity": "warn",
+      "symbols": [
+        "C",
+        "D",
+        "RMP"
+      ]
+    },
+    "ISO-59020-07 CR-025": {
+      "condition": "IRII == E / F",
+      "severity": "warn",
+      "symbols": [
+        "E",
+        "F",
+        "IRII"
+      ]
+    },
+    "ISO-59020-08 CR-026": {
+      "condition": "system_breakdown_done == true",
+      "severity": "warn",
+      "symbols": [
+        "system_breakdown_done"
+      ]
+    },
+    "ISO-59020-08 CR-027": {
+      "condition": "data_normalized == true AND data_completeness_checked == true",
+      "severity": "warn",
+      "symbols": [
+        "data_completeness_checked",
+        "data_normalized"
+      ]
+    },
+    "ISO-59020-08 CR-028": {
+      "condition": "primary_data_preference == true AND data_traceability == true",
+      "severity": "warn",
+      "symbols": [
+        "data_traceability",
+        "primary_data_preference"
+      ]
+    },
+    "ISO-59020-08 CR-029": {
+      "condition": "data_traceability == true",
+      "severity": "warn",
+      "symbols": [
+        "data_traceability"
+      ]
+    },
+    "ISO-59020-08 CR-030": {
+      "condition": "documentation_complete == true",
+      "severity": "warn",
+      "symbols": [
+        "documentation_complete"
+      ]
+    },
+    "ISO-59020-09 CR-031": {
+      "condition": "criteria_review_done == true",
+      "severity": "block",
+      "symbols": [
+        "criteria_review_done"
+      ]
+    },
+    "ISO-59020-09 CR-032": {
+      "condition": "value_impact_assessed == true",
+      "severity": "warn",
+      "symbols": [
+        "value_impact_assessed"
+      ]
+    },
+    "ISO-59020-09 CR-033": {
+      "condition": "interested_parties_consulted == true",
+      "severity": "warn",
+      "symbols": [
+        "interested_parties_consulted"
+      ]
+    },
+    "ISO-59020-09 CR-034": {
+      "condition": "report_transparency == true",
+      "severity": "warn",
+      "symbols": [
+        "report_transparency"
+      ]
+    },
+    "ISO-59020-09 CR-035": {
+      "condition": "information_verifiable == true",
+      "severity": "warn",
+      "symbols": [
+        "information_verifiable"
+      ]
+    },
+    "ISO-59020-09 CR-036": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59020-09 CR-037": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    }
+  }
+}
