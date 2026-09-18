@@ -1,0 +1,2954 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-A-178 a178",
+    "captured_at": "2026-09-18T07:34:07.664Z",
+    "standard": "DWA-A-178",
+    "slug": "a178",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 118,
+    "section_rows": 190,
+    "sections_total": 190,
+    "equation_rows": 13,
+    "gate_rows": 28
+  },
+  "A178-01 bundesland": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-02"
+    ],
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 client": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 coordinates": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 design_engineer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 operator": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 project_id": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 project_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 regulatory_driver": {
+    "enum_values": [
+      {
+        "value": "emissions_immissions",
+        "label_de": "Emissions-/Immissionsanalyse",
+        "label_en": "Emissions/immissions analysis",
+        "order_index": 1,
+        "regulation_reference": "§5.1"
+      },
+      {
+        "value": "wasserrecht",
+        "label_de": "Wasserrechtliche Erlaubnis",
+        "label_en": "Water-law permit",
+        "order_index": 2,
+        "regulation_reference": "§1.2"
+      },
+      {
+        "value": "wrrl_massnahme",
+        "label_de": "WRRL-Maßnahmenprogramm",
+        "label_en": "WFD measure program",
+        "order_index": 3,
+        "regulation_reference": "§1.2, EG-WRRL"
+      },
+      {
+        "value": "sonstiges",
+        "label_de": "Sonstiges",
+        "label_en": "Other",
+        "order_index": 4,
+        "regulation_reference": null
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 treatment_need_confirmed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 wasserschutzgebiet": {
+    "enum_values": [
+      {
+        "value": "zone_none",
+        "label_de": "Kein Wasserschutzgebiet",
+        "label_en": "Not a water protection zone",
+        "order_index": 0,
+        "regulation_reference": "§6.1.3.3"
+      },
+      {
+        "value": "zone_I",
+        "label_de": "Schutzzone I",
+        "label_en": "Protection zone I",
+        "order_index": 1,
+        "regulation_reference": "§6.1.3.3, RiStWag"
+      },
+      {
+        "value": "zone_II",
+        "label_de": "Schutzzone II",
+        "label_en": "Protection zone II",
+        "order_index": 2,
+        "regulation_reference": "§6.1.3.3, RiStWag"
+      },
+      {
+        "value": "zone_IIIa",
+        "label_de": "Schutzzone IIIa",
+        "label_en": "Protection zone IIIa",
+        "order_index": 3,
+        "regulation_reference": "§6.1.3.3, RiStWag"
+      },
+      {
+        "value": "zone_IIIb",
+        "label_de": "Schutzzone IIIb",
+        "label_en": "Protection zone IIIb",
+        "order_index": 4,
+        "regulation_reference": "§6.1.3.3, RiStWag"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-02"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 water_authority": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-01 waterbody_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-02 einzugsgebiet_groesse_ha": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-02 einzugsgebiet_typ": {
+    "enum_values": [
+      {
+        "value": "misch",
+        "label_de": "Mischsystem",
+        "label_en": "Combined system",
+        "order_index": 1,
+        "regulation_reference": "§6.1.3.1, §6.2.2.1"
+      },
+      {
+        "value": "trenn",
+        "label_de": "Trennsystem",
+        "label_en": "Separate system",
+        "order_index": 2,
+        "regulation_reference": "§6.1.3.2, §6.2.1.2"
+      },
+      {
+        "value": "strasse",
+        "label_de": "Straßenentwässerung",
+        "label_en": "Road drainage",
+        "order_index": 3,
+        "regulation_reference": "§6.1.3.3, §6.2.1.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-02 gewaesserart": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-02 system_planungsphase": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-02 system_type": {
+    "enum_values": [
+      {
+        "value": "misch",
+        "label_de": "Mischsystem",
+        "label_en": "Combined system",
+        "order_index": 1,
+        "regulation_reference": "§6.1.3.1, §6.2.2.1"
+      },
+      {
+        "value": "trenn",
+        "label_de": "Trennsystem",
+        "label_en": "Separate system",
+        "order_index": 2,
+        "regulation_reference": "§6.1.3.2, §6.2.1.2"
+      },
+      {
+        "value": "strasse",
+        "label_de": "Straßenentwässerung",
+        "label_en": "Road drainage",
+        "order_index": 3,
+        "regulation_reference": "§6.1.3.3, §6.2.1.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-04",
+      "A178-06",
+      "A178-09"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-02 vorfluter_kennzahl": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-03 belastungs_data_source": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-03 data_completeness_score": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-03 data_gaps_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-03 feasibility_determination": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-03 kostra_data_source": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-03 site_assessment_date": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "date",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-03 soil_data_source": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-04 A_E_b_a": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-06",
+      "A178-09",
+      "A178-10",
+      "A178-16"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-04 A_E_b_a_i": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-04 a178_A_E_b": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-04 a178_A_E_k": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-04 a178_belastungskategorie": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-04 a178_psi_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-05 fremdwasser_relevant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-08"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-05 h_N_a_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-05 langzeitsimulation_dauer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-12",
+      "A178-13",
+      "A178-14"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-06 b_R_a": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-06 b_R_a_default": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-06 feststoffeintrag_alarm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-07 abdichtung_kdb_staerke": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 b_krit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-10",
+      "A178-16"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 b_R_e_zul": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-16"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 becken_typ": {
+    "enum_values": [
+      {
+        "value": "fang",
+        "label_de": "Fangfilterbecken",
+        "label_en": "Capture-type basin",
+        "order_index": 1,
+        "regulation_reference": "§6.2.2.3, Gl. (5)"
+      },
+      {
+        "value": "durchlauf",
+        "label_de": "Durchlauffilterbecken",
+        "label_en": "Flow-through basin",
+        "order_index": 2,
+        "regulation_reference": "§6.2.2.3, Gl. (6)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 e_0": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-09"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 eta_B_soll": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-10"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 filter_calcium_carbonate": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 filter_feinanteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 filter_U": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 filter_ueberkornanteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 geotextil_zwischen_filter_drane": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 h_FK_required": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 pflanzdichte": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 q_Dr_RBF": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-11"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 rrl_vorhanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13",
+      "A178-17"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-07 v_spez_grobstoff": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-08 A_E_b_a_summary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-08 b_R_a_summary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-08 belastungs_kategorie_summary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-08 data_collection_phase_complete": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-08 e_0_summary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-08 h_N_a_m_summary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-08 summary_completion_date": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "date",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-09 a178_B_F_AFS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "A178-09 a178_B_F_CSB": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "A178-09 a178_C_AFS_zulauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-09 a178_C_CSB_zulauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-09 B_RBF_zu": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-10"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-09 B_RBFA_zu": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-12"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-10 A_F": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-11",
+      "A178-13",
+      "A178-16"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-10 a178_A_RBF_min": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "A178-10 a178_A_RBF_spez": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-10 a178_q_F_max": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-11 h_RR": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-17"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-11 Q_Dr_RBF": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-11 V_RBF": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-11 V_RRL": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-12 attest_a178_12_req_11": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-12 C_RBF_zu": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-12 C_RBFA_zu": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-12 VQ_RBF_zu": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-15"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-12 VQ_RBFA_zu": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-12"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-13 b_F": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-16"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-13 eta_RR": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-13 eta_RRL": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-13 eta_VS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-13 VQ_Dr_RBF": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13",
+      "A178-15"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-13 VQ_Dr_RRL": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-13 VQ_FU": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-14 B_Dr_RBF": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-14"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-14 B_FU": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-14"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-14 B_RBF_ab": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-14 B_RBFA_ab": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-16"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-14 B_RRL": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-14"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-14 B_VS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-14"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-15 eta_F": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-13"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-15 eta_RBF_hyd": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-19"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "A178-15 n_FU": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-16 b_F_im_bereich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "A178-16 emission_eingehalten": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "A178-16 nachweis_b_F": {
+    "enum_values": [
+      {
+        "value": "pass",
+        "label_de": "bestanden",
+        "label_en": "pass",
+        "order_index": 0,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "fail",
+        "label_de": "nicht bestanden",
+        "label_en": "fail",
+        "order_index": 1,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "conditional",
+        "label_de": "bedingt",
+        "label_en": "conditional",
+        "order_index": 2,
+        "regulation_reference": "workflow"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-19"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-16 nachweis_einleitfracht": {
+    "enum_values": [
+      {
+        "value": "pass",
+        "label_de": "bestanden",
+        "label_en": "pass",
+        "order_index": 0,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "fail",
+        "label_de": "nicht bestanden",
+        "label_en": "fail",
+        "order_index": 1,
+        "regulation_reference": "workflow"
+      },
+      {
+        "value": "conditional",
+        "label_de": "bedingt",
+        "label_en": "conditional",
+        "order_index": 2,
+        "regulation_reference": "workflow"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "A178-19"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-17 dauerhafter_einstau": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-17 k_f_b": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-17 n_RBF": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-17 t_RR_E_n1": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "A178-18 A_F_iterated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-18 b_F_iterated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-18 convergence_achieved": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-18 iteration_count": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-18 optimisation_completion_date": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "date",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-18 optimisation_target": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-18 V_RBF_iterated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-19 compliance_verdict": {
+    "enum_values": [
+      {
+        "value": "compliant",
+        "label_de": "konform",
+        "label_en": "compliant",
+        "order_index": 1,
+        "regulation_reference": "methodology"
+      },
+      {
+        "value": "compliant_with_conditions",
+        "label_de": "konform mit Auflagen",
+        "label_en": "compliant with conditions",
+        "order_index": 2,
+        "regulation_reference": "methodology"
+      },
+      {
+        "value": "not_compliant",
+        "label_de": "nicht konform",
+        "label_en": "not compliant",
+        "order_index": 3,
+        "regulation_reference": "methodology"
+      },
+      {
+        "value": "insufficient_data",
+        "label_de": "unzureichende Daten",
+        "label_en": "insufficient data",
+        "order_index": 4,
+        "regulation_reference": "methodology"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "A178-19 documentation_complete": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-19 filter_thickness_check": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-19 final_signoff_date": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "date",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-19 final_signoff_engineer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-19 nachweis_b_F_compliant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-19 nachweis_einleitfracht_compliant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "A178-19 q_F_max_check": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "sections": {
+    "A178-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-01 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-01 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-01 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-08 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-09 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-10 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-11 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-12 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-13 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-14 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-15 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-16 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-17 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-18 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "A178-19 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "A178-09 2": {
+      "id": "015e1c4b-12bd-4b9a-b14e-b85817aa92cf",
+      "output_symbol": "B_RBF_zu",
+      "input_symbols": [
+        "A_E_b_a_i",
+        "b_R_a"
+      ]
+    },
+    "A178-09 3": {
+      "id": "c884fe4d-1032-48b1-9492-9e50789d5bf2",
+      "output_symbol": "B_RBF_zu",
+      "input_symbols": [
+        "A_E_b_a_i",
+        "b_R_a",
+        "e_0"
+      ]
+    },
+    "A178-10 1": {
+      "id": "a38487b0-603c-49b9-8381-4f49030338eb",
+      "output_symbol": "A_F",
+      "input_symbols": [
+        "B_RBF_zu",
+        "b_krit",
+        "eta_B_soll"
+      ]
+    },
+    "A178-11 4": {
+      "id": "0916962e-7e05-4fe7-804a-98fc71ab21e9",
+      "output_symbol": "Q_Dr_RBF",
+      "input_symbols": [
+        "q_Dr_RBF",
+        "A_F"
+      ]
+    },
+    "A178-12 8": {
+      "id": "94b4026d-a965-4849-a7d2-7d131b5c634a",
+      "output_symbol": "C_RBFA_zu",
+      "input_symbols": [
+        "B_RBFA_zu",
+        "VQ_RBFA_zu"
+      ]
+    },
+    "A178-13 5": {
+      "id": "b81485b4-a5f1-4ad5-acbe-2d85168648f7",
+      "output_symbol": "b_F",
+      "input_symbols": [
+        "VQ_Dr_RBF",
+        "eta_F",
+        "C_RBFA_zu",
+        "eta_VS",
+        "A_F"
+      ]
+    },
+    "A178-13 6": {
+      "id": "27ce5163-6458-496d-8e6a-d6d63691e339",
+      "output_symbol": "b_F",
+      "input_symbols": [
+        "VQ_Dr_RBF",
+        "eta_F",
+        "VQ_FU",
+        "eta_RR",
+        "C_RBFA_zu",
+        "eta_VS",
+        "A_F"
+      ]
+    },
+    "A178-13 7": {
+      "id": "a75eca54-280a-4d74-bffc-3d67977bd25d",
+      "output_symbol": "b_F",
+      "input_symbols": [
+        "VQ_Dr_RBF",
+        "eta_F",
+        "VQ_FU",
+        "eta_RR",
+        "VQ_Dr_RRL",
+        "eta_RRL",
+        "C_RBFA_zu",
+        "eta_VS",
+        "A_F"
+      ]
+    },
+    "A178-14 11": {
+      "id": "ba57b49a-c9f6-46fb-bcf9-a2634913e368",
+      "output_symbol": "B_RBFA_ab",
+      "input_symbols": [
+        "B_VS",
+        "B_Dr_RBF",
+        "B_FU",
+        "B_RRL"
+      ]
+    },
+    "A178-15 12": {
+      "id": "e457ee3d-5b4b-4843-af93-9015874f3aac",
+      "output_symbol": "eta_RBF_hyd",
+      "input_symbols": [
+        "VQ_Dr_RBF",
+        "VQ_RBF_zu"
+      ]
+    },
+    "A178-15 13": {
+      "id": "18a6351e-31f7-448f-9e0f-a74bd6fbdfcf",
+      "output_symbol": "eta_F",
+      "input_symbols": [
+        "C_RBF_zu",
+        "VQ_Dr_RBF",
+        "B_RBF_ab",
+        "VQ_RBF_zu"
+      ]
+    },
+    "A178-16 10": {
+      "id": "b3085f29-7a03-4021-ba9b-45addc5d91df",
+      "output_symbol": "emission_eingehalten",
+      "input_symbols": [
+        "B_RBFA_ab",
+        "A_E_b_a",
+        "b_R_e_zul"
+      ]
+    },
+    "A178-16 9": {
+      "id": "b4167409-558e-4744-8b6f-049c469f085c",
+      "output_symbol": "b_F_im_bereich",
+      "input_symbols": [
+        "b_F",
+        "b_krit"
+      ]
+    }
+  },
+  "gates": {
+    "A178-01 REQ-01": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A178-01 REQ-02": {
+      "condition": "treatment_need_confirmed == True",
+      "severity": "block",
+      "symbols": [
+        "treatment_need_confirmed"
+      ]
+    },
+    "A178-01 REQ-03": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A178-02 REQ-16": {
+      "condition": "IF system_type == 'strasse' THEN h_RR >= 0.5",
+      "severity": "block",
+      "symbols": [
+        "h_RR",
+        "system_type"
+      ]
+    },
+    "A178-04 REQ-04": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A178-04 REQ-05": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A178-04 REQ-06": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A178-04 REQ-08": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A178-06 REQ-07": {
+      "condition": "feststoffeintrag_alarm == false",
+      "severity": "block",
+      "symbols": [
+        "feststoffeintrag_alarm"
+      ]
+    },
+    "A178-07 REQ-13": {
+      "condition": "filter_U < 5 AND filter_feinanteil <= 3 AND filter_ueberkornanteil <= 15 AND filter_calcium_carbonate >= 20",
+      "severity": "block",
+      "symbols": [
+        "filter_U",
+        "filter_calcium_carbonate",
+        "filter_feinanteil",
+        "filter_ueberkornanteil"
+      ]
+    },
+    "A178-07 REQ-14": {
+      "condition": "q_Dr_RBF <= 0.05",
+      "severity": "block",
+      "symbols": [
+        "q_Dr_RBF"
+      ]
+    },
+    "A178-07 REQ-25": {
+      "condition": "abdichtung_kdb_staerke >= 2",
+      "severity": "block",
+      "symbols": [
+        "abdichtung_kdb_staerke"
+      ]
+    },
+    "A178-07 REQ-26": {
+      "condition": "geotextil_zwischen_filter_drane == False",
+      "severity": "block",
+      "symbols": [
+        "geotextil_zwischen_filter_drane"
+      ]
+    },
+    "A178-07 REQ-27": {
+      "condition": "pflanzdichte >= 4 AND pflanzdichte <= 8",
+      "severity": "block",
+      "symbols": [
+        "pflanzdichte"
+      ]
+    },
+    "A178-09 REQ-17": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "A178-09 REQ-18": {
+      "condition": "IF system_type == 'trenn' AND h_N_a_m > 1000 THEN A_F >= 100 * A_E_b_a",
+      "severity": "block",
+      "symbols": [
+        "A_E_b_a",
+        "A_F",
+        "h_N_a_m",
+        "system_type"
+      ]
+    },
+    "A178-11 REQ-15": {
+      "condition": "h_RR >= 0.3 AND h_RR <= 2",
+      "severity": "block",
+      "symbols": [
+        "h_RR"
+      ]
+    },
+    "A178-12 REQ-09": {
+      "condition": "IF system_type == 'misch' THEN (e_0 <= 55 AND n_RBF >= 10)",
+      "severity": "block",
+      "symbols": [
+        "e_0",
+        "n_RBF",
+        "system_type"
+      ]
+    },
+    "A178-12 REQ-10": {
+      "condition": "IF system_type IN {'trenn','strasse'} THEN v_spez_grobstoff >= 0.5",
+      "severity": "block",
+      "symbols": [
+        "system_type",
+        "v_spez_grobstoff"
+      ]
+    },
+    "A178-12 REQ-11": {
+      "condition": "attest_a178_12_req_11 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_a178_12_req_11"
+      ]
+    },
+    "A178-12 REQ-12": {
+      "condition": "(IF system_type == 'misch' THEN h_FK_required >= 0.75) AND (IF system_type IN {'trenn','strasse'} THEN h_FK_required >= 0.5)",
+      "severity": "block",
+      "symbols": [
+        "h_FK_required",
+        "system_type"
+      ]
+    },
+    "A178-12 REQ-23": {
+      "condition": "langzeitsimulation_dauer >= 10",
+      "severity": "block",
+      "symbols": [
+        "langzeitsimulation_dauer"
+      ]
+    },
+    "A178-13 REQ-19": {
+      "condition": "4 <= b_F AND b_F <= 7",
+      "severity": "block",
+      "symbols": [
+        "b_F"
+      ]
+    },
+    "A178-16 REQ-20": {
+      "condition": "B_RBFA_ab / A_E_b_a <= b_R_e_zul",
+      "severity": "block",
+      "symbols": [
+        "A_E_b_a",
+        "B_RBFA_ab",
+        "b_R_e_zul"
+      ]
+    },
+    "A178-16 REQ-21": {
+      "condition": "IF system_type == 'misch' THEN t_RR_E_n1 <= 48",
+      "severity": "block",
+      "symbols": [
+        "system_type",
+        "t_RR_E_n1"
+      ]
+    },
+    "A178-17 REQ-22": {
+      "condition": "n_RBF >= 10",
+      "severity": "block",
+      "symbols": [
+        "n_RBF"
+      ]
+    },
+    "A178-18 REQ-24": {
+      "condition": "convergence_achieved == True",
+      "severity": "block",
+      "symbols": [
+        "convergence_achieved"
+      ]
+    },
+    "A178-18 REQ-28": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    }
+  }
+}

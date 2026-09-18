@@ -1,0 +1,539 @@
+-- DWA-A-178 — Plan 3 Task 14 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the 13 equation rows — ids / md5(formula) —, the 28
+-- compliance rows — ids / severities / md5(condition) —, worksheet + section titles, standards.version
+-- 'Juni 2019 (korrigierte Fassung Oktober 2019)', field labels / units / is_required / validation_rules) were captured
+-- read-only on 2026-09-18 (src/lib/eval/field-configs/a178.prior.json; scripts/verification/prod-query.mjs). Transcript
+-- lines refer to C:\Users\Ekowai\Desktop\Guidelines\DWA-A-178\DWA-A_178.md. This task changes NO gate severity.
+--
+-- Conventions: `s.code = 'DWA-A-178'`, worksheets by code, never by id (equations and gates by their captured uuid + a
+-- guard on md5(formula) / md5(condition) of the text they replace so a re-run is a no-op); each block names its
+-- rollback. Every block that DELETEs or rewrites an equation / gate row follows the amendment-I archive pattern: the
+-- affected rows are copied into `equations_archive_a178` / `compliance_requirements_archive_a178` in the SAME
+-- transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE false; INSERT … SELECT * … WHERE (id = … AND
+-- md5(…) = …)`), the DELETE / UPDATE is guarded on the md5 read read-only from prod, and the rollback restores from the
+-- archive by id with an EXPLICIT column list (never `SELECT *`, never retyped — prod-query.mjs truncates cells at 120
+-- chars); the archive table is dropped by the rollback or on the owner's sign-off that the change is final. A field
+-- retirement is `active = false` (reversible). New gates are INSERTs with a DELETE-by-description rollback. The Plan-3
+-- DATA migrations (20260917101400 seed · 20260917101410 field configs · 20260917101420 equations) must be applied
+-- BEFORE any block that reads a created symbol (teilflaechen_178, A_E_b_a_calc, B_RBF_zu_calc, teilflaechen_count,
+-- spezifische_ziele_formuliert, leichtfluessigkeitsfang_vorgesehen, h_FK_min_tab, fremdwasser_massnahmen_geprueft,
+-- v_spez_grobstoff_min, b_krit_tab, q_Dr_RBF_vorgabe, A_F_strasse, V_RR, V_FK, V_RBF_calc, vorstufe_typ, eta_VS_tab1,
+-- frachtpfade, b_F_calc, C_RBF_zu_calc, B_RBF_ab_calc, frachtpfade_unzulaessig, iterationen, iteration_count_calc,
+-- A_F_last, b_F_last, iterationen_konvergiert, betriebsbefunde, befunde_count).
+-- Consumer edits write `fields.consumer_worksheets` (text[]); the guards keep a re-run idempotent.
+--
+-- Captured equation rows (all verification_status verified_against_standard; md5 = md5(formula)):
+--   Gl. 2  015e1c4b-12bd-4b9a-b14e-b85817aa92cf (A178-09) 'B_RBF_zu = SUM_over_i(A_E_b_a_i * b_R_a)'                 c893061658ec3560f9837d59b1d20f9a
+--   Gl. 3  c884fe4d-1032-48b1-9492-9e50789d5bf2 (A178-09) 'B_RBF_zu = SUM_over_i(A_E_b_a_i * b_R_a * e_0)'           55ab9aa3a942478074eee614505e5e27
+--   Gl. 1  a38487b0-603c-49b9-8381-4f49030338eb (A178-10) 'A_F = (B_RBF_zu / b_krit) * eta_B_soll'                   ba2bfa365e368c956685999ee90c6b91
+--   Gl. 4  0916962e-7e05-4fe7-804a-98fc71ab21e9 (A178-11) 'Q_Dr_RBF = q_Dr_RBF * A_F'                                102871669493df0556a3017797c655f1
+--   Gl. 8  94b4026d-a965-4849-a7d2-7d131b5c634a (A178-12) 'C_RBFA_zu = (B_RBFA_zu * 1000) / VQ_RBFA_zu'              147681bcbc313e52bc8f072a21edf162
+--   Gl. 5  b81485b4-a5f1-4ad5-acbe-2d85168648f7 (A178-13) 'b_F = ((VQ_Dr_RBF * eta_F) * C_RBFA_zu * (1 - eta_VS)) / (A_F * 1000)'
+--                                                                                                                   28aa1dafa01807576d79048f541b9c6b
+--   Gl. 6  27ce5163-6458-496d-8e6a-d6d63691e339 (A178-13) 'b_F = ((VQ_Dr_RBF * eta_F + VQ_FU * eta_RR) * C_RBFA_zu * (1 - eta_VS)) / (A_F * 1000)'
+--                                                                                                                   f1d191251b474590873aea7e9ad75e77
+--   Gl. 7  a75eca54-280a-4d74-bffc-3d67977bd25d (A178-13) 'b_F = ((VQ_Dr_RBF * eta_F + VQ_FU * eta_RR + VQ_Dr_RRL * eta_RRL) * C_RBFA_zu * (1 - eta_VS)) / (A_F * 1000)'
+--                                                                                                                   c5e0af0e487066812c5a656287edab5e
+--   Gl. 11 ba57b49a-c9f6-46fb-bcf9-a2634913e368 (A178-14) 'B_RBFA_ab = B_VS + B_Dr_RBF + B_FU + B_RRL'               142c6b1716dd49b276e8331909606a28
+--   Gl. 12 e457ee3d-5b4b-4843-af93-9015874f3aac (A178-15) 'eta_RBF_hyd = VQ_Dr_RBF / VQ_RBF_zu'                      d057477fc3c0ede94493dfead2f2372d
+--   Gl. 13 18a6351e-31f7-448f-9e0f-a74bd6fbdfcf (A178-15) 'eta_F = ((C_RBF_zu * VQ_Dr_RBF) - (B_RBF_ab * 1000)) / (C_RBF_zu * VQ_RBF_zu)'
+--                                                                                                                   dc5c17ee17bbfef77028f76daacf33a4
+--   Gl. 10 b3085f29-7a03-4021-ba9b-45addc5d91df (A178-16) 'B_RBFA_ab / A_E_b_a <= b_R_e_zul'                         f4c9057c317380fc6d198b648933daf5
+--   Gl. 9  b4167409-558e-4744-8b6f-049c469f085c (A178-16) '4 <= b_F <= b_krit = 7   [kg/(m^2*a)]'                    c45c7234ccd1b2cee8658c78ed96fc73
+-- Captured compliance rows (md5 = md5(condition); 8 rows carry an EMPTY condition — md5 d41d8cd98f00b204e9800998ecf8427e):
+--   REQ-01 525c1a19-ad97-4266-9f96-9db674adf8c4 (A178-01, warn)  ''
+--   REQ-02 7329266f-9ef4-4de5-8e97-00fee4e5027b (A178-01, block) 'treatment_need_confirmed == True'                   caa85dff59040374c24023697adb0a71
+--   REQ-03 f4b11f5c-6de5-4eef-919c-f27f5f69240b (A178-01, warn)  ''
+--   REQ-16 a7b8e509-3de5-4bf5-81b1-2fb7ce140796 (A178-02, block) "IF system_type == 'strasse' THEN h_RR >= 0.5"      3fab94fdbe704a3d41e81dcd6ee8441d
+--   REQ-04 e8503d63-0263-4df1-b644-ed1dc94737ec (A178-04, warn)  ''
+--   REQ-05 528583bb-c7ee-455e-97fe-aa1c4a9c9370 (A178-04, warn)  ''
+--   REQ-06 146cfd37-afb7-457d-96a0-d8eea269c472 (A178-04, warn)  ''
+--   REQ-08 d9d62bf1-de9b-4b73-b939-24ea39910b20 (A178-04, warn)  ''
+--   REQ-07 bc2aec7d-35d6-416f-b7cb-61b642ea5b27 (A178-06, block) 'feststoffeintrag_alarm == false'                    9acd7687316f8cebd97059ab28eb2561
+--   REQ-13 5fa37529-28ff-4486-97f6-749f4af675cd (A178-07, block) 'filter_U < 5 AND filter_feinanteil <= 3 AND filter_ueberkornanteil <= 15 AND filter_calcium_carbonate >= 20'
+--                                                                                                                   74b101545b5f6a3b253f0d46679b642a
+--   REQ-14 5b904151-8d2c-4840-b89e-be54d7306f7f (A178-07, block) 'q_Dr_RBF <= 0.05'                                  aec86098765ff3eab4c0e1ff197700c6
+--   REQ-25 dc353d0d-aa8d-4ba0-a872-0ae9ddffe97e (A178-07, block) 'abdichtung_kdb_staerke >= 2'                       29ba81b023cbe6bc8d364afa8c22ccee
+--   REQ-26 395abb64-0899-4051-816f-b0f1a426330f (A178-07, block) 'geotextil_zwischen_filter_drane == False'          bdc1ac90a6020fcfbca8c344996d422f
+--   REQ-27 3f48d791-3d3a-4d01-b9ba-cdf8cb22795a (A178-07, block) 'pflanzdichte >= 4 AND pflanzdichte <= 8'           20ca632b3ded6895e3a97b4a96deda64
+--   REQ-17 44d1425b-8382-4bd7-b77e-9733a0bc2fac (A178-09, warn)  ''
+--   REQ-18 269deecc-49c2-480b-b3a7-b164ddd96984 (A178-09, block) "IF system_type == 'trenn' AND h_N_a_m > 1000 THEN A_F >= 100 * A_E_b_a"
+--                                                                                                                   b67796c71c191925cb3eefb9d0b49c05
+--   REQ-15 b5ad025c-1752-4ca3-8bae-fe83d8dd8b1b (A178-11, block) 'h_RR >= 0.3 AND h_RR <= 2'                         3657173aedb7f5aa1a0bff32369ff965
+--   REQ-09 613892b0-4ade-4f74-8910-6e25498553f0 (A178-12, block) "IF system_type == 'misch' THEN (e_0 <= 55 AND n_RBF >= 10)"
+--                                                                                                                   468a7b9bf53bb3a0351444ea8778e8be
+--   REQ-10 03bdeeb0-d563-4b63-ad3b-75f8ff1d2677 (A178-12, block) "IF system_type IN {'trenn','strasse'} THEN v_spez_grobstoff >= 0.5"
+--                                                                                                                   b77b2dd48bf43f31a0446a160bf0e62a
+--   REQ-11 c991cba7-31a6-4e0f-a8b8-4e3bac1f7f6a (A178-12, block) 'attest_a178_12_req_11 == True'                     b77192f8a24003ac868d40d4168d7334
+--   REQ-12 07b40e36-8400-4b12-a06a-6f96d2618853 (A178-12, block) "(IF system_type == 'misch' THEN h_FK_required >= 0.75) AND (IF system_type IN {'trenn','strasse'} THEN h_FK_required >= 0.5)"
+--                                                                                                                   057f4620c6e02cd8d2c272057668f722
+--   REQ-23 a983201f-44e9-462f-9e09-d6466df6916d (A178-12, block) 'langzeitsimulation_dauer >= 10'                    60098f54961ed00784da478589f0a6d2
+--   REQ-19 444bc2df-de5e-4fc7-bf32-3528a87af023 (A178-13, block) '4 <= b_F AND b_F <= 7'                             d59099fe05e4f4cfb2523aa6e3ac2eed
+--   REQ-20 8b808afb-9d48-45de-a0b6-1e4db1c7b2be (A178-16, block) 'B_RBFA_ab / A_E_b_a <= b_R_e_zul'                  f4c9057c317380fc6d198b648933daf5
+--   REQ-21 cd323ef6-b95c-4346-af41-305ee3a77324 (A178-16, block) "IF system_type == 'misch' THEN t_RR_E_n1 <= 48"    82785150038c53cf31d0c7ea8bf219e5
+--   REQ-22 33ad1e02-8480-4515-8af9-50e3022bd311 (A178-17, block) 'n_RBF >= 10'                                       134c757d0fe7fd95d920d844d4efddc1
+--   REQ-24 742c8b7a-2b69-45d1-b277-39e3c278c7a0 (A178-18, block) 'convergence_achieved == True'                      8f691dbb5c191cf269be2df99bd93d66
+--   REQ-28 12f8444a-daad-4b58-8a72-b7f593ee9e10 (A178-18, warn)  ''
+-- Explicit column lists (information_schema, read-only 2026-09-18):
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   fields: id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote
+-- Helper used below (inline in each statement): a worksheet's template id =
+--   (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-A-178' AND w.code = '<code>')
+
+-- =====================================================================================================================
+-- a178-C-1 · A178-02 / A178-07 · consumer edit: system_type (+ rrl_vorhanden, becken_typ) reach the worksheets whose rules and gates read them
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: system_type.consumer_worksheets = {A178-04, A178-06, A178-09}; rrl_vorhanden = {A178-13, A178-17}; becken_typ = {A178-13}.
+-- Prod gates REQ-09 / REQ-10 / REQ-12 (A178-12), REQ-21 (A178-16) and REQ-16 (A178-02 — reads h_RR of A178-11) read system_type
+-- on worksheets that never inherit it (a178-X-1); the emitted rules on A178-07 (v_spez_grobstoff, v_spez_grobstoff_min),
+-- A178-10 (A_F_strasse), A178-11 (V_RRL ← rrl_vorhanden) and A178-17 (t_RR_E_n1) are `pending` = visible and inert until this edit.
+-- Evidence: L590 "l Mischsystem $h_{\mathrm{FK}} \geq 0,75 \mathrm{~m}$,", L591 "1 Trennsystem und Straßenentwässerung
+-- $h_{\mathrm{FK}} \geq 0,50 \mathrm{~m}$." (h_FK by system on A178-07); L677 (v_spez, Trennsystem); L806 "$t_{\mathrm{RR}, \mathrm{E},
+-- \mathrm{n}=1}$ (h) mittlere jährliche Einstaudauer des Retentionsraums (Mischsystem)"; L782 (A_F Straße); L777 (V_RRL "gegebenenfalls").
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-04','A178-06','A178-07','A178-09','A178-10','A178-11','A178-12','A178-13','A178-16','A178-17']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-02' AND s.code = 'DWA-A-178' AND f.symbol = 'system_type' AND f.active
+--    AND f.consumer_worksheets = ARRAY['A178-04','A178-06','A178-09']::text[];
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-11','A178-13','A178-14','A178-17']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-07' AND s.code = 'DWA-A-178' AND f.symbol = 'rrl_vorhanden' AND f.active
+--    AND f.consumer_worksheets = ARRAY['A178-13','A178-17']::text[];
+-- COMMIT;
+-- Rollback:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-04','A178-06','A178-09']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-02' AND s.code = 'DWA-A-178' AND f.symbol = 'system_type'
+--    AND f.consumer_worksheets = ARRAY['A178-04','A178-06','A178-07','A178-09','A178-10','A178-11','A178-12','A178-13','A178-16','A178-17']::text[];
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-13','A178-17']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-07' AND s.code = 'DWA-A-178' AND f.symbol = 'rrl_vorhanden'
+--    AND f.consumer_worksheets = ARRAY['A178-11','A178-13','A178-14','A178-17']::text[];
+-- COMMIT;
+
+-- =====================================================================================================================
+-- a178-C-2 · A178-07 · e_0 ← system_type == 'misch' (REFUSED: e_0 is consumed by A178-09 — Gl. 3)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L739 "$e_{0}$ & (\%) & mittlere Jahresentlastungsrate der Vorstufe" (Gl. 3, Mischsystem only, L727); L347 "(Mischsystem)".
+-- Chosen now: no rule; the Misch-only e_0 lives per Teilfläche in the register (column hidden for trenn / strasse). After
+-- a178-R-1 (Gl. 3 retired) e_0 has no consumer left and the rule can be emitted:
+-- UPDATE fields f SET visible_when = 'system_type == ''misch''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-07' AND s.code = 'DWA-A-178' AND f.symbol = 'e_0' AND f.active AND f.visible_when IS NULL
+--    AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- Rollback: … SET visible_when = NULL … WHERE f.symbol = 'e_0' AND f.visible_when = 'system_type == ''misch''';
+
+-- =====================================================================================================================
+-- a178-C-3 · A178-13 / A178-14 · VQ_FU, eta_RR ← becken_typ == 'durchlauf'; VQ_Dr_RRL, eta_RRL, B_RRL ← rrl_vorhanden == true (REFUSED: transitive producers)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: all five are self-consumed only (ignored, Task 12b) but feed Gl. 6 / 7 (b_F, consumed by A178-16) and Gl. 11
+-- (B_RBFA_ab, consumed by A178-16) — the emitter names the chains `VQ_FU → Gl.6 b_F (consumed by A178-16)`,
+-- `B_RRL → Gl.11 B_RBFA_ab (consumed by A178-16)`.
+-- Evidence: L819 "Stoffliche Bodenfilteroberflächenbelastung bei Durchlauffilterbecken:" (Gl. 6 with VQ_FÜ · η_RR); L826
+-- "… mit Regenrückhaltelamelle:" (Gl. 7 with VQ_Dr,RRL · η_RRL); L663 "kann … eine Regenrückhaltelamelle … angeordnet werden".
+-- Chosen now: no rule; the path-dependence lives in the `frachtpfade` register (a row exists only for a path the plant has;
+-- `zulaessig` flags a path outside the configuration). After a178-R-2 (one b_F equation over the register) the four -13
+-- scalars have no equation left and the rules can be emitted; B_RRL follows a178-R-4.
+-- Rules to emit then (visible_when, each guarded `IS NULL`; rollback SET NULL):
+--   A178-13 VQ_FU, eta_RR  ← becken_typ == 'durchlauf'
+--   A178-13 VQ_Dr_RRL, eta_RRL ← rrl_vorhanden == true
+--   A178-14 B_RRL ← rrl_vorhanden == true   (needs C-1: rrl_vorhanden → A178-14)
+
+-- =====================================================================================================================
+-- a178-C-4 · A178-12 … A178-16 · the Nachweis waiver for Straßenabflüsse without specific goals (section rules)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L794 "Bei Retentionsbodenfilterbecken zur reinen Behandlung von Straßenoberflächenwasser, die entsprechend der oben
+-- getroffenen Festlegungen bemessen sind und für die keine besonderen Reinigungsziele formuliert wurden, kann auf das
+-- Nachweisverfahren verzichtet werden."; L784 "Zusätzliche Nachweise des Retentionsbodenfilterbeckens sind nicht erforderlich."
+-- Why staged: every field-bearing section of A178-12 … -16 holds a producer another worksheet consumes (C_RBFA_zu → -13,
+-- VQ_RBF_zu / C_RBF_zu → -15, b_F → -16, B_RBF_ab / B_RBFA_ab → -15 / -16, eta_RBF_hyd → -19, n_FU → -17), the drivers
+-- (system_type, spezifische_ziele_formuliert) are not inherited there, and the field-less sections (A, F, I … M) would be
+-- inert rules. The visibility rule per section would be: spezifische_ziele_formuliert == true OR system_type != 'strasse'.
+-- Prerequisites: C-1 (system_type) + C-5 (spezifische_ziele_formuliert → A178-12 … -16) + the owner's acceptance that hiding
+-- the Nachweis worksheets hides producers the Konformitätszusammenfassung (-19) reads. Alternative without hiding: a
+-- worksheet-level "nicht zutreffend" state (Plan-3 Phase 6). No SQL proposed until the owner chooses.
+
+-- =====================================================================================================================
+-- a178-C-5 · created outputs that other worksheets should read (consumer edits on Plan-3 fields)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- A `create` never sets consumer_worksheets. The following make the twins inheritable where their prod counterparts are read:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-06','A178-09','A178-10','A178-16']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-04' AND s.code = 'DWA-A-178' AND f.symbol = 'A_E_b_a_calc' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-09','A178-10']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-04' AND s.code = 'DWA-A-178' AND f.symbol = 'B_RBF_zu_calc' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-10','A178-12','A178-13','A178-14','A178-15','A178-16']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-02' AND s.code = 'DWA-A-178' AND f.symbol = 'spezifische_ziele_formuliert' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-07']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-02' AND s.code = 'DWA-A-178' AND f.symbol = 'h_FK_min_tab' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-16']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-13' AND s.code = 'DWA-A-178' AND f.symbol = 'b_F_calc' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-14','A178-15']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-13' AND s.code = 'DWA-A-178' AND f.symbol IN ('C_RBF_zu_calc','B_RBF_ab_calc') AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- COMMIT;
+-- Rollback: the same statements with SET consumer_worksheets = NULL guarded on the lists written above.
+-- Note: b_F_calc / C_RBF_zu_calc / B_RBF_ab_calc are scalar-only equations (not server-materialised, amendment D / a178-I-2) —
+-- an inherited copy reads the stored value, which is null until the engine-output materialisation workstream lands;
+-- A_E_b_a_calc / B_RBF_zu_calc are register-fed and materialise on save.
+
+-- =====================================================================================================================
+-- a178-R-1 · A178-09 · Gl. 2 / Gl. 3 (two rows writing B_RBF_zu with the phantom token SUM_over_i) → one equation reading B_RBF_zu_calc
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L723 "B_{\mathrm{RBF}, \mathrm{zu}}=\sum\left(A_{\mathrm{E}, \mathrm{~b}, \mathrm{a}, \mathrm{i}} \cdot b_{\mathrm{R}, \mathrm{a}}\right) \tag{2}";
+-- L730 "B_{\mathrm{RBF}, \mathrm{zu}}=\sum\left(A_{\mathrm{E}, \mathrm{~b}, \mathrm{a}, \mathrm{i}} \cdot b_{\mathrm{R}, \mathrm{a}} \cdot e_{0}\right) \tag{3}";
+-- L718 "Die Summe aller Einzelfrachten aus dem angeschlossenen Einzugsgebiet ist dann mit der Entlastungsrate der Vorstufe zu
+-- multiplizieren (GI. 3)." Capture: both rows output B_RBF_zu (consumed by A178-10); the engine rewrites `SUM_over_i(x)` to the
+-- phantom symbol `SUM_over_i_…` (S-2a-1), so neither row computes today; the single `A_E_b_a_i` scalar cannot carry i > 1.
+-- Plan 3 emits `B_RBF_zu_calc` (A178-04-D2, register-fed, switched on system_type). This block makes Gl. 2 read it (one
+-- producer of B_RBF_zu) and retires Gl. 3; requires C-5 (B_RBF_zu_calc → A178-09).
+-- Why staged: replacing verified equations is an always-sign-off class.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_a178 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_a178 SELECT * FROM equations
+--  WHERE (id = '015e1c4b-12bd-4b9a-b14e-b85817aa92cf' AND md5(formula) = 'c893061658ec3560f9837d59b1d20f9a')
+--     OR (id = 'c884fe4d-1032-48b1-9492-9e50789d5bf2' AND md5(formula) = '55ab9aa3a942478074eee614505e5e27');
+-- UPDATE equations SET formula = 'B_RBF_zu = B_RBF_zu_calc', input_symbols = ARRAY['B_RBF_zu_calc']::text[],
+--        clause_reference = '§6.2.2.1 Gl.(2) / Gl.(3)', verification_status = 'imported_unverified'
+--  WHERE id = '015e1c4b-12bd-4b9a-b14e-b85817aa92cf' AND md5(formula) = 'c893061658ec3560f9837d59b1d20f9a';
+-- DELETE FROM equations e USING equations_archive_a178 a WHERE e.id = a.id AND md5(e.formula) = md5(a.formula)
+--    AND e.id = 'c884fe4d-1032-48b1-9492-9e50789d5bf2';
+-- COMMIT;
+-- Rollback (full rows from the archive, explicit column list, never retyped):
+-- BEGIN;
+-- UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, clause_reference = a.clause_reference, verification_status = a.verification_status
+--   FROM equations_archive_a178 a WHERE e.id = a.id AND e.id = '015e1c4b-12bd-4b9a-b14e-b85817aa92cf';
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_a178 WHERE id = 'c884fe4d-1032-48b1-9492-9e50789d5bf2' ON CONFLICT (id) DO NOTHING;
+-- COMMIT;
+-- The archive table `equations_archive_a178` is shared by R-1 / R-2 / R-4 — drop it only once all three are rolled back or final.
+
+-- =====================================================================================================================
+-- a178-D-1 · A178-04 · A_E_b_a_i (single scalar, consumed by A178-09) and A_E_b_a (typed Σ, consumed by -06 / -09 / -10 / -16) ↔ teilflaechen_178 / A_E_b_a_calc
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L737 "$A_{\mathrm{E}, \mathrm{b}, \mathrm{a}, \mathrm{i}}$ & (ha) & befestigte, angeschlossene Teilflächen im Einzugsgebiet der
+-- Retentionsbodenfilteranlage"; L915 "$A_{\mathrm{E}, \mathrm{b}, \mathrm{a}}$ & (ha) & Summe aller befestigten, angeschlossenen Flächen …".
+-- Chosen now: both inputs stay; the register carries the N instances and A_E_b_a_calc the Σ (twin). On ratification (after
+-- R-1 and C-5): retire A_E_b_a_i (active = false) and make A_E_b_a read the Σ — either a new equation
+-- 'A_E_b_a = A_E_b_a_calc' on A178-04 (input_symbols {A_E_b_a_calc}; A_E_b_a is a required input today, so the field
+-- becomes engine-owned) or retire A_E_b_a and re-point its consumers / gates (REQ-18, REQ-20, Gl. 10) to A_E_b_a_calc.
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-04' AND s.code = 'DWA-A-178' AND f.symbol = 'A_E_b_a_i' AND f.active;
+-- Rollback: … SET active = true … WHERE f.symbol = 'A_E_b_a_i' AND NOT f.active.
+
+-- =====================================================================================================================
+-- a178-D-2 · A178-06 · b_R_a / b_R_a_default (one value for the whole catchment) ↔ teilflaechen_178.b_r_a_i (per Teilfläche)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L716 "Die AFS63-Zulauffracht zum Retentionsbodenfilter kann über mittlere spezifische Jahresfrachtpotenziale
+-- ( $b_{\mathrm{R}, \mathrm{a}}$ ), bezogen auf $A_{\mathrm{E}, \mathrm{b}, \mathrm{a},}$ abgeschätzt werden. Als Rechenwert zur
+-- Vorbemessung der Bodenfilteroberfläche wird eine flächenspezifische Fracht von $b_{\mathrm{R}, \mathrm{a}}=530 \mathrm{~kg} /(\mathrm{ha}
+-- \cdot \mathrm{a})$ angesetzt." — plural "Jahresfrachtpotenziale", one Rechenwert; Gl. 2 / 3 print b_R,a inside the Σ (a178-J-2).
+-- Chosen now: b_R_a (A178-06) stays the catchment value the prod Gl. 2 / 3 read; the register column is typed per row with the
+-- Rechenwert shown beside it. On ratification of R-1 the scalar b_R_a loses its consumer (A178-09) and may be retired, or kept
+-- as the catchment default the rows must equal (a consistency gate `abw_rechenwert`-style is already the row badge).
+-- Note: prod b_R_a_default (A178-06, "Standard-Rechenwert b_R,a", validation "default value 530") is a typed copy of the
+-- Rechenwert — retire on ratification: UPDATE fields … SET active = false … WHERE w.code = 'A178-06' AND f.symbol = 'b_R_a_default' AND f.active;
+
+-- =====================================================================================================================
+-- a178-D-3 · A178-07 · e_0 (one Entlastungsrate, consumed by A178-09) ↔ teilflaechen_178.e_0_i (per Teilfläche, Misch only)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L730 (Gl. 3 prints e_0 inside the Σ); L739 "$e_{0}$ & (\%) & mittlere Jahresentlastungsrate der Vorstufe"; L671
+-- "Bestehende Entlastungsbauwerke können in der Regel als Vorstufe genutzt werden, wenn sie eine Entlastungsrate von $e_{0} \leq 55 \%$ einhalten".
+-- Chosen now: both stay. One plant usually has ONE Vorstufe (one e_0); the per-row column serves catchments with several
+-- Entlastungsbauwerke. On ratification either (a) keep the scalar and read it in the row expr (`… * e_0 / 100`, needs C-1:
+-- e_0 → A178-04) so the rows never diverge, or (b) retire the scalar after R-1. The owner picks; REQ-09 (e_0 ≤ 55) then reads
+-- either the scalar or a `max_rows(teilflaechen_178, e_0_i)` twin (new equation on -04).
+
+-- =====================================================================================================================
+-- a178-R-2 · A178-13 · Gl. 5 / 6 / 7 (three rows writing b_F, first wins) → b_F_calc (one row-Σ over frachtpfade)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L815 (Gl. 5 "bei Fangfilterbecken"), L822 (Gl. 6 "bei Durchlauffilterbecken"), L829 (Gl. 7 "… mit
+-- Regenrückhaltelamelle"); L879 "Der Nachweis ist erfüllt, wenn in der betreffenden Anlagenkonfiguration (GL. 5 bis GL. 7)
+-- die nachgewiesene Bodenfilteroberflächenbelastung $b_{\mathrm{F}}$ die zulässige Bodenfilteroberflächenbelastung $b_{\text {krit }}$
+-- gemäß 6.2.2.1 einhält:". Capture: three rows output b_F (consumed by A178-16); the engine takes the first in list order (Gl. 5),
+-- so a Durchlauffilterbecken with FÜ / RRL never gets Gl. 6 / 7. A178-13-D1 reproduces each (pinned: 4,75 / 5,25 / 5,55 kg/(m²·a)
+-- on the same inputs). Also carries the Tab.-1 η per path (locked) instead of the typed eta_RR / eta_RRL and the -15 eta_F copy.
+-- Why staged: replacing verified equations is an always-sign-off class.
+-- Option (a) — rewrite Gl. 5 as the register form, archive + delete Gl. 6 and Gl. 7:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_a178 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_a178 SELECT * FROM equations
+--  WHERE (id = 'b81485b4-a5f1-4ad5-acbe-2d85168648f7' AND md5(formula) = '28aa1dafa01807576d79048f541b9c6b')
+--     OR (id = '27ce5163-6458-496d-8e6a-d6d63691e339' AND md5(formula) = 'f1d191251b474590873aea7e9ad75e77')
+--     OR (id = 'a75eca54-280a-4d74-bffc-3d67977bd25d' AND md5(formula) = 'c5e0af0e487066812c5a656287edab5e');
+-- UPDATE equations SET formula = 'b_F = sum_rows(frachtpfade, vq_m3 * eta_tab1) * C_RBFA_zu * (1 - eta_VS) / (A_F * 1000)',
+--        input_symbols = ARRAY['frachtpfade', 'C_RBFA_zu', 'eta_VS', 'A_F']::text[],
+--        clause_reference = '§6.2.2.3 Gl.(5)–(7)', verification_status = 'imported_unverified'
+--  WHERE id = 'b81485b4-a5f1-4ad5-acbe-2d85168648f7' AND md5(formula) = '28aa1dafa01807576d79048f541b9c6b';
+-- DELETE FROM equations e USING equations_archive_a178 a WHERE e.id = a.id AND md5(e.formula) = md5(a.formula)
+--    AND e.id IN ('27ce5163-6458-496d-8e6a-d6d63691e339', 'a75eca54-280a-4d74-bffc-3d67977bd25d');
+-- COMMIT;
+-- Option (b) — keep the three printed rows and make b_F read the twin: UPDATE … SET formula = 'b_F = b_F_calc', input_symbols =
+-- ARRAY['b_F_calc'] on Gl. 5, delete Gl. 6 / 7 as above (b_F_calc is scalar-only → not materialised; on -13 itself the engine
+-- computes it in the same pass, so the read is live).
+-- Rollback (full rows from the archive, explicit column list):
+-- BEGIN;
+-- UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, clause_reference = a.clause_reference, verification_status = a.verification_status
+--   FROM equations_archive_a178 a WHERE e.id = a.id AND e.id = 'b81485b4-a5f1-4ad5-acbe-2d85168648f7';
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_a178 WHERE id IN ('27ce5163-6458-496d-8e6a-d6d63691e339', 'a75eca54-280a-4d74-bffc-3d67977bd25d') ON CONFLICT (id) DO NOTHING;
+-- COMMIT;
+
+-- =====================================================================================================================
+-- a178-R-3 · A178-15 / A178-13 · eta_F is an INPUT of Gl. 5–7 (Tab.-1 Rechenwert 0,95, typed on -15, consumed by -13) AND the OUTPUT of Gl. 13 on -15
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L870 "\hline AFS63 & $0^{11}$ & 0,95 & 0,50 & 0,60 \\" (η_F = 0,95 "zur Anwendung in GI. (5) bis GL. (7)", L867);
+-- L953 "\eta_{F}=\frac{\left(C_{R B F, z u} \cdot V Q_{D R, R B F, z u}\right)-\left(B_{R B F, a b} \cdot 1.000\right)}{C_{R B F, z u} \cdot V Q_{R B F, z u}} \tag{13}"
+-- (§6.2.2.3 b) "Frachtwirkungsgrad des Filterkörpers" — an EVALUATION of the simulated loads). Capture: Gl. 13 writes eta_F on -15,
+-- the same symbol Gl. 5 / 6 / 7 read on -13 (inherited from -15) — the design value is overwritten by the evaluation (circular
+-- once B_RBF_ab itself depends on η_F). Chosen now: the register reads the Tab.-1 value by lookup (never the typed eta_F);
+-- Gl. 13 untouched. Proposal: rename the Gl. 13 output to `eta_F_nachweis` (new field on -15, Gl. 13 output_symbol +
+-- output field) so `eta_F` stays the Tab.-1 design input:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_a178 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_a178 SELECT * FROM equations WHERE id = '18a6351e-31f7-448f-9e0f-a74bd6fbdfcf' AND md5(formula) = 'dc5c17ee17bbfef77028f76daacf33a4';
+-- INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, order_index, verification_status, active)
+-- SELECT w.id, (SELECT id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'D'), 'eta_F_nachweis',
+--        'η_F — Frachtwirkungsgrad des Filterkörpers aus der Langzeitsimulation (Gl. 13)', 'number', '-', false, '§6.2.2.3 b), Gl. (13)',
+--        'Plan 3 (a178-R-3): Ausgabe der Gl. 13; der Tab.-1-Rechenwert eta_F bleibt der Eingang von Gl. 5–7.',
+--        (SELECT coalesce(max(order_index), 0) + 1 FROM fields f2 WHERE f2.worksheet_template_id = w.id), 'imported_unverified', true
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-A-178' AND w.code = 'A178-15'
+--    AND NOT EXISTS (SELECT 1 FROM fields f3 WHERE f3.worksheet_template_id = w.id AND f3.symbol = 'eta_F_nachweis');
+-- UPDATE equations SET formula = 'eta_F_nachweis = ((C_RBF_zu * VQ_Dr_RBF) - (B_RBF_ab * 1000)) / (C_RBF_zu * VQ_RBF_zu)', output_symbol = 'eta_F_nachweis',
+--        verification_status = 'imported_unverified'
+--  WHERE id = '18a6351e-31f7-448f-9e0f-a74bd6fbdfcf' AND md5(formula) = 'dc5c17ee17bbfef77028f76daacf33a4';
+-- COMMIT;
+-- Rollback: UPDATE equations e SET formula = a.formula, output_symbol = a.output_symbol, verification_status = a.verification_status FROM
+-- equations_archive_a178 a WHERE e.id = a.id AND e.id = '18a6351e-31f7-448f-9e0f-a74bd6fbdfcf'; DELETE FROM fields WHERE symbol = 'eta_F_nachweis'
+-- AND description LIKE 'Plan 3 (a178-R-3)%'.
+-- Also on the sheet: the printed Gl. 13 numerator symbol reads "V Q_{D R, R B F, z u}" (no such symbol in §3.2 — a178-U-3); prod uses VQ_Dr_RBF.
+
+-- =====================================================================================================================
+-- a178-R-4 · A178-14 / A178-13 · Gl. 11 B_RBFA_ab = B_VS + B_Dr_RBF + B_FU + B_RRL → B_RBF_ab_calc + B_VS
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L904 "B_{\mathrm{RBFA}, \mathrm{ab}}=B_{\mathrm{VS}}+B_{\mathrm{Dr}, \mathrm{RBF}}+B_{\mathrm{FU}}+B_{\mathrm{RRL}} \tag{11}";
+-- L967–L970 "$B_{\text {RBF,ab }}(\mathrm{kg} / \mathrm{a})$ & \begin{tabular}{l} … mittlerer jährlicher Frachtaustrag aus dem Retentionsbodenfilterbecken, \\
+-- Summe aus Restfracht filtriert, Entlastung über den Filterbeckenüberlauf \\ und, wenn vorhanden, aus Regenrückhaltelamelle".
+-- Capture: B_VS (A178-14) is self-consumed only — not inherited on -13, so the brief's `B_RBFA_ab_calc = Σ + B_VS` cannot
+-- compute on -13 and a register-fed row cannot live on -14 (m277e trap 2). Chosen now: B_RBF_ab_calc (Σ of the per-path
+-- loads, -13) only. Proposal: C-5 makes B_RBF_ab_calc inheritable on -14, then Gl. 11 reads it:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_a178 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_a178 SELECT * FROM equations WHERE id = 'ba57b49a-c9f6-46fb-bcf9-a2634913e368' AND md5(formula) = '142c6b1716dd49b276e8331909606a28';
+-- UPDATE equations SET formula = 'B_RBFA_ab = B_VS + B_RBF_ab_calc', input_symbols = ARRAY['B_VS', 'B_RBF_ab_calc']::text[], verification_status = 'imported_unverified'
+--  WHERE id = 'ba57b49a-c9f6-46fb-bcf9-a2634913e368' AND md5(formula) = '142c6b1716dd49b276e8331909606a28';
+-- COMMIT;
+-- Rollback: UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, verification_status = a.verification_status FROM
+-- equations_archive_a178 a WHERE e.id = a.id AND e.id = 'ba57b49a-c9f6-46fb-bcf9-a2634913e368';
+-- Caveat: B_RBF_ab_calc is scalar-only on -13 (not materialised) — the inherited copy is null until the materialisation
+-- workstream lands; until then keep Gl. 11 as is (the four typed loads).
+
+-- =====================================================================================================================
+-- a178-E-1 · A178-07 · h_FK_required (number, no consumers, no same-worksheet gate) → lookup_fill S6_1_4_5 by system_type (STAGED; twin h_FK_min_tab on -02 emitted)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L589 "Die erforderliche Höhe des Filterkörpers beträgt im konsolidierten Zustand:", L590 / L591 (0,75 / 0,50 m).
+-- Why staged: system_type is not consumed on A178-07 (a262e trap 1: the widget renders read-only "Schlüssel fehlt" and the
+-- engineer loses the input) — requires C-1 first; amendment J (re-bind only when fail-safe).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_a178 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_a178 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-A-178' AND w.code = 'A178-07' AND f.symbol = 'h_FK_required' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"§6.1.4.5"}'::jsonb,
+--        lookup = '{"table_code":"S6_1_4_5","role":"limit","keys":[{"column":"system_type","from_symbol":"system_type"}],"value":"h_fk_min_m"}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-07' AND s.code = 'DWA-A-178' AND f.symbol = 'h_FK_required' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-02' AND s.code = 'DWA-A-178' AND f.symbol = 'h_FK_min_tab' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET widget = a.widget, ui_config = a.ui_config, lookup = a.lookup FROM fields_archive_a178 a WHERE f.id = a.id AND a.symbol = 'h_FK_required';
+--           UPDATE fields … SET active = true … WHERE w.code = 'A178-02' AND f.symbol = 'h_FK_min_tab' AND NOT f.active; DROP TABLE fields_archive_a178 (once E-2 is also final / rolled back).
+
+-- =====================================================================================================================
+-- a178-E-2 · A178-13 · eta_VS (number, required, self-consumed only, input of Gl. 5–7) → lookup_fill TABELLE1_VS by vorstufe_typ (STAGED; twin eta_VS_tab1 emitted)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L873 "1) Bei vorhandenen RKB $\left(q_{\mathrm{A}} \leq 10 \mathrm{~m} / \mathrm{h}\right)$ oder RÜB-DB kann für AFS63
+-- $\eta_{\mathrm{VS}}=0,2$ angesetzt werden."; L975 "Wird die Wirksamkeit der Vorstufe für AFS63 mit Null angenommen, …".
+-- Why staged: amendment J — with `vorstufe_typ` unset the fill renders read-only and the required input cannot be typed.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_a178 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_a178 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-A-178' AND w.code = 'A178-13' AND f.symbol = 'eta_VS' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"Tab. 1 Anm. 1)"}'::jsonb,
+--        lookup = '{"table_code":"TABELLE1_VS","role":"value","keys":[{"column":"vorstufe_typ","from_symbol":"vorstufe_typ"}],"value":"eta_vs"}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-13' AND s.code = 'DWA-A-178' AND f.symbol = 'eta_VS' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-13' AND s.code = 'DWA-A-178' AND f.symbol = 'eta_VS_tab1' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET widget = a.widget, ui_config = a.ui_config, lookup = a.lookup FROM fields_archive_a178 a WHERE f.id = a.id AND a.symbol = 'eta_VS';
+--           UPDATE fields … SET active = true … WHERE w.code = 'A178-13' AND f.symbol = 'eta_VS_tab1' AND NOT f.active.
+
+-- =====================================================================================================================
+-- a178-G-1 · A178-17 · REQ-22 'n_RBF >= 10' (block, unguarded) + the Misch-only visibility of n_RBF (REFUSED by the gate-aware guard)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L979 "Im Mischsystem muss die Einstaudauer des Retentionsraums für $n=1 \leq 48 \mathrm{~h}$ sein. Die Beschickungshäufigkeit
+-- muss im langjährigen Mittel $\geq 10$ a sein." (the second sentence's scope — Mischsystem or all systems — is a reading, a178-J-5;
+-- prod's own validation_rules text ">= 10 (Mischsystem)" and REQ-09 place it under Misch); L673 "$n \geq 10$ Entlastungen pro Jahr"
+-- (§6.2.1.1 Mischsystem, the Vorstufe's discharges). Chosen now: n_RBF stays visible for every system, REQ-22 unchanged.
+-- Proposal (needs C-1: system_type → A178-17):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_a178 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_a178 SELECT * FROM compliance_requirements WHERE id = '33ad1e02-8480-4515-8af9-50e3022bd311' AND md5(condition) = '134c757d0fe7fd95d920d844d4efddc1';
+-- UPDATE compliance_requirements SET condition = 'IF system_type == ''misch'' THEN n_RBF >= 10'
+--  WHERE id = '33ad1e02-8480-4515-8af9-50e3022bd311' AND md5(condition) = '134c757d0fe7fd95d920d844d4efddc1';
+-- UPDATE fields f SET visible_when = 'system_type == ''misch''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-17' AND s.code = 'DWA-A-178' AND f.symbol = 'n_RBF' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition FROM compliance_requirements_archive_a178 a WHERE c.id = a.id AND c.id = '33ad1e02-8480-4515-8af9-50e3022bd311';
+--           UPDATE fields … SET visible_when = NULL … WHERE f.symbol = 'n_RBF' AND f.visible_when = 'system_type == ''misch'''; DROP TABLE compliance_requirements_archive_a178 (once G-2 / G-3 are final / rolled back).
+
+-- =====================================================================================================================
+-- a178-G-2 · A178-13 · REQ-19 '4 <= b_F AND b_F <= 7' (block) hard-codes 7 instead of b_krit; Gl. 9 prints b_krit = 7
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L884 "4 \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right) \leq b_{F} \leq b_{\text {krit }}=7 \mathrm{~kg} /\left(\mathrm{m}^{2}
+-- \cdot \mathrm{a}\right) \tag{9}"; L689 "… wird eine maximal zulässige AFS63-Filterflächenbelastung von $b_{\text {krit }}=7 \mathrm{~kg}
+-- /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right)$ festgesetzt." Capture: b_krit (A178-07, typed, required) is consumed by A178-10 / -16 —
+-- NOT by -13, where REQ-19 lives. Chosen now: REQ-19 unchanged (the literal IS the printed value); b_krit_tab twin on -07.
+-- Proposal (needs b_krit → A178-13):
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A178-10','A178-13','A178-16']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A178-07' AND s.code = 'DWA-A-178' AND f.symbol = 'b_krit' AND f.active AND f.consumer_worksheets = ARRAY['A178-10','A178-16']::text[];
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_a178 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_a178 SELECT * FROM compliance_requirements WHERE id = '444bc2df-de5e-4fc7-bf32-3528a87af023' AND md5(condition) = 'd59099fe05e4f4cfb2523aa6e3ac2eed';
+-- UPDATE compliance_requirements SET condition = '4 <= b_F AND b_F <= b_krit'
+--  WHERE id = '444bc2df-de5e-4fc7-bf32-3528a87af023' AND md5(condition) = 'd59099fe05e4f4cfb2523aa6e3ac2eed';
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition FROM compliance_requirements_archive_a178 a WHERE c.id = a.id AND c.id = '444bc2df-de5e-4fc7-bf32-3528a87af023';
+--           UPDATE fields … SET consumer_worksheets = ARRAY['A178-10','A178-16']::text[] … WHERE f.symbol = 'b_krit' AND f.consumer_worksheets = ARRAY['A178-10','A178-13','A178-16']::text[].
+
+-- =====================================================================================================================
+-- a178-G-3 · A178-02 / A178-12 · REQ-11 'attest_a178_12_req_11 == True' (block, unconditional) → the WSG-conditional attestation on -02
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L683 "Bei der Straßenentwässerung gelten außerhalb von Wasserschutzgebieten die Vorgaben für das Trennsystem. Innerhalb
+-- von Wasserschutzgebieten ist zum Schutz gegen Havarien ein zusätzlicher Auffangraum für Leichtflüssigkeiten gemäß RiStWag
+-- vorzusehen." Capture: REQ-11 (A178-12, "Nachweis: §6.2.1.3") blocks EVERY project on a boolean, also Misch / Trenn and Straße
+-- outside a WSG. Chosen now: REQ-11 unchanged; the created `leichtfluessigkeitsfang_vorgesehen` (A178-02, visible only for
+-- strasse + WSG) has no gate. Proposal — a new conditional gate on A178-02 and REQ-11 retired:
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-11a', 'Leichtflüssigkeitsfang (RiStWag) bei Straßenentwässerung im Wasserschutzgebiet',
+--        'IF system_type == ''strasse'' AND wasserschutzgebiet != ''zone_none'' THEN leichtfluessigkeitsfang_vorgesehen == True',
+--        '§6.2.1.3', 'block', 'Plan 3 (a178-G-3): §6.2.1.3 — zusätzlicher Auffangraum für Leichtflüssigkeiten gemäß RiStWag innerhalb von Wasserschutzgebieten.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-A-178' AND w.code = 'A178-02'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-11a');
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_a178 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_a178 SELECT * FROM compliance_requirements WHERE id = 'c991cba7-31a6-4e0f-a8b8-4e3bac1f7f6a' AND md5(condition) = 'b77192f8a24003ac868d40d4168d7334';
+-- DELETE FROM compliance_requirements c USING compliance_requirements_archive_a178 a WHERE c.id = a.id AND md5(c.condition) = md5(a.condition) AND c.id = 'c991cba7-31a6-4e0f-a8b8-4e3bac1f7f6a';
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-11a' AND description LIKE 'Plan 3 (a178-G-3)%';
+--           INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+--           SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--             FROM compliance_requirements_archive_a178 WHERE id = 'c991cba7-31a6-4e0f-a8b8-4e3bac1f7f6a' ON CONFLICT (id) DO NOTHING;
+-- (The -12 attest field attest_a178_12_req_11 may then be retired: active = false.)
+
+-- =====================================================================================================================
+-- a178-G-4 · A178-10 · new gate: vereinfachte Bemessung Straßenabflüsse — A_F >= A_F_strasse when no specific goals are formulated
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L781 "Wurden durch die Aufsichtsbehörden keine spezifischen Behandlungsziele formuliert, kann die Bemessung eines
+-- Retentionsbodenfilterbeckens zur reinen Behandlung der Niederschlagsabflüsse von Verkehrsflächen stark vereinfacht entsprechend
+-- den folgenden Vorgaben erfolgen:", L782 "I spezifische Bodenfilteroberfläche $A_{\mathrm{F}}=100 \mathrm{~m}^{2} / \mathrm{ha}$ angeschlossener
+-- befestigte Fläche ( $A_{\mathrm{E}, \mathrm{b}, \mathrm{a}}$ );", L783 (h_RR ≥ 0,5 m — already REQ-16). Needs C-1 + C-5.
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-29', 'Vereinfachte Bemessung Straßenabflüsse: A_F ≥ 100 m²/ha A_E,b,a',
+--        'IF system_type == ''strasse'' AND spezifische_ziele_formuliert == False THEN A_F >= A_F_strasse', '§6.2.2.2', 'block',
+--        'Plan 3 (a178-G-4): §6.2.2.2 — ohne spezifische Behandlungsziele gilt A_F = 100 m²/ha angeschlossener befestigter Fläche.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-A-178' AND w.code = 'A178-10'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-29');
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-29' AND description LIKE 'Plan 3 (a178-G-4)%';
+-- Note: "kann … vereinfacht" — the simplification is optional; whether the 100 m²/ha then binds as a minimum (≥) or an equality
+-- is the owner's reading (the sentence prints "=", L782).
+
+-- =====================================================================================================================
+-- a178-G-5 · A178-13 · new gates on the register outputs: frachtpfade_unzulaessig == 0 (block) and 4 <= b_F_calc <= b_krit_tab (Gl. 9)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L879 (Nachweis "in der betreffenden Anlagenkonfiguration (GL. 5 bis GL. 7)"); L819 / L826 (which paths belong to
+-- which configuration); L884 (Gl. 9). b_krit_tab lives on -07 (needs a consumer edit, or the literal 7 as REQ-19).
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-30', 'Abflusspfade passen zur Anlagenkonfiguration (Beckentyp / RRL)', 'frachtpfade_unzulaessig == 0', '§6.2.2.3', 'block',
+--        'Plan 3 (a178-G-5): Filterbeckenüberlauf nur bei Durchlauffilterbecken (Gl. 6), RRL-Drossel nur mit Regenrückhaltelamelle (Gl. 7).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-A-178' AND w.code = 'A178-13'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-30');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-19a', 'Gl. 9 auf b_F aus den Abflusspfaden', '4 <= b_F_calc AND b_F_calc <= 7', '§6.2.2.3 Gl. (9)', 'warn',
+--        'Plan 3 (a178-G-5): 4 kg/(m²·a) ≤ b_F ≤ b_krit = 7 kg/(m²·a) auf b_F_calc; warn neben REQ-19 bis a178-R-2 ratifiziert ist.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-A-178' AND w.code = 'A178-13'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-19a');
+-- Rollback: DELETE FROM compliance_requirements WHERE code IN ('REQ-30', 'REQ-19a') AND description LIKE 'Plan 3 (a178-G-5)%';
+-- Caveat: b_F_calc / frachtpfade_unzulaessig are engine outputs on -13 — frachtpfade_unzulaessig is register-fed (materialised on
+-- save), b_F_calc scalar-only (evaluated on the form / report; a178-I-2).
+
+-- =====================================================================================================================
+-- a178-G-6 · A178-13 / A178-07 · Stauraumkanal mit unten liegender Entlastung: the e_0 > 55 % exception is not permitted
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L671 "Bestehende Entlastungsbauwerke können in der Regel als Vorstufe genutzt werden, wenn sie eine Entlastungsrate von
+-- $e_{0} \leq 55 \%$ einhalten und regelgerecht betrieben werden. In Einzelfällen kann im Bestand eine höhere Entlastungsrate
+-- zugelassen werden. Für Stauraumkanäle mit unten liegender Entlastung ist diese Ausnahme nicht zulässig, weil bei diesen Anlagen mit
+-- einem erhöhten Feststoffaustrag zu rechnen ist." Prod: REQ-09 (e_0 ≤ 55, on -12, pending — X-1) and e_0's validation text
+-- "<= 55 (Bestand: höher zulässig)" carry the exception without the Stauraumkanal clause. Needs e_0 → A178-13 (or vorstufe_typ → -07).
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-31', 'Stauraumkanal mit unten liegender Entlastung: e_0 ≤ 55 % ohne Ausnahme',
+--        'IF vorstufe_typ == ''stauraum_unten'' THEN e_0 <= 55', '§6.2.1.1', 'block',
+--        'Plan 3 (a178-G-6): §6.2.1.1 — die Bestandsausnahme (höhere Entlastungsrate) ist für Stauraumkanäle mit unten liegender Entlastung nicht zulässig.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-A-178' AND w.code = 'A178-13'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-31');
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-31' AND description LIKE 'Plan 3 (a178-G-6)%';
+
+-- =====================================================================================================================
+-- a178-G-7 · A178-05 / A178-04 · REQ-05 (warn, EMPTY condition) → the Fremdwasser attestation as a conditional gate
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L451 "Wird ein Fremdwasserzufluss festgestellt, sind Sanierungsvorschläge zu erarbeiten, die einen verfahrensgerechten Betrieb
+-- des Retentionsbodenfilters ermöglichen. Vor der Planung des Retentionsbodenfilters muss geprüft werden, ob die Maßnahmen erfolgreich
+-- waren. Kann ein relevanter Fremdwasserzufluss zu einem Retentionsbodenfilterbecken nicht beseitigt werden, müssen entweder
+-- betriebliche Maßnahmen vorgesehen werden (z. B. alternierende Beschickung hydraulisch getrennter Filterbeete) oder der Bau der Anlage
+-- muss unterbleiben." Capture: REQ-05 (528583bb-…, A178-04, warn) has an EMPTY condition (`manual` at runtime); 7 more rows
+-- (REQ-01 / -03 / -04 / -06 / -08 / -17 / -28) are empty too (a178-I-3). The created boolean lives on A178-05 beside its driver.
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-05a', 'Fremdwasser: Sanierung / betriebliche Maßnahmen vor der Planung geprüft',
+--        'IF fremdwasser_relevant == True THEN fremdwasser_massnahmen_geprueft == True', '§5.2.2', 'warn',
+--        'Plan 3 (a178-G-6): §5.2.2 — bei festgestelltem Fremdwasserzufluss Sanierungsvorschläge erarbeiten und den Erfolg vor der Planung prüfen.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-A-178' AND w.code = 'A178-05'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-05a');
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-05a' AND description LIKE 'Plan 3 (a178-G-6)%';
+-- Severity: warn (as REQ-05 today; "muss" in the sentence would support block — the owner's call, severity is never changed by this task).
+
+-- =====================================================================================================================
+-- a178-D-4 … D-11 · register columns / twins ↔ existing typed inputs (amendment K pairs; one block each on the sheet, SQL here)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- D-4  frachtpfade.vq_m3 ↔ A178-13 VQ_Dr_RBF (consumed by -15, Gl. 12) / VQ_FU / VQ_Dr_RRL (self-consumed): after R-2 the two
+--      self-consumed scalars may be retired; VQ_Dr_RBF stays (Gl. 12 / 13 read it) or Gl. 12 / 13 read a `sum_rows(frachtpfade,
+--      if(pfad == 'dr_rbf', vq_m3, 0))` twin (new equation on -13).
+--      UPDATE fields … SET active = false … WHERE w.code = 'A178-13' AND f.symbol IN ('VQ_FU','VQ_Dr_RRL') AND f.active;  (after R-2 only)
+-- D-5  frachtpfade.eta_tab1 (Tab. 1, locked) ↔ A178-13 eta_RR / eta_RRL (typed, self-consumed) and A178-15 eta_F (typed, consumed by -13):
+--      after R-2 retire eta_RR / eta_RRL; eta_F follows R-3.
+--      UPDATE fields … SET active = false … WHERE w.code = 'A178-13' AND f.symbol IN ('eta_RR','eta_RRL') AND f.active;  (after R-2 only)
+-- D-6  C_RBF_zu_calc (-13) ↔ A178-12 C_RBF_zu (typed, consumed by -15, Gl. 13 input): on ratification a new equation on -12
+--      'C_RBF_zu = C_RBFA_zu * (1 - eta_VS)' needs eta_VS → A178-12 (consumer edit) — or Gl. 13 reads C_RBF_zu_calc after C-5.
+-- D-7  frachtpfade.b_ab / B_RBF_ab_calc (-13) ↔ A178-14 B_Dr_RBF / B_FU / B_RRL (typed, self-consumed) and B_RBF_ab (typed, consumed by -15):
+--      after R-4 retire the three per-path inputs; B_RBF_ab reads B_RBF_ab_calc (new equation on -14 after C-5).
+-- D-8  V_RBF_calc (-11) ↔ A178-11 V_RBF (typed, required): on ratification 'V_RBF = V_RBF_calc' (new equation on -11, input_symbols
+--      {V_RBF_calc}) or retire V_RBF and re-point A178-18's V_RBF_iterated copy (D-9).
+-- D-9  iterationen (-18) ↔ A_F_iterated / V_RBF_iterated / b_F_iterated (typed, required), iteration_count (typed, required,
+--      inferred_from_worksheet), convergence_achieved (boolean, REQ-24): on ratification retire the four typed values
+--      (active = false) and rewrite REQ-24 (742c8b7a-…, md5 8f691dbb…) to 'iterationen_konvergiert >= 1' (archive pattern) —
+--      or keep the boolean as the engineer's declaration and add REQ-24a 'IF convergence_achieved == True THEN iterationen_konvergiert >= 1' (warn).
+-- D-10 b_krit_tab (-07) ↔ b_krit (typed, required, consumed by -10 / -16; Gl. 1 / 9 input): on ratification 'b_krit = b_krit_tab'
+--      (new equation on -07) — the field becomes engine-owned at the printed 7 kg/(m²·a).
+-- D-11 q_Dr_RBF_vorgabe (-07) ↔ q_Dr_RBF (typed, required, consumed by -11; REQ-14 ≤ 0,05): NO retirement — the standard requires
+--      the Drosselorgan's Kennlinie for the Nachweis (L767); the twin is the Vorbemessung default only.
+
+-- =====================================================================================================================
+-- a178-X-5 · prod hygiene · self-consumer entries in consumer_worksheets (11 fields; the guard ignores them since Task 12b)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: A178-12 VQ_RBFA_zu; A178-13 eta_RR, eta_RRL, eta_VS, VQ_Dr_RBF, VQ_Dr_RRL, VQ_FU; A178-14 B_Dr_RBF, B_FU, B_RRL, B_VS
+-- list their OWN worksheet (loadInheritedFields never inherits from the owner — a no-op at runtime).
+-- UPDATE fields f SET consumer_worksheets = NULLIF(array_remove(f.consumer_worksheets, w.code), ARRAY[]::text[])
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-178' AND f.active AND w.code = ANY(f.consumer_worksheets);
+-- Rollback: re-add w.code to the 11 captured lists (the capture is the source: a178.prior.json consumer_worksheets per key).

@@ -3466,6 +3466,401 @@ Report: `reports/plan-3-din276.md` · STAGED SQL: `scripts/verification/din276-S
 - **Table sizes:** TABLE1 326 rows = the 326 prod `kg_*` fields (1:1, pinned); TABLE4 259 rows = 72 KG rows + 187 printed items; TABLE3 78 rows; TABLE2 8 rows; 671/671 quotes verbatim.
 - **The English transcript** is a translation — designations / notes are seeded as printed in English (the German field labels of prod are not in the transcript); the owner's ruling on md-verified English cells vs the German DIN text (SR-3) is the same as for every translated transcript in Plan 3.
 
+## Task 14 — DWA-A-178 (a178)
+
+Report: `reports/plan-3-a178.md` · STAGED SQL: `scripts/verification/a178-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-178\DWA-A_178.md` (lines cited; the LaTeX is quoted as printed) · prod capture `src/lib/eval/field-configs/a178.prior.json` (2026-09-18, read-only; 118 fields / 190 sections / 13 equations / 28 gates). Nothing below is applied. Class letters per the skeleton; O = override-policy, J = judgment (encoding choice the text leaves open), I = interface-gap, X = cross-standard / prod observation.
+
+### a178-C-1 · DWA-A-178 · A178-02 / A178-07 · `system_type` (and `rrl_vorhanden`) reach the worksheets whose rules and gates read them
+- Class: consumer-edit
+- Chosen now (fail-safe): the emitted rules on A178-07 (`v_spez_grobstoff`, `v_spez_grobstoff_min` ← `system_type IN {'trenn', 'strasse'}`), A178-10 (`A_F_strasse` ← strasse), A178-11 (`V_RRL` ← `rrl_vorhanden == true`) and A178-17 (`t_RR_E_n1` ← misch) are `pending` = visible and inert (capture: `system_type` is consumed by A178-04 / -06 / -09 only; `rrl_vorhanden` by -13 / -17). The prod gates REQ-09 / -10 / -12 (A178-12) and REQ-21 (A178-16) read `system_type` on worksheets that never inherit it (a178-X-1) — the same edit lights them up.
+- Evidence (verbatim, transcript line): "l Mischsystem $h_{\mathrm{FK}} \geq 0,75 \mathrm{~m}$," (L590); "1 Trennsystem und Straßenentwässerung $h_{\mathrm{FK}} \geq 0,50 \mathrm{~m}$." (L591); "I $t_{\mathrm{RR}, \mathrm{E}, \mathrm{n}=1}$ (h) mittlere jährliche Einstaudauer des Retentionsraums (Mischsystem)" (L806); "Das nutzbare Volumen einer gegebenenfalls erforderlichen Regenrückhaltelamelle ( $V_{\text {RLL }}$ ) ist zusätzlich zu berechnen." (L777)
+- Proposed SQL / config: STAGED block C-1 — `system_type.consumer_worksheets` += A178-07 / -10 / -11 / -12 / -13 / -16 / -17; `rrl_vorhanden` += A178-11 / -14 (guarded on the captured lists; rollback restores them).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-C-2 · DWA-A-178 · A178-07 · `e_0` ← `system_type == 'misch'` (refused: consumed by A178-09)
+- Class: consumer-edit
+- Chosen now (fail-safe): no rule on the scalar; the Misch-only e_0 lives per Teilfläche in the register (column hidden for trenn / strasse).
+- Evidence (verbatim, transcript line): "\hline $e_{0}$ & (\%) & mittlere Jahresentlastungsrate der Vorstufe \\" (L739); "$e_{0}$ & \% & mittlere Jahresentlastungsrate der Vorstufe (Mischsystem)" (L347)
+- Proposed SQL / config: STAGED block C-2 — emit the rule once a178-R-1 retires Gl. 3 (the only consumer of e_0).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-C-3 · DWA-A-178 · A178-13 / A178-14 · `VQ_FU`, `eta_RR` ← Durchlauf; `VQ_Dr_RRL`, `eta_RRL`, `B_RRL` ← RRL (refused: transitive producers)
+- Class: consumer-edit
+- Chosen now (fail-safe): no rule; the path-dependence lives in the `frachtpfade` register (rows exist only for the plant's paths; `zulaessig` flags a path outside the configuration). Emitter chains: `VQ_FU → Gl.6 b_F (consumed by A178-16)`, `eta_RRL → Gl.7 b_F (consumed by A178-16)`, `B_RRL → Gl.11 B_RBFA_ab (consumed by A178-16)`.
+- Evidence (verbatim, transcript line): "Stoffliche Bodenfilteroberflächenbelastung bei Durchlauffilterbecken:" (L819); "Stoffliche Bodenfilteroberflächenbelastung bei Durchlauffilterbecken mit Regenrückhaltelamelle:" (L826); "Wenn es die Höhenverhältnisse zulassen, kann aus Kostengründen und zur Unterhaltungsoptimierung eine Regenrückhaltelamelle (Rückhalteraum) über dem Retentionsraum des Retentionsbodenfilterbeckens angeordnet werden." (L663)
+- Proposed SQL / config: STAGED block C-3 — the five rules after a178-R-2 / R-4 (and C-1 for B_RRL).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-C-4 · DWA-A-178 · A178-12 … A178-16 · the Nachweis waiver for Straßenabflüsse without specific goals (section rules)
+- Class: consumer-edit (+ the owner's acceptance of hiding producer sections)
+- Chosen now (fail-safe): no section rule (every field-bearing section holds a producer another worksheet consumes; the drivers are not inherited there; field-less sections would be inert). The created `spezifische_ziele_formuliert` (A178-02, visible for strasse) records the fact.
+- Evidence (verbatim, transcript line): "Bei Retentionsbodenfilterbecken zur reinen Behandlung von Straßenoberflächenwasser, die entsprechend der oben getroffenen Festlegungen bemessen sind und für die keine besonderen Reinigungsziele formuliert wurden, kann auf das Nachweisverfahren verzichtet werden." (L794); "Derart bemessene Retentionsbodenfilterbecken können sicher betrieben werden und reinigen mit hohem Wirkungsgrad mehr als $90 \%$ des Jahresabflusses. Zusätzliche Nachweise des Retentionsbodenfilterbeckens sind nicht erforderlich." (L784)
+- Proposed SQL / config: STAGED block C-4 — prerequisites C-1 + C-5 and a ruling on hiding producer sections (or a worksheet-level "nicht zutreffend" state, Phase 6).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-C-5 · DWA-A-178 · created outputs → their readers (A_E_b_a_calc, B_RBF_zu_calc, b_F_calc, C_RBF_zu_calc, B_RBF_ab_calc, spezifische_ziele_formuliert, h_FK_min_tab)
+- Class: consumer-edit
+- Chosen now (fail-safe): the twins are visible on their own worksheets only (a `create` never sets consumers).
+- Evidence (verbatim, transcript line): "$A_{\mathrm{E}, \mathrm{b}, \mathrm{a}}$ & (ha) & Summe aller befestigten, angeschlossenen Flächen im Einzugsgebiet der Retentionsbodenfilteranlage" (L915); "Der Nachweis ist erfüllt, wenn in der betreffenden Anlagenkonfiguration (GL. 5 bis GL. 7) die nachgewiesene Bodenfilteroberflächenbelastung $b_{\mathrm{F}}$ die zulässige Bodenfilteroberflächenbelastung $b_{\text {krit }}$ gemäß 6.2.2.1 einhält:" (L879)
+- Proposed SQL / config: STAGED block C-5 (seven UPDATEs, guarded on empty lists; note the scalar-only twins are not materialised — a178-I-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-R-1 · DWA-A-178 · A178-09 · Gl. 2 / Gl. 3 (two rows writing `B_RBF_zu` with the phantom `SUM_over_i`) → one equation over the Teilflächen register
+- Class: equation-replacement
+- Chosen now (fail-safe): both prod rows untouched; `B_RBF_zu_calc` (A178-04-D2, register-fed, switched on `system_type`) is the twin.
+- Evidence (verbatim, transcript line): "B_{\mathrm{RBF}, \mathrm{zu}}=\sum\left(A_{\mathrm{E}, \mathrm{~b}, \mathrm{a}, \mathrm{i}} \cdot b_{\mathrm{R}, \mathrm{a}}\right) \tag{2}" (L723); "B_{\mathrm{RBF}, \mathrm{zu}}=\sum\left(A_{\mathrm{E}, \mathrm{~b}, \mathrm{a}, \mathrm{i}} \cdot b_{\mathrm{R}, \mathrm{a}} \cdot e_{0}\right) \tag{3}" (L730); "Die Summe aller Einzelfrachten aus dem angeschlossenen Einzugsgebiet ist dann mit der Entlastungsrate der Vorstufe zu multiplizieren (GI. 3)." (L718)
+- Proposed SQL / config: STAGED block R-1 — Gl. 2 (015e1c4b-…, md5 c8930616…) rewritten to `B_RBF_zu = B_RBF_zu_calc`, Gl. 3 (c884fe4d-…, md5 55ab9aa3…) archived + deleted; archive-pattern rollback; needs C-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-R-2 · DWA-A-178 · A178-13 · Gl. 5 / 6 / 7 (three rows writing `b_F`, first wins) → `b_F_calc` (one row-Σ over `frachtpfade`)
+- Class: equation-replacement
+- Chosen now (fail-safe): the three rows untouched; `b_F_calc` (A178-13-D1) reproduces each (pinned 4,75 / 5,25 / 5,55 kg/(m²·a) on one input set) and reads the Tab.-1 η per path (locked).
+- Evidence (verbatim, transcript line): "b_{F}=\frac{\left(V Q_{D r, R B F} \cdot \eta_{F}\right) \cdot C_{R B F A, z u} \cdot\left(1-\eta_{V S}\right)}{A_{F} \cdot 1.000} \tag{5}" (L815); "b_{F}=\frac{\left(V Q_{D r, R B F} \cdot \eta_{F}+V Q_{F U} \cdot \eta_{R R}\right) \cdot C_{R B F A, z u} \cdot\left(1-\eta_{V S}\right)}{A_{F} \cdot 1.000} \tag{6}" (L822); "b_{F}=\frac{\left(V Q_{D r, R B F} \cdot \eta_{F}+V Q_{F U} \cdot \eta_{R R}+V Q_{D r, R R L} \cdot \eta_{R R L}\right) \cdot C_{R B F A, z u} \cdot\left(1-\eta_{V S}\right)}{A_{F} \cdot 1.000} \tag{7}" (L829)
+- Proposed SQL / config: STAGED block R-2 — option (a) Gl. 5 (b81485b4-…) rewritten to the register form, Gl. 6 / 7 archived + deleted; option (b) `b_F = b_F_calc`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-R-3 · DWA-A-178 · A178-15 / A178-13 · `eta_F` is both the Tab.-1 input of Gl. 5–7 and the Gl. 13 output (circular)
+- Class: equation-replacement (rename of the Gl. 13 output)
+- Chosen now (fail-safe): Gl. 13 untouched; the register reads η_F = 0,95 from Tab. 1 by lookup, never the typed / computed `eta_F`.
+- Evidence (verbatim, transcript line): "\hline AFS63 & $0^{11}$ & 0,95 & 0,50 & 0,60 \\" (L870); "\eta_{F}=\frac{\left(C_{R B F, z u} \cdot V Q_{D R, R B F, z u}\right)-\left(B_{R B F, a b} \cdot 1.000\right)}{C_{R B F, z u} \cdot V Q_{R B F, z u}} \tag{13}" (L953)
+- Proposed SQL / config: STAGED block R-3 — Gl. 13 (18a6351e-…, md5 dc5c17ee…) outputs a new field `eta_F_nachweis` on A178-15; `eta_F` stays the design input.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-R-4 · DWA-A-178 · A178-14 / A178-13 · Gl. 11 `B_RBFA_ab = B_VS + B_Dr_RBF + B_FU + B_RRL` → `B_VS + B_RBF_ab_calc`
+- Class: equation-replacement
+- Chosen now (fail-safe): Gl. 11 untouched; `B_RBF_ab_calc` (Σ of the per-path loads) lives on -13 where the paths are; `B_VS` (-14) is not inherited on -13, so the brief's `B_RBFA_ab_calc = Σ + B_VS` is not emitted.
+- Evidence (verbatim, transcript line): "B_{\mathrm{RBFA}, \mathrm{ab}}=B_{\mathrm{VS}}+B_{\mathrm{Dr}, \mathrm{RBF}}+B_{\mathrm{FU}}+B_{\mathrm{RRL}} \tag{11}" (L904); "mittlerer jährlicher Frachtaustrag aus dem Retentionsbodenfilterbecken, \\ Summe aus Restfracht filtriert, Entlastung über den Filterbeckenüberlauf \\ und, wenn vorhanden, aus Regenrückhaltelamelle" (L968–L970)
+- Proposed SQL / config: STAGED block R-4 — Gl. 11 (ba57b49a-…, md5 142c6b17…) reads `B_RBF_ab_calc` after C-5; caveat: scalar-only twin not materialised (I-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-E-1 · DWA-A-178 · A178-07 · `h_FK_required` ← S6_1_4_5 by `system_type` (widget re-bind of an existing input — STAGED; twin on A178-02 emitted)
+- Class: equation-replacement (widget re-bind)
+- Chosen now (fail-safe): `h_FK_required` keeps its number input; the §6.1.4.5 value is the created twin `h_FK_min_tab` (lookup_fill, role limit) beside `system_type` on A178-02 (the key is not consumed on -07 — a262e trap 1 — and amendment J).
+- Evidence (verbatim, transcript line): "Die erforderliche Höhe des Filterkörpers beträgt im konsolidierten Zustand:" (L589); L590 / L591 as under C-1
+- Proposed SQL / config: STAGED block E-1 — `widget IS NULL`-guarded UPDATE with the row archived into `fields_archive_a178`, the twin deactivated; rollback restores the three Plan-1 columns by id; needs C-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-E-2 · DWA-A-178 · A178-13 · `eta_VS` ← TABELLE1_VS by `vorstufe_typ` (widget re-bind of a required input — STAGED; twin `eta_VS_tab1` emitted)
+- Class: equation-replacement (widget re-bind)
+- Chosen now (fail-safe): `eta_VS` (required, self-consumed only, input of Gl. 5–7) keeps its input — with `vorstufe_typ` unset a lookup_fill renders read-only (amendment J); the fill is the created twin beside the created select.
+- Evidence (verbatim, transcript line): "1) Bei vorhandenen RKB $\left(q_{\mathrm{A}} \leq 10 \mathrm{~m} / \mathrm{h}\right)$ oder RÜB-DB kann für AFS63 $\eta_{\mathrm{VS}}=0,2$ angesetzt werden." (L873)
+- Proposed SQL / config: STAGED block E-2 — guarded UPDATE + archive rollback, twin deactivated on ratification.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-G-1 · DWA-A-178 · A178-17 · REQ-22 `n_RBF >= 10` (block, unguarded) + `n_RBF` ← Misch (refused by the gate-aware guard)
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-22 unchanged; `n_RBF` stays visible for every system (the brief's rule is not emitted).
+- Evidence (verbatim, transcript line): "Im Mischsystem muss die Einstaudauer des Retentionsraums für $n=1 \leq 48 \mathrm{~h}$ sein. Die Beschickungshäufigkeit muss im langjährigen Mittel $\geq 10$ a sein." (L979); "Es ist sicherzustellen, dass im langjährigen Mittel $n \geq 10$ Entlastungen pro Jahr gegeben sind, um einer Unterlast des Filters zu begegnen." (L673, §6.2.1.1 Mischsystem)
+- Proposed SQL / config: STAGED block G-1 — REQ-22 (33ad1e02-…, md5 134c757d…) → `IF system_type == 'misch' THEN n_RBF >= 10` + the field rule; archive rollback; needs C-1. Whether the second L979 sentence is Misch-only is the owner's reading (a178-J-5).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-G-2 · DWA-A-178 · A178-13 · REQ-19 `4 <= b_F AND b_F <= 7` hard-codes 7 instead of `b_krit`
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-19 unchanged (the literal IS the printed value); `b_krit_tab` twin (= 7) on A178-07 beside the typed `b_krit`.
+- Evidence (verbatim, transcript line): "4 \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right) \leq b_{F} \leq b_{\text {krit }}=7 \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right) \tag{9}" (L884); "… wird eine maximal zulässige AFS63-Filterflächenbelastung von $b_{\text {krit }}=7 \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right)$ festgesetzt." (L689)
+- Proposed SQL / config: STAGED block G-2 — `b_krit` → A178-13 (consumer edit) and REQ-19 (444bc2df-…, md5 d59099fe…) → `4 <= b_F AND b_F <= b_krit`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-G-3 · DWA-A-178 · A178-02 / A178-12 · REQ-11 `attest_a178_12_req_11 == True` (block, unconditional) vs the WSG-conditional Leichtflüssigkeitsfang
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-11 unchanged (blocks every project on a boolean); the created `leichtfluessigkeitsfang_vorgesehen` (A178-02) is visible only for strasse + Wasserschutzgebiet and has no gate.
+- Evidence (verbatim, transcript line): "Bei der Straßenentwässerung gelten außerhalb von Wasserschutzgebieten die Vorgaben für das Trennsystem. Innerhalb von Wasserschutzgebieten ist zum Schutz gegen Havarien ein zusätzlicher Auffangraum für Leichtflüssigkeiten gemäß RiStWag vorzusehen." (L683)
+- Proposed SQL / config: STAGED block G-3 — new REQ-11a on A178-02 `IF system_type == 'strasse' AND wasserschutzgebiet != 'zone_none' THEN leichtfluessigkeitsfang_vorgesehen == True` (block), REQ-11 (c991cba7-…) archived + deleted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-G-4 · DWA-A-178 · A178-10 · new gate `IF system_type == 'strasse' AND spezifische_ziele_formuliert == False THEN A_F >= A_F_strasse`
+- Class: gate-guard (new gate)
+- Chosen now (fail-safe): no gate; `A_F_strasse` (A178-10-D1) shows the 100 m²/ha figure beside `A_F`.
+- Evidence (verbatim, transcript line): "Wurden durch die Aufsichtsbehörden keine spezifischen Behandlungsziele formuliert, kann die Bemessung eines Retentionsbodenfilterbeckens zur reinen Behandlung der Niederschlagsabflüsse von Verkehrsflächen stark vereinfacht entsprechend den folgenden Vorgaben erfolgen:" (L781); "I spezifische Bodenfilteroberfläche $A_{\mathrm{F}}=100 \mathrm{~m}^{2} / \mathrm{ha}$ angeschlossener befestigte Fläche ( $A_{\mathrm{E}, \mathrm{b}, \mathrm{a}}$ );" (L782)
+- Proposed SQL / config: STAGED block G-4 (REQ-29, block; needs C-1 + C-5); "=" vs "≥" is the owner's reading.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-G-5 · DWA-A-178 · A178-13 · new gates on the register outputs: `frachtpfade_unzulaessig == 0` and Gl. 9 on `b_F_calc`
+- Class: gate-guard (new gates)
+- Chosen now (fail-safe): no gate; the `zulaessig` badge and the count are visible.
+- Evidence (verbatim, transcript line): L879 (as under C-5); L819 / L826 (as under C-3); L884 (as under G-2)
+- Proposed SQL / config: STAGED block G-5 (REQ-30 block, REQ-19a warn).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-G-6 · DWA-A-178 · A178-13 / A178-07 · Stauraumkanal mit unten liegender Entlastung — the e_0 > 55 % exception is not permitted
+- Class: gate-guard (new gate)
+- Chosen now (fail-safe): no gate; `vorstufe_typ` carries the token `stauraum_unten` and its description states the rule.
+- Evidence (verbatim, transcript line): "In Einzelfällen kann im Bestand eine höhere Entlastungsrate zugelassen werden. Für Stauraumkanäle mit unten liegender Entlastung ist diese Ausnahme nicht zulässig, weil bei diesen Anlagen mit einem erhöhten Feststoffaustrag zu rechnen ist." (L671)
+- Proposed SQL / config: STAGED block G-6 (REQ-31 `IF vorstufe_typ == 'stauraum_unten' THEN e_0 <= 55`, block; needs e_0 → A178-13).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-G-7 · DWA-A-178 · A178-05 / A178-04 · REQ-05 (warn, EMPTY condition) → the Fremdwasser attestation as a conditional gate
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-05 unchanged (`manual`); the created `fremdwasser_massnahmen_geprueft` (A178-05, visible when `fremdwasser_relevant == true`) records the check without a gate.
+- Evidence (verbatim, transcript line): "Wird ein Fremdwasserzufluss festgestellt, sind Sanierungsvorschläge zu erarbeiten, die einen verfahrensgerechten Betrieb des Retentionsbodenfilters ermöglichen. Vor der Planung des Retentionsbodenfilters muss geprüft werden, ob die Maßnahmen erfolgreich waren." (L451)
+- Proposed SQL / config: STAGED block G-7 (REQ-05a on A178-05, warn — "muss" would support block; severity is the owner's).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-1 · DWA-A-178 · A178-04 · `A_E_b_a_i` (single scalar) / `A_E_b_a` (typed Σ) ↔ `teilflaechen_178` / `A_E_b_a_calc`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): both inputs stay; the register carries the N instances, `A_E_b_a_calc` the Σ twin.
+- Evidence (verbatim, transcript line): "\hline $A_{\mathrm{E}, \mathrm{b}, \mathrm{a}, \mathrm{i}}$ & (ha) & befestigte, angeschlossene Teilflächen im Einzugsgebiet der Retentionsbodenfilteranlage \\" (L737); L915 (as under C-5)
+- Proposed SQL / config: STAGED block D-1 — retire `A_E_b_a_i` after R-1; `A_E_b_a` engine-owned (`A_E_b_a = A_E_b_a_calc`) or re-pointed.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-2 · DWA-A-178 · A178-06 · `b_R_a` / `b_R_a_default` ↔ `teilflaechen_178.b_r_a_i`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the catchment scalar stays (Gl. 2 / 3 read it); the register column is typed per row with the Rechenwert 530 shown and a badge when it differs.
+- Evidence (verbatim, transcript line): "Die AFS63-Zulauffracht zum Retentionsbodenfilter kann über mittlere spezifische Jahresfrachtpotenziale ( $b_{\mathrm{R}, \mathrm{a}}$ ), bezogen auf $A_{\mathrm{E}, \mathrm{b}, \mathrm{a},}$ abgeschätzt werden. Als Rechenwert zur Vorbemessung der Bodenfilteroberfläche wird eine flächenspezifische Fracht von $b_{\mathrm{R}, \mathrm{a}}=530 \mathrm{~kg} /(\mathrm{ha} \cdot \mathrm{a})$ angesetzt." (L716)
+- Proposed SQL / config: STAGED block D-2 — retire `b_R_a_default` (a typed copy of the Rechenwert); `b_R_a` after R-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-3 · DWA-A-178 · A178-07 · `e_0` (one Entlastungsrate) ↔ `teilflaechen_178.e_0_i` (per Teilfläche)
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): both stay; the row column serves catchments with several Entlastungsbauwerke.
+- Evidence (verbatim, transcript line): L730 (Gl. 3, e_0 inside the Σ); L739 (as under C-2)
+- Proposed SQL / config: STAGED block D-3 — (a) read the scalar in the row (needs C-1: e_0 → A178-04) or (b) retire it after R-1; REQ-09 then reads a `max_rows` twin.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-4 · DWA-A-178 · A178-13 · `VQ_Dr_RBF` / `VQ_FU` / `VQ_Dr_RRL` ↔ `frachtpfade.vq_m3`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the three scalars stay (Gl. 5–7 / 12 / 13 read them); the register rows are the twins.
+- Evidence (verbatim, transcript line): "l $V Q_{\mathrm{Dr}, \mathrm{RBF}}\left(\mathrm{m}^{3} / \mathrm{a}\right)$ mittleres jährliches Abflussvolumen über das Drosselorgan des Retentionsbodenfiterbeckens" (L799); "I $V Q_{F \ddot{U}} \quad\left(\mathrm{~m}^{3} / \mathrm{a}\right) \quad$ mittleres jährliches Abflussvolumen über den Filterbeckenüberlauf" (L801); "I $V Q_{\mathrm{Dr}, \mathrm{RRL}}\left(\mathrm{m}^{3} / \mathrm{a}\right)$ mittleres jährliches Abflussvolumen des Drosselorgans einer Regenrückhaltelamelle" (L802)
+- Proposed SQL / config: STAGED block D-4 — retire `VQ_FU` / `VQ_Dr_RRL` after R-2; `VQ_Dr_RBF` stays for Gl. 12 / 13.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-5 · DWA-A-178 · A178-13 / A178-15 · `eta_RR` / `eta_RRL` / `eta_F` (typed Rechenwerte) ↔ `frachtpfade.eta_tab1` (Tab. 1, locked)
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the typed inputs stay; the register reads Tab. 1 by lookup.
+- Evidence (verbatim, transcript line): L870 (as under R-3)
+- Proposed SQL / config: STAGED block D-5 — retire `eta_RR` / `eta_RRL` after R-2; `eta_F` follows R-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-6 · DWA-A-178 · A178-12 / A178-13 · `C_RBF_zu` (typed, Gl. 13 input) ↔ `C_RBF_zu_calc`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the typed input stays on A178-12 (it cannot read `eta_VS` of -13); the twin lives on -13.
+- Evidence (verbatim, transcript line): "Wird die Wirksamkeit der Vorstufe für AFS63 mit Null angenommen, entspricht die Zulaufkonzentration zum Retentionsbodenfilterbecken $C_{\text {RBF,zu }}$ der nach GL. (8) ermittelten Zulaufkonzentration zur Retentionsbodenfilteranlage $C_{\text {RBF, zu }}$. Weist die Vorstufe einen nennenswerten Wirkungsgrad auf, muss eine entsprechende Abminderung erfolgen." (L975)
+- Proposed SQL / config: STAGED block D-6 — a new equation on -12 needs `eta_VS` → A178-12, or Gl. 13 reads `C_RBF_zu_calc` after C-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-7 · DWA-A-178 · A178-14 / A178-13 · `B_Dr_RBF` / `B_FU` / `B_RRL` / `B_RBF_ab` (typed) ↔ `frachtpfade.b_ab` / `B_RBF_ab_calc`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the typed loads stay (Gl. 11 / 13 read them); the per-path derivation is the twin.
+- Evidence (verbatim, transcript line): L968–L970 (as under R-4)
+- Proposed SQL / config: STAGED block D-7 — retire the three per-path inputs after R-4; `B_RBF_ab` reads the twin after C-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-8 · DWA-A-178 · A178-11 · `V_RBF` (typed, required) ↔ `V_RBF_calc` (= `V_RR` + 15 % · `V_FK`)
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the typed input stays; `V_RR` / `V_FK` are created inputs beside it.
+- Evidence (verbatim, transcript line): "Das nutzbare Retentionsvolumen des Retentionsbodenfilterbeckens ( $V_{\text {RBF }}$ ) ergibt sich aus dem Volumen des Retentionsraums und dem nutzbaren Porenvolumen des Filterkörpers. Das Porenvolumen wird pauschal mit $15 \%$ des Filterkörpervolumens angesetzt." (L775)
+- Proposed SQL / config: STAGED block D-8 — `V_RBF = V_RBF_calc` (new equation) or retire and re-point.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-9 · DWA-A-178 · A178-18 · `A_F_iterated` / `V_RBF_iterated` / `b_F_iterated` / `iteration_count` / `convergence_achieved` ↔ `iterationen`
+- Class: deactivation (amendment K pair) · gate-guard (REQ-24)
+- Chosen now (fail-safe): the typed values and REQ-24 (`convergence_achieved == True`) stay; the register keeps the history and derives count / last step / converged steps.
+- Evidence (verbatim, transcript line): "Entsprechen die Nachweisgrößen nicht den vorgegebenen Zielgrößen, erfolgt eine Iteration, bei der die Bodenfilteroberfläche $A_{\mathrm{F}}$ und/oder die Einstauhöhe $h_{\mathrm{RR}}$ so lange variiert werden, bis alle Vorgaben und Nachweise erfüllt sind." (L983)
+- Proposed SQL / config: STAGED block D-9 — retire the four typed values; REQ-24 (742c8b7a-…, md5 8f691dbb…) → `iterationen_konvergiert >= 1` (archive pattern) or an additional REQ-24a (warn).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-10 · DWA-A-178 · A178-07 · `b_krit` (typed, required; Gl. 1 / 9 input) ↔ `b_krit_tab` (= 7, locked)
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the typed input stays; the twin shows the printed 7 kg/(m²·a).
+- Evidence (verbatim, transcript line): L689 (as under G-2)
+- Proposed SQL / config: STAGED block D-10 — `b_krit = b_krit_tab` (new equation; the field becomes engine-owned).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-D-11 · DWA-A-178 · A178-07 · `q_Dr_RBF` (typed, REQ-14 ≤ 0,05) ↔ `q_Dr_RBF_vorgabe` (= 0,05, anhaltswert)
+- Class: deactivation (amendment K pair) — NO retirement proposed
+- Chosen now (fail-safe): both stay: the twin is the Vorbemessung default, the Nachweis needs the Drosselorgan's Kennlinie.
+- Evidence (verbatim, transcript line): "Für diese Berechnung kann eine konstante Abflussspende des Drosselorgans des Retentionsbodenfilterbeckens von $q_{\mathrm{Dr}, \mathrm{RBF}}=0,05 \mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)$ gemäß 6.1.4.10 angesetzt werden. Für die nachfolgende Nachweisrechnung muss die Kennlinie des geplanten Drosselorgans angesetzt werden." (L767)
+- Proposed SQL / config: none (record only).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-O-1 · DWA-A-178 · TABELLE1 · "Rechenwerte … zur Anwendung in Gl. (5) bis Gl. (7)" → `locked`
+- Class: override-policy
+- Chosen now (fail-safe): `locked` — "zur Anwendung in" read as "anzusetzen" (spec §7 row 1); "Rechenwert" itself is not in the wording table. Consequence: the `frachtpfade` register carries no η override column (the brief's `eta_override` is not built); the typed prod `eta_RR` / `eta_RRL` / `eta_F` remain the engineer's deviation path until D-5.
+- Evidence (verbatim, transcript line): "\caption{Tabelle 1: Rechenwerte der mittleren Frachtrückhaltegrade der einzelnen Komponenten der Retentionsbodenfilteranlage, bezogen auf AFS63, zur Anwendung in GI. (5) bis GL. (7)}" (L867)
+- Proposed SQL / config: alternative `anhaltswert` (`UPDATE regulation_tables SET override_policy = 'anhaltswert' WHERE standard_code = 'DWA-A-178' AND table_code = 'TABELLE1'`) + an audited `eta_abw` column in the register.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-O-2 · DWA-A-178 · S6_2_RECHENWERTE · b_R,a 530 "wird … angesetzt", Porenvolumen "wird pauschal … angesetzt", the Straße Vorgaben under "kann … stark vereinfacht" → `locked`
+- Class: override-policy
+- Chosen now (fail-safe): `locked` (the inventory's / brief's cue "kann b_R,a = 530 angesetzt werden" is NOT what L716 prints — R-5 reversal: the sentence reads "wird … angesetzt"); the values are displayed (derived columns / twins), never filled into an input, so the policy governs no widget today.
+- Evidence (verbatim, transcript line): L716 (as under D-2); L775 (as under D-8); "Wurden durch die Aufsichtsbehörden keine spezifischen Behandlungsziele formuliert, kann die Bemessung … stark vereinfacht entsprechend den folgenden Vorgaben erfolgen:" (L781)
+- Proposed SQL / config: alternative `kann` for the two Straße rows (the simplification itself is optional).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-O-3 · DWA-A-178 · S6_2_ANHALT · q_Dr,RBF "kann … angesetzt werden" (no printed alternative), Pflanzdichte "haben sich … bewährt", Frachtaufkommen "üblich … bis zu" → `anhaltswert`
+- Class: override-policy
+- Chosen now (fail-safe): `anhaltswert` (spec §7 row 2: "kann … angepasst werden" class; a `kann` policy needs a printed alternative). Note L639 prints the SAME 0,05 as a hard limit ("ist sicherzustellen … begrenzt") — seeded separately in S6_LIMITS (`q_dr_rbf_max`, locked).
+- Evidence (verbatim, transcript line): L767 (as under D-11); "Als Pflanzdichte haben sich 4 bis 8 Pflanzen je Quadratmeter bewährt." (L619); "Es ist sicherzustellen, dass bei Volleinstau des Retentionsraums die spezifische Drosselabflussspende auf $q_{\text {Dr,RBF }}=0,05 \mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)$ begrenzt ist." (L639)
+- Proposed SQL / config: none unless the owner reads L767 as `locked`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-O-4 · DWA-A-178 · TABELLE1_VS / `eta_VS_tab1` · the `kann` select offers 0 / 0,2 for every Vorstufe type
+- Class: override-policy (mechanism limit)
+- Chosen now (fail-safe): TABELLE1_VS fills 0,2 for `rkb_le10` / `rueb_db` (the footnote's permitted value — the reason to distinguish the type) and 0 for `stauraum_unten` / `sonstige`; the widget's `kann` alternatives come from the value column (`values: ['0', '0.2']`), so an engineer could pick 0,2 for a row whose base is 0 — the badge shows the row's Bedingung, `eta_VS` itself stays typed.
+- Evidence (verbatim, transcript line): L873 (as under E-2); "\hline AFS63 & $0^{11}$ & 0,95 & 0,50 & 0,60 \\" (L870)
+- Proposed SQL / config: either fill 0 for every row and let the engineer pick 0,2 via `kann` (no auto 0,2), or a per-row alternatives list (Plan-3 mechanism gap, [CODE]).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-U-1 · DWA-A-178 · TABELLE1 · the η_VS cell prints `$0^{11}$` (OCR of the footnote marker "0 ¹⁾")
+- Class: unreadable-cell
+- Chosen now (fail-safe): value 0 encoded (the digit is unambiguous; the superscript "11" is the marker "1)" rendered as an exponent); TABELLE1 stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline AFS63 & $0^{11}$ & 0,95 & 0,50 & 0,60 \\" (L870); "1) Bei vorhandenen RKB …" (L873)
+- Proposed SQL / config: owner confirms "0 ¹⁾" on the PDF page (SR-3) → `UPDATE regulation_tables SET verification_status = 'md_verified' WHERE standard_code = 'DWA-A-178' AND table_code = 'TABELLE1' AND verification_status = 'imported_unverified';`
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-U-2 · DWA-A-178 · captions / prose · "GI. (5) bis GL. (7)", "GI. (4)", "GL. (1)", "GL. (8)" — OCR of "Gl."
+- Class: unreadable-cell (cosmetic OCR)
+- Chosen now (fail-safe): quoted verbatim as printed (the verifier needs the transcript text); the labels / descriptions write "Gl.".
+- Evidence (verbatim, transcript line): L862 / L867 (captions); "Der Abfluss über die Drosseleinrichtung des Retentionsbodenfilterbeckens berechnet sich nach GI. (4)." (L745)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-U-3 · DWA-A-178 · Gl. 13 · the numerator prints `V Q_{D R, R B F, z u}` (no such symbol in §3.2)
+- Class: unreadable-cell
+- Chosen now (fail-safe): not encoded (Gl. 13 is prod's verified row with `VQ_Dr_RBF`); recorded.
+- Evidence (verbatim, transcript line): L953 (as under R-3); "\hline $V Q_{\text {Dr,RBF }}$ & $\mathrm{m}^{3} / \mathrm{a}$ & mittleres jährliches Abflussvolumen durch das Drosselorgan des Filterkörpers eines Retentionsbodenfilterbeckens \\" (L362)
+- Proposed SQL / config: none (PDF check whether the print reads VQ_Dr,RBF).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-U-4 · DWA-A-178 · L975 · "C_RBF,zu" printed twice where the second should be C_RBFA,zu (Gl. 8)
+- Class: unreadable-cell
+- Chosen now (fail-safe): the sentence is quoted as printed; `C_RBF_zu_calc = C_RBFA_zu * (1 - eta_VS)` follows the printed factor of Gl. 5–7.
+- Evidence (verbatim, transcript line): L975 (as under D-6)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-J-1 · DWA-A-178 · A178-13 · `vorstufe_typ` tokens / labels (rkb_le10 · rueb_db · stauraum_unten · sonstige)
+- Class: judgment (encoding choice)
+- Chosen now (fail-safe): four options — the two named in the footnote, the Stauraumkanal with lower discharge (L671, its own rule), and "sonstige" for every other Vorstufe (Grobstoffrückhalt, RÜB without DB, Stauraumkanal with upper discharge); labels composed from the §3.1 definitions (L303 RKB, L297 DB, L311 RÜB).
+- Evidence (verbatim, transcript line): L873; L671; "\hline Regenklärbecken & RKB & Regenbecken im Regenwasserkanal eines Trennsystems, das aus dem Regenwasser sedimentierbare Stoffe (Schlamm) und Schwimmstoffe (Fette, Öle) abtrennt \\" (L303)
+- Proposed SQL / config: none (rename via `enum_values` if the owner prefers other tokens).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-J-2 · DWA-A-178 · `teilflaechen_178` · b_R,a and e_0 as per-row columns
+- Class: judgment (encoding choice)
+- Chosen now (fail-safe): Gl. 2 / 3 print b_R,a and e_0 inside the Σ without an index i; prod carries one scalar each (A178-06 / -07) that A178-04 does not inherit → per-row columns, typed, the Rechenwert shown beside b_R,a.
+- Evidence (verbatim, transcript line): L723; L730; L716
+- Proposed SQL / config: see D-2 / D-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-J-3 · DWA-A-178 · TABELLE2 · `befund` tokens are this task's own
+- Class: judgment (encoding choice)
+- Chosen now (fail-safe): snake_case tokens derived from the printed Befund text (e.g. `ueppiger_wuchs`, `draenablauf_klar`); the printed cells are the values, `group_label` = Bereich.
+- Evidence (verbatim, transcript line): "\hline \multirow[t]{5}{*}{Schilf} & üppiger Wuchs auf der gesamten Filterfläche & hohe, gleichmäßige Filterbelastung \\" (L1085)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-J-4 · DWA-A-178 · `frachtpfade` · path tokens (dr_rbf · fue · dr_rrl) and no η override column
+- Class: judgment (encoding choice)
+- Chosen now (fail-safe): the three printed Abflussvolumina with an η (L799 / L801 / L802) are the rows; η from Tab. 1 by lookup (locked, O-1); the brief's `eta_override` / `eta_used` columns are not built (a plain number column would bypass `locked` without an audit).
+- Evidence (verbatim, transcript line): L799 / L801 / L802 (as under D-4)
+- Proposed SQL / config: with O-1 → anhaltswert, an audited override needs the register `override` block bound to a `lookup_key` column (mechanism: the toggle binds to the first lookup_key) — a TABELLE1 lookup_key `komponente` column instead of the `pfad` enum.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-J-5 · DWA-A-178 · L979 · "Die Beschickungshäufigkeit muss im langjährigen Mittel ≥ 10 a sein." — Misch-only or all systems?
+- Class: judgment (normative ambiguity)
+- Chosen now (fail-safe): `n_RBF` stays visible for every system and REQ-22 unguarded (see G-1); the seeded S6_LIMITS row `n_rbf_min` carries the sentence without a system key.
+- Evidence (verbatim, transcript line): L979 (as under G-1); prod `n_RBF.validation_rules` ">= 10 (Mischsystem)" and REQ-09 place it under Misch (capture)
+- Proposed SQL / config: G-1 if Misch-only.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-J-6 · DWA-A-178 · `teilflaechen_178.b_row` · e_0 in % → `/ 100` in Gl. 3
+- Class: judgment (unit)
+- Chosen now (fail-safe): Gl. 3 multiplies by e_0 with the unit "(%)" printed in the symbol table — the row divides by 100 so kg/a result (pinned: 2 ha · 530 · 40 % = 424 kg/a).
+- Evidence (verbatim, transcript line): L739; L730
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-F-1 · DWA-A-178 · A178-13-D2 · `C_RBF_zu_calc = C_RBFA_zu * (1 - eta_VS)` — the Abminderung is printed in words
+- Class: text-only-formula
+- Chosen now (fail-safe): encoded as the factor printed in Gl. 5–7; the typed `C_RBF_zu` stays (D-6).
+- Evidence (verbatim, transcript line): L975 (as under D-6); L815 (the factor `\cdot\left(1-\eta_{V S}\right)`)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-F-2 · DWA-A-178 · `frachtpfade.b_ab` / A178-13-D3 · per-path load `VQ · C_RBF,zu · (1 − η) / 1000` — printed in words only
+- Class: text-only-formula
+- Chosen now (fail-safe): encoded as the complement of the retained term of Gl. 5–7 (mass balance pinned: retained 5550 + passed 950 = inflow 6500 kg/a); the typed loads on A178-14 stay (D-7).
+- Evidence (verbatim, transcript line): L968–L970 (as under R-4)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-F-3 · DWA-A-178 · A178-11-D1 · `V_RBF_calc = V_RR + 15 % · V_FK` — words (Schritt 4)
+- Class: text-only-formula
+- Chosen now (fail-safe): encoded with created inputs `V_RR` / `V_FK`; the typed `V_RBF` stays (D-8).
+- Evidence (verbatim, transcript line): L775 (as under D-8)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-F-4 · DWA-A-178 · A178-10-D1 · `A_F_strasse = 100 m²/ha · A_E_b_a` — words (§6.2.2.2)
+- Class: text-only-formula
+- Chosen now (fail-safe): encoded as a visible twin; no gate (G-4).
+- Evidence (verbatim, transcript line): L782 (as under G-4)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-I-1 · DWA-A-178 · all tables · edition token `'2019-06'`
+- Class: interface-gap
+- Chosen now (fail-safe): the title page prints "Juni 2019" (L7 / L17); the imprint "© DWA, 1. Auflage, Stand: korrigierte Fassung Oktober 2019, Hennef 2019" (L42) = prod `standards.version` 'Juni 2019 (korrigierte Fassung Oktober 2019)' — token '2019-06'.
+- Evidence (verbatim, transcript line): "Juni 2019" (L7); "© DWA, 1. Auflage, Stand: korrigierte Fassung Oktober 2019, Hennef 2019" (L42)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-I-2 · DWA-A-178 · A178-07-D1 … D3, A178-10-D1, A178-11-D1, A178-13-D1 / D2 · scalar-only equations are not server-materialised
+- Class: interface-gap
+- Chosen now (fail-safe): expected (amendment D; register-scoped materialiser); the register-fed rows (-04 D1 … D3, -13 D3 / D4, -18 D1 … D5) materialise on save.
+- Evidence (verbatim, transcript line): n/a (mechanism)
+- Proposed SQL / config: none (engine-output materialisation workstream).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-I-3 · DWA-A-178 · prod · 19 worksheets / 118 fields / 13 equations / 28 gates; 8 gates with an EMPTY condition
+- Class: interface-gap (prod facts)
+- Chosen now (fail-safe): recorded — REQ-01 / -03 (A178-01), REQ-04 / -05 / -06 / -08 (A178-04), REQ-17 (A178-09), REQ-28 (A178-18) are `manual` at runtime (never a refusal, round-2 ruling); the harness proof of A-178 is "14 of 19 UNPROVEN" per the repo doctrine (untouched by this task — the harness re-ran green on prod's rows).
+- Evidence (verbatim, transcript line): n/a (capture 2026-09-18)
+- Proposed SQL / config: G-7 for REQ-05; the other seven need conditions the standard prints only as prose.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-X-1 · DWA-A-178 · A178-12 / A178-16 · REQ-09 / -10 / -12 / -21 read symbols their worksheet neither owns nor inherits
+- Class: cross-standard (prod observation)
+- Chosen now (fail-safe): untouched; the gates are `pending` forever in prod (e_0 / n_RBF / v_spez_grobstoff / h_FK_required / system_type are not on A178-12; t_RR_E_n1 / system_type not on A178-16).
+- Evidence (verbatim, transcript line): n/a (capture)
+- Proposed SQL / config: C-1 (system_type) + the remaining consumer edits (e_0, n_RBF, v_spez_grobstoff, h_FK_required → A178-12; t_RR_E_n1 → A178-16), or move the gates to the owning worksheets (A178-07 / -17).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-X-2 · DWA-A-178 · A178-08 · the summary copies (`A_E_b_a_summary`, `h_N_a_m_summary`, `b_R_a_summary`, `e_0_summary`, `belastungs_kategorie_summary`) → inheritance
+- Class: cross-standard (Phase 6)
+- Chosen now (fail-safe): untouched.
+- Evidence (verbatim, transcript line): n/a (capture: five re-typed duplicates of A178-04 / -05 / -06 / -07 values)
+- Proposed SQL / config: retire and inherit the producers (consumer edits) — Phase 6.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-X-3 · DWA-A-178 · A178-16 / A178-19 · three verdict shapes for the same fact (`nachweis_b_F` enum, `b_F_im_bereich` boolean = Gl. 9, `nachweis_b_F_compliant` boolean; likewise Einleitfracht)
+- Class: cross-standard (Phase 6)
+- Chosen now (fail-safe): untouched.
+- Evidence (verbatim, transcript line): "4 \mathrm{~kg} … \tag{9}" (L884) — one printed criterion
+- Proposed SQL / config: one engine-owned verdict per criterion; the others retired.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-X-4 · DWA-A-178 · A178-02 · `einzugsgebiet_typ` duplicates `system_type` (identical enums, no consumers)
+- Class: cross-standard (Phase 6)
+- Chosen now (fail-safe): untouched; nothing keyed on it.
+- Evidence (verbatim, transcript line): n/a (capture)
+- Proposed SQL / config: retire `einzugsgebiet_typ`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-X-5 · DWA-A-178 · prod · 11 self-consumer entries in `consumer_worksheets`
+- Class: cross-standard (prod hygiene)
+- Chosen now (fail-safe): ignored by the guard (Task 12b); nothing emitted depends on them.
+- Evidence (verbatim, transcript line): n/a (capture: A178-12 VQ_RBFA_zu; A178-13 eta_RR, eta_RRL, eta_VS, VQ_Dr_RBF, VQ_Dr_RRL, VQ_FU; A178-14 B_Dr_RBF, B_FU, B_RRL, B_VS)
+- Proposed SQL / config: STAGED block X-5 (`array_remove`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (no signature needed)
+
+- **Brief ↔ transcript:** the brief's cue "kann b_R,a = 530 angesetzt werden" is not printed — L716 reads "wird … angesetzt" (O-2); the brief's `fremdwasser_*` fields (A178-05) do not exist in prod (the created `fremdwasser_massnahmen_geprueft` stands in); the brief's `leichtfluessigkeitsfang` fields do not exist (created on A178-02); the brief's `A178-09-D1` / `A178-14-D1` placements could never be register-fed (registers live on -04 / -13).
+- **No worked numeric example is printed** (Anhang A is a flowchart) — every equation pin is hand-derived from the printed forms.
+- **`system_type` reach:** the single most valuable ratification for A-178 is C-1 — it lights up four prod gates and five emitted rules at once.
+
 ## Plan 3 tooling rulings
 
 ### plan3-T-12c · [CODE] · `emit-field-configs-sql.ts` gate-aware guard · a `visible_when` may not silently disarm a same-worksheet gate

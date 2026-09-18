@@ -31,6 +31,7 @@ import { din181301SeedTables } from './regulation-tables-seed-din18130_1';
 import { m205SeedTables } from './regulation-tables-seed-m205';
 import { m187SeedTables } from './regulation-tables-seed-m187';
 import { din276SeedTables } from './regulation-tables-seed-din276';
+import { a178SeedTables } from './regulation-tables-seed-a178';
 
 export type SeedBuilder = { build: () => RegulationTable[]; ts: string; slugFile: string; supersedes?: string };
 
@@ -49,7 +50,8 @@ export const SEED_BUILDERS: Record<string, SeedBuilder> = {
   m205: { build: m205SeedTables, ts: '20260917101100', slugFile: 'm205' }, // Plan 3 Task 11: DWA-M-205 (fifteen tables)
   m187: { build: m187SeedTables, ts: '20260917101200', slugFile: 'm187' }, // Plan 3 Task 12: DWA-M-187 (eleven tables)
   din276: { build: din276SeedTables, ts: '20260917101300', slugFile: 'din276' }, // Plan 3 Task 13: DIN-276 (four tables — Table 1 KG catalogue, Tables 2 / 3 / 4 reference units)
-  // Plan-3 tasks append one line each, e.g. a178: { build: a178SeedTables, ts: '20260917101400', slugFile: 'a178' }
+  a178: { build: a178SeedTables, ts: '20260917101400', slugFile: 'a178' }, // Plan 3 Task 14: DWA-A-178 (seven tables — Tab. 1 split η / η_VS, §6.1.4.5 h_FK, three text-limit tables, Tab. 2 indicators)
+  // Plan-3 tasks append one line each, e.g. din16941_2: { build: din169412SeedTables, ts: '20260917101500', slugFile: 'din16941_2' }
 };
 
 /** Slugs that no other builder supersedes — the set the runtime fallback serves. */
