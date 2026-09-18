@@ -101,7 +101,8 @@ export type PriorEquationRow = {
  */
 export type PriorGateRow = {
   condition: string;
-  severity: string;
+  /** `compliance_requirements.severity` — NOT NULL in prod today; null tolerated in the shape (the fold prints a notice). */
+  severity: string | null;
   symbols: string[];
   parse_error?: true;
 };

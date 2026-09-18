@@ -101,6 +101,7 @@ export function foldSnapshot(fieldRows, sectionRows, meta, equationRows = [], ga
     const key = `${r.worksheet} ${r.req_code}`;
     if (snapshot.gates[key]) throw new Error(`duplicate gate key ${key}`);
     const condition = r.condition ?? '';
+    if (r.severity == null) console.error(`NOTICE: gate ${key} has a NULL severity — prod has none today; the emitter accepts it, the executor should record it`);
     const symbols = condition.trim() ? extractConditionSymbols(condition) : null;
     snapshot.gates[key] = symbols
       ? { condition, severity: r.severity ?? null, symbols: [...symbols].sort() }

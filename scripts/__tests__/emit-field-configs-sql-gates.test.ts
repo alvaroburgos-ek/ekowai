@@ -166,10 +166,65 @@ describe('gate-aware guard (Task 12c)', () => {
     expect(() => assertPriorSnapshot(bad({ nospace: gate('x > 0', ['x']) }))).toThrow(/keys are "<worksheet> <req_code>"/);
     expect(() => assertPriorSnapshot(bad({ 'S-01 CR-01': null }))).toThrow(/row must be an object/);
     expect(() => assertPriorSnapshot(bad({ 'S-01 CR-01': { condition: 1, severity: 'block', symbols: [] } }))).toThrow(/condition must be a string/);
-    expect(() => assertPriorSnapshot(bad({ 'S-01 CR-01': { condition: 'x > 0', severity: null, symbols: [] } }))).toThrow(/severity must be a string/);
+    expect(() => assertPriorSnapshot(bad({ 'S-01 CR-01': { condition: 'x > 0', severity: 7, symbols: [] } }))).toThrow(/severity must be a string\/null/);
+    expect(() => assertPriorSnapshot(bad({ 'S-01 CR-01': { condition: 'x > 0', severity: null, symbols: [] } }))).not.toThrow(); // round 3: null tolerated (prod has none)
     expect(() => assertPriorSnapshot(bad({ 'S-01 CR-01': { condition: 'x > 0', severity: 'block', symbols: 'x' } }))).toThrow(/symbols must be a string array/);
     expect(() => assertPriorSnapshot(bad({ 'S-01 CR-01': { condition: 'x > 0', severity: 'block', symbols: [], parse_error: false } }))).toThrow(/parse_error must be true or absent/);
     expect(() => assertPriorSnapshot(bad({ 'S-01 CR-01': { condition: 'x > 0', severity: 'block', symbols: ['x'], parse_error: true } }))).toThrow(/a parse_error row carries no symbols/);
     expect(() => assertPriorSnapshot(prior)).not.toThrow();
+  });
+  it('round 3: a gate reads the hidden symbol through a BARE-ident == / != RHS too (the runtime pre-check hiddenReferences) — refused when that ident is a field the rule hides, not a reader otherwise', () => {
+    // FLL-GAR-10 shape: the gate compares a driver against a bare token that is ALSO a field of the worksheet
+    const p: PriorSnapshot = {
+      'S-01 x': row(), 'S-01 y': row(), 'S-01 z': row({ section_code: 'C', section_path: ['C'] }),
+      sections: { 'S-01 B': { visible_when: null }, 'S-01 C': { visible_when: null } },
+      gates: { 'S-01 CR-01': gate('x == y', ['x']), 'S-01 CR-02': gate("x == 'y'", ['x']), 'S-01 CR-03': gate('x != y AND z > 0', ['x', 'z']) },
+    };
+    const rule = (symbol: string) => ({ standard: 'S', worksheet: 'S-01', symbol, widget: 'scalar' as const, visible_when: DRIVER, verification_quote: 'q' });
+    // y is a field and the rule hides it: CR-01 (bare RHS) and CR-03 (bare RHS in a conjunction) read it; the quoted CR-02 does not
+    expect(gateReaders(p, 'S-01', 'y', DRIVER).map((r) => r.code)).toEqual(['CR-01', 'CR-03']);
+    expect(() => emitFieldConfigSql('x', [rule('y')], [], p)).toThrow(/S-01 y: visible_when hides y read by gate CR-01 \(block: "x == y"\), CR-03 \(block: "x != y AND z > 0"\)/);
+    expect(() => emitFieldConfigSql('x', [rule('y')], [], p)).not.toThrow(/CR-02/);
+    // hiding another symbol: the bare RHS is not about it — not a reader (CR-03 reads z via its captured symbols only)
+    expect(gateReaders(p, 'S-01', 'z', DRIVER).map((r) => r.code)).toEqual(['CR-03']);
+    expect(gateReaders(p, 'S-01', 'x', DRIVER).map((r) => r.code)).toEqual(['CR-01', 'CR-02', 'CR-03']);
+    // a gate whose bare RHS names a token that is NOT a field of the worksheet reads nothing through it
+    const q: PriorSnapshot = { ...p, gates: { 'S-01 CR-09': gate('x == other', ['x']) } };
+    expect(gateReaders(q, 'S-01', 'y', DRIVER)).toEqual([]);
+    expect(emitFieldConfigSql('x', [rule('y')], [], q).up).toContain("f.symbol = 'y'");
+    // the section rule over B (x, y) is refused through y's bare-RHS readers
+    expect(() => emitFieldConfigSql('x', [], [{ standard: 'S', worksheet: 'S-01', section_code: 'B', visible_when: DRIVER, verification_quote: 'q' }], p)).toThrow(/section S-01 B: .*hides y read by gate CR-01/);
+  });
+  it('round 3: the bare-literal rule sees this batch\'s CREATED fields and INHERITED fields, not only the captured rows of the worksheet', () => {
+    const bareGate = 'IF shaft_type == typ_B THEN d_S >= 1';
+    const p: PriorSnapshot = { ...prior, gates: { ...prior.gates, 'A138-12 CR-02': gate(bareGate, ['d_S', 'shaft_type'], 'warn') } };
+    const create = { section_code: 'B', label_de: 'L', data_type: 'number' as const, clause_reference: '§1', description: 'Plan 3: x' };
+    // captured rows only ⇒ exempt (round 2)
+    expect(emitFieldConfigSql('x', [field('d_S')], [], p).up).toContain("f.symbol = 'd_S'");
+    // the same batch CREATES a field typ_B on A138-12 ⇒ the bare token resolves ⇒ not the same literal ⇒ refused
+    const createdTypB = { ...base, symbol: 'typ_B', widget: 'scalar' as const, verification_quote: 'q', create };
+    expect(() => emitFieldConfigSql('x', [field('d_S'), createdTypB], [], p)).toThrow(/A138-12 d_S: visible_when hides d_S read by gate CR-02 \(warn: "IF shaft_type == typ_B THEN d_S >= 1"\)/);
+    expect(gateReaders(p, 'A138-12', 'd_S', DRIVER, new Set(['A138-12 typ_B'])).map((r) => r.code)).toEqual(['CR-02']);
+    expect(gateReaders(p, 'A138-12', 'd_S', DRIVER, new Set(['A138-13 typ_B']))).toEqual([]); // a create on another worksheet does not resolve here
+    // a field typ_B owned by A138-13 and INHERITED by A138-12 (consumer_worksheets) resolves too ⇒ refused
+    const inherited: PriorSnapshot = { ...p, 'A138-13 typ_B': row({ consumer_worksheets: ['A138-12'] }) };
+    expect(gateReaders(inherited, 'A138-12', 'd_S', DRIVER).map((r) => r.code)).toEqual(['CR-02']);
+    const notInherited: PriorSnapshot = { ...p, 'A138-13 typ_B': row({ consumer_worksheets: ['A138-14'] }) };
+    expect(gateReaders(notInherited, 'A138-12', 'd_S', DRIVER)).toEqual([]);
+  });
+  it('round 3: a section rule also covers the batch\'s CREATED fields landing in the hidden section tree (a created field read through a bare-ident RHS)', () => {
+    const p: PriorSnapshot = {
+      'S-01 status': row({ section_code: 'A', section_path: ['A'] }),
+      sections: { 'S-01 A': { visible_when: null }, 'S-01 B': { visible_when: null }, 'S-01 B.1': { visible_when: null, parent_code: 'B' }, 'S-01 C': { visible_when: null } },
+      gates: { 'S-01 CR-01': gate('status == neu', ['status']) },
+    };
+    const mk = (section_code: string) => ({ standard: 'S', worksheet: 'S-01', symbol: 'neu', widget: 'scalar' as const, verification_quote: 'q', create: { section_code, label_de: 'L', data_type: 'number' as const, clause_reference: '§1', description: 'Plan 3: x' } });
+    const sec = (section_code: string) => ({ standard: 'S', worksheet: 'S-01', section_code, visible_when: DRIVER, verification_quote: 'q' });
+    // created `neu` lands in B.1 (descendant of B): hiding B hides it, and CR-01 reads it through the bare RHS ⇒ refused
+    expect(() => emitFieldConfigSql('x', [mk('B.1')], [sec('B')], p)).toThrow(/section S-01 B: visible_when on a section \(or a descendant of it\) hides neu read by gate CR-01 \(block: "status == neu"\)/);
+    expect(() => emitFieldConfigSql('x', [mk('B.1')], [sec('B.1')], p)).toThrow(/section S-01 B\.1: .*hides neu read by gate CR-01/);
+    // created in C: hiding B does not touch it; without the create the bare token is not a field and B passes
+    expect(emitFieldConfigSql('x', [mk('C')], [sec('B')], p).up).toContain("ws.code = 'B'");
+    expect(emitFieldConfigSql('x', [], [sec('B')], p).up).toContain("ws.code = 'B'");
   });
 });

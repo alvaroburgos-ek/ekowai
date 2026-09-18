@@ -48,7 +48,11 @@
  *     symbol, same op, same literal; a bare `tok` equals a quoted `'tok'` only when no
  *     field `tok` exists on the worksheet, round 2; `guardExempts`): the gate never
  *     fires while the field is hidden anyway; anything else refuses. `create` entries run
- *     the same check for uniformity (a created field cannot be in an existing gate).
+ *     the same check (round 3: a created field CAN be read by an existing gate through a
+ *     bare-ident RHS, and counts as resolvable for the bare-literal rule; a section rule
+ *     also covers the batch's creates landing in its tree). Round 3: "reads" is decided by
+ *     the runtime's own `hiddenReferences` on top of the captured `symbols` — the superset
+ *     that counts a bare-ident `==` / `!=` RHS naming the hidden symbol.
  *     A legacy prior without `gates` degrades to the producer-only guard (the CLI warns);
  *     `gate_guard: 'warn'` (CLI `--gate-guard=warn`, the Task 12c re-audit + the freshness
  *     pins of standards whose modules still carry refused rules) turns each refusal into a
@@ -86,7 +90,7 @@
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseFieldConfig, type RegisterUiConfig } from '../../src/lib/eval/field-config';
-import { parseCondition, parseNumeric, quotedComparisonLiterals, type Expr } from '../../src/lib/expr';
+import { parseCondition, parseNumeric, quotedComparisonLiterals, hiddenReferences, type Expr } from '../../src/lib/expr';
 import type { FieldConfigEntry, SectionVisibilityEntry, PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorGateRow, PriorSnapshot } from '../../src/lib/eval/field-configs/types';
 import { FIELD_CONFIG_MODULES } from '../../src/lib/eval/field-configs';
 import { rewriteRules } from '../../src/lib/eval/rewrites';
@@ -176,7 +180,7 @@ export function assertPriorSnapshot(prior: PriorSnapshot): void {
     if (!key.includes(' ')) throw new Error(`prior.gates "${key}": keys are "<worksheet> <req_code>"`);
     if (row == null || typeof row !== 'object' || Array.isArray(row)) throw new Error(`prior.gates "${key}": row must be an object`);
     if (typeof row.condition !== 'string') throw new Error(`prior.gates "${key}".condition must be a string`);
-    if (typeof row.severity !== 'string') throw new Error(`prior.gates "${key}".severity must be a string`);
+    if (row.severity != null && typeof row.severity !== 'string') throw new Error(`prior.gates "${key}".severity must be a string/null`);
     if (!Array.isArray(row.symbols) || row.symbols.some((x) => typeof x !== 'string')) throw new Error(`prior.gates "${key}".symbols must be a string array`);
     if (row.parse_error != null && row.parse_error !== true) throw new Error(`prior.gates "${key}".parse_error must be true or absent`);
     if (row.parse_error && row.symbols.length) throw new Error(`prior.gates "${key}": a parse_error row carries no symbols`);
@@ -223,21 +227,45 @@ const isEmptyCondition = (gate: PriorGateRow): boolean => gate.condition.trim() 
 export type GateReader = { code: string; gate: PriorGateRow; reason: 'reads' | 'parse_error' };
 
 /**
- * The same-worksheet gates that read `symbol` (captured `prior.gates[…].symbols`, matched through
- * `normalizeSymbol` like the producer walk) — or whose condition the engine could not parse (`parse_error`:
- * symbols unknown ⇒ counted conservatively) — minus the ones `guardExempts` for this `visibleWhen`.
- * Empty when the prior carries no `gates` map (legacy prior — the CLI warns).
+ * Round 3: does a symbol named `tok` resolve on `worksheet` at runtime? True when the captured prior holds
+ * `<worksheet> <tok>`, when this batch CREATES it (`createdKeys`), or when another worksheet's field `tok` is
+ * inherited here (`consumer_worksheets` includes `worksheet` — `loadInheritedFields`). Decides the bare ↔ quoted
+ * literal equivalence of `guardExempts`: a bare `tok` that resolves is NOT the same literal as `'tok'`.
  */
-export function gateReaders(prior: PriorSnapshot, worksheet: string, symbol: string, visibleWhen: string): GateReader[] {
+function symbolResolvesOn(prior: PriorSnapshot, worksheet: string, tok: string, createdKeys: ReadonlySet<string>): boolean {
+  const key = `${worksheet} ${tok}`;
+  if (key in prior || createdKeys.has(key)) return true;
+  const suffix = ` ${tok}`;
+  return priorFieldRows(prior).some(([k, r]) => k.endsWith(suffix) && k !== key && (r.consumer_worksheets?.includes(worksheet) ?? false));
+}
+
+/**
+ * The same-worksheet gates that read `symbol` — the captured `prior.gates[…].symbols` (matched through
+ * `normalizeSymbol` like the producer walk) OR, round 3, the runtime's own N.A. pre-check `hiddenReferences`
+ * (`src/lib/expr/evaluate.ts`) applied to the gate's condition with `symbol` hidden: a superset of
+ * `extractSymbols` that also counts a bare-ident `==` / `!=` RHS naming the hidden symbol (`status == neu` with
+ * a field `neu` hidden ⇒ N.A. at runtime) — or whose condition the engine could not parse (`parse_error`:
+ * symbols unknown ⇒ counted conservatively; an EMPTY condition is exempt — round 2) — minus the ones
+ * `guardExempts` for this `visibleWhen` (bare ↔ quoted literal equivalence decided by `symbolResolvesOn`:
+ * captured fields + this batch's creates + inherited fields). Empty when the prior carries no `gates` map
+ * (legacy prior — the CLI warns).
+ */
+export function gateReaders(prior: PriorSnapshot, worksheet: string, symbol: string, visibleWhen: string, createdKeys: ReadonlySet<string> = new Set()): GateReader[] {
   if (!prior.gates) return [];
   const prefix = `${worksheet} `;
   const sym = normalizeSymbol(symbol);
-  const hasField = (tok: string): boolean => `${worksheet} ${tok}` in prior;
+  const hidden: ReadonlySet<string> = new Set([symbol]);
+  const hasField = (tok: string): boolean => symbolResolvesOn(prior, worksheet, tok, createdKeys);
   const out: GateReader[] = [];
   for (const [key, gate] of Object.entries(prior.gates)) {
     if (!key.startsWith(prefix)) continue;
     if (gate.parse_error && isEmptyCondition(gate)) continue; // round 2: empty ⇒ `manual`, hiding changes nothing
-    const reason: GateReader['reason'] | null = gate.parse_error ? 'parse_error' : gate.symbols.some((s) => normalizeSymbol(s) === sym) ? 'reads' : null;
+    const reads = (): boolean => {
+      if (gate.symbols.some((s) => normalizeSymbol(s) === sym)) return true;
+      const ast = parseCondition(gate.condition);
+      return ast != null && hiddenReferences(ast, hidden).length > 0;
+    };
+    const reason: GateReader['reason'] | null = gate.parse_error ? 'parse_error' : reads() ? 'reads' : null;
     if (!reason) continue;
     if (reason === 'reads' && guardExempts(gate.condition, visibleWhen, hasField)) continue;
     out.push({ code: key.slice(prefix.length), gate, reason });
@@ -249,9 +277,23 @@ const gateRefusalText = (symbol: string, readers: GateReader[]): string =>
   `hides ${symbol} read by gate ${readers.map((r) => `${r.code} (${r.gate.severity}: ${JSON.stringify(r.gate.condition)}${r.reason === 'parse_error' ? ' — parse_error, symbols unknown' : ''})`).join(', ')}`;
 
 /** Refusal text of the gate-aware guard for one hidden symbol (null = accepted). */
-function fieldGateRefusal(prior: PriorSnapshot, worksheet: string, symbol: string, visibleWhen: string): string | null {
-  const readers = gateReaders(prior, worksheet, symbol, visibleWhen);
+function fieldGateRefusal(prior: PriorSnapshot, worksheet: string, symbol: string, visibleWhen: string, createdKeys: ReadonlySet<string>): string | null {
+  const readers = gateReaders(prior, worksheet, symbol, visibleWhen, createdKeys);
   return readers.length ? gateRefusalText(symbol, readers) : null;
+}
+
+/**
+ * Round 3: is the captured section `sectionCode` the hidden section `hiddenCode` or one of its descendants?
+ * Walked over `prior.sections[…].parent_code` (a cycle in bad data stops the walk). Used for same-batch `create`
+ * entries, whose rows are not in the prior's `section_path` yet.
+ */
+function sectionInTree(prior: PriorSnapshot, worksheet: string, sectionCode: string, hiddenCode: string): boolean {
+  const seen = new Set<string>();
+  for (let code: string | null | undefined = sectionCode; code != null && !seen.has(code); code = prior.sections?.[`${worksheet} ${code}`]?.parent_code) {
+    if (code === hiddenCode) return true;
+    seen.add(code);
+  }
+  return false;
 }
 
 /**
@@ -315,7 +357,7 @@ const textOrNull = (v: string | null | undefined) => (v == null ? 'NULL' : q(v))
 const NO_PRIOR_NOTE = (key: string) => `-- ${key}: no prior snapshot row captured — restore assumes prod had NULL in these columns; re-capture before applying the rollback.`;
 
 /** `gate`: receives each Task 12c gate refusal (the caller throws or collects it per `gate_guard`). */
-function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior: PriorSnapshot, gate: (msg: string) => void): void {
+function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior: PriorSnapshot, gate: (msg: string) => void, createdKeys: ReadonlySet<string>): void {
   const id = `${e.worksheet} ${e.symbol}`;
   const cfg = parseFieldConfig({ widget: e.widget, uiConfig: e.ui_config ?? null, lookup: e.lookup ?? null, visibleWhen: e.visible_when ?? null }); // throws FieldConfigError
   if (e.visible_when != null && parseCondition(e.visible_when) === null) throw new Error(`${id}: visible_when does not parse: ${e.visible_when}`);
@@ -330,7 +372,7 @@ function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior:
     const chain = producerChain(prior, e.worksheet, e.symbol, { skipDirect: !!e.create });
     if (chain) throw new Error(`${id}: visible_when on a symbol consumed by another worksheet — hides ${chain} (hiding a producer, or an input of a producer, hides the inherited value; STAGE the consumer edit instead)`);
     // Task 12c: a same-worksheet gate reading the hidden symbol would silently stop enforcing. Runs for create entries too (uniformity).
-    const refusal = fieldGateRefusal(prior, e.worksheet, e.symbol, e.visible_when);
+    const refusal = fieldGateRefusal(prior, e.worksheet, e.symbol, e.visible_when, createdKeys);
     if (refusal) gate(`${id}: visible_when ${refusal} — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`);
   }
   if (e.widget === 'lookup_fill') {
@@ -419,7 +461,7 @@ function inSectionTree(r: PriorFieldRow, sectionCode: string): boolean {
   return path.includes(sectionCode);
 }
 
-function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot, gate: (msg: string) => void): void {
+function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot, gate: (msg: string) => void, createdKeys: ReadonlySet<string>, creates: ReadonlyArray<FieldConfigEntry>): void {
   const key = `${s.worksheet} ${s.section_code}`;
   if (parseCondition(s.visible_when) === null) throw new Error(`section ${key}: visible_when does not parse: ${s.visible_when}`);
   if (prior.sections && !(key in prior.sections)) throw new Error(`section ${key}: not a captured section (its UPDATE would touch 0 rows) — check worksheet_sections.code`);
@@ -431,8 +473,15 @@ function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot, gate: 
   // Task 12c: every field of the section tree is hidden with it — a same-worksheet gate reading any of them stops enforcing.
   const gated = priorFieldRows(prior)
     .filter(([k, r]) => k.startsWith(`${s.worksheet} `) && inSectionTree(r, s.section_code))
-    .map(([k]) => fieldGateRefusal(prior, s.worksheet, k.slice(s.worksheet.length + 1), s.visible_when))
+    .map(([k]) => fieldGateRefusal(prior, s.worksheet, k.slice(s.worksheet.length + 1), s.visible_when, createdKeys))
     .filter((m): m is string => m != null);
+  // Round 3: same-batch creates landing in the hidden section tree are hidden with it too (a created field with no
+  // section_code lands in the worksheet's first root section — not resolvable here, so it is not checked).
+  const createdGated = creates
+    .filter((e) => e.worksheet === s.worksheet && e.create?.section_code != null && sectionInTree(prior, s.worksheet, e.create.section_code, s.section_code))
+    .map((e) => fieldGateRefusal(prior, s.worksheet, e.symbol, s.visible_when, createdKeys))
+    .filter((m): m is string => m != null);
+  gated.push(...createdGated);
   if (gated.length) gate(`section ${key}: visible_when on a section (or a descendant of it) ${gated.join('; ')} — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`);
 }
 
@@ -444,6 +493,10 @@ function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot, gate: 
 export function emitFieldConfigSql(slug: string, entries: FieldConfigEntry[], sections: SectionVisibilityEntry[], prior: PriorSnapshot, header: FieldConfigHeader = {}): { up: string; down: string; warnings: string[] } {
   assertPriorSnapshot(prior);
   const gateWarnings: string[] = [];
+  // Round 3: the batch's created fields per worksheet — they resolve at runtime like captured ones (bare-literal rule) and
+  // are hidden by a section rule over their section.
+  const creates = entries.filter((e) => e.create);
+  const createdKeys: ReadonlySet<string> = new Set(creates.map((e) => `${e.worksheet} ${e.symbol}`));
   const gate = (msg: string): void => {
     if (header.gate_guard === 'warn') gateWarnings.push(`GATE-REFUSAL (warn mode) ${msg}`);
     else throw new Error(msg);
@@ -465,7 +518,7 @@ export function emitFieldConfigSql(slug: string, entries: FieldConfigEntry[], se
     if (seen.has(key)) throw new Error(`${key}: duplicate entry`);
     seen.add(key);
     const p = prior[key];
-    validateEntry(e, p, prior, gate);
+    validateEntry(e, p, prior, gate, createdKeys);
     if (e.create) {
       const section = e.create.section_code
         ? `(SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = ${q(e.create.section_code)})`
@@ -497,7 +550,7 @@ ${JOIN} WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id
     const key = `${s.worksheet} ${s.section_code}`;
     if (seenSections.has(key)) throw new Error(`section ${key}: duplicate entry`);
     seenSections.add(key);
-    validateSection(s, prior, gate);
+    validateSection(s, prior, gate, createdKeys, creates);
     up.push(`UPDATE worksheet_sections ws SET visible_when = ${q(s.visible_when)} ${sectionWhere(s)};`);
     const ps = prior.sections?.[key];
     if (!ps) down.push(NO_PRIOR_NOTE(`section ${key}`));

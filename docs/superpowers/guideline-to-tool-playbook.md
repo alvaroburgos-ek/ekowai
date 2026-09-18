@@ -343,7 +343,15 @@ message names the gate(s): `hides A_min read by gate CR-01 (block: "max_d IS NOT
 - **`parse_error` gates refuse conservatively** — their symbols are unknown, so every rule on that worksheet is
   refused naming `parse_error`. Exception (round 2 ruling): an EMPTY / whitespace `condition` is `manual` at the
   engine whatever is hidden — still captured (`parse_error: true`), never a refusal.
-- **`create` entries** run the same check (a created field cannot be in an existing gate; uniformity).
+- **"Reads" is the runtime's own test (round 3).** On top of the captured `symbols`, a gate reads the hidden
+  symbol when `hiddenReferences(parseCondition(condition), {symbol})` is non-empty — the engine's N.A. pre-check,
+  a superset of `extractSymbols` that also counts a bare-ident `==` / `!=` RHS naming a hidden field (`status ==
+  neu` with a field `neu` on the worksheet ⇒ N.A. once `neu` is hidden). The captured `symbols` alone would miss
+  it. The bare-literal rule above resolves a token against the captured rows of the worksheet, the fields this
+  batch CREATES, and fields other worksheets own that are inherited here (`consumer_worksheets`).
+- **`create` entries** run the same check; a section rule also covers the batch's creates landing in its section
+  tree (walked over `parent_code`; a create without `section_code` lands in the first root section and is not
+  resolvable, so it is not checked).
 - **Legacy priors** without `gates` degrade to the producer-only guard; the CLI prints
   `warning: <slug>.prior.json carries no "gates" map …` — re-capture before emitting.
 - **`--gate-guard=warn`** (library: `gate_guard: 'warn'`) turns each refusal into a `GATE-REFUSAL (warn mode) …`
