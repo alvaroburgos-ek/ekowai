@@ -52,7 +52,14 @@
  *     bare-ident RHS, and counts as resolvable for the bare-literal rule; a section rule
  *     also covers the batch's creates landing in its tree). Round 3: "reads" is decided by
  *     the runtime's own `hiddenReferences` on top of the captured `symbols` — the superset
- *     that counts a bare-ident `==` / `!=` RHS naming the hidden symbol.
+ *     that counts a bare-ident `==` / `!=` RHS naming the hidden symbol. Round 4: a gate
+ *     also reads `symbol` when `symbol` REACHES, through same-worksheet equations
+ *     (`equationReach` — the producer walk's BFS, remaps honoured, cycle-guarded), an
+ *     output the gate reads (a hidden input nulls the equation, the gate goes N.A.); the
+ *     message names the chain (`hides x → Gl.1 Y_G read by gate CR-12 (…)`).
+ *   - amendment N (round 4): `select_many` on an EXISTING field whose captured `data_type`
+ *     is not `json` is REFUSED — the checklist editor stores `{type:'json'}`, the enum
+ *     reader expects `value_enum`; the data_type switch is a STAGED S-block.
  *     A legacy prior without `gates` degrades to the producer-only guard (the CLI warns);
  *     `gate_guard: 'warn'` (CLI `--gate-guard=warn`, the Task 12c re-audit + the freshness
  *     pins of standards whose modules still carry refused rules) turns each refusal into a
@@ -224,7 +231,11 @@ export function guardExempts(condition: string, visibleWhen: string, hasField: (
 const isEmptyCondition = (gate: PriorGateRow): boolean => gate.condition.trim() === '';
 
 /** One gate the guard names in a refusal. */
-export type GateReader = { code: string; gate: PriorGateRow; reason: 'reads' | 'parse_error' };
+export type GateReader = {
+  code: string; gate: PriorGateRow; reason: 'reads' | 'parse_error';
+  /** Round 4: when the gate reads an OUTPUT the hidden symbol reaches through same-worksheet equations — `x → Gl.1 Y_G` (absent for a direct read). */
+  chain?: string;
+};
 
 /**
  * Round 3: does a symbol named `tok` resolve on `worksheet` at runtime? True when the captured prior holds
@@ -254,27 +265,44 @@ export function gateReaders(prior: PriorSnapshot, worksheet: string, symbol: str
   if (!prior.gates) return [];
   const prefix = `${worksheet} `;
   const sym = normalizeSymbol(symbol);
-  const hidden: ReadonlySet<string> = new Set([symbol]);
   const hasField = (tok: string): boolean => symbolResolvesOn(prior, worksheet, tok, createdKeys);
+  // Round 4: every output the hidden symbol reaches through same-worksheet equations is nulled with it (a hidden
+  // input nulls the equation) — a gate reading such an output stops enforcing exactly like a direct read.
+  const reach = equationReach(prior, worksheet, symbol);
   const out: GateReader[] = [];
   for (const [key, gate] of Object.entries(prior.gates)) {
     if (!key.startsWith(prefix)) continue;
     if (gate.parse_error && isEmptyCondition(gate)) continue; // round 2: empty ⇒ `manual`, hiding changes nothing
-    const reads = (): boolean => {
-      if (gate.symbols.some((s) => normalizeSymbol(s) === sym)) return true;
-      const ast = parseCondition(gate.condition);
-      return ast != null && hiddenReferences(ast, hidden).length > 0;
-    };
-    const reason: GateReader['reason'] | null = gate.parse_error ? 'parse_error' : reads() ? 'reads' : null;
+    const ast = gate.parse_error ? null : parseCondition(gate.condition);
+    const readsName = (name: string, norm: string): boolean =>
+      gate.symbols.some((s) => normalizeSymbol(s) === norm) || (ast != null && hiddenReferences(ast, new Set([name])).length > 0);
+    let reason: GateReader['reason'] | null = null;
+    let chain: string | undefined;
+    if (gate.parse_error) reason = 'parse_error';
+    else if (readsName(symbol, sym)) reason = 'reads';
+    else {
+      const hop = reach.find((h) => readsName(h.output, h.out));
+      if (hop) { reason = 'reads'; chain = hop.chain; }
+    }
     if (!reason) continue;
     if (reason === 'reads' && guardExempts(gate.condition, visibleWhen, hasField)) continue;
-    out.push({ code: key.slice(prefix.length), gate, reason });
+    out.push({ code: key.slice(prefix.length), gate, reason, ...(chain ? { chain } : {}) });
   }
   return out;
 }
 
-const gateRefusalText = (symbol: string, readers: GateReader[]): string =>
-  `hides ${symbol} read by gate ${readers.map((r) => `${r.code} (${r.gate.severity}: ${JSON.stringify(r.gate.condition)}${r.reason === 'parse_error' ? ' — parse_error, symbols unknown' : ''})`).join(', ')}`;
+/** `hides <symbol | chain> read by gate <code> (<severity>: "<condition>")[, …]` — one segment per distinct chain (round 4), `; `-joined. */
+const gateRefusalText = (symbol: string, readers: GateReader[]): string => {
+  const groups = new Map<string, GateReader[]>();
+  for (const r of readers) {
+    const what = r.chain ?? symbol;
+    if (!groups.has(what)) groups.set(what, []);
+    groups.get(what)!.push(r);
+  }
+  return [...groups.entries()]
+    .map(([what, rs]) => `hides ${what} read by gate ${rs.map((r) => `${r.code} (${r.gate.severity}: ${JSON.stringify(r.gate.condition)}${r.reason === 'parse_error' ? ' — parse_error, symbols unknown' : ''})`).join(', ')}`)
+    .join('; ');
+};
 
 /** Refusal text of the gate-aware guard for one hidden symbol (null = accepted). */
 function fieldGateRefusal(prior: PriorSnapshot, worksheet: string, symbol: string, visibleWhen: string, createdKeys: ReadonlySet<string>): string | null {
@@ -323,16 +351,35 @@ export function producerChain(prior: PriorSnapshot, worksheet: string, symbol: s
     const direct = consumers(symbol);
     if (direct) return `${symbol} (consumed by ${direct.join(', ')})`;
   }
+  // BFS from the hidden symbol through same-worksheet equations; the first consumed output names the chain.
+  for (const hop of equationReach(prior, worksheet, symbol)) {
+    const c = consumers(hop.output) ?? consumers(hop.out);
+    if (c) return `${hop.chain} (consumed by ${c.join(', ')})`;
+  }
+  return null;
+}
+
+/** One output the hidden symbol reaches: as stored (`output`), normalised (`out`), and the chain text `x → Gl.1 y → …`. */
+export type EquationHop = { output: string; out: string; chain: string };
+
+/**
+ * Every output symbol that `symbol` reaches through SAME-worksheet equations, in BFS order (cycle-guarded), over
+ * the captured `prior.equations` (stored `input_symbols` + the Plan-2a `rewriteRules[id].remap` inputs), symbols
+ * matched through `normalizeSymbol`. Shared by the producer guard (`producerChain`) and, since round 4, the
+ * gate-aware guard (`gateReaders`): a hidden input nulls every equation downstream of it. A prior without
+ * `equations` reaches nothing.
+ */
+export function equationReach(prior: PriorSnapshot, worksheet: string, symbol: string): EquationHop[] {
   const prefix = `${worksheet} `;
   const eqs = Object.entries(prior.equations ?? {}).filter(([k]) => k.startsWith(prefix)).map(([k, e]) => {
     const remap = e.id ? Object.values(rewriteRules[e.id]?.remap ?? {}) : [];
     const n = k.slice(prefix.length);
     return { label: /^\d/.test(n) ? `Gl.${n}` : n, output: e.output_symbol, inputs: new Set([...e.input_symbols, ...remap].map(normalizeSymbol)) };
   });
-  // BFS from the hidden symbol through same-worksheet equations; the first consumed output names the chain.
   const start = normalizeSymbol(symbol);
   const queue: Array<{ sym: string; chain: string }> = [{ sym: start, chain: symbol }];
   const seen = new Set<string>([start]);
+  const hops: EquationHop[] = [];
   while (queue.length) {
     const { sym, chain } = queue.shift()!;
     for (const e of eqs) {
@@ -340,12 +387,11 @@ export function producerChain(prior: PriorSnapshot, worksheet: string, symbol: s
       if (!e.inputs.has(sym) || seen.has(out)) continue;
       seen.add(out);
       const next = `${chain} → ${e.label} ${e.output}`;
-      const c = consumers(e.output) ?? consumers(out);
-      if (c) return `${next} (consumed by ${c.join(', ')})`;
+      hops.push({ output: e.output, out, chain: next });
       queue.push({ sym: out, chain: next });
     }
   }
-  return null;
+  return hops;
 }
 
 const where = (e: { standard: string; worksheet: string; symbol: string }) =>
@@ -390,6 +436,9 @@ function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior:
   } else {
     // A captured snapshot (_meta present) that lacks the key means the UPDATE would touch 0 rows — same rule as sections.
     if (!p && prior._meta) throw new Error(`${id}: not a captured active field of ${e.worksheet} (its UPDATE would touch 0 rows) — check worksheet/symbol, or add it via create`);
+    // Amendment N (round 4): the checklist editor stores {type:'json'} and the enum reader expects value_enum — a select_many
+    // re-keyed onto a captured non-json field would lose its data; the data_type switch is a STAGED S-block, never emitted here.
+    if (e.widget === 'select_many' && p?.data_type != null && p.data_type !== 'json') throw new Error(`${id}: select_many on a non-json field loses data (captured data_type ${p.data_type}) — STAGE the data_type switch (S-block)`);
     if (Array.isArray(e.enum_values)) {
       // D-1: a list may only go into a NULL prior — and "NULL" must be a captured fact, never an absent row.
       if (!p) throw new Error(`${id}: D-1 — enum_values given but no prior snapshot row; capture prod (or add the field via create) before emitting`);

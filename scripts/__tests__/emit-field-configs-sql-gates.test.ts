@@ -13,7 +13,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
-  emitFieldConfigSql, assertPriorSnapshot, gateReaders, guardExempts, priorSnapshotWarnings, parseHeaderArgs,
+  emitFieldConfigSql, assertPriorSnapshot, gateReaders, guardExempts, priorSnapshotWarnings, parseHeaderArgs, producerChain, equationReach,
   type PriorSnapshot, type PriorFieldRow, type PriorGateRow,
 } from '../regulation-tables/emit-field-configs-sql';
 
@@ -226,5 +226,66 @@ describe('gate-aware guard (Task 12c)', () => {
     // created in C: hiding B does not touch it; without the create the bare token is not a field and B passes
     expect(emitFieldConfigSql('x', [mk('C')], [sec('B')], p).up).toContain("ws.code = 'B'");
     expect(emitFieldConfigSql('x', [], [sec('B')], p).up).toContain("ws.code = 'B'");
+  });
+  it('round 4: hiding a consumer-free INPUT of a same-worksheet equation whose OUTPUT a gate reads is refused, naming the chain (DIN-EN-16941-2 CR-12 shape); one hop, two hops, IF-guarded accepted, chain to an unread output accepted', () => {
+    // DIN-EN-16941-2-03: Gl. 1 Y_G = f(A_G, e_G, h_N), Gl. 2 D_G = f(Y_G, …); CR-12 reads Y_G and D_G; no other worksheet consumes anything
+    const ws = 'DIN-EN-16941-2-03';
+    const r = (over: Partial<PriorFieldRow> = {}) => row({ section_code: 'B', section_path: ['B'], ...over });
+    const p: PriorSnapshot = {
+      [`${ws} A_G`]: r(), [`${ws} e_G`]: r(), [`${ws} h_N`]: r(), [`${ws} Y_G`]: r(), [`${ws} D_G`]: r(), [`${ws} P_G`]: r({ section_code: 'C', section_path: ['C'] }), [`${ws} loose`]: r({ section_code: 'C', section_path: ['C'] }),
+      sections: { [`${ws} B`]: { visible_when: null }, [`${ws} C`]: { visible_when: null } },
+      equations: {
+        [`${ws} 1`]: { output_symbol: 'Y_G', input_symbols: ['A_G', 'e_G', 'h_N'] },
+        [`${ws} 2`]: { output_symbol: 'D_G', input_symbols: ['Y_G', 'P_G'] },
+        [`${ws} 3`]: { output_symbol: 'unread', input_symbols: ['loose'] },
+      },
+      gates: {
+        [`${ws} CR-12`]: gate('Y_G IS NOT NULL AND D_G IS NOT NULL AND bemessungswert_massgebend IS NOT NULL', ['D_G', 'Y_G', 'bemessungswert_massgebend']),
+        [`${ws} CR-13`]: gate('D_G > 0', ['D_G']),
+        [`${ws} CR-14`]: gate("IF verfahren == 'vereinfacht' THEN D_G > 0", ['D_G', 'verfahren']),
+      },
+    };
+    const VEREINFACHT = "verfahren == 'vereinfacht'";
+    const rule = (symbol: string, visible_when = VEREINFACHT) => ({ standard: 'DIN-EN-16941-2', worksheet: ws, symbol, widget: 'scalar' as const, visible_when, verification_quote: 'q' });
+    // one hop: A_G → Gl.1 Y_G (CR-12) and → Gl.2 D_G (CR-12, CR-13); CR-14 is IF-guarded on the same driver ⇒ exempt
+    const readers = gateReaders(p, ws, 'A_G', VEREINFACHT);
+    expect(readers.map((x) => [x.code, x.chain])).toEqual([['CR-12', 'A_G → Gl.1 Y_G'], ['CR-13', 'A_G → Gl.1 Y_G → Gl.2 D_G']]);
+    expect(() => emitFieldConfigSql('x', [rule('A_G')], [], p)).toThrow('DIN-EN-16941-2-03 A_G: visible_when hides A_G → Gl.1 Y_G read by gate CR-12 (block: "Y_G IS NOT NULL AND D_G IS NOT NULL AND bemessungswert_massgebend IS NOT NULL"); hides A_G → Gl.1 Y_G → Gl.2 D_G read by gate CR-13 (block: "D_G > 0") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block');
+    // the producer guard stays silent (nothing is consumed elsewhere) — this is the gate-aware guard's own finding
+    expect(producerChain(p, ws, 'A_G')).toBeNull();
+    // two hops: P_G → Gl.2 D_G only
+    expect(gateReaders(p, ws, 'P_G', VEREINFACHT).map((x) => [x.code, x.chain])).toEqual([['CR-12', 'P_G → Gl.2 D_G'], ['CR-13', 'P_G → Gl.2 D_G']]);
+    // a direct read wins over the chain (no chain text) — hiding Y_G itself
+    expect(gateReaders(p, ws, 'Y_G', VEREINFACHT).map((x) => [x.code, x.chain])).toEqual([['CR-12', undefined], ['CR-13', 'Y_G → Gl.2 D_G']]);
+    // IF-guarded on the same driver: the only reader of D_G via CR-14 is exempt; a rule on ANOTHER driver is not
+    const onlyGuarded: PriorSnapshot = { ...p, gates: { [`${ws} CR-14`]: p.gates![`${ws} CR-14`] } };
+    expect(gateReaders(onlyGuarded, ws, 'A_G', VEREINFACHT)).toEqual([]);
+    expect(emitFieldConfigSql('x', [rule('A_G')], [], onlyGuarded).up).toContain("f.symbol = 'A_G'");
+    expect(gateReaders(onlyGuarded, ws, 'A_G', "verfahren == 'detailliert'").map((x) => [x.code, x.chain])).toEqual([['CR-14', 'A_G → Gl.1 Y_G → Gl.2 D_G']]);
+    // chain to an output no gate reads ⇒ accepted
+    expect(gateReaders(p, ws, 'loose', VEREINFACHT)).toEqual([]);
+    expect(emitFieldConfigSql('x', [rule('loose')], [], p).up).toContain("f.symbol = 'loose'");
+    // section rule over B (A_G, e_G, h_N, Y_G, D_G) is refused through the chains; C (P_G, loose) through P_G only
+    const sec = (section_code: string) => ({ standard: 'DIN-EN-16941-2', worksheet: ws, section_code, visible_when: VEREINFACHT, verification_quote: 'q' });
+    expect(() => emitFieldConfigSql('x', [], [sec('B')], p)).toThrow(/section DIN-EN-16941-2-03 B: .*hides A_G → Gl\.1 Y_G read by gate CR-12 .*hides Y_G read by gate CR-12/);
+    expect(() => emitFieldConfigSql('x', [], [sec('C')], p)).toThrow(/section DIN-EN-16941-2-03 C: .*hides P_G → Gl\.2 D_G read by gate CR-12 \(block: "[^"]+"\), CR-13 \(block: "D_G > 0"\)/);
+    expect(() => emitFieldConfigSql('x', [], [sec('C')], p)).not.toThrow(/loose/);
+    // a legacy prior without `equations` reaches nothing (direct reads only)
+    const legacy: PriorSnapshot = { ...p }; delete legacy.equations;
+    expect(gateReaders(legacy, ws, 'A_G', VEREINFACHT)).toEqual([]);
+    expect(equationReach(p, ws, 'A_G').map((h) => h.chain)).toEqual(['A_G → Gl.1 Y_G', 'A_G → Gl.1 Y_G → Gl.2 D_G']);
+  });
+  it('round 4 (amendment N): select_many on an EXISTING field whose captured data_type is not json is refused; json (or an uncaptured data_type) passes; a create is not this rule', () => {
+    const p: PriorSnapshot = {
+      'S-01 checks_json': row({ data_type: 'json', enum_values: [{ value: 'a', label_de: 'A', order_index: 0 }] }),
+      'S-01 checks_enum': row({ data_type: 'enum', enum_values: [{ value: 'a', label_de: 'A', order_index: 0 }] }),
+      'S-01 checks_untyped': row({ enum_values: [{ value: 'a', label_de: 'A', order_index: 0 }] }),
+    };
+    const sm = (symbol: string) => ({ standard: 'S', worksheet: 'S-01', symbol, widget: 'select_many' as const, ui_config: { title: 'Checks' }, enum_values: 'keep_prod' as const, verification_quote: 'q' });
+    expect(emitFieldConfigSql('x', [sm('checks_json')], [], p).up).toContain("widget = 'select_many'");
+    expect(emitFieldConfigSql('x', [sm('checks_untyped')], [], p).up).toContain("f.symbol = 'checks_untyped'");
+    expect(() => emitFieldConfigSql('x', [sm('checks_enum')], [], p)).toThrow('S-01 checks_enum: select_many on a non-json field loses data (captured data_type enum) — STAGE the data_type switch (S-block)');
+    // a select_one on the same enum field is untouched by this rule
+    expect(emitFieldConfigSql('x', [{ ...sm('checks_enum'), widget: 'select_one' as const, ui_config: null }], [], p).up).toContain("widget = 'select_one'");
   });
 });

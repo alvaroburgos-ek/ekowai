@@ -352,6 +352,17 @@ message names the gate(s): `hides A_min read by gate CR-01 (block: "max_d IS NOT
 - **`create` entries** run the same check; a section rule also covers the batch's creates landing in its section
   tree (walked over `parent_code`; a create without `section_code` lands in the first root section and is not
   resolvable, so it is not checked).
+- **Equation chains count (round 4, from the DIN-EN-16941-2 G-9 finding).** A gate also reads the hidden symbol
+  when the symbol REACHES, through same-worksheet equations (`equationReach` — the producer walk's BFS over
+  `prior.equations`, `rewriteRules` remaps honoured, cycle-guarded), an output the gate reads: a hidden input
+  nulls the equation, the output is null, the gate goes N.A. — hiding the Gl. 1 / Gl. 2 inputs under
+  `vereinfacht` makes `Y_G` / `D_G` null and the block gate CR-12 unpassable even though nothing is consumed by
+  another worksheet. The message names the chain: `hides Q_S → Gl.1 Y_G read by gate CR-12 (block: …) — STAGE as
+  a G-block`. The IF-guard exemption applies as before (same driver / op / literal on the gate).
+- **Amendment N — `select_many` on a non-json field is refused.** The checklist editor stores `{type:'json'}` and
+  the enum reader expects `value_enum`; re-keying an EXISTING field whose captured `data_type` is not `json` to
+  `select_many` would lose its data. Message: `select_many on a non-json field loses data (captured data_type
+  enum) — STAGE the data_type switch (S-block)`. A `create` declares its own `data_type` (use `json`).
 - **Legacy priors** without `gates` degrade to the producer-only guard; the CLI prints
   `warning: <slug>.prior.json carries no "gates" map …` — re-capture before emitting.
 - **`--gate-guard=warn`** (library: `gate_guard: 'warn'`) turns each refusal into a `GATE-REFUSAL (warn mode) …`
