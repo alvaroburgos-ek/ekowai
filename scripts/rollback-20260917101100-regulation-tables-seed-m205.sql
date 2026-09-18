@@ -1,0 +1,17 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE1';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE2';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE4';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'S4_1_2_3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'S3_3_LOGRED';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE5';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE6';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE7';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE8_UV';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE8_MEMBRAN';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'TABELLE8_OZON';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'S4_3_3_2';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'S4_4_2';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-205' AND edition = '2013-03' AND table_code = 'S4_3_3_4';
+COMMIT;

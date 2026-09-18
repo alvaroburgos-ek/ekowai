@@ -1,0 +1,5373 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-205 m205",
+    "captured_at": "2026-09-18T02:10:42.040Z",
+    "standard": "DWA-M-205",
+    "slug": "m205",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 237,
+    "section_rows": 234,
+    "sections_total": 234,
+    "equation_rows": 24
+  },
+  "M205-01 anlagen_id": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-01 biologische_vorbehandlung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-01 empfangsgewaesser_zweck": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-01 ew_anschlussgroesse": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09",
+      "M205-26"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-02 badegewaesser_guete": {
+    "enum_values": [
+      {
+        "value": "ausgezeichnet",
+        "label_de": "Ausgezeichnete Qualität",
+        "label_en": "Excellent quality",
+        "order_index": 1,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "gut",
+        "label_de": "Gute Qualität",
+        "label_en": "Good quality",
+        "order_index": 2,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "ausreichend",
+        "label_de": "Ausreichende Qualität",
+        "label_en": "Sufficient quality",
+        "order_index": 3,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "mangelhaft",
+        "label_de": "Mangelhafte Qualität",
+        "label_en": "Poor quality",
+        "order_index": 4,
+        "regulation_reference": "§3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 behoerdliche_freigabe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 brauchwasser_standzeit_h": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-02"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 daly_wert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-03"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 eg_badegewaesser_richtlinie": {
+    "enum_values": [
+      {
+        "value": "alt",
+        "label_de": "Alt (Richtlinie 76/160/EWG)",
+        "label_en": "Old (Directive 76/160/EEC)",
+        "order_index": 1,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "neu",
+        "label_de": "Neu (Richtlinie 2006/7/EG)",
+        "label_en": "New (Directive 2006/7/EC)",
+        "order_index": 2,
+        "regulation_reference": "§3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 eignungsklasse_bewaesserung": {
+    "enum_values": [
+      {
+        "value": "1",
+        "label_de": "Eignungsklasse 1",
+        "label_en": "Suitability class 1",
+        "order_index": 1,
+        "regulation_reference": "§3.3, Tab.3"
+      },
+      {
+        "value": "2",
+        "label_de": "Eignungsklasse 2",
+        "label_en": "Suitability class 2",
+        "order_index": 2,
+        "regulation_reference": "§3.3, Tab.3"
+      },
+      {
+        "value": "3",
+        "label_de": "Eignungsklasse 3",
+        "label_en": "Suitability class 3",
+        "order_index": 3,
+        "regulation_reference": "§3.3, Tab.3"
+      },
+      {
+        "value": "4",
+        "label_de": "Eignungsklasse 4",
+        "label_en": "Suitability class 4",
+        "order_index": 4,
+        "regulation_reference": "§3.3, Tab.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 gewaesserklasse": {
+    "enum_values": [
+      {
+        "value": "binnen_ausgezeichnet",
+        "label_de": "Binnengewässer / ausgezeichnet",
+        "label_en": "Inland / excellent",
+        "order_index": 10,
+        "regulation_reference": "§3.2, Tab.2"
+      },
+      {
+        "value": "binnen_gut",
+        "label_de": "Binnengewässer / gut",
+        "label_en": "Inland / good",
+        "order_index": 20,
+        "regulation_reference": "§3.2, Tab.2"
+      },
+      {
+        "value": "binnen_ausreichend",
+        "label_de": "Binnengewässer / ausreichend",
+        "label_en": "Inland / sufficient",
+        "order_index": 30,
+        "regulation_reference": "§3.2, Tab.2"
+      },
+      {
+        "value": "kueste_ausgezeichnet",
+        "label_de": "Küsten-/Übergangsgewässer / ausgezeichnet",
+        "label_en": "Coastal / excellent",
+        "order_index": 40,
+        "regulation_reference": "§3.2, Tab.2"
+      },
+      {
+        "value": "kueste_gut",
+        "label_de": "Küsten-/Übergangsgewässer / gut",
+        "label_en": "Coastal / good",
+        "order_index": 50,
+        "regulation_reference": "§3.2, Tab.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 nutzungsziel": {
+    "enum_values": [
+      {
+        "value": "badegewaesser",
+        "label_de": "Badegewässer",
+        "label_en": "Bathing water",
+        "order_index": 10,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "bewaesserung",
+        "label_de": "Bewässerung",
+        "label_en": "Irrigation",
+        "order_index": 20,
+        "regulation_reference": "§3.3"
+      },
+      {
+        "value": "trinkwassergewinnung",
+        "label_de": "Oberflächengewässer für Trinkwassergewinnung",
+        "label_en": "Surface water for drinking water abstraction",
+        "order_index": 30,
+        "regulation_reference": "§3.4"
+      },
+      {
+        "value": "brauchwasser",
+        "label_de": "Brauchwasser",
+        "label_en": "Service / process water",
+        "order_index": 40,
+        "regulation_reference": "§3.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-04",
+      "M205-10"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 toc_bewaesserung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 ziel_brauchwasser_oder_vollentkeimung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-04"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-02 ziel_spurenstoffabbau": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-04"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-03 afs": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-05",
+      "M205-06"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-03 behandlungsziel": {
+    "enum_values": [
+      {
+        "value": "badegewaesser",
+        "label_de": "Badegewaesser (EG-Richtlinie)",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "bewaesserung",
+        "label_de": "Bewaesserung (WHO/DIN 19650/TLL)",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "trinkwassergewinnung",
+        "label_de": "Oberflaechengewaesser Trinkwassergewinnung",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "brauchwasser",
+        "label_de": "Brauchwassernutzung",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-03 behoerdliche_freigabe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-03 bromid": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-03 desinfektion_erforderlich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-03 doc": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-03 durchfluss_max": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-05",
+      "M205-06",
+      "M205-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-03 nutzungsziel": {
+    "enum_values": [
+      {
+        "value": "badegewaesser",
+        "label_de": "Badegewässer",
+        "label_en": "Bathing water",
+        "order_index": 10,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "bewaesserung",
+        "label_de": "Bewässerung",
+        "label_en": "Irrigation",
+        "order_index": 20,
+        "regulation_reference": "§3.3"
+      },
+      {
+        "value": "trinkwassergewinnung",
+        "label_de": "Oberflächengewässer für Trinkwassergewinnung",
+        "label_en": "Surface water for drinking water abstraction",
+        "order_index": 30,
+        "regulation_reference": "§3.4"
+      },
+      {
+        "value": "brauchwasser",
+        "label_de": "Brauchwasser",
+        "label_en": "Service / process water",
+        "order_index": 40,
+        "regulation_reference": "§3.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09",
+      "M205-25"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-03 quellen_punkt_diffus": {
+    "enum_values": [
+      {
+        "value": "punktfoermig",
+        "label_de": "Punktförmige Einträge",
+        "label_en": "Point sources",
+        "order_index": 1,
+        "regulation_reference": "§3.1"
+      },
+      {
+        "value": "diffus",
+        "label_de": "Diffuse Einträge",
+        "label_en": "Diffuse sources",
+        "order_index": 2,
+        "regulation_reference": "§3.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-03 uvt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-05"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-03 ziel_spurenstoffabbau": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-04 badegewaesser_guete": {
+    "enum_values": [
+      {
+        "value": "ausgezeichnet",
+        "label_de": "Ausgezeichnete Qualität",
+        "label_en": "Excellent quality",
+        "order_index": 1,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "gut",
+        "label_de": "Gute Qualität",
+        "label_en": "Good quality",
+        "order_index": 2,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "ausreichend",
+        "label_de": "Ausreichende Qualität",
+        "label_en": "Sufficient quality",
+        "order_index": 3,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "mangelhaft",
+        "label_de": "Mangelhafte Qualität",
+        "label_en": "Poor quality",
+        "order_index": 4,
+        "regulation_reference": "§3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-04 eg_badegewaesser_richtlinie": {
+    "enum_values": [
+      {
+        "value": "alt",
+        "label_de": "Alt (Richtlinie 76/160/EWG)",
+        "label_en": "Old (Directive 76/160/EEC)",
+        "order_index": 1,
+        "regulation_reference": "§3.2"
+      },
+      {
+        "value": "neu",
+        "label_de": "Neu (Richtlinie 2006/7/EG)",
+        "label_en": "New (Directive 2006/7/EC)",
+        "order_index": 2,
+        "regulation_reference": "§3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-04 faekalcoliforme": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-04 gesamtcoliforme": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-04 gewaesserklasse": {
+    "enum_values": [
+      {
+        "value": "binnen_ausgezeichnet",
+        "label_de": "Binnengewässer / ausgezeichnet",
+        "label_en": "Inland / excellent",
+        "order_index": 10,
+        "regulation_reference": "§3.2, Tab.2"
+      },
+      {
+        "value": "binnen_gut",
+        "label_de": "Binnengewässer / gut",
+        "label_en": "Inland / good",
+        "order_index": 20,
+        "regulation_reference": "§3.2, Tab.2"
+      },
+      {
+        "value": "binnen_ausreichend",
+        "label_de": "Binnengewässer / ausreichend",
+        "label_en": "Inland / sufficient",
+        "order_index": 30,
+        "regulation_reference": "§3.2, Tab.2"
+      },
+      {
+        "value": "kueste_ausgezeichnet",
+        "label_de": "Küsten-/Übergangsgewässer / ausgezeichnet",
+        "label_en": "Coastal / excellent",
+        "order_index": 40,
+        "regulation_reference": "§3.2, Tab.2"
+      },
+      {
+        "value": "kueste_gut",
+        "label_de": "Küsten-/Übergangsgewässer / gut",
+        "label_en": "Coastal / good",
+        "order_index": 50,
+        "regulation_reference": "§3.2, Tab.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-04 gewaessertyp": {
+    "enum_values": [
+      {
+        "value": "binnen",
+        "label_de": "Binnengewaesser",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "kueste",
+        "label_de": "Kuesten-/Uebergangsgewaesser",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-04 guetekategorie": {
+    "enum_values": [
+      {
+        "value": "ausgezeichnet",
+        "label_de": "Ausgezeichnete Qualitaet",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "gut",
+        "label_de": "Gute Qualitaet",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "ausreichend",
+        "label_de": "Ausreichende Qualitaet",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-04 strep_faecalis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-05 daly_wert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-03"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-05 eignungsklasse_bewaesserung": {
+    "enum_values": [
+      {
+        "value": "1",
+        "label_de": "Eignungsklasse 1",
+        "label_en": "Suitability class 1",
+        "order_index": 1,
+        "regulation_reference": "§3.3, Tab.3"
+      },
+      {
+        "value": "2",
+        "label_de": "Eignungsklasse 2",
+        "label_en": "Suitability class 2",
+        "order_index": 2,
+        "regulation_reference": "§3.3, Tab.3"
+      },
+      {
+        "value": "3",
+        "label_de": "Eignungsklasse 3",
+        "label_en": "Suitability class 3",
+        "order_index": 3,
+        "regulation_reference": "§3.3, Tab.3"
+      },
+      {
+        "value": "4",
+        "label_de": "Eignungsklasse 4",
+        "label_en": "Suitability class 4",
+        "order_index": 4,
+        "regulation_reference": "§3.3, Tab.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-05 fkstrep": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-05 gerinne_abdeckung_lichtdicht": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja",
+        "label_en": "Yes",
+        "order_index": 1,
+        "regulation_reference": "§4.1.3.2"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§4.1.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-05"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 invest_kosten_uv": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 ip_schutzart": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 kosten_uv_cent_m3": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 nicht_bestrahltes_volumen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 nutzung": {
+    "enum_values": [
+      {
+        "value": "restricted",
+        "label_de": "Eingeschraenkte Nutzung",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "unrestricted",
+        "label_de": "Uneingeschraenkte Nutzung",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-05 spez_strom_uv": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 strahler_auslastung_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09",
+      "M205-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 strahler_leistungsdichte": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 strahler_nutzungsdauer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 strahler_oberflaechentemperatur": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 strahler_quecksilberdampfdruck": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 strahler_wellenlaenge": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 strahlertyp": {
+    "enum_values": [
+      {
+        "value": "niederdruck",
+        "label_de": "Niederdruckstrahler (Hg)",
+        "label_en": "Low-pressure mercury lamp",
+        "order_index": 10,
+        "regulation_reference": "§4.1.3.1, Tab.4"
+      },
+      {
+        "value": "mitteldruck",
+        "label_de": "Mitteldruckstrahler (Hg)",
+        "label_en": "Medium-pressure mercury lamp",
+        "order_index": 20,
+        "regulation_reference": "§4.1.3.1, Tab.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 toc": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-05 toc_bewaesserung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-05 uv_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 uv_dosis_zielband": {
+    "enum_values": [
+      {
+        "value": "mindestbestrahlung",
+        "label_de": "Mindestbestrahlung 300–450 J/m² (Grenz-/Leitwerte 76/160/EWG)",
+        "label_en": "Minimum dose 300–450 J/m² (limit/guide values 76/160/EEC)",
+        "order_index": 1,
+        "regulation_reference": "§4.1.2.3"
+      },
+      {
+        "value": "einzelfall_zehnerpotenz",
+        "label_de": "Einzelfall: Unterschreitung der Leitwerte um eine Zehnerpotenz (400–700 J/m²)",
+        "label_en": "Case-specific: one log below guide values (400–700 J/m²)",
+        "order_index": 2,
+        "regulation_reference": "§4.1.2.3"
+      },
+      {
+        "value": "tab2_ausgezeichnet",
+        "label_de": "Zielband ausgezeichnete Qualität (Tab.2 2006/7/EG, 400–700 J/m²)",
+        "label_en": "Target band excellent quality (Tab.2 2006/7/EC, 400–700 J/m²)",
+        "order_index": 3,
+        "regulation_reference": "§4.1.2.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-05"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 uv_intensitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 uvc_anteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 uvt_min": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-05 verweildauer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 abwassertemperatur_bereich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-06"
+    ],
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 arbeitsdruck": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 brutto_permeatfluss": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 eps_potenzial": {
+    "enum_values": [
+      {
+        "value": "gering",
+        "label_de": "Gering",
+        "label_en": "Low",
+        "order_index": 1,
+        "regulation_reference": "§4.2.3.2"
+      },
+      {
+        "value": "mittel",
+        "label_de": "Mittel",
+        "label_en": "Medium",
+        "order_index": 2,
+        "regulation_reference": "§4.2.3.2"
+      },
+      {
+        "value": "hoch",
+        "label_de": "Hoch",
+        "label_en": "High",
+        "order_index": 3,
+        "regulation_reference": "§4.2.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-06"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 membranbetrieb": {
+    "enum_values": [
+      {
+        "value": "dead_end",
+        "label_de": "Dead-End-Filtration",
+        "label_en": "Dead-end filtration",
+        "order_index": 10,
+        "regulation_reference": "§4.2.2"
+      },
+      {
+        "value": "cross_flow",
+        "label_de": "Cross-Flow-Filtration",
+        "label_en": "Cross-flow filtration",
+        "order_index": 20,
+        "regulation_reference": "§4.2.2"
+      },
+      {
+        "value": "semi_crossflow",
+        "label_de": "Semi-Crossflow",
+        "label_en": "Semi-crossflow",
+        "order_index": 30,
+        "regulation_reference": "§4.2.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 membranverfahren": {
+    "enum_values": [
+      {
+        "value": "mikrofiltration",
+        "label_de": "Mikrofiltration (MF)",
+        "label_en": "Microfiltration",
+        "order_index": 10,
+        "regulation_reference": "§4.2.2"
+      },
+      {
+        "value": "ultrafiltration",
+        "label_de": "Ultrafiltration (UF)",
+        "label_en": "Ultrafiltration",
+        "order_index": 20,
+        "regulation_reference": "§4.2.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 netto_permeatfluss": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 permeabilitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 porenweite": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 scaling_verursacher": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-06"
+    ],
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 spez_energie_membran": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 transmembrandruck": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-06 vorsiebung_erforderlich": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja",
+        "label_en": "Yes",
+        "order_index": 1,
+        "regulation_reference": "§4.2.3.2"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§4.2.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-06"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 betriebsanweisung_biostoffv": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-07 brauchwasser_standzeit_h": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-03"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-07 bromat_bildung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ct_wert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ct_wert_zielorganismus": {
+    "enum_values": [
+      {
+        "value": "e_coli",
+        "label_de": "Escherichia coli",
+        "label_en": "Escherichia coli",
+        "order_index": 1,
+        "regulation_reference": "§4.3.2 (DVGW W 225)"
+      },
+      {
+        "value": "cryptosporidien",
+        "label_de": "Cryptosporidien-Oozysten",
+        "label_en": "Cryptosporidium oocysts",
+        "order_index": 2,
+        "regulation_reference": "§4.3.2 (DVGW W 225)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-07"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 gefaehrdungsbeurteilung_biostoffv": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-07 kosten_ozon_cent_m3": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ndma_bildung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ozon_aufenthaltszeit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ozon_aus_o2_anteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ozon_einsatzgas": {
+    "enum_values": [
+      {
+        "value": "luft",
+        "label_de": "Luft",
+        "label_en": "Air",
+        "order_index": 1,
+        "regulation_reference": "§4.3.3.2"
+      },
+      {
+        "value": "reiner_sauerstoff",
+        "label_de": "Technisch reiner Sauerstoff",
+        "label_en": "Technically pure oxygen",
+        "order_index": 2,
+        "regulation_reference": "§4.3.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-07"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ozon_konz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ozon_pro_doc": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ozon_pro_m3_o2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ozon_pro_o2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ozongenerator_frequenz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 ozongenerator_spannung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 restozon_abluft": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-17",
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 spez_energie_anlage_ozon": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 spez_energie_ozon": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 temperatur_ozonentfernung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 verbrennung_typ": {
+    "enum_values": [
+      {
+        "value": "thermisch",
+        "label_de": "Thermisch (≥ 350 °C, mind. 2 s)",
+        "label_en": "Thermal (≥ 350 °C, min. 2 s)",
+        "order_index": 1,
+        "regulation_reference": "§4.3.3.4"
+      },
+      {
+        "value": "katalytisch",
+        "label_de": "Katalytisch (60–80 °C)",
+        "label_en": "Catalytic (60–80 °C)",
+        "order_index": 2,
+        "regulation_reference": "§4.3.3.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-07"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-07 wiederverkeimungsbeurteilung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-07 ziel_brauchwasser_oder_vollentkeimung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-09"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-08 afs": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10",
+      "M205-14"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-08 bromid": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-08 chlormittel_typ": {
+    "enum_values": [
+      {
+        "value": "chlorgas",
+        "label_de": "Chlorgas (Cl₂)",
+        "label_en": "Chlorine gas (Cl₂)",
+        "order_index": 1,
+        "regulation_reference": "§4.4.2"
+      },
+      {
+        "value": "natriumhypochlorit",
+        "label_de": "Natriumhypochlorit (NaOCl)",
+        "label_en": "Sodium hypochlorite (NaOCl)",
+        "order_index": 2,
+        "regulation_reference": "§4.4.2"
+      },
+      {
+        "value": "chlordioxid",
+        "label_de": "Chlordioxid (ClO₂)",
+        "label_en": "Chlorine dioxide (ClO₂)",
+        "order_index": 3,
+        "regulation_reference": "§4.4.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-08"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 clo2_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 doc": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-08 durchfluss_max": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10",
+      "M205-14",
+      "M205-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-08 entchlorungsstufe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 freies_chlor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 h2o2_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-08"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 h2o2_einsatz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 h2o2_kontaktzeit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-08"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 kontaktzeit_chlor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 kontaktzeit_pes": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 pes_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 pes_handelsform_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-08"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 ph_chlorung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 restchlor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 restchlor_betrieb": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-08 uvt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-09 chlorung_routine": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-09 empfohlenes_verfahren": {
+    "enum_values": [
+      {
+        "value": "uv_bestrahlung",
+        "label_de": "UV-Bestrahlung",
+        "label_en": "UV irradiation",
+        "order_index": 1,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "membrandesinfektion",
+        "label_de": "Nachgeschaltete Membrandesinfektion",
+        "label_en": "Downstream membrane disinfection",
+        "order_index": 2,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "ozonung",
+        "label_de": "Ozonung",
+        "label_en": "Ozonation",
+        "order_index": 3,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "chlorung",
+        "label_de": "Chlorung / sonstige oxidative Verfahren",
+        "label_en": "Chlorination / other oxidative processes",
+        "order_index": 4,
+        "regulation_reference": "§5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-09 kalibrierintervall_sensor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-09 monatlicher_nachweis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-09 pruefintervall_mikrobio": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-09 reinigungsintervall_sensor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-09 uv_sensor_anzahl_pro_bank": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-09 verfahren": {
+    "enum_values": [
+      {
+        "value": "uv",
+        "label_de": "UV-Bestrahlung",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "membran",
+        "label_de": "Membranverfahren",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "ozon",
+        "label_de": "Ozonung",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "chlorung",
+        "label_de": "Chlorung",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "paa",
+        "label_de": "Peressigsaeure",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "h2o2",
+        "label_de": "Wasserstoffperoxid",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-09 vergleich_e_coli_erreichbar": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-09 vergleich_vorbehandlungsbedarf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-10 darmviren": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-10 e_coli_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-10 enterokokken_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-10 faekalcoliforme_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-10 faekalstreptokokken_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-10 gesamtcoliforme_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-10 log_reduktion": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-10 salmonellen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-10 strahlertyp": {
+    "enum_values": [
+      {
+        "value": "niederdruck",
+        "label_de": "Niederdruckstrahler (Hg)",
+        "label_en": "Low-pressure mercury lamp",
+        "order_index": 10,
+        "regulation_reference": "§4.1.3.1, Tab.4"
+      },
+      {
+        "value": "mitteldruck",
+        "label_de": "Mitteldruckstrahler (Hg)",
+        "label_en": "Medium-pressure mercury lamp",
+        "order_index": 20,
+        "regulation_reference": "§4.1.3.1, Tab.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-10 uv_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-10 uv_dosis_zielband": {
+    "enum_values": [
+      {
+        "value": "mindestbestrahlung",
+        "label_de": "Mindestbestrahlung 300–450 J/m² (Grenz-/Leitwerte 76/160/EWG)",
+        "label_en": "Minimum dose 300–450 J/m² (limit/guide values 76/160/EEC)",
+        "order_index": 1,
+        "regulation_reference": "§4.1.2.3"
+      },
+      {
+        "value": "einzelfall_zehnerpotenz",
+        "label_de": "Einzelfall: Unterschreitung der Leitwerte um eine Zehnerpotenz (400–700 J/m²)",
+        "label_en": "Case-specific: one log below guide values (400–700 J/m²)",
+        "order_index": 2,
+        "regulation_reference": "§4.1.2.3"
+      },
+      {
+        "value": "tab2_ausgezeichnet",
+        "label_de": "Zielband ausgezeichnete Qualität (Tab.2 2006/7/EG, 400–700 J/m²)",
+        "label_en": "Target band excellent quality (Tab.2 2006/7/EC, 400–700 J/m²)",
+        "order_index": 3,
+        "regulation_reference": "§4.1.2.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-10 uv_intensitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-10 uvc_anteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-10 uvt_min": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-10 verweildauer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-11 abschreibungsdauer_baulich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-11 abschreibungsdauer_emt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-11 gerinne_abdeckung_lichtdicht": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja",
+        "label_en": "Yes",
+        "order_index": 1,
+        "regulation_reference": "§4.1.3.2"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§4.1.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-11 ip_schutzart": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-11 kapitalkostenanteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-11 mehrstrassige_anlage": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-11 nicht_bestrahltes_volumen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-10"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-11 strahler_leistungsdichte": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-11 strahler_oberflaechentemperatur": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-11 strahler_quecksilberdampfdruck": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-11 strahler_wellenlaenge": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-12 hg_strahler_sonderentsorgung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-12 strahler_auslastung_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24",
+      "M205-26"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-12 strahler_nutzungsdauer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-13 invest_kosten_uv": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-26"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-13 kosten_uv_cent_m3": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-26"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-13 spez_strom_uv": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-26"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-14 abwassertemperatur_bereich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-14"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 arbeitsdruck": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 brutto_permeatfluss": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 eps_potenzial": {
+    "enum_values": [
+      {
+        "value": "gering",
+        "label_de": "Gering",
+        "label_en": "Low",
+        "order_index": 1,
+        "regulation_reference": "§4.2.3.2"
+      },
+      {
+        "value": "mittel",
+        "label_de": "Mittel",
+        "label_en": "Medium",
+        "order_index": 2,
+        "regulation_reference": "§4.2.3.2"
+      },
+      {
+        "value": "hoch",
+        "label_de": "Hoch",
+        "label_en": "High",
+        "order_index": 3,
+        "regulation_reference": "§4.2.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-14"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 membran_porenweite": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 membranbetrieb": {
+    "enum_values": [
+      {
+        "value": "dead_end",
+        "label_de": "Dead-End-Filtration",
+        "label_en": "Dead-end filtration",
+        "order_index": 10,
+        "regulation_reference": "§4.2.2"
+      },
+      {
+        "value": "cross_flow",
+        "label_de": "Cross-Flow-Filtration",
+        "label_en": "Cross-flow filtration",
+        "order_index": 20,
+        "regulation_reference": "§4.2.2"
+      },
+      {
+        "value": "semi_crossflow",
+        "label_de": "Semi-Crossflow",
+        "label_en": "Semi-crossflow",
+        "order_index": 30,
+        "regulation_reference": "§4.2.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 membranverfahren": {
+    "enum_values": [
+      {
+        "value": "mikrofiltration",
+        "label_de": "Mikrofiltration (MF)",
+        "label_en": "Microfiltration",
+        "order_index": 10,
+        "regulation_reference": "§4.2.2"
+      },
+      {
+        "value": "ultrafiltration",
+        "label_de": "Ultrafiltration (UF)",
+        "label_en": "Ultrafiltration",
+        "order_index": 20,
+        "regulation_reference": "§4.2.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 netto_permeatfluss": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 permeabilitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-14 pilotierung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-14 porenweite": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 scaling_verursacher": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-14"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 transmembrandruck": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-14 vorsiebung_erforderlich": {
+    "enum_values": [
+      {
+        "value": "ja",
+        "label_de": "Ja",
+        "label_en": "Yes",
+        "order_index": 1,
+        "regulation_reference": "§4.2.3.2"
+      },
+      {
+        "value": "nein",
+        "label_de": "Nein",
+        "label_en": "No",
+        "order_index": 2,
+        "regulation_reference": "§4.2.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-14"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-15 spez_energie_membran": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-26"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-17 ct_wert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-17 ct_wert_zielorganismus": {
+    "enum_values": [
+      {
+        "value": "e_coli",
+        "label_de": "Escherichia coli",
+        "label_en": "Escherichia coli",
+        "order_index": 1,
+        "regulation_reference": "§4.3.2 (DVGW W 225)"
+      },
+      {
+        "value": "cryptosporidien",
+        "label_de": "Cryptosporidien-Oozysten",
+        "label_en": "Cryptosporidium oocysts",
+        "order_index": 2,
+        "regulation_reference": "§4.3.2 (DVGW W 225)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-17"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-17 ozon_aufenthaltszeit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-17 ozon_aus_o2_anteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-17 ozon_einsatzgas": {
+    "enum_values": [
+      {
+        "value": "luft",
+        "label_de": "Luft",
+        "label_en": "Air",
+        "order_index": 1,
+        "regulation_reference": "§4.3.3.2"
+      },
+      {
+        "value": "reiner_sauerstoff",
+        "label_de": "Technisch reiner Sauerstoff",
+        "label_en": "Technically pure oxygen",
+        "order_index": 2,
+        "regulation_reference": "§4.3.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-17"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-17 ozon_konz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-17 ozon_pro_doc": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-17 ozon_pro_m3_o2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-17 ozon_pro_o2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-17 ozongenerator_frequenz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-17 ozongenerator_spannung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-17 reaktor_gasdicht": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-18 katalytisch": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-18 restozon_abgas": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-18 restozon_abluft": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-17",
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-18 temperatur_ozonentfernung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-18 verbrennung_haltezeit_s": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-18 verbrennung_typ": {
+    "enum_values": [
+      {
+        "value": "thermisch",
+        "label_de": "Thermisch (≥ 350 °C, mind. 2 s)",
+        "label_en": "Thermal (≥ 350 °C, min. 2 s)",
+        "order_index": 1,
+        "regulation_reference": "§4.3.3.4"
+      },
+      {
+        "value": "katalytisch",
+        "label_de": "Katalytisch (60–80 °C)",
+        "label_en": "Catalytic (60–80 °C)",
+        "order_index": 2,
+        "regulation_reference": "§4.3.3.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-17"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-19 kosten_ozon_cent_m3": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-26"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-19 spez_energie_anlage_ozon": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-26"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-19 spez_energie_ozon": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-26"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-20 bromat_bildung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-20 ndma_bildung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-21 chlor_kontaktzeit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 chlor_ph": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 chlormittel": {
+    "enum_values": [
+      {
+        "value": "cl2",
+        "label_de": "Chlorgas",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "naocl",
+        "label_de": "Natriumhypochlorit",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      },
+      {
+        "value": "clo2",
+        "label_de": "Chlordioxid",
+        "label_en": "",
+        "order_index": 0,
+        "regulation_reference": ""
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 chlormittel_typ": {
+    "enum_values": [
+      {
+        "value": "chlorgas",
+        "label_de": "Chlorgas (Cl₂)",
+        "label_en": "Chlorine gas (Cl₂)",
+        "order_index": 1,
+        "regulation_reference": "§4.4.2"
+      },
+      {
+        "value": "natriumhypochlorit",
+        "label_de": "Natriumhypochlorit (NaOCl)",
+        "label_en": "Sodium hypochlorite (NaOCl)",
+        "order_index": 2,
+        "regulation_reference": "§4.4.2"
+      },
+      {
+        "value": "chlordioxid",
+        "label_de": "Chlordioxid (ClO₂)",
+        "label_en": "Chlorine dioxide (ClO₂)",
+        "order_index": 3,
+        "regulation_reference": "§4.4.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-21"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 clo2_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 clo2_konzentration": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 entchlorungsstufe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 freies_chlor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 kontaktzeit_chlor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 ph_chlorung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-21 restchlor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-21 restchlor_betrieb": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-21 restchlor_gewaesser": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-22 bgv_b4_konformitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-22 csb_zunahme": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-22 kontaktzeit_pes": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-22 paa_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-22 pes_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-22 pes_handelsform_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-21"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-22 sicherheitsdatenblatt_pes": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-23 h2o2_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-21"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-23 h2o2_einsatz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-23 h2o2_kontaktzeit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-21"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-24 gerinne_zuschaltbar": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M205-24 kalibrierintervall_sensor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-24 monatlicher_nachweis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-24 pruefintervall_mikrobio": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M205-25"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-24 reinigungsintervall_sensor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-24 uv_sensor_anzahl_pro_bank": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-25 darmviren": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-25 e_coli_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-25 enterokokken_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-25 faekalcoliforme_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-25 faekalstreptokokken_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-25 gesamtcoliforme_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-25 log_reduktion": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-25 projekt_konform": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-25 salmonellen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-26 abschreibungsdauer_baulich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-26 abschreibungsdauer_emt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M205-26 kapitalkostenanteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M205-26 konformitaetsaussage": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "sections": {
+    "M205-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-01 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-01 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-02 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-02 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-03 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-03 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-04 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-05 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-05 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-05 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-06 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-07 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-07 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-07 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-08 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-08 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-08 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-08 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-08 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-08 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-08 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-08 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-08 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-09 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-09 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-09 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-09 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-09 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-09 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-09 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-09 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-09 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-10 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-10 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-10 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-10 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-10 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-10 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-10 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-10 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-10 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-11 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-11 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-11 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-11 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-11 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-11 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-11 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-11 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-11 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-12 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-12 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-12 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-12 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-12 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-12 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-12 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-12 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-12 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-13 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-13 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-13 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-13 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-13 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-13 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-13 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-13 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-13 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-14 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-14 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-14 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-14 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-14 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-14 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-14 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-14 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-14 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-15 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-15 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-15 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-15 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-15 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-15 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-15 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-15 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-15 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-16 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-16 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-16 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-16 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-16 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-16 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-16 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-16 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-16 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-17 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-17 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-17 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-17 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-17 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-17 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-17 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-17 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-17 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-18 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-18 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-18 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-18 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-18 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-18 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-18 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-18 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-18 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-19 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-19 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-19 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-19 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-19 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-19 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-19 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-19 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-19 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-20 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-20 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-20 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-20 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-20 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-20 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-20 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-20 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-20 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-21 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-21 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-21 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-21 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-21 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-21 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-21 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-21 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-21 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-22 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-22 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-22 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-22 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-22 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-22 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-22 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-22 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-22 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-23 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-23 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-23 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-23 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-23 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-23 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-23 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-23 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-23 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-24 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-24 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-24 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-24 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-24 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-24 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-24 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-24 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-24 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-25 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-25 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-25 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-25 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-25 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-25 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-25 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-25 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-25 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-26 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-26 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-26 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-26 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-26 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-26 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-26 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-26 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M205-26 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "M205-05 EQ-01": {
+      "id": "464d8a4f-72d2-4ca3-8e24-5677a57d14ce",
+      "output_symbol": "uv_dosis",
+      "input_symbols": [
+        "uv_intensitaet",
+        "verweildauer"
+      ]
+    },
+    "M205-05 EQ-02": {
+      "id": "ba51e8f2-4c20-4c01-8f4d-9effcc262b37",
+      "output_symbol": "uv_dosis",
+      "input_symbols": [
+        "uv_dosis",
+        "uv_dosis_zielband"
+      ]
+    },
+    "M205-05 EQ-06": {
+      "id": "197122ba-f723-4b27-80c1-51a972ea8e12",
+      "output_symbol": "spez_strom_uv",
+      "input_symbols": []
+    },
+    "M205-05 EQ-12": {
+      "id": "1a5e5b28-d9c1-4a49-8c5e-9d596e000ff9",
+      "output_symbol": "uv_dosis",
+      "input_symbols": [
+        "uv_dosis",
+        "uv_dosis_zielband"
+      ]
+    },
+    "M205-06 EQ-07": {
+      "id": "b3126c0d-7940-413e-b3f0-b25b02ccbf38",
+      "output_symbol": "spez_energie_membran",
+      "input_symbols": []
+    },
+    "M205-06 EQ-08": {
+      "id": "33419052-171f-4874-94be-d63cdf0e1cfa",
+      "output_symbol": "permeabilitaet",
+      "input_symbols": [
+        "brutto_permeatfluss",
+        "transmembrandruck"
+      ]
+    },
+    "M205-07 EQ-03": {
+      "id": "c5762992-522f-4cf1-a58f-a46ec3ca9096",
+      "output_symbol": "ct_wert",
+      "input_symbols": [
+        "ozon_konz",
+        "ozon_aufenthaltszeit"
+      ]
+    },
+    "M205-07 EQ-04": {
+      "id": "5bc795dd-75f7-433c-a359-b2c1e58d7488",
+      "output_symbol": "ozon_pro_doc",
+      "input_symbols": [
+        "ozon_pro_doc"
+      ]
+    },
+    "M205-07 EQ-05": {
+      "id": "9fc20ef5-b655-46ee-b46f-320ab755a974",
+      "output_symbol": "spez_energie_ozon",
+      "input_symbols": []
+    },
+    "M205-08 EQ-09": {
+      "id": "0e05ac69-c6c4-460a-80b0-7664370b08ca",
+      "output_symbol": "clo2_dosis",
+      "input_symbols": []
+    },
+    "M205-08 EQ-10": {
+      "id": "86f703b6-6348-4577-a624-029e1ce3c93b",
+      "output_symbol": "freies_chlor",
+      "input_symbols": []
+    },
+    "M205-08 EQ-11": {
+      "id": "cb540d04-9822-4941-a6e2-12a9be184c8e",
+      "output_symbol": "restchlor_betrieb",
+      "input_symbols": [
+        "restchlor_betrieb"
+      ]
+    },
+    "M205-10 EQ-01": {
+      "id": "7ebe3986-55b8-41a5-8f35-6bd42f5fc8a1",
+      "output_symbol": "uv_dosis",
+      "input_symbols": [
+        "uv_intensitaet",
+        "verweildauer"
+      ]
+    },
+    "M205-10 EQ-02": {
+      "id": "31918a55-696c-4044-a398-1f1c5e36d1e1",
+      "output_symbol": "uv_dosis",
+      "input_symbols": [
+        "uv_dosis",
+        "uv_dosis_zielband"
+      ]
+    },
+    "M205-10 EQ-12": {
+      "id": "d55d6598-b169-469f-8e17-f7a1c9583bf2",
+      "output_symbol": "uv_dosis",
+      "input_symbols": [
+        "uv_dosis",
+        "uv_dosis_zielband"
+      ]
+    },
+    "M205-13 EQ-06": {
+      "id": "246ff465-b925-47a4-85eb-beb9932f9f65",
+      "output_symbol": "spez_strom_uv",
+      "input_symbols": []
+    },
+    "M205-14 EQ-08": {
+      "id": "d7668bb1-a44b-42ac-9be7-34714774d34e",
+      "output_symbol": "permeabilitaet",
+      "input_symbols": [
+        "brutto_permeatfluss",
+        "transmembrandruck"
+      ]
+    },
+    "M205-15 EQ-07": {
+      "id": "d399b7fd-e988-4499-a2a6-6af379ab0db5",
+      "output_symbol": "spez_energie_membran",
+      "input_symbols": []
+    },
+    "M205-17 EQ-03": {
+      "id": "9d8b3158-0e0d-43e5-83d8-1f631a6ba2fc",
+      "output_symbol": "ct_wert",
+      "input_symbols": [
+        "ozon_konz",
+        "ozon_aufenthaltszeit"
+      ]
+    },
+    "M205-17 EQ-04": {
+      "id": "30a51b8c-422f-411a-8c09-c728a393f433",
+      "output_symbol": "ozon_pro_doc",
+      "input_symbols": [
+        "ozon_pro_doc"
+      ]
+    },
+    "M205-19 EQ-05": {
+      "id": "14262b5f-2a76-49f9-bddd-bac5747356cd",
+      "output_symbol": "spez_energie_ozon",
+      "input_symbols": []
+    },
+    "M205-21 EQ-09": {
+      "id": "0c258d85-0a1e-4456-b0df-12f529d11d2c",
+      "output_symbol": "clo2_dosis",
+      "input_symbols": []
+    },
+    "M205-21 EQ-10": {
+      "id": "3f3b7237-8837-45ff-86a5-1582f7156cbd",
+      "output_symbol": "freies_chlor",
+      "input_symbols": []
+    },
+    "M205-21 EQ-11": {
+      "id": "b02ff29a-36a0-41b8-b466-0a3b701bd895",
+      "output_symbol": "restchlor_betrieb",
+      "input_symbols": [
+        "restchlor_betrieb"
+      ]
+    }
+  }
+}

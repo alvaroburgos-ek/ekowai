@@ -528,6 +528,30 @@ suitability matrix: seed only the sub-rows whose mark is printed on the row itse
 alignment / cross-reference leads), and seed the printed "-" cells as explicit `nicht geeignet` rows so the fill
 distinguishes "not suitable" from "no row".
 
+**Encoding traps (Plan 3 Task 11, DWA-M-205).** (1) A visibility rule on a field that a block gate reads (`wiederverkeimungsbeurteilung`
+← CR-31) turns the gate `not_applicable` whenever the rule fails — that is an enforcement change, not visibility: STAGE it as the gate
+guard it really is (`IF standzeit > 0 THEN …`, m205-G-6) and never emit the field rule first. (2) A target table with several
+printed row heads that the brief keys on scalar drivers (`gewaessertyp` × `guetekategorie`) must be keyed on what the REGISTER's
+worksheet actually inherits — check the drivers' `consumer_worksheets` before choosing keys; prod's combined `gewaesserklasse`
+(binnen_gut, kueste_gut, …) is inherited on M205-10, the two separate selects are not; a printed cell with no prod token
+(`kueste_ausreichend`) is still seeded under its natural token so the table is complete, and the token gap is an E-block (D-1).
+(3) A `lookup_value` column with a printed "-" cell (Strep. faecalis I-Wert) makes the row's derived `ok` null and
+`count_rows(reg, ok == 0)` `manual_required` — do not paper over it with `if(x IS NULL, …)` readings; keep the null, show the
+printed text in a sibling `derived` column, offer the `behoerde` discriminator branch, and record the J-block. (4) `mean_rows` /
+`min_rows` over a register whose `derived` column is null on SOME complete rows (log10(c_in / c_out) with c_out = 0) fails with
+`Unbekanntes Symbol` — filter with the conditional third argument (`mean_rows(reg, log_red, c_out > 0)`) and say so in the note.
+(5) Printed RANGES per select token (Tab. 4 lamp figures) are never filled into a number field (SR-2 — a `_min` fill is an
+auto-pick): create TEXT `lookup_fill` twins that show the printed cell, seed the numeric bounds as `_min` / `_max` columns for a
+STAGED range gate, and leave the existing numeric inputs as manufacturer data. (6) A figure the standard states as arithmetic on
+printed numbers ("etwa 10 kWh/kg … bei Luft ca. 60 % mehr" → 16) may be seeded with the printed operands beside it and a J-block;
+never seed a number the text only implies without stating the rule. (7) A `lookup_fill` over a cell that is null for one token
+(katalytisch has no hold time) shows "—" as a limit — hide the fill for that token with `visible_when` instead of seeding a
+placeholder. (8) `extractSymbols` takes a parsed node (`parseExpression(src)`), not the source string — a string argument
+yields an empty set silently. (9) A discriminator register that mixes a `lookup_key` (Tab. 1 row picker) with `derived`
+`lookup()` rows (Tab. 2 / 3 from worksheet scope) is the working pattern for "which target table applies": row-scope
+`visible_when` on every branch column, one `limit` derived by nested `if(quelle == …)`, no `override` block — the "authority
+sets the target" sentence is a `behoerde` branch with typed inputs, not an override of a table value.
+
 **Staged DELETE rollbacks (controller ruling, Plan 3 Task 6 fix round 1 — corpus-wide).** A STAGED block that deletes rows
 from a table without an `active` column (`equations`, `compliance_requirements`) (1) copies the full rows into an archive table
 created in the SAME transaction (`CREATE TABLE IF NOT EXISTS <table>_archive_<slug> AS SELECT * FROM <table> WHERE false;

@@ -1,0 +1,394 @@
+-- DWA-M-205 — Plan 3 Task 11 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the 24 equation rows — ids / md5(formula) —, the 72
+-- compliance rows — ids / severities / md5(condition) —, worksheet + section titles, standards.version 'März 2013',
+-- field labels / units / is_required / validation_rules) were captured read-only on 2026-09-18
+-- (src/lib/eval/field-configs/m205.prior.json; scripts/verification/prod-query.mjs). Transcript lines refer to
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA-M-205\DWA-M_205.md. This task changes NO gate severity (every prod gate is `block`).
+--
+-- Conventions: `s.code = 'DWA-M-205'`, worksheets by code, never by id (equations and gates by their captured uuid + a
+-- guard on md5(formula) / md5(condition) of the text they replace so a re-run is a no-op); each block names its
+-- rollback. Every block that DELETEs or rewrites an equation / gate row follows the amendment-I archive pattern: the
+-- affected rows are copied into `equations_archive_m205` / `compliance_requirements_archive_m205` in the SAME
+-- transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE false; INSERT … SELECT * … WHERE (id = … AND
+-- md5(…) = …)`), the DELETE / UPDATE is guarded on the md5 read read-only from prod, and the rollback restores from the
+-- archive by id with an EXPLICIT column list (never `SELECT *`, never retyped — prod-query.mjs truncates cells at 120
+-- chars); the archive table is dropped by the rollback or on the owner's sign-off that the change is final. A field
+-- retirement is `active = false` (reversible). New gates are INSERTs with a DELETE-by-description rollback. The Plan-3
+-- DATA migrations (20260917101100 seed · 20260917101110 field configs · 20260917101120 equations) must be applied
+-- BEFORE any block that reads a created symbol (leitorganismen, leitorganismen_verletzungen, leitorganismen_count,
+-- uv_dosis_min, uv_dosis_max, bewirtschaftung, log_reduktion_empfehlung, *_tab4, bestrahlungsgerinne, gerinne_count,
+-- durchfluss_gerinne_sum, gerinne_sensor_verletzungen, membranmodule, membranflaeche_sum, permeat_design,
+-- ozongeneratoren, ozon_kapazitaet_sum, ozon_pro_doc_calc, ozonbedarf_kg_h, o2_bedarf_kg_h, ct_ecoli_basis, ct_ziel,
+-- spez_energie_ozon_tab, temperatur_ozonentfernung_min/_max, verbrennung_haltezeit_min, chlorungsmittel,
+-- chlordosis_verletzungen, proben_desinfektion, proben_count, log_reduktion_mean, log_reduktion_min).
+-- Consumer edits write `fields.consumer_worksheets` (text[]); the guards keep a re-run idempotent.
+--
+-- Captured compliance rows (all severity block; md5 = md5(condition)) — the Tab.-2 gates on M205-10:
+--   CR-03   e05e98c2-15c1-49c1-999c-40d9675fe75f  'e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200'   e69a940e7d385764aa5dec0c1486f7a4
+--   CR-03-2 ab98859a-a512-489b-bd9b-31d49a6ee4f0  (same)                                                  e69a940e7d385764aa5dec0c1486f7a4
+--   CR-04   25d6d316-dd85-4491-b62d-c10e7adbcfcf  'e_coli_ablauf <= 250 AND enterokokken_ablauf <= 100'   9fd94eda197a06caaba7b98b35460467
+--   CR-04-2 85c33f56-0637-4176-933d-506916835434  (same)                                                  9fd94eda197a06caaba7b98b35460467
+--   CR-05   8ce355c6-4bb7-456f-bf55-dc7718413de0  'e_coli_ablauf == 0 AND enterokokken_ablauf == 0'       f95f0e0f21461db51510ce157aa28126
+--   CR-05-2 9812fb5e-92f0-497d-979f-35664282c99b  (same)                                                  f95f0e0f21461db51510ce157aa28126
+--   CR-14   b8ee6fc2-af91-47b5-ae05-2a04047edb15  'e_coli_ablauf <= 1000 AND enterokokken_ablauf <= 400'  401d0b0b6e0facc2c61f2548fb9d6682
+--   CR-14-2 1d2f5224-be95-4980-8cca-b7bcb1ff0983  (same)                                                  401d0b0b6e0facc2c61f2548fb9d6682
+--   CR-15   e74217a2-5f7b-49fc-9cae-8fe2fd7281ad  'e_coli_ablauf <= 900 AND enterokokken_ablauf <= 330'   46b04258322c728bdace7e6563b55cef
+--   CR-15-2 2bc4cee8-c01d-41bc-91aa-80783344b386  (same)                                                  46b04258322c728bdace7e6563b55cef
+--   CR-16   4f28b791-b621-4dea-9d12-ed274947d5be  'e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200'   e69a940e7d385764aa5dec0c1486f7a4  (Küste gut = Binnen ausgezeichnet cells)
+--   CR-16-2 7632aa40-ac77-4abd-a411-902151dbdd8c  (same)                                                  e69a940e7d385764aa5dec0c1486f7a4
+--   CR-17   8e8a26dc-ecb0-4840-8269-648598dcdba7  'e_coli_ablauf <= 500 AND enterokokken_ablauf <= 185'   8c214e0a7135dda402b9dee3fdfcc5bb
+--   CR-17-2 86179325-4a53-4d53-b473-1c7cf55f0181  (same)                                                  8c214e0a7135dda402b9dee3fdfcc5bb
+-- Other captured rows referenced below:
+--   CR-07   d4be8eb8-c2ac-486f-be60-ed0bc6d07cf0 (M205-05) · 16541376-1bcd-4055-be9d-b421e51e62ba (M205-10)  'uv_dosis >= 300 AND uv_dosis <= 700'  809c912efd533a0f28f9caec93a8af98
+--   CR-20   139658fe-3d40-40f4-8155-5e397f2bd3ec · CR-20-2 7581d576-0ab4-4aee-9033-22bd134b59d7 (M205-10)   'log_reduktion >= 3'                   66c1febf1f3b7a980cd50b862faa9ebe
+--   CR-21   8fc3c2ef-4de8-4ebc-aa6c-832a0e1fec34 (M205-07) · 06b2b87b-c196-4562-a69f-2564f3a0b1b2 (M205-10) · REQ-M205-ES1-04 e6ba2255-dd8b-4797-a394-68bfa563df3c (warn) · -2 1d23c9fe-44e7-4767-b544-6027563a75e8 (warn)  'ozon_pro_doc < 0.8'  f248e112aaa24ed44480499b4600879f
+--   CR-26   28589251-2af0-4301-a543-5fb9f60090ff (M205-10) · 7c147ff3-9496-45c6-a8ab-ce48d595a9f4 (M205-18)  'temperatur_ozonentfernung >= 350 OR katalytisch == True'  6553d461a64cfdd31643c275339b492a
+--   CR-28   869c84ce-e0ff-41a3-a0e5-0895f2bee132 (M205-03) · 07515d2b-bca7-4e30-a955-a5ef85834518 (M205-10)  'durchfluss_max <= 1000 OR mehrstrassige_anlage == True'  46a5c6536cac085a100aa657933681da
+--   CR-31   6b8754ed-25fd-4b8f-97ae-a38c9012b50c · CR-31-2 cf706693-1306-4877-b689-a4f8c48ee49e (M205-07)   'wiederverkeimungsbeurteilung == True'  ea522e1cd6851f9908eec427e20510be
+-- Captured equation rows (all verification_status verified_against_standard; md5 = md5(formula)):
+--   EQ-05  9fc20ef5-b655-46ee-b46f-320ab755a974 (M205-07) · 14262b5f-2a76-49f9-bddd-bac5747356cd (M205-19)  'spez_energie_ozon = 10'  e06ce2e611f45e2f535f63e6d1d66a78  input_symbols NULL
+--   EQ-04  5bc795dd-75f7-433c-a359-b2c1e58d7488 (M205-07) · 30a51b8c-422f-411a-8c09-c728a393f433 (M205-17)  'ozon_pro_doc < 0.8'     f248e112aaa24ed44480499b4600879f  input_symbols {ozon_pro_doc}
+--   EQ-02  ba51e8f2-4c20-4c01-8f4d-9effcc262b37 (M205-05) · 31918a55-696c-4044-a398-1f1c5e36d1e1 (M205-10)  'uv_dosis >= 300 AND uv_dosis <= 450'  1bc8ac0a655fe359c6a34eda7ac291e1
+--   EQ-12  1a5e5b28-d9c1-4a49-8c5e-9d596e000ff9 (M205-05) · d55d6598-b169-469f-8e17-f7a1c9583bf2 (M205-10)  'uv_dosis >= 400 AND uv_dosis <= 700'  05f04d0244151bb235e2796fafdc42b3
+--   EQ-06  197122ba-f723-4b27-80c1-51a972ea8e12 (M205-05) · 246ff465-b925-47a4-85eb-beb9932f9f65 (M205-13)  'spez_strom_uv >= 30 AND spez_strom_uv <= 60'  a4afea8e1e069f90b3b46f56bd9d8001
+--   EQ-07  b3126c0d-7940-413e-b3f0-b25b02ccbf38 (M205-06) · d399b7fd-e988-4499-a2a6-6af379ab0db5 (M205-15)  'spez_energie_membran >= 0.1 AND spez_energie_membran <= 0.2'  39c9dee1b4c1b1668399448ce3028149
+--   EQ-09  0e05ac69-c6c4-460a-80b0-7664370b08ca (M205-08) · 0c258d85-0a1e-4456-b0df-12f529d11d2c (M205-21)  'clo2_dosis >= 5 AND clo2_dosis <= 10'  d9d43fa8135099f40ad65a644a7330c4
+--   EQ-10  86f703b6-6348-4577-a624-029e1ce3c93b (M205-08) · 3f3b7237-8837-45ff-86a5-1582f7156cbd (M205-21)  'freies_chlor >= 1 AND freies_chlor <= 20'  bdae7b3b891a31a28e816a2ff9363b6b
+--   EQ-11  cb540d04-9822-4941-a6e2-12a9be184c8e (M205-08) · b02ff29a-36a0-41b8-b466-0a3b701bd895 (M205-21)  'restchlor_betrieb >= 0.2'  6a64d95caf0d3d9439c6bdb2dd212963
+-- Explicit column lists (information_schema, read-only 2026-09-18):
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   fields: id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote
+
+-- =====================================================================================================================
+-- m205-G-1 · M205-10 · the 14 Tab.-2 gates (CR-03/04/05/14/15/16/17 + their -2 twins) → ONE gate on the Leitorganismus register
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L232 "Die Festlegung des Behandlungsziels für die Abwasserdesinfektion erfolgt in der Regel durch die zuständige
+-- Behörde."; Tab. 2 L322–L323 / L331–L332 (six (Gewässertyp × Kategorie) cell pairs — the seven prod gates hard-code them
+-- and all fire at once: a plant meeting "Binnengewässer gut" (1.000 / 400) fails CR-03 (500 / 200), CR-04 (250 / 100),
+-- CR-05 (0 / 0) …); L343 "Der Parameter „Gesamtcoliforme" ist weggefallen".
+-- Why staged: replacing 14 verified block gates by one register gate is a gate-condition change (always sign-off).
+-- Option (after the three DATA migrations; the register rows carry the Gewässerklasse limit per row):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m205 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m205 SELECT * FROM compliance_requirements
+--  WHERE (id = 'e05e98c2-15c1-49c1-999c-40d9675fe75f' AND md5(condition) = 'e69a940e7d385764aa5dec0c1486f7a4')
+--     OR (id = 'ab98859a-a512-489b-bd9b-31d49a6ee4f0' AND md5(condition) = 'e69a940e7d385764aa5dec0c1486f7a4')
+--     OR (id = '25d6d316-dd85-4491-b62d-c10e7adbcfcf' AND md5(condition) = '9fd94eda197a06caaba7b98b35460467')
+--     OR (id = '85c33f56-0637-4176-933d-506916835434' AND md5(condition) = '9fd94eda197a06caaba7b98b35460467')
+--     OR (id = '8ce355c6-4bb7-456f-bf55-dc7718413de0' AND md5(condition) = 'f95f0e0f21461db51510ce157aa28126')
+--     OR (id = '9812fb5e-92f0-497d-979f-35664282c99b' AND md5(condition) = 'f95f0e0f21461db51510ce157aa28126')
+--     OR (id = 'b8ee6fc2-af91-47b5-ae05-2a04047edb15' AND md5(condition) = '401d0b0b6e0facc2c61f2548fb9d6682')
+--     OR (id = '1d2f5224-be95-4980-8cca-b7bcb1ff0983' AND md5(condition) = '401d0b0b6e0facc2c61f2548fb9d6682')
+--     OR (id = 'e74217a2-5f7b-49fc-9cae-8fe2fd7281ad' AND md5(condition) = '46b04258322c728bdace7e6563b55cef')
+--     OR (id = '2bc4cee8-c01d-41bc-91aa-80783344b386' AND md5(condition) = '46b04258322c728bdace7e6563b55cef')
+--     OR (id = '4f28b791-b621-4dea-9d12-ed274947d5be' AND md5(condition) = 'e69a940e7d385764aa5dec0c1486f7a4')
+--     OR (id = '7632aa40-ac77-4abd-a411-902151dbdd8c' AND md5(condition) = 'e69a940e7d385764aa5dec0c1486f7a4')
+--     OR (id = '8e8a26dc-ecb0-4840-8269-648598dcdba7' AND md5(condition) = '8c214e0a7135dda402b9dee3fdfcc5bb')
+--     OR (id = '86179325-4a53-4d53-b473-1c7cf55f0181' AND md5(condition) = '8c214e0a7135dda402b9dee3fdfcc5bb');
+-- DELETE FROM compliance_requirements c USING compliance_requirements_archive_m205 a WHERE c.id = a.id AND md5(c.condition) = md5(a.condition);
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'CR-03P3', 'Leitorganismen: jeder erfasste Zielwert eingehalten (Tab. 1 / 2 / 3 oder Behörde)',
+--        'leitorganismen_count >= 1 AND leitorganismen_verletzungen == 0', '§2.1, §3.2, §3.3, Tab. 1, Tab. 2, Tab. 3', 'block',
+--        'Plan 3 (m205-G-1): ersetzt CR-03/04/05/14/15/16/17 (+ -2) — der Zielwert je Organismus kommt aus der gewählten Zieltabelle (Register leitorganismen, M205-10-D1 / -D2).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M205-10' AND s.code = 'DWA-M-205'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'CR-03P3');
+-- COMMIT;
+-- Rollback (explicit columns, from the archive):
+-- BEGIN;
+-- DELETE FROM compliance_requirements c USING worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE c.worksheet_template_id = w.id AND w.code = 'M205-10' AND s.code = 'DWA-M-205' AND c.code = 'CR-03P3';
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_m205 a WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.id = a.id);
+-- DELETE FROM compliance_requirements_archive_m205 a USING compliance_requirements c WHERE c.id = a.id;
+-- COMMIT;
+-- The archive table `compliance_requirements_archive_m205` is dropped once every archived row of this file (G-1, G-4, G-5, G-6, G-7, G-13) is rolled back, or by the owner once the changes are signed off as final.
+
+-- =====================================================================================================================
+-- m205-G-2 · M205-10 (and -05/-06/-07/-08/-18) · process gates armed by `verfahren` only
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4 / §5 — the process chapters are alternatives (L1038 "Zur Desinfektion des Gesamtablaufes kommt derzeit im
+-- Wesentlichen die UV-Bestrahlung zum Einsatz. …"); `verfahren` (M205-09, tokens uv / membran / ozon / chlorung / paa /
+-- h2o2) has NO consumer (capture) — every process gate fires on every project (the 12 mirrored process gates on M205-10
+-- read symbols inherited from -07 / -08 / -18: CR-08/09/10/11/12/21/22/24/26/28/29/34).
+-- Why staged: gate-condition change; needs m205-C-1 first (verfahren reaches no worksheet today).
+-- Option (one UPDATE per gate, guarded on md5; e.g. CR-09 on M205-10):
+-- UPDATE compliance_requirements SET condition = 'IF verfahren == ''ozon'' THEN ' || condition
+--  WHERE id = '0d0317dc-81c3-4524-ae00-08babe61658c' AND md5(condition) = 'eccab69f8e23e4dba21d20c2c298afa4';
+-- (the same shape for CR-08 3743076c… ozon · CR-10 483343b5… ozon · CR-11 04ad3958… chlorung · CR-12 52e51dae… chlorung ·
+--  CR-21 06b2b87b… ozon · CR-22 41159760… chlorung · CR-24 b2ea5082… chlorung · CR-26 28589251… ozon · CR-28 07515d2b… uv ·
+--  CR-29 089ca890… uv · CR-34 1c173520… membran · CR-07 16541376… uv; and their home-worksheet originals on -03/-05/-06/-07/-08/-18)
+-- Rollback: UPDATE … SET condition = substring(condition from position('THEN ' in condition) + 5) WHERE condition LIKE 'IF verfahren == %' AND id IN (…).
+
+-- =====================================================================================================================
+-- m205-G-3 · M205-10 · CR-20 `log_reduktion >= 3` → the §3.3 recommendation by Nutzung / Bewirtschaftung (S3_3_LOGRED)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence (both sentences): L354 "Für die uneingeschränkte Nutzung wird eine Keimreduzierung um 6 bis 7 Log-Stufen
+-- empfohlen (bezogen auf eine Rohabwasserbelastung von $10^{7}$ Escherichia coli in 100 ml ), für die eingeschränkte
+-- Nutzung um 4 LogStufen (bei arbeitsintensiver Bewirtschaftung) bzw. um 3 Log-Stufen (bei hoch mechanisierter
+-- Bewirtschaftung)."; prod CR-20 / CR-20-2 (M205-10) 'log_reduktion >= 3' (md5 66c1febf1f3b7a980cd50b862faa9ebe).
+-- Why staged: gate-condition change; SR-2 (6 "bis" 7 is a range — which bound is the gate?); the drivers `nutzung`
+-- (M205-05, consumer-free) and the created `bewirtschaftung` (M205-05) are not in scope on M205-10 (needs a consumer edit).
+-- Option (lower bound of the printed recommendation):
+-- UPDATE compliance_requirements SET condition = 'log_reduktion >= lookup(''S3_3_LOGRED'', nutzung, bewirtschaftung, ''log_min'')'
+--  WHERE id = '139658fe-3d40-40f4-8155-5e397f2bd3ec' AND md5(condition) = '66c1febf1f3b7a980cd50b862faa9ebe';
+-- (+ consumer edit: UPDATE fields f SET consumer_worksheets = array(select distinct x from unnest(coalesce(f.consumer_worksheets,'{}'::text[]) || '{M205-10}'::text[]) x)
+--    FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND w.code = 'M205-05' AND s.code = 'DWA-M-205' AND f.symbol IN ('nutzung','bewirtschaftung') AND f.active;)
+-- Rollback: UPDATE compliance_requirements SET condition = 'log_reduktion >= 3' WHERE id = '139658fe-3d40-40f4-8155-5e397f2bd3ec' AND condition LIKE 'log_reduktion >= lookup(%'; consumer arrays back to NULL / the captured value.
+
+-- =====================================================================================================================
+-- m205-G-4 · 21 `-2` twins + 2 REQ-M205-ES1 twins (23 same-worksheet duplicate gate rows)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: 72 compliance rows; 21 rows carry a `-2` code with the SAME condition and worksheet as their base row
+-- (CR-06-2, CR-31-2, CR-32-2, REQ-M205-ES1-04-2, CR-23-2, REQ-M205-ES1-11-2, CR-13-2, CR-27-2, CR-30-2, CR-03-2, CR-04-2,
+-- CR-05-2, CR-14-2, CR-15-2, CR-16-2, CR-17-2, CR-20-2, CR-33-2, CR-25-2, CR-35-2, CR-36-2); REQ-M205-ES1-04 (M205-07,
+-- warn) duplicates CR-21 and REQ-M205-ES1-11 (M205-08, block) duplicates CR-23. The brief's "≈30 -2 duplicates" is the
+-- inventory's estimate; 23 is the captured count.
+-- Why staged: deleting gate rows (deactivation class). Option: archive-pattern DELETE of the 23 rows (ids in the capture,
+-- each guarded on md5(condition) = the base row's md5); rollback = INSERT … SELECT <explicit columns> FROM
+-- compliance_requirements_archive_m205 WHERE code LIKE '%-2' OR code LIKE 'REQ-M205-ES1-%'.
+
+-- =====================================================================================================================
+-- m205-G-5 · M205-05 / M205-10 · CR-07 `uv_dosis >= 300 AND uv_dosis <= 700` → the band of the chosen Zielband (S4_1_2_3)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L488 "Danach beträgt die Mindestbestrahlung etwa $300 \mathrm{~J} / \mathrm{m}^{2}$ bis $450 \mathrm{~J} /
+-- \mathrm{m}^{2}$ …"; L490 "… Schwankungsbreite für die eingestellte Mindestbestrahlung von $400 \mathrm{~J} / \mathrm{m}^{2}$
+-- bis $600 \mathrm{~J} / \mathrm{m}^{2}$ und im Einzelfall bis zu $700 \mathrm{~J} / \mathrm{m}^{2}$ [16]." Prod CR-07 is the
+-- UNION of both bands (300–700) and the -10 field VR says `uv_dosis >= 400` (inventory data-quality gap).
+-- Why staged: gate-condition change; `uv_dosis_zielband` has a third token (`tab2_ausgezeichnet`) without a printed band (E-2).
+-- Option: UPDATE compliance_requirements SET condition = 'uv_dosis >= uv_dosis_min'
+--  WHERE id = '16541376-1bcd-4055-be9d-b421e51e62ba' AND md5(condition) = '809c912efd533a0f28f9caec93a8af98';   -- M205-10 (uv_dosis_min created there)
+-- Rollback: UPDATE … SET condition = 'uv_dosis >= 300 AND uv_dosis <= 700' WHERE id = '16541376-…' AND condition = 'uv_dosis >= uv_dosis_min'.
+
+-- =====================================================================================================================
+-- m205-G-6 · M205-07 · CR-31 `wiederverkeimungsbeurteilung == True` armed only with a Standzeit (the brief's visible_when — not emitted)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L423 "Insbesondere bei längeren Standzeiten ist die Möglichkeit der Wiederverkeimung zu berücksichtigen."
+-- Capture: wiederverkeimungsbeurteilung (M205-07, boolean, not required, consumer-free) is read by the block gates CR-31 /
+-- CR-31-2 (md5 ea522e1cd6851f9908eec427e20510be); brauchwasser_standzeit_h (M205-07, number ≥ 0) is on the same worksheet.
+-- Why not emitted: a `visible_when brauchwasser_standzeit_h > 0` on the field turns CR-31 `not_applicable` whenever the
+-- Standzeit is 0 or empty — an enforcement change through visibility, so it is staged as the gate guard it really is.
+-- Option: UPDATE compliance_requirements SET condition = 'IF brauchwasser_standzeit_h > 0 THEN wiederverkeimungsbeurteilung == True'
+--  WHERE id IN ('6b8754ed-25fd-4b8f-97ae-a38c9012b50c', 'cf706693-1306-4877-b689-a4f8c48ee49e') AND md5(condition) = 'ea522e1cd6851f9908eec427e20510be';
+-- (optionally the field rule afterwards: UPDATE fields SET visible_when = 'brauchwasser_standzeit_h > 0' … symbol = 'wiederverkeimungsbeurteilung' AND w.code = 'M205-07')
+-- Rollback: UPDATE … SET condition = 'wiederverkeimungsbeurteilung == True' WHERE id IN (…) AND condition LIKE 'IF brauchwasser_standzeit_h%'; visible_when = NULL.
+
+-- =====================================================================================================================
+-- m205-G-7 · M205-07 / M205-10 · CR-21 (+ REQ-M205-ES1-04) `ozon_pro_doc < 0.8` armed only for bromide-bearing water
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L947 "Die Ozonung von bromidhaltigem Abwasser kann zur Bildung von Bromat führen … Die Bromatbildung kann
+-- minimiert werden, wenn Ozon proportional zum DOC ( $<0,8 \mathrm{mg} / \mathrm{mg}$ ) dosiert wird." — the 0,8 rule is
+-- the bromate remedy, not a general limit (L920 prints the design range "ca. 0,5 mg bis 1 mg Ozon/mg DOC").
+-- Capture: bromid on M205-03 (consumed by -07) and M205-08 (consumed by -17) — NOT on M205-10; ozon_pro_doc / bromat_bildung
+-- are consumed (-07 → -10, -17 → -25, -20 → -25) so the brief's visible_when rules are refused (m205-C-4).
+-- Option: UPDATE compliance_requirements SET condition = 'IF bromid > 0 THEN ozon_pro_doc < 0.8'
+--  WHERE id IN ('8fc3c2ef-4de8-4ebc-aa6c-832a0e1fec34', 'e6ba2255-dd8b-4797-a394-68bfa563df3c', '1d23c9fe-44e7-4767-b544-6027563a75e8') AND md5(condition) = 'f248e112aaa24ed44480499b4600879f';  -- M205-07 (bromid in scope)
+-- (the M205-10 mirror 06b2b87b-c196-4562-a69f-2564f3a0b1b2 needs bromid consumed on -10 first, or goes with G-4 as a mirror duplicate)
+-- Rollback: UPDATE … SET condition = 'ozon_pro_doc < 0.8' WHERE id IN (…) AND condition LIKE 'IF bromid > 0 THEN%'.
+
+-- =====================================================================================================================
+-- m205-G-8 · M205-11 · CR-28 through the channel register (gerinne_count / durchfluss_gerinne_sum) + m205-C-5
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L548 "Bei starken Durchfluss-Schwankungen, immer aber bei Durchflüssen über $1000 \mathrm{~m}^{3} / \mathrm{h}$
+-- ist die Aufteilung des Gesamtdurchflusses auf parallel angeordnete Gerinne zweckmäßig."
+-- Capture: CR-28 reads `durchfluss_max <= 1000 OR mehrstrassige_anlage == True` on M205-03 and M205-10; durchfluss_max
+-- (M205-03 → -05/-06/-07; M205-08 → -10/-14/-17) is NOT consumed on M205-11 where the register lives.
+-- Option (new gates on M205-11 after C-5 `durchfluss_max` consumer += M205-11):
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'CR-28P3', 'Gerinne: Σ Q ≥ maximaler Zufluss; über 1000 m³/h mehrere Gerinne',
+--        'durchfluss_gerinne_sum >= durchfluss_max AND (durchfluss_max <= 1000 OR gerinne_count >= 2)', '§4.1.3.2', 'warn',
+--        'Plan 3 (m205-G-8): Registerform von CR-28 — Zweckmäßigkeit ("zweckmäßig"), daher warn.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M205-11' AND s.code = 'DWA-M-205'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'CR-28P3');
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'CR-28P3' AND description LIKE 'Plan 3 (m205-G-8)%'.
+
+-- =====================================================================================================================
+-- m205-G-9 · M205-05 · Tab.-4 range checks on the six numeric lamp inputs (new warn gates; the fills are text twins — m205-R-4)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 4 L530–L537 (ranges per Strahlertyp); L603 "Im Angebot sind vom Anbieter die Nutzungsdauer der UV-Strahler
+-- … die UV-C-Leistung der Strahler am Ende der Nutzungsdauer … anzugeben und zu garantieren." (manufacturer data govern).
+-- Option (one INSERT per property, e.g. Nutzungsdauer):
+--   condition 'strahler_nutzungsdauer >= lookup(''TABELLE4'', strahlertyp, ''nutzungsdauer_min'') AND strahler_nutzungsdauer <= lookup(''TABELLE4'', strahlertyp, ''nutzungsdauer_max'')', severity warn, code 'CR-T4-NUTZUNGSDAUER'
+--   (likewise hg_druck, wellenlaenge, leistungsdichte, uvc_anteil, oberflaechentemp with their _min/_max columns).
+-- Rollback: DELETE … WHERE code LIKE 'CR-T4-%' AND description LIKE 'Plan 3 (m205-G-9)%'.
+
+-- =====================================================================================================================
+-- m205-G-10 · M205-14 · permeat_design ≥ durchfluss_max (new warn gate; durchfluss_max IS consumed on -14)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L768–L770 "Die hydraulische Bemessung einer Membrandesinfektion hängt vom Behandlungszweck ab: - Desinfektion des
+-- Gesamtablaufes: Bemessung analog der vorgeschalteten Stufen (gemäß Arbeitsblatt ATV-DVWK-A 198 …), - Desinfektion zur
+-- Brauchwasseraufbereitung: Bemessung anhand gesicherter Bedarfswerte."
+-- Option: INSERT … code 'CR-14P3', condition 'permeat_design >= durchfluss_max', severity warn, worksheet M205-14 (the
+-- Brauchwasser case compares against the demand, not durchfluss_max — hence warn). Rollback: DELETE by code + description.
+
+-- =====================================================================================================================
+-- m205-G-11 · M205-17 · ozon_kapazitaet_sum ≥ ozonbedarf_kg_h (new warn gate; ozonbedarf_kg_h is scalar-only — m205-I-1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L899 (generator sizing); L920 (required concentration). Option: INSERT … code 'CR-17P3a', condition
+-- 'ozon_kapazitaet_sum >= ozonbedarf_kg_h', severity warn. Note: ozonbedarf_kg_h is not server-materialised (amendment D),
+-- so the gate evaluates on the form only until the scalar materialiser lands. Rollback: DELETE by code + description.
+
+-- =====================================================================================================================
+-- m205-G-12 · M205-17 · ct_wert ≥ ct_ziel (new warn gate)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L868 "… So übersteigt der $c t$-Wert für CryptosporidienOozysten den für Escherichia coli um ca. das
+-- Fünfhundertfache (bezüglich einer Reduktion der Keimzahl um 99 \%). … müssen im Regelfall durch Vorversuche ermittelt werden."
+-- Option: INSERT … code 'CR-17P3b', condition 'ct_wert >= ct_ziel', severity warn (the basis is an engineer input from
+-- Vorversuche). Rollback: DELETE by code + description.
+
+-- =====================================================================================================================
+-- m205-G-13 · M205-18 (and the M205-10 mirror) · CR-26 → the S4_3_3_4 limits per Vernichtungsverfahren
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L931 "Dies kann thermisch (Erhitzen auf $350^{\circ} \mathrm{C}$ über mindestens 2 Sekunden) oder katalytisch
+-- (bei $60^{\circ} \mathrm{C}$ bis $80^{\circ} \mathrm{C}$ ) erfolgen." Prod CR-26 'temperatur_ozonentfernung >= 350 OR
+-- katalytisch == True' ignores the 2-second hold and the catalytic 60–80 °C window; `katalytisch` (boolean) duplicates
+-- `verbrennung_typ` (enum) on M205-18.
+-- Option: UPDATE compliance_requirements SET condition = 'temperatur_ozonentfernung >= temperatur_ozonentfernung_min AND (verbrennung_typ != ''thermisch'' OR verbrennung_haltezeit_s >= verbrennung_haltezeit_min) AND (verbrennung_typ != ''katalytisch'' OR temperatur_ozonentfernung <= temperatur_ozonentfernung_max)'
+--  WHERE id = '7c147ff3-9496-45c6-a8ab-ce48d595a9f4' AND md5(condition) = '6553d461a64cfdd31643c275339b492a';   -- M205-18
+-- Rollback: UPDATE … SET condition = 'temperatur_ozonentfernung >= 350 OR katalytisch == True' WHERE id = '7c147ff3-…' AND condition LIKE 'temperatur_ozonentfernung >= temperatur_ozonentfernung_min%'.
+
+-- =====================================================================================================================
+-- m205-G-14 · M205-11 / M205-21 · register count gates (sensor rule; §4.4.2 dose range)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L590–L591 (sensors per bank); L973 / L984 (dose ranges). Option: INSERT … 'CR-11P3' 'gerinne_sensor_verletzungen == 0'
+-- (block — "ist mindestens ein UV-Sensor … anzuordnen", "sind mindestens zwei UV-Sensoren erforderlich") on M205-11;
+-- 'CR-21P3' 'chlordosis_verletzungen == 0' (warn — "sind … erforderlich" for Cl2, "etwa" for ClO2) on M205-21. Rollback: DELETE by code + description.
+
+-- =====================================================================================================================
+-- m205-R-1 · M205-07 / M205-19 · EQ-05 `spez_energie_ozon = 10` → the S4_3_3_2 lookup by Einsatzgas (+ m205-C-5)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L899 "Der spezifische Energieverbrauch der Ozonerzeugung aus Reinsauerstoff beträgt etwa $10 \mathrm{kWh} /
+-- \mathrm{kg}$ Ozon. Bei Verwendung von Luft beträgt er ca. $60 \%$ mehr."
+-- Capture: EQ-05 on M205-07 (9fc20ef5-…) and M205-19 (14262b5f-…), formula 'spez_energie_ozon = 10', input_symbols NULL,
+-- verified_against_standard; spez_energie_ozon consumed (-07 → -11, -19 → -26); ozon_einsatzgas on -07 (own) and -17
+-- (consumer_worksheets ['M205-17'] — not on -19). Plan 3 created the twin spez_energie_ozon_tab (lookup_fill) on M205-17.
+-- Why staged: replacing a verified equation (always sign-off); the Luft figure 16 is the standard's arithmetic (m205-J-3).
+-- Option (archive pattern; M205-07 has ozon_einsatzgas in scope today, M205-19 after C-5):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_m205 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_m205 SELECT * FROM equations
+--  WHERE (id = '9fc20ef5-b655-46ee-b46f-320ab755a974' AND md5(formula) = 'e06ce2e611f45e2f535f63e6d1d66a78')
+--     OR (id = '14262b5f-2a76-49f9-bddd-bac5747356cd' AND md5(formula) = 'e06ce2e611f45e2f535f63e6d1d66a78');
+-- UPDATE equations SET formula = 'spez_energie_ozon = lookup(''S4_3_3_2'', ozon_einsatzgas, ''spez_energie_kwh_kg'')', input_symbols = ARRAY['ozon_einsatzgas'],
+--        description = coalesce(description, '') || ' [Plan 3 m205-R-1: 10 kWh/kg Reinsauerstoff, 16 kWh/kg Luft (+ 60 %)]'
+--  WHERE id IN ('9fc20ef5-b655-46ee-b46f-320ab755a974', '14262b5f-2a76-49f9-bddd-bac5747356cd') AND md5(formula) = 'e06ce2e611f45e2f535f63e6d1d66a78';
+-- COMMIT;
+-- Rollback: UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, description = a.description FROM equations_archive_m205 a
+--  WHERE e.id = a.id AND e.formula LIKE 'spez_energie_ozon = lookup(%'; DELETE FROM equations_archive_m205 a USING equations e WHERE e.id = a.id AND e.formula = a.formula;
+-- The archive table `equations_archive_m205` is dropped once every archived row of this file (R-1, R-2, R-3) is rolled back, or by the owner once the changes are signed off as final.
+
+-- =====================================================================================================================
+-- m205-R-2 · M205-07 / M205-17 · EQ-04 `ozon_pro_doc < 0.8` → `ozon_pro_doc = ozon_konz / doc` (takes ownership of the manual input)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L920 "Erforderliche Ozonkonzentration: 2 mg bis 10 mg Ozon/l bzw. ca. $0,5 \mathrm{mg}$ bis 1 mg Ozon/mg DOC,";
+-- L947 (< 0,8 mg/mg for bromate). Capture: EQ-04 is a range check with output = input (`ozon_pro_doc`), the field
+-- ozon_pro_doc is a manual input (M205-07 → -10, M205-17 → -25, VR 'ozon_pro_doc <= 0.8'); Plan 3 created the twin
+-- ozon_pro_doc_calc (M205-17-D1). Why staged: verified-equation replacement + deactivation of a consumed manual input.
+-- Option (archive pattern as R-1): UPDATE equations SET formula = 'ozon_pro_doc = ozon_konz / doc', input_symbols = ARRAY['ozon_konz','doc']
+--  WHERE id IN ('5bc795dd-75f7-433c-a359-b2c1e58d7488', '30a51b8c-422f-411a-8c09-c728a393f433') AND md5(formula) = 'f248e112aaa24ed44480499b4600879f';
+-- (doc is consumed on -07 (from -03) and -17 (from -08) — both in scope). Rollback from the archive as R-1.
+
+-- =====================================================================================================================
+-- m205-R-3 · demote the 14 range-check "equations" (EQ-02/06/07/09/10/11/12 on two worksheets each) to validation rules
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: the rows listed in the header carry conditions (`x >= a AND x <= b`) with output_symbol = the input or
+-- input_symbols NULL — they are gates, not derivations; EQ-01/02/12 all write `uv_dosis` on M205-05 and M205-10 (EQ-01 is the
+-- only real derivation). Why staged: deleting verified equation rows (deactivation class). Proposal (commented only):
+-- archive-pattern DELETE of the 14 rows (ids + md5 in the header) and, per row, `UPDATE fields SET validation_rules =
+-- jsonb_build_object('raw', <condition>)` on the output field where the VR is null — the field VRs already carry most of
+-- them (e.g. 'spez_energie_ozon >= 10', 'ozon_konz >= 2 AND ozon_konz <= 10'). Rollback: INSERT … SELECT <explicit
+-- equations columns> FROM equations_archive_m205 WHERE equation_number IN ('EQ-02','EQ-06','EQ-07','EQ-09','EQ-10','EQ-11','EQ-12').
+
+-- =====================================================================================================================
+-- m205-C-1 · M205-09 verfahren → consumer_worksheets = the process worksheets (prerequisite of G-2 and of any section rule)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: verfahren (M205-09, enum uv/membran/ozon/chlorung/paa/h2o2, not required, consumer_worksheets NULL).
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M205-10','M205-11','M205-12','M205-13','M205-14','M205-15','M205-16','M205-17','M205-18','M205-19','M205-20','M205-21','M205-22','M205-23','M205-24','M205-25','M205-26']
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M205-09' AND s.code = 'DWA-M-205' AND f.symbol = 'verfahren' AND f.active AND f.consumer_worksheets IS NULL;
+-- Rollback: … SET consumer_worksheets = NULL WHERE … symbol = 'verfahren' AND consumer_worksheets = ARRAY[…same list…].
+
+-- =====================================================================================================================
+-- m205-C-2 · section rules on M205-10 … M205-23 by `verfahren` — refused by the transitive producer guard, STAGED
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: every worksheet carries the flat sections A/B/C/D/F/J/K/L/M; fields live in B and D only; each B / D of the
+-- process worksheets holds a consumed producer (M205-10 B strahlertyp → -24, D uv_dosis → -25; -11 B gerinne_abdeckung_lichtdicht
+-- → -10, D nicht_bestrahltes_volumen → -10; -12 B strahler_auslastung_pct → -24/-26; -13 D → -26; -14 B brutto_permeatfluss → -24,
+-- D permeabilitaet → -24; -15 D → -26; -17 B ozon_aufenthaltszeit → -25, D ct_wert → -25; -18 B verbrennung_typ → -17, D
+-- restozon_abluft → -17/-25; -19 D → -26; -20 D → -25; -21 B clo2_dosis → -25, D restchlor → -25; -22 B kontaktzeit_pes → -25;
+-- -23 B h2o2_dosis → -21; -16 has no field). The field-free sections would be inert rules (Task 8 lesson) — none emitted.
+-- Why staged: hiding a producer section nulls its consumers' inherited values (importer rule) — an owner decision per
+-- worksheet. Option (after C-1; one UPDATE per section, e.g. M205-10 B):
+-- UPDATE worksheet_sections ws SET visible_when = 'verfahren == ''uv'''
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE ws.worksheet_template_id = w.id AND w.code = 'M205-10' AND s.code = 'DWA-M-205' AND ws.code = 'B' AND ws.visible_when IS NULL;
+-- (uv: -10…-13; membran: -14, -15; ozon: -16…-20; chlorung: -21; paa: -22; h2o2: -23 — B and D each). Rollback: visible_when = NULL WHERE visible_when = 'verfahren == ''<token>'''.
+
+-- =====================================================================================================================
+-- m205-C-3 · M205-03 behandlungsziel → consumer_worksheets += M205-05, M205-10, M205-24 (lights up the two -05 Tab.-3 rules)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: behandlungsziel (M205-03, enum badegewaesser/bewaesserung/trinkwassergewinnung/brauchwasser, consumer_worksheets
+-- NULL) — the emitted rules `fkstrep` / `toc` ← behandlungsziel == 'bewaesserung' on M205-05 are `pending` (visible, inert).
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M205-05','M205-10','M205-24'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M205-03' AND s.code = 'DWA-M-205' AND f.symbol = 'behandlungsziel' AND f.active AND f.consumer_worksheets IS NULL;
+-- Rollback: … SET consumer_worksheets = NULL WHERE … symbol = 'behandlungsziel' AND consumer_worksheets = ARRAY['M205-05','M205-10','M205-24'].
+
+-- =====================================================================================================================
+-- m205-C-4 · M205-21 / M205-07 / M205-17 / M205-20 · visibility on consumed process inputs (refused; the brief's Step-4 rows)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: clo2_dosis, freies_chlor, kontaktzeit_chlor, ph_chlorung, entchlorungsstufe (M205-21 → M205-25); ozon_pro_doc,
+-- bromat_bildung (M205-07 → -10; M205-17 / -20 → -25). Emitted instead: the consumer-free twins chlor_kontaktzeit, chlor_ph,
+-- restchlor_betrieb (≠ chlordioxid) and clo2_konzentration (= chlordioxid). Option (after the owner accepts that a hidden
+-- producer inherits null on -25): UPDATE fields SET visible_when = 'chlormittel_typ == ''chlordioxid''' … symbol = 'clo2_dosis';
+-- visible_when = 'chlormittel_typ != ''chlordioxid''' … symbol IN ('freies_chlor','kontaktzeit_chlor','ph_chlorung','entchlorungsstufe') on M205-21;
+-- visible_when = 'bromid > 0' … symbol IN ('bromat_bildung','ozon_pro_doc') on M205-07 (bromid in scope there). Rollback: visible_when = NULL.
+
+-- =====================================================================================================================
+-- m205-C-5 · consumer edits for G-8 / R-1: durchfluss_max (M205-08) += M205-11; ozon_einsatzgas (M205-17) += M205-19
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- UPDATE fields f SET consumer_worksheets = array(select distinct x from unnest(coalesce(f.consumer_worksheets,'{}'::text[]) || '{M205-11}'::text[]) x)
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND w.code = 'M205-08' AND s.code = 'DWA-M-205' AND f.symbol = 'durchfluss_max' AND f.active;
+-- UPDATE fields f SET consumer_worksheets = array(select distinct x from unnest(coalesce(f.consumer_worksheets,'{}'::text[]) || '{M205-19}'::text[]) x)
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND w.code = 'M205-17' AND s.code = 'DWA-M-205' AND f.symbol = 'ozon_einsatzgas' AND f.active;
+-- Rollback: array_remove(consumer_worksheets, 'M205-11') / array_remove(consumer_worksheets, 'M205-19') on the same rows.
+
+-- =====================================================================================================================
+-- m205-D-1 · M205-10 / M205-25 · retire the seven Ablauf scalars once G-1 is ratified (the register carries the values)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: e_coli_ablauf, enterokokken_ablauf (required), gesamtcoliforme_ablauf, faekalcoliforme_ablauf, faekalstreptokokken_ablauf,
+-- salmonellen, darmviren on M205-10 (consumer-free; read by the 14 gates) and their copies on M205-25 (consumer-free).
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code IN ('M205-10','M205-25') AND s.code = 'DWA-M-205' AND f.active
+--    AND f.symbol IN ('e_coli_ablauf','enterokokken_ablauf','gesamtcoliforme_ablauf','faekalcoliforme_ablauf','faekalstreptokokken_ablauf','salmonellen','darmviren');
+-- Rollback: … SET active = true on the same rows.
+
+-- =====================================================================================================================
+-- m205-E-1 · M205-02 / M205-04 gewaesserklasse — the printed "Küstengewässer ausreichend" category has no prod token
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: enum_values binnen_ausgezeichnet / binnen_gut / binnen_ausreichend / kueste_ausgezeichnet / kueste_gut (five).
+-- Evidence: L331 "Intestinale Enterokokken (cfu// 100 ml ) & 100 (95) & 200 (95) & 185 (90) …" and L332 "Escherichia coli
+-- (cfu/ 100 ml ) & 250 (95) & 500 (95) & 500 (90) …" under "Küstengewässer und Übergangsgewässer" (L329).
+-- Chosen now: the two rows are seeded under the token `kueste_ausreichend` (TABELLE2 complete, reachable by lookup); D-1
+-- forbids touching enum_values here. Option: UPDATE fields SET enum_values = enum_values || '[{"value":"kueste_ausreichend","label_de":"Küstengewässer – ausreichend","order_index":5}]'::jsonb
+--  … symbol = 'gewaesserklasse' AND w.code IN ('M205-02','M205-04') AND NOT (enum_values @> '[{"value":"kueste_ausreichend"}]'). Rollback: remove the element.
+
+-- =====================================================================================================================
+-- m205-E-2 · M205-05 / M205-10 uv_dosis_zielband — the token `tab2_ausgezeichnet` has no printed dose band
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.1.2.3 prints two bands (L488 300–450 for the 76/160/EWG limits; L490 400–600 / 700 for the Isar target);
+-- L923 (ozone) mentions "ausgezeichnete Qualität" only as the ozone pilot outcome. Chosen now: S4_1_2_3 has two rows; with
+-- tab2_ausgezeichnet selected the fills uv_dosis_min / uv_dosis_max read "keine Zeile". Option: owner names the band (or
+-- retires the token — D-1 applies).
+
+-- =====================================================================================================================
+-- m205-E-3 · M205-07 / M205-19 spez_energie_ozon — re-bind as the S4_3_3_2 lookup_fill (withdrawn; twin created)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Class: widget re-bind on a CONSUMED input (E-2 rule): spez_energie_ozon (M205-07 → M205-11; M205-19 → M205-26; VR
+-- 'spez_energie_ozon >= 10'; EQ-05 writes it). Plan 3 created spez_energie_ozon_tab (lookup_fill, role value) on M205-17.
+-- Option (after R-1; archive pattern on fields as din18130_1-E-2): archive the -07 row into fields_archive_m205, UPDATE
+-- widget = 'lookup_fill', ui_config = '{"source_label":"§4.3.3.2"}'::jsonb, lookup = '{"table_code":"S4_3_3_2","role":"value","keys":[{"column":"einsatzgas","from_symbol":"ozon_einsatzgas"}],"value":"spez_energie_kwh_kg"}'::jsonb
+--  WHERE symbol = 'spez_energie_ozon' AND w.code = 'M205-07' AND f.active AND f.widget IS NULL; deactivate the twin.
+-- Rollback: the four Plan-1 columns back from the archive row by id (explicit columns); twin re-activated.

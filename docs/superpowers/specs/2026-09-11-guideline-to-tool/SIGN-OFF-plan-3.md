@@ -2424,3 +2424,330 @@ Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din1
 - **`i_max_calc` / `i_min_calc` need `gefaelle_typ`, `l` AND `l_0`** (the engine checks every named input; an `if()` branch does not exempt them) — all three are required prod inputs on -03 / inherited, so the cards compute for every complete test.
 - **Tab. 9's Versuch 2** computes 2,6924·10⁻⁴ from the printed inputs (V_w = 510·10⁻⁶) while the table prints 2,693·10⁻⁴ — rounding inside the printed inputs; pinned to two decimals.
 - **Bundle growth:** ~12 KB of lifted quotes (Tab. 5 lines are the largest) ride in the client bundle via the seed fallback (Task-0 observation; Task 30 measures).
+
+## Task 11 — DWA-M-205 (m205)
+
+Report: `reports/plan-3-m205.md` · STAGED SQL: `scripts/verification/m205-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-205\DWA-M_205.md` (lines cited) · prod capture `src/lib/eval/field-configs/m205.prior.json` (2026-09-18, read-only; 237 fields, 234 sections, 24 equations; 72 compliance rows read with `prod-query.mjs`). Ids follow the Task-11 brief where it names them (G-1…G-4, R-1…R-3, F-1…F-3, X-1, X-2); the rest use the skeleton letters (R-4/R-5 = range-SR-2, E = enum-token / binding, C = consumer-edit, D = deactivation, U = unreadable cell, J = judgment reading, I = interface gap, O = override policy). Nothing below is applied.
+
+### m205-G-1 · DWA-M-205 · M205-10 · CR-03/04/05/14/15/16/17 (+ -2) → `leitorganismen_verletzungen == 0`
+- Class: gate-guard (equation-replacement of 14 verified block gates by one register gate)
+- Chosen now (fail-safe): the 14 gates stay as they are (mutually contradictory, all firing); the register `leitorganismen` and `M205-10-D1` / `-D2` are emitted beside them as visible twins.
+- Evidence (verbatim, transcript line): "Die Festlegung des Behandlungsziels für die Abwasserdesinfektion erfolgt in der Regel durch die zuständige Behörde." (L232); Tab. 2 "Intestinale Enterokokken (cfu/ 100 ml ) & 200 (95) & 400 (95) & 330 (90)" (L322), "Escherichia coli (cfu/ 100 ml ) & 500 (95) & 1.000 (95) & 900 (90)" (L323), Küstengewässer "100 (95) & 200 (95) & 185 (90)" (L331), "250 (95) & 500 (95) & 500 (90)" (L332); capture: CR-03 (500/200), CR-04 (250/100), CR-05 (0/0), CR-14 (1000/400), CR-15 (900/330), CR-16 (500/200), CR-17 (500/185) all `block` on M205-10, each with a `-2` twin.
+- Proposed SQL / config: STAGED block m205-G-1 (archive of the 14 rows into `compliance_requirements_archive_m205`, md5-guarded DELETE, one INSERT `CR-03P3` = `leitorganismen_count >= 1 AND leitorganismen_verletzungen == 0`, explicit-column rollback).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-2 · DWA-M-205 · M205-10 (+ -03/-05/-06/-07/-08/-18) · process gates armed by `verfahren`
+- Class: gate-guard
+- Chosen now (fail-safe): every process gate keeps firing on every project (Restchlor ≥ 0,2 on a UV plant included); no section rule emitted (C-1 / C-2).
+- Evidence (verbatim, transcript line): "Zur Desinfektion des Gesamtablaufes kommt derzeit im Wesentlichen die UV-Bestrahlung zum Einsatz. Die Membranfiltration ist bei einer Reihe von MBR-Anlagen in Betrieb. Die nachgeschaltete Membrandesinfektion ist bisher nur auf Einzelfälle beschränkt. Die Ozonung wurde in mehreren Pilotvorhaben untersucht." (L1038); capture: `verfahren` (M205-09) `consumer_worksheets` NULL; 12 process gates mirrored onto M205-10 read symbols inherited from -07/-08/-18.
+- Proposed SQL / config: STAGED block m205-G-2 (`IF verfahren == '<token>' THEN <condition>` per gate, md5-guarded; needs C-1 first).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-3 · DWA-M-205 · M205-10 · CR-20 `log_reduktion >= 3` → §3.3 recommendation by Nutzung / Bewirtschaftung
+- Class: gate-guard + range-SR-2 (6 "bis" 7)
+- Chosen now (fail-safe): CR-20 unchanged (≥ 3 = the least strict printed figure); S3_3_LOGRED seeded with `log_min` / `log_max`; the created select `bewirtschaftung` + text fill `log_reduktion_empfehlung` on M205-05 show the printed recommendation; `log_reduktion_mean` / `_min` on M205-24 compute the achieved reduction from samples.
+- Evidence (verbatim, transcript line): "Für die uneingeschränkte Nutzung wird eine Keimreduzierung um 6 bis 7 Log-Stufen empfohlen (bezogen auf eine Rohabwasserbelastung von $10^{7}$ Escherichia coli in 100 ml ), für die eingeschränkte Nutzung um 4 LogStufen (bei arbeitsintensiver Bewirtschaftung) bzw. um 3 Log-Stufen (bei hoch mechanisierter Bewirtschaftung)." (L354); capture: CR-20 / CR-20-2 `log_reduktion >= 3` (block, M205-10); `nutzung` (M205-05) consumer-free.
+- Proposed SQL / config: STAGED block m205-G-3 (`log_reduktion >= lookup('S3_3_LOGRED', nutzung, bewirtschaftung, 'log_min')` + consumer edit of `nutzung` / `bewirtschaftung` to M205-10; the owner may prefer `log_max` for the unrestricted case).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-4 · DWA-M-205 · 23 duplicate gate rows (21 `-2` twins + REQ-M205-ES1-04 / -11)
+- Class: deactivation
+- Chosen now (fail-safe): untouched.
+- Evidence (verbatim, transcript line): none printed — prod hygiene; capture lists 72 rows, 21 with a `-2` code and the same condition / worksheet as their base row, plus REQ-M205-ES1-04 (= CR-21, M205-07, warn) and REQ-M205-ES1-11 (= CR-23, M205-08, block). The brief's "≈30" is the inventory estimate; 23 is the captured count.
+- Proposed SQL / config: STAGED block m205-G-4 (archive-pattern DELETE of the 23 rows).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-5 · DWA-M-205 · M205-05 / M205-10 · CR-07 `uv_dosis >= 300 AND uv_dosis <= 700` → band of the chosen Zielband
+- Class: gate-guard
+- Chosen now (fail-safe): CR-07 unchanged (the union of both printed bands); `uv_dosis_min` / `uv_dosis_max` created on M205-10 as `limit` fills from S4_1_2_3.
+- Evidence (verbatim, transcript line): "Danach beträgt die Mindestbestrahlung etwa $300 \mathrm{~J} / \mathrm{m}^{2}$ bis $450 \mathrm{~J} / \mathrm{m}^{2}$ zur sicheren Einhaltung der Grenz- und Leitwerte der EG-Badegewässer-Richtlinie für biologisch gereinigtes Abwasser bei einer Konzentration an abfiltrierbaren Stoffen von $5 \mathrm{mg} / \mathrm{l}$ bis $20 \mathrm{mg} / \mathrm{l}$." (L488); "Eine Auswertung der Daten von verschiedenen, im Betrieb befindlichen UVAnlagen zeigt eine Schwankungsbreite für die eingestellte Mindestbestrahlung von $400 \mathrm{~J} / \mathrm{m}^{2}$ bis $600 \mathrm{~J} / \mathrm{m}^{2}$ und im Einzelfall bis zu $700 \mathrm{~J} / \mathrm{m}^{2}$ [16]." (L490). Prod: the M205-10 `uv_dosis` VR reads `uv_dosis >= 400` while EQ-02 checks 300–450 (inventory gap).
+- Proposed SQL / config: STAGED block m205-G-5 (`uv_dosis >= uv_dosis_min` on M205-10).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-6 · DWA-M-205 · M205-07 · CR-31 `wiederverkeimungsbeurteilung == True` only with a Standzeit (the brief's visible_when, NOT emitted)
+- Class: gate-guard (a visibility rule on a gate-bearing field is an enforcement change)
+- Chosen now (fail-safe): field visible, gate unchanged.
+- Evidence (verbatim, transcript line): "Insbesondere bei längeren Standzeiten ist die Möglichkeit der Wiederverkeimung zu berücksichtigen." (L423); capture: `wiederverkeimungsbeurteilung` (M205-07, boolean, consumer-free) read by CR-31 / CR-31-2 (block); `brauchwasser_standzeit_h` on the same worksheet.
+- Proposed SQL / config: STAGED block m205-G-6 (`IF brauchwasser_standzeit_h > 0 THEN …`, optionally the field rule afterwards).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-7 · DWA-M-205 · M205-07 / M205-10 · CR-21 (+ REQ-M205-ES1-04) `ozon_pro_doc < 0.8` armed by `bromid > 0`
+- Class: gate-guard (the brief's `bromat_bildung` / `ozon_pro_doc` visibility is refused — consumed producers, C-4)
+- Chosen now (fail-safe): gates unchanged; `ozon_pro_doc_calc` (M205-17-D1) computes the ratio beside the manual input.
+- Evidence (verbatim, transcript line): "Die Bromatbildung kann minimiert werden, wenn Ozon proportional zum DOC ( $<0,8 \mathrm{mg} / \mathrm{mg}$ ) dosiert wird." (L947); "Erforderliche Ozonkonzentration: 2 mg bis 10 mg Ozon/l bzw. ca. $0,5 \mathrm{mg}$ bis 1 mg Ozon/mg DOC," (L920) — the design range reaches 1 mg/mg, so the 0,8 gate is the bromate remedy only.
+- Proposed SQL / config: STAGED block m205-G-7 (`IF bromid > 0 THEN ozon_pro_doc < 0.8` on M205-07 where bromid is in scope; the M205-10 mirror needs a consumer edit or goes with G-4).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-8 · DWA-M-205 · M205-11 · CR-28 through the channel register (Σ Q, count) + consumer edit `durchfluss_max` → M205-11
+- Class: gate-guard + consumer-edit
+- Chosen now (fail-safe): `bestrahlungsgerinne` register + `durchfluss_gerinne_sum` / `gerinne_count` emitted; CR-28 (boolean `mehrstrassige_anlage`) unchanged.
+- Evidence (verbatim, transcript line): "Bei starken Durchfluss-Schwankungen, immer aber bei Durchflüssen über $1000 \mathrm{~m}^{3} / \mathrm{h}$ ist die Aufteilung des Gesamtdurchflusses auf parallel angeordnete Gerinne zweckmäßig." (L548); capture: `durchfluss_max` consumed by -05/-06/-07 (from -03) and -10/-14/-17 (from -08), not by -11.
+- Proposed SQL / config: STAGED blocks m205-G-8 (new warn gate `CR-28P3`) + m205-C-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-9 · DWA-M-205 · M205-05 · Tab.-4 range checks on the six numeric lamp inputs
+- Class: gate-guard (new warn gates)
+- Chosen now (fail-safe): no gate; the printed ranges are shown by the six text fills (R-4) and seeded as `_min` / `_max` columns.
+- Evidence (verbatim, transcript line): Tab. 4 "Mittlere Nutzungsdauer & h & 8.000-16.000 & 4.000-12.000" (L537), "Quecksilberdampfdruck & hPa & ca. 0,01 & 1.000-10.000" (L530); "Im Angebot sind vom Anbieter die Nutzungsdauer der UV-Strahler einschließlich des Einflusses der Schaltvorgänge, die UV-C-Leistung der Strahler am Ende der Nutzungsdauer und der zugehörige Energieverbrauch der Strahler pro Kubikmeter Abwasserdurchfluss durch die UV-Anlage anzugeben und zu garantieren." (L603).
+- Proposed SQL / config: STAGED block m205-G-9.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-10 · DWA-M-205 · M205-14 · `permeat_design >= durchfluss_max`
+- Class: gate-guard (new warn gate; `durchfluss_max` IS consumed on -14)
+- Chosen now (fail-safe): no gate; `permeat_design` (M205-14-D2) shows Σ Fläche × Netto-Fluss.
+- Evidence (verbatim, transcript line): "Die hydraulische Bemessung einer Membrandesinfektion hängt vom Behandlungszweck ab:" (L768) "- Desinfektion des Gesamtablaufes: Bemessung analog der vorgeschalteten Stufen (gemäß Arbeitsblatt ATV-DVWK-A 198 „Vereinheitlichung und Herleitung von Bemessungswerten für Abwasseranlagen")," (L769) "- Desinfektion zur Brauchwasseraufbereitung: Bemessung anhand gesicherter Bedarfswerte." (L770).
+- Proposed SQL / config: STAGED block m205-G-10.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-11 · DWA-M-205 · M205-17 · `ozon_kapazitaet_sum >= ozonbedarf_kg_h`
+- Class: gate-guard (new warn gate; scalar-only input — I-1)
+- Chosen now (fail-safe): no gate; both outputs shown.
+- Evidence (verbatim, transcript line): "Anlagen für Ozonleistungen über $1 \mathrm{~kg} / \mathrm{h}$ arbeiten bei einer Spannung von ca. 10 kV und einer Frequenz von ca. 600 Hz ." (L899); L920 (required concentration).
+- Proposed SQL / config: STAGED block m205-G-11.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-12 · DWA-M-205 · M205-17 · `ct_wert >= ct_ziel`
+- Class: gate-guard (new warn gate)
+- Chosen now (fail-safe): no gate; `ct_ecoli_basis` input + `ct_ziel` (M205-17-D5) emitted.
+- Evidence (verbatim, transcript line): "So übersteigt der $c t$-Wert für CryptosporidienOozysten den für Escherichia coli um ca. das Fünfhundertfache (bezüglich einer Reduktion der Keimzahl um 99 \%)." … "hängen die erforderlichen Bedingungen von den Verhältnissen des Einzelfalles ab und müssen im Regelfall durch Vorversuche ermittelt werden." (L868).
+- Proposed SQL / config: STAGED block m205-G-12.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-13 · DWA-M-205 · M205-18 (+ M205-10 mirror) · CR-26 → S4_3_3_4 limits per Vernichtungsverfahren
+- Class: gate-guard
+- Chosen now (fail-safe): CR-26 unchanged; `temperatur_ozonentfernung_min` / `_max` and `verbrennung_haltezeit_min` created as `limit` fills (locked table).
+- Evidence (verbatim, transcript line): "Dies kann thermisch (Erhitzen auf $350^{\circ} \mathrm{C}$ über mindestens 2 Sekunden) oder katalytisch (bei $60^{\circ} \mathrm{C}$ bis $80^{\circ} \mathrm{C}$ ) erfolgen." (L931); capture: CR-26 `temperatur_ozonentfernung >= 350 OR katalytisch == True` (block; the 2 s hold and the 60–80 °C window are not checked; `katalytisch` boolean duplicates `verbrennung_typ`).
+- Proposed SQL / config: STAGED block m205-G-13.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-G-14 · DWA-M-205 · M205-11 / M205-21 · register count gates (sensors per bank; §4.4.2 dose range)
+- Class: gate-guard (new gates)
+- Chosen now (fail-safe): no gate; `gerinne_sensor_verletzungen` (M205-11-D3) and `chlordosis_verletzungen` (M205-21-D1) shown.
+- Evidence (verbatim, transcript line): "Je Bestrahlungsbank ist mindestens ein UV-Sensor zur Messung der Bestrahlungsstärke mit unterer Alarmgrenze zur kontinuierlichen Überwachung des Betriebes" (L590) "anzuordnen. … Wenn hintereinander liegende Bestrahlungsräume durchflussabhängig zu- und abgeschaltet werden, sind mindestens zwei UV-Sensoren erforderlich, einer im ständig eingeschalteten Bereich und einer im am häufigsten abgeschalteten Bereich." (L591); "Je nach dem Gehalt an organischen Stoffen im Abwasser sind 1 mg bis 20 mg freies Chlor pro Liter, eine gründliche Durchmischung sowie eine Kontaktzeit von 15 bis 30 Minuten erforderlich." (L973).
+- Proposed SQL / config: STAGED block m205-G-14 (sensor gate block — "ist … anzuordnen", "sind … erforderlich"; dose gate warn).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-R-1 · DWA-M-205 · M205-07 / M205-19 · EQ-05 `spez_energie_ozon = 10` → S4_3_3_2 lookup by Einsatzgas
+- Class: equation-replacement (the brief's R-1)
+- Chosen now (fail-safe): EQ-05 unchanged; twin `spez_energie_ozon_tab` (lookup_fill, M205-17) emitted (E-3).
+- Evidence (verbatim, transcript line): "Der spezifische Energieverbrauch der Ozonerzeugung aus Reinsauerstoff beträgt etwa $10 \mathrm{kWh} / \mathrm{kg}$ Ozon. Bei Verwendung von Luft beträgt er ca. $60 \%$ mehr." (L899); capture: EQ-05 on M205-07 and M205-19, `input_symbols` NULL, `verified_against_standard`.
+- Proposed SQL / config: STAGED block m205-R-1 (archive pattern, `spez_energie_ozon = lookup('S4_3_3_2', ozon_einsatzgas, 'spez_energie_kwh_kg')`; M205-19 needs C-5).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-R-2 · DWA-M-205 · M205-07 / M205-17 · EQ-04 `ozon_pro_doc < 0.8` → `ozon_pro_doc = ozon_konz / doc`
+- Class: equation-replacement + deactivation (takes ownership of a consumed manual input)
+- Chosen now (fail-safe): EQ-04 and the manual `ozon_pro_doc` unchanged; twin `ozon_pro_doc_calc` (M205-17-D1) emitted.
+- Evidence (verbatim, transcript line): "Erforderliche Ozonkonzentration: 2 mg bis 10 mg Ozon/l bzw. ca. $0,5 \mathrm{mg}$ bis 1 mg Ozon/mg DOC," (L920); L947 (bromate < 0,8).
+- Proposed SQL / config: STAGED block m205-R-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-R-3 · DWA-M-205 · 14 range-check "equations" (EQ-02/06/07/09/10/11/12 × 2 worksheets) → validation rules
+- Class: deactivation (the brief's R-3)
+- Chosen now (fail-safe): rows untouched.
+- Evidence (verbatim, transcript line): capture — conditions `x >= a AND x <= b` with `output_symbol` = the input or `input_symbols` NULL; EQ-01/02/12 all write `uv_dosis` on M205-05 and M205-10 (only EQ-01 derives; L439 "Die UV-Bestrahlung, die eine Zelle im Mittel erhält, lässt sich rechnerisch als Produkt aus der mittleren Bestrahlungsstärke in $\mathrm{W} / \mathrm{m}^{2}$ und der mittleren Verweildauer in s abschätzen.").
+- Proposed SQL / config: STAGED block m205-R-3 (archive-pattern DELETE + VR backfill, commented only).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-R-4 · DWA-M-205 · M205-05 · Tab.-4 lamp figures are printed RANGES — text twins, not numeric fills
+- Class: range-SR-2
+- Chosen now (fail-safe): six created TEXT `lookup_fill` twins (`*_tab4`) show the printed cell per Strahlertyp; the six existing numeric inputs stay manufacturer data; `_min` / `_max` seeded for G-9. The brief's "pick the `_min`/`_max` pair per field" would auto-select a bound.
+- Evidence (verbatim, transcript line): "Typische Leistungsdichte bezogen auf die Lichtbogenlänge & $\mathrm{W} / \mathrm{cm}$ & 1-4 & 100-200" (L534); "UV-C-Leistung ( 254 nm ) \% bezogen auf die eingespeiste elektr. Leistung bei neuem Strahler & \% & ca. 20-35 & ca. 8-15" (L535); "Die garantierten Lebensdauern von UV-Strahlern liegen im Bereich von 8.000 bis 12.000 Betriebsstunden." (L702).
+- Proposed SQL / config: none (data as emitted); if the owner wants numeric fills, name the bound per property.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-R-5 · DWA-M-205 · M205-10 · S4_1_2_3 `einzelfall_zehnerpotenz` upper bound 600 (regular) vs 700 (Einzelfall)
+- Class: range-SR-2
+- Chosen now (fail-safe): both seeded (`dosis_max_regel_j_m2` 600, `dosis_max_j_m2` 700); the fill `uv_dosis_max` shows 700 (the brief's "400–700", matching prod EQ-12 / CR-07's upper bound).
+- Evidence (verbatim, transcript line): L490 (quoted under G-5).
+- Proposed SQL / config: none; the owner may re-point the fill to `dosis_max_regel_j_m2`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-E-1 · DWA-M-205 · M205-02 / M205-04 · `gewaesserklasse` lacks the printed "Küstengewässer ausreichend" token
+- Class: enum-token (D-1: prod `enum_values` never overwritten by this task)
+- Chosen now (fail-safe): TABELLE2 seeds the two printed cells under `kueste_ausreichend` (table complete; reachable by lookup); the enum keeps its five tokens.
+- Evidence (verbatim, transcript line): "Küstengewässer und Übergangsgewässer" (L329); "Intestinale Enterokokken (cfu// 100 ml ) & 100 (95) & 200 (95) & 185 (90) & DIN EN ISO 7899-1 oder DIN EN ISO 7899-2" (L331); "Escherichia coli (cfu/ 100 ml ) & 250 (95) & 500 (95) & 500 (90) & DIN EN ISO 9308-3 oder DIN EN ISO 9308-1" (L332); capture: five tokens on M205-02 and M205-04.
+- Proposed SQL / config: STAGED block m205-E-1 (append the token to both rows).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-E-2 · DWA-M-205 · M205-05 / M205-10 · `uv_dosis_zielband` token `tab2_ausgezeichnet` has no printed band
+- Class: enum-token
+- Chosen now (fail-safe): no S4_1_2_3 row; the fills read "keine Zeile" for that token.
+- Evidence (verbatim, transcript line): §4.1.2.3 prints only L488 (300–450) and L490 (400–600 / 700); "Unter diesen Bedingungen kann grundsätzlich von einer Einhaltung der Anforderungen der Badegewässerrichtlinie ("ausgezeichnete Qualität" gemäß Richtlinie 2006/ 7/EG (neu) bzw. Leitwerte gemäß Richtlinie 76/160/EWG (alt)) im Ablauf des Reaktionsbehälters ausgegangen werden." (L923) is the ozone chapter.
+- Proposed SQL / config: owner names the band or retires the token (D-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-E-3 · DWA-M-205 · M205-07 / M205-19 · `spez_energie_ozon` re-bind as lookup_fill (withdrawn — twin created)
+- Class: widget re-bind of a consumed input (Task 7 E-2 rule)
+- Chosen now (fail-safe): `spez_energie_ozon_tab` created on M205-17 beside `ozon_einsatzgas`; the inputs stay.
+- Evidence (verbatim, transcript line): L899 (quoted under R-1); capture: consumed -07 → -11, -19 → -26; VR `spez_energie_ozon >= 10`.
+- Proposed SQL / config: STAGED block m205-E-3 (archive pattern on `fields`, after R-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-C-1 · DWA-M-205 · M205-09 · `verfahren` consumer_worksheets (NULL today)
+- Class: consumer-edit
+- Chosen now (fail-safe): nothing keyed on `verfahren` is emitted (a rule would be `pending`); the switch is entirely STAGED.
+- Evidence (verbatim, transcript line): §4 chapter structure (L1038 quoted under G-2); capture: `verfahren` `consumer_worksheets` NULL.
+- Proposed SQL / config: STAGED block m205-C-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-C-2 · DWA-M-205 · M205-10 … M205-23 · section rules by `verfahren` (refused: every B / D holds a consumed producer)
+- Class: consumer-edit (hiding producer sections nulls the consumers' inherited values)
+- Chosen now (fail-safe): zero section rules emitted (the field-free A/C/F/J/K/L/M would be inert — Task 8 lesson).
+- Evidence (verbatim, transcript line): capture — the producer per section is listed in the STAGED block (e.g. M205-10 B `strahlertyp` → M205-24, D `uv_dosis` → M205-25).
+- Proposed SQL / config: STAGED block m205-C-2 (28 `worksheet_sections.visible_when` UPDATEs after C-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-C-3 · DWA-M-205 · M205-03 · `behandlungsziel` consumer_worksheets += M205-05, M205-10, M205-24
+- Class: consumer-edit
+- Chosen now (fail-safe): the two emitted rules `fkstrep` / `toc` ← `behandlungsziel == 'bewaesserung'` (M205-05) are `pending` (visible, inert) until this lands.
+- Evidence (verbatim, transcript line): "Als Beurteilungsparameter (Leitorganismen) dienen Fäkalstreptokokken und Escherichia coli." (L360); "Als Behandlungsziel wird eine maximal zulässige Anzahl von definierten Mikroorganismenarten (Leitorganismen) pro Abwasservolumeneinheit vorgegeben." (L228); capture: consumer_worksheets NULL.
+- Proposed SQL / config: STAGED block m205-C-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-C-4 · DWA-M-205 · M205-21 / M205-07 / M205-17 / M205-20 · visibility on consumed process inputs (refused)
+- Class: consumer-edit
+- Chosen now (fail-safe): rules emitted only on the consumer-free twins `clo2_konzentration` (= chlordioxid), `chlor_kontaktzeit` / `chlor_ph` / `restchlor_betrieb` (≠ chlordioxid); `clo2_dosis`, `freies_chlor`, `kontaktzeit_chlor`, `ph_chlorung`, `entchlorungsstufe`, `bromat_bildung`, `ozon_pro_doc` stay visible.
+- Evidence (verbatim, transcript line): "Eine Chlorung wird in der Regel unter Verwendung von Chlorgas ( $\mathrm{Cl}_{2}$ ), Hypochloritverbindungen, z. B. Natriumhypochlorit (NaOCl, Chlorbleichlauge) oder Chlordioxid $\left(\mathrm{ClO}_{2}\right)$ durchgeführt." (L967); L947 (bromide); capture: consumers M205-25 / M205-10.
+- Proposed SQL / config: STAGED block m205-C-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-C-5 · DWA-M-205 · M205-08 `durchfluss_max` += M205-11 · M205-17 `ozon_einsatzgas` += M205-19
+- Class: consumer-edit (prerequisites of G-8 and R-1)
+- Chosen now (fail-safe): none.
+- Evidence (verbatim, transcript line): L548 / L899 (quoted above); capture: `durchfluss_max` (M205-08) consumers M205-10 / -14 / -17; `ozon_einsatzgas` (M205-17) consumer M205-17.
+- Proposed SQL / config: STAGED block m205-C-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-D-1 · DWA-M-205 · M205-10 / M205-25 · retire the seven Ablauf scalars after G-1
+- Class: deactivation
+- Chosen now (fail-safe): scalars stay (two of them required); the register is a twin.
+- Evidence (verbatim, transcript line): L228 / L232 (quoted above); capture: `e_coli_ablauf`, `enterokokken_ablauf` required on M205-10; seven symbols × two worksheets, consumer-free.
+- Proposed SQL / config: STAGED block m205-D-1 (`active = false`, reversible).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-U-1 · DWA-M-205 · M205-10 · TABELLE1 Darmviren volume "10 1*)"
+- Class: unreadable-cell
+- Chosen now (fail-safe): `volume_ml` null, `volume_text` "10 1" verbatim, row seeded (I-Wert "0 (95)" legible); TABELLE1 `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline Darmviren in 10 1*) & - & 0 (95) \\" (L305) — the unit glyph is ambiguous (OCR "l" / "1"; the caption context reads 10 l).
+- Proposed SQL / config: after the PDF read (SR-3): `UPDATE regulation_table_rows SET row_values = row_values || '{"volume_ml": 10000}' WHERE …` and `verification_status = 'md_verified'` on TABELLE1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-U-2 · DWA-M-205 · M205-09 · TABELLE8_* rating cells printed as the digit "0"
+- Class: unreadable-cell
+- Chosen now (fail-safe): `bewertung` keeps the printed glyph verbatim ("0" at L1050 Ozonung, L1054 Membran, L1055 Membran + Ozonung, L1058 UV; "o" elsewhere); no normalised rating column; all three TABELLE8_* tables `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline Aufwand für Arbeitssicherheit & o & mäßig & 0 & mäßig & - & erhöht \\" (L1054); "\hline Spezifischer Energieeinsatz ( $\mathrm{Whm}^{-3}$ ) & + & 30-60 & 0 & 100-400 & 0 & 100-150 \\" (L1055).
+- Proposed SQL / config: after the PDF read: `UPDATE regulation_table_rows SET row_values = jsonb_set(row_values, '{bewertung}', '"o"') WHERE … AND row_values->>'bewertung' = '0'` + status upgrade.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-U-3 · DWA-M-205 · M205-09 · TABELLE8_UV "400 mJ/s- 700 mJ/s" (unit typo for J/m²)
+- Class: unreadable-cell (transcript / print typo)
+- Chosen now (fail-safe): text kept verbatim in TABELLE8_UV `e_coli_erreichbar`; not seeded as a numeric dose band (S4_1_2_3 carries the §4.1.2.3 figures).
+- Evidence (verbatim, transcript line): "\hline Einhaltbare Konzentration (E. coli/ 100 ml ) & + & < 10 (bei $400 \mathrm{~mJ} / \mathrm{s}- 700 \mathrm{~mJ} / \mathrm{s}$ ) & + & < 10 (Mikro-/Ultrafiltration) & + & < 100 (0,8 g Ozon/g DOC) \\" (L1052) vs L490 "400 J/m² bis 600 J/m² und im Einzelfall bis zu 700 J/m²".
+- Proposed SQL / config: none (owner confirms the print on p. 32).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-J-1 · DWA-M-205 · M205-10 · Tab. 1 Leitwert (G) vs Grenzwert (I) as the target
+- Class: judgment reading (register column `wert_typ`)
+- Chosen now (fail-safe): the engineer picks G or I per row (both columns shown with their percentiles); no default.
+- Evidence (verbatim, transcript line): "Bei Einhaltung der Leitwerte wurde das" (L291) "Baden als unbedenklich eingestuft. Bei Überschreitungen galt die Badegewässerqualität zwar als nicht optimal, das Baden war aber noch möglich, solange die Grenzwerte nicht überschritten wurden." (L293); "An der Isar wurde als Zielvorgabe die Unterschreitung der Leitwerte um eine Zehnerpotenz vorgegeben." (L490).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-J-2 · DWA-M-205 · M205-21 · S4_4_2 Natriumhypochlorit row carries the Chlorgas dose sentence
+- Class: judgment reading
+- Chosen now (fail-safe): the NaOCl row seeds 1–20 mg/l freies Chlor, 15–30 min, pH 6–8, Restchlor 0,2 from the Chlorgas paragraph (the sentence speaks of "freies Chlor", HOCl is the agent of both).
+- Evidence (verbatim, transcript line): "Sowohl bei Chlorgas als auch bei Hypochloritverbindungen geht die desinfizierende Wirkung vor allem von der undissoziierten unterchlorigen Säure (HOCl) aus, die im pH -abhängigen Gleichgewicht mit Chlor und dem Hy-pochlorit-Ion ( $\mathrm{OCl}^{-}$) steht." (L969); L973 (the dose sentence, under "Bei Anwendung von Chlorgas").
+- Proposed SQL / config: if rejected, `UPDATE regulation_table_rows SET row_values = row_values || '{"dosis_min": null, "dosis_max": null, …}' WHERE row_key = 'natriumhypochlorit'`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-J-3 · DWA-M-205 · M205-17 · S4_3_3_2 Luft 16 kWh/kg is the standard's arithmetic (10 + 60 %), not a printed figure
+- Class: judgment reading
+- Chosen now (fail-safe): 16 seeded with `aufschlag_pct` 60 beside it; the fill label says "Rechenwert".
+- Evidence (verbatim, transcript line): "Der spezifische Energieverbrauch der Ozonerzeugung aus Reinsauerstoff beträgt etwa $10 \mathrm{kWh} / \mathrm{kg}$ Ozon. Bei Verwendung von Luft beträgt er ca. $60 \%$ mehr." (L899).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-J-4 · DWA-M-205 · M205-10 · targets without a number ("-", "nicht nachweisbar", "> 400") leave the register count undecidable
+- Class: judgment reading
+- Chosen now (fail-safe): Tab. 1 "-" → `null`; Tab. 3 class 1 "nicht nachweisbar" and class 4 "> 400 / > 2000 / > 20" → `_max` null with the printed text shown; a row with a null target has `ok` null and `M205-10-D1` reads `manual_required: Fehlende Eingabe für count_rows(): ok` — the engineer switches that row to `behoerde` with the authority's number, or picks the G column. Encoding "nicht nachweisbar" as 0 and "> 400" as no bound would be a reading.
+- Evidence (verbatim, transcript line): "\hline 1 & \begin{tabular}{l}" … "& nicht nachweisbar & nicht nachweisbar & $\leq 2$ \\" (L368–L372); "\multirow{5}{*}{$>400^{6)}$} & \multirow{5}{*}{> $2000^{6)}$} & \multirow{5}{*}{> $20^{6)}$}" (L395); "6) Die 10-fache Menge sollte nicht überschritten werden." (L408); "\hline Streptococcus faecalis in $100 \mathrm{ml}^{*)}$ & 100 (90) & - \\" (L303).
+- Proposed SQL / config: if the owner rules "nicht nachweisbar" = 0 KBE and "> x" = 10 × x (footnote 6), seed the numbers.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-J-5 · DWA-M-205 · M205-21 · `restchlor_betrieb` (required) hidden under Chlordioxid
+- Class: judgment reading (hidden required input)
+- Chosen now (fail-safe): rule emitted (`chlormittel_typ != 'chlordioxid'`); a hidden required field is skipped by the approval gate; EQ-11 on -21 (output = input, consumer-free) reads null.
+- Evidence (verbatim, transcript line): "In dem aus dem Behandlungsbecken abfließenden Abwasser muss noch ein Überschuss von freiem Chlor in" (L981) "der Größenordnung von $0,2 \mathrm{mg} / \mathrm{l}$ nachzuweisen sein, um die Desinfektionswirkung sicherzustellen." (L982) — free chlorine; for ClO₂ "Die Dosierung erfolgt mengenproportional in Abhängigkeit vom Chlordioxidüberschuss im Wasser" (L984).
+- Proposed SQL / config: if rejected: `UPDATE fields SET visible_when = NULL WHERE symbol = 'restchlor_betrieb' AND w.code = 'M205-21'`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-F-1 · DWA-M-205 · M205-10 / M205-24 · percentile compliance over a sample series
+- Class: text-only-formula
+- Chosen now (fail-safe): the register compares ONE Ablaufwert per organism against the limit; the percentile is displayed, not evaluated; `proben_desinfektion` carries the series with mean / min log reduction.
+- Evidence (verbatim, transcript line): "Die Ziffern in Klammern geben an, in wie viel Prozent der Proben die Werte eingehalten sein müssen." (L309); "Die Werte in Klammern geben die Art der Perzentil-Bewertung an." (L335); "Die Rahmenbedingungen für die Überprüfung dieser Zielvorgabe sind zu definieren: Zeitraum der Einhaltung (bei Badegewässern die Badesaison), Art der Probennahme und -behandlung, Bestimmungsverfahren für die zu untersuchenden Mikroorganismen, Auswertung der Ergebnisse, statistische Einhaltungsregeln." (L232).
+- Proposed SQL / config: owner names the rule (e.g. `percentile_rows(proben_desinfektion, c_out, 0.95) <= limit` per organism — R-7 percentile definition).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-F-2 · DWA-M-205 · M205-10 · `verweildauer = V_reaktor / Q` (the brief's M205-10-D2)
+- Class: text-only-formula
+- Chosen now (fail-safe): not emitted; `verweildauer` stays an input; no `V_reaktor` created.
+- Evidence (verbatim, transcript line): "Die UV-Bestrahlung, die eine Zelle im Mittel erhält, lässt sich rechnerisch als Produkt aus der mittleren Bestrahlungsstärke in $\mathrm{W} / \mathrm{m}^{2}$ und der mittleren Verweildauer in s abschätzen." … "Die Verweildauer ist die Zeit, die eine Zelle der UV-Strahlung ausgesetzt ist." (L439) — no volume / flow relation is printed; "eine Verweilzeitstudie vorzulegen" (L599).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-F-3 · DWA-M-205 · M205-13 / M205-19 / M205-26 · KVR cost per m³
+- Class: text-only-formula
+- Chosen now (fail-safe): `kosten_*_cent_m3`, `kapitalkostenanteil`, `abschreibungsdauer_*` stay inputs.
+- Evidence (verbatim, transcript line): "Zur Abschätzung der spezifischen Kosten wurde eine Kostenvergleichsrechnung gemäß den KVR-Leitlinien [22] durchgeführt und eine Abschreibungsdauer von 25 Jahren für den bautechnischen Teil und 12,5 Jahren für den elektro- und maschinentechnischen Teil angesetzt." (L708) — no interest rate, no formula printed.
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-X-1 · DWA-M-205 · branch `feat/m205-singlesource` (worktree `_wt-m205`, commit 8ebd624 — written, NOT applied)
+- Class: cross-standard / cross-branch
+- Chosen now (fail-safe): no symbol of that migration is touched here (`ct_wert` → M205-17 owner, `permeabilitaet` → M205-14, `spez_energie_ozon` → M205-19, `uv_dosis` → M205-10 with the -05 EQ-01/02/12 deactivated); this task's fills / twins use new symbols only; R-1 targets EQ-05 on M205-19 (that branch's owner choice) and M205-07 (which that branch deactivates — apply R-1 after it, the -07 UPDATE then touches 0 rows).
+- Evidence: `git log feat/m205-singlesource` (8ebd624 "feat(m205): single-source migration (written, NOT applied) + rollback").
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-X-2 · DWA-M-205 · four mis-titled worksheets + ≈95 re-typed duplicates (Phase 6)
+- Class: cross-standard / hygiene
+- Chosen now (fail-safe): untouched; the created fields sit where their drivers are (Tab.-4 twins on M205-05 "Bewässerung mit gereinigtem Abwasser", which holds the UV lamp block; `ozon_*` on M205-17; the chlorine register on M205-21).
+- Evidence: prod titles (read-only 2026-09-18): M205-05 "Bewässerung mit gereinigtem Abwasser" (holds strahlertyp, uv_dosis, …), M205-06 "Trinkwassergewinnung aus Oberflächengewässern" (holds the membrane block), M205-07 "Brauchwassernutzung und Arbeitsschutz (BioStoffV)" (holds the ozone block), M205-08 "Zulaufcharakterisierung Kläranlagenablauf" (holds chlorine / PES / H2O2); duplicates per the inventory §4 list. Brief said 82 requirements; the capture holds 72.
+- Proposed SQL / config: Phase 6 (single-source consolidation playbook).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-I-1 · DWA-M-205 · M205-17 · scalar-only equations not server-materialised
+- Class: interface-gap
+- Chosen now (fail-safe): `ozon_pro_doc_calc`, `ozonbedarf_kg_h`, `o2_bedarf_kg_h`, `ct_ziel` compute on hook / report / snapshot / PDF only (amendment D); the twelve register-fed rows materialise on save.
+- Evidence: Plan-2a design (register-scoped materialiser); noted once here.
+- Proposed SQL / config: none (engine-output materialisation workstream).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-I-2 · DWA-M-205 · M205-18 · a `lookup_fill` over a null cell renders "—"
+- Class: interface-gap
+- Chosen now (fail-safe): `temperatur_ozonentfernung_max` (null for thermisch) carries `visible_when verbrennung_typ == 'katalytisch'`, `verbrennung_haltezeit_min` (null for katalytisch) `== 'thermisch'` — the null cell is never shown as a limit.
+- Evidence (verbatim, transcript line): L931 (quoted under G-13).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-O-1 · DWA-M-205 · M205-18 · S4_3_3_4 `locked` although the sentence says "kann"
+- Class: override-policy
+- Chosen now (fail-safe): `locked` (the brief's policy): "kann thermisch … oder katalytisch" chooses the METHOD; the figures follow "muss … vermindert werden".
+- Evidence (verbatim, transcript line): "Aufgrund seiner toxischen Eigenschaften muss das im Abgas der Anlagen enthaltene Restozon vor der Ableitung ins Freie abgesaugt und gezielt auf eine Konzentration von maximal $0,02 \mathrm{mg} / \mathrm{m}^{3}$ vermindert werden (Merkblatt DVGW W 625). Dies kann thermisch (Erhitzen auf $350^{\circ} \mathrm{C}$ über mindestens 2 Sekunden) oder katalytisch (bei $60^{\circ} \mathrm{C}$ bis $80^{\circ} \mathrm{C}$ ) erfolgen." (L931).
+- Proposed SQL / config: `UPDATE regulation_tables SET override_policy = 'kann' WHERE table_code = 'S4_3_3_4'` if the owner reads "kann" as a value choice.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-O-2 · DWA-M-205 · M205-10 · TABELLE1 / TABELLE2 / TABELLE3 `anhaltswert` on the §2.1 authority sentence
+- Class: override-policy
+- Chosen now (fail-safe): `anhaltswert` (the brief's cue): the tables are the directive's immission limits used "zum Beispiel" as emission targets; the `quelle = behoerde` row is the deviation channel (no override block on the register, so no per-row override of a table value).
+- Evidence (verbatim, transcript line): L232 (quoted under G-1); "Vorgaben an die Leistung einer Abwasserdesinfektion können sich zum Beispiel nach den Werten und Parametern der EG-Badegewässerrichtlinie, die der Gewässerbewertung dienen, richten." (L289); Tab. 3 footnote "4) Richtwert, der analog § 2 Abs. 3 TrinkwV (Fassung vom 05.12.1990, BGBl. I, S. 2616) so weit unterschritten werden sollte, wie dies nach dem Stand der Technik mit vertretbarem Aufwand unter Berücksichtigung der Umstände des Einzelfalles möglich ist." (L406).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (no signature needed)
+
+- **Codebase vs brief:** 72 compliance rows (brief: 82); TABELLE2 keyed on prod's combined `gewaesserklasse` (the brief's `gewaessertyp` × `guetekategorie` live on M205-04 only, consumer-free); the six Tab.-4 fills are text twins (R-4); `spez_energie_ozon` not re-bound (E-3); `uv_dosis_min` / `_max` on M205-10 (the single-source owner); `M205-10-D2 verweildauer` not emitted (F-2); `membranmodule.verfahren` uses prod's `mikrofiltration` / `ultrafiltration` tokens (brief: mf / uf); `permeat_design` in m³/h (÷ 1000).
+- **Every section of every M205 worksheet is the same flat template** (A Zweck · B Eingangsgrößen / Inputs · C Arbeitsblatt-spezifische Bearbeitung · D Ergebnisse · F · J · K · L · M; fields in B / D only, 108 of 237 orphans) — registers were created in C, outputs in D, fills / selects in B.
+- **A c_out = 0 sample** ("nicht nachweisbar") has no log reduction: `M205-24-D1` / `-D2` filter on `c_out > 0` (conditional aggregate); the register note asks for the detection limit.
+- **`M205-17-D3` for Luft** is `manual_required: Operand ist keine Zahl: null` by design (no printed O₂ factor for air).
+- **Bundle growth:** ~26 KB of lifted quotes (`Q`) ride in the client bundle via the seed fallback (Task-0 observation; Task 30 measures).
