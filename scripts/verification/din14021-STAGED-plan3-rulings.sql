@@ -1,0 +1,1022 @@
+-- DIN-14021 — Plan 3 Task 25 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md (same ids).
+-- Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the order it appears —
+-- except the stated dependencies: C-4 BEFORE G-28; G-25 → G-26 → G-27 (new codes REQ-51 … REQ-54 in order); G-1 … G-18, G-22 … G-27 and C-1 AFTER the
+-- DATA migrations 20260917102500 (seed) · 20260917102510 (field configs: claims register + outputs, the two checklists, unqualified_claim) ·
+-- 20260917102520 (equations DIN-14021-01-D1 … D3); G-20 additionally AFTER din14021-F-1 ([CODE]).
+-- Prod facts (enum tokens, consumer_worksheets, gate ids / conditions / md5, equation ids, the 0 stored values / 0 worksheet instances of the standard,
+-- max code REQ-50) were captured read-only on 2026-09-18 (src/lib/eval/field-configs/din14021.prior.json + din14021.text.prior.json via
+-- node scripts/verification/capture-text.mjs DIN-14021 din14021 — full cells, md5 read from prod, never retyped; gate conditions below are the CAPTURED strings;
+-- post-state md5 values computed with node:crypto from the exact strings written). This file and the sheet section are GENERATED (scratchpad
+-- gen-din14021-staged.mjs) — every "…" (L…) fragment is asserted inside its transcript span, every staged condition parse-checked (check-din14021-staged.ts).
+-- Transcript lines refer to C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-14021\DIN-EN-ISO-14021.md (DIN EN ISO 14021:2016, bilingual DE / EN — German column quoted).
+--
+-- Conventions: s.code = 'DIN-14021', worksheets by code (prod codes DIN-14021-NN), never by id; every UPDATE is guarded by the prior value (or md5)
+-- it replaces so a re-run is a no-op; each block names its rollback. A staged gate rewrite archives the full compliance_requirements row into
+-- compliance_requirements_archive_din14021 in the SAME transaction (CREATE TABLE … AS SELECT * … WHERE false; INSERT … SELECT c.* WHERE c.id = … AND md5(c.condition) = …),
+-- guards the UPDATE on md5(condition), and rolls back by restoring condition / description / worksheet_template_id / severity / requires_attestation from the
+-- archive by id with an EXPLICIT column list; the archive table is dropped by the LAST rollback that uses it OR by the owner once every gate change is signed
+-- off as final. No prod EQUATION is touched (EQ-01 … EQ-03 keep their rows).
+--
+-- Column lists (information_schema, read-only — the iso5667_6 / vsme captures of 2026-09-18; unchanged schema):
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion,
+--     audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation   (no `active` column; max code today REQ-50)
+--   fields: id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference,
+--     description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at,
+--     audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote (+ widget, ui_config,
+--     lookup, visible_when after 20260911100000)
+--
+-- Shorthand:  WS(code) = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = '<code>')
+--             FLD(ws, sym) = UPDATE fields f … FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = '<ws>' AND f.symbol = '<sym>' AND f.active
+--             RESTORE(id) = UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation
+--                             FROM compliance_requirements_archive_din14021 a WHERE a.id = c.id AND c.id = '<id>';
+--
+-- Gates touched (read-only 2026-09-18; conditions from the capture):
+--   DIN-14021-03 REQ-11 (id fe8947a8-ba07-4d79-afae-546d214bab8e, block, md5 f2ac7576889f9bc95a775bd0e16966d2, condition 'mobius_loop_used IS NOT NULL AND selected_claim_type IS NOT NULL')
+--   DIN-14021-04 REQ-14 (id 1eed592d-6f9a-4049-aed9-f604d70a2d41, block, md5 3e1fd5d9be551bf05ae360ea83cfba6e, condition 'comparative_claim IS NOT NULL AND comparison_basis IS NOT NULL')
+--   DIN-14021-04 REQ-15 (id 2a8288a6-f558-4efd-88d2-7d774ad1cf7e, block, md5 b13b65d76a01d6f4e9b99c6c90742059, condition 'comparison_same_functional_unit IS NOT NULL AND comparison_time_interval IS NOT NULL')
+--   DIN-14021-04 REQ-16 (id d784ce28-ada5-4594-812d-98afe8cb2ae9, block, md5 51b155c0d2a46a221854834156aa4ca1, condition 'product_packaging_separated == True')
+--   DIN-14021-05 REQ-20 (id 5306d73e-cfc7-467a-b751-10e9df889d17, block, md5 a1f6e2ba19e6497f9d73092f07e723d1, condition 'R_energy - E_energy > 0')
+--   DIN-14021-05 REQ-21 (id 5afe212b-a6c4-4778-8a8b-f2053063eaf7, block, md5 4562b7f284a7d45b799ba42c5e1a68f1, condition 'recycled_content_pct IS NOT NULL')
+--   DIN-14021-05 REQ-22 (id 5959aabf-e977-4d66-83b9-ec6936e7f20a, block, md5 bf069602ec635ca062808865b0b96d6b, condition 'renewable_material_pct IS NOT NULL')
+--   DIN-14021-05 REQ-23 (id 6127dacd-f26e-41c3-a24a-40b1476a955c, block, md5 14549b44e2fd34d8f9cbcc63bb7b6d20, condition 'renewable_energy_pct IS NOT NULL')
+--   DIN-14021-05 REQ-24 (id e484c778-8c67-47f8-8030-f6845231abf0, block, md5 238b0fa501e3e9d9b273ed551b6a892a, condition 'carbon_neutral_offset_declared IS NOT NULL AND carbon_footprint_value IS NOT NULL')
+--   DIN-14021-05 REQ-25 (id 26ae9ce0-cbcf-4c7c-8042-9bdfb004ccea, block, md5 6430b46514944e31ad010b81e9931af0, condition 'carbon_footprint_value IS NOT NULL')
+--   DIN-14021-03 REQ-26 (id da592ff5-47cb-45d1-ac51-6060f963217b, block, md5 c0d83f0b82a6b30de8811e69e6d95c61, condition 'TRUE')
+--   DIN-14021-06 REQ-27 (id 86511300-f5bf-4c12-99cd-b99837775ad1, block, md5 5305b6ef2c22bf283b4d3a0d1c379c0c, condition 'general_requirements_met IS NOT NULL AND verification_requirements_met IS NOT NULL AND specific_requirements_met IS NOT NULL AND compliance_verdict IS NOT NULL')
+--   DIN-14021-04 REQ-46 (id a325c518-9105-4c0f-af62-0a69168940f2, block, md5 0784440dc67a60bd950bd79ab9e4050c, condition 'comparative_claim IS NOT NULL AND comparison_basis IS NOT NULL AND comparison_same_functional_unit IS NOT NULL')
+--   DIN-14021-01 REQ-47 (id c0d3dc96-d982-48f7-88b2-787ead3fa73e, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-03 REQ-48 (id 8e1f3c48-bc8f-4566-bb4b-7406f7780b28, block, md5 260b79a4ae644c23444e0cfb8bb2dd09, condition 'mobius_loop_used == True')
+--   DIN-14021-05 REQ-49 (id d145272f-698e-4679-986e-4f667ec9e95c, block, md5 6430b46514944e31ad010b81e9931af0, condition 'carbon_footprint_value IS NOT NULL')
+--   DIN-14021-01 REQ-50 (id 9b29e7d1-d313-4c7d-84ba-3bbb413d99a7, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-28 (id 70ab21c4-f508-4f75-9754-1bccde86e1c5, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-29 (id 1f3c1651-b9c1-43ab-b57b-a0e6c23a1711, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-30 (id c8a266f1-4b79-42f2-9db7-54b0f605554e, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-31 (id a3226816-26c6-4ecb-bde8-ec991432c9b6, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-32 (id d2851137-8c96-49a9-8249-a6b2b95547d7, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-33 (id 02a16df5-332a-4cd7-9333-28a8d96a263f, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-34 (id 109b97e2-4db9-4be3-9152-fce850628ea8, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-35 (id 2ff95419-9d9e-4e89-bf04-99ce28e53e2a, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-36 (id 391df0ce-a733-4ece-a072-7097918daa58, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-37 (id e6c654f0-9fa0-4fae-bf0c-d211b2d45617, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-38 (id cffa56ed-44e4-49f1-aa84-a93976721930, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-39 (id 4950267a-8ec6-489e-897e-afd0e3bf28d6, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-40 (id bb3ed37c-07d2-49b1-8b16-00bb2d8a592d, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-41 (id 09fcb3a0-b6f8-401d-b4fe-f512601c681c, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-42 (id 60167137-3e7f-44a1-8151-71592700a1f0, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-43 (id 97b3f082-3c5b-41d6-b56e-28dcd163c4b4, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-44 (id b0bfc06b-53cc-4c32-b4aa-ed335f0192a3, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+--   DIN-14021-01 REQ-45 (id 4917d4f9-110b-427b-8447-8671bad8074f, block, md5 28c4f6704f3aa59f8bfdc892f3158f68, condition 'selected_claim_type IS NOT NULL')
+-- Equations (read-only 2026-09-18, untouched): DIN-14021-05 EQ-01 (id bf45c951-daee-447a-b699-81157cdb61e0, verified_against_standard, md5 ec663920e912f6e72a32376c5f455a1b); DIN-14021-05 EQ-02 (id c14004cb-6185-4b81-8ae0-427a9d9d791b, verified_against_standard, md5 6b7094cfa67590e2c90187184f9e21c3); DIN-14021-05 EQ-03 (id af58d637-011b-4b83-a1d7-c8a1d4b4a129, verified_against_standard, md5 846ab332a7cc0b4d214f4b2ba63725ed)
+-- Worksheet ids (read-only 2026-09-18): DIN-14021-01 54c32010-95e1-42eb-b53c-7e98ae817bdb; DIN-14021-02 391ac803-77e4-4af6-a8a7-6d20c1bf7049; DIN-14021-03 ffc4e0ec-a064-44b2-8ade-c050e83b00ce; DIN-14021-04 187258b8-f70a-4457-8384-5c6797ddb582; DIN-14021-05 16564a57-d255-4b88-ab67-6aa3606e99ad; DIN-14021-06 d064e6e4-9507-4203-b45c-ae7f0d566bb5
+--
+-- =====================================================================================================================
+-- din14021-G-1 · DIN-14021-01 · REQ-28 (block, `selected_claim_type IS NOT NULL`, §7.2 compostable) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-28 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.2 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'compostable' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.2 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.2.2.1 Eine Aussage zur Kompostierbarkeit darf nicht erfolgen, wenn ein Produkt, eine Verpackung oder ein Produkt- oder Verpackungsbestandteil: a) den Gesamtnutzen des Komposts als Bodenverbesserungsmittel negativ beeinflusst; b) zu irgendeinem Zeitpunkt der Zersetzung oder danach Stoffe in gefährlichen Konzentrationen an die Umwelt abgibt; oder c) die Zersetzungsgeschwindigkeit in derartigen Systemen, in denen das Produkt oder der Bestandteil möglicherweise kompostiert wird, beträchtlich verringert." (L1104–L1107)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '70ab21c4-f508-4f75-9754-1bccde86e1c5' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''compostable'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-1): §7.2 nur für den Aussagetyp compostable — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '70ab21c4-f508-4f75-9754-1bccde86e1c5' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('70ab21c4-f508-4f75-9754-1bccde86e1c5');
+--
+-- =====================================================================================================================
+-- din14021-G-2 · DIN-14021-01 · REQ-29 (block, `selected_claim_type IS NOT NULL`, §7.3 degradable) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-29 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.3 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'degradable' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.3 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.3.2.1 Die folgenden Voraussetzungen beziehen sich auf alle Abbauarten, z. B. den biologischen und den Photoabbau. a) Aussagen zur Abbaubarkeit dürfen nur in Bezug auf ein bestimmtes Prüfverfahren erfolgen, das den zu erreichenden Abbaugrad und die Testdauer einschließt, und sie müssen für die Umstände zutreffen, unter denen das Produkt oder die Verpackung voraussichtlich entsorgt wird. b) Es darf keine Aussage zur Abbaubarkeit für ein Produkt oder eine Verpackung oder einen Bestandteil eines Produktes oder einer Verpackung erfolgen, die Stoffe in gefährlichen Konzentrationen an die Umwelt abgeben." (L1155–L1157)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '1f3c1651-b9c1-43ab-b57b-a0e6c23a1711' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''degradable'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-2): §7.3 nur für den Aussagetyp degradable — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '1f3c1651-b9c1-43ab-b57b-a0e6c23a1711' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('1f3c1651-b9c1-43ab-b57b-a0e6c23a1711');
+--
+-- =====================================================================================================================
+-- din14021-G-3 · DIN-14021-01 · REQ-30 (block, `selected_claim_type IS NOT NULL`, §7.4 designed_for_disassembly) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-30 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.4 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'designed_for_disassembly' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.4 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.4.2.1 Die Aussage für zerlegbar konstruiert muss mit einer erklärenden Stellungnahme verbunden sein, die die Bestandteile oder Einzelteile festlegt, die wiederzuverwenden, zu recyceln, zur Rückgewinnung von Energie zu nutzen oder auf bestimmte andere Weise vom anfallenden Abfall abzutrennen sind." (L1192)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'c8a266f1-4b79-42f2-9db7-54b0f605554e' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''designed_for_disassembly'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-3): §7.4 nur für den Aussagetyp designed_for_disassembly — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = 'c8a266f1-4b79-42f2-9db7-54b0f605554e' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('c8a266f1-4b79-42f2-9db7-54b0f605554e');
+--
+-- =====================================================================================================================
+-- din14021-G-4 · DIN-14021-01 · REQ-31 (block, `selected_claim_type IS NOT NULL`, §7.5 extended_life_product) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-31 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.5 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'extended_life_product' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.5 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.5.2.1 Sämtliche Aussagen zum verlängerten Produktleben müssen dargelegt werden. Weil die Aussagen zum verlängerten Produktleben vergleichende Aussagen sind, müssen die Anforderungen von 6.3 erfüllt sein." (L1250)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'a3226816-26c6-4ecb-bde8-ec991432c9b6' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''extended_life_product'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-4): §7.5 nur für den Aussagetyp extended_life_product — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = 'a3226816-26c6-4ecb-bde8-ec991432c9b6' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('a3226816-26c6-4ecb-bde8-ec991432c9b6');
+--
+-- =====================================================================================================================
+-- din14021-G-5 · DIN-14021-01 · REQ-32 (block, `selected_claim_type IS NOT NULL`, §7.6 recovered_energy) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-32 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.6 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'recovered_energy' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.6 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "Die Bewertung muss nach Abschnitt 6 erfolgen. Außerdem muss die Abschätzung der zurückgewonnenen Energie in folgender Weise berechnet werden: a) Die Aussage darf nur erfolgen, wenn $R-E>0$. b) Die Aussage zur zurückgewonnenen Nettoenergie muss wie folgt angegeben werden:" (L1296–L1298)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'd2851137-8c96-49a9-8249-a6b2b95547d7' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''recovered_energy'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-5): §7.6 nur für den Aussagetyp recovered_energy — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = 'd2851137-8c96-49a9-8249-a6b2b95547d7' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('d2851137-8c96-49a9-8249-a6b2b95547d7');
+--
+-- =====================================================================================================================
+-- din14021-G-6 · DIN-14021-01 · REQ-33 (block, `selected_claim_type IS NOT NULL`, §7.7 recyclable) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-33 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.7 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'recyclable' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.7 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "Falls keine Sammelstellen oder Sammeleinrichtungen für das Recycling des Produktes oder der Verpackung für einen angemessenen Anteil an Käufern, potentiellen Käufern oder Anwendern des Produktes in verkehrsgünstiger Lage zur Verfügung stehen, gilt Folgendes: a) Es muss eine konkrete Aussage zur Recyclingfähigkeit erfolgen. b) Die konkrete Aussage muss in geeigneter Weise auf die begrenzte Verfügbarkeit von Sammelstellen und Sammeleinrichtungen hinweisen. c) Verallgemeinerte Bezeichnungen wie „Recyclingfähig, wenn Einrichtungen vorhanden sind", die nicht auf die begrenzte Verfügbarkeit von Sammelstellen und Sammeleinrichtungen hinweisen, sind nicht zulässig." (L1336–L1340)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '02a16df5-332a-4cd7-9333-28a8d96a263f' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''recyclable'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-6): §7.7 nur für den Aussagetyp recyclable — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '02a16df5-332a-4cd7-9333-28a8d96a263f' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('02a16df5-332a-4cd7-9333-28a8d96a263f');
+--
+-- =====================================================================================================================
+-- din14021-G-7 · DIN-14021-01 · REQ-34 (block, `selected_claim_type IS NOT NULL`, §7.8 recycled_content) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-34 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.8 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'recycled_content' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.8 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.8.2.1 Erfolgt eine Aussage zum Recyclatgehalt, muss der prozentuale Anteil an recyceltem Material angegeben werden. 7.8.2.2 Der prozentuale Anteil des Recyclats für Produkte und Verpackung muss einzeln angegeben und darf nicht zusammengefasst werden." (L1449–L1450)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '109b97e2-4db9-4be3-9152-fce850628ea8' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''recycled_content'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-7): §7.8 nur für den Aussagetyp recycled_content — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '109b97e2-4db9-4be3-9152-fce850628ea8' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('109b97e2-4db9-4be3-9152-fce850628ea8');
+--
+-- =====================================================================================================================
+-- din14021-G-8 · DIN-14021-01 · REQ-35 (block, `selected_claim_type IS NOT NULL`, §7.9 reduced_energy_consumption) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-35 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.9 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'reduced_energy_consumption' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.9 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.9.2.1 Alle Aussagen zum reduzierten Energieverbrauch müssen begründet sein. Weil der reduzierte Energieverbrauch eine vergleichende Aussage ist, müssen die Anforderungen von 6.3 erfüllt sein. 7.9.2.2 Aussagen zum reduzierten Energieverbrauch müssen auf Reduzierung des Energieverbrauchs bei der Verwendung von Produkten und Dienstleistungen beruhen. Die Aussage darf keinen reduzierten Energieverbrauch bei den Verfahren zur Herstellung des Produktes einschließen." (L1508–L1509)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '2ff95419-9d9e-4e89-bf04-99ce28e53e2a' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''reduced_energy_consumption'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-8): §7.9 nur für den Aussagetyp reduced_energy_consumption — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '2ff95419-9d9e-4e89-bf04-99ce28e53e2a' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('2ff95419-9d9e-4e89-bf04-99ce28e53e2a');
+--
+-- =====================================================================================================================
+-- din14021-G-9 · DIN-14021-01 · REQ-36 (block, `selected_claim_type IS NOT NULL`, §7.10 reduced_resource_use) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-36 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.10 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'reduced_resource_use' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.10 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.10.2.4 Aussagen zum reduzierten Ressourcenverbrauch müssen als Anteil der Reduzierung in Prozent (\%) angegeben werden. Weil der reduzierte Ressourcenverbrauch eine vergleichende Aussage ist, müssen die Anforderungen von 6.3 erfüllt sein." (L1551)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '391df0ce-a733-4ece-a072-7097918daa58' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''reduced_resource_use'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-9): §7.10 nur für den Aussagetyp reduced_resource_use — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '391df0ce-a733-4ece-a072-7097918daa58' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('391df0ce-a733-4ece-a072-7097918daa58');
+--
+-- =====================================================================================================================
+-- din14021-G-10 · DIN-14021-01 · REQ-37 (block, `selected_claim_type IS NOT NULL`, §7.11 reduced_water_consumption) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-37 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.11 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'reduced_water_consumption' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.11 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.11.2.1 Alle Aussagen zum reduzierten Wasserverbrauch müssen begründet sein. Weil der reduzierte Wasserverbrauch eine vergleichende Aussage ist, müssen die Anforderungen von 6.3 erfüllt sein." (L1585)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'e6c654f0-9fa0-4fae-bf0c-d211b2d45617' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''reduced_water_consumption'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-10): §7.11 nur für den Aussagetyp reduced_water_consumption — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = 'e6c654f0-9fa0-4fae-bf0c-d211b2d45617' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('e6c654f0-9fa0-4fae-bf0c-d211b2d45617');
+--
+-- =====================================================================================================================
+-- din14021-G-11 · DIN-14021-01 · REQ-38 (block, `selected_claim_type IS NOT NULL`, §7.12.1.1 reusable) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-38 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.12.1.1 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'reusable' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.12.1.1 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.12.2.2 Eine Aussage, dass ein Produkt oder eine Verpackung wiederverwendbar oder nachfüllbar ist, darf nur erfolgen, wenn: a) ein Programm zum Sammeln der gebrauchten Produkte oder Verpackungen vorhanden ist und wenn sie wiederverwendet oder nachgefüllt werden, oder b) Einrichtungen oder Produkte vorhanden sind, die es dem Käufer ermöglichen, Produkte oder Verpackungen wiederzuverwenden oder nachzufüllen." (L1646–L1648)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'cffa56ed-44e4-49f1-aa84-a93976721930' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''reusable'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-11): §7.12.1.1 nur für den Aussagetyp reusable — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = 'cffa56ed-44e4-49f1-aa84-a93976721930' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('cffa56ed-44e4-49f1-aa84-a93976721930');
+--
+-- =====================================================================================================================
+-- din14021-G-12 · DIN-14021-01 · REQ-39 (block, `selected_claim_type IS NOT NULL`, §7.12.1.2 refillable) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-39 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.12.1.2 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'refillable' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.12.1.2 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.12.2.2 Eine Aussage, dass ein Produkt oder eine Verpackung wiederverwendbar oder nachfüllbar ist, darf nur erfolgen, wenn: a) ein Programm zum Sammeln der gebrauchten Produkte oder Verpackungen vorhanden ist und wenn sie wiederverwendet oder nachgefüllt werden, oder b) Einrichtungen oder Produkte vorhanden sind, die es dem Käufer ermöglichen, Produkte oder Verpackungen wiederzuverwenden oder nachzufüllen." (L1646–L1648)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '4950267a-8ec6-489e-897e-afd0e3bf28d6' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''refillable'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-12): §7.12.1.2 nur für den Aussagetyp refillable — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '4950267a-8ec6-489e-897e-afd0e3bf28d6' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('4950267a-8ec6-489e-897e-afd0e3bf28d6');
+--
+-- =====================================================================================================================
+-- din14021-G-13 · DIN-14021-01 · REQ-40 (block, `selected_claim_type IS NOT NULL`, §7.13 waste_reduction) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-40 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.13 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'waste_reduction' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.13 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "7.13.2.1 Alle Aussagen zur Abfallminderung müssen begründet sein. Weil Abfallminderung eine vergleichende Aussage ist, müssen die Anforderungen von 6.3 erfüllt sein." (L1683)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'bb3ed37c-07d2-49b1-8b16-00bb2d8a592d' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''waste_reduction'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-13): §7.13 nur für den Aussagetyp waste_reduction — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = 'bb3ed37c-07d2-49b1-8b16-00bb2d8a592d' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('bb3ed37c-07d2-49b1-8b16-00bb2d8a592d');
+--
+-- =====================================================================================================================
+-- din14021-G-14 · DIN-14021-01 · REQ-41 (block, `selected_claim_type IS NOT NULL`, §7.14 renewable_material) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-41 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.14 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'renewable_material' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.14 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "Eine uneingeschränkte Aussage zur Erneuerbarkeit ist nur zulässig, wenn das Produkt zu 100 \% aus erneuerbarem Material besteht, wobei nur geringfügige Anteile an nicht erneuerbarem Material in diesem Material erlaubt sind. Andernfalls müssen Aussagen zur Erneuerbarkeit wie folgt eingeschränkt werden: a) wenn eine Aussage zum Gehalt an erneuerbarem Material gemacht wird, muss der prozentuale Massenanteil von erneuerbarem Material angegeben werden; b) der prozentuale Anteil von erneuerbarem Material (Massenanteil) in Produkten und in Verpackungen muss getrennt angegeben werden und darf nicht zusammengefasst werden." (L1719–L1721)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '09fcb3a0-b6f8-401d-b4fe-f512601c681c' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''renewable_material'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-14): §7.14 nur für den Aussagetyp renewable_material — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '09fcb3a0-b6f8-401d-b4fe-f512601c681c' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('09fcb3a0-b6f8-401d-b4fe-f512601c681c');
+--
+-- =====================================================================================================================
+-- din14021-G-15 · DIN-14021-01 · REQ-42 (block, `selected_claim_type IS NOT NULL`, §7.15 renewable_energy) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-42 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.15 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'renewable_energy' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.15 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "Eine uneingeschränkte Aussage zur erneuerbaren Energie ist nur zulässig, wenn 100 \% der Energie erneuerbar ist. Andernfalls müssen Aussagen zur erneuerbaren Energie wie folgt eingeschränkt werden." (L1763)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '60167137-3e7f-44a1-8151-71592700a1f0' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''renewable_energy'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-15): §7.15 nur für den Aussagetyp renewable_energy — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '60167137-3e7f-44a1-8151-71592700a1f0' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('60167137-3e7f-44a1-8151-71592700a1f0');
+--
+-- =====================================================================================================================
+-- din14021-G-16 · DIN-14021-01 · REQ-43 (block, `selected_claim_type IS NOT NULL`, §7.16 sustainable) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-43 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.16 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'sustainable' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.16 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "Wie in 5.5 angeführt, darf keine Anbietererklärung über das Erreichen von Nachhaltigkeit abgegeben werden. Im vorliegenden Unterabschnitt wird nochmals betont, dass uneingeschränkte Anbietererklärungen zu „nachhaltig“ und „Nachhaltigkeit" nicht verwendet werden dürfen." (L1801)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '97b3f082-3c5b-41d6-b56e-28dcd163c4b4' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''sustainable'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-16): §7.16 nur für den Aussagetyp sustainable — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '97b3f082-3c5b-41d6-b56e-28dcd163c4b4' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('97b3f082-3c5b-41d6-b56e-28dcd163c4b4');
+--
+-- =====================================================================================================================
+-- din14021-G-17 · DIN-14021-01 · REQ-44 (block, `selected_claim_type IS NOT NULL`, §7.17.2 product_carbon_footprint) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-44 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.17.2 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'product_carbon_footprint' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.17.2 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "Die Quantifizierung und Kommunikation von „Carbon Footprints“ von Produkten muss nach ISO/TS 14067 durchgeführt werden." (L1845)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'b0bfc06b-53cc-4c32-b4aa-ed335f0192a3' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''product_carbon_footprint'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-17): §7.17.2 nur für den Aussagetyp product_carbon_footprint — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = 'b0bfc06b-53cc-4c32-b4aa-ed335f0192a3' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('b0bfc06b-53cc-4c32-b4aa-ed335f0192a3');
+--
+-- =====================================================================================================================
+-- din14021-G-18 · DIN-14021-01 · REQ-45 (block, `selected_claim_type IS NOT NULL`, §7.17.3 carbon_neutral) — IF-guard on the claim type + the register verdict instead of the presence tautology
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-45 stays as captured: a PRESENCE check that passes for EVERY claim type once one is chosen (the inventory's "greedy tautology" — 20 gates share md5 28c4f6704f3aa59f8bfdc892f3158f68: REQ-28 … REQ-45, REQ-47, REQ-50), so no §7.17.3 requirement is enforced today. Once ratified the gate reads IF selected_claim_type == 'carbon_neutral' THEN specific_requirements_met_code == 1 — it fires only for its own type and reads the register verdict of DIN-14021-01-D3 (every claim row passes its computed type check; an EMPTY register reads 0 ⇒ the gate FAILS, never a phantom pass). The computed checks are the four printed ones (R−E>0, the 100 % of unqualified renewable claims, the CO2-neutral / nachhaltig prohibition, the 6.3 comparative duty); the remaining §7.17.3 conditions are the row's printed condition_text, attested by the engineer (din14021-J-4). Caveat: the verdict spans ALL rows (a failing row of another type also fails this gate — a per-type count would need one equation per token); the alternative is REJECT (keep the presence check). Verified in-session (evaluateCondition): type + code 1 ⇒ pass; type + code 0 ⇒ fail; another type ⇒ pass; unset ⇒ pending.
+-- Evidence: "Eine uneingeschränkte Aussage zu „CO2-neutral“ darf nicht gemacht werden." (L1856)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (the gate reads the created output specific_requirements_met_code on the same worksheet -01; it materialises on save). Apply order among G-1 … G-18: any.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '4917d4f9-110b-427b-8447-8671bad8074f' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''carbon_neutral'' THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-18): §7.17.3 nur für den Aussagetyp carbon_neutral — die Registerprüfung (specific_requirements_met_code, DIN-14021-01-D3) ersetzt die Präsenzprüfung selected_claim_type IS NOT NULL.'
+--  WHERE c.id = '4917d4f9-110b-427b-8447-8671bad8074f' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- COMMIT;
+-- Rollback: RESTORE('4917d4f9-110b-427b-8447-8671bad8074f');
+--
+-- =====================================================================================================================
+-- din14021-G-19 · DIN-14021-04 · REQ-14 / REQ-15 / REQ-46 (block, `comparative_claim IS NOT NULL AND …` / `… IS NOT NULL`) + REQ-16 (`product_packaging_separated == True`) — IF-guards on `comparative_claim == true` + the follow-up hides of the four §6.3 fields
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The four gates stay as captured and the four -04 fields stay visible: the producer guard REFUSES every hide (each field is consumed by DIN-14021-06 — pinned) and the gate-aware guard names REQ-14 / REQ-46 (comparison_basis), REQ-15 / REQ-46 (comparison_same_functional_unit), REQ-15 (comparison_time_interval), REQ-16 (product_packaging_separated). Today REQ-14 / REQ-46 demand a comparison basis and REQ-15 a functional unit + time interval WHENEVER comparative_claim is answered (also "no"), and REQ-16 blocks every non-comparative claim — §6.3 is "Bewertung von vergleichenden Aussagen". Once ratified, in ONE transaction: the four gates read IF comparative_claim == true THEN <captured check> and the four hides follow (exempt by the IF guard; the producer guard still names -06 — the -06 twins of these four inherit null for a non-comparative claim, which is the intended reading; REQ-27 on -06 reads none of them). Verified in-session: comparative + basis ⇒ pass; comparative without basis ⇒ fail; not comparative ⇒ pass; unset ⇒ pending.
+-- Evidence: "6.3.1 Vergleichende Aussagen müssen im Hinblick auf einen oder mehrere der folgenden Punkte bewertet werden: a) vorheriges Verfahren einer Organisation; b) vorheriges Produkt einer Organisation; c) Verfahren einer anderen Organisation; oder d) Produkt einer anderen Organisation." (L958–L962); "Der Vergleich darf nur durchgeführt werden: - auf der Grundlage einer veröffentlichten Norm oder eines anerkannten Prüfverfahrens (siehe 6.4); und - in Bezug auf vergleichbare, gegenwärtige oder vor Kurzem in demselben Markt angebotene Produkte mit entsprechender Funktion von demselben oder einem anderen Anbieter." (L964–L966); "6.3.2 Vergleichende Aussagen, die Umweltaspekte des Produktlebensweges enthalten, müssen: a) in denselben Maßeinheiten gemessen und berechnet sein; b) auf derselben Funktionseinheit beruhen; und c) über einen angemessenen Zeitraum, gewöhnlich 12 Monate, berechnet werden." (L967–L970); "6.3.4 Es besteht ein hohes Risiko, eine absolute Aussage mit einer relativen Aussage zu verwechseln. Daher sollte die Aussage so formuliert werden, dass sie als absolute und nicht als relative Aussage verstanden wird." (L1003)
+-- Note: Self-contained (no created symbol read). The register column pairs comparative / comparison_basis / comparison_months are din14021-D-7 … D-9.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '1eed592d-6f9a-4049-aed9-f604d70a2d41' AND md5(c.condition) = '3e1fd5d9be551bf05ae360ea83cfba6e';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF comparative_claim == true THEN comparison_basis IS NOT NULL',
+--   description = 'Plan 3 (din14021-G-19): Vergleichsbasis a) – d) nur für vergleichende Aussagen (§6.3.1, L958–L962).'
+--  WHERE c.id = '1eed592d-6f9a-4049-aed9-f604d70a2d41' AND md5(c.condition) = '3e1fd5d9be551bf05ae360ea83cfba6e';
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '2a8288a6-f558-4efd-88d2-7d774ad1cf7e' AND md5(c.condition) = 'b13b65d76a01d6f4e9b99c6c90742059';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF comparative_claim == true THEN comparison_same_functional_unit IS NOT NULL AND comparison_time_interval IS NOT NULL',
+--   description = 'Plan 3 (din14021-G-19): Funktionseinheit und Berechnungszeitraum nur für vergleichende Aussagen (§6.3.2 b) / c), L967–L970).'
+--  WHERE c.id = '2a8288a6-f558-4efd-88d2-7d774ad1cf7e' AND md5(c.condition) = 'b13b65d76a01d6f4e9b99c6c90742059';
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'a325c518-9105-4c0f-af62-0a69168940f2' AND md5(c.condition) = '0784440dc67a60bd950bd79ab9e4050c';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF comparative_claim == true THEN comparison_basis IS NOT NULL AND comparison_same_functional_unit IS NOT NULL',
+--   description = 'Plan 3 (din14021-G-19): §6.3 nur für vergleichende Aussagen (L964–L966).'
+--  WHERE c.id = 'a325c518-9105-4c0f-af62-0a69168940f2' AND md5(c.condition) = '0784440dc67a60bd950bd79ab9e4050c';
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'd784ce28-ada5-4594-812d-98afe8cb2ae9' AND md5(c.condition) = '51b155c0d2a46a221854834156aa4ca1';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF comparative_claim == true THEN product_packaging_separated == true',
+--   description = 'Plan 3 (din14021-G-19): Produkt und Verpackung getrennt nur für vergleichende Aussagen (§6.3.5, L1003).'
+--  WHERE c.id = 'd784ce28-ada5-4594-812d-98afe8cb2ae9' AND md5(c.condition) = '51b155c0d2a46a221854834156aa4ca1';
+-- follow-up (only after the UPDATEs above — the rules are then exempt by the IF guard; the producer guard names -06, see Chosen now):
+-- UPDATE fields f SET visible_when = 'comparative_claim == true' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_basis' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'comparative_claim == true' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_same_functional_unit' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'comparative_claim == true' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_time_interval' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'comparative_claim == true' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'product_packaging_separated' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE('1eed592d-6f9a-4049-aed9-f604d70a2d41'); RESTORE('2a8288a6-f558-4efd-88d2-7d774ad1cf7e'); RESTORE('a325c518-9105-4c0f-af62-0a69168940f2'); RESTORE('d784ce28-ada5-4594-812d-98afe8cb2ae9'); UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_basis' AND f.active AND f.visible_when = 'comparative_claim == true'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_same_functional_unit' AND f.active AND f.visible_when = 'comparative_claim == true'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_time_interval' AND f.active AND f.visible_when = 'comparative_claim == true'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'product_packaging_separated' AND f.active AND f.visible_when = 'comparative_claim == true';
+--
+-- =====================================================================================================================
+-- din14021-G-20 · DIN-14021-03 · REQ-26 (block, `TRUE`, §5.2) — a constant-true gate: proposal = the §5.3 – §5.10 checklist completeness (contains() per printed heading), applicable only after din14021-F-1 ([CODE])
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-26 stays TRUE (it passes on every project — an inert block gate). The 5.2 sentence it quotes is a pointer to ISO 14020 (no field carries it); the nearest printed content is the §5.3 – §5.10 block the created checklist general_requirements_items (-03, migration 20260917102510) enumerates. Proposed rewrite (the gate reads all eight printed headings ticked): contains(general_requirements_items, '5.3 …') == true AND … (eight clauses, values = the checklist's enum_values[].value — the printed headings). CAVEAT: the runtime gate scope maps a json carrier to a presence marker (src/lib/compliance/evaluate.ts "Resolve a JSON carrier field's value FOR THE CONDITION DSL … never arithmetic") and passes no contains() carrier — the rewritten gate would read manual until din14021-F-1 lands; parse-checked in-session, not evaluated. Alternative: REJECT (keep TRUE) and rely on REQ-01 … REQ-10 / REQ-48 which already read the twelve -03 booleans.
+-- Evidence: "Die in Abschnitt 5 aufgeführten Anforderungen gelten für sämtliche umweltbezogenen Anbietererklärungen, unabhängig davon, ob es eine von den ausgewählten Aussagen ist, auf die in Abschnitt 7 verwiesen wird, oder eine sonstige Umweltaussage." (L757); "darf nicht gemacht werden" (L783); "Umweltbezogene Anbietererklärungen und ergänzende Erklärungen sind Gegenstand aller Anforderungen in 5.7. Derartige Aussagen, einschließlich jeder ergänzenden Erklärung:" (L823)
+-- Note: Apply AFTER 20260917102510 AND after din14021-F-1 ([CODE]); the twelve -03 booleans are din14021-D-26 … D-35.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'da592ff5-47cb-45d1-ac51-6060f963217b' AND md5(c.condition) = 'c0d83f0b82a6b30de8811e69e6d95c61';
+-- UPDATE compliance_requirements c SET
+--   condition = 'contains(general_requirements_items, ''5.3 Unbestimmte oder unspezifische Aussagen'') == true AND contains(general_requirements_items, ''5.4 Aussagen von „... frei“'') == true AND contains(general_requirements_items, ''5.5 Aussagen zur Nachhaltigkeit'') == true AND contains(general_requirements_items, ''5.6 Anwendung von ergänzenden Erklärungen'') == true AND contains(general_requirements_items, ''5.7 Besondere Anforderungen'') == true AND contains(general_requirements_items, ''5.8 Verwendung von Symbolen für Umweltaussagen'') == true AND contains(general_requirements_items, ''5.9 Sonstige Informationen oder Aussagen'') == true AND contains(general_requirements_items, ''5.10 Spezifische Symbole'') == true',
+--   description = 'Plan 3 (din14021-G-20): alle acht Abschnitte 5.3 – 5.10 in der Prüfliste general_requirements_items angekreuzt (S5_3_5_10) — ersetzt die Konstante TRUE; wirksam erst nach din14021-F-1.'
+--  WHERE c.id = 'da592ff5-47cb-45d1-ac51-6060f963217b' AND md5(c.condition) = 'c0d83f0b82a6b30de8811e69e6d95c61';
+-- COMMIT;
+-- Rollback: RESTORE('da592ff5-47cb-45d1-ac51-6060f963217b');
+--
+-- =====================================================================================================================
+-- din14021-G-21 · DIN-14021-04 · `comparison_time_interval` validation rule `comparison_time_interval eq 12` (prod VR, read-only 2026-09-18) contradicts the printed "gewöhnlich 12 Monate" — proposal: default 12 + justification, never a hard equality
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The VR stays as captured (a display-level rule; no gate reads "eq 12" — REQ-15 checks IS NOT NULL). The printed sentence is "über einen angemessenen Zeitraum, gewöhnlich 12 Monate" — a usual value, not a fixed one (7.10.2.7 / 7.10.3 print a 12-month period for reduced resource use separately). Proposal: default_value 12 on the field, the VR replaced by a range-free note, and a justification text field when the value differs (INSERT-class, not emitted — the inventory names no such field). The register column comparison_months (D-9) carries no rule beyond min 0.
+-- Evidence: "c) über einen angemessenen Zeitraum, gewöhnlich 12 Monate, berechnet werden." (L967–L970); "7.10.2.7 Wurde für eine anfängliche Dauer von 12 Monaten eine Reduzierung des Ressourcenverbrauchs erzielt" (L1548–L1555)
+-- Note: validation_rules is a JSON column ({"raw": "…"}); the UPDATE below is guarded on the captured raw string. Self-contained.
+-- BEGIN;
+-- UPDATE fields f SET default_value = '12', validation_rules = '{"raw": "comparison_time_interval >= 0 -- gewoehnlich 12 Monate (6.3.2 c); Abweichung begruenden"}'::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_time_interval' AND f.active AND f.validation_rules->>'raw' = 'comparison_time_interval eq 12' AND f.default_value IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET default_value = NULL, validation_rules = '{"raw": "comparison_time_interval eq 12"}'::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_time_interval' AND f.active AND f.default_value = '12';
+--
+-- =====================================================================================================================
+-- din14021-G-22 · DIN-14021-01 · REQ-47 (block, §5.2 ISO 14020 cross-reference) and REQ-50 (block, §7.3.2.1 test methods) share the presence tautology `selected_claim_type IS NOT NULL` — REQ-50 gets the degradable / compostable guard, REQ-47 stays (no field carries ISO 14020)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay as captured (inert presence checks). REQ-50 quotes §7.3.2.1 ("Die folgenden Voraussetzungen beziehen sich auf alle Abbauarten") and its description names §7.2 / §7.3 — proposal: IF selected_claim_type IN {'degradable', 'compostable'} THEN specific_requirements_met_code == 1 (an IN guard: the gate-aware guard never exempts an IN form, so no hide relies on it). REQ-47 duplicates REQ-26 (§5.2, ISO 14020 principles — a pointer to another document, content-boundary rule): no rewrite proposed; DEFER or REJECT.
+-- Evidence: "7.3.2.1 Die folgenden Voraussetzungen beziehen sich auf alle Abbauarten, z. B. den biologischen und den Photoabbau." (L1155–L1157); "Die in Abschnitt 5 aufgeführten Anforderungen gelten für sämtliche umweltbezogenen Anbietererklärungen, unabhängig davon, ob es eine von den ausgewählten Aussagen ist, auf die in Abschnitt 7 verwiesen wird, oder eine sonstige Umweltaussage." (L757)
+-- Note: Apply AFTER 20260917102510 / 20260917102520 (REQ-50 reads the created output).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '9b29e7d1-d313-4c7d-84ba-3bbb413d99a7' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type IN {''degradable'', ''compostable''} THEN specific_requirements_met_code == 1',
+--   description = 'Plan 3 (din14021-G-22): §7.2 / §7.3 nur für abbaubar / kompostierbar — Registerprüfung statt Präsenzprüfung.'
+--  WHERE c.id = '9b29e7d1-d313-4c7d-84ba-3bbb413d99a7' AND md5(c.condition) = '28c4f6704f3aa59f8bfdc892f3158f68';
+-- REQ-47 (id c0d3dc96-d982-48f7-88b2-787ead3fa73e, md5 28c4f6704f3aa59f8bfdc892f3158f68): no statement — observation only.
+-- COMMIT;
+-- Rollback: RESTORE('9b29e7d1-d313-4c7d-84ba-3bbb413d99a7');
+--
+-- =====================================================================================================================
+-- din14021-G-23 · DIN-14021-05 · REQ-20 (block, `R_energy - E_energy > 0`, §7.6.3 a)) — IF-guard on the recovered-energy type + the follow-up hides of R_energy / E_energy / P_energy
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-20 stays as captured and R / E / P stay visible: the gate-aware guard REFUSES the R_energy / E_energy hides ("read by gate REQ-20") and the producer guard refuses all three (R_energy → EQ-01 net_recovered_energy_pct, consumed by DIN-14021-06 — pinned). Today REQ-20 is PENDING on every claim that is not a recovered-energy claim (R / E unset) — it can never pass for the 22 other types. Once ratified the gate reads IF selected_claim_type == 'recovered_energy' THEN R_energy - E_energy > 0 (selected_claim_type is inherited on -05 — consumer_worksheets ["DIN-14021-05"], pinned) and the three hides follow (exempt by the equality guard — pinned; the producer chain then nulls net_recovered_energy_pct on -06 for a non-recovered claim, the intended reading). The register carries the same rule per row (recovered_ok). Verified in-session: recovered + 100/40 ⇒ pass; recovered + 30/40 ⇒ fail; compostable ⇒ pass; unset ⇒ pending.
+-- Evidence: "a) Die Aussage darf nur erfolgen, wenn $R-E>0$." (L1297); "Zurückgewonnene Nettoenergie (\%) $$ \frac{(R-E)}{(R-E)+P} \times 100 $$" (L1300–L1303); "Dabei ist $P$ Energiemenge aus Primärquellen, die beim Herstellungsverfahren zum Herstellen des Produktes eingesetzt wird; $R$ Energiemenge, die sich aus dem Prozess der Energierückgewinnung ergibt; $E$ Energiemenge aus Primärquellen, die für den Prozess der Energierückgewinnung eingesetzt wird, um die zurückgewonnene Energie zurückzugewinnen oder zu entnehmen." (L1305–L1308)
+-- Note: Self-contained. Register pairs r / e / p / net_recovered_pct are din14021-D-10 / D-12 / D-13 / D-14.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '5306d73e-cfc7-467a-b751-10e9df889d17' AND md5(c.condition) = 'a1f6e2ba19e6497f9d73092f07e723d1';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''recovered_energy'' THEN R_energy - E_energy > 0',
+--   description = 'Plan 3 (din14021-G-23): R−E>0 nur für Aussagen zur zurückgewonnenen Energie (§7.6.3 a), L1297).'
+--  WHERE c.id = '5306d73e-cfc7-467a-b751-10e9df889d17' AND md5(c.condition) = 'a1f6e2ba19e6497f9d73092f07e723d1';
+-- follow-up (only after the UPDATE above — exempt by the IF guard; the producer guard names -06 via EQ-01, see Chosen now):
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''recovered_energy''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'R_energy' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''recovered_energy''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'E_energy' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''recovered_energy''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'P_energy' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE('5306d73e-cfc7-467a-b751-10e9df889d17'); UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'R_energy' AND f.active AND f.visible_when = 'selected_claim_type == ''recovered_energy'''; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'E_energy' AND f.active AND f.visible_when = 'selected_claim_type == ''recovered_energy'''; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'P_energy' AND f.active AND f.visible_when = 'selected_claim_type == ''recovered_energy''';
+--
+-- =====================================================================================================================
+-- din14021-G-24 · DIN-14021-05 · REQ-21 (block, `recycled_content_pct IS NOT NULL`, §7.8.2.1) — IF-guard on the recycled-content type + the follow-up hides of A_mass_recycled / P_mass_product
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-21 stays as captured and A / P stay visible: the gate-aware guard names REQ-21 (A_mass_recycled → EQ-02 recycled_content_pct — a chain read) and the producer guard refuses both (EQ-02 output consumed by -06 — pinned). Today REQ-21 BLOCKS every claim that is not a recycled-content claim (the percentage is unset). Once ratified: IF selected_claim_type == 'recycled_content' THEN recycled_content_pct IS NOT NULL and the two hides follow (exempt by the equality guard). The two §7.8.1.1 waste tokens (pre_consumer_material / post_consumer_material) map to the recycled_content block in CLAIMMAP (din14021-J-1) — an IN {…} guard covering them would never exempt a hide; the equality form is staged, the IN form is the owner's alternative.
+-- Evidence: "7.8.2.1 Erfolgt eine Aussage zum Recyclatgehalt, muss der prozentuale Anteil an recyceltem Material angegeben werden. 7.8.2.2 Der prozentuale Anteil des Recyclats für Produkte und Verpackung muss einzeln angegeben und darf nicht zusammengefasst werden." (L1449–L1450); "$X(\%)=\frac{A}{P} \times 100$" (L1480); "Masseanteil des recycelten Materials in einem Produkt oder einer Verpackung. Als Recyclatgehalt dürfen in Übereinstimmung mit der folgenden Verwendung der Begriffe nur Abfälle vor Gebrauch und Abfälle nach Gebrauch in Betracht gezogen werden." (L1382)
+-- Note: Self-contained. Register pairs a_mass / p_mass / recycled_pct are din14021-D-15 / D-16 / D-17.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '5afe212b-a6c4-4778-8a8b-f2053063eaf7' AND md5(c.condition) = '4562b7f284a7d45b799ba42c5e1a68f1';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''recycled_content'' THEN recycled_content_pct IS NOT NULL',
+--   description = 'Plan 3 (din14021-G-24): der Recyclatgehalt in Prozent nur für Aussagen zum Recyclatgehalt (§7.8.2.1, L1449).'
+--  WHERE c.id = '5afe212b-a6c4-4778-8a8b-f2053063eaf7' AND md5(c.condition) = '4562b7f284a7d45b799ba42c5e1a68f1';
+-- follow-up (only after the UPDATE above):
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''recycled_content''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'A_mass_recycled' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''recycled_content''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'P_mass_product' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE('5afe212b-a6c4-4778-8a8b-f2053063eaf7'); UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'A_mass_recycled' AND f.active AND f.visible_when = 'selected_claim_type == ''recycled_content'''; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'P_mass_product' AND f.active AND f.visible_when = 'selected_claim_type == ''recycled_content''';
+--
+-- =====================================================================================================================
+-- din14021-G-25 · DIN-14021-05 · REQ-22 (block, `renewable_material_pct IS NOT NULL`, §7.14.2) — IF-guard on the renewable-material type + NEW gate REQ-51 on the printed 100 % for an UNQUALIFIED claim (created driver `unqualified_claim`) + the follow-up hide
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): REQ-22 stays as captured (it BLOCKS every other claim type today) and renewable_material_pct stays visible (gate-aware guard: "read by gate REQ-22"; producer guard: consumed by -06). Once ratified: REQ-22 reads IF selected_claim_type == 'renewable_material' THEN renewable_material_pct IS NOT NULL; the NEW gate REQ-51 carries the prod VR's own wording ("renewable_material_pct eq 100 when unqualified_claim" — the driver did not exist; it is CREATED by 20260917102510 as the -05 attestation unqualified_claim, visible for the four "uneingeschränkt" types) as a compound IF guard: IF selected_claim_type == 'renewable_material' AND unqualified_claim == true THEN renewable_material_pct == 100 (evaluate.ts grammar; verified in-session: material + unqualified + 100 ⇒ pass; material + unqualified + 80 ⇒ fail; material + qualified + 80 ⇒ pass; energy type ⇒ pass; unset ⇒ pending). The hide follows (exempt by the equality guard of REQ-22; REQ-51's compound guard is not an exemption form — the hide is owner-applied with that knowledge). The register carries the same rule per row (renewable_ok, the printed 100).
+-- Evidence: "Eine uneingeschränkte Aussage zur Erneuerbarkeit ist nur zulässig, wenn das Produkt zu 100 \% aus erneuerbarem Material besteht, wobei nur geringfügige Anteile an nicht erneuerbarem Material in diesem Material erlaubt sind. Andernfalls müssen Aussagen zur Erneuerbarkeit wie folgt eingeschränkt werden: a) wenn eine Aussage zum Gehalt an erneuerbarem Material gemacht wird, muss der prozentuale Massenanteil von erneuerbarem Material angegeben werden; b) der prozentuale Anteil von erneuerbarem Material (Massenanteil) in Produkten und in Verpackungen muss getrennt angegeben werden und darf nicht zusammengefasst werden." (L1719–L1721); "Wenn bei Primärrohstoffen Aussagen zur Erneuerbarkeit gemacht werden, müssen diese Materialien aus Quellen stammen, die sich mit einer Geschwindigkeit regenerieren, die gleich oder höher als die Geschwindigkeit des Abbaus ist." (L1717)
+-- Note: Apply AFTER 20260917102510 (REQ-51 reads the created unqualified_claim). Max prod code today REQ-50 (read-only max(code) 2026-09-18) ⇒ REQ-51. Register pairs renewable_pct / unqualified are din14021-D-21 / D-11.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '5959aabf-e977-4d66-83b9-ec6936e7f20a' AND md5(c.condition) = 'bf069602ec635ca062808865b0b96d6b';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''renewable_material'' THEN renewable_material_pct IS NOT NULL',
+--   description = 'Plan 3 (din14021-G-25): der Anteil erneuerbaren Materials nur für Aussagen zu erneuerbarem Material (§7.14.2 a), L1720).'
+--  WHERE c.id = '5959aabf-e977-4d66-83b9-ec6936e7f20a' AND md5(c.condition) = 'bf069602ec635ca062808865b0b96d6b';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05'), 'REQ-51', 'Uneingeschränkte Aussage zu erneuerbarem Material nur bei 100 % (7.14.2)', 'IF selected_claim_type == ''renewable_material'' AND unqualified_claim == true THEN renewable_material_pct == 100', '7.14.2', 'block',
+--   'Plan 3 (din14021-G-25): „Eine uneingeschränkte Aussage zur Erneuerbarkeit ist nur zulässig, wenn das Produkt zu 100 % aus erneuerbarem Material besteht“ (L1719) — Treiber unqualified_claim (erstellt durch 20260917102510).'
+-- WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements x WHERE x.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05') AND x.code = 'REQ-51');
+-- follow-up (only after the UPDATE above):
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''renewable_material''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'renewable_material_pct' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE('5959aabf-e977-4d66-83b9-ec6936e7f20a'); DELETE FROM compliance_requirements WHERE worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05') AND code = 'REQ-51' AND description LIKE 'Plan 3 (din14021-G-%'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'renewable_material_pct' AND f.active AND f.visible_when = 'selected_claim_type == ''renewable_material''';
+--
+-- =====================================================================================================================
+-- din14021-G-26 · DIN-14021-05 · REQ-23 (block, `renewable_energy_pct IS NOT NULL`, §7.15.2) — IF-guard on the renewable-energy type + NEW gate REQ-52 on the printed 100 % for an UNQUALIFIED claim + the follow-up hide
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The mirror of G-25 for §7.15.2: REQ-23 stays as captured (BLOCKS every other type today) and renewable_energy_pct stays visible (gate-aware: REQ-23; producer: consumed by -06). Once ratified: IF selected_claim_type == 'renewable_energy' THEN renewable_energy_pct IS NOT NULL; NEW REQ-52: IF selected_claim_type == 'renewable_energy' AND unqualified_claim == true THEN renewable_energy_pct == 100 (the prod VR "renewable_energy_pct eq 100 when unqualified_claim"); the hide follows. Verified in-session as G-25.
+-- Evidence: "Eine uneingeschränkte Aussage zur erneuerbaren Energie ist nur zulässig, wenn 100 \% der Energie erneuerbar ist. Andernfalls müssen Aussagen zur erneuerbaren Energie wie folgt eingeschränkt werden." (L1763); "Wenn ein Anteil der Energie aus erneuerbaren Energiequellen stammt, muss der prozentuale Anteil eindeutig angegeben werden." (L1765)
+-- Note: Apply AFTER 20260917102510 and AFTER G-25 (REQ-51 then REQ-52 — code order only). Register pairs renewable_pct / unqualified are din14021-D-22 / D-11.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '6127dacd-f26e-41c3-a24a-40b1476a955c' AND md5(c.condition) = '14549b44e2fd34d8f9cbcc63bb7b6d20';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''renewable_energy'' THEN renewable_energy_pct IS NOT NULL',
+--   description = 'Plan 3 (din14021-G-26): der Anteil erneuerbarer Energie nur für Aussagen zu erneuerbarer Energie (§7.15.2, L1765).'
+--  WHERE c.id = '6127dacd-f26e-41c3-a24a-40b1476a955c' AND md5(c.condition) = '14549b44e2fd34d8f9cbcc63bb7b6d20';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05'), 'REQ-52', 'Uneingeschränkte Aussage zu erneuerbarer Energie nur bei 100 % (7.15.2)', 'IF selected_claim_type == ''renewable_energy'' AND unqualified_claim == true THEN renewable_energy_pct == 100', '7.15.2', 'block',
+--   'Plan 3 (din14021-G-26): „Eine uneingeschränkte Aussage zur erneuerbaren Energie ist nur zulässig, wenn 100 % der Energie erneuerbar ist.“ (L1763) — Treiber unqualified_claim.'
+-- WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements x WHERE x.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05') AND x.code = 'REQ-52');
+-- follow-up (only after the UPDATE above):
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''renewable_energy''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'renewable_energy_pct' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE('6127dacd-f26e-41c3-a24a-40b1476a955c'); DELETE FROM compliance_requirements WHERE worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05') AND code = 'REQ-52' AND description LIKE 'Plan 3 (din14021-G-%'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'renewable_energy_pct' AND f.active AND f.visible_when = 'selected_claim_type == ''renewable_energy''';
+--
+-- =====================================================================================================================
+-- din14021-G-27 · DIN-14021-05 · REQ-24 / REQ-25 / REQ-49 (block, `carbon_neutral_offset_declared IS NOT NULL AND carbon_footprint_value IS NOT NULL` / `carbon_footprint_value IS NOT NULL` ×2, §7.17) — IF-guards on the two carbon types + NEW gates REQ-53 (§7.17.3.2 no unqualified "CO2-neutral") and REQ-54 (§7.16.1 no unqualified "nachhaltig") + the follow-up hides
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The three gates stay as captured (REQ-25 and REQ-49 are byte-identical duplicates — same md5 6430b46514944e31ad010b81e9931af0; all three BLOCK every non-carbon claim today) and the two -05 fields stay visible (gate-aware: REQ-24 / REQ-25 / REQ-49 on carbon_footprint_value, REQ-24 on carbon_neutral_offset_declared; producer: consumed by -06). Once ratified: REQ-24 reads IF selected_claim_type == 'carbon_neutral' THEN carbon_neutral_offset_declared IS NOT NULL AND carbon_footprint_value IS NOT NULL (§7.17.3.3 — a statement giving the footprint and what was offset); REQ-25 and REQ-49 read IF selected_claim_type IN {'product_carbon_footprint', 'carbon_neutral'} THEN carbon_footprint_value IS NOT NULL (§7.17.2.2 / 7.17.3.4: the footprint underlies both — an IN guard, which the gate-aware guard never exempts, so the carbon_footprint_value hide is owner-applied; the duplicate REQ-49 could instead be retired — archive pattern, owner's call); NEW REQ-53: IF selected_claim_type == 'carbon_neutral' THEN unqualified_claim == false ("Eine uneingeschränkte Aussage zu „CO2-neutral“ darf nicht gemacht werden"); NEW REQ-54: IF selected_claim_type == 'sustainable' THEN unqualified_claim == false (§7.16.1). Verified in-session: neutral + declared + value ⇒ pass; neutral without value ⇒ fail; compostable ⇒ pass; neutral + unqualified true ⇒ REQ-53 fail; unset ⇒ pending. The register carries the same rules per row (unqualified_ok, carbon_offset_declared).
+-- Evidence: "Die Quantifizierung und Kommunikation von „Carbon Footprints“ von Produkten muss nach ISO/TS 14067 durchgeführt werden." (L1845); "Eine uneingeschränkte Aussage zu „CO2-neutral“ darf nicht gemacht werden." (L1856); "Aussagen zur „CO2-Neutralität“, einschließlich Ausgleichen, müssen durch eine Erklärung abgesichert werden, in der der „Carbon Footprint“ angegeben wird und in der eindeutig erläutert wird, was ausgeglichen wurde, wobei sämtliche Einzelheiten des angewendeten Ausgleichssystems und Informationen anzugeben sind, die dem Käufer den Zugang zu Quellen für weitergehende Informationen ermöglichen, die das Ausgleichsprogramm erläutern." (L1864); "Die Bestimmung der „ $\mathrm{CO}_{2}$-Neutralität“ muss zuerst auf der Berechnung des „Carbon Footprints" (siehe 7.17.2.2) und dann auf der Anrechnung der zu den Emissionen des „Carbon Footprints" äquivalenten Ausgleiche beruhen. Alternativ kann „ $\mathrm{CO}_{2}$-Neutralität“ von einem Produkt erreicht werden, wenn dessen „Carbon Footprint" null ist." (L1894); "Wie in 5.5 angeführt, darf keine Anbietererklärung über das Erreichen von Nachhaltigkeit abgegeben werden. Im vorliegenden Unterabschnitt wird nochmals betont, dass uneingeschränkte Anbietererklärungen zu „nachhaltig“ und „Nachhaltigkeit" nicht verwendet werden dürfen." (L1801)
+-- Note: Apply AFTER 20260917102510 (REQ-53 / REQ-54 read the created unqualified_claim) and AFTER G-26 (code order REQ-51 … REQ-54). Register pairs carbon_footprint / carbon_offset_declared are din14021-D-23 / D-24.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'e484c778-8c67-47f8-8030-f6845231abf0' AND md5(c.condition) = '238b0fa501e3e9d9b273ed551b6a892a';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type == ''carbon_neutral'' THEN carbon_neutral_offset_declared IS NOT NULL AND carbon_footprint_value IS NOT NULL',
+--   description = 'Plan 3 (din14021-G-27): Carbon Footprint angegeben und Ausgleich erklärt nur für CO2-neutral-Aussagen (§7.17.3.3, L1864).'
+--  WHERE c.id = 'e484c778-8c67-47f8-8030-f6845231abf0' AND md5(c.condition) = '238b0fa501e3e9d9b273ed551b6a892a';
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = '26ae9ce0-cbcf-4c7c-8042-9bdfb004ccea' AND md5(c.condition) = '6430b46514944e31ad010b81e9931af0';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type IN {''product_carbon_footprint'', ''carbon_neutral''} THEN carbon_footprint_value IS NOT NULL',
+--   description = 'Plan 3 (din14021-G-27): Carbon Footprint nach ISO/TS 14067 nur für Carbon-Footprint- und CO2-neutral-Aussagen (§7.17.2.2, L1845; §7.17.3.4, L1894).'
+--  WHERE c.id = '26ae9ce0-cbcf-4c7c-8042-9bdfb004ccea' AND md5(c.condition) = '6430b46514944e31ad010b81e9931af0';
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'd145272f-698e-4679-986e-4f667ec9e95c' AND md5(c.condition) = '6430b46514944e31ad010b81e9931af0';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF selected_claim_type IN {''product_carbon_footprint'', ''carbon_neutral''} THEN carbon_footprint_value IS NOT NULL',
+--   description = 'Plan 3 (din14021-G-27): wie REQ-25 (Duplikat — Stilllegung als Alternative, Archivmuster).'
+--  WHERE c.id = 'd145272f-698e-4679-986e-4f667ec9e95c' AND md5(c.condition) = '6430b46514944e31ad010b81e9931af0';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05'), 'REQ-53', 'Keine uneingeschränkte CO2-neutral-Aussage (7.17.3.2)', 'IF selected_claim_type == ''carbon_neutral'' THEN unqualified_claim == false', '7.17.3.2', 'block',
+--   'Plan 3 (din14021-G-27): „Eine uneingeschränkte Aussage zu „CO2-neutral“ darf nicht gemacht werden.“ (L1856) — Treiber unqualified_claim.'
+-- WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements x WHERE x.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05') AND x.code = 'REQ-53');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05'), 'REQ-54', 'Keine uneingeschränkte Nachhaltigkeits-Aussage (7.16.1)', 'IF selected_claim_type == ''sustainable'' THEN unqualified_claim == false', '7.16.1', 'block',
+--   'Plan 3 (din14021-G-27): „uneingeschränkte Anbietererklärungen zu „nachhaltig“ und „Nachhaltigkeit" nicht verwendet werden dürfen“ (L1801) — Treiber unqualified_claim.'
+-- WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements x WHERE x.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05') AND x.code = 'REQ-54');
+-- follow-up (only after the UPDATEs above; the carbon_footprint_value hide relies on an IN guard — not exempt, owner-applied):
+-- UPDATE fields f SET visible_when = 'selected_claim_type IN {''product_carbon_footprint'', ''carbon_neutral''}' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'carbon_footprint_value' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''carbon_neutral''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'carbon_neutral_offset_declared' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE('e484c778-8c67-47f8-8030-f6845231abf0'); RESTORE('26ae9ce0-cbcf-4c7c-8042-9bdfb004ccea'); RESTORE('d145272f-698e-4679-986e-4f667ec9e95c'); DELETE FROM compliance_requirements WHERE worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05') AND code = 'REQ-53' AND description LIKE 'Plan 3 (din14021-G-%'; DELETE FROM compliance_requirements WHERE worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-14021' AND w.code = 'DIN-14021-05') AND code = 'REQ-54' AND description LIKE 'Plan 3 (din14021-G-%'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'carbon_footprint_value' AND f.active AND f.visible_when = 'selected_claim_type IN {''product_carbon_footprint'', ''carbon_neutral''}'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'carbon_neutral_offset_declared' AND f.active AND f.visible_when = 'selected_claim_type == ''carbon_neutral''';
+--
+-- =====================================================================================================================
+-- din14021-G-28 · DIN-14021-03 · REQ-11 (block, `mobius_loop_used IS NOT NULL AND selected_claim_type IS NOT NULL`, §5.10.2.4) and REQ-48 (block, `mobius_loop_used == True`, §5.10.2.1) — the Möbius rule as a guard on the loop + the follow-up hide of `mobius_loop_used`; REQ-48 blocks every claim WITHOUT the loop today
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay as captured and mobius_loop_used stays visible: the gate-aware guard names REQ-11 / REQ-48 and the producer guard refuses the hide (consumed by -05 and -06 — pinned). Two prod facts inside the block: (a) REQ-11 is a presence pair (both answered ⇒ pass) — the printed rule is "darf nur für Aussagen von Recyclatgehalt und Recyclingfähigkeit verwendet werden", i.e. IF mobius_loop_used == true THEN selected_claim_type IN {'recyclable', 'recycled_content'}; but selected_claim_type is NOT inherited on -03 (consumer_worksheets ["DIN-14021-05"] — pinned), so REQ-11 is pending on every project until din14021-C-4 adds -03 (apply C-4 FIRST). (b) REQ-48 (mobius_loop_used == True, §5.10.2.1 ISO 7000-1135 design) demands the loop on EVERY claim — an enforcement error; the printed rule is conditional on using the loop ("Sobald es als Umweltaussage verwendet wird, muss dessen Ausführung die graphischen Anforderungen an ISO 7000-1135 erfüllen") and needs an attestation prod does not hold (variant B: a created boolean mobius_iso7000_conform + IF mobius_loop_used == true THEN mobius_iso7000_conform == true — INSERT-class, not emitted); staged here as variant A = deactivate REQ-48's enforcement by the archive pattern? NO — a deletion is the owner's; the block only states the finding and variant B. The hide of mobius_loop_used under the two recycling types follows REQ-11's rewrite but an IN guard is never exempt — owner-applied. The register column mobius carries the same visibility per row (din14021-D-5).
+-- Evidence: "5.10.2.4 Das Drei-Pfeile-Symbol darf nur für Aussagen von Recyclatgehalt und Recyclingfähigkeit verwendet werden, wie es in 7.7 und 7.8 festgelegt ist." (L910); "Sobald es als Umweltaussage verwendet wird, muss dessen Ausführung die graphischen Anforderungen an ISO 7000-1135 erfüllen." (L907); "7.7.3.2 Wird für eine Aussage zur Recyclingfähigkeit ein Symbol verwendet, muss es wie in 5.10.2 beschrieben das Drei-Pfeile-Symbol sein. 7.7.3.3 Als Aussage zur Recyclingfähigkeit muss das in 5.10.2 beschriebene Drei-PfeileSymbol ohne Prozentwert verwendet werden." (L1343–L1344); "7.8.3.2 Falls zur Aussage zum Recyclatgehalt ein Symbol verwendet wird, muss es das Drei-Pfeile-Symbol mit zugehörigem Prozentwert sein" (L1453–L1454)
+-- Note: Apply AFTER din14021-C-4 (selected_claim_type must reach -03). REQ-48: variant B only (no statement below).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din14021 SELECT c.* FROM compliance_requirements c WHERE c.id = 'fe8947a8-ba07-4d79-afae-546d214bab8e' AND md5(c.condition) = 'f2ac7576889f9bc95a775bd0e16966d2';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF mobius_loop_used == true THEN selected_claim_type IN {''recyclable'', ''recycled_content''}',
+--   description = 'Plan 3 (din14021-G-28): das Drei-Pfeile-Symbol nur für Aussagen von Recyclatgehalt und Recyclingfähigkeit (§5.10.2.4, L910) — bedingt auf die Verwendung des Symbols; setzt din14021-C-4 voraus.'
+--  WHERE c.id = 'fe8947a8-ba07-4d79-afae-546d214bab8e' AND md5(c.condition) = 'f2ac7576889f9bc95a775bd0e16966d2';
+-- follow-up (only after the UPDATE above and C-4; an IN guard is not exempt — owner-applied):
+-- UPDATE fields f SET visible_when = 'selected_claim_type IN {''recyclable'', ''recycled_content''}' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'mobius_loop_used' AND f.active AND f.visible_when IS NULL;
+-- REQ-48 (id 8e1f3c48-bc8f-4566-bb4b-7406f7780b28, md5 260b79a4ae644c23444e0cfb8bb2dd09): variant B needs an INSERT-class attestation — no statement.
+-- COMMIT;
+-- Rollback: RESTORE('fe8947a8-ba07-4d79-afae-546d214bab8e'); UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'mobius_loop_used' AND f.active AND f.visible_when = 'selected_claim_type IN {''recyclable'', ''recycled_content''}';
+--
+-- =====================================================================================================================
+-- din14021-C-1 · DIN-14021-01 → DIN-14021-06 · `specific_requirements_met_code` (created on -01, DIN-14021-01-D3) → consumer DIN-14021-06 (a `create` never sets consumer_worksheets; the -06 twin `specific_requirements_met` is D-25)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The equation lives on the register's worksheet (-01) and materialises on save; -06 (the summary worksheet that types the "Aggregat" booleans by hand) does not inherit it until this consumer edit. Emitted nothing (a create carries no consumers). Once ratified the -06 form / report shows the computed code beside the hand-typed boolean; REQ-27 keeps reading the boolean until D-25.
+-- Evidence: "7.1.1 Abschnitt 7 gibt Erklärungen und Anwendungshinweise für ausgewählte, häufig in umweltbezogenen Anbietererklärungen verwendete Begriffe. Die Verantwortung des Antragstellers, den in diesem Abschnitt dargelegten Prinzipien zu folgen, darf nicht durch Verwendung ähnlicher Begriffe abgeschwächt werden. Abschnitt 7 ergänzt, ersetzt jedoch nicht die Anforderungen in anderen Abschnitten der vorliegenden Internationalen Norm." (L1059)
+-- Note: Apply AFTER 20260917102510.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-14021-06'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'specific_requirements_met_code' AND f.active AND f.consumer_worksheets IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET consumer_worksheets = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'specific_requirements_met_code' AND f.active AND f.consumer_worksheets = ARRAY['DIN-14021-06'];
+--
+-- =====================================================================================================================
+-- din14021-C-2 · DIN-14021-03 · `symbol_distinguishable` / `natural_object_link` ← `symbol_used == true` (§5.8.3 / §5.8.5) REFUSED by the producer guard only (both consumed by DIN-14021-06; no gate reads them)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Not emitted (pinned: "consumed by another worksheet"; gateReaders empty). symbol_used (-01) IS inherited on -03 (consumer_worksheets ["DIN-14021-03"]), so the rule would resolve. Staged as a structural change with the -06 consequence stated: with symbol_used == false the two -06 twins inherit null (the intended reading — §5.8.3 / §5.8.5 speak of a symbol that is used); REQ-27 reads neither.
+-- Evidence: "5.8.1 Wenn eine umweltbezogene Anbietererklärung gemacht wird, ist die Verwendung eines Symbols freigestellt." (L874); "5.8.3 Symbole für eine bestimmte Umweltaussage sollten von anderen Symbolen, einschließlich Symbolen für sonstige Umweltaussagen, leicht zu unterscheiden sein." (L876); "5.8.5 Gegenstände aus der Natur dürfen nur abgebildet werden, wenn ein direkter und überprüfbarer Bezug zwischen Gegenstand und erklärtem Nutzen besteht." (L878)
+-- Note: Self-contained.
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'symbol_used == true' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'symbol_distinguishable' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'symbol_used == true' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'natural_object_link' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'symbol_distinguishable' AND f.active AND f.visible_when = 'symbol_used == true'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'natural_object_link' AND f.active AND f.visible_when = 'symbol_used == true';
+--
+-- =====================================================================================================================
+-- din14021-C-3 · DIN-14021-05 · `I_resource_initial` / `N_resource_new` ← `selected_claim_type == 'reduced_resource_use'` (§7.10.3) REFUSED by the transitive producer guard (I / N → EQ-03 reduced_resource_use_pct, consumed by DIN-14021-06); no gate reads them
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Not emitted (pinned: chain "I_resource_initial → EQ-03 reduced_resource_use_pct (consumed by DIN-14021-06)"; gateReaders empty). Staged with the consequence stated: for a claim that is not a reduced-resource claim EQ-03 reads null and -06 inherits null (intended — U(%) exists only for §7.10). The register carries I / N / U per row (din14021-D-18 … D-20).
+-- Evidence: "$U(\%)=\frac{(I-N)}{I} \times 100$" (L1570); "Der prozentuale Anteil ( $U \%$ ) an reduziertem Ressourcenverbrauch muss nach folgender Gleichung bestimmt werden." (L1569–L1574)
+-- Note: Self-contained.
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''reduced_resource_use''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'I_resource_initial' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'selected_claim_type == ''reduced_resource_use''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'N_resource_new' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'I_resource_initial' AND f.active AND f.visible_when = 'selected_claim_type == ''reduced_resource_use'''; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'N_resource_new' AND f.active AND f.visible_when = 'selected_claim_type == ''reduced_resource_use''';
+--
+-- =====================================================================================================================
+-- din14021-C-4 · DIN-14021-01 → DIN-14021-03 · `selected_claim_type` (-01) → consumer DIN-14021-03 (today ["DIN-14021-05"] only) — REQ-11 reads it on -03 and is pending on every project; G-28 needs it
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Not emitted (consumer edits are structural). The capture shows consumer_worksheets ["DIN-14021-05"] (pinned); REQ-11 on -03 names selected_claim_type — the harness resolves it through the conflict-free project-wide fallback, the form does not. Apply BEFORE G-28.
+-- Evidence: "5.10.2.4 Das Drei-Pfeile-Symbol darf nur für Aussagen von Recyclatgehalt und Recyclingfähigkeit verwendet werden, wie es in 7.7 und 7.8 festgelegt ist." (L910)
+-- Note: Apply order: C-4 → G-28.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-14021-05', 'DIN-14021-03'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'selected_claim_type' AND f.active AND f.consumer_worksheets = ARRAY['DIN-14021-05'];
+-- COMMIT;
+-- Rollback: UPDATE fields f SET consumer_worksheets = ARRAY['DIN-14021-05'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'selected_claim_type' AND f.active AND f.consumer_worksheets = ARRAY['DIN-14021-05', 'DIN-14021-03'];
+--
+-- =====================================================================================================================
+-- din14021-D-1 · DIN-14021-01 · `selected_claim_type` ↔ `claims.claim_type` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod enum, is_required true, gates REQ-28 / REQ-29 / REQ-30 / REQ-31 / REQ-32 / REQ-33 / REQ-34 / REQ-35 / REQ-36 / REQ-37 / REQ-38 / REQ-39 / REQ-40 / REQ-41 / REQ-42 / REQ-43 / REQ-44 / REQ-45 / REQ-47 / REQ-50, consumers ["DIN-14021-05"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — the gate driver of 21 gates and the -05 inheritance; the register column is its N-instances twin.
+-- Evidence: "7.2 kompostierbar 7.3 abbaubar 7.4 zerlegbar konstruiert 7.5 verlängertes Produktleben 7.6 zurückgewonnene Energie 7.7 recyclingfähig 7.8 Recyclatgehalt 7.9 reduzierter Energieverbrauch 7.10 reduzierter Ressourcenverbrauch 7.11 reduzierter Wasserverbrauch 7.12 wiederverwendbar und nachfüllbar 7.13 Abfallminderung" (L1063–L1074)
+-- Note: Proposal: DEFER — the gate driver of 21 gates and the -05 inheritance; the register column is its N-instances twin.
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'selected_claim_type' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'selected_claim_type' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-2 · DIN-14021-01 · `claim_scope` ↔ `claims.scope` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod enum, is_required true, gates REQ-07, consumers ["DIN-14021-03","DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: derive on ratification: the scalar = the scope of the single claim; retire when the register is the claim set.
+-- Evidence: "d) müssen in einer Weise dargestellt werden, die eindeutig zeigt, ob die Aussage für das gesamte Produkt, nur für einen Teil des Produktes, die Verpackung oder einen Teil einer Dienstleistung gilt;" (L827)
+-- Note: Proposal: derive on ratification: the scalar = the scope of the single claim; retire when the register is the claim set.
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'claim_scope' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'claim_scope' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-3 · DIN-14021-01 · `communication_channel` ↔ `claims.channel` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod enum, is_required true, gates none, consumers ["DIN-14021-03"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: retire on ratification.
+-- Evidence: "Umweltbezogene Anbietererklärungen und ergänzende Erklärungen sind Gegenstand aller Anforderungen in 5.7. Derartige Aussagen, einschließlich jeder ergänzenden Erklärung:" (L823)
+-- Note: Proposal: retire on ratification.
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'communication_channel' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'communication_channel' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-4 · DIN-14021-01 · `symbol_used` ↔ `claims.symbol` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod boolean, is_required false, gates none, consumers ["DIN-14021-03"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — the driver of the -03 symbol rules (C-2).
+-- Evidence: "5.8.1 Wenn eine umweltbezogene Anbietererklärung gemacht wird, ist die Verwendung eines Symbols freigestellt." (L874)
+-- Note: Proposal: DEFER — the driver of the -03 symbol rules (C-2).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'symbol_used' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-01' AND f.symbol = 'symbol_used' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-5 · DIN-14021-03 · `mobius_loop_used` ↔ `claims.mobius` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod boolean, is_required false, gates REQ-11 / REQ-48, consumers ["DIN-14021-05","DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — read by REQ-11 / REQ-48 (G-28).
+-- Evidence: "5.10.2.4 Das Drei-Pfeile-Symbol darf nur für Aussagen von Recyclatgehalt und Recyclingfähigkeit verwendet werden, wie es in 7.7 und 7.8 festgelegt ist." (L910)
+-- Note: Proposal: DEFER — read by REQ-11 / REQ-48 (G-28).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'mobius_loop_used' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'mobius_loop_used' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-6 · DIN-14021-03 · `explanatory_statement` ↔ `claims.explanatory` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod text, is_required false, gates REQ-04, consumers ["DIN-14021-05","DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — read by REQ-04 (unconditional IS NOT NULL — §5.6 makes it conditional on "wenn die Aussage allein möglicherweise zu Missverständnissen führen kann").
+-- Evidence: "Umweltbezogene Anbietererklärungen müssen mit einer ergänzenden Erklärung verbunden sein, wenn die Aussage allein möglicherweise zu Missverständnissen führen kann. Eine Umweltaussage darf nur dann ohne ergänzende Erklärung erfolgen, wenn sie unter allen vorhersehbaren Umständen ohne Einschränkungen gültig ist." (L799)
+-- Note: Proposal: DEFER — read by REQ-04 (unconditional IS NOT NULL — §5.6 makes it conditional on "wenn die Aussage allein möglicherweise zu Missverständnissen führen kann").
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'explanatory_statement' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'explanatory_statement' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-7 · DIN-14021-04 · `comparative_claim` ↔ `claims.comparative` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod boolean, is_required false, gates REQ-14 / REQ-46, consumers ["DIN-14021-05","DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — the driver of G-19.
+-- Evidence: "6.3.1 Vergleichende Aussagen müssen im Hinblick auf einen oder mehrere der folgenden Punkte bewertet werden: a) vorheriges Verfahren einer Organisation; b) vorheriges Produkt einer Organisation; c) Verfahren einer anderen Organisation; oder d) Produkt einer anderen Organisation." (L958–L962)
+-- Note: Proposal: DEFER — the driver of G-19.
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparative_claim' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparative_claim' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-8 · DIN-14021-04 · `comparison_basis` ↔ `claims.comparison_basis` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod enum, is_required false, gates REQ-14 / REQ-46, consumers ["DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: retire on ratification of G-19.
+-- Evidence: "6.3.1 Vergleichende Aussagen müssen im Hinblick auf einen oder mehrere der folgenden Punkte bewertet werden: a) vorheriges Verfahren einer Organisation; b) vorheriges Produkt einer Organisation; c) Verfahren einer anderen Organisation; oder d) Produkt einer anderen Organisation." (L958–L962)
+-- Note: Proposal: retire on ratification of G-19.
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_basis' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_basis' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-9 · DIN-14021-04 · `comparison_time_interval` ↔ `claims.comparison_months` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [Monate], is_required false, gates REQ-15, consumers ["DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: retire on ratification of G-19 / G-21.
+-- Evidence: "c) über einen angemessenen Zeitraum, gewöhnlich 12 Monate, berechnet werden." (L967–L970)
+-- Note: Proposal: retire on ratification of G-19 / G-21.
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_time_interval' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'comparison_time_interval' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-10 · DIN-14021-05 · `R_energy` ↔ `claims.r` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [MJ], is_required false, gates REQ-20, consumers null) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — EQ-01 input, read by REQ-20 (G-23).
+-- Evidence: "Dabei ist $P$ Energiemenge aus Primärquellen, die beim Herstellungsverfahren zum Herstellen des Produktes eingesetzt wird; $R$ Energiemenge, die sich aus dem Prozess der Energierückgewinnung ergibt; $E$ Energiemenge aus Primärquellen, die für den Prozess der Energierückgewinnung eingesetzt wird, um die zurückgewonnene Energie zurückzugewinnen oder zu entnehmen." (L1305–L1308)
+-- Note: Proposal: DEFER — EQ-01 input, read by REQ-20 (G-23).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'R_energy' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'R_energy' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-11 · DIN-14021-05 · `unqualified_claim` ↔ `claims.unqualified` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (CREATED by 20260917102510 (no prod row)) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: both created this task: the scalar is the single-claim mirror the brief asks for (G-25 … G-27 read it); retire the scalar when the register gates replace the -05 gates.
+-- Evidence: "Eine uneingeschränkte Aussage zur Erneuerbarkeit ist nur zulässig, wenn das Produkt zu 100 \% aus erneuerbarem Material besteht" (L1719–L1721)
+-- Note: Proposal: both created this task: the scalar is the single-claim mirror the brief asks for (G-25 … G-27 read it); retire the scalar when the register gates replace the -05 gates.
+-- both created by 20260917102510 — no retirement statement.
+-- Rollback: n/a
+--
+-- =====================================================================================================================
+-- din14021-D-12 · DIN-14021-05 · `E_energy` ↔ `claims.e` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [MJ], is_required false, gates REQ-20, consumers null) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — EQ-01 input, read by REQ-20 (G-23).
+-- Evidence: "Dabei ist $P$ Energiemenge aus Primärquellen, die beim Herstellungsverfahren zum Herstellen des Produktes eingesetzt wird; $R$ Energiemenge, die sich aus dem Prozess der Energierückgewinnung ergibt; $E$ Energiemenge aus Primärquellen, die für den Prozess der Energierückgewinnung eingesetzt wird, um die zurückgewonnene Energie zurückzugewinnen oder zu entnehmen." (L1305–L1308)
+-- Note: Proposal: DEFER — EQ-01 input, read by REQ-20 (G-23).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'E_energy' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'E_energy' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-13 · DIN-14021-05 · `P_energy` ↔ `claims.p` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [MJ], is_required false, gates none, consumers null) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — EQ-01 input (G-23).
+-- Evidence: "Dabei ist $P$ Energiemenge aus Primärquellen, die beim Herstellungsverfahren zum Herstellen des Produktes eingesetzt wird; $R$ Energiemenge, die sich aus dem Prozess der Energierückgewinnung ergibt; $E$ Energiemenge aus Primärquellen, die für den Prozess der Energierückgewinnung eingesetzt wird, um die zurückgewonnene Energie zurückzugewinnen oder zu entnehmen." (L1305–L1308)
+-- Note: Proposal: DEFER — EQ-01 input (G-23).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'P_energy' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'P_energy' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-14 · DIN-14021-05 · `net_recovered_energy_pct` ↔ `claims.net_recovered_pct` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [%], is_required false, gates none, consumers ["DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: EQ-01 keeps its row (verified_against_standard per the harness header); the register cell is the same printed formula per row — no second scalar equation (amendment K).
+-- Evidence: "Zurückgewonnene Nettoenergie (\%) $$ \frac{(R-E)}{(R-E)+P} \times 100 $$" (L1300–L1303)
+-- Note: Proposal: EQ-01 keeps its row (verified_against_standard per the harness header); the register cell is the same printed formula per row — no second scalar equation (amendment K).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'net_recovered_energy_pct' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'net_recovered_energy_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-15 · DIN-14021-05 · `A_mass_recycled` ↔ `claims.a_mass` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [kg], is_required false, gates none, consumers null) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — EQ-02 input (G-24).
+-- Evidence: "A Masse des recycelten Materials;" (L1479–L1485)
+-- Note: Proposal: DEFER — EQ-02 input (G-24).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'A_mass_recycled' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'A_mass_recycled' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-16 · DIN-14021-05 · `P_mass_product` ↔ `claims.p_mass` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [kg], is_required false, gates none, consumers null) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — EQ-02 input (G-24).
+-- Evidence: "$P$ Produktmasse." (L1479–L1485)
+-- Note: Proposal: DEFER — EQ-02 input (G-24).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'P_mass_product' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'P_mass_product' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-17 · DIN-14021-05 · `recycled_content_pct` ↔ `claims.recycled_pct` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [%], is_required false, gates REQ-21, consumers ["DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: EQ-02 keeps its row; read by REQ-21 (G-24); the register cell is the same printed formula per row.
+-- Evidence: "$X(\%)=\frac{A}{P} \times 100$" (L1480)
+-- Note: Proposal: EQ-02 keeps its row; read by REQ-21 (G-24); the register cell is the same printed formula per row.
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'recycled_content_pct' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'recycled_content_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-18 · DIN-14021-05 · `I_resource_initial` ↔ `claims.i_res` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [Einheit/Produktionseinheit], is_required false, gates none, consumers null) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — EQ-03 input (C-3).
+-- Evidence: "$I$ anfänglicher Ressourcenverbrauch, angegeben als verbrauchte Ressource je Produktionseinheit;" (L1569–L1574)
+-- Note: Proposal: DEFER — EQ-03 input (C-3).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'I_resource_initial' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'I_resource_initial' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-19 · DIN-14021-05 · `N_resource_new` ↔ `claims.n_res` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [Einheit/Produktionseinheit], is_required false, gates none, consumers null) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — EQ-03 input (C-3).
+-- Evidence: "$N$ neuer Ressourcenverbrauch, angegeben als verbrauchte Ressource je Produktionseinheit." (L1569–L1574)
+-- Note: Proposal: DEFER — EQ-03 input (C-3).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'N_resource_new' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'N_resource_new' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-20 · DIN-14021-05 · `reduced_resource_use_pct` ↔ `claims.reduced_pct` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [%], is_required false, gates none, consumers ["DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: EQ-03 keeps its row; the register cell is the same printed formula per row.
+-- Evidence: "$U(\%)=\frac{(I-N)}{I} \times 100$" (L1570)
+-- Note: Proposal: EQ-03 keeps its row; the register cell is the same printed formula per row.
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'reduced_resource_use_pct' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'reduced_resource_use_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-21 · DIN-14021-05 · `renewable_material_pct` ↔ `claims.renewable_pct` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [%], is_required false, gates REQ-22, consumers ["DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — read by REQ-22 (G-25); one register column serves both renewable types (the block decides).
+-- Evidence: "a) wenn eine Aussage zum Gehalt an erneuerbarem Material gemacht wird, muss der prozentuale Massenanteil von erneuerbarem Material angegeben werden;" (L1719–L1721)
+-- Note: Proposal: DEFER — read by REQ-22 (G-25); one register column serves both renewable types (the block decides).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'renewable_material_pct' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'renewable_material_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-22 · DIN-14021-05 · `renewable_energy_pct` ↔ `claims.renewable_pct` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [%], is_required false, gates REQ-23, consumers ["DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — read by REQ-23 (G-26).
+-- Evidence: "Wenn ein Anteil der Energie aus erneuerbaren Energiequellen stammt, muss der prozentuale Anteil eindeutig angegeben werden." (L1765)
+-- Note: Proposal: DEFER — read by REQ-23 (G-26).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'renewable_energy_pct' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'renewable_energy_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-23 · DIN-14021-05 · `carbon_footprint_value` ↔ `claims.carbon_footprint` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod number [kg CO2e], is_required false, gates REQ-24 / REQ-25 / REQ-49, consumers ["DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — read by REQ-24 / REQ-25 / REQ-49 (G-27).
+-- Evidence: "Die Quantifizierung und Kommunikation von „Carbon Footprints“ von Produkten muss nach ISO/TS 14067 durchgeführt werden." (L1845)
+-- Note: Proposal: DEFER — read by REQ-24 / REQ-25 / REQ-49 (G-27).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'carbon_footprint_value' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'carbon_footprint_value' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-24 · DIN-14021-05 · `carbon_neutral_offset_declared` ↔ `claims.carbon_offset_declared` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod boolean, is_required false, gates REQ-24, consumers ["DIN-14021-06"]) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: DEFER — read by REQ-24 (G-27).
+-- Evidence: "Aussagen zur „CO2-Neutralität“, einschließlich Ausgleichen, müssen durch eine Erklärung abgesichert werden, in der der „Carbon Footprint“ angegeben wird und in der eindeutig erläutert wird, was ausgeglichen wurde, wobei sämtliche Einzelheiten des angewendeten Ausgleichssystems und Informationen anzugeben sind, die dem Käufer den Zugang zu Quellen für weitergehende Informationen ermöglichen, die das Ausgleichsprogramm erläutern." (L1864)
+-- Note: Proposal: DEFER — read by REQ-24 (G-27).
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'carbon_neutral_offset_declared' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-05' AND f.symbol = 'carbon_neutral_offset_declared' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-25 · DIN-14021-06 · `specific_requirements_met` ↔ `claims.specific_requirements_met_code (DIN-14021-01-D3)` (amendment K pair)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per claim), the prod scalar (prod boolean, is_required true, gates REQ-27, consumers null) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 0 stored values and 0 worksheet instances for DIN-14021 (read-only count 2026-09-18) — any retirement is data-free. Proposal: derive: the hand-typed "Aggregat" boolean becomes the inherited code (C-1); REQ-27 must then read specific_requirements_met_code == 1 — a gate change, staged inside this block as the second statement; DEFER until C-1.
+-- Evidence: "7.1.1 Abschnitt 7 gibt Erklärungen und Anwendungshinweise für ausgewählte, häufig in umweltbezogenen Anbietererklärungen verwendete Begriffe. Die Verantwortung des Antragstellers, den in diesem Abschnitt dargelegten Prinzipien zu folgen, darf nicht durch Verwendung ähnlicher Begriffe abgeschwächt werden. Abschnitt 7 ergänzt, ersetzt jedoch nicht die Anforderungen in anderen Abschnitten der vorliegenden Internationalen Norm." (L1059)
+-- Note: Proposal: derive: the hand-typed "Aggregat" boolean becomes the inherited code (C-1); REQ-27 must then read specific_requirements_met_code == 1 — a gate change, staged inside this block as the second statement; DEFER until C-1.
+-- retirement pattern (when ratified): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-06' AND f.symbol = 'specific_requirements_met' AND f.active;
+-- second statement (REQ-27 reads the code — gate change): UPDATE compliance_requirements c SET condition = 'general_requirements_met IS NOT NULL AND verification_requirements_met IS NOT NULL AND specific_requirements_met_code == 1 AND compliance_verdict IS NOT NULL' WHERE c.id = '86511300-f5bf-4c12-99cd-b99837775ad1' AND md5(c.condition) = '5305b6ef2c22bf283b4d3a0d1c379c0c';
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-06' AND f.symbol = 'specific_requirements_met' AND NOT f.active; RESTORE('86511300-f5bf-4c12-99cd-b99837775ad1');
+--
+-- =====================================================================================================================
+-- din14021-D-26 · DIN-14021-03 · `vague_claim_present` (§5.3) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required true, gate REQ-01, consumers ["DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "Eine unbestimmte oder unspezifische Umweltaussage oder eine, die allgemein darauf abzielt, dass ein Produkt günstig für die Umwelt oder umweltverträglich ist, darf nicht gemacht werden. Deshalb dürfen keine Umweltaussagen wie „umweltsicher“, „umweltfreundlich“, „freundlich zur Erde", „ohne Emissionen“, „grün“, „naturfreundlich" und „ozonfreundlich“ verwendet werden." (L783)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'vague_claim_present' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'vague_claim_present' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-27 · DIN-14021-03 · `free_claim_substance_level_ok` (§5.4) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required false, gate REQ-02, consumers ["DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "Eine Aussage von „... frei“ darf nur gemacht werden, wenn der Anteil des bestimmten Stoffes nicht größer ist als der, der als anerkannte Spurenverunreinigung oder natürliche Grundbelastung vorzufinden wäre." (L789)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'free_claim_substance_level_ok' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'free_claim_substance_level_ok' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-28 · DIN-14021-03 · `sustainability_claim_present` (§5.5) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required true, gate REQ-03, consumers ["DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "Konzepte im Zusammenhang mit Nachhaltigkeit sind äußerst kompliziert und werden noch untersucht. Gegenwärtig gibt es keine bestimmten Verfahren zur Messung von Nachhaltigkeit oder zu ihrer Bestätigung. Deshalb darf keine Aussage über das Erreichen von Nachhaltigkeit gemacht werden." (L795)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'sustainability_claim_present' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'sustainability_claim_present' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-29 · DIN-14021-03 · `claim_accurate_not_misleading` (§5.7 a)) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required true, gate REQ-05, consumers ["DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "Umweltbezogene Anbietererklärungen und ergänzende Erklärungen sind Gegenstand aller Anforderungen in 5.7. Derartige Aussagen, einschließlich jeder ergänzenden Erklärung:" (L823)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'claim_accurate_not_misleading' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'claim_accurate_not_misleading' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-30 · DIN-14021-03 · `claim_substantiated_verified` (§5.7 b)) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required true, gate REQ-06, consumers ["DIN-14021-04","DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "Umweltbezogene Anbietererklärungen und ergänzende Erklärungen sind Gegenstand aller Anforderungen in 5.7. Derartige Aussagen, einschließlich jeder ergänzenden Erklärung:" (L823)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'claim_substantiated_verified' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'claim_substantiated_verified' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-31 · DIN-14021-03 · `lifecycle_considered` (§5.7 h)) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required true, gate REQ-08, consumers ["DIN-14021-04","DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "Umweltbezogene Anbietererklärungen und ergänzende Erklärungen sind Gegenstand aller Anforderungen in 5.7. Derartige Aussagen, einschließlich jeder ergänzenden Erklärung:" (L823)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'lifecycle_considered' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'lifecycle_considered' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-32 · DIN-14021-03 · `third_party_implication_avoided` (§5.7 i)) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required true, gate REQ-09, consumers ["DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "Umweltbezogene Anbietererklärungen und ergänzende Erklärungen sind Gegenstand aller Anforderungen in 5.7. Derartige Aussagen, einschließlich jeder ergänzenden Erklärung:" (L823)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'third_party_implication_avoided' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'third_party_implication_avoided' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-33 · DIN-14021-03 · `claim_geographic_relevance` (§5.7 r)) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required true, gate REQ-10, consumers ["DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "Umweltbezogene Anbietererklärungen und ergänzende Erklärungen sind Gegenstand aller Anforderungen in 5.7. Derartige Aussagen, einschließlich jeder ergänzenden Erklärung:" (L823)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'claim_geographic_relevance' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'claim_geographic_relevance' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-34 · DIN-14021-03 · `symbol_distinguishable` (§5.8.3) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required false, gate none, consumers ["DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "5.8.3 Symbole für eine bestimmte Umweltaussage sollten von anderen Symbolen, einschließlich Symbolen für sonstige Umweltaussagen, leicht zu unterscheiden sein." (L876)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'symbol_distinguishable' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'symbol_distinguishable' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-35 · DIN-14021-03 · `natural_object_link` (§5.8.5) ↔ `general_requirements_items` (the §5.3 – §5.10 checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks the printed CLAUSE, the boolean answers the specific question (prod boolean, is_required false, gate none, consumers ["DIN-14021-06"]). No equation reads either (booleans never reach scalar equations; the checklist needs din14021-F-1). Proposal: keep the boolean while its gate enforces; the checklist is the §5 walk for the engineer — DEFER.
+-- Evidence: "5.8.5 Gegenstände aus der Natur dürfen nur abgebildet werden, wenn ein direkter und überprüfbarer Bezug zwischen Gegenstand und erklärtem Nutzen besteht." (L878)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after the gate moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'natural_object_link' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-03' AND f.symbol = 'natural_object_link' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-D-36 · DIN-14021-04 · `info_documented_min` (§6.5.3, one boolean for all seven items) ↔ `documentation_items` (the a) – g) checklist)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay: the checklist ticks each printed item, the boolean attests all seven at once (prod boolean, is_required true, gate REQ-19, consumers ["DIN-14021-06"]). REQ-19 (info_documented_min == True) keeps reading the boolean until din14021-F-1 lets a gate / equation read the checklist (the seven-clause contains() form is recorded in F-1). Proposal: DEFER.
+-- Evidence: "6.5.3 Die Mindestangaben, die nach 6.2 zu dokumentieren und aufzubewahren sind, müssen Folgendes enthalten:" (L1032); "a) Angabe der angewendeten Norm oder des angewendeten Verfahrens;" (L1033)
+-- Note: Proposal: DEFER (gate-read boolean).
+-- retirement pattern (when ratified, after REQ-19 moves to the checklist): UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'info_documented_min' AND f.active;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-14021' AND w.code = 'DIN-14021-04' AND f.symbol = 'info_documented_min' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- din14021-F-1 · DIN-14021-03 / -04 / -06 · The brief's `general_requirements_met_code` / `verification_requirements_met_code` / `compliance_verdict_code` (contains() over the two checklists + the boolean verifiable_without_confidential) cannot compute on any engine path — [CODE]: pass json checklist carriers to `contains()` (materialiser, form hook, report evaluator, gate scope)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Not emitted (the three equations would read "Unbekanntes Symbol" forever): src/lib/eval/materialize-derived.ts builds registers + scalar inputs only (json carriers that are not registers are dropped — "json carriers are registers, not scalars"), src/lib/eval/use-equation-engine.ts / evaluate-for-report.ts pass registers + tableLookup and no carriers, and booleans never reach scalar equations (engine-input.ts) — probed in-session; iso46001-F-2 is the precedent. Intended rows once [CODE] lands (values = the checklists' enum_values[].value, i.e. the printed lines): DIN-14021-03-D1 general_requirements_met_code = if(contains(general_requirements_items, '5.3 Unbestimmte oder unspezifische Aussagen') AND contains(general_requirements_items, '5.4 Aussagen von „... frei“') AND contains(general_requirements_items, '5.5 Aussagen zur Nachhaltigkeit') AND contains(general_requirements_items, '5.6 Anwendung von ergänzenden Erklärungen') AND contains(general_requirements_items, '5.7 Besondere Anforderungen') AND contains(general_requirements_items, '5.8 Verwendung von Symbolen für Umweltaussagen') AND contains(general_requirements_items, '5.9 Sonstige Informationen oder Aussagen') AND contains(general_requirements_items, '5.10 Spezifische Symbole'), 1, 0); DIN-14021-04-D1 verification_requirements_met_code = if(contains(documentation_items, 'a) …') AND contains(documentation_items, 'b) …') AND contains(documentation_items, 'c) …') AND contains(documentation_items, 'd) …') AND contains(documentation_items, 'e) …') AND contains(documentation_items, 'f) …') AND contains(documentation_items, 'g) …') AND verifiable_without_confidential_code == 1, 1, 0) — with verifiable_without_confidential a BOOLEAN that needs an enum twin or a gate-side reading; DIN-14021-06-D1 compliance_verdict_code = if(general_requirements_met_code == 1 AND specific_requirements_met_code == 1 AND verification_requirements_met_code == 1, 1, 0) (inputs inherited via C-blocks). Until then the -06 booleans general_requirements_met / verification_requirements_met and compliance_verdict stay hand-typed; specific_requirements_met_code IS computed (register-fed, -01).
+-- Evidence: "6.5.3 Die Mindestangaben, die nach 6.2 zu dokumentieren und aufzubewahren sind, müssen Folgendes enthalten:" (L1032); "6.5.1 Eine umweltbezogene Anbietererklärung ist nur dann als überprüfbar zu betrachten, wenn eine derartige Überprüfung ohne Zugang zu vertraulichen Geschäftsangaben vorgenommen werden kann. Die Aussagen dürfen nicht erfolgen, wenn sie nur mithilfe vertraulicher Geschäftsangaben überprüft werden können." (L1030); "Die in Abschnitt 5 aufgeführten Anforderungen gelten für sämtliche umweltbezogenen Anbietererklärungen, unabhängig davon, ob es eine von den ausgewählten Aussagen ist, auf die in Abschnitt 7 verwiesen wird, oder eine sonstige Umweltaussage." (L757)
+-- Note: [CODE] item; STAGED block F-1 has no SQL (rollback: n/a).
+-- no statement — [CODE] item (contains() carriers on the engine paths).
+-- Rollback: n/a
+--
+-- =====================================================================================================================
+-- din14021-I-1 · DIN-14021-01 · Materialisation (amendment D, noted once): the three emitted equations are register-fed on -01 and materialise on save; no scalar-only row this task; the created `unqualified_claim` rule hides on the form / report / PDF but is `pending` (visible) for the server materialiser
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): DIN-14021-01-D1 / D2 / D3 read only the -01 register claims ⇒ written by the save-path materialiser (register-scoped). The -05 rule unqualified_claim ← selected_claim_type IN {…} keys on an INHERITED driver: hidden on the form / report / PDF, pending for the server-side computeVisibility (templateFields only — vsme-X-3 [CODE] item) — fail-safe (visible ⇒ the attestation is never silently nulled).
+-- Evidence: "7.1.1 Abschnitt 7 gibt Erklärungen und Anwendungshinweise für ausgewählte, häufig in umweltbezogenen Anbietererklärungen verwendete Begriffe. Die Verantwortung des Antragstellers, den in diesem Abschnitt dargelegten Prinzipien zu folgen, darf nicht durch Verwendung ähnlicher Begriffe abgeschwächt werden. Abschnitt 7 ergänzt, ersetzt jedoch nicht die Anforderungen in anderen Abschnitten der vorliegenden Internationalen Norm." (L1059)
+-- Note: Observation; no SQL.
+-- no statement.
+-- Rollback: n/a
+--
+-- =====================================================================================================================
+-- din14021-J-1 · DIN-14021-01 · The four §7.8.1.1 TERM tokens of prod's `selected_claim_type` (pre_consumer_material / post_consumer_material / recycled_material / recovered_reclaimed_material) are definitions, not claim types with their own Voraussetzungen — CLAIMMAP maps the two waste tokens to the recycled_content block and the two material tokens to `none`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): CLAIMMAP keeps all 23 prod tokens (D-1 / G-A3). §7.8.1.1 a) prints "Als Recyclatgehalt dürfen … nur Abfälle vor Gebrauch und Abfälle nach Gebrauch in Betracht gezogen werden" — a claim of pre-/post-consumer content IS a recycled-content claim (7.8.2.1 applies ⇒ block recycled_content, the A / P columns show); "recyceltes Material" / "zurückgewonnenes [verwertetes] Material" are material definitions without a printed percentage clause ⇒ block none, the definition as condition_text. Alternative: fold the four into recycled_content (an enum change — D-1 forbids it here).
+-- Evidence: "Masseanteil des recycelten Materials in einem Produkt oder einer Verpackung. Als Recyclatgehalt dürfen in Übereinstimmung mit der folgenden Verwendung der Begriffe nur Abfälle vor Gebrauch und Abfälle nach Gebrauch in Betracht gezogen werden." (L1382); "Material, das beim Herstellungsverfahren aus dem Abfallstrom abgetrennt wird. Nicht enthalten ist die Wiederverwendung von Materialien aus Nachbearbeitung, Nachschliff oder Schrott, die im Verlauf eines technischen Verfahrens entstehen und im selben Prozess wiederverwendet werden können." (L1386); "> Material aus Haushalten, gewerblichen und industriellen Einrichtungen oder Instituten (die Endverbraucher des Produktes sind), das nicht mehr länger für den vorgesehenen Zweck verwendet werden kann. Darin enthalten ist zurückgeführtes Material aus der Lieferkette." (L1412); "Material, das aus zurückgewonnenem [verwertetem] Material mit Hilfe eines Herstellungsverfahrens aufbereitet und zu einem Endprodukt oder zu einem Bestandteil eines Endproduktes verarbeitet wurde." (L1416); "Material, das andernfalls als Abfall entsorgt oder zur Energierückgewinnung verwendet worden wäre, stattdessen jedoch gesammelt und als Materialeinsatz zurückgewonnen [verwertet] und an Stelle von neuem Primärmaterial für ein Recycling- oder Herstellungsverfahren verwendet wird." (L1420)
+-- Note: Structure decision; no SQL.
+-- no statement.
+-- Rollback: n/a
+--
+-- =====================================================================================================================
+-- din14021-J-2 · DIN-14021-01 · `other` ("sonstige Umweltaussage") maps to §5.1 — the printed sentence that names it; no §7 clause, block none
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): CLAIMMAP row other: clause 5.1, condition_text = L757 ("… oder eine sonstige Umweltaussage") — the only printed sentence about claims outside Clause 7; the row exists so the register's lookup_key offers every prod token. No type check computes for it (type_ok = 1 unless the comparative box is required — it is not).
+-- Evidence: "Die in Abschnitt 5 aufgeführten Anforderungen gelten für sämtliche umweltbezogenen Anbietererklärungen, unabhängig davon, ob es eine von den ausgewählten Aussagen ist, auf die in Abschnitt 7 verwiesen wird, oder eine sonstige Umweltaussage." (L757); "7.1.1 Abschnitt 7 gibt Erklärungen und Anwendungshinweise für ausgewählte, häufig in umweltbezogenen Anbietererklärungen verwendete Begriffe. Die Verantwortung des Antragstellers, den in diesem Abschnitt dargelegten Prinzipien zu folgen, darf nicht durch Verwendung ähnlicher Begriffe abgeschwächt werden. Abschnitt 7 ergänzt, ersetzt jedoch nicht die Anforderungen in anderen Abschnitten der vorliegenden Internationalen Norm." (L1059)
+-- Note: Structure decision; no SQL.
+-- no statement.
+-- Rollback: n/a
+--
+-- =====================================================================================================================
+-- din14021-J-3 · DIN-14021-03 · S5_3_5_10 carries ONE binding sentence per clause as `requirement_text` (5.8.5 / 5.9.2 / 5.10.2.4 for the three symbol clauses; the 5.7 intro for a) – r)) — the clauses print several
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The table is a checklist backbone (heading + one sentence), not the full text: 5.7 prints eighteen items a) – r) (L823–L836 / L852–L860), 5.8 five sub-clauses, 5.9 two, 5.10 four. The checklist ticks the CLAUSE; the twelve prod booleans keep the item-level questions (D-26 … D-35). Alternative: one row per printed item (26 rows) — a bigger table with the same checklist semantics.
+-- Evidence: "Umweltbezogene Anbietererklärungen und ergänzende Erklärungen sind Gegenstand aller Anforderungen in 5.7. Derartige Aussagen, einschließlich jeder ergänzenden Erklärung:" (L823); "5.8.5 Gegenstände aus der Natur dürfen nur abgebildet werden, wenn ein direkter und überprüfbarer Bezug zwischen Gegenstand und erklärtem Nutzen besteht." (L878); "5.9.2 Worte, Zahlen oder Symbole, die nicht für Umweltaussagen vorgesehen sind, dürfen nicht so verwendet werden, dass sie möglicherweise als Umweltaussage missverstanden werden können." (L884); "5.10.2.4 Das Drei-Pfeile-Symbol darf nur für Aussagen von Recyclatgehalt und Recyclingfähigkeit verwendet werden, wie es in 7.7 und 7.8 festgelegt ist." (L910)
+-- Note: Structure decision; no SQL.
+-- no statement.
+-- Rollback: n/a
+--
+-- =====================================================================================================================
+-- din14021-J-4 · DIN-14021-01 · The printed per-type conditions that are TEXT (compostable a) – c), degradable test method, disassembly statement, recyclable facilities, reusable programme, …) are shown per row (`condition_text`) and attested by the engineer — only the four computable checks enter `type_ok`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): type_ok = recovered_ok (R−E>0) AND renewable_ok (100 % when unqualified) AND unqualified_ok (no unqualified CO2-neutral / nachhaltig) AND comparative_ok (the five comparative-by-clause types need the comparison ticked). Every other "darf nur … wenn" is a sentence without a field (the standard prints no test for "Sammelstellen … in verkehrsgünstiger Lage" etc.); a per-row boolean "Bedingung erfüllt" would be an attestation column — not created (the brief names none; the prod REQ-28 … REQ-45 descriptions carry the same text). Consequence for G-1 … G-18: their verdict is the computed subset.
+-- Evidence: "7.2.2.1 Eine Aussage zur Kompostierbarkeit darf nicht erfolgen, wenn ein Produkt, eine Verpackung oder ein Produkt- oder Verpackungsbestandteil: a) den Gesamtnutzen des Komposts als Bodenverbesserungsmittel negativ beeinflusst; b) zu irgendeinem Zeitpunkt der Zersetzung oder danach Stoffe in gefährlichen Konzentrationen an die Umwelt abgibt; oder c) die Zersetzungsgeschwindigkeit in derartigen Systemen, in denen das Produkt oder der Bestandteil möglicherweise kompostiert wird, beträchtlich verringert." (L1104–L1107); "7.3.2.1 Die folgenden Voraussetzungen beziehen sich auf alle Abbauarten, z. B. den biologischen und den Photoabbau. a) Aussagen zur Abbaubarkeit dürfen nur in Bezug auf ein bestimmtes Prüfverfahren erfolgen, das den zu erreichenden Abbaugrad und die Testdauer einschließt, und sie müssen für die Umstände zutreffen, unter denen das Produkt oder die Verpackung voraussichtlich entsorgt wird. b) Es darf keine Aussage zur Abbaubarkeit für ein Produkt oder eine Verpackung oder einen Bestandteil eines Produktes oder einer Verpackung erfolgen, die Stoffe in gefährlichen Konzentrationen an die Umwelt abgeben." (L1155–L1157); "Falls keine Sammelstellen oder Sammeleinrichtungen für das Recycling des Produktes oder der Verpackung für einen angemessenen Anteil an Käufern, potentiellen Käufern oder Anwendern des Produktes in verkehrsgünstiger Lage zur Verfügung stehen, gilt Folgendes: a) Es muss eine konkrete Aussage zur Recyclingfähigkeit erfolgen. b) Die konkrete Aussage muss in geeigneter Weise auf die begrenzte Verfügbarkeit von Sammelstellen und Sammeleinrichtungen hinweisen. c) Verallgemeinerte Bezeichnungen wie „Recyclingfähig, wenn Einrichtungen vorhanden sind", die nicht auf die begrenzte Verfügbarkeit von Sammelstellen und Sammeleinrichtungen hinweisen, sind nicht zulässig." (L1336–L1340); "7.12.2.2 Eine Aussage, dass ein Produkt oder eine Verpackung wiederverwendbar oder nachfüllbar ist, darf nur erfolgen, wenn: a) ein Programm zum Sammeln der gebrauchten Produkte oder Verpackungen vorhanden ist und wenn sie wiederverwendet oder nachgefüllt werden, oder b) Einrichtungen oder Produkte vorhanden sind, die es dem Käufer ermöglichen, Produkte oder Verpackungen wiederzuverwenden oder nachzufüllen." (L1646–L1648)
+-- Note: Judgment; no SQL. A future attestation column is INSERT-free (ui_config only) — a register-column addition is a widget config change, not a structure change.
+-- no statement.
+-- Rollback: n/a
+--
+-- =====================================================================================================================
+-- din14021-O-1 · DIN-14021 · Absence / presence records (amendment O): no numeric table in the transcript; `unqualified_claim` absent from the capture; "12 Monate" printed twice (6.3.2 c) and 7.10.2.7 / 7.10.3); the four "uneingeschränkte" sentences
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): grep -n "Tabelle [0-9]" "<transcript>" → L570 only (the bibliographic pointer "IPCC … Tabelle 2.14"; the English twin L591 "Table 2.14") — no printed value table (inventory §1 confirmed). grep -c '"DIN-14021-05 unqualified_claim"' src/lib/eval/field-configs/din14021.prior.json → 0 (exit 1); grep -c unqualified_claim …prior.json → 0 (exit 1) — the prod VR strings name a field that does not exist; CREATED by 20260917102510. grep -n "12 Monate" → L970 (6.3.2 c) "gewöhnlich 12 Monate") and L1554 (7.10.2.7 "für eine anfängliche Dauer von 12 Monaten"); 7.10.3 L1569 "während 12-monatiger Dauer". grep -n -i "uneingeschränkte" → L1719 / L1763 / L1801 / L1856 — exactly the four types of UNQUALIFIED_TYPES. Commands and raw output in the report §3.
+-- Evidence: "gewöhnlich 12 Monate" (L967–L970); "Eine uneingeschränkte Aussage zur Erneuerbarkeit ist nur zulässig" (L1719–L1721); "Eine uneingeschränkte Aussage zur erneuerbaren Energie ist nur zulässig" (L1763); "uneingeschränkte Anbietererklärungen zu „nachhaltig“" (L1801); "Eine uneingeschränkte Aussage zu „CO2-neutral“ darf nicht gemacht werden." (L1856)
+-- Note: Observation; no SQL.
+-- no statement.
+-- Rollback: n/a
+--
+-- =====================================================================================================================
+-- din14021-X-1 · DIN-14021-05 · Cross-standard twins NOT merged (Phase 6): `recycled_content_pct` ↔ ISO-59020 `pct_RECI_X` (inflow recycled content "qualifies per ISO 14021"), `renewable_material_pct` ↔ ISO-59020 `pct_RENI_X`; `carbon_footprint_value` (product, ISO/TS 14067) is NOT the VSME organisation GHG total
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing encoded across standards (spec §8 Phase 6). The DIN-14021 register keeps its own per-claim X (%) / renewable share; ISO-59020's per-flow registers keep theirs; a product carbon footprint (7.17.2.1 "Nettosumme der Treibhausgase eines Produkt-Lebenswegs") is a different quantity from an organisation's Scope totals — never merged.
+-- Evidence: "Masseanteil des recycelten Materials in einem Produkt oder einer Verpackung. Als Recyclatgehalt dürfen in Übereinstimmung mit der folgenden Verwendung der Begriffe nur Abfälle vor Gebrauch und Abfälle nach Gebrauch in Betracht gezogen werden." (L1382); "Die Quantifizierung und Kommunikation von „Carbon Footprints“ von Produkten muss nach ISO/TS 14067 durchgeführt werden." (L1845)
+-- Note: Phase-6 item; no SQL.
+-- no statement.
+-- Rollback: n/a
+--

@@ -30,5 +30,6 @@ export const EQUATION_MODULES: Record<string, () => Promise<EquationModule>> = {
   iso46001: () => import('./iso46001'),
   iso5667_6: () => import('./iso5667_6'),
   vsme: () => import('./vsme'),
-  // Plan-3 tasks append one line each, e.g. din14021: () => import('./din14021'),
+  din14021: () => import('./din14021'),
+  // Plan-3 tasks append one line each, e.g. iso14046: () => import('./iso14046'),
 };

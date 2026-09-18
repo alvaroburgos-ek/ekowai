@@ -1,0 +1,1628 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DIN-14021 din14021",
+    "captured_at": "2026-09-18T20:08:06.917Z",
+    "standard": "DIN-14021",
+    "slug": "din14021",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 47,
+    "section_rows": 41,
+    "sections_total": 41,
+    "equation_rows": 3,
+    "gate_rows": 50
+  },
+  "DIN-14021-01 claim_scope": {
+    "enum_values": [
+      {
+        "value": "complete_product",
+        "label_de": "gesamtes Produkt",
+        "label_en": "complete product",
+        "order_index": 1,
+        "regulation_reference": "5.7 d)"
+      },
+      {
+        "value": "product_component",
+        "label_de": "Produktbestandteil",
+        "label_en": "product component",
+        "order_index": 2,
+        "regulation_reference": "5.7 d)"
+      },
+      {
+        "value": "packaging",
+        "label_de": "Verpackung",
+        "label_en": "packaging",
+        "order_index": 3,
+        "regulation_reference": "5.7 d)"
+      },
+      {
+        "value": "service_element",
+        "label_de": "Dienstleistungselement",
+        "label_en": "element of a service",
+        "order_index": 4,
+        "regulation_reference": "5.7 d)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-03",
+      "DIN-14021-06"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-14021-01 claimant_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-14021-01 communication_channel": {
+    "enum_values": [
+      {
+        "value": "product_packaging_label",
+        "label_de": "Produkt-/Verpackungsaufschrift",
+        "label_en": "product/packaging label",
+        "order_index": 1,
+        "regulation_reference": "3.1.4"
+      },
+      {
+        "value": "product_literature",
+        "label_de": "Produktliteratur",
+        "label_en": "product literature",
+        "order_index": 2,
+        "regulation_reference": "3.1.4"
+      },
+      {
+        "value": "technical_bulletin",
+        "label_de": "technisches Bulletin",
+        "label_en": "technical bulletin",
+        "order_index": 3,
+        "regulation_reference": "3.1.4"
+      },
+      {
+        "value": "advertising",
+        "label_de": "Werbung",
+        "label_en": "advertising",
+        "order_index": 4,
+        "regulation_reference": "3.1.4"
+      },
+      {
+        "value": "telemarketing",
+        "label_de": "Telemarketing",
+        "label_en": "telemarketing",
+        "order_index": 5,
+        "regulation_reference": "3.1.4"
+      },
+      {
+        "value": "digital_electronic_media",
+        "label_de": "digitale/elektronische Medien",
+        "label_en": "digital or electronic media",
+        "order_index": 6,
+        "regulation_reference": "3.1.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-03"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-14021-01 product_identification": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-05",
+      "DIN-14021-06"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-14021-01 selected_claim_type": {
+    "enum_values": [
+      {
+        "value": "compostable",
+        "label_de": "kompostierbar",
+        "label_en": "compostable",
+        "order_index": 1,
+        "regulation_reference": "7.2.1"
+      },
+      {
+        "value": "degradable",
+        "label_de": "abbaubar",
+        "label_en": "degradable",
+        "order_index": 2,
+        "regulation_reference": "7.3.1"
+      },
+      {
+        "value": "designed_for_disassembly",
+        "label_de": "zerlegbar konstruiert",
+        "label_en": "designed for disassembly",
+        "order_index": 3,
+        "regulation_reference": "7.4.1"
+      },
+      {
+        "value": "extended_life_product",
+        "label_de": "verlaengertes Produktleben",
+        "label_en": "extended life product",
+        "order_index": 4,
+        "regulation_reference": "7.5.1"
+      },
+      {
+        "value": "recovered_energy",
+        "label_de": "zurueckgewonnene Energie",
+        "label_en": "recovered energy",
+        "order_index": 5,
+        "regulation_reference": "7.6.1"
+      },
+      {
+        "value": "recyclable",
+        "label_de": "recyclingfaehig",
+        "label_en": "recyclable",
+        "order_index": 6,
+        "regulation_reference": "7.7.1"
+      },
+      {
+        "value": "recycled_content",
+        "label_de": "Recyclatgehalt",
+        "label_en": "recycled content",
+        "order_index": 7,
+        "regulation_reference": "7.8.1.1 a)"
+      },
+      {
+        "value": "pre_consumer_material",
+        "label_de": "Abfall vor Gebrauch",
+        "label_en": "pre-consumer material",
+        "order_index": 8,
+        "regulation_reference": "7.8.1.1 a) 1)"
+      },
+      {
+        "value": "post_consumer_material",
+        "label_de": "Abfall nach Gebrauch",
+        "label_en": "post-consumer material",
+        "order_index": 9,
+        "regulation_reference": "7.8.1.1 a) 2)"
+      },
+      {
+        "value": "recycled_material",
+        "label_de": "recyceltes Material",
+        "label_en": "recycled material",
+        "order_index": 10,
+        "regulation_reference": "7.8.1.1 b)"
+      },
+      {
+        "value": "recovered_reclaimed_material",
+        "label_de": "zurueckgewonnenes [verwertetes] Material",
+        "label_en": "recovered [reclaimed] material",
+        "order_index": 11,
+        "regulation_reference": "7.8.1.1 c)"
+      },
+      {
+        "value": "reduced_energy_consumption",
+        "label_de": "reduzierter Energieverbrauch",
+        "label_en": "reduced energy consumption",
+        "order_index": 12,
+        "regulation_reference": "7.9.1"
+      },
+      {
+        "value": "reduced_resource_use",
+        "label_de": "reduzierter Ressourcenverbrauch",
+        "label_en": "reduced resource use",
+        "order_index": 13,
+        "regulation_reference": "7.10.1"
+      },
+      {
+        "value": "reduced_water_consumption",
+        "label_de": "reduzierter Wasserverbrauch",
+        "label_en": "reduced water consumption",
+        "order_index": 14,
+        "regulation_reference": "7.11.1"
+      },
+      {
+        "value": "reusable",
+        "label_de": "wiederverwendbar",
+        "label_en": "reusable",
+        "order_index": 15,
+        "regulation_reference": "7.12.1.1"
+      },
+      {
+        "value": "refillable",
+        "label_de": "nachfuellbar",
+        "label_en": "refillable",
+        "order_index": 16,
+        "regulation_reference": "7.12.1.2"
+      },
+      {
+        "value": "waste_reduction",
+        "label_de": "Abfallminderung",
+        "label_en": "waste reduction",
+        "order_index": 17,
+        "regulation_reference": "7.13.1"
+      },
+      {
+        "value": "renewable_material",
+        "label_de": "erneuerbares Material",
+        "label_en": "renewable material",
+        "order_index": 18,
+        "regulation_reference": "7.14.1"
+      },
+      {
+        "value": "renewable_energy",
+        "label_de": "erneuerbare Energie",
+        "label_en": "renewable energy",
+        "order_index": 19,
+        "regulation_reference": "7.15.1"
+      },
+      {
+        "value": "sustainable",
+        "label_de": "nachhaltig",
+        "label_en": "sustainable",
+        "order_index": 20,
+        "regulation_reference": "7.16.1"
+      },
+      {
+        "value": "product_carbon_footprint",
+        "label_de": "Carbon Footprint eines Produktes",
+        "label_en": "product carbon footprint",
+        "order_index": 21,
+        "regulation_reference": "7.17.2"
+      },
+      {
+        "value": "carbon_neutral",
+        "label_de": "CO2-neutral",
+        "label_en": "carbon neutral",
+        "order_index": 22,
+        "regulation_reference": "7.17.3"
+      },
+      {
+        "value": "other",
+        "label_de": "sonstige Umweltaussage",
+        "label_en": "other environmental claim",
+        "order_index": 23,
+        "regulation_reference": "5.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-05"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-14021-01 symbol_used": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-03"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-14021-03 claim_accurate_not_misleading": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-03 claim_geographic_relevance": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-03 claim_substantiated_verified": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-04",
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-03 explanatory_statement": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-05",
+      "DIN-14021-06"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-03 free_claim_substance_level_ok": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-03 lifecycle_considered": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-04",
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-03 mobius_loop_used": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-05",
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-14021-03 natural_object_link": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-14021-03 sustainability_claim_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-03 symbol_distinguishable": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-14021-03 third_party_implication_avoided": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-03 vague_claim_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-04 comparative_claim": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-05",
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-14021-04 comparison_basis": {
+    "enum_values": [
+      {
+        "value": "own_prior_process",
+        "label_de": "eigenes vorheriges Verfahren",
+        "label_en": "own prior process",
+        "order_index": 1,
+        "regulation_reference": "6.3.1 a)"
+      },
+      {
+        "value": "own_prior_product",
+        "label_de": "eigenes vorheriges Produkt",
+        "label_en": "own prior product",
+        "order_index": 2,
+        "regulation_reference": "6.3.1 b)"
+      },
+      {
+        "value": "other_org_process",
+        "label_de": "Verfahren anderer Organisation",
+        "label_en": "another organization's process",
+        "order_index": 3,
+        "regulation_reference": "6.3.1 c)"
+      },
+      {
+        "value": "other_org_product",
+        "label_de": "Produkt anderer Organisation",
+        "label_en": "another organization's product",
+        "order_index": 4,
+        "regulation_reference": "6.3.1 d)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-14021-04 comparison_same_functional_unit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-14021-04 comparison_time_interval": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-14021-04 evaluation_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-04 info_documented_min": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "DIN-14021-04 method_selected": {
+    "enum_values": [
+      {
+        "value": "international_standard",
+        "label_de": "Internationale Norm",
+        "label_en": "International Standard",
+        "order_index": 1,
+        "regulation_reference": "6.4"
+      },
+      {
+        "value": "recognized_standard",
+        "label_de": "anerkannte (regionale/nationale) Norm",
+        "label_en": "recognized regional/national standard",
+        "order_index": 2,
+        "regulation_reference": "6.4"
+      },
+      {
+        "value": "peer_reviewed_industry",
+        "label_de": "peer-reviewtes Industrie-/Handelsverfahren",
+        "label_en": "peer-reviewed industry/trade method",
+        "order_index": 3,
+        "regulation_reference": "6.4"
+      },
+      {
+        "value": "claimant_developed",
+        "label_de": "vom Antragsteller entwickeltes Verfahren",
+        "label_en": "claimant-developed method",
+        "order_index": 4,
+        "regulation_reference": "6.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-05",
+      "DIN-14021-06"
+    ],
+    "data_type": "enum",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "DIN-14021-04 product_packaging_separated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-14021-04 reliable_reproducible_results": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-04 verifiable_without_confidential": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "DIN-14021-05 A_mass_recycled": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 carbon_footprint_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 carbon_neutral_offset_declared": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 E_energy": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 I_resource_initial": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 N_resource_new": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 net_recovered_energy_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 P_energy": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 P_mass_product": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 R_energy": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 recycled_content_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 reduced_resource_use_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 renewable_energy_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-05 renewable_material_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-14021-06"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-14021-06 approver_signature": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "L",
+    "section_id_is_null": false,
+    "section_path": [
+      "L"
+    ]
+  },
+  "DIN-14021-06 compliance_verdict": {
+    "enum_values": [
+      {
+        "value": "conform",
+        "label_de": "konform",
+        "label_en": "conform",
+        "order_index": 1,
+        "regulation_reference": "5,6,7"
+      },
+      {
+        "value": "non_conform",
+        "label_de": "nicht konform",
+        "label_en": "non-conform",
+        "order_index": 2,
+        "regulation_reference": "5,6,7"
+      },
+      {
+        "value": "remediation_required",
+        "label_de": "Nachbesserung erforderlich",
+        "label_en": "remediation required",
+        "order_index": 3,
+        "regulation_reference": "5,6,7"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "J",
+    "section_id_is_null": false,
+    "section_path": [
+      "J"
+    ]
+  },
+  "DIN-14021-06 general_requirements_met": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "DIN-14021-06 specific_requirements_met": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "DIN-14021-06 verification_requirements_met": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "sections": {
+    "DIN-14021-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-03 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-04 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-06 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-14021-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "DIN-14021-05 EQ-01": {
+      "id": "bf45c951-daee-447a-b699-81157cdb61e0",
+      "output_symbol": "net_recovered_energy_pct",
+      "input_symbols": [
+        "R_energy",
+        "E_energy",
+        "P_energy"
+      ]
+    },
+    "DIN-14021-05 EQ-02": {
+      "id": "c14004cb-6185-4b81-8ae0-427a9d9d791b",
+      "output_symbol": "recycled_content_pct",
+      "input_symbols": [
+        "A_mass_recycled",
+        "P_mass_product"
+      ]
+    },
+    "DIN-14021-05 EQ-03": {
+      "id": "af58d637-011b-4b83-a1d7-c8a1d4b4a129",
+      "output_symbol": "reduced_resource_use_pct",
+      "input_symbols": [
+        "I_resource_initial",
+        "N_resource_new"
+      ]
+    }
+  },
+  "gates": {
+    "DIN-14021-01 REQ-07": {
+      "condition": "claim_scope IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "claim_scope"
+      ]
+    },
+    "DIN-14021-01 REQ-28": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-29": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-30": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-31": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-32": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-33": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-34": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-35": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-36": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-37": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-38": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-39": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-40": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-41": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-42": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-43": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-44": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-45": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-47": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-01 REQ-50": {
+      "condition": "selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-03 REQ-01": {
+      "condition": "vague_claim_present == True",
+      "severity": "block",
+      "symbols": [
+        "vague_claim_present"
+      ]
+    },
+    "DIN-14021-03 REQ-02": {
+      "condition": "free_claim_substance_level_ok == True",
+      "severity": "block",
+      "symbols": [
+        "free_claim_substance_level_ok"
+      ]
+    },
+    "DIN-14021-03 REQ-03": {
+      "condition": "sustainability_claim_present == True",
+      "severity": "block",
+      "symbols": [
+        "sustainability_claim_present"
+      ]
+    },
+    "DIN-14021-03 REQ-04": {
+      "condition": "explanatory_statement IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "explanatory_statement"
+      ]
+    },
+    "DIN-14021-03 REQ-05": {
+      "condition": "claim_accurate_not_misleading == True",
+      "severity": "block",
+      "symbols": [
+        "claim_accurate_not_misleading"
+      ]
+    },
+    "DIN-14021-03 REQ-06": {
+      "condition": "claim_substantiated_verified == True",
+      "severity": "block",
+      "symbols": [
+        "claim_substantiated_verified"
+      ]
+    },
+    "DIN-14021-03 REQ-08": {
+      "condition": "lifecycle_considered == True",
+      "severity": "block",
+      "symbols": [
+        "lifecycle_considered"
+      ]
+    },
+    "DIN-14021-03 REQ-09": {
+      "condition": "third_party_implication_avoided == True",
+      "severity": "block",
+      "symbols": [
+        "third_party_implication_avoided"
+      ]
+    },
+    "DIN-14021-03 REQ-10": {
+      "condition": "claim_geographic_relevance == True",
+      "severity": "block",
+      "symbols": [
+        "claim_geographic_relevance"
+      ]
+    },
+    "DIN-14021-03 REQ-11": {
+      "condition": "mobius_loop_used IS NOT NULL AND selected_claim_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "mobius_loop_used",
+        "selected_claim_type"
+      ]
+    },
+    "DIN-14021-03 REQ-26": {
+      "condition": "TRUE",
+      "severity": "block",
+      "symbols": []
+    },
+    "DIN-14021-03 REQ-48": {
+      "condition": "mobius_loop_used == True",
+      "severity": "block",
+      "symbols": [
+        "mobius_loop_used"
+      ]
+    },
+    "DIN-14021-04 REQ-12": {
+      "condition": "evaluation_documented == True",
+      "severity": "block",
+      "symbols": [
+        "evaluation_documented"
+      ]
+    },
+    "DIN-14021-04 REQ-13": {
+      "condition": "reliable_reproducible_results == True",
+      "severity": "block",
+      "symbols": [
+        "reliable_reproducible_results"
+      ]
+    },
+    "DIN-14021-04 REQ-14": {
+      "condition": "comparative_claim IS NOT NULL AND comparison_basis IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "comparative_claim",
+        "comparison_basis"
+      ]
+    },
+    "DIN-14021-04 REQ-15": {
+      "condition": "comparison_same_functional_unit IS NOT NULL AND comparison_time_interval IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "comparison_same_functional_unit",
+        "comparison_time_interval"
+      ]
+    },
+    "DIN-14021-04 REQ-16": {
+      "condition": "product_packaging_separated == True",
+      "severity": "block",
+      "symbols": [
+        "product_packaging_separated"
+      ]
+    },
+    "DIN-14021-04 REQ-17": {
+      "condition": "method_selected IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "method_selected"
+      ]
+    },
+    "DIN-14021-04 REQ-18": {
+      "condition": "verifiable_without_confidential == True",
+      "severity": "block",
+      "symbols": [
+        "verifiable_without_confidential"
+      ]
+    },
+    "DIN-14021-04 REQ-19": {
+      "condition": "info_documented_min == True",
+      "severity": "block",
+      "symbols": [
+        "info_documented_min"
+      ]
+    },
+    "DIN-14021-04 REQ-46": {
+      "condition": "comparative_claim IS NOT NULL AND comparison_basis IS NOT NULL AND comparison_same_functional_unit IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "comparative_claim",
+        "comparison_basis",
+        "comparison_same_functional_unit"
+      ]
+    },
+    "DIN-14021-05 REQ-20": {
+      "condition": "R_energy - E_energy > 0",
+      "severity": "block",
+      "symbols": [
+        "E_energy",
+        "R_energy"
+      ]
+    },
+    "DIN-14021-05 REQ-21": {
+      "condition": "recycled_content_pct IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "recycled_content_pct"
+      ]
+    },
+    "DIN-14021-05 REQ-22": {
+      "condition": "renewable_material_pct IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "renewable_material_pct"
+      ]
+    },
+    "DIN-14021-05 REQ-23": {
+      "condition": "renewable_energy_pct IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "renewable_energy_pct"
+      ]
+    },
+    "DIN-14021-05 REQ-24": {
+      "condition": "carbon_neutral_offset_declared IS NOT NULL AND carbon_footprint_value IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "carbon_footprint_value",
+        "carbon_neutral_offset_declared"
+      ]
+    },
+    "DIN-14021-05 REQ-25": {
+      "condition": "carbon_footprint_value IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "carbon_footprint_value"
+      ]
+    },
+    "DIN-14021-05 REQ-49": {
+      "condition": "carbon_footprint_value IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "carbon_footprint_value"
+      ]
+    },
+    "DIN-14021-06 REQ-27": {
+      "condition": "general_requirements_met IS NOT NULL AND verification_requirements_met IS NOT NULL AND specific_requirements_met IS NOT NULL AND compliance_verdict IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "compliance_verdict",
+        "general_requirements_met",
+        "specific_requirements_met",
+        "verification_requirements_met"
+      ]
+    }
+  }
+}
