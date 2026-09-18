@@ -26,7 +26,7 @@
  * report / snapshot / PDF paths only (2a design, controller amendment D).
  */
 import type { EquationEntry, EquationModule } from '../field-configs/types';
-import { Q } from '../regulation-tables-seed-m1200_2';
+import { Q, frag } from '../regulation-tables-seed-m1200_2';
 import { ORGANISMEN, ORG_OUTPUTS } from '../field-configs/m1200_2';
 
 const STD = 'DWA-M-1200-2';
@@ -45,7 +45,8 @@ export function orgFormula(key: string, token: string, col: string, out: string)
     case 'sd': return `${out} = ${sd}`;
     case 'p10': return `${out} = ${mean} - ${K} * ${sd}`;
     case 'p50': return `${out} = ${median}`;
-    case 'validierung_ok': return `${out} = if(count_rows(${REG}, ${c}) >= lookup('S3_3_3', wassergueteklasse, 'n_total') AND count_rows(${REG}, ${c} AND erreicht == 1) >= lookup('S3_3_3', wassergueteklasse, 'n_pass_min') AND max_rows(${REG}, shortfall, ${c}) <= lookup('S3_3_3', wassergueteklasse, 'max_shortfall_log10'), 1, 0)`;
+    // J-6 (fix round 1): the MISS count is bounded (n_total − n_pass_min = 1 for A, 8 for B-1 / C-1 — L681 "einmal nicht erreicht"), not the hit count — with more than 16 pairs a hit-count rule would let extra misses pass.
+    case 'validierung_ok': return `${out} = if(count_rows(${REG}, ${c}) >= lookup('S3_3_3', wassergueteklasse, 'n_total') AND count_rows(${REG}, ${c} AND erreicht == 0) <= lookup('S3_3_3', wassergueteklasse, 'n_total') - lookup('S3_3_3', wassergueteklasse, 'n_pass_min') AND max_rows(${REG}, shortfall, ${c}) <= lookup('S3_3_3', wassergueteklasse, 'max_shortfall_log10'), 1, 0)`;
     case 'perzentil_ok': return `${out} = if(if(lookup('ANHANGC1', wassergueteklasse, 'percentile') == 10, ${mean} - ${K} * ${sd}, ${median}) >= lookup('TAB3', wassergueteklasse, '${col}'), 1, 0)`;
     default: throw new Error(`unknown org output ${key}`);
   }
@@ -97,7 +98,7 @@ export const EQUATIONS: EquationEntry[] = [
   eq('M12002-13', 'M12002-13-D1', 'parameter_count = count_rows(betriebsparameter)', ['betriebsparameter'], null, '§6.4, Tab. 6',
     'Plan 3: Anzahl vollständiger Betriebsparameter-Zeilen ("Es sind mindestens die Betriebsparameter gemäß Tabelle 6 zu berücksichtigen", L663).', Q.L663),
   eq('M12002-13', 'M12002-13-D2', 'parameter_nicht_online = count_rows(betriebsparameter, online_ok == 0)', ['betriebsparameter'], null, '§6.4',
-    'Plan 3: Betriebsparameter ohne Online-Messung ("Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand und die Einhaltung der Anforderungen zu allen Zeitpunkten sicherzustellen", L1287); REQ-11 (messhauefigkeit == online) STAGED (m1200_2-G-6).', Q.L1287),
+    'Plan 3: Betriebsparameter ohne Online-Messung ("Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand und die Einhaltung der Anforderungen zu allen Zeitpunkten sicherzustellen", L1289); REQ-11 (messhauefigkeit == online) STAGED (m1200_2-G-6).', frag(Q.L1289, 'Durch Online-Monitoring', ' Die Mess-wertaktualisierung')),
   eq('M12002-13', 'M12002-13-D3', 'alarm_verzoegerung_max_calc = max_rows(betriebsparameter, alarm_verzoegerung_min, alarm_verzoegerung_min IS NOT NULL)', ['betriebsparameter'], 'min', '§6.4',
     'Plan 3: größte eingetragene Alarmverzögerung über die Zeilen ("Abweichungen vom zulässigen Betriebsfenster sollten je nach System nach 5 min bis 30 min eine Alarmierung auslösen", L1289 — SR-2: der Bereich wird angezeigt, geprüft wird das prod-Gate-Maximum 30 min); Zeilen ohne Eintrag zählen nicht; Übernahme als alarm_verzoegerung_min / REQ-11 STAGED (m1200_2-D-8 / -G-6).', Q.L1289),
 

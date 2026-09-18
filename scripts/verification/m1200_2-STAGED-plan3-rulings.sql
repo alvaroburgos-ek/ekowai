@@ -114,7 +114,13 @@
 -- Evidence: L679 "sind je 16 korrespondierende Proben im Zulauf und Ablauf zu nehmen"; L681 (A: 15 von 16, 1,0 log10); L683 (B-1 / C-1:
 -- 8 von 16, 2,0 log10); L668 "separat für jeden Indikatororganismus"; L706 (E. coli, somatische und F-spezifische Coliphagen, Clostridium-
 -- perfringens-Sporen bzw. alternativ sulfatreduzierende Sporenbildner). Chosen now: REQ-05 unchanged (reads the typed probenanzahl_zulauf).
--- Proposed (the created verdicts are 0 / 1 per organism; an organism without rows leaves its verdict undecidable ⇒ gate pending):
+-- Proposed (the created verdicts are 0 / 1 per organism; an organism without rows leaves its verdict undecidable). Engine semantics of the
+-- condition (src/lib/expr/evaluate.ts `case 'or'` / `case 'and'`, Kleene ternary, both operands always evaluated — no short-circuit):
+-- OR is 'true' when EITHER side is true even if the other is missing (a materialised null verdict reads as missing), 'missing' when
+-- neither is true and one is missing, else 'false'; AND is 'false' when either side is false even if the other is missing. So: Clostridium
+-- rows absent + sulfatreduzierer verdict 1 ⇒ the OR group passes; both absent ⇒ pending; any organism's verdict 0 ⇒ the gate FAILS even
+-- while another organism is still undecidable. J-6: the verdict bounds the MISS count (n_total − n_pass_min), so more than 16 pairs
+-- never pass on extra hits.
 -- BEGIN;
 -- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m1200_2 AS SELECT * FROM compliance_requirements WHERE false;
 -- INSERT INTO compliance_requirements_archive_m1200_2 SELECT * FROM compliance_requirements
@@ -207,7 +213,7 @@
 -- =====================================================================================================================
 -- m1200_2-G-6 · -13 REQ-11 (block) · `messhauefigkeit == online AND alarm_verzoegerung_min <= 30` → the register's outputs
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Evidence: L1287 "Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand und die Einhaltung der Anforderungen zu
+-- Evidence: L1289 "Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand und die Einhaltung der Anforderungen zu
 -- allen Zeitpunkten sicherzustellen"; L1289 "Abweichungen vom zulässigen Betriebsfenster sollten je nach System nach 5 min bis 30 min eine
 -- Alarmierung auslösen." (SR-2 range; prod reads the maximum 30). Chosen now: unchanged.
 -- BEGIN;
@@ -335,7 +341,7 @@
 -- =====================================================================================================================
 -- m1200_2-D-8 · -13 messhauefigkeit (required, REQ-11) / alarm_verzoegerung_min (REQ-11) ↔ betriebsparameter rows (ONE atomic pair — both are REQ-11's inputs)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Evidence: L1287; L1289; Tab. 6 (L1297). Chosen now: both stay. Proposed: retire the two scalars after G-6 (D-1 block shape on M12002-13).
+-- Evidence: L1289 (both sentences); L1287 (Systemträgheit); Tab. 6 (L1297). Chosen now: both stay. Proposed: retire the two scalars after G-6 (D-1 block shape on M12002-13).
 
 -- =====================================================================================================================
 -- m1200_2-D-9 · -15 kostenkennwert_aufbereitung (REQ-14) ↔ kosten_summe_calc

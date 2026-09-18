@@ -110,7 +110,7 @@ export const ORG_OUTPUTS: ReadonlyArray<{ key: string; sym: (stem: string) => st
   { key: 'sd', sym: (s) => `sd_${s}_calc`, label: (l) => `Standardabweichung SD der Stichprobe — ${l}`, unit: 'log10', clause: 'Anhang C.2', note: 'stdev_rows (Stichprobe, n − 1) über die Zeilen des Organismus (L1821); mindestens 2 Zeilen' },
   { key: 'p10', sym: (s) => `p10_${s}_calc`, label: (l) => `10. Perzentil = MW − 1,282 · SD — ${l}`, unit: 'log10', clause: 'Anhang C.2, Gl. C.2-1', note: 'k aus GL_C2_1 (L1822)' },
   { key: 'p50', sym: (s) => `p50_${s}_calc`, label: (l) => `50. Perzentil (Median) — ${l}`, unit: 'log10', clause: 'Anhang C.2, Gl. C.2-2', note: 'median_rows über die Zeilen des Organismus (L1823)' },
-  { key: 'validierung_ok', sym: (s) => `validierung_ok_${s}`, label: (l) => `Vereinfachtes Validierungsmonitoring bestanden (1 = ja) — ${l}`, unit: null, clause: '§3.3.3', note: '≥ 16 Paare, ≥ 15 (A) / ≥ 8 (B-1, C-1) erreicht, größte Unterschreitung ≤ 1,0 / 2,0 log10 (S3_3_3; L681 / L683); ohne S3_3_3-Zeile (B-2, C-2, D) unentscheidbar' },
+  { key: 'validierung_ok', sym: (s) => `validierung_ok_${s}`, label: (l) => `Vereinfachtes Validierungsmonitoring bestanden (1 = ja) — ${l}`, unit: null, clause: '§3.3.3', note: '≥ 16 Paare, höchstens 1 (A) / 8 (B-1, C-1) Paare mit nicht erreichtem Ziel (n_total − n_pass_min — L681 "einmal nicht erreicht"; bei mehr als 16 Paaren zählt die Fehlzahl, nie die Trefferzahl — m1200_2-J-6), größte Unterschreitung ≤ 1,0 / 2,0 log10 (S3_3_3; L681 / L683); ohne S3_3_3-Zeile (B-2, C-2, D) unentscheidbar' },
   { key: 'perzentil_ok', sym: (s) => `perzentil_ok_${s}`, label: (l) => `Umfängliches Validierungsmonitoring: gefordertes Perzentil ≥ Leistungsziel (1 = ja) — ${l}`, unit: null, clause: 'Anhang C.1 / C.2', note: '10. Perzentil (A) bzw. Median (B-1, C-1) nach ANHANGC1 gegen das TAB3-Ziel (L1800 / L1802)' },
 ];
 
@@ -292,7 +292,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'fenster_max', label: 'Betriebsfenster max', type: 'number', aria_label: 'obere Alarmgrenze' },
         { key: 'einheit', label: 'Einheit', type: 'text' },
         { key: 'alarm_verzoegerung_min', label: 'Alarmverzögerung (5 bis 30 min)', type: 'number', min: 0, unit: 'min', aria_label: 'Alarmverzögerung in Minuten' },
-        { key: 'online_ok', label: 'online', type: 'derived', expr: "if(messhaeufigkeit == 'online', 1, 0)", display: 'badge', value_labels: { '1': '', '0': 'nicht online (L1287)' } },
+        { key: 'online_ok', label: 'online', type: 'derived', expr: "if(messhaeufigkeit == 'online', 1, 0)", display: 'badge', value_labels: { '1': '', '0': 'nicht online (L1289)' } },
         { key: 'alarm_ok', label: 'Alarm', type: 'derived', expr: 'if(alarm_verzoegerung_min IS NULL, 0, if(alarm_verzoegerung_min <= 30, 1, 0))', display: 'badge', value_labels: { '1': '', '0': 'Alarmverzögerung fehlt oder > 30 min' } },
       ],
       footer: ['parameter_count', 'parameter_nicht_online', 'alarm_verzoegerung_max_calc'],
@@ -304,8 +304,8 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   }),
   WS13({ symbol: 'parameter_count', widget: 'derived', ui_config: null, verification_quote: Q.L663,
     create: { section_code: 'M12002-13-D', label_de: 'Anzahl überwachter Betriebsparameter', data_type: 'number', unit: null, clause_reference: '§6.4, Tab. 6', description: 'Plan 3: Ausgabe der Gleichung M12002-13-D1 (count_rows über betriebsparameter).' } }),
-  WS13({ symbol: 'parameter_nicht_online', widget: 'derived', ui_config: null, verification_quote: Q.L1287,
-    create: { section_code: 'M12002-13-D', label_de: 'Betriebsparameter ohne Online-Messung', data_type: 'number', unit: null, clause_reference: '§6.4', description: 'Plan 3: Ausgabe der Gleichung M12002-13-D2 (count_rows(online_ok == 0)); "Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand … zu allen Zeitpunkten sicherzustellen" (L1287); REQ-11 STAGED (m1200_2-G-6).' } }),
+  WS13({ symbol: 'parameter_nicht_online', widget: 'derived', ui_config: null, verification_quote: frag(Q.L1289, 'Durch Online-Monitoring', ' Die Mess-wertaktualisierung'),
+    create: { section_code: 'M12002-13-D', label_de: 'Betriebsparameter ohne Online-Messung', data_type: 'number', unit: null, clause_reference: '§6.4', description: 'Plan 3: Ausgabe der Gleichung M12002-13-D2 (count_rows(online_ok == 0)); "Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand … zu allen Zeitpunkten sicherzustellen" (L1289); REQ-11 STAGED (m1200_2-G-6).' } }),
   WS13({ symbol: 'alarm_verzoegerung_max_calc', widget: 'derived', ui_config: null, verification_quote: Q.L1289,
     create: { section_code: 'M12002-13-D', label_de: 'Größte Alarmverzögerung über die Betriebsparameter (Soll ≤ 30 min)', data_type: 'number', unit: 'min', clause_reference: '§6.4', description: 'Plan 3: Ausgabe der Gleichung M12002-13-D3 (max_rows über betriebsparameter.alarm_verzoegerung_min, Zeilen mit Eintrag); Übernahme als alarm_verzoegerung_min / REQ-11 STAGED (m1200_2-D-8 / -G-6).' } }),
   WS13({ symbol: 'messhauefigkeit_integritaet', widget: 'select_one', ui_config: null, enum_values: 'keep_prod', visible_when: MEMBRAN_MF_UF_MBR, verification_quote: Q.L1304_1310 }),

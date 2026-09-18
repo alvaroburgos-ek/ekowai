@@ -63,6 +63,7 @@ describe('DWA-M-1200-2 Plan-3 equations', () => {
     for (const e of EQUATIONS) for (const s of e.input_symbols) expect(outputs.has(s), `${e.equation_number} chains on ${s}`).toBe(false);
     expect(eq('M12002-05-D6').formula).toBe(orgFormula('n', 'e_coli', 'log10_e_coli', 'n_ecoli'));
     expect(eq('M12002-05-D14').formula).toBe(orgFormula('perzentil_ok', 'e_coli', 'log10_e_coli', 'perzentil_ok_ecoli'));
+    expect(eq('M12002-05-D13').formula).toContain("count_rows(validierungsproben, organismus == 'e_coli' AND erreicht == 0) <= lookup('S3_3_3', wassergueteklasse, 'n_total') - lookup('S3_3_3', wassergueteklasse, 'n_pass_min')"); // J-6: miss count bounded
     expect(() => emitEquationsSql('m1200_2', EQUATIONS)).not.toThrow();
   });
 
@@ -142,6 +143,14 @@ describe('DWA-M-1200-2 Plan-3 equations', () => {
     const twoMiss = { validierungsproben: prep('M12002-05', 'validierungsproben', [...base.slice(0, 14), { id: '15', organismus: 'e_coli', date: '2024-01-15', x_i: 10 ** 4.6, y_i: 1 }, { id: '16', organismus: 'e_coli', date: '2024-01-16', x_i: 10 ** 4.7, y_i: 1 }], klasseScope('A')) };
     expect(computed(run(org('ecoli', 'validierung_ok'), { klasse: 'A', registers: twoMiss }))).toBe(0);
     expect(computed(run(org('ecoli', 'validierung_ok'), { klasse: 'C-1', registers: twoMiss }))).toBe(1);
+    // J-6 (fix round 1): MORE than 16 pairs — the MISS count is bounded (A: at most 1, B-1 / C-1: at most 8), never the hit count
+    const twentyFiveMiss = { validierungsproben: prep('M12002-05', 'validierungsproben', [...sixteen('e_coli', 6.0, 0.2), ...Array.from({ length: 4 }, (_, i) => ({ id: String(17 + i), organismus: 'e_coli', date: '2024-02-0' + (i + 1), x_i: 10 ** 6.1, y_i: 1 }))].map((r, i) => (i < 5 ? { ...r, x_i: 10 ** 4.6, y_i: 1 } : r)), klasseScope('A')) };
+    expect(computed(run(org('ecoli', 'n'), { registers: twentyFiveMiss }))).toBe(20);
+    expect(computed(run(org('ecoli', 'n_erreicht'), { registers: twentyFiveMiss }))).toBe(15); // 15 hits would pass a hit-count rule
+    expect(computed(run(org('ecoli', 'validierung_ok'), { klasse: 'A', registers: twentyFiveMiss }))).toBe(0);   // 5 misses > 1
+    expect(computed(run(org('ecoli', 'validierung_ok'), { klasse: 'B-1', registers: twentyFiveMiss }))).toBe(1); // 5 misses ≤ 8
+    const twentyOneMiss = { validierungsproben: prep('M12002-05', 'validierungsproben', [...sixteen('e_coli', 6.0, 0.2), ...Array.from({ length: 4 }, (_, i) => ({ id: String(17 + i), organismus: 'e_coli', date: '2024-02-0' + (i + 1), x_i: i === 0 ? 10 ** 4.6 : 10 ** 6.1, y_i: 1 }))], klasseScope('A')) };
+    expect(computed(run(org('ecoli', 'validierung_ok'), { klasse: 'A', registers: twentyOneMiss }))).toBe(1); // 20 pairs, 1 miss by 0,4 log10
     // 15 pairs only: fails the N = 16 rule for every class
     const fifteen = { validierungsproben: prep('M12002-05', 'validierungsproben', base.slice(0, 15), klasseScope('A')) };
     expect(computed(run(org('ecoli', 'validierung_ok'), { klasse: 'A', registers: fifteen }))).toBe(0);

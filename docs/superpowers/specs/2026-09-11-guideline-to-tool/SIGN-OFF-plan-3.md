@@ -4180,7 +4180,7 @@ Report: `reports/plan-3-m1200_2.md` · STAGED SQL: `scripts/verification/m1200_2
 ### m1200_2-G-6 · DWA-M-1200-2 · -13 · REQ-11 `messhauefigkeit == online AND alarm_verzoegerung_min <= 30` onto the register outputs
 - Class: gate condition change
 - Chosen now (fail-safe): unchanged; the register computes `parameter_nicht_online` and `alarm_verzoegerung_max_calc` as visible twins.
-- Evidence (verbatim, transcript line): "Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand und die Einhaltung der Anforderungen zu allen Zeitpunkten sicherzustellen und Abweichungen vom zulässigen Betriebsfenster oder Havarien frühzeitig festzustellen, um Gegenmaßnahmen einzuleiten." (L1287); "Abweichungen vom zulässigen Betriebsfenster sollten je nach System nach 5 min bis 30 min eine Alarmierung auslösen." (L1289)
+- Evidence (verbatim, transcript line): "Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand und die Einhaltung der Anforderungen zu allen Zeitpunkten sicherzustellen und Abweichungen vom zulässigen Betriebsfenster oder Havarien frühzeitig festzustellen, um Gegenmaßnahmen einzuleiten." (L1289, sentence 1); "Abweichungen vom zulässigen Betriebsfenster sollten je nach System nach 5 min bis 30 min eine Alarmierung auslösen." (L1289, sentence 3)
 - Proposed SQL / config: STAGED block G-6.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -4250,7 +4250,7 @@ Report: `reports/plan-3-m1200_2.md` · STAGED SQL: `scripts/verification/m1200_2
 ### m1200_2-D-8 · DWA-M-1200-2 · -13 · `messhauefigkeit` (required) / `alarm_verzoegerung_min` (REQ-11) ↔ `betriebsparameter` rows (atomic pair)
 - Class: deactivation (K)
 - Chosen now (fail-safe): both stay; REQ-11 keeps reading the scalars until G-6.
-- Evidence (verbatim, transcript line): L1287 / L1289 (see G-6)
+- Evidence (verbatim, transcript line): L1289 (see G-6); "Die Messhäufigkeit von Betriebsparametern muss die Systemträgheit berücksichtigen." (L1287)
 - Proposed SQL / config: STAGED block D-8 (after G-6).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -4289,6 +4289,20 @@ Report: `reports/plan-3-m1200_2.md` · STAGED SQL: `scripts/verification/m1200_2
 - Proposed SQL / config: PDF look at Tab. E.1 (p. 85) → seed the value.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
+### m1200_2-U-5 · DWA-M-1200-2 · -12 · TAB4 text cells (OCR "l" for "(") — fix round 1
+- Class: unreadable-cell
+- Chosen now (fail-safe): the printed text cells are kept VERBATIM and displayed as printed (the chlor stage label reads "Chlorbasierte Desinfektion lanalog auch andere chemische Desinfektion)"); TAB4 `imported_unverified` (round 0 had it `md_verified` — amendment F applies to garbled text cells too, controller ruling). Cells / lines: "lanalog auch andere chemische Desinfektion)" (L790, bezeichnung); "lggf. im Pilotmaßstab" (L765–L769, methodik); "lengl. „Reduction Equivalent Dose“" (L784–L789, methodik); "lelektrostatische Abstoßung)" (L805 / L806, mechanismen); "laus Polyamid)" and "lengl. .,Molecular Weight Cut-off"" (L806, mechanismen / einflussfaktoren); "Tie-fen-/Medienfilter" (L816, mechanismen). No numeric cell is affected.
+- Evidence (verbatim, transcript line): "\hline Chlorbasierte Desinfektion lanalog auch andere chemische Desinfektion) & Inaktivierung durch Oxidationsreaktionen mit z. B. Zellwänden oder genetischem Material Restchlorgehalte ermöglichen De-pot-Wirkung" (L790, first two cells); "Rückhalt durch dichte trennaktive Schicht laus Polyamid) der dichten Membranen" (L806)
+- Proposed SQL / config: PDF look at Tab. 4 (p. 26–28) → `md_verified`; optionally a plain rendering column (`bezeichnung_text`) beside the verbatim cell, the din16941_2 TABD3 pattern.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-U-6 · DWA-M-1200-2 · -12 · TABB2 Anmerkung text cells (OCR "l" for "(") — fix round 1
+- Class: unreadable-cell
+- Chosen now (fail-safe): the Anmerkung cells are kept verbatim ("lund Bakterien)" L1772, "lunter Berücksichtigung von Kurzschlüssen)" L1774); TABB2 `imported_unverified` (round 0 `md_verified`). Every NUMERIC cell is clean: the 36 erreichbar credits and the parsed erwartbar bounds (0 / 0,5-1 / 1-2 / 2,5-4 / 1,5-4 / 2-4 / 4 / 4-6 / systemspezifisch) are printed unambiguously and pinned; the register's credit lookups read those only.
+- Evidence (verbatim, transcript line): "Ein Ct-Wert, der mit einer Inaktivierung von $4 \log _{10}$-Stufen für Viren lund Bakterien) verbunden ist" (L1772); "Bei einer minimalen hydraulischen Verweilzeit (lunter Berücksichtigung von Kurzschlüssen) von gesicherten $\geqslant 25$ Tagen" (L1774)
+- Proposed SQL / config: PDF look at Tab. B.2 (p. 72–73) → `md_verified`; no value changes.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
 ### m1200_2-J-1 · DWA-M-1200-2 · -05 · `confidence_alpha` / `k_faktor_normal` visibility by monitoring type (the generic `umfaenglich` token)
 - Class: judgment (visibility driver semantics)
 - Chosen now (fail-safe): `confidence_alpha` ← `validierungsmonitoring_typ IN {'umfaenglich', 'umfaenglich_montecarlo'}` (α is the Monte-Carlo variant's input), `k_faktor_normal` ← `IN {'umfaenglich', 'umfaenglich_basis'}` (k is the Basisvariante's constant); the generic `umfaenglich` token keeps BOTH visible (the transcript names the two variants; prod carries a third, generic token).
@@ -4319,16 +4333,16 @@ Report: `reports/plan-3-m1200_2.md` · STAGED SQL: `scripts/verification/m1200_2
 
 ### m1200_2-J-5 · DWA-M-1200-2 · -12 · one stage vocabulary across Tab. B.2 / Tab. 6 / Tab. 4 / Tab. E.1
 - Class: judgment (token mapping)
-- Chosen now (fail-safe): TABB2's twelve printed stages are the register's `lookup_key`; TAB6 / TAB4 / TABE1_STUFEN reuse a token only where the printed stage is the same (mbr, mf_uf, ozon, ro, uv, uv_aop, chlor; E.1 "Mechanisch-biologische Behandlung mit Nachklärung" → `biologisch`, "Keramische Ultrafiltration" → `mf_uf`) and keep their own otherwise (`medienfiltration`, `belebung`, `ro_nf`, `schnellsand`, `bak`) — a stage without a row in a side table shows an empty hint (no diagnostic). Consequence: Tab. 6's "Medienfiltration" row is reachable through the -13 `betriebsparameter` register only, not from a B.2 "Koagulation, Flockung und Filtration" row.
+- Chosen now (fail-safe): TABB2's twelve printed stages are the register's `lookup_key`; the side tables reuse a token only where the printed stage is the same — TAB6: mbr, mf_uf, ozon, ro, uv, uv_aop, chlor; TAB4: mbr, uv, chlor, ozon, mf_uf (its "Umkehrosmose und Nanofiltration" row is `ro_nf`, NOT B.2's `ro` — `ro` is shared with TAB6 only); TABE1_STUFEN: biologisch ("Mechanisch-biologische Behandlung mit Nachklärung"), mf_uf ("Keramische Ultrafiltration"), ozon, uv — and keep their own otherwise (`medienfiltration`, `belebung`, `ro_nf`, `schnellsand`, `bak`) — a stage without a row in a side table shows an empty hint (no diagnostic). Consequence: Tab. 6's "Medienfiltration" row is reachable through the -13 `betriebsparameter` register only, not from a B.2 "Koagulation, Flockung und Filtration" row.
 - Evidence (verbatim, transcript line): "\hline Medienfiltration & Trübung, Durchfluss & Online \\" (L1311); "\hline Koagulation, Flockung und Filtration & 2 & 4 & 4 & 1-2 & 2,5-4 & 2,5-4 & …" (L1755); "\hline Keramische Ultrafiltration & Nominale Porengröße 30 nm , Flux $=90 \mathrm{l} / \mathrm{m}^{2} / \mathrm{h} \mathrm{bis} 120 \mathrm{l} / \mathrm{m}^{2} / \mathrm{h}$, …" (L2173)
 - Proposed SQL / config: as seeded; alternative = map Medienfiltration ↔ Koagulation/Flockung/Filtration.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### m1200_2-J-6 · DWA-M-1200-2 · -05 · N = 16 encoded as `>= 16` (prod REQ-05's reading)
+### m1200_2-J-6 · DWA-M-1200-2 · -05 · N = 16 encoded as `>= 16` (prod REQ-05's reading) — and the > 16 case (fix round 1)
 - Class: judgment
-- Chosen now (fail-safe): `validierung_ok_<org>` requires `count_rows ≥ n_total` (16) — the prod gate reads `probenanzahl_zulauf >= 16`; the transcript says "je 16" (exactly). More than 16 pairs is not refused.
+- Chosen now (fail-safe, corrected in fix round 1): `validierung_ok_<org>` requires `count_rows ≥ n_total` (16 — the prod gate reads `probenanzahl_zulauf >= 16`; the transcript says "je 16", exactly) AND bounds the MISS count: `count_rows(reg, c AND erreicht == 0) <= n_total − n_pass_min` (1 for A, 8 for B-1 / C-1) AND the largest shortfall. The round-0 form bounded the HIT count (`n_erreicht ≥ n_pass_min`), which is over-permissive beyond 16 pairs (20 pairs with 5 misses would have passed class A on 15 hits). The miss bound is source-settled for A by "Falls das Leistungsziel einmal nicht erreicht wird" (at most once) and for B-1 / C-1 by "In mindestens 8 der 16" (at most 8 misses of the 16); pinned: 20 pairs / 5 misses → A 0, B-1 1; 20 pairs / 1 miss → A 1. Explicit > 16 statement: extra pairs beyond 16 are accepted and every miss among them counts — the printed rule is for exactly 16, so the stricter alternative (undecidable when n ≠ 16) is offered below.
 - Evidence (verbatim, transcript line): L679 (see G-1); "ist eine Probenanzahl N von 16 je Zu- und Ablauf vorzusehen (in Anlehnung an die EU-Badegewässerrichtlinie, Richtlinie 2006/7/EG)." (L1814)
-- Proposed SQL / config: as emitted.
+- Proposed SQL / config: as emitted (miss-count form). Alternative: `count_rows(reg, c) == n_total` (exactly 16; 17+ pairs undecidable until the engineer trims to the 16 corresponding pairs) — one-token change in `orgFormula`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m1200_2-J-7 · DWA-M-1200-2 · -05 · below-detection pairs: LRV_i = log10(x_i / Nachweisgrenze) as a lower bound
@@ -4349,7 +4363,7 @@ Report: `reports/plan-3-m1200_2.md` · STAGED SQL: `scripts/verification/m1200_2
 - Class: override-policy
 - Chosen now (fail-safe): `anhaltswert` from the caption ("Beispiel") and L1293 ("beispielhaft") — the override toggle applies to the register's parameter / frequency cells; the PARAMETER SET is mandatory by L663.
 - Evidence (verbatim, transcript line): "\caption{Tabelle 6: Beispiel für Betriebsparameter und deren Messhäufigkeit zur Überwachung der zulässigen Betriebsbedingungen von ausgewählten Aufbereitungsstufen (Quelle: Australian Guidelines for Water Recycling 2020, Draft of Chapters 1, 2, 3 and 5 and Appendices 2 and 3, mit Ergänzungen)}" (L1297); "Es sind mindestens die Betriebsparameter gemäß Tabelle 6 zu berücksichtigen." (L663, sentence 3)
-- Proposed SQL / config: as seeded; alternative = `locked` for the parameter columns (needs a second table — one table, one policy).
+- Proposed SQL / config: as seeded; alternative = `locked` for the parameter columns (needs a second table — one table, one policy). Note: the TAB6 `ozon` row's `parameter_online` holds BOTH printed parameter lines ("Spezifische Ozondosis oder ΔSAK254" and "Temperatur, pH, Trübung") because its frequency cell prints "Online / Online" — nothing is periodic there.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m1200_2-F-1 · DWA-M-1200-2 · -15 · `kosten_summe_calc` (Σ over the cost rows — no printed formula)

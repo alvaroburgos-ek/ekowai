@@ -43,7 +43,11 @@
  *   TAB4          Tab. 4 (L758–L816) validation principles per stage — text cells
  *                 verbatim (mechanisms, influencing factors, method, reference) —
  *                 `locked` (L754 "sind die Validierungsgrundsätze … zusammengefasst"
- *                 — no modal that permits a deviation; O-1 proposes `anhaltswert`)
+ *                 — no modal that permits a deviation; O-1 proposes `anhaltswert`).
+ *                 `imported_unverified`: the printed TEXT cells carry the OCR "l" for
+ *                 "(" ("lanalog auch andere chemische Desinfektion)" L790, "laus
+ *                 Polyamid)" / "lengl." L806, "lggf." L765, "lelektrostatische" L805 /
+ *                 L806, "Tie-fen-" L816) — kept verbatim, displayed as printed (U-5)
  *   TAB6          Tab. 6 (L1297–L1319) operating parameters + frequency per stage —
  *                 `anhaltswert` (caption L1297 "Beispiel für Betriebsparameter",
  *                 L1293 "zeigt beispielhaft"; the L663 "mindestens … zu
@@ -56,7 +60,9 @@
  *                 erreichbar (numbers) and erwartbar (printed text + parsed
  *                 min / max, null for "systemspezifisch") per organism group —
  *                 `anhaltswert` (L1748 "Indikative"; L659 "können … herangezogen
- *                 werden")
+ *                 werden"). `imported_unverified`: the Anmerkung text cells carry the
+ *                 same OCR garble ("lund Bakterien)" L1772, "lunter Berücksichtigung"
+ *                 L1774); every numeric erreichbar / erwartbar cell is clean (U-6)
  *   S8_2_KOSTEN   §8.2 (L1450–L1465) specific cost ranges per stage (€/m³ SW, 2020)
  *                 — `anhaltswert` (L1450 "grobe Richtwerte"); SR-2: min / max are
  *                 hints beside the engineer's own figure
@@ -71,9 +77,10 @@
  * `M12002-02.wassergueteklasse` values (`A B-1 B-2 C-1 C-2 D`, captured
  * m1200_2.prior.json 2026-09-18); TABB2 / TAB6 / TAB4 / TABE1_STUFEN /
  * S8_2_KOSTEN `stufe` = the created stage vocabularies exported below (the
- * verfahrenskette register keys on TABB2's twelve tokens; TAB6 / TAB4 / TABE1
- * share a token where the printed stage is the same — mbr, mf_uf, ozon, ro, uv,
- * uv_aop, chlor — and keep their own where it is not); TABE1_LEISTUNG `organismus`
+ * verfahrenskette register keys on TABB2's twelve tokens; TAB6 shares mbr, mf_uf,
+ * ozon, ro, uv, uv_aop, chlor; TAB4 shares mbr, uv, chlor, ozon, mf_uf (its
+ * "Umkehrosmose und Nanofiltration" row is `ro_nf`, not B.2's `ro`); TABE1_STUFEN
+ * shares biologisch, mf_uf, ozon, uv; each keeps its own token otherwise); TABE1_LEISTUNG `organismus`
  * = the created register's organism tokens.
  */
 import type { RegulationTable, RegulationRow, ValueColumn } from './regulation-tables';
@@ -421,7 +428,7 @@ export function tab4AsTable(): RegulationTable {
     key_columns: ['stufe'],
     value_columns: [{ name: 'bezeichnung', type: 'string' }, { name: 'mechanismen', type: 'string' }, { name: 'einflussfaktoren', type: 'string' }, { name: 'methodik', type: 'string' }, { name: 'referenz', type: 'string' }],
     override_policy: 'locked', override_quote: `${Q.L754} — ${Q.L758}`, // L754 — L758
-    verification_status: 'md_verified', rows };
+    verification_status: 'imported_unverified', rows }; // m1200_2-U-5
 }
 
 // ---------------------------------------------------------------------------
@@ -511,7 +518,7 @@ export function tabB2AsTable(): RegulationTable {
       { name: 'erwartbar_gemeinsam', type: 'boolean' }, { name: 'anmerkung', type: 'string' },
     ],
     override_policy: 'anhaltswert', override_quote: `${Q.L1748} — ${frag(Q.L659, 'können als Alternativvariante', ' die den Anforderungen')}`, // L1748 — L659
-    verification_status: 'md_verified', rows };
+    verification_status: 'imported_unverified', rows }; // m1200_2-U-6 (text cells; the numeric credit cells are clean)
 }
 
 // ---------------------------------------------------------------------------

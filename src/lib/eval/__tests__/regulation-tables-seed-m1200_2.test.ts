@@ -29,8 +29,8 @@ describe('DWA-M-1200-2 seed builders (Plan 3 Task 16)', () => {
       for (const r of x.rows) expect(r.verbatim_quote.trim().length, `${x.table_code} ${r.row_key}`).toBeGreaterThan(0);
     }
     expect(Object.fromEntries(t.map((x) => [x.table_code, x.verification_status]))).toEqual({
-      TAB3: 'imported_unverified', S3_3_3: 'md_verified', ANHANGC1: 'md_verified', GL_C2_1: 'md_verified', TAB4: 'md_verified',
-      TAB6: 'imported_unverified', TABB2: 'md_verified', S8_2_KOSTEN: 'md_verified', TABE1_STUFEN: 'md_verified', TABE1_LEISTUNG: 'imported_unverified',
+      TAB3: 'imported_unverified', S3_3_3: 'md_verified', ANHANGC1: 'md_verified', GL_C2_1: 'md_verified', TAB4: 'imported_unverified',
+      TAB6: 'imported_unverified', TABB2: 'imported_unverified', S8_2_KOSTEN: 'md_verified', TABE1_STUFEN: 'md_verified', TABE1_LEISTUNG: 'imported_unverified',
     });
     expect(Object.fromEntries(t.map((x) => [x.table_code, x.override_policy]))).toEqual({
       TAB3: 'locked', S3_3_3: 'locked', ANHANGC1: 'locked', GL_C2_1: 'locked', TAB4: 'locked',
@@ -113,6 +113,10 @@ describe('DWA-M-1200-2 seed builders (Plan 3 Task 16)', () => {
     expect(row(t, 'teiche').values).toMatchObject({ viren_erreichbar: 5, protozoen_erreichbar: 5, bakterien_erreichbar: 5, bakterien_erwartbar_text: 'systemspezifisch', bakterien_erwartbar_min: null });
     expect(t.override_quote).toContain('Indikative'); // L1748
     expect(t.override_quote).toContain('können als Alternativvariante'); // L659
+    // U-6: the Anmerkung text cells carry the OCR "l" for "("; the numeric cells above are clean
+    expect(String(row(t, 'chlor').values.anmerkung)).toContain('lund Bakterien)');
+    expect(String(row(t, 'teiche').values.anmerkung)).toContain('lunter Berücksichtigung');
+    expect(t.verification_status).toBe('imported_unverified');
   });
 
   it('TAB6 (L1300–L1319): eight stages; MF/UF Trübung online + Integritätsmessung täglich (printed lines); MBR online / wöchentlich split is U-3; Chlor "Online oder zumindest täglich"', () => {
@@ -144,6 +148,10 @@ describe('DWA-M-1200-2 seed builders (Plan 3 Task 16)', () => {
     expect(String(row(t, 'mf_uf').values.einflussfaktoren)).toContain('Permeatfluss, Transmembrandruck');
     expect(row(t, 'schnellsand').values.referenz).toBe('WaterRF (2023), US EPA: 1991, DVGW W 213-3 (A)');
     expect(t.override_policy).toBe('locked'); // m1200_2-O-1
+    // U-5: the printed text cells carry the OCR "l" for "(" — kept verbatim, table unverified
+    expect(row(t, 'chlor').values.bezeichnung).toBe('Chlorbasierte Desinfektion lanalog auch andere chemische Desinfektion)');
+    expect(String(row(t, 'ro_nf').values.mechanismen)).toContain('laus Polyamid)');
+    expect(t.verification_status).toBe('imported_unverified');
   });
 
   it('S8_2_KOSTEN (L1453–L1458, L1464, L1465): min / max €/m³ SW per stage, 2020 index, "zusätzlich" flag', () => {
