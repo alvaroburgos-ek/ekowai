@@ -41,7 +41,7 @@ describe('DIN-276 regulation-table seed (Plan 3 Task 13)', () => {
   it('TABLE1 (Table 1, L464–L1010): 326 printed KG rows = 8 first-level + 52 second-level + 266 third-level; every parent_kg / kg1 / kg2 resolves; the prod kg_* fields of DIN-276-09 … -16 map 1:1 onto the rows (capture 2026-09-18)', () => {
     const t = table1AsTable();
     expect(t.key_columns).toEqual(['kg']);
-    expect(t.value_columns.map((c) => c.name)).toEqual(['designation', 'notes', 'level', 'parent_kg', 'kg1', 'kg2']);
+    expect(t.value_columns.map((c) => c.name)).toEqual(['designation', 'notes', 'level', 'parent_kg', 'kg1', 'kg2', 'kg1_key']);
     const byLevel = (n: number) => t.rows.filter((r) => r.values.level === n);
     expect([byLevel(1).length, byLevel(2).length, byLevel(3).length]).toEqual([8, 52, 266]);
     expect(byLevel(1).map((r) => r.row_key)).toEqual([...KG_LEVEL1]);
@@ -50,6 +50,8 @@ describe('DIN-276 regulation-table seed (Plan 3 Task 13)', () => {
       const p = r.values.parent_kg;
       if (r.values.level === 1) { expect(p).toBeNull(); expect(r.values.kg2).toBeNull(); } else { expect(keys.has(p as string), `${r.row_key} parent ${p}`).toBe(true); expect(r.values.kg2).toBe(`KG ${(r.values.level === 2 ? r.row_key : (p as string)).slice(3)}`); }
       expect(r.values.kg1).toBe(`KG ${r.row_key.slice(3, 4)}00`);
+      expect(r.values.kg1_key).toBe(`kg_${r.row_key.slice(3, 4)}00`); // TABLE2 key of the first-level ancestor (fix round 1, L1022 fallback)
+      expect(keys.has(r.values.kg1_key as string)).toBe(true);
       expect(/^KG \d{3}$/.test(r.values.kg1 as string)).toBe(true); // never an identifier (string-literal trap, module header)
     }
     // prod ↔ Table 1: every kg_NNN / kg_NN0_total field of the eight KG worksheets is a printed row and vice versa
@@ -61,7 +63,7 @@ describe('DIN-276 regulation-table seed (Plan 3 Task 13)', () => {
     // printed cells (L464 / L538 / L546 / L1005)
     expect(byKey(t.rows, 'kg_100').values.designation).toBe('Property');
     expect(byKey(t.rows, 'kg_300').values.designation).toBe('Building - Building constructions');
-    expect(byKey(t.rows, 'kg_311').values).toMatchObject({ designation: 'Manufacture', level: 3, parent_kg: 'kg_310', kg1: 'KG 300', kg2: 'KG 310' });
+    expect(byKey(t.rows, 'kg_311').values).toMatchObject({ designation: 'Manufacture', level: 3, parent_kg: 'kg_310', kg1: 'KG 300', kg2: 'KG 310', kg1_key: 'kg_300' });
     expect(byKey(t.rows, 'kg_311').values.notes).toContain('Soil removal, soil securing and soil application');
     expect(byKey(t.rows, 'kg_800').values.designation).toBe('Financing');
     expect(byKey(t.rows, 'kg_229').values.notes).toBeNull(); // printed blank (L522 "\hline 229 & Miscellaneous for KG 220 & \\\\")

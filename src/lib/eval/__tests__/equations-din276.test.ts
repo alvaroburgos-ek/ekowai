@@ -74,7 +74,10 @@ describe('DIN-276 Plan-3 equations', () => {
       { id: 'd', kg: 'kg_300', kosten_eur: 99 },                                // first level → Tab. 2 unit; counted in the KG Σ, in no second-level Σ
       { id: 'e', kg: 'kg_411', tab4_nr: '1', kosten_eur: 5 },                   // KG 400 row on the KG 300 worksheet → fremd (Tab.-4 item unit m)
       { id: 'f', kg: 'kg_121', kosten_eur: 7 },                                 // KG 100 row → fremd; no unit row anywhere → blank
-      { id: 'g', kg: 'kg_340', kosten_eur: 1 },                                 // din276-U-1: blank unit cell
+      { id: 'g', kg: 'kg_340', kosten_eur: 1 },                                 // din276-U-1: blank unit cell (Tab. 3 makes a specification — no Tab.-2 fallback)
+      { id: 'h', kg: 'kg_490', kosten_eur: 1 },                                 // KG 400 head row WITH a printed Tab.-4 unit (m² GFA)
+      { id: 'i', kg: 'kg_890', kosten_eur: 1 },                                 // no Tab.-3 / 4 row → Tab. 2 of the ancestor (KG 800: m² GFA)
+      { id: 'j', kg: 'kg_121', menge: 3, kennwert: 0.1, kosten_eur: 0.3 },      // 3 × 0,1 = 0,30 to the cent → ok
     ]);
     expect(reg.diagnostics).toBeUndefined();
     expect(reg.rows.map((r) => [r.complete, r.values.bezeichnung, r.values.einheit, r.values.kosten_calc, r.values.abw, r.values.ebene1, r.values.ebene2, r.values.im_kg])).toEqual([
@@ -83,14 +86,19 @@ describe('DIN-276 Plan-3 equations', () => {
       [true, 'Foundation, substructure', 'm²', 100, 1, 'KG 300', 'KG 320', 1],
       [true, 'Building - Building constructions', 'm²', null, 0, 'KG 300', '-', 1],
       [true, 'Sewage systems', 'm', null, 0, 'KG 400', 'KG 410', 0],
-      [true, 'Surveying fees', null, null, 0, 'KG 100', 'KG 120', 0],
+      [true, 'Surveying fees', 'm²', null, 0, 'KG 100', 'KG 120', 0], // L1022: KG 121 has no Tab.-3 / 4 row → Table 2 of KG 100 (Plot area, m²)
       [true, 'Interior walls/vertical building structures, interior', null, null, 0, 'KG 300', 'KG 340', 1],
+      [true, 'Other measures for technical installations', 'm²', null, 0, 'KG 400', 'KG 490', 0],
+      [true, 'Other financing costs', 'm²', null, 0, 'KG 800', 'KG 890', 0],
+      [true, 'Surveying fees', 'm²', 0.30000000000000004, 0, 'KG 100', 'KG 120', 0],
     ]);
+    expect(reg.rows.find((r) => r.id === 'e')!.values.tab4_kg_einheit).toBeNull(); // 411 head row prints no unit — Tab. 4 makes no KG-level specification → Tab. 2 would apply for kg_411 itself
+    expect(reg.rows.find((r) => r.id === 'h')!.values.tab4_kg_einheit).toBe('m²');
     expect(reg.rows[0].values.hinweis).toContain('Soil removal, soil securing and soil application');
     const R = { kg3_positionen: reg };
     expect(computed(run('DIN-276-11-D1', { registers: R }))).toBe(4500);
     expect(computed(run('DIN-276-11-D2', { registers: R }))).toBe(5);
-    expect(computed(run('DIN-276-11-D3', { registers: R }))).toBe(2);
+    expect(computed(run('DIN-276-11-D3', { registers: R }))).toBe(5); // e, f, h, i, j are foreign KGs on the KG 300 worksheet
     expect(computed(run('DIN-276-11-D4', { registers: R }))).toBe(1);
     expect(eq('DIN-276-11-D5').output_symbol).toBe('kg_310_from_rows');
     expect(computed(run('DIN-276-11-D5', { registers: R }))).toBe(4250);

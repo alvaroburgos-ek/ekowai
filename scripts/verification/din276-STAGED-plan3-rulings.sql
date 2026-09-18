@@ -62,10 +62,11 @@
 -- Range consumer tokens in prod (never matched by loadInheritedFields `code = ANY(consumer_worksheets)`):
 --   'DIN-276-02..29' (client_name, lead_engineer, project_name, project_number), 'DIN-276-09..16' (ekowai_sector, applicable_cost_groups, cost_breakdown_depth, vat_treatment),
 --   'DIN-276-04..16' (building_count), 'DIN-276-18..22' (cost_breakdown_depth, cost_planning_principle, planning_stage_active, input_documents_register, cost_calculation_method),
---   'DIN-276-09..29' (separate_calculations_per_building), 'DIN-276-04..28' (cost_status_date), 'DIN-276-04..08' (input_documents_register), 'DIN-276-18..23' (vat_treatment).
+--   'DIN-276-09..29' (separate_calculations_per_building), 'DIN-276-04..28' (cost_status_date), 'DIN-276-04..08' (input_documents_register), 'DIN-276-18..23' (vat_treatment),
+--   'DIN-276-09..16' beside an explicit code (execution_oriented_breakdown) — 16 fields in total (re-counted from the capture, fix round 1).
 
 -- =====================================================================================================================
--- din276-C-1 · prod · range tokens in `consumer_worksheets` → explicit worksheet codes (14 fields reach NO worksheet today)
+-- din276-C-1 · prod · range tokens in `consumer_worksheets` → explicit worksheet codes (16 fields carry a range token; 13 reach NO worksheet today, execution_oriented_breakdown / cost_planning_principle / cost_calculation_method reach only their explicit code)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Evidence: capture 2026-09-18 (see the token list above); `loadInheritedFields` matches `code = ANY(consumer_worksheets)` only.
 -- Why staged: a consumer edit (always sign-off). Every visibility rule and lookup keyed on these drivers (the emitted
@@ -81,8 +82,8 @@
 --  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND f.active
 --    AND EXISTS (SELECT 1 FROM unnest(f.consumer_worksheets) t(tok) WHERE tok ~ '^DIN-276-\d\d\.\.\d\d$');
 -- COMMIT;
--- Note: '(system terminus)' on final_verdict is left untouched. Affected: the 14 fields listed under "Range consumer tokens".
--- Rollback: restore the captured arrays (din276.prior.json, `consumer_worksheets` per field) — 14 UPDATE statements, one per field, e.g.
+-- Note: '(system terminus)' on final_verdict is left untouched. Affected: the 16 fields listed under "Range consumer tokens" (incl. execution_oriented_breakdown ["DIN-276-09..16","DIN-276-21"]).
+-- Rollback: restore the captured arrays (din276.prior.json, `consumer_worksheets` per field) — 16 UPDATE statements, one per field, e.g.
 -- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-276-09..16'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code = 'DIN-276-02' AND f.symbol = 'applicable_cost_groups';
 
 -- =====================================================================================================================
@@ -371,6 +372,31 @@
 -- Option (after C-5): re-point -26 / -28 to GK_kennwert_BGF_calc (consumers ARRAY['DIN-276-26', 'DIN-276-28']) and to the C-5 AF twin; then
 -- UPDATE fields f SET active = false … ((w.code = 'DIN-276-23' AND f.symbol = 'GK_kennwert_BGF') OR (w.code = 'DIN-276-24' AND f.symbol IN ('cost_parameter_per_BGF', 'cost_parameter_per_AF', 'KKW_analyse_eur_m2_BGF', 'KKW_analyse_eur_m3_BRI', 'KKW_analyse_kg300_anteil'))) AND f.active;
 -- Rollback: SET active = true; consumer_worksheets = NULL on the twins.
+
+-- =====================================================================================================================
+-- din276-D-10 · DIN-276-18 / -23 / -25 · `bauwerk_aktuell` ↔ IDENT-02 `building_costs` / `GK_bauwerkskosten`; `stufe_aktuell_gesamt` / `*_gesamt_calc` ↔ IDENT-01 `GK_total` (amendment K pairs)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §3.11 L163 "Costs resulting from the sum of cost groups 100 to 800"; §3.12 L169 "Costs resulting from the sum of cost groups 300 and 400".
+-- Capture: IDENT-01 bcd6a7f0-f369-43e0-a0a1-3279219e8618 (DIN-276-23, md5 64222da6be5849297faffbf2a24947b0, verified_against_standard, GK_total consumer-free);
+-- IDENT-02 e7e1658e-dfba-4da2-81b1-e757a1c708e7 (DIN-276-25, md5 5380e3a57680ccf660f3ac03883bd681, verified_against_standard, building_costs consumed by -24 / -26 / -28);
+-- GK_bauwerkskosten (DIN-276-23, typed, consumer-free — X-2).
+-- Why staged: the same physical figure has two producers once the matrix carries the current stage (the KG worksheets via IDENT-01 / IDENT-02
+-- and the matrix's last row) — amendment K: register column stays, one D-block per pair. Fail-safe now: IDENT-01 / IDENT-02 untouched; the
+-- matrix twins are visible; nothing compares them.
+-- Resolution: the KG worksheets remain the single source of the CURRENT determination; `bauwerk_aktuell` (DIN-276-18-D11) and
+-- `stufe_aktuell_gesamt` (-D7) retire in favour of a consistency gate once C-3 (matrix outputs → -26 / -28) and C-5 (GK_total → -24) let the
+-- four symbols meet — the five per-stage `*_gesamt_calc` stay (a historic stage has no other source). Option (after C-3 + C-5, on DIN-276-28
+-- where building_costs, GK_total (C-5 adds -28) and the matrix outputs are all inherited):
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-11P3', 'Matrix (aktuelle Stufe) = Kostengruppen-Arbeitsblätter', 'stufe_aktuell_gesamt == GK_total AND bauwerk_aktuell == building_costs', '§3.11, §3.12', 'warn',
+--        'Plan 3 (din276-D-10): die letzte Matrixzeile muss die Summen der KG-Arbeitsblätter wiedergeben (IDENT-01 / IDENT-02 bleiben die Produzenten).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-276' AND w.code = 'DIN-276-28';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code = 'DIN-276-18' AND f.symbol IN ('bauwerk_aktuell', 'stufe_aktuell_gesamt') AND f.description LIKE 'Plan 3:%' AND f.active;
+--   (and DELETE the two equation rows DIN-276-18-D7 / -D11 by description; D8 … D10 then read `sum_rows(last_rows(kostenstufen_matrix, 1), gesamt)` inline — an E-edit inside this block.)
+-- Alternative (owner's call): keep the matrix as the source and re-point IDENT-01 / IDENT-02 to `stufe_aktuell_gesamt` / `bauwerk_aktuell`
+-- (archive pattern on the two ids / md5 above) — then the KG worksheets become the detail and the matrix the ledger.
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (din276-D-10):%'; SET active = true on the two fields; re-INSERT the two equation rows from 20260917101320_equations_din276.sql.
 
 -- =====================================================================================================================
 -- din276-E-1 · DIN-276-26 · IDENT-04 `deviation_amount = current_stage_total - previous_stage_total` (imported_unverified) → the matrix outputs

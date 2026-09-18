@@ -73,12 +73,17 @@ const TABLE1_DESIGNATION = { key: 'bezeichnung', label: 'Bezeichnung (Tab. 1)', 
 export const VAT_RATE_VISIBLE = 'vat_treatment IN {gross, mixed}';
 
 // ---- register row expressions ----
-/** Tab. 2 / 3 / 4 unit of the picked KG: first level → Tab. 2; KG 4xx with a Tab.-4 item number → Tab. 4 (kg, nr); else Tab. 3 (a KG without a printed unit row reads blank). */
-export const EINHEIT_EXPR = "if(lookup('TABLE1', kg, 'level') == 1, lookup('TABLE2', kg, 'unit'), if(tab4_nr IS NULL, lookup('TABLE3', kg, 'unit'), lookup('TABLE4', kg, tab4_nr, 'unit')))";
+/** §6.2 L1022: Table 2 applies to every KG "Unless further specifications are made under 6.3 and Table 3 as well as under 6.4 and Table 4" — the chain
+ * Tab.-4 item (kg, tab4_nr) → Tab.-4 KG row (kg, '0'; a printed-blank unit there = no specification → Tab. 2) → Tab. 3 (every 3xx row carries a
+ * printed determination, so a blank Tab.-3 unit stays blank: din276-U-1) → Tab. 2 by the first-level ancestor (`kg1_key`). Routed by `ebene1`
+ * (Tab. 3 covers every KG 3xx, Tab. 4 every KG 4xx — no lookup miss; `lookup(…) IS NULL` is not grammar, so the Tab.-4 KG unit is the helper
+ * column `tab4_kg_einheit`). Fix round 1. */
+export const TAB4_KG_EINHEIT_EXPR = "lookup('TABLE4', kg, '0', 'unit')";
+export const EINHEIT_EXPR = "if(tab4_nr IS NULL, if(ebene1 == 'KG 400', if(tab4_kg_einheit IS NULL, lookup('TABLE2', lookup('TABLE1', kg, 'kg1_key'), 'unit'), tab4_kg_einheit), if(ebene1 == 'KG 300', lookup('TABLE3', kg, 'unit'), lookup('TABLE2', lookup('TABLE1', kg, 'kg1_key'), 'unit'))), lookup('TABLE4', kg, tab4_nr, 'unit'))";
 /** §3.13 L175 "Value that represents the ratio of costs to a reference unit" — Kosten = Menge · Kennwert (the printed definition, inverted). */
 export const KOSTEN_CALC_EXPR = 'menge * kennwert';
-/** Typed cost ≠ Menge · Kennwert (only when both are entered). */
-export const ABWEICHUNG_EXPR = 'if(menge IS NULL OR kennwert IS NULL, 0, if(kosten_eur == menge * kennwert, 0, 1))';
+/** Typed cost ≠ Menge · Kennwert (only when both are entered; compared to the cent — `round()` is one-argument in `functions.ts`, so |Δ| < 0,005). */
+export const ABWEICHUNG_EXPR = 'if(menge IS NULL OR kennwert IS NULL, 0, if(abs(kosten_eur - menge * kennwert) < 0.005, 0, 1))';
 export const EBENE1_EXPR = "lookup('TABLE1', kg, 'kg1')";
 export const EBENE2_EXPR = "if(lookup('TABLE1', kg, 'level') == 1, '-', lookup('TABLE1', kg, 'kg2'))";
 export const imKgExpr = (kg1: string) => `if(ebene1 == '${kg1}', 1, 0)`;
@@ -112,20 +117,21 @@ function kgRegisterUi(k: (typeof KG_WORKSHEETS)[number]): RegisterUiConfig {
   const level2 = secondLevelOf(k.kg1);
   return {
     title: `Kostenpositionen ${k.kg1} (Menge × Kennwert = Kosten)`,
-    subtitle: 'Tab. 1 / §6 — je Zeile eine Kostengruppe der Tab. 1 mit Menge, Bezugseinheit (Tab. 2 / 3 / 4), Kostenkennwert und Kosten',
+    subtitle: 'Tab. 1 / §6 — je Zeile eine Kostengruppe der Tab. 1 mit Menge, Bezugseinheit (Tab. 4 → Tab. 3 → Tab. 2, §6.2), Kostenkennwert und Kosten',
     add_label: '+ Kostenposition', placement: 'section',
     columns: [
       { ...TABLE1_KG_COLUMN, required: true },
       TABLE1_DESIGNATION,
       { key: 'tab4_nr', label: 'Tab.-4-Position (nur KG 4xx)', type: 'text', placeholder: 'z. B. 1', aria_label: 'Nummer der Position in Tabelle 4 (nur für Kostengruppen 4xx)' },
+      { key: 'ebene1', label: 'KG 1. Ebene', type: 'derived', expr: EBENE1_EXPR },
+      { key: 'ebene2', label: 'KG 2. Ebene', type: 'derived', expr: EBENE2_EXPR },
+      { key: 'tab4_kg_einheit', label: 'Einheit der KG (Tab. 4)', type: 'derived', expr: TAB4_KG_EINHEIT_EXPR },
       { key: 'menge', label: 'Menge', type: 'number', min: 0 },
       { key: 'einheit', label: 'Einheit (Tab. 2 / 3 / 4)', type: 'derived', expr: EINHEIT_EXPR },
       { key: 'kennwert', label: 'Kostenkennwert', type: 'number', unit: 'EUR/Einheit', min: 0 },
       { key: 'kosten_calc', label: 'Menge × Kennwert', type: 'derived', expr: KOSTEN_CALC_EXPR },
       { key: 'kosten_eur', label: 'Kosten', type: 'number', unit: EUR, required: true, min: 0 },
       { key: 'abw', label: 'Kosten ≠ Menge × Kennwert', type: 'derived', expr: ABWEICHUNG_EXPR, display: 'badge', value_labels: { '1': 'abweichend', '0': 'ok' } },
-      { key: 'ebene1', label: 'KG 1. Ebene', type: 'derived', expr: EBENE1_EXPR },
-      { key: 'ebene2', label: 'KG 2. Ebene', type: 'derived', expr: EBENE2_EXPR },
       { key: 'im_kg', label: `Position gehört zu ${k.kg1}`, type: 'derived', expr: imKgExpr(k.kg1), display: 'badge', value_labels: { '1': 'ja', '0': 'nein' } },
       { key: 'hinweis', label: 'Hinweise (Tab. 1)', type: 'lookup_value', lookup: { table_code: 'TABLE1', key_column: 'kg', value: 'notes' } },
     ],
@@ -243,7 +249,7 @@ export const KENNWERT_QUELLEN_UI: RegisterUiConfig = {
     { key: 'stand', label: 'Datenstand', type: 'date' },
     { key: 'region', label: 'Region / Regionalfaktor', type: 'text' },
     { key: 'preisstand', label: 'Preisstand (Index)', type: 'text' },
-    { key: 'standard', label: 'Standard', type: 'text', datalist: ['einfach', 'mittel', 'hoch'] },
+    { key: 'standard', label: 'Standard', type: 'text' },
     { key: 'bemerkung', label: 'Bemerkung', type: 'text' },
   ],
   footer: ['kennwert_quellen_count'],

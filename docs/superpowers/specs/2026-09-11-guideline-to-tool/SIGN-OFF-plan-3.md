@@ -3142,11 +3142,11 @@ Report: `reports/plan-3-m187.md` · STAGED SQL: `scripts/verification/m187-STAGE
 
 Report: `reports/plan-3-din276.md` · STAGED SQL: `scripts/verification/din276-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-276\DIN-276.md` (English translation of DIN 276:2018-12; lines cited) · prod capture `src/lib/eval/field-configs/din276.prior.json` (2026-09-18, read-only). Ids follow the Task-13 brief where they exist (M-1 / M-2, G-1 / G-2, D-1, F-1, R-1 → E-1, R-2 → D-3, S-1, X-1 … X-3, J-1); every further refused / withheld / read item got its own block. Nothing below is applied.
 
-### din276-C-1 · DIN-276 · prod · range tokens in `consumer_worksheets` (14 fields reach no worksheet)
+### din276-C-1 · DIN-276 · prod · range tokens in `consumer_worksheets` (16 fields; 13 reach no worksheet at all, 3 reach only their explicit codes)
 - Class: consumer-edit
 - Chosen now (fail-safe): nothing changed; the emitted rule on `GK_mwst_satz_pct` and every STAGED rule keyed on `applicable_cost_groups` / `planning_stage_active` / `cost_breakdown_depth` / `vat_treatment` / `separate_calculations_per_building` read `pending` (visible, inert) until the tokens are expanded.
-- Evidence (verbatim, capture 2026-09-18): `applicable_cost_groups` consumers `["DIN-276-09..16"]`, `planning_stage_active` `["DIN-276-18..22"]`, `cost_breakdown_depth` `["DIN-276-09..16","DIN-276-18..22"]`, `vat_treatment` `["DIN-276-09..16","DIN-276-18..23"]`, `separate_calculations_per_building` `["DIN-276-09..29"]`, `building_count` `["DIN-276-04..16"]`, `client_name` / `lead_engineer` / `project_name` / `project_number` `["DIN-276-02..29"]`, `cost_status_date` `["DIN-276-04..28"]`, `input_documents_register` `["DIN-276-04..08","DIN-276-18..22"]`, `ekowai_sector` `["DIN-276-09..16"]`; `loadInheritedFields` matches `code = ANY(consumer_worksheets)` (fll_gar trap 1).
-- Proposed SQL / config: STAGED block din276-C-1 (one UPDATE expanding every `DIN-276-a..b` token).
+- Evidence (verbatim, capture 2026-09-18): `applicable_cost_groups` consumers `["DIN-276-09..16"]`, `planning_stage_active` `["DIN-276-18..22"]`, `cost_breakdown_depth` `["DIN-276-09..16","DIN-276-18..22"]`, `vat_treatment` `["DIN-276-09..16","DIN-276-18..23"]`, `separate_calculations_per_building` `["DIN-276-09..29"]`, `building_count` `["DIN-276-04..16"]`, `client_name` / `lead_engineer` / `project_name` / `project_number` `["DIN-276-02..29"]`, `cost_status_date` `["DIN-276-04..28"]`, `input_documents_register` `["DIN-276-04..08","DIN-276-18..22"]`, `ekowai_sector` `["DIN-276-09..16"]`, and the three mixed lists `execution_oriented_breakdown` `["DIN-276-09..16","DIN-276-21"]`, `cost_planning_principle` `["DIN-276-03","DIN-276-18..22"]`, `cost_calculation_method` `["DIN-276-07","DIN-276-18..22"]` (fix round 1: 16 fields, re-counted from the capture); `loadInheritedFields` matches `code = ANY(consumer_worksheets)` (fll_gar trap 1).
+- Proposed SQL / config: STAGED block din276-C-1 (one UPDATE expanding every `DIN-276-a..b` token; the rollback is 16 UPDATE statements restoring the captured arrays).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din276-M-1 · DIN-276 · DIN-276-09 … -16 · KG worksheet sections ← `applicable_cost_groups` (select_many)
@@ -3289,6 +3289,13 @@ Report: `reports/plan-3-din276.md` · STAGED SQL: `scripts/verification/din276-S
 - Proposed SQL / config: STAGED block din276-D-9.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
+### din276-D-10 · DIN-276 · DIN-276-18 / -23 / -25 · `bauwerk_aktuell` ↔ IDENT-02 `building_costs` / `GK_bauwerkskosten`; `stufe_aktuell_gesamt` / `KR_gesamt_calc` … `KF_gesamt_calc` ↔ IDENT-01 `GK_total` (amendment K pairs, fix round 1)
+- Class: deactivation + equation (single-source pairs; the register column stays — N stages — and the prod scalars keep their producers)
+- Chosen now (fail-safe): both prod equations untouched (IDENT-01 `GK_total = kg_100_total + … + kg_800_total` on -23, IDENT-02 `building_costs = kg_300_total + kg_400_total` on -25, both `verified_against_standard`); the matrix twins are visible only. Resolution: the KG worksheets stay the single source of the CURRENT determination's KG totals — IDENT-01 / IDENT-02 stay; `bauwerk_aktuell` and `stufe_aktuell_gesamt` are the matrix's own reading of the same figures and RETIRE ON RATIFICATION in favour of a consistency gate (`stufe_aktuell_gesamt == GK_total`, `bauwerk_aktuell == building_costs`, warn) once C-3 / C-5 make the four symbols meet on one worksheet; `GK_bauwerkskosten` (-23, typed) retires under X-2; the five `*_gesamt_calc` stay (historic stages have no other source).
+- Evidence (verbatim, transcript line): "Costs resulting from the sum of cost groups 100 to 800" (L163); "Costs resulting from the sum of cost groups 300 and 400" (L169). Capture: IDENT-01 `bcd6a7f0-f369-43e0-a0a1-3279219e8618` md5 `64222da6be5849297faffbf2a24947b0`; IDENT-02 `e7e1658e-dfba-4da2-81b1-e757a1c708e7` md5 `5380e3a57680ccf660f3ac03883bd681`; `building_costs` consumed by -24 / -26 / -28, `GK_total` consumer-free, `GK_bauwerkskosten` consumer-free.
+- Proposed SQL / config: STAGED block din276-D-10.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
 ### din276-E-1 · DIN-276 · DIN-276-26 · IDENT-04 `deviation_amount = current_stage_total - previous_stage_total` (imported_unverified) → the matrix outputs (the brief's R-1)
 - Class: equation-replacement
 - Chosen now (fail-safe): IDENT-04 untouched; `stufen_abweichung` (DIN-276-18-D9) is the twin.
@@ -3333,14 +3340,14 @@ Report: `reports/plan-3-din276.md` · STAGED SQL: `scripts/verification/din276-S
 
 ### din276-J-1 · DIN-276 · DIN-276-18 … -22 / -27 / -22 / -23 · option lists the description prints but the standard does not (`*_lph` HOAI phases, `AA_typ`, `KF_rechnungspruefung_status`, `GK_freigabe_status`)
 - Class: text-only (no printed list — content boundary)
-- Chosen now (fail-safe): no select created / no retype; the `abweichungen.typ` column is free text with the prod description's words as a datalist (suggestions, not values).
+- Chosen now (fail-safe): no select created / no retype; the `abweichungen.typ` column is free text whose datalist (`Planungsänderung / Preisentwicklung / Mengenänderung / Sonstige`) is prod's own `AA_typ` description `'planungsänderung | preisentwicklung | mengenänderung | sonstig'` re-cased — suggestions, not values, not guideline content. Fix round 1: the `kennwert_quellen.standard` datalist (`einfach / mittel / hoch`) was DROPPED — it had no source (prod `KKW_standard.description` is empty, the label "Standard (einfach/mittel/hoch)" is a prod label, the transcript prints no such scale); the column is free text.
 - Evidence (verbatim, transcript line): "Deviations in the individual cost groups from the cost calculations must be presented, explained and documented according to type and scope." (L386) — "type" without a printed list; HOAI phases are not printed anywhere in the transcript (grep "HOAI" → 0 hits).
 - Proposed SQL / config: none — an owner-supplied list would be a project convention, not a guideline value.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din276-J-2 · DIN-276 · TABLE1 · `level`, `parent_kg`, `kg1`, `kg2` are structural columns, not printed cells
 - Class: text-only-formula (structure from the ordinal)
-- Chosen now (fail-safe): derived from the three-digit code by the standard's own rule; `kg1` / `kg2` printed as "KG 300" / "KG 310" so a row condition can never resolve them as symbols.
+- Chosen now (fail-safe): derived from the three-digit code by the standard's own rule; `kg1` / `kg2` printed as "KG 300" / "KG 310" so a row condition can never resolve them as symbols. Fix round 1 adds `kg1_key` (`kg_N00`, the TABLE2 key of the first-level ancestor, a lookup argument only) so the register's unit column implements the L1022 fallback chain — Tab.-4 item → Tab.-4 KG row (a printed-blank unit there = no KG-level specification → Tab. 2) → Tab. 3 (every KG 3xx row carries a printed determination, so a blank Tab.-3 unit stays blank, U-1) → Tab. 2 of the ancestor; pinned (`kg_490` → m² via Tab. 4 nr "0", `kg_121` → m² of KG 100, `kg_890` → m² of KG 800, `kg_411` head → m² of KG 400, `kg_340` → blank).
 - Evidence (verbatim, transcript line): "The cost breakdown is shown in Table 1. It provides for three levels, which are characterised by three-digit ordinal numbers." (L424); "These first-level cost groups are further subdivided into second- and third-level cost groups." (L436).
 - Proposed SQL / config: none (TABLE1 stays `md_verified` — the four columns are not quoted cells).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER

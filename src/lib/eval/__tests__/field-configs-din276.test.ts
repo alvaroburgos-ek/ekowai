@@ -11,7 +11,8 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { FIELD_CONFIGS, SECTION_VISIBILITY, VAT_RATE_VISIBLE, KG_WORKSHEETS, secondLevelOf, kgRegisterSymbol, kg2SumSymbol, MATRIX_UI, SONDERKOSTEN_UI, VERGABE_UI, EINHEIT_EXPR, imKgExpr, AKTUELL_EXPR } from '../field-configs/din276';
+import { FIELD_CONFIGS, SECTION_VISIBILITY, VAT_RATE_VISIBLE, KG_WORKSHEETS, secondLevelOf, kgRegisterSymbol, kg2SumSymbol, MATRIX_UI, SONDERKOSTEN_UI, VERGABE_UI, EINHEIT_EXPR, TAB4_KG_EINHEIT_EXPR, ABWEICHUNG_EXPR, imKgExpr, AKTUELL_EXPR } from '../field-configs/din276';
+import { EQUATIONS } from '../equations/din276';
 import type { PriorSnapshot } from '../field-configs/types';
 import { parseFieldConfig, type RegisterUiConfig } from '../field-config';
 import { parseCondition, parseNumeric } from '@/lib/expr';
@@ -94,21 +95,32 @@ describe('DIN-276 field configs (Plan 3 Task 13)', () => {
     expect(priorRow('DIN-276-01 special_cost_flags').enum_values).toBeNull(); // Plan-1 selection migration unapplied — the register `art` tokens are this task's own (din276-J-4)
   });
 
-  it('string-literal trap: no enum token compared by literal in a row expression is a column key of its register or a prod symbol of its worksheet (probe 2026-09-18: `status == \'auftrag\'` resolves to a column `auftrag`)', () => {
-    const literals = (expr: string) => [...expr.matchAll(/== '([^']+)'/g)].map((m) => m[1]);
-    for (const r of FIELD_CONFIGS.filter((x) => x.widget === 'register')) {
-      const cfg = registerCfg(r.worksheet, r.symbol);
-      const keys = new Set(cfg.columns.map((c) => c.key));
-      const ws = symbolsOn(r.worksheet);
-      for (const c of cfg.columns.filter((x) => x.expr)) for (const lit of literals(c.expr!)) {
-        expect(keys.has(lit), `${r.symbol}.${c.key}: literal '${lit}' is a column key`).toBe(false);
-        expect(ws.has(lit), `${r.symbol}.${c.key}: literal '${lit}' is a prod symbol of ${r.worksheet}`).toBe(false);
-      }
+  it('string-literal trap (X-1, widened in fix round 1): no literal compared in ANY expression — register column exprs / column visible_when, equation formulas, field visible_when — is a register column key, a prod symbol or a created symbol of its worksheet (13b made the engine safe; the pin documents the invariant)', () => {
+    const literals = (expr: string): string[] => [
+      ...[...expr.matchAll(/(?:==|!=)\s*'([^']+)'/g)].map((m) => m[1]),
+      ...[...expr.matchAll(/\bIN\s*\{([^}]*)\}/g)].flatMap((m) => m[1].split(',').map((x) => x.trim().replace(/^'|'$/g, '')).filter(Boolean)),
+    ];
+    const created = (ws: string) => new Set(FIELD_CONFIGS.filter((e) => e.worksheet === ws && e.create).map((e) => e.symbol));
+    const columnKeys = (ws: string) => new Set(FIELD_CONFIGS.filter((e) => e.worksheet === ws && e.widget === 'register').flatMap((e) => registerCfg(ws, e.symbol).columns.map((c) => c.key)));
+    const forbidden = (ws: string) => new Set([...symbolsOn(ws), ...created(ws), ...columnKeys(ws)]);
+    const check = (ws: string, where: string, expr: string | null | undefined) => { if (!expr) return; const f = forbidden(ws); for (const lit of literals(expr)) expect(f.has(lit), `${ws} ${where}: literal '${lit}' is a column key / symbol in scope`).toBe(false); };
+    let n = 0;
+    for (const e of FIELD_CONFIGS) {
+      check(e.worksheet, `${e.symbol}.visible_when`, e.visible_when); if (e.visible_when) n++;
+      if (e.widget === 'register') for (const c of registerCfg(e.worksheet, e.symbol).columns) { check(e.worksheet, `${e.symbol}.${c.key}`, c.expr); check(e.worksheet, `${e.symbol}.${c.key}.visible_when`, c.visible_when); if (c.expr) n++; }
     }
+    for (const q of EQUATIONS) { check(q.worksheet, q.equation_number, q.formula); n++; }
+    for (const sec of SECTION_VISIBILITY) { check(sec.worksheet, `section ${sec.section_code}`, sec.visible_when); n++; }
+    expect(n).toBe(175); // every expression surface walked: 1 field rule + 8 × 7 KG column exprs + 2 matrix + 1 VE column exprs + 115 formulas
     expect(literals(AKTUELL_EXPR)).toEqual(['rechnung', 'auftrag']);
-    expect(VERGABE_UI.columns.map((c) => c.key)).toContain('auftrag_eur'); // the amount columns are suffixed
+    expect(VERGABE_UI.columns.map((c) => c.key)).toContain('auftrag_eur'); // the amount columns are suffixed (the pre-13b collision)
     expect(literals(imKgExpr('KG 300'))).toEqual(['KG 300']); // a space — never an identifier
+    expect(literals(VAT_RATE_VISIBLE)).toEqual(['gross', 'mixed']);
+    expect(literals(EINHEIT_EXPR)).toEqual(['KG 400', 'KG 300']);
     expect(EINHEIT_EXPR).toContain("lookup('TABLE4', kg, tab4_nr, 'unit')");
+    expect(EINHEIT_EXPR).toContain("lookup('TABLE2', lookup('TABLE1', kg, 'kg1_key'), 'unit')"); // L1022 fallback through the first-level ancestor
+    expect(TAB4_KG_EINHEIT_EXPR).toBe("lookup('TABLE4', kg, '0', 'unit')");
+    expect(ABWEICHUNG_EXPR).toContain('abs(kosten_eur - menge * kennwert) < 0.005'); // cent tolerance (round() is one-argument)
   });
 
   it('lookup_fill: three created TEXT twins on DIN-276-24 keyed on the created kg_selector (TABLE2 key column order, value columns exist); the existing number `reference_unit` (IDENT-03 input) is not re-bound (amendment J)', () => {
@@ -134,7 +146,7 @@ describe('DIN-276 field configs (Plan 3 Task 13)', () => {
     expect(m.footer).toEqual(['KR_gesamt_calc', 'KSch_gesamt_calc', 'KBer_gesamt_calc', 'KA_gesamt_calc', 'KF_gesamt_calc', 'stufen_count', 'stufe_aktuell_gesamt', 'stufe_vorher_gesamt', 'stufen_abweichung', 'stufen_abweichung_pct', 'bauwerk_aktuell']);
     for (const k of KG_WORKSHEETS) {
       const cfg = registerCfg(k.ws, kgRegisterSymbol(k.n));
-      expect(cfg.columns.map((c) => c.key)).toEqual(['kg', 'bezeichnung', 'tab4_nr', 'menge', 'einheit', 'kennwert', 'kosten_calc', 'kosten_eur', 'abw', 'ebene1', 'ebene2', 'im_kg', 'hinweis']);
+      expect(cfg.columns.map((c) => c.key)).toEqual(['kg', 'bezeichnung', 'tab4_nr', 'ebene1', 'ebene2', 'tab4_kg_einheit', 'menge', 'einheit', 'kennwert', 'kosten_calc', 'kosten_eur', 'abw', 'im_kg', 'hinweis']);
       expect(cfg.columns.filter((c) => c.required).map((c) => c.key)).toEqual(['kg', 'kosten_eur']);
       expect(cfg.columns.find((c) => c.key === 'im_kg')!.expr).toBe(imKgExpr(k.kg1));
       expect(cfg.footer).toEqual([`kg${k.n}_positionen_sum`, `kg${k.n}_positionen_count`, `kg${k.n}_positionen_fremd`, `kg${k.n}_positionen_abweichend`, ...secondLevelOf(k.kg1).map((l) => kg2SumSymbol(l.code))]);
@@ -147,6 +159,8 @@ describe('DIN-276 field configs (Plan 3 Task 13)', () => {
     expect(registerCfg('DIN-276-27', 'abweichungen').columns.filter((c) => c.required).map((c) => c.key)).toEqual(['kg', 'betrag', 'ursache']);
     expect(registerCfg('DIN-276-04', 'flurstuecke').footer).toEqual(['grundstuecksflaeche_GF_calc', 'flurstuecke_count']);
     expect(registerCfg('DIN-276-07', 'kennwert_quellen').footer).toEqual(['kennwert_quellen_count']);
+    expect(registerCfg('DIN-276-07', 'kennwert_quellen').columns.find((c) => c.key === 'standard')!.datalist).toBeUndefined(); // fix round 1: 'einfach / mittel / hoch' was unsourced
+    expect(registerCfg('DIN-276-27', 'abweichungen').columns.find((c) => c.key === 'typ')!.datalist).toEqual(['Planungsänderung', 'Preisentwicklung', 'Mengenänderung', 'Sonstige']); // prod's own AA_typ description, re-cased (J-1)
     // every footer symbol of every register is a created derived field on the same worksheet
     for (const r of FIELD_CONFIGS.filter((x) => x.widget === 'register')) for (const sym of registerCfg(r.worksheet, r.symbol).footer!) expect(byKey(r.worksheet, sym)?.widget, `${r.worksheet} ${sym}`).toBe('derived');
   });
