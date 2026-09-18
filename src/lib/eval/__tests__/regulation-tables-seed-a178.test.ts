@@ -93,6 +93,7 @@ describe('DWA-A-178 Plan-3 seed tables', () => {
     expect(S6_LIMITS_ROWS.map((r) => r.line)).toEqual(['L689', 'L884', 'L677', 'L671', 'L673', 'L979', 'L979', 'L575', 'L575', 'L639', 'L635', 'L606', 'L606', 'L606', 'L608', 'L583', 'L792']);
     expect(t.rows.find((r) => r.keys.parameter === 'b_krit')?.values.modal).toBe('festgesetzt'); // L689 "wird eine maximal zulässige AFS63-Filterflächenbelastung von b_krit = 7 kg/(m²·a) festgesetzt"
     expect(t.rows.find((r) => r.keys.parameter === 'u_max')?.values.comparator).toBe('<');
+    expect(t.rows.find((r) => r.keys.parameter === 'n_rbf_min')?.values.unit).toBe('a'); // L979 prints "≥ 10 a" — as printed (fix round 1, a178-U-5); §3.2 L354 prints n_RBF in 1/a
     expect(t.override_policy).toBe('locked');
     expect(t.verification_status).toBe('md_verified');
     for (const r of t.rows) expect(r.values.text).toBe(r.verbatim_quote);

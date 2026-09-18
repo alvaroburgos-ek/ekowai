@@ -124,7 +124,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'b_row', label: 'Fracht der Teilfläche', type: 'derived', expr: B_ROW_EXPR, unit: 'kg/a' },
       ],
       footer: ['A_E_b_a_calc', 'B_RBF_zu_calc', 'teilflaechen_count'],
-      note: `${Q.L716} Mischsystem: e_0 je Teilfläche in % (Gl. 3, ${Q.L739}); die Spalte ist im Trenn-/Straßensystem ausgeblendet. Der Rechenwert 530 kg/(ha·a) ist zur Vorbemessung anzusetzen; im Nachweis sind alle frachtmindernden Komponenten zu berücksichtigen (§6.2.2.1).`,
+      note: `${Q.L716} Mischsystem: e_0 je Teilfläche in % (Gl. 3, ${Q.L739}); die Spalte ist im Trenn-/Straßensystem ausgeblendet. Nur vollständige Zeilen gehen in die Summen ein — eine Mischsystem-Zeile ohne e_0 fällt aus B_RBF_zu_calc (und aus A_E_b_a_calc) heraus, bis e_0 eingetragen ist. Der Rechenwert 530 kg/(ha·a) ist zur Vorbemessung anzusetzen; im Nachweis sind alle frachtmindernden Komponenten zu berücksichtigen (§6.2.2.1).`,
     },
     verification_quote: `${Q.L723} — ${Q.L730} — ${Q.L737}`,
     create: { section_code: 'C', label_de: 'Teilflächen im Einzugsgebiet (A_E,b,a,i · b_R,a [· e_0])', data_type: 'json', unit: null, clause_reference: '§6.2.2.1, Gl. (2), Gl. (3)',

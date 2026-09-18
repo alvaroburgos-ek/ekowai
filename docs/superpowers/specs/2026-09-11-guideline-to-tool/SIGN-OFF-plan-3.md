@@ -3698,7 +3698,21 @@ Report: `reports/plan-3-a178.md` · STAGED SQL: `scripts/verification/a178-STAGE
 - Class: override-policy (mechanism limit)
 - Chosen now (fail-safe): TABELLE1_VS fills 0,2 for `rkb_le10` / `rueb_db` (the footnote's permitted value — the reason to distinguish the type) and 0 for `stauraum_unten` / `sonstige`; the widget's `kann` alternatives come from the value column (`values: ['0', '0.2']`), so an engineer could pick 0,2 for a row whose base is 0 — the badge shows the row's Bedingung, `eta_VS` itself stays typed.
 - Evidence (verbatim, transcript line): L873 (as under E-2); "\hline AFS63 & $0^{11}$ & 0,95 & 0,50 & 0,60 \\" (L870)
-- Proposed SQL / config: either fill 0 for every row and let the engineer pick 0,2 via `kann` (no auto 0,2), or a per-row alternatives list (Plan-3 mechanism gap, [CODE]).
+- Proposed SQL / config: **[CODE] tooling candidate — "per-row alternatives on RegulationRow"** (queued by the controller for the final wave, fix round 1): the `kann` select reads a per-row `alternatives` list when present and falls back to the value column's `values`; no DATA change here. Interim alternative: fill 0 for every row and let the engineer pick 0,2 via `kann`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-O-5 · DWA-A-178 · S6_LIMITS · rows with descriptive modals under the table's `locked` policy (h_rr_min / h_rr_max "liegen zwischen", deckschicht_cm "besteht aus", langzeitsimulation_min_a "basiert auf … mindestens")
+- Class: override-policy
+- Chosen now (fail-safe): the four rows stay in S6_LIMITS (`locked`, cue L689); their `modal` column carries the printed verb so the reading stays visible; no widget binds S6_LIMITS today (the rows are read by `lookup()` twins only), so the policy governs nothing on screen.
+- Evidence (verbatim, transcript line): "Nutzbare Einstauhöhen liegen zwischen $h_{R R}=0,3 \mathrm{~m}$ und 2 m ." (L575); "Sie besteht aus einer 5 cm starken Schicht aus kantengerundetem oder gebrochenem mineralischem Material ( 2 mm bis 8 mm )." (L583); "Der Nachweis der Retentionsbodenfilteranlage im Trenn- und Mischsystem basiert auf einer Kontinuumssimulation mit mindestens 10 Jahren Niederschlagsbelastung." (L792)
+- Proposed SQL / config: none unless the owner wants the four rows in a separate `anhaltswert` table (prod REQ-15 blocks on 0,3 … 2 and REQ-23 on ≥ 10 a today, which supports `locked`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a178-U-5 · DWA-A-178 · S6_LIMITS · `n_rbf_min` — L979 prints the unit "a" ("≥ 10 a") where §3.2 prints n_RBF in 1/a
+- Class: unreadable-cell (printed unit inconsistent with the symbol table)
+- Chosen now (fail-safe): the row's `unit` cell is the PRINTED "a" (fix round 1; the first commit had normalised it to 1/a); the value 10 is unambiguous; the label names the §3.2 unit; prod `n_RBF` carries 1/a.
+- Evidence (verbatim, transcript line): "Die Beschickungshäufigkeit muss im langjährigen Mittel $\geq 10$ a sein." (L979); "\hline $n_{\text {RBF }}$ & 1/a & Anzahl der Beschickungen des Retentionsbodenfilterbeckens \\" (L354)
+- Proposed SQL / config: owner reads the PDF (SR-3): if the print is "1/a" or "/a", `UPDATE regulation_table_rows SET row_values = jsonb_set(row_values, '{unit}', '"1/a"') WHERE row_key = 'n_rbf_min' AND table_id = (SELECT id FROM regulation_tables WHERE standard_code = 'DWA-A-178' AND table_code = 'S6_LIMITS');`
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### a178-U-1 · DWA-A-178 · TABELLE1 · the η_VS cell prints `$0^{11}$` (OCR of the footnote marker "0 ¹⁾")

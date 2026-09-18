@@ -497,10 +497,10 @@
 -- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
 -- SELECT w.id, 'REQ-05a', 'Fremdwasser: Sanierung / betriebliche Maßnahmen vor der Planung geprüft',
 --        'IF fremdwasser_relevant == True THEN fremdwasser_massnahmen_geprueft == True', '§5.2.2', 'warn',
---        'Plan 3 (a178-G-6): §5.2.2 — bei festgestelltem Fremdwasserzufluss Sanierungsvorschläge erarbeiten und den Erfolg vor der Planung prüfen.'
+--        'Plan 3 (a178-G-7): §5.2.2 — bei festgestelltem Fremdwasserzufluss Sanierungsvorschläge erarbeiten und den Erfolg vor der Planung prüfen.'
 --   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-A-178' AND w.code = 'A178-05'
 --    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-05a');
--- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-05a' AND description LIKE 'Plan 3 (a178-G-6)%';
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-05a' AND description LIKE 'Plan 3 (a178-G-7)%';
 -- Severity: warn (as REQ-05 today; "muss" in the sentence would support block — the owner's call, severity is never changed by this task).
 
 -- =====================================================================================================================
