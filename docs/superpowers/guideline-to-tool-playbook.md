@@ -482,6 +482,28 @@ catches the slip before any migration is emitted. (6) A guideline that defines a
 area … do not belong directly", §3) may still be summed by prod's own field definition — encode the guideline's share
 (water area only) and prod's total (all zones) as two outputs and record the difference (J-4), never silently pick one.
 
+**Encoding traps (Plan 3 Task 9, DWA-M-820-3).** (1) A checklist catalogue (`Nr. | Kriterium | Hinweise`, 193 printed rows over
+ten annexes) is a regulation TABLE whose rows are text: key `nr` = the printed number as token `n1` …, value columns the printed
+cells + `nr_num`; lift every row span MECHANICALLY by line range (a throwaway parser that tracks the nested
+`\begin{tabular}{l}…\end{tabular}` depth so a multi-line cell ends the row at depth 0) and assert every cell inside its span
+at build time (`inSpan`) — the verifier then passes first run; keep OCR quirks verbatim in the values ("Automatisie-rungs-",
+"..In Scope")"). (2) The register that consumes such a catalogue is `nr` lookup_key → text lookup_values (the printed cells
+fill on pick) + an enum rating; a catalogue prod splits over two worksheets stays ONE table — each half's register carries a
+row `derived` badge `if(lookup(T, nr, 'nr_num') >= from AND … <= to, 1, 0)` and every count filters on `badge == 1`, so a row
+picked on the wrong half is visible and not counted. (3) `count_rows` over an EMPTY register is 0 (computed), unlike the Σ
+functions — a count twin next to a manual required count silently reads 0 until rows are picked; never let an equation take
+ownership of an existing consumed manual count (create `_calc` twins, STAGE the switch as a D-block with the full 48 × 4 SQL
+generated from the same template). (4) `consumer_worksheets = ["ALL"]` is a prod token `loadInheritedFields` never matches
+(`code = ANY(...)`) — the same trap as a range string (Task 7); a driver declared "ALL" reaches NO worksheet, so every rule
+keyed on it is `pending`: emit on the CREATED fields anyway, pin the capture fact, STAGE the one consumer UPDATE (C-1).
+(5) A standard whose every existing field is consumed (246 / 250 here) admits no `visible_when` UPDATE at all — the whole
+visibility story lives on created fields + STAGED section blocks; say so in the report rather than emitting inert
+field-free section rules (Task 8 lesson). (6) A 67-input `if(a == 'x' OR b == 'x' …, 1, 0)` over enum inputs parses, is
+engine-eligible and computes (strings via amendment D), but every input must be set — an `if()` branch does not exempt
+inputs; split such a flag per annex when projects of one type exist, and record the "set the other annex nicht_zutreffend"
+rule in the label. (7) Generating TS with `JSON.stringify` for every lifted span sidesteps the `${`/backtick hazards; the
+Bash heredoc on this machine collapses `\\` to `\` — write generator scripts with the Write tool, never a heredoc.
+
 **Staged DELETE rollbacks (controller ruling, Plan 3 Task 6 fix round 1 — corpus-wide).** A STAGED block that deletes rows
 from a table without an `active` column (`equations`, `compliance_requirements`) (1) copies the full rows into an archive table
 created in the SAME transaction (`CREATE TABLE IF NOT EXISTS <table>_archive_<slug> AS SELECT * FROM <table> WHERE false;

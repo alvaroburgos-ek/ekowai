@@ -1,0 +1,12 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_A1';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_A2';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_A3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_A4';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_B1';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_B2';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_B3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_B4';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_B5';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-820-3' AND edition = '2026' AND table_code = 'QE_B6';
+COMMIT;

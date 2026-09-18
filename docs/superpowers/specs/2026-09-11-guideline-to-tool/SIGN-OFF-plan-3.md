@@ -1992,3 +1992,170 @@ Report: `reports/plan-3-fll_naturteich.md` · STAGED SQL: `scripts/verification/
 - **Prod's `total_pool_area_m2` VR includes supplementary areas** while §3 defines them as not belonging to the pool (J-4) — D1 follows prod's definition (Σ all zones), D2 the guideline's water-area share.
 - **No drainage field exists on FLLNT-07** (the brief's §9.1 `drainage_*` rule has no target; REQ-14 is the attestation on -06).
 - **The transcript is plain text with hyphenated line breaks**; the `*_printed` cells of TABLE1 / TABLE9 keep the hyphen fragments verbatim ("purifi- cation", "natu- ral"), the select labels de-hyphenate for display.
+
+## Task 9 — DWA-M-820-3 (m820_3)
+
+Report: `reports/plan-3-m820_3.md` · STAGED SQL: `scripts/verification/m820_3-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-820-3\DWA-M_820-3.md` (Februar 2026; lines cited) · prod capture `src/lib/eval/field-configs/m820_3.prior.json` (2026-09-18, read-only; 250 fields, 216 sections, 0 equations). Ids follow the Task-9 brief (I = interface-gap, O = override-policy, X = cross-worksheet prod hygiene, J = judgment). Nothing below is applied. Every emitted rule keyed on `project_type` is `pending` (inert) until C-1 — the driver's consumer list is the literal `{ALL}`.
+
+### m820_3-C-1 · DWA-M-820-3 · M8203-01 · project_type (+ 12 rows) consumer_worksheets = '{ALL}'
+- Class: consumer-edit
+- Chosen now (fail-safe): the 126 created-field rules (`project_type IN {'gesamtsystem', 'both'}` / `{'einzelprojekt', 'both'}`) are emitted anyway and stay `pending` = visible; nothing else keyed on the driver is touched. `loadInheritedFields` matches `code = ANY(consumer_worksheets)` — `'ALL'` is no worksheet code (the fll_gar-C-1 class), so `project_type`, the project identity fields and the four `*_definition_acknowledged` flags are inherited NOWHERE today.
+- Evidence (verbatim, transcript line): "Die Aufteilung in „Konzept für das Gesamtsystem“ und „Projekte“ ist dabei eine elementare Grundlage." (L321); "Auf der Grundlage des Konzepts für das Gesamtsystem wurden erforderliche Projekte identifiziert (siehe 5.4). Diese werden im Folgenden einzeln betrachtet und umgesetzt." (L398)
+- Proposed SQL / config: STAGED block C-1 (option a: the driver only → the 23 other codes; option b: all 13 `{ALL}` rows).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-C-2 · DWA-M-820-3 · M8203-04 … M8203-10 · Anhang-A section hide ← project_type IN {'gesamtsystem', 'both'}
+- Class: consumer-edit
+- Chosen now (fail-safe): no section rule emitted — every field-bearing section (C on -04 … -06 with `pz_5N_*`, F on -07 … -10 with `qe5N_*`) holds producers consumed by -07 … -09 / -22 / -24 and the emitter refuses them (pinned); the field-free sections are not observable alone (Task 8 lesson). The CREATED registers / outputs on -07 … -10 carry the rule instead.
+- Evidence (verbatim, transcript line): L321, L398 (as C-1); "Ein strukturierter Planungsprozess, der mit dem Konzept für das Gesamtsystem beginnt und daraus einzelne Projekte ableitet, gibt eine verlässliche und gut funktionierende Struktur, um bedarfsorientiert zu arbeiten." (L313)
+- Proposed SQL / config: STAGED block C-2 (63 `UPDATE worksheet_sections`, all nine captured codes per worksheet; needs C-1 first).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-C-3 · DWA-M-820-3 · M8203-11 … M8203-18 · Anhang-B section hide ← project_type IN {'einzelprojekt', 'both'}
+- Class: consumer-edit
+- Chosen now (fail-safe): as C-2 for the eight Projekt worksheets (B holds `pz_6N_*` → -13 / -15 / -23 / -24; F holds `qe6N*_*` → -23 / -24).
+- Evidence (verbatim, transcript line): L398; "Die Hinweise sind gegliedert nach den in Teil 1 und Teil 2 bereits verwendeten Leistungsphasen." (L194)
+- Proposed SQL / config: STAGED block C-3 (72 section rows; needs C-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-C-4 · DWA-M-820-3 · M8203-19 · aia_available / bap_defined / cde_platform_defined / digital_twin_after_project ← bim_project_definition_complete == true
+- Class: consumer-edit
+- Chosen now (fail-safe): no rule — all five M8203-19 booleans are consumed by M8203-24 (refused, pinned); and §7.2.2 prints the BIM-Projektdefinition as one of six parallel goals, not as the precondition of the others.
+- Evidence (verbatim, transcript line): "I Die BIM-Projektdefinition ist abgeschlossen." (L591); "I Die AIA (Auftraggeberinformationsanforderungen) liegen vor. Die Daten, die im Betrieb benötigt werden, sind festgelegt. Die AIA sind darauf angepasst." (L592); "I Der BAP (BIM-Abwicklungsplan) ist definiert und abgestimmt." (L594)
+- Proposed SQL / config: STAGED block C-4 (three `visible_when` UPDATEs, optional).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-C-5 · DWA-M-820-3 · M8203-07 … M8203-18 · the twelve created `<prefix>_items_rated` → consumers M8203-22 / -23 / -24
+- Class: consumer-edit
+- Chosen now (fail-safe): `M8203-22-D2` / `M8203-23-D2` (Σ rated over the annex registers) are emitted and read "Fehlende Eingaben" on the summary worksheets until this edit (a `create` never sets consumers). Latent guard note: after the edit the emitter refuses the emitted `visible_when` on the twelve outputs at the next re-emit (withdraw those twelve rules then, or keep — the fll_naturteich-G-1 class).
+- Evidence (verbatim, transcript line): "Das Erreichen der Phasenziele kann mit den in Teil 3 in den Anhängen jeweils hinterlegten Qualitätselementen überprüft werden." (L67)
+- Proposed SQL / config: STAGED block C-5 (twelve `UPDATE fields … consumer_worksheets`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-D-1 · DWA-M-820-3 · M8203-07 … M8203-18 · qeNN_items_y / _p / _n / _na (48 fields) → derived from the registers
+- Class: deactivation
+- Chosen now (fail-safe): the counts are emitted onto CREATED twins `<prefix>_items_{y,p,n,na}_calc` (+ `<prefix>_items_rated`); the 48 manual, required, consumed count fields keep their input widgets and REQ-15 … REQ-24 keep reading them. The brief's "their fields become derived" is exactly this block (an equation never takes ownership of a consumed manual number without a ruling — a138-D-2 / fll_naturteich-R-* precedent). Capture: 0 stored `project_parameters` for the standard (120 draft instances / 5 projects) — no typed count would be overwritten today.
+- Evidence (verbatim, transcript line): "Das Erreichen der Phasenziele kann mit den in Teil 3 in den Anhängen jeweils hinterlegten Qualitätselementen überprüft werden." (L67) — the checklist is the count's single source.
+- Proposed SQL / config: STAGED block D-1 (48 × {widget → derived, equation output re-pointed, twin `active = false`, register footer re-pointed}).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-D-2 · DWA-M-820-3 · M8203-22 / M8203-23 · gesamt_anhang_a_items_total / gesamt_anhang_b_items_total → derived
+- Class: deactivation
+- Chosen now (fail-safe): `M8203-22-D1` / `M8203-23-D1` sum the inherited `qeNN_items_total` constants onto the created twins `*_items_total_calc` (computable today: 38 / 155); the manual fields (VR `==38` / `==155`) stay. Scalar-only rows are not server-materialised (amendment D) — after the switch M8203-24's inherited copy reads the stored value.
+- Evidence (verbatim, transcript line): the ten catalogue headings "A. 1 QE 5.2: Bedarfsplanung Konzept" (L685) … "B. 6 QE 6.7: Projektabschluss" (L1170) with 15 / 8 / 12 / 3 / 15 / 40 / 50 / 34 / 10 / 6 printed rows (seed test).
+- Proposed SQL / config: STAGED block D-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-F-1 · DWA-M-820-3 · M8203-07 … -18 / -22 / -23 / -24 · qeNN_fulfilment_pct, gesamt_anhang_a/b_fulfilment_pct, the three verdict enums
+- Class: text-only-formula
+- Chosen now (fail-safe): all stay MANUAL. Nothing in the transcript prints a rating scale, a P-weight, an NA treatment or verdict bands; emitted instead are the per-rating shares `<prefix>_share_{y,p,n,na}_pct = count · 100 / <prefix>_items_total` (arithmetic on printed counts, no weighting).
+- Evidence (verbatim, transcript line): "Dabei stellen die angegebenen Qualitätselemente nur eine projektübergeordnete Auswahl an Kriterien dar, die im Anwendungsfall projektspezifisch ausgewählt und ergänzt werden müssen." (L67); "Eine Vervollständigung an den jeweiligen Projektaufgaben wird im Projektteam durchgeführt." (L202)
+- Proposed SQL / config: STAGED block F-1 — candidates (a) `items_y / (items_total − items_na) · 100`, (b) `(items_y + 0.5 · items_p) / (items_total − items_na) · 100`; verdict bands the owner's numbers.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-G-1 · DWA-M-820-3 · M8203-04 / -05 / -06 · REQ-06 / REQ-07 / REQ-08 guarded IF project_type IN {'gesamtsystem', 'both'}
+- Class: gate-guard
+- Chosen now (fail-safe): the three block gates stay unconditional (an Einzelprojekt is blocked by the Anhang-A Phasenziele today). Needs C-1 first (the guard would be `pending` on -04 … -06).
+- Evidence (verbatim, transcript line): L398; L321.
+- Proposed SQL / config: STAGED block G-1 (archive pattern; `'IF … THEN (' || condition || ')'`, md5-guarded by the captured ids).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-G-2 · DWA-M-820-3 · M8203-11 / -12 / -14 / -16 / -17 / -18 · REQ-09 … REQ-14 guarded IF project_type IN {'einzelprojekt', 'both'}
+- Class: gate-guard
+- Chosen now (fail-safe): the six block gates stay unconditional (a Gesamtsystem-only project is blocked by the Anhang-B Phasenziele today). Needs C-1.
+- Evidence (verbatim, transcript line): L398; L194.
+- Proposed SQL / config: STAGED block G-2 (archive pattern).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-G-3 · DWA-M-820-3 · M8203-07 … M8203-18 · new completeness gates on `<prefix>_items_rated == <prefix>_items_total`
+- Class: gate-guard
+- Chosen now (fail-safe): no gate reads the registers; REQ-15 … REQ-24 keep testing the manual counts (REQ-20 / REQ-21 on M8203-11 read out-of-scope symbols — X-1). Proposal: twelve new warn gates (one per QE worksheet, own symbols) — redundant once D-1 is ratified.
+- Evidence (verbatim, transcript line): the printed catalogue sizes (L687 … L1190; seed test); L67.
+- Proposed SQL / config: STAGED block G-3 (twelve INSERTs, DELETE-by-description rollback).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-G-4 · DWA-M-820-3 · M8203-22 → M8203-24 · REQ-31 "Projektstopp-Prüfung" (EMPTY condition) onto projektstopp_code
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-31 stays empty (never evaluates); the codes `projektstopp_code_a` (-22, 13 goals), `projektstopp_code_b` (-23, 54 goals), `projektstopp_code` (-24, all 67) are emitted as derived numbers. `projektstopp_review_triggered` (-02) is consumed by -24 only, so the printed rule is decidable on -24.
+- Evidence (verbatim, transcript line): "Werden Phasenziele nicht oder nur unvollständig erreicht, ist die Prüfung eines Projektstopps erforderlich. Im Rahmen einer Risikoanalyse muss bewertet werden, ob und wie das Projekt fortgeführt werden kann." (L307)
+- Proposed SQL / config: STAGED block G-4 (archive pattern; the row moves to M8203-24 with `IF projektstopp_code == 1 THEN projektstopp_review_triggered == true`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-G-5 · DWA-M-820-3 · M8203-01 / -04 / -19 · REQ-02 / REQ-03 / REQ-05 / REQ-27 / REQ-29 — EMPTY conditions
+- Class: gate-guard
+- Chosen now (fail-safe): untouched (never evaluate). Proposals per gate in the STAGED block (REQ-02 on the created `anwendungshinweise` via `contains()`, REQ-03 on the four `*_definition_acknowledged` flags, REQ-05 on `grundsatz_two_step_followed`, REQ-27 on `bestandsdaten_complete_digital`, REQ-29 on the -21 flags) — three of them sit on mirror worksheets (X-1).
+- Evidence (verbatim, transcript line): L200 / L202 / L204 / L206 (the four Anwendungshinweise); "Hier ist die Zweistufigkeit erforderlich; d. h. zunächst eine Gesamtsystembetrachtung, inklusive Abwägung der Wirtschaftlichkeit, zu erstellen und erst dann Einzelprojekte zu definieren, die den langfristigen Bedarf auch wirklich decken." (L305)
+- Proposed SQL / config: STAGED block G-5 (text only until the owner picks).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-M-1 · DWA-M-820-3 · M8203-12 … M8203-18 · additionally ← applicable_lph (select_many)
+- Class: multi-select-driver
+- Chosen now (fail-safe): no LPH-driven rule — a conditional keyed on a multi-select is not encodable as `visible_when`; the Plan-1 `applicable_lph` config (I-1 pending pair) is untouched. Proposal: the `contains(applicable_lph, 'lph_N')` form ANDed with the annex rule on the created registers (mapping B.2 → LPH 1–4, B.3 → 5–7, B.4 → 8, B.5 / B.6 → 8 / 9 is the inventory's reading of the headings, not a printed table).
+- Evidence (verbatim, transcript line): "Die Hinweise sind gegliedert nach den in Teil 1 und Teil 2 bereits verwendeten Leistungsphasen." (L194); B.2 headings "Grundlagenermittlung" (L801), "Vorplanung" (L823), "Entwurfsplanung" (L832), "Genehmigungsplanung (inkl. Genehmigungsverfahren)" (L871); B.3 "Ausführungsplanung" (L889), "Vorbereiten der Vergabe" (L950), "Mitwirken bei der Vergabe" (L1006)
+- Proposed SQL / config: STAGED block M-1 (the seven conditions, text).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-J-1 · DWA-M-820-3 · M8203-01 / M8203-02 · sektoren / anwendungshinweise beside sector_* / anw_hinweis_*_confirmed
+- Class: deactivation
+- Chosen now (fail-safe): additive — the created select_many sets carry the printed words / sentences; the eight booleans stay and REQ-01 keeps reading the sector booleans. `bild1_schritte` NOT created (U-2).
+- Evidence (verbatim, transcript line): "Das Merkblatt richtet sich an Auftraggeber und Auftragnehmer (beauftragte Ingenieurbüros) für planerische Arbeiten bei der Herstellung von Anlagen in den Bereichen Wasserwirtschaft, Wasserbau, Abwasser und Abfall." (L196); "I Im konkreten Projekt werden aus den Qualitätselementen die projektspezifischen Anforderungen und Aufgabenlisten, inklusive Zuständigkeiten, vom Anwendenden entwickelt und in Arbeitsunterlagen (beispielsweise Checklisten) dokumentiert." (L200)
+- Proposed SQL / config: STAGED block J-1 (retire the booleans, re-point REQ-01 to `contains(sektoren, …)`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-J-2 · DWA-M-820-3 · M8203-22 / -23 / -24 · "nicht oder nur unvollständig erreicht" vs the prod enum
+- Class: text-only-formula
+- Chosen now (fail-safe, narrower): the three Projektstopp codes fire on `nicht_erreicht` only; `teilweise_erreicht` (which REQ-06 … REQ-14 accept as met) does not trigger the review.
+- Evidence (verbatim, transcript line): L307 (as G-4).
+- Proposed SQL / config: STAGED block J-2 (widen to `IN {'nicht_erreicht', 'teilweise_erreicht'}` per input).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-J-3 · DWA-M-820-3 · M8203-07 … M8203-18 · share denominators = the manual `qeNN_items_total` constants
+- Class: text-only-formula
+- Chosen now (fail-safe): `<prefix>_share_<r>_pct` divides by the existing required constant (VR `== N`, typed by the engineer), not by the seeded catalogue size (no expression reads a table's row count).
+- Evidence (verbatim, transcript line): the catalogue sizes as pinned (seed test); prod descriptions "Total QE items in Anhang A.1; verbatim count 15." (capture).
+- Proposed SQL / config: STAGED block J-3 (optional literal denominators).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-U-1 · DWA-M-820-3 · M8203-10 · QE_A4 — two Nr. cells printed empty
+- Class: unreadable-cell
+- Chosen now (fail-safe): rows keyed n1 / n2 / n3 by printed position (Ökonomie before the printed "2", Sozioökonomie after it); QE_A4 stays `imported_unverified`; the three category rows and their 2 / 3 / 2 Hinweise lines are seeded verbatim.
+- Evidence (verbatim, transcript line): "\hline \multirow{2}{*}{} & \multirow[t]{2}{*}{Ökonomie/Wirtschaftlichkeit} & Minimierung der Lebenszykluskosten im Konzept/Projekt \\" (L752); "\hline \multirow[t]{3}{*}{2} & \multirow[t]{3}{*}{Ökologie/Umwelt} & Minimierung der ökologischen Auswirkungen ( $\mathrm{CO}_{2}$, Klimabilanz etc.) \\" (L754); "\hline \multirow{2}{*}{} & \multirow[t]{2}{*}{Sozioökonomie/Gesellschaft} & Wirkung auf Gesellschaft \\" (L757)
+- Proposed SQL / config: a PDF look at p. 24 (TOC L168) → `md_verified`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-U-2 · DWA-M-820-3 · M8203-03 · Bild 1 is an image — bild1_schritte not created
+- Class: unreadable-cell
+- Chosen now (fail-safe): the four `bild1_step_*` booleans stay; no select_many (the step labels are not printed as text).
+- Evidence (verbatim, transcript line): "\caption{Bild 1: Schema: Konzept und Projekte (Grafik: H. HÜTTER)}" (L318) inside `\begin{figure} … \includegraphics … \end{figure}` (L315–L319)
+- Proposed SQL / config: none until the PDF page (p. 11, TOC L178) is read.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-I-1 · DWA-M-820-3 · M8203-07 … M8203-18 · project-specific additions ("ergänzt") are not register rows
+- Class: interface-gap
+- Chosen now (fail-safe): `nr` is a required lookup_key over the printed rows — "ausgewählt" is covered (pick rows, NA the rest), "ergänzt" is not; additions go into `qeNN_critical_gaps` / the remark column. The tables' `anhaltswert` policy records the cue; the registers carry no override block (a rewritten criterion would not be the printed one).
+- Evidence (verbatim, transcript line): "… die im Anwendungsfall projektspezifisch ausgewählt und ergänzt werden müssen." (L67); L200.
+- Proposed SQL / config: a register contract with an optional key + free-text criterion column (or the 2b `catalog` picker with `add_custom_label`) — Plan-2b follow-up, not this task.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-X-1 · DWA-M-820-3 · M8203-01 / -04 / -11 / -19 · prod gates reading symbols not in scope on their worksheet
+- Class: cross-standard
+- Chosen now (fail-safe): untouched — REQ-20 / REQ-21 (on -11, reading the -12 … -15 totals), REQ-03 (on -01, the -03 flags), REQ-05 (on -04, a -02 flag), REQ-27 / REQ-29 (on -19, the -20 / -21 flags) are `pending` on every project today (the m1200_3 / fll_naturteich X-3 class).
+- Evidence (verbatim, transcript line): capture (consumer lists) + the conditions read in-session.
+- Proposed SQL / config: G-3 (per-worksheet completeness gates) and G-5 carry the proposals.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_3-O-1 · DWA-M-820-3 · QE_A1 … QE_B6 · override policy `anhaltswert`
+- Class: override-policy
+- Chosen now (fail-safe): `anhaltswert` on all ten catalogues (the "müssen" binds the adaptation, not a fixed value); no register override block.
+- Evidence (verbatim, transcript line): "Dabei stellen die angegebenen Qualitätselemente nur eine projektübergeordnete Auswahl an Kriterien dar, die im Anwendungsfall projektspezifisch ausgewählt und ergänzt werden müssen." (L67, repeated L1247 / L1291); "Die in Anhang A und B angegebenen Qualitätselemente stellen eine Auswahl an Kriterien für die Projektabwicklung dar." (L194)
+- Proposed SQL / config: none (`locked` would deny the printed "ergänzt"; `kann` has no printed alternatives).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 9, no signature needed)
+
+- **"174 printed items" (brief / inventory) is an arithmetic slip:** the ten catalogues print 15 + 8 + 12 + 3 = 38 and 15 + 40 + 50 + 34 + 10 + 6 = 155 rows → **193**, which is also what the prod `qeNN_items_total` VR strings (15 / 8 / 12 / 3 / 15 / 21 / 19 / 17 / 33 / 34 / 10 / 6) and the M8203-22 / -23 descriptions sum to. 193 spans lifted, 193/193 verbatim.
+- **A.3 Hinweise spans all twelve rows** (`\multirow[t]{12}{*}{Kurzbeschreibungen zur Identifikation von Projekten aus dem Konzept}`, L732) — stored on every QE_A3 row; LaTeX-explicit, not a judgment.
+- **OCR quirks kept verbatim in the cell values** (never de-hyphenated by guess): "..In Scope")" / "..Out of Scope")" (L737 / L738), "Automatisie-rungs-" (L833), "Außerund" (L849), "lausführendes" (L943), "Werkund" (L1070), "entsorgung" (L876), "Pla-nungs-" (L1089), "Inverkehrbringerl" (L1131); the A.4 "( $\mathrm{CO}_{2}$," is stored as "( CO2," (L754). A PDF pass may correct the display text; the quotes stay as printed.
+- **Every existing field of the standard is consumed** (246 of 250; the four unconsumed are the M8203-24 sign-off / verdict / Projektstopp rows) — no `visible_when` UPDATE on an existing field is possible for this standard without a consumer ruling; the task's 126 rules therefore all sit on created fields.
+- **The Projektstopp codes require every named goal to be set** (the engine checks inputs before evaluating; an `if()` branch does not exempt them — Task 7 trap 3): a Gesamtsystem-only project sets the 54 Anhang-B goals `nicht_zutreffend` (or reads `manual_required` on `projektstopp_code`); `projektstopp_code_a` / `_b` compute per annex.
+- **Bundle growth:** the 193 lifted spans (~95 KB incl. the multi-line cells) ship in the client bundle via the seed fallback (Task-0 observation; Task 30 measures) — the largest Plan-3 seed so far.

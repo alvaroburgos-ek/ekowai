@@ -1,0 +1,885 @@
+-- DWA-M-820-3 — Plan 3 Task 9 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, 0 equation rows, the 32 compliance rows — ids /
+-- severities / md5(condition) / lengths, sample conditions read in 110-char chunks —, worksheet + section titles,
+-- standards.version 'Februar 2026', field labels + validation_rules, 120 draft worksheet instances over 5 projects
+-- with 0 stored project_parameters for this standard) were captured read-only on 2026-09-18
+-- (src/lib/eval/field-configs/m820_3.prior.json; scripts/verification/prod-query.mjs). Transcript lines refer to
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA-M-820-3\DWA-M_820-3.md (Februar 2026). This task changes NO gate severity.
+--
+-- Conventions: `s.code = 'DWA-M-820-3'`, worksheets by code, never by id (gates by their captured uuid + a guard on
+-- md5(condition) of the text they replace so a re-run is a no-op); each block names its rollback. Every block that
+-- rewrites a gate text (G-1, G-2, G-4) follows the amendment-I archive pattern: the affected rows are copied into
+-- `compliance_requirements_archive_m820_3` in the SAME transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE
+-- false; INSERT … SELECT * … WHERE (id = … AND md5(condition) = …)`), the UPDATE is guarded on md5(condition) read
+-- read-only from prod, and the rollback restores the archived text by id with an EXPLICIT column (never `SELECT *`,
+-- never retyped — prod-query.mjs truncates cells at 120 chars; the long REQ-06 … REQ-14 conditions are rewritten with
+-- `'IF … THEN (' || condition || ')'` so no text is retyped); the archive table is dropped by the rollback or on the
+-- owner's sign-off that the change is final. A field retirement is `active = false` (reversible). New gates (G-3, G-5)
+-- are INSERTs with a DELETE-by-description rollback. The Plan-3 DATA migrations (20260917100900 seed · 20260917100910
+-- field configs · 20260917100920 equations) must be applied BEFORE any block that reads a created symbol
+-- (qeNN_items, qeNN_items_*_calc, qeNN_items_rated, qeNN_share_*_pct, gesamt_anhang_a/b_items_total_calc,
+-- gesamt_anhang_a/b_items_rated, projektstopp_code_a/_b, projektstopp_code, sektoren, anwendungshinweise).
+-- Consumer edits write `fields.consumer_worksheets` (text[]); the guards keep a re-run idempotent. The Plan-1 schema
+-- migration renames the LEGACY prod regulation_tables first (plan1-D-3-1) — apply order in the playbook.
+--
+-- Captured compliance rows referenced below (severity in brackets; md5 = md5(coalesce(condition,'')); len = length):
+--   REQ-01 e80e465f-9949-4625-9a9e-71db20b68143 (M8203-01, block, 0e0883c979c586e8b1f4e9ecd76c8d1c, 192)
+--   REQ-02 da1c0a1f-c33b-47ae-8574-b688544dda6a (M8203-01, warn, d41d8cd98f00b204e9800998ecf8427e = EMPTY, 0)
+--   REQ-03 cef56c74-5ca2-4b61-8c12-0debdcbb2f2f (M8203-01, warn, EMPTY)
+--   REQ-05 0b2a9ed3-98e3-41f8-be28-4fbcb0c9607f (M8203-04, warn, EMPTY)
+--   REQ-06 bbcb791b-6619-4dc9-a5d7-995cd03e2ce4 (M8203-04, block, 0affd58587301285dcfc54bbcc92d843, 580)
+--   REQ-07 0a7ecd73-7ac4-49a8-87bc-9693527b50a5 (M8203-05, block, 5612b4f87ae268f1616687b8d715b29f, 580)
+--   REQ-08 39e44cf0-d538-4bad-8c34-2ae835a05f01 (M8203-06, block, 9e85b07a298062b5b05bab96b1a1268f, 346)
+--   REQ-09 ce8dd8b8-c545-425f-a9e4-294da680690b (M8203-11, block, 29a4c4f530f8b72be333e6f142a4cd8f, 580)
+--   REQ-10 d7dc4676-d5ce-4b3d-9cd2-169f9a8479f5 (M8203-12, block, 57faec48ebd9616b6c4182d7ad19f224, 931)
+--   REQ-11 2e4a9e3e-bfda-4e27-ba71-23bfa409bafb (M8203-14, block, 5b7cb97c373a439636d164d0800e7d7e, 1408)
+--   REQ-12 3e3f90d7-20fd-4ef4-a3fc-1b73d4fa365f (M8203-16, block, a3f8c74171b63dc09940bb2210d1d98a, 1408)
+--   REQ-13 60487869-3b04-4520-9cef-e3c057b78cea (M8203-17, block, bd6e7fb5030f38a8d5c8a4c010a0119f, 1288)
+--   REQ-14 978ccf98-b0a6-424d-b697-e9ee1e83bc41 (M8203-18, block, ab314d8cdf9a1c35771e0839b3104b4b, 697)
+--   REQ-15 789326c2-0995-4901-98f4-d26a580824c1 (M8203-07, warn, 95eacfbc561e3d4aef0c90e1b7d42e5a, 'qe52_items_y + qe52_items_p + qe52_items_n + qe52_items_na == qe52_items_total')
+--   REQ-16 22aeb359-9a62-415b-9fdd-3ffb1c7abf6d (M8203-08, warn, dfe3dfb9e5eb37953e6c58fda67855f7, 78) · REQ-17 bb41a340-2a47-42f6-ac8d-af3bca3e58e0 (M8203-09, warn, 13361c0845a6c5cb6eb5dc342de6cf2b, 78)
+--   REQ-18 c356f580-d0ba-41ce-a129-bba630a0935a (M8203-10, warn, b93c1e1b5272935ac170788e7e72bc52, 78) · REQ-19 30aa6d78-9d9b-4b64-926a-18077bab5513 (M8203-11, warn, 9b4d181b7c96185a9497c43c75146271, 78)
+--   REQ-20 12504d14-ac9b-4f3f-b23e-8bbea483d729 (M8203-11, warn, bbae8277c3de31e19ff4303da2b66633, 'qe63a_items_total + qe63b_items_total == 40')
+--   REQ-21 061f6853-94a4-4564-bd53-500ec3acc570 (M8203-11, warn, ab3758b9f6a5a3fa1878465ecf48989b, 'qe64a_items_total + qe64b_items_total == 50')
+--   REQ-22 7a37ea42-e437-4dce-bb9c-e26fdd380799 (M8203-16, warn, 6c13e1bedb41dd60d5354036067fb641, 78) · REQ-23 8aa114e2-a830-420e-985d-73823d9b9a35 (M8203-17, warn, fc02373a300e58892583335506586fab, 78)
+--   REQ-24 c4b753d1-0ed6-476e-8589-335fb625f7cb (M8203-18, warn, 8a4bc3fad58e25a874d56b522f285b29, 78)
+--   REQ-25 9c62f96a-9e46-493e-a17e-d97a6841474c (M8203-19, warn, e102b5ca0ff25be4fc8741b388f4b2ca, 'bim_project_definition_complete == true AND aia_available == true AND bap_defined == true AND cde_platform_defined == true')
+--   REQ-27 96bc2de9-c590-4b71-bcd0-a1c41e0c0588 (M8203-19, warn, EMPTY) · REQ-29 c7d18a70-5fe6-4df3-a8ea-5c63af022598 (M8203-19, warn, EMPTY)
+--   REQ-31 064de314-e704-4ebf-80ae-da1e28e5e7b3 (M8203-22, warn, EMPTY, 'Projektstopp-Prüfung')
+--   REQ-32 1f223a4a-43a1-4a60-8ea5-4a364c56a2d7 (M8203-24, block, d3af080ada171669e74063698d6ba761, 175)
+-- Explicit column list (information_schema, read-only 2026-09-18):
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+
+-- =====================================================================================================================
+-- m820_3-C-1 · M8203-01 project_type (and 12 more rows) consumer_worksheets = '{ALL}' — a token loadInheritedFields never matches
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: 13 fields carry consumer_worksheets = '{ALL}' (M8203-01 applicable_lph, client_auftraggeber, contract_reference,
+-- contractor_auftragnehmer, project_location, project_number, project_title, project_type, registration_date; M8203-03
+-- phase_definition_acknowledged, phasenziele_definition_acknowledged, projektziele_definition_acknowledged,
+-- qe_definition_acknowledged). src/lib/db/queries/worksheet.ts loadInheritedFields selects `<code> = ANY(consumer_worksheets)`
+-- — 'ALL' equals no worksheet code, so NONE of them is inherited anywhere (the fll_gar-C-1 class). Consequence today: every
+-- emitted `project_type IN {…}` rule (126 created fields) is `pending` = visible and inert; the STAGED gates G-1 / G-2 would
+-- be pending too.
+-- Evidence: L321 "Die Aufteilung in „Konzept für das Gesamtsystem“ und „Projekte“ ist dabei eine elementare Grundlage."; L398
+-- "Auf der Grundlage des Konzepts für das Gesamtsystem wurden erforderliche Projekte identifiziert (siehe 5.4). Diese werden
+-- im Folgenden einzeln betrachtet und umgesetzt."
+-- Why staged: a consumer_worksheets edit is an always-sign-off class.
+-- Option (a) — the driver only:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-02', 'M8203-03', 'M8203-04', 'M8203-05', 'M8203-06', 'M8203-07', 'M8203-08', 'M8203-09', 'M8203-10', 'M8203-11', 'M8203-12', 'M8203-13', 'M8203-14', 'M8203-15', 'M8203-16', 'M8203-17', 'M8203-18', 'M8203-19', 'M8203-20', 'M8203-21', 'M8203-22', 'M8203-23', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-01' AND s.code = 'DWA-M-820-3' AND f.symbol = 'project_type' AND f.active AND f.consumer_worksheets = ARRAY['ALL']::text[];
+-- COMMIT;
+-- Option (b) — the same list on all 13 '{ALL}' rows (WHERE f.consumer_worksheets = ARRAY['ALL']::text[] AND s.code = 'DWA-M-820-3',
+-- the M8203-03 rows without 'M8203-03' in the list).
+-- Rollback: SET consumer_worksheets = ARRAY['ALL']::text[] on the touched rows (WHERE f.consumer_worksheets @> ARRAY['M8203-24']
+-- AND f.symbol IN (…)).
+-- Latent guard note: after (a) the emitter would still accept the 126 created-field rules (project_type gains consumers, the
+-- CREATED fields do not) — no re-emit conflict.
+
+-- =====================================================================================================================
+-- m820_3-C-2 · M8203-04 … M8203-10 (Anhang A: Phasenziele + QE worksheets) section hide ← project_type IN {gesamtsystem, both} — refused (consumed producers inside)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: -04 / -05 / -06 section C holds pz_52_* / pz_53_* / pz_54_* (→ -07 … -09, -22, -24); -07 … -10 section F holds
+-- qe5N_items_* / qe5N_fulfilment_pct / qe5N_assessor / … (→ -22, -24). The emitter refuses every one of them
+-- (field-configs-m820_3.test.ts pins the refusal); the field-free sections A / B / D / J / K / L / M are not observable
+-- alone (worksheet-form.tsx renders only sections with a visible field). Emitted instead: the CREATED registers and
+-- outputs on -07 … -10 carry the rule (inert until C-1).
+-- Evidence: L321 / L398 (see C-1); L313 "Ein strukturierter Planungsprozess, der mit dem Konzept für das Gesamtsystem
+-- beginnt und daraus einzelne Projekte ableitet, gibt eine verlässliche und gut funktionierende Struktur, um
+-- bedarfsorientiert zu arbeiten."
+-- Why staged: hiding the producer sections nulls the inherited pz_5N / qe5N values on -22 / -24 for Einzelprojekte (REQ-06 …
+-- -08 / -15 … -18 would report not_applicable — the printed intent, but an enforcement change); needs C-1 first.
+-- Option (all nine captured sections per worksheet, guarded on the captured NULL):
+-- BEGIN;
+-- UPDATE worksheet_sections ws SET visible_when = 'project_type IN {''gesamtsystem'', ''both''}'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE ws.worksheet_template_id = w.id AND w.code IN ('M8203-04', 'M8203-05', 'M8203-06', 'M8203-07', 'M8203-08', 'M8203-09', 'M8203-10')
+--    AND s.code = 'DWA-M-820-3' AND ws.code IN ('A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M') AND ws.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on the 63 rows (WHERE ws.visible_when = 'project_type IN {''gesamtsystem'', ''both''}').
+
+-- =====================================================================================================================
+-- m820_3-C-3 · M8203-11 … M8203-18 (Anhang B: Projekt QE worksheets) section hide ← project_type IN {einzelprojekt, both} — refused (consumed producers inside)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: section B of -11 / -12 / -14 / -16 / -17 / -18 holds the pz_6N_* enums (→ -13 / -15, -23, -24); section F of
+-- -11 … -18 holds qe6N*_items_* / _fulfilment_pct / … (→ -23, -24). Refused by the emitter (pinned). Same reading as C-2
+-- for Gesamtsystem-only projects (REQ-09 … -14 / -19 … -24 → not_applicable).
+-- Evidence: L398 (§6.1); L194 "Die Hinweise sind gegliedert nach den in Teil 1 und Teil 2 bereits verwendeten Leistungsphasen."
+-- Option (72 section rows):
+-- BEGIN;
+-- UPDATE worksheet_sections ws SET visible_when = 'project_type IN {''einzelprojekt'', ''both''}'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE ws.worksheet_template_id = w.id AND w.code IN ('M8203-11', 'M8203-12', 'M8203-13', 'M8203-14', 'M8203-15', 'M8203-16', 'M8203-17', 'M8203-18')
+--    AND s.code = 'DWA-M-820-3' AND ws.code IN ('A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M') AND ws.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on the 72 rows (WHERE ws.visible_when = 'project_type IN {''einzelprojekt'', ''both''}').
+
+-- =====================================================================================================================
+-- m820_3-C-4 · M8203-19 aia_available / bap_defined / cde_platform_defined / digital_twin_after_project ← bim_project_definition_complete == true — refused (consumed by M8203-24)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: all five M8203-19 booleans carry consumer_worksheets = '{M8203-24}'; the emitter refuses the rule on each
+-- (pinned). The cue is also weak: §7.2.2 prints the BIM-Projektdefinition as ONE of six parallel goals, not as the
+-- precondition of the others — L591 "I Die BIM-Projektdefinition ist abgeschlossen." followed by L592 "I Die AIA
+-- (Auftraggeberinformationsanforderungen) liegen vor. …", L594 "I Der BAP (BIM-Abwicklungsplan) ist definiert und
+-- abgestimmt.", L597 "I Die Schnittstellen und die Vereinbarungen zum Datenaustausch sowie die zu verwendende CDEPlattform
+-- sind festgelegt." REQ-25 already ANDs the four flags.
+-- Chosen now: no rule; every flag stays visible. Option (if the owner reads the definition as the precondition):
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'bim_project_definition_complete == true'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-19' AND s.code = 'DWA-M-820-3' AND f.symbol IN ('aia_available', 'bap_defined', 'cde_platform_defined') AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on the three rows. REQ-25 would then read not_applicable while the definition is unset
+-- (enforcement change — why staged).
+
+-- =====================================================================================================================
+-- m820_3-C-5 · consumer edit: the twelve created <prefix>_items_rated outputs → M8203-22 / M8203-23 (+ M8203-24) — lights the annex rated sums
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: a `create` never sets consumer_worksheets, so M8203-22-D2 / M8203-23-D2 (Σ of the created qeNN_items_rated)
+-- read "Fehlende Eingaben" on the summary worksheets until this edit. Evidence: L67 "Das Erreichen der Phasenziele kann
+-- mit den in Teil 3 in den Anhängen jeweils hinterlegten Qualitätselementen überprüft werden."
+-- Why staged: consumer_worksheets edit (always-sign-off). Latent guard note (the fll_naturteich-G-1 class): once these
+-- twelve rows carry consumers, the emitter REFUSES the emitted `visible_when` on them at the next re-emit of
+-- 20260917100910 — on ratification either withdraw the twelve output rules (the registers keep theirs) or accept the
+-- refusal message; functionally safe today because the rule and the consumer never coexist in prod before this block.
+-- Option:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-22', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-22', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-22', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-22', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-23', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-23', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-23', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-23', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-23', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-23', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-23', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M8203-23', 'M8203-24']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items_rated' AND f.active AND f.description LIKE 'Plan 3:%' AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- COMMIT;
+-- Rollback: SET consumer_worksheets = NULL on the twelve rows (the created NULL).
+
+-- =====================================================================================================================
+-- m820_3-D-1 · the 48 manual count fields qeNN_items_y/p/n/na → derived from the registers (ownership switch); the 48 created *_calc twins retired
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The brief names the existing qeNN_items_y/p/n/na as the equation outputs ("their fields become derived — m820_3-D-1
+-- lists the 48"). Chosen now (fail-safe): the counts are emitted onto CREATED twins (<prefix>_items_<r>_calc, migration
+-- 20260917100910 / 20260917100920) and the manual fields keep their input widgets — an equation never takes ownership of
+-- a consumed manual number without a ruling (a138-D-2 / fll_naturteich-R-* precedent), and the switch is the deactivation
+-- class this id carries. Capture: the 48 fields are is_required = true, VR '>=0', consumed by M8203-22 / -23 / -24 and read
+-- by REQ-15 … REQ-24; 0 stored project_parameters exist for the standard (120 draft instances / 5 projects), so no
+-- engineer-typed count is overwritten today. After this block REQ-15 … REQ-24 (y + p + n + na == total) become
+-- self-fulfilling once every printed item is rated, and the materialiser writes the counts on every save (0 on an empty
+-- register — never null).
+-- Evidence: L67 "Das Erreichen der Phasenziele kann mit den in Teil 3 in den Anhängen jeweils hinterlegten
+-- Qualitätselementen überprüft werden." — the checklist IS the count's source; the manual number duplicates it.
+-- Option (per field: widget → derived; equation output re-pointed; twin retired; register footer re-pointed) — 48 × 4 statements:
+-- BEGIN;
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe52_items_y', formula = replace(e.formula, 'qe52_items_y_calc = ', 'qe52_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-07-D1' AND e.output_symbol = 'qe52_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe52_items_y_calc"', '"qe52_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe52_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe52_items_p', formula = replace(e.formula, 'qe52_items_p_calc = ', 'qe52_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-07-D2' AND e.output_symbol = 'qe52_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe52_items_p_calc"', '"qe52_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe52_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe52_items_n', formula = replace(e.formula, 'qe52_items_n_calc = ', 'qe52_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-07-D3' AND e.output_symbol = 'qe52_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe52_items_n_calc"', '"qe52_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe52_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe52_items_na', formula = replace(e.formula, 'qe52_items_na_calc = ', 'qe52_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-07-D4' AND e.output_symbol = 'qe52_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe52_items_na_calc"', '"qe52_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-07' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe52_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe52_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe53_items_y', formula = replace(e.formula, 'qe53_items_y_calc = ', 'qe53_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-08-D1' AND e.output_symbol = 'qe53_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe53_items_y_calc"', '"qe53_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe53_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe53_items_p', formula = replace(e.formula, 'qe53_items_p_calc = ', 'qe53_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-08-D2' AND e.output_symbol = 'qe53_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe53_items_p_calc"', '"qe53_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe53_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe53_items_n', formula = replace(e.formula, 'qe53_items_n_calc = ', 'qe53_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-08-D3' AND e.output_symbol = 'qe53_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe53_items_n_calc"', '"qe53_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe53_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe53_items_na', formula = replace(e.formula, 'qe53_items_na_calc = ', 'qe53_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-08-D4' AND e.output_symbol = 'qe53_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe53_items_na_calc"', '"qe53_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-08' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe53_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe53_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe54_items_y', formula = replace(e.formula, 'qe54_items_y_calc = ', 'qe54_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-09-D1' AND e.output_symbol = 'qe54_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe54_items_y_calc"', '"qe54_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe54_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe54_items_p', formula = replace(e.formula, 'qe54_items_p_calc = ', 'qe54_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-09-D2' AND e.output_symbol = 'qe54_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe54_items_p_calc"', '"qe54_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe54_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe54_items_n', formula = replace(e.formula, 'qe54_items_n_calc = ', 'qe54_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-09-D3' AND e.output_symbol = 'qe54_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe54_items_n_calc"', '"qe54_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe54_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe54_items_na', formula = replace(e.formula, 'qe54_items_na_calc = ', 'qe54_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-09-D4' AND e.output_symbol = 'qe54_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe54_items_na_calc"', '"qe54_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-09' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe54_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe54_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe55_items_y', formula = replace(e.formula, 'qe55_items_y_calc = ', 'qe55_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-10-D1' AND e.output_symbol = 'qe55_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe55_items_y_calc"', '"qe55_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe55_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe55_items_p', formula = replace(e.formula, 'qe55_items_p_calc = ', 'qe55_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-10-D2' AND e.output_symbol = 'qe55_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe55_items_p_calc"', '"qe55_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe55_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe55_items_n', formula = replace(e.formula, 'qe55_items_n_calc = ', 'qe55_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-10-D3' AND e.output_symbol = 'qe55_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe55_items_n_calc"', '"qe55_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe55_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe55_items_na', formula = replace(e.formula, 'qe55_items_na_calc = ', 'qe55_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-10-D4' AND e.output_symbol = 'qe55_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe55_items_na_calc"', '"qe55_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-10' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe55_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe55_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe62_items_y', formula = replace(e.formula, 'qe62_items_y_calc = ', 'qe62_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-11-D1' AND e.output_symbol = 'qe62_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe62_items_y_calc"', '"qe62_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe62_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe62_items_p', formula = replace(e.formula, 'qe62_items_p_calc = ', 'qe62_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-11-D2' AND e.output_symbol = 'qe62_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe62_items_p_calc"', '"qe62_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe62_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe62_items_n', formula = replace(e.formula, 'qe62_items_n_calc = ', 'qe62_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-11-D3' AND e.output_symbol = 'qe62_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe62_items_n_calc"', '"qe62_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe62_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe62_items_na', formula = replace(e.formula, 'qe62_items_na_calc = ', 'qe62_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-11-D4' AND e.output_symbol = 'qe62_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe62_items_na_calc"', '"qe62_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-11' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe62_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe62_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe63a_items_y', formula = replace(e.formula, 'qe63a_items_y_calc = ', 'qe63a_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-12-D1' AND e.output_symbol = 'qe63a_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe63a_items_y_calc"', '"qe63a_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe63a_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe63a_items_p', formula = replace(e.formula, 'qe63a_items_p_calc = ', 'qe63a_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-12-D2' AND e.output_symbol = 'qe63a_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe63a_items_p_calc"', '"qe63a_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe63a_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe63a_items_n', formula = replace(e.formula, 'qe63a_items_n_calc = ', 'qe63a_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-12-D3' AND e.output_symbol = 'qe63a_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe63a_items_n_calc"', '"qe63a_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe63a_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe63a_items_na', formula = replace(e.formula, 'qe63a_items_na_calc = ', 'qe63a_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-12-D4' AND e.output_symbol = 'qe63a_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe63a_items_na_calc"', '"qe63a_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-12' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63a_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe63a_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe63b_items_y', formula = replace(e.formula, 'qe63b_items_y_calc = ', 'qe63b_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-13-D1' AND e.output_symbol = 'qe63b_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe63b_items_y_calc"', '"qe63b_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe63b_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe63b_items_p', formula = replace(e.formula, 'qe63b_items_p_calc = ', 'qe63b_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-13-D2' AND e.output_symbol = 'qe63b_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe63b_items_p_calc"', '"qe63b_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe63b_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe63b_items_n', formula = replace(e.formula, 'qe63b_items_n_calc = ', 'qe63b_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-13-D3' AND e.output_symbol = 'qe63b_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe63b_items_n_calc"', '"qe63b_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe63b_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe63b_items_na', formula = replace(e.formula, 'qe63b_items_na_calc = ', 'qe63b_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-13-D4' AND e.output_symbol = 'qe63b_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe63b_items_na_calc"', '"qe63b_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-13' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe63b_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe63b_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe64a_items_y', formula = replace(e.formula, 'qe64a_items_y_calc = ', 'qe64a_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-14-D1' AND e.output_symbol = 'qe64a_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe64a_items_y_calc"', '"qe64a_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe64a_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe64a_items_p', formula = replace(e.formula, 'qe64a_items_p_calc = ', 'qe64a_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-14-D2' AND e.output_symbol = 'qe64a_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe64a_items_p_calc"', '"qe64a_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe64a_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe64a_items_n', formula = replace(e.formula, 'qe64a_items_n_calc = ', 'qe64a_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-14-D3' AND e.output_symbol = 'qe64a_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe64a_items_n_calc"', '"qe64a_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe64a_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe64a_items_na', formula = replace(e.formula, 'qe64a_items_na_calc = ', 'qe64a_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-14-D4' AND e.output_symbol = 'qe64a_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe64a_items_na_calc"', '"qe64a_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-14' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64a_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe64a_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe64b_items_y', formula = replace(e.formula, 'qe64b_items_y_calc = ', 'qe64b_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-15-D1' AND e.output_symbol = 'qe64b_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe64b_items_y_calc"', '"qe64b_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe64b_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe64b_items_p', formula = replace(e.formula, 'qe64b_items_p_calc = ', 'qe64b_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-15-D2' AND e.output_symbol = 'qe64b_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe64b_items_p_calc"', '"qe64b_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe64b_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe64b_items_n', formula = replace(e.formula, 'qe64b_items_n_calc = ', 'qe64b_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-15-D3' AND e.output_symbol = 'qe64b_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe64b_items_n_calc"', '"qe64b_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe64b_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe64b_items_na', formula = replace(e.formula, 'qe64b_items_na_calc = ', 'qe64b_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-15-D4' AND e.output_symbol = 'qe64b_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe64b_items_na_calc"', '"qe64b_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-15' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe64b_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe64b_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe65_items_y', formula = replace(e.formula, 'qe65_items_y_calc = ', 'qe65_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-16-D1' AND e.output_symbol = 'qe65_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe65_items_y_calc"', '"qe65_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe65_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe65_items_p', formula = replace(e.formula, 'qe65_items_p_calc = ', 'qe65_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-16-D2' AND e.output_symbol = 'qe65_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe65_items_p_calc"', '"qe65_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe65_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe65_items_n', formula = replace(e.formula, 'qe65_items_n_calc = ', 'qe65_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-16-D3' AND e.output_symbol = 'qe65_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe65_items_n_calc"', '"qe65_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe65_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe65_items_na', formula = replace(e.formula, 'qe65_items_na_calc = ', 'qe65_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-16-D4' AND e.output_symbol = 'qe65_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe65_items_na_calc"', '"qe65_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-16' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe65_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe65_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe66_items_y', formula = replace(e.formula, 'qe66_items_y_calc = ', 'qe66_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-17-D1' AND e.output_symbol = 'qe66_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe66_items_y_calc"', '"qe66_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe66_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe66_items_p', formula = replace(e.formula, 'qe66_items_p_calc = ', 'qe66_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-17-D2' AND e.output_symbol = 'qe66_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe66_items_p_calc"', '"qe66_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe66_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe66_items_n', formula = replace(e.formula, 'qe66_items_n_calc = ', 'qe66_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-17-D3' AND e.output_symbol = 'qe66_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe66_items_n_calc"', '"qe66_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe66_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe66_items_na', formula = replace(e.formula, 'qe66_items_na_calc = ', 'qe66_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-17-D4' AND e.output_symbol = 'qe66_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe66_items_na_calc"', '"qe66_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-17' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe66_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe66_items_na_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items_y' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe67_items_y', formula = replace(e.formula, 'qe67_items_y_calc = ', 'qe67_items_y = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-18-D1' AND e.output_symbol = 'qe67_items_y_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items_y_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe67_items_y_calc"', '"qe67_items_y"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe67_items_y_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items_p' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe67_items_p', formula = replace(e.formula, 'qe67_items_p_calc = ', 'qe67_items_p = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-18-D2' AND e.output_symbol = 'qe67_items_p_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items_p_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe67_items_p_calc"', '"qe67_items_p"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe67_items_p_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items_n' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe67_items_n', formula = replace(e.formula, 'qe67_items_n_calc = ', 'qe67_items_n = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-18-D3' AND e.output_symbol = 'qe67_items_n_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items_n_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe67_items_n_calc"', '"qe67_items_n"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe67_items_n_calc"%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items_na' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'qe67_items_na', formula = replace(e.formula, 'qe67_items_na_calc = ', 'qe67_items_na = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-18-D4' AND e.output_symbol = 'qe67_items_na_calc' AND e.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items_na_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = replace(f.ui_config::text, '"qe67_items_na_calc"', '"qe67_items_na"')::jsonb FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-18' AND s.code = 'DWA-M-820-3' AND f.symbol = 'qe67_items' AND f.active AND f.widget = 'register' AND f.ui_config::text LIKE '%"qe67_items_na_calc"%';
+-- COMMIT;
+-- Rollback (reverse, same scopes): widget = NULL, ui_config = NULL WHERE f.widget = 'derived' on the 48 manual fields;
+-- output_symbol = '<sym>_calc', formula = replace(formula, '<sym> = ', '<sym>_calc = ') on the 48 equations WHERE
+-- e.output_symbol = '<sym>'; active = true on the 48 twins WHERE f.description LIKE 'Plan 3:%'; the register footers
+-- replace('"<sym>"', '"<sym>_calc"'). The share rows (D6 … D9) are untouched by this block (they read the register directly).
+
+-- =====================================================================================================================
+-- m820_3-D-2 · gesamt_anhang_a_items_total / gesamt_anhang_b_items_total (M8203-22 / -23) → derived from the inherited catalogue sums; the two created *_total_calc twins retired
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: both are is_required manual numbers (VR '==38' / '==155', descriptions "15+8+12+3=38" / "15+40+50+34+10+6=155"),
+-- consumed by M8203-24. Emitted now: M8203-22-D1 / M8203-23-D1 onto the created twins gesamt_anhang_a/b_items_total_calc
+-- (computable today — the qeNN_items_total constants are consumed by -22 / -23). Same class as D-1.
+-- Evidence: the ten catalogue headings L685 / L713 / L728 / L749 / L765 / L797 / L886 / L1024 / L1138 / L1170 with 15 / 8 /
+-- 12 / 3 / 15 / 40 / 50 / 34 / 10 / 6 printed rows (seed test).
+-- Option:
+-- BEGIN;
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-22' AND s.code = 'DWA-M-820-3' AND f.symbol = 'gesamt_anhang_a_items_total' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'gesamt_anhang_a_items_total', formula = replace(e.formula, 'gesamt_anhang_a_items_total_calc = ', 'gesamt_anhang_a_items_total = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-22' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-22-D1' AND e.output_symbol = 'gesamt_anhang_a_items_total_calc';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-22' AND s.code = 'DWA-M-820-3' AND f.symbol = 'gesamt_anhang_a_items_total_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET widget = 'derived', ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-23' AND s.code = 'DWA-M-820-3' AND f.symbol = 'gesamt_anhang_b_items_total' AND f.active AND f.widget IS NULL;
+-- UPDATE equations e SET output_symbol = 'gesamt_anhang_b_items_total', formula = replace(e.formula, 'gesamt_anhang_b_items_total_calc = ', 'gesamt_anhang_b_items_total = ') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'M8203-23' AND s.code = 'DWA-M-820-3' AND e.equation_number = 'M8203-23-D1' AND e.output_symbol = 'gesamt_anhang_b_items_total_calc';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M8203-23' AND s.code = 'DWA-M-820-3' AND f.symbol = 'gesamt_anhang_b_items_total_calc' AND f.active AND f.description LIKE 'Plan 3:%';
+-- COMMIT;
+-- Rollback: the reverse of each statement (widget = NULL WHERE f.widget = 'derived'; output back to *_calc; active = true).
+-- Note: scalar-only equations are not server-materialised (amendment D) — after this block the two fields show the engine
+-- value on the form / report, and M8203-24's inherited copy reads the STORED value (null until the engine-output
+-- materialisation workstream lands) — the owner may prefer to keep the manual constants until then.
+
+-- =====================================================================================================================
+-- m820_3-F-1 · qeNN_fulfilment_pct (12 fields) and gesamt_anhang_a/b_fulfilment_pct / *_verdict — the fulfilment formula and the verdict bands are NOT printed
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The standard prints the catalogues only; no rating scale, no weighting of "P", no NA treatment, no green / amber / red
+-- bands appear anywhere in the transcript (searched: "Erfüllungsgrad", "%", "gewicht", "Ampel" — no hit outside the
+-- prod design). The 12 fulfilment_pct fields ("Overall fulfilment rate computed from Y/P/N counts") and the three
+-- verdict enums (gruen / gelb / rot) stay MANUAL. Emitted instead: the per-rating shares <prefix>_share_{y,p,n,na}_pct
+-- (count · 100 / <prefix>_items_total — pure arithmetic on printed counts, no weighting).
+-- Candidate formulas for the owner (text only — nothing emitted):
+--   (a) fulfilment_pct = items_y / (items_total - items_na) * 100                       — P counts as not fulfilled
+--   (b) fulfilment_pct = (items_y + 0.5 * items_p) / (items_total - items_na) * 100     — P half-weighted
+--   (both: division by zero when every item is NA — manual_required)
+-- Verdict bands: none printed — proposal for ratification only (e.g. gruen >= 80, gelb >= 50, rot < 50 — the owner's numbers).
+-- Evidence: L67 "Das Erreichen der Phasenziele kann mit den in Teil 3 in den Anhängen jeweils hinterlegten
+-- Qualitätselementen überprüft werden. Dabei stellen die angegebenen Qualitätselemente nur eine projektübergeordnete
+-- Auswahl an Kriterien dar, …" — the standard leaves the evaluation to the project team (L202 "Eine Vervollständigung an
+-- den jeweiligen Projektaufgaben wird im Projektteam durchgeführt.").
+-- Why staged: a formula described in words but not printed is an always-sign-off class.
+
+-- =====================================================================================================================
+-- m820_3-G-1 · REQ-06 / REQ-07 / REQ-08 (M8203-04 / -05 / -06, block) guarded IF project_type IN {gesamtsystem, both} THEN (…)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: the three Phasenziel all-met gates are unconditional (580 / 580 / 346 chars — every pz_5N_*_status must be
+-- erreicht / teilweise_erreicht / nicht_zutreffend); an Einzelprojekt is blocked by them. project_type is NOT in scope on
+-- -04 / -05 / -06 until C-1 (the guard would be `pending`, i.e. the gate stays as today) — apply AFTER C-1.
+-- Evidence: L398 "Auf der Grundlage des Konzepts für das Gesamtsystem wurden erforderliche Projekte identifiziert (siehe
+-- 5.4). Diese werden im Folgenden einzeln betrachtet und umgesetzt."; L321.
+-- Why staged: gate condition change on block gates (enforcement).
+-- Option (archive pattern; the text is wrapped, never retyped):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m820_3 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m820_3 SELECT * FROM compliance_requirements
+--  WHERE (id = 'bbcb791b-6619-4dc9-a5d7-995cd03e2ce4' AND md5(condition) = '0affd58587301285dcfc54bbcc92d843')
+--     OR (id = '0a7ecd73-7ac4-49a8-87bc-9693527b50a5' AND md5(condition) = '5612b4f87ae268f1616687b8d715b29f')
+--     OR (id = '39e44cf0-d538-4bad-8c34-2ae835a05f01' AND md5(condition) = '9e85b07a298062b5b05bab96b1a1268f');
+-- UPDATE compliance_requirements SET condition = 'IF project_type IN {''gesamtsystem'', ''both''} THEN (' || condition || ')'
+--  WHERE (id = 'bbcb791b-6619-4dc9-a5d7-995cd03e2ce4' AND md5(condition) = '0affd58587301285dcfc54bbcc92d843')
+--     OR (id = '0a7ecd73-7ac4-49a8-87bc-9693527b50a5' AND md5(condition) = '5612b4f87ae268f1616687b8d715b29f')
+--     OR (id = '39e44cf0-d538-4bad-8c34-2ae835a05f01' AND md5(condition) = '9e85b07a298062b5b05bab96b1a1268f');
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition FROM compliance_requirements_archive_m820_3 a
+--  WHERE a.id = c.id AND c.id IN ('bbcb791b-…', '0a7ecd73-…', '39e44cf0-…') AND c.condition LIKE 'IF project_type IN%';
+--  then DROP TABLE compliance_requirements_archive_m820_3 (or on the owner's sign-off that the change is final).
+
+-- =====================================================================================================================
+-- m820_3-G-2 · REQ-09 … REQ-14 (M8203-11 / -12 / -14 / -16 / -17 / -18, block) guarded IF project_type IN {einzelprojekt, both} THEN (…)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: unconditional all-met gates over pz_62 … pz_67 (580 / 931 / 1408 / 1408 / 1288 / 697 chars); a
+-- Gesamtsystem-only project is blocked by them. Same reading, same pattern and same C-1 precondition as G-1.
+-- Evidence: L398; L194.
+-- Option:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m820_3 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m820_3 SELECT * FROM compliance_requirements
+--  WHERE (id = 'ce8dd8b8-c545-425f-a9e4-294da680690b' AND md5(condition) = '29a4c4f530f8b72be333e6f142a4cd8f')
+--     OR (id = 'd7dc4676-d5ce-4b3d-9cd2-169f9a8479f5' AND md5(condition) = '57faec48ebd9616b6c4182d7ad19f224')
+--     OR (id = '2e4a9e3e-bfda-4e27-ba71-23bfa409bafb' AND md5(condition) = '5b7cb97c373a439636d164d0800e7d7e')
+--     OR (id = '3e3f90d7-20fd-4ef4-a3fc-1b73d4fa365f' AND md5(condition) = 'a3f8c74171b63dc09940bb2210d1d98a')
+--     OR (id = '60487869-3b04-4520-9cef-e3c057b78cea' AND md5(condition) = 'bd6e7fb5030f38a8d5c8a4c010a0119f')
+--     OR (id = '978ccf98-b0a6-424d-b697-e9ee1e83bc41' AND md5(condition) = 'ab314d8cdf9a1c35771e0839b3104b4b');
+-- UPDATE compliance_requirements SET condition = 'IF project_type IN {''einzelprojekt'', ''both''} THEN (' || condition || ')'
+--  WHERE (id = 'ce8dd8b8-c545-425f-a9e4-294da680690b' AND md5(condition) = '29a4c4f530f8b72be333e6f142a4cd8f')
+--     OR (id = 'd7dc4676-d5ce-4b3d-9cd2-169f9a8479f5' AND md5(condition) = '57faec48ebd9616b6c4182d7ad19f224')
+--     OR (id = '2e4a9e3e-bfda-4e27-ba71-23bfa409bafb' AND md5(condition) = '5b7cb97c373a439636d164d0800e7d7e')
+--     OR (id = '3e3f90d7-20fd-4ef4-a3fc-1b73d4fa365f' AND md5(condition) = 'a3f8c74171b63dc09940bb2210d1d98a')
+--     OR (id = '60487869-3b04-4520-9cef-e3c057b78cea' AND md5(condition) = 'bd6e7fb5030f38a8d5c8a4c010a0119f')
+--     OR (id = '978ccf98-b0a6-424d-b697-e9ee1e83bc41' AND md5(condition) = 'ab314d8cdf9a1c35771e0839b3104b4b');
+-- COMMIT;
+-- Rollback: as G-1 (restore condition from the archive by id WHERE c.condition LIKE 'IF project_type IN%'; DROP the archive).
+
+-- =====================================================================================================================
+-- m820_3-G-3 · new completeness gates REQ-15R … REQ-24R (warn) on the register counts: <prefix>_items_rated == <prefix>_items_total — beside REQ-15 … REQ-24
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: REQ-15 … REQ-19 / -22 … -24 test `y + p + n + na == total` on the manual counts; REQ-20 / REQ-21 (on
+-- M8203-11) test the split totals `qe63a_items_total + qe63b_items_total == 40` / `… == 50` reading symbols that are not
+-- in scope on -11 (m820_3-X-1). Emitted now: nothing on the gates (the register counts are twins). Proposal: ONE new warn
+-- gate per QE worksheet on the created <prefix>_items_rated (own symbol, in scope) — every printed item rated. After D-1
+-- the existing gates become self-fulfilling and this block is redundant; before D-1 it is the only machine check that the
+-- checklist is complete.
+-- Evidence: the printed catalogue sizes (L687 … L1190; seed test 15 / 8 / 12 / 3 / 15 / 40 / 50 / 34 / 10 / 6); L67.
+-- Why staged: new gates (enforcement).
+-- Option:
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-15R', 'QE-Checkliste vollständig bewertet (qe52, 15 gedruckte Kriterien)', 'qe52_items_rated == qe52_items_total', 'Anhang A', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-07' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-16R', 'QE-Checkliste vollständig bewertet (qe53, 8 gedruckte Kriterien)', 'qe53_items_rated == qe53_items_total', 'Anhang A', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-08' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-17R', 'QE-Checkliste vollständig bewertet (qe54, 12 gedruckte Kriterien)', 'qe54_items_rated == qe54_items_total', 'Anhang A', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-09' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-18R', 'QE-Checkliste vollständig bewertet (qe55, 3 gedruckte Kriterien)', 'qe55_items_rated == qe55_items_total', 'Anhang A', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-10' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-19R', 'QE-Checkliste vollständig bewertet (qe62, 15 gedruckte Kriterien)', 'qe62_items_rated == qe62_items_total', 'Anhang B', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-11' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-20a', 'QE-Checkliste vollständig bewertet (qe63a, 21 gedruckte Kriterien)', 'qe63a_items_rated == qe63a_items_total', 'Anhang B', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-12' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-20b', 'QE-Checkliste vollständig bewertet (qe63b, 19 gedruckte Kriterien)', 'qe63b_items_rated == qe63b_items_total', 'Anhang B', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-13' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-21a', 'QE-Checkliste vollständig bewertet (qe64a, 17 gedruckte Kriterien)', 'qe64a_items_rated == qe64a_items_total', 'Anhang B', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-14' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-21b', 'QE-Checkliste vollständig bewertet (qe64b, 33 gedruckte Kriterien)', 'qe64b_items_rated == qe64b_items_total', 'Anhang B', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-15' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-22R', 'QE-Checkliste vollständig bewertet (qe65, 34 gedruckte Kriterien)', 'qe65_items_rated == qe65_items_total', 'Anhang B', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-16' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-23R', 'QE-Checkliste vollständig bewertet (qe66, 10 gedruckte Kriterien)', 'qe66_items_rated == qe66_items_total', 'Anhang B', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-17' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-24R', 'QE-Checkliste vollständig bewertet (qe67, 6 gedruckte Kriterien)', 'qe67_items_rated == qe67_items_total', 'Anhang B', 'warn', 'Plan 3: STAGED m820_3-G-3 — jede gedruckte Zeile des Katalogs ist im Register bewertet.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-18' AND s.code = 'DWA-M-820-3'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.description LIKE 'Plan 3: STAGED m820_3-G-3%');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3: STAGED m820_3-G-3%'.
+
+-- =====================================================================================================================
+-- m820_3-G-4 · REQ-31 "Projektstopp-Prüfung" (M8203-22, warn, EMPTY condition) → onto the Projektstopp codes; move to M8203-24
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: REQ-31 has no condition (never evaluates). The derived codes: projektstopp_code_a (M8203-22, 13 Anhang-A
+-- goals), projektstopp_code_b (M8203-23, 54 Anhang-B goals), projektstopp_code (M8203-24, all 67).
+-- projektstopp_review_triggered (M8203-02) is consumed by M8203-24 only — so the printed rule "review required when a
+-- goal is missed" is decidable on -24 (both symbols in scope), not on -22.
+-- Evidence: L307 "Werden Phasenziele nicht oder nur unvollständig erreicht, ist die Prüfung eines Projektstopps
+-- erforderlich. Im Rahmen einer Risikoanalyse muss bewertet werden, ob und wie das Projekt fortgeführt werden kann."
+-- Why staged: gate condition + worksheet move (enforcement); m820_3-J-2 decides whether teilweise_erreicht also triggers.
+-- Option (archive pattern; the row moves to M8203-24 and gets the condition):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m820_3 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m820_3 SELECT * FROM compliance_requirements
+--  WHERE id = '064de314-e704-4ebf-80ae-da1e28e5e7b3' AND md5(coalesce(condition, '')) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- UPDATE compliance_requirements c SET condition = 'IF projektstopp_code == 1 THEN projektstopp_review_triggered == true',
+--        worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M8203-24' AND s.code = 'DWA-M-820-3')
+--  WHERE c.id = '064de314-e704-4ebf-80ae-da1e28e5e7b3' AND md5(coalesce(c.condition, '')) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition, worksheet_template_id = a.worksheet_template_id
+--  FROM compliance_requirements_archive_m820_3 a WHERE a.id = c.id AND c.id = '064de314-…'; DROP the archive.
+-- Alternative kept on -22: 'IF projektstopp_code_a == 1 THEN projektstopp_review_triggered == true' needs the consumer edit
+-- M8203-02 projektstopp_review_triggered += M8203-22 first.
+
+-- =====================================================================================================================
+-- m820_3-G-5 · REQ-02 / REQ-03 / REQ-05 / REQ-27 / REQ-29 — EMPTY conditions; proposals from the checklists (text only)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: five warn gates never evaluate. Proposals (each a new condition — enforcement, therefore staged; three are
+-- on MIRROR worksheets and need a consumer edit or a move first — m820_3-X-1):
+--   REQ-02 "Anwendungshinweise acknowledged" (M8203-01): 'contains(anwendungshinweise, ''hinweis_1'') AND contains(anwendungshinweise, ''hinweis_2'') AND contains(anwendungshinweise, ''hinweis_3'') AND contains(anwendungshinweise, ''hinweis_4'')'
+--      — anwendungshinweise is the CREATED select_many on M8203-02 (L200 / L202 / L204 / L206); the gate sits on -01 → move to -02 or use the four booleans anw_hinweis_1…4_confirmed == true there.
+--   REQ-03 "Definitions acknowledged" (M8203-01): 'phase_definition_acknowledged == true AND phasenziele_definition_acknowledged == true AND projektziele_definition_acknowledged == true AND qe_definition_acknowledged == true' — the flags live on M8203-03 with consumer '{ALL}' (C-1).
+--   REQ-05 "Zweistufiger Ansatz" (M8203-04): 'grundsatz_two_step_followed == true' — the flag lives on M8203-02 (consumed by -24 only); L305 "Hier ist die Zweistufigkeit erforderlich; d. h. zunächst eine Gesamtsystembetrachtung, inklusive Abwägung der Wirtschaftlichkeit, zu erstellen und erst dann Einzelprojekte zu definieren, die den langfristigen Bedarf auch wirklich decken."
+--   REQ-27 "Qualität Bestandsdaten (§7.3)" (M8203-19): 'bestandsdaten_complete_digital == true' — the flag lives on M8203-20.
+--   REQ-29 "Projektkommunikation (§7.5.2)" (M8203-19): 'communication_concept_adaptive == true AND cde_used_for_communication == true' — the flags live on M8203-21.
+-- No SQL until the owner picks; each would be an UPDATE guarded on md5(coalesce(condition,'')) = 'd41d8cd98f00b204e9800998ecf8427e' (EMPTY) with the archive pattern.
+
+-- =====================================================================================================================
+-- m820_3-M-1 · M8203-12 / M8203-13 (B.2 Planung) and M8203-14 / -15 / -16 / -17 / -18 additionally ← applicable_lph — a select_many driver (not encodable as visible_when)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: applicable_lph is the Plan-1 json checklist (tokens lph_0 … lph_9; consumer '{ALL}' — C-1; I-1 pending pair
+-- untouched). Rule: a conditional keyed on a multi-select is not encodable (playbook Step 4) — sign-off only.
+-- Evidence: L194 "Die Hinweise sind gegliedert nach den in Teil 1 und Teil 2 bereits verwendeten Leistungsphasen."; the
+-- B.2 group headings L801 "Grundlagenermittlung", L823 "Vorplanung", L832 "Entwurfsplanung", L871 "Genehmigungsplanung
+-- (inkl. Genehmigungsverfahren)" (LPH 1–4); B.3 L889 "Ausführungsplanung", L950 "Vorbereiten der Vergabe", L1006
+-- "Mitwirken bei der Vergabe" (LPH 5–7); B.4 = Ausführung (LPH 8), B.5 / B.6 (LPH 8 / 9).
+-- Proposal for ratification (the contains() form, on the CREATED registers / outputs, ANDed with the annex rule):
+--   M8203-12: "project_type IN {'einzelprojekt', 'both'} AND (contains(applicable_lph, 'lph_1') OR contains(applicable_lph, 'lph_2'))"
+--   M8203-13: "… AND (contains(applicable_lph, 'lph_3') OR contains(applicable_lph, 'lph_4'))"
+--   M8203-14: "… AND contains(applicable_lph, 'lph_5')" · M8203-15: "… AND (contains(applicable_lph, 'lph_6') OR contains(applicable_lph, 'lph_7'))"
+--   M8203-16: "… AND contains(applicable_lph, 'lph_8')" · M8203-17 / -18: "… AND (contains(applicable_lph, 'lph_8') OR contains(applicable_lph, 'lph_9'))"
+-- (the mapping LPH ↔ catalogue is the inventory's reading of the headings, not printed as a table — the owner confirms).
+
+-- =====================================================================================================================
+-- m820_3-J-1 · sektoren (M8203-01) / anwendungshinweise (M8203-02) created as select_many beside the booleans sector_* / anw_hinweis_*_confirmed
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: additive — the four sector booleans (REQ-01 reads them) and the four Anwendungshinweis booleans stay; the
+-- select_many sets carry the printed words / sentences as options. bild1_schritte is NOT created (Bild 1 is an image —
+-- m820_3-U-2). Ratification retires the booleans (active = false, REQ-01 re-pointed to
+-- 'contains(sektoren, ''wasserwirtschaft'') OR contains(sektoren, ''wasserbau'') OR contains(sektoren, ''abwasser'') OR contains(sektoren, ''abfall'')').
+-- Evidence: L196 "… für planerische Arbeiten bei der Herstellung von Anlagen in den Bereichen Wasserwirtschaft, Wasserbau,
+-- Abwasser und Abfall."; L200 / L202 / L204 / L206 (the four Hinweise, bullet glyph OCR'd as "I" / "1").
+-- Why staged: deactivation + gate re-point.
+
+-- =====================================================================================================================
+-- m820_3-J-2 · "nicht oder nur unvollständig erreicht" — does teilweise_erreicht trigger the Projektstopp review?
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe, narrower): the three codes fire on nicht_erreicht only. The printed sentence L307 names both
+-- "nicht" and "nur unvollständig erreicht"; prod's enum has erreicht / teilweise_erreicht / nicht_erreicht /
+-- nicht_zutreffend, and REQ-06 … REQ-14 already ACCEPT teilweise_erreicht as phase-goal-met — reading "unvollständig" as
+-- teilweise_erreicht would make every partially met goal trigger a stop review while the same goal passes the phase gate.
+-- Option: widen the three formulas to `(pz == 'nicht_erreicht' OR pz == 'teilweise_erreicht')` per input (UPDATE equations …
+-- formula = replace(formula, ' == ''nicht_erreicht''', ' IN {''nicht_erreicht'', ''teilweise_erreicht''}')) — guarded on the
+-- 'Plan 3:' description; rollback = the reverse replace.
+
+-- =====================================================================================================================
+-- m820_3-J-3 · share denominators = the manual qeNN_items_total constants (prod), not the seeded catalogue size
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: <prefix>_share_<r>_pct = count · 100 / <prefix>_items_total — the existing is_required constants (VR
+-- '== 15' … typed by the engineer). The printed size is the seeded table's row count (pinned), but no expression reads a
+-- table's row count today. If the owner prefers, the denominator can become the literal printed count per worksheet
+-- (15 / 8 / 12 / 3 / 15 / 21 / 19 / 17 / 33 / 34 / 10 / 6) — a one-line replace per equation, rollback the reverse.
+
+-- =====================================================================================================================
+-- m820_3-U-1 · QE_A4 (A. 4 QE 5.5: Matrix Nachhaltigkeit) — the Nr. cells of two of the three rows are printed EMPTY
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L752 "\hline \multirow{2}{*}{} & \multirow[t]{2}{*}{Ökonomie/Wirtschaftlichkeit} & Minimierung der
+-- Lebenszykluskosten im Konzept/Projekt \\" and L757 "\hline \multirow{2}{*}{} & \multirow[t]{2}{*}{Sozioökonomie/Gesellschaft}
+-- & Wirkung auf Gesellschaft \\" print no number; only L754 "\hline \multirow[t]{3}{*}{2} & \multirow[t]{3}{*}{Ökologie/Umwelt} …"
+-- prints "2". Chosen now: the rows are keyed n1 / n2 / n3 by printed position (Ökonomie before the printed "2", Sozioökonomie
+-- after it); the table stays imported_unverified; nothing else is affected (prod total 3 agrees). A PDF look at p. 24
+-- (TOC L168 "A. 4 QE 5.5: Matrix Nachhaltigkeit ..... 24") flips it to md_verified.
+
+-- =====================================================================================================================
+-- m820_3-U-2 · Bild 1 (Schema: Konzept und Projekte) is an image — bild1_schritte NOT created
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L315–L319 "\begin{figure} \includegraphics[…]{…-13.jpg…} \caption{Bild 1: Schema: Konzept und Projekte
+-- (Grafik: H. HÜTTER)} \end{figure}" — the four steps prod encodes as bild1_step_1…4 are not printed as text in the
+-- transcript. Chosen now: the booleans stay; no select_many. A PDF look at p. 11 (TOC L178) would give the printed step
+-- labels for a later create.
+
+-- =====================================================================================================================
+-- m820_3-I-1 · project-specific additions ("ergänzt") are not representable as register rows
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L67 "… die im Anwendungsfall projektspezifisch ausgewählt und ergänzt werden müssen."; L200 "Im konkreten
+-- Projekt werden aus den Qualitätselementen die projektspezifischen Anforderungen und Aufgabenlisten, inklusive
+-- Zuständigkeiten, vom Anwendenden entwickelt …". The register's `nr` is a required lookup_key over the printed rows, so
+-- an ADDED criterion has no row; `ausgewählt` is covered (rows are picked; NA rating for the rest). Interface gap: a
+-- register needs an optional key + free-text criterion column (or the 2b `catalog` picker with add_custom_label) before
+-- additions can be rows; the tables' anhaltswert policy records the cue. Chosen now: additions go into qeNN_critical_gaps /
+-- remark (free text) — residue.
+
+-- =====================================================================================================================
+-- m820_3-X-1 · prod gates on MIRROR worksheets reading symbols that are not in scope (REQ-20 / REQ-21 / REQ-03 / REQ-05 / REQ-27 / REQ-29)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: REQ-20 / REQ-21 sit on M8203-11 and read qe63a/63b/64a/64b_items_total (consumers M8203-23 / -24 — never -11);
+-- REQ-03 (on -01) reads the -03 flags ('{ALL}'); REQ-05 (on -04) reads a -02 flag; REQ-27 / REQ-29 (on -19) read -20 / -21
+-- flags. Each is `pending` on every project today (the m1200_3 / fll_naturteich X-3 class). Not touched by this task;
+-- proposals in G-3 (new per-worksheet completeness gates) and G-5.
+
+-- =====================================================================================================================
+-- m820_3-O-1 · override policy anhaltswert on the ten catalogue tables; no override block on the registers
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L67 "… die im Anwendungsfall projektspezifisch ausgewählt und ergänzt werden müssen." (Vorwort, repeated
+-- L1247 / L1291); L194 "Die in Anhang A und B angegebenen Qualitätselemente stellen eine Auswahl an Kriterien für die
+-- Projektabwicklung dar." — the "müssen" binds the ADAPTATION, not a fixed value, so anhaltswert (not locked) is the
+-- policy; the registers carry no override block (the printed text is never rewritten — a rewritten criterion would not
+-- be the printed one; additions are I-1). Alternative: `kann` is wrong (no printed alternatives); `locked` would deny the
+-- printed "ergänzt".

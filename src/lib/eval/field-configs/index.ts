@@ -20,5 +20,6 @@ export const FIELD_CONFIG_MODULES: Record<string, () => Promise<FieldConfigModul
   m1200_3: () => import('./m1200_3'),
   fll_gar: () => import('./fll_gar'),
   fll_naturteich: () => import('./fll_naturteich'),
-  // Plan-3 tasks append one line each, e.g. m820_3: () => import('./m820_3'),
+  m820_3: () => import('./m820_3'),
+  // Plan-3 tasks append one line each, e.g. din18130_1: () => import('./din18130_1'),
 };
