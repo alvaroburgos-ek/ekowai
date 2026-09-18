@@ -156,7 +156,7 @@ export function s7221PumpAsTable(): RegulationTable {
 // S7_2_2_4 — §7.2.2.4 (L1026–L1028): CTCV "puede aplicarse, por ejemplo, cuando el caudal instantáneo del
 // efluente varía poco en el tiempo (coeficiente de variación de la repetibilidad del 20 % por término medio …)".
 // One row; "puede aplicarse … por ejemplo" ⇒ anhaltswert. The CV condition is a precondition of the mode,
-// not a limit of a measured value — shown on the created `ctcv_cv_max_tab` fill (ISO-5667-10-06).
+// not a limit of a measured value — read by the ISO-5667-10-05-D1 / D2 equations (derived `ctcv_cv_max` / `ctcv_applicable` on -05; no fill).
 // ---------------------------------------------------------------------------
 export function s7224AsTable(): RegulationTable {
   inSpan(Q.L1026_1028, '20 %', 'S7_2_2_4 ctcv');

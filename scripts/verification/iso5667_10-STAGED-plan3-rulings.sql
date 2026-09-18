@@ -111,6 +111,7 @@
 -- Chosen now (fail-safe): CR-018 keeps the fixed 25 ml (block); the per-device check lives in the -07 `probenahmegeraete` register (unit_volume_min / unit_volume_ok per row, `geraete_unit_volume_fail`). Nothing on -06 reads the pump technology today (`pump_technology` lives on -07, not inherited on -06 — C-2). Two variants staged; variant B needs no consumer edit and reads the printed figures directly.
 -- Evidence: "- Volumen de la unidad: - debe ser adecuado para garantizar un muestreo representativo (por ejemplo, al menos 50 ml para la bomba de vacío o 25 ml para el émbolo en línea);" (L934–L937); "El muestreo de los sistemas de bombeo puede realizarse mediante diferentes tecnologías [por ejemplo, mediante una bomba de vacío (VAP), mediante una bomba peristáltica (PP), mediante un émbolo en línea o utilizando sistemas de bombeo externos]. Las ventajas e inconvenientes de los dos tipos principales de muestreadores se presentan en el Anexo F." (L1318–L1321)
 -- Note: peristaltic / external print no minimum (iso5667_10-E-1): variant A leaves the gate pending for them (lookup miss); variant B keeps the 25 ml floor for every technology and adds the 50 ml branch for the vacuum pump only.
+-- Note: Variant B WITHOUT C-2: CR-018 never passes — probed with pump_technology absent on -06: unit_volume = 40 ⇒ the whole compound is pending (otherwise-passing states never pass), unit_volume = 10 ⇒ fail (failures still fail). Apply C-2 first, or not B.
 -- -- Variant A (twin on -06, needs C-2 first):
 -- BEGIN;
 -- UPDATE fields f SET consumer_worksheets = array_append(consumer_worksheets, 'ISO-5667-10-06') … WHERE s.code = 'ISO-5667-10' AND w.code = 'ISO-5667-10-07' AND f.symbol = 'pump_technology' AND f.active AND NOT ('ISO-5667-10-06' = ANY(coalesce(consumer_worksheets, '{}')));  -- = C-2
@@ -132,7 +133,7 @@
 --   description = 'Plan 3 (iso5667_10-G-5, Variante B): mindestens 50 ml für die Vakuumpumpe, 25 ml für den Inline-Kolben (L936–L937).'
 --  WHERE c.id = 'a536d673-3d7f-4de7-9b45-f61a1127a9ae' AND md5(c.condition) = '314c2418088b6fac3838f640fd81b5b7';
 -- COMMIT;
--- -- Variant B ALSO needs C-2 (pump_technology reaches -06) — otherwise the IF guard is pending and only the 25 ml floor enforces.
+-- -- Variant B ALSO needs C-2 (pump_technology reaches -06): without C-2, CR-018 NEVER PASSES — probed: with pump_technology absent on -06, unit_volume = 40 ⇒ the whole compound is PENDING (an otherwise-passing state never reaches pass), unit_volume = 10 ⇒ fail (failures still fail). B is NOT benign standalone.
 -- Rollback: RESTORE('a536d673-3d7f-4de7-9b45-f61a1127a9ae'); DELETE FROM equations WHERE worksheet_template_id = WS('ISO-5667-10-06') AND equation_number = 'ISO-5667-10-06-D5' AND description LIKE 'Plan 3 (iso5667_10-G-5)%'; UPDATE fields SET active = false … symbol = 'unit_volume_min_calc'; array_remove the consumer entry (C-2 rollback).
 --
 -- =====================================================================================================================
@@ -143,7 +144,6 @@
 -- BEGIN;
 -- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso5667_10 AS SELECT * FROM compliance_requirements WHERE false;
 -- INSERT INTO compliance_requirements_archive_iso5667_10 SELECT c.* FROM compliance_requirements c WHERE c.id = '571e1790-2dc0-4e52-ac1f-99ee1c22e441' AND md5(c.condition) = 'fbf7703c4b0eb83ac3152b67c3556af9';
--- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso5667_10 AS SELECT * FROM compliance_requirements WHERE false;
 -- INSERT INTO compliance_requirements_archive_iso5667_10 SELECT c.* FROM compliance_requirements c WHERE c.id = 'b855b97c-6cb6-4c69-9b79-67fe39af3149' AND md5(c.condition) = 'df039554aa0092697604182a0c9f0da0';
 -- UPDATE compliance_requirements c SET
 --   condition = 'IF specific_site_type == ''sewer_channel_manhole'' THEN restriction_downstream_diameters >= 3',
@@ -224,12 +224,14 @@
 -- =====================================================================================================================
 -- iso5667_10-C-1 · ISO-5667-10-02 · representativeness_mode.consumer_worksheets += ISO-5667-10-07
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Chosen now (fail-safe): The two -07 tank rules (`tank_mixing_system` / `tank_sampling_device` ← in_storage) are EMITTED and `pending` (visible, inert) until the driver reaches -07 (today ["ISO-5667-10-04","ISO-5667-10-06"]).
+-- Chosen now (fail-safe): The two -07 tank rules (`tank_mixing_system` / `tank_sampling_device` ← in_storage) are NOT emitted (fix round 1 — they would be `pending` forever while the driver reaches only ["ISO-5667-10-04","ISO-5667-10-06"]); they are the two UPDATEs below, to apply in the SAME transaction as the consumer edit.
 -- Evidence: "- representatividad en un almacenamiento (depósito, lagunas, cuencas, etc.)." (L374); "8.4 Equipo de muestreo del tanque 8.4.1 Mezcla El sistema de mezcla se utiliza para garantizar la homogeneidad del contenido de un tanque antes de la descarga y para recoger una muestra representativa (véase el anexo A)." (L1404–L1407)
 -- BEGIN;
 -- UPDATE fields f SET consumer_worksheets = array_append(coalesce(consumer_worksheets, '{}'), 'ISO-5667-10-07') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-5667-10' AND w.code = 'ISO-5667-10-02' AND f.symbol = 'representativeness_mode' AND f.active AND NOT ('ISO-5667-10-07' = ANY(coalesce(consumer_worksheets, '{}')));
+-- FLD(ISO-5667-10-07, tank_mixing_system) SET visible_when = 'representativeness_mode == ''in_storage''' … AND f.visible_when IS NULL;
+-- FLD(ISO-5667-10-07, tank_sampling_device) SET visible_when = 'representativeness_mode == ''in_storage''' … AND f.visible_when IS NULL;
 -- COMMIT;
--- Rollback: UPDATE fields SET consumer_worksheets = array_remove(consumer_worksheets, 'ISO-5667-10-07') … same row.
+-- Rollback: FLD(ISO-5667-10-07, tank_mixing_system) SET visible_when = NULL … AND f.visible_when = 'representativeness_mode == ''in_storage'''; FLD(ISO-5667-10-07, tank_sampling_device) SET visible_when = NULL … AND f.visible_when = 'representativeness_mode == ''in_storage'''; UPDATE fields SET consumer_worksheets = array_remove(consumer_worksheets, 'ISO-5667-10-07') … same row. Cues: L374 (representatividad en un almacenamiento), L1415–L1428 (mixing systems), L1434–L1452 (tank sampling devices).
 --
 -- =====================================================================================================================
 -- iso5667_10-C-2 · ISO-5667-10-07 · pump_technology.consumer_worksheets += ISO-5667-10-06 (for G-5)

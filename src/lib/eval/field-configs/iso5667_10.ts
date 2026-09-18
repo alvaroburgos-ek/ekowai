@@ -22,8 +22,8 @@
  * on -04 (inherited on -06, NOT on -02 — the -02 register carries its own
  * `specific_site_type` column instead), `main_sampling_type` on -05 (inherited on
  * -06 / -07), `composite_mode` on -05 (inherited on -06), `representativeness_mode`
- * on -02 (inherited on -04 / -06 — NOT on -07: the two -07 tank rules are emitted
- * `pending` until iso5667_10-C-1), `sampling_period` on -03.
+ * on -02 (inherited on -04 / -06 — NOT on -07: the two -07 tank rules are STAGED with
+ * the consumer edit iso5667_10-C-1, not emitted), `sampling_period` on -03.
  *
  * What is deliberately NOT here (each on the sign-off sheet; STAGED SQL in
  * scripts/verification/iso5667_10-STAGED-plan3-rulings.sql):
@@ -342,9 +342,9 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     create: { section_code: 'C', label_de: 'Geräte mit Einheitsvolumen unter dem gedruckten Minimum (§7.2.2.1)', data_type: 'number', unit: null, clause_reference: '§7.2.2.1',
       description: 'Plan 3: Ausgabe der Gleichung ISO-5667-10-07-D2 (count_rows über probenahmegeraete, unit_volume_ok == 0); ein Gate darauf ist STAGED (iso5667_10-G-5).' },
   }),
-  // representativeness_mode (ISO-5667-10-02) is inherited on -04 / -06 but NOT on -07 — both rules are `pending` (visible, inert) until iso5667_10-C-1 adds -07.
-  WS07({ symbol: 'tank_mixing_system', widget: 'select_one', ui_config: null, enum_values: 'keep_prod', visible_when: IN_STORAGE, verification_quote: `${Q.L374} — ${Q.L1415_1428}` }),
-  WS07({ symbol: 'tank_sampling_device', widget: 'select_one', ui_config: null, enum_values: 'keep_prod', visible_when: IN_STORAGE, verification_quote: `${Q.L374} — ${Q.L1434_1452}` }),
+  // representativeness_mode (ISO-5667-10-02) is inherited on -04 / -06 but NOT on -07 — the two -07 tank rules (tank_mixing_system /
+  // tank_sampling_device ← in_storage, L374 / L1415–L1428 / L1434–L1452) would be `pending` forever here and are STAGED inside
+  // iso5667_10-C-1 together with the consumer edit (fix round 1; not emitted).
 
   // ---- ISO-5667-10-08: homogeniser by collected volume (§9.1) ----
   WS08({

@@ -49,19 +49,18 @@ describe('ISO-5667-10 field configs (Plan 3 Task 20)', () => {
     expect(SECTION_VISIBILITY).toEqual([]);
   });
 
-  it('counts: 37 field entries (27 create, 10 update), widgets by kind, the visibility list (12 on existing / created inputs + the register / output rules)', () => {
-    expect(FIELD_CONFIGS).toHaveLength(37);
+  it('counts: 35 field entries (27 create, 8 update), widgets by kind, the visibility list (8 on existing inputs + 19 on created fields)', () => {
+    expect(FIELD_CONFIGS).toHaveLength(35);
     expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(27);
     expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual([
       'ISO-5667-10-04 sampling_depth_fraction', 'ISO-5667-10-04 wwtp_sampling_objective', 'ISO-5667-10-04 bypass_flow_assessed', 'ISO-5667-10-04 cooling_system_type', 'ISO-5667-10-04 upstream_of_biocide',
       'ISO-5667-10-05 grab_method',
       'ISO-5667-10-06 sampler_flow_linked', 'ISO-5667-10-06 tank_mixing_maintained',
-      'ISO-5667-10-07 tank_mixing_system', 'ISO-5667-10-07 tank_sampling_device',
-    ]);
+    ]); // fix round 1: the two -07 tank rules (driver not inherited on -07) moved into STAGED C-1
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('register')).toEqual(['ISO-5667-10-01 stichproben_qualifiziert', 'ISO-5667-10-02 probenahmestellen', 'ISO-5667-10-03 probenahmetermine', 'ISO-5667-10-06 flaschen_ctcv', 'ISO-5667-10-07 probenahmegeraete']);
     expect(byWidget('lookup_fill')).toEqual(['ISO-5667-10-06 composite_interval_max']);
-    expect(byWidget('select_one')).toEqual(['ISO-5667-10-04 wwtp_sampling_objective', 'ISO-5667-10-04 cooling_system_type', 'ISO-5667-10-05 grab_method', 'ISO-5667-10-06 composite_duration_band', 'ISO-5667-10-07 tank_mixing_system', 'ISO-5667-10-07 tank_sampling_device']);
+    expect(byWidget('select_one')).toEqual(['ISO-5667-10-04 wwtp_sampling_objective', 'ISO-5667-10-04 cooling_system_type', 'ISO-5667-10-05 grab_method', 'ISO-5667-10-06 composite_duration_band']);
     expect(byWidget('select_many')).toEqual([]);
     expect(byWidget('attestation')).toEqual(['ISO-5667-10-04 bypass_flow_assessed', 'ISO-5667-10-04 upstream_of_biocide', 'ISO-5667-10-06 sampler_flow_linked', 'ISO-5667-10-06 tank_mixing_maintained']);
     expect(byWidget('scalar')).toEqual(['ISO-5667-10-04 sampling_depth_fraction', 'ISO-5667-10-05 flow_cv_pct', 'ISO-5667-10-06 event_trigger_criterion']);
@@ -83,9 +82,8 @@ describe('ISO-5667-10 field configs (Plan 3 Task 20)', () => {
       `ISO-5667-10-06 composite_duration_band :: ${COMPOSITE}`, `ISO-5667-10-06 composite_interval_max :: ${COMPOSITE}`,
       `ISO-5667-10-06 flaschen_ctcv :: ${CTCV}`, `ISO-5667-10-06 v_n_sum :: ${CTCV}`, `ISO-5667-10-06 m3_n_sum :: ${CTCV}`, `ISO-5667-10-06 flaschen_count :: ${CTCV}`,
       `ISO-5667-10-06 sampler_flow_linked :: ${FLOW_PROPORTIONAL}`, `ISO-5667-10-06 event_trigger_criterion :: ${EVENT}`, `ISO-5667-10-06 tank_mixing_maintained :: ${IN_STORAGE}`,
-      `ISO-5667-10-07 tank_mixing_system :: ${IN_STORAGE}`, `ISO-5667-10-07 tank_sampling_device :: ${IN_STORAGE}`,
     ]);
-    expect(vis).toHaveLength(29);
+    expect(vis).toHaveLength(27);
   });
 
   it('G-A3 key-string equality: table keys and register enum options equal the captured prod enum value strings / the created select exactly', () => {
@@ -142,7 +140,7 @@ describe('ISO-5667-10 field configs (Plan 3 Task 20)', () => {
     for (const k of ['restriction_downstream_diameters', 'sampling_depth_fraction']) expect(vis(k), k).toBe(SEWER);
     for (const k of ['wwtp_objective', 'bypass_assessed']) expect(vis(k), k).toBe(WWTP);
     for (const k of ['cooling_type', 'cooling_runoff_s', 'upstream_of_biocide']) expect(vis(k), k).toBe(COOLING);
-    for (const k of ['id', 'location', 'flow_type', 'well_mixed']) expect(vis(k), k).toBeUndefined();
+    for (const k of ['kennung', 'location', 'flow_type', 'well_mixed']) expect(vis(k), k).toBeUndefined();
     expect(registerCfg('ISO-5667-10-07', 'probenahmegeraete').columns.find((c) => c.key === 'pump_technology')?.discriminator).toBe(true);
   });
 
@@ -157,13 +155,14 @@ describe('ISO-5667-10 field configs (Plan 3 Task 20)', () => {
     expect(priorRow('ISO-5667-10-06 composite_interval').data_type).toBe('number');
   });
 
-  it('drivers resolve on their rule\'s worksheet — or are pinned pending: representativeness_mode is not inherited on -07 (iso5667_10-C-1)', () => {
+  it('drivers resolve on their rule\'s worksheet: representativeness_mode is not inherited on -07, so no -07 rule is emitted (STAGED iso5667_10-C-1)', () => {
     expect(priorRow('ISO-5667-10-01 sample_type_definition').consumer_worksheets).toEqual(['ISO-5667-10-05']); // driver on -01 itself
     expect(priorRow('ISO-5667-10-03 sampling_period').consumer_worksheets).toBeNull();                      // driver on -03 itself
     expect(priorRow('ISO-5667-10-04 specific_site_type').consumer_worksheets).toEqual(['ISO-5667-10-06']);   // driver on -04 itself; NOT on -02 (the register carries its own column)
     expect(priorRow('ISO-5667-10-05 main_sampling_type').consumer_worksheets).toEqual(['ISO-5667-10-06', 'ISO-5667-10-07']);
     expect(priorRow('ISO-5667-10-05 composite_mode').consumer_worksheets).toEqual(['ISO-5667-10-06']);
-    expect(priorRow('ISO-5667-10-02 representativeness_mode').consumer_worksheets).toEqual(['ISO-5667-10-04', 'ISO-5667-10-06']); // -07 missing → the two -07 tank rules are pending until C-1
+    expect(priorRow('ISO-5667-10-02 representativeness_mode').consumer_worksheets).toEqual(['ISO-5667-10-04', 'ISO-5667-10-06']); // -07 missing → the two -07 tank rules are STAGED (C-1), not emitted
+    expect(FIELD_CONFIGS.filter((e) => e.worksheet === 'ISO-5667-10-07' && !e.create)).toEqual([]);
     expect(priorRow('ISO-5667-10-06 event_triggered_sampling').data_type).toBe('boolean');
   });
 
@@ -226,7 +225,7 @@ describe('ISO-5667-10 field configs (Plan 3 Task 20)', () => {
     const files = fieldConfigFilesFor('iso5667_10', '20260917102010');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(10);
+    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(8);
     expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(27);
     expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
