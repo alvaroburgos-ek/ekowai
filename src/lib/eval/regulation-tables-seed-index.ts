@@ -42,6 +42,7 @@ import { iso59020SeedTables } from './regulation-tables-seed-iso59020';
 import { iso46001SeedTables } from './regulation-tables-seed-iso46001';
 import { iso56676SeedTables } from './regulation-tables-seed-iso5667_6';
 import { din14021SeedTables } from './regulation-tables-seed-din14021';
+import { iso14046SeedTables } from './regulation-tables-seed-iso14046';
 
 export type SeedBuilder = { build: () => RegulationTable[]; ts: string; slugFile: string; supersedes?: string };
 
@@ -71,7 +72,8 @@ export const SEED_BUILDERS: Record<string, SeedBuilder> = {
   iso46001: { build: iso46001SeedTables, ts: '20260917102200', slugFile: 'iso46001' }, // Plan 3 Task 22: ISO-46001 (two informative catalogues — Table A.1 monitoring areas 39 rows, Table D.1 one settled sector row)
   iso5667_6: { build: iso56676SeedTables, ts: '20260917102300', slugFile: 'iso5667_6' }, // Plan 3 Task 23: ISO-5667-6 (six tables — Anexo A Chézy example, §13.1 report items a) – q), §7.1 30 cm, §5.1.3 five flows / 10 %, §5.1.4 six samples / three flows / 90 %, §10.8 5 min)
   din14021: { build: din14021SeedTables, ts: '20260917102500', slugFile: 'din14021' }, // Plan 3 Task 25: DIN-14021 (three text tables — CLAIMMAP claim type → §7 clause / condition / numeric block, S6_5_3 documentation items a) – g), S5_3_5_10 general requirements 5.3 – 5.10)
-  // Plan-3 tasks append one line each, e.g. iso14046: { build: iso14046SeedTables, ts: '20260917102600', slugFile: 'iso14046' }
+  iso14046: { build: iso14046SeedTables, ts: '20260917102600', slugFile: 'iso14046' }, // Plan 3 Task 26: ISO-14046 (two text catalogues — S5_2_4_2_DQ data-quality items a) – j), S6_2_TP third-party-report aspects a) – g))
+  // Plan-3 tasks append one line each, e.g. atv_a704e: { build: atvA704eSeedTables, ts: '20260917102700', slugFile: 'atv_a704e' }
 };
 
 /** Slugs that no other builder supersedes — the set the runtime fallback serves. */

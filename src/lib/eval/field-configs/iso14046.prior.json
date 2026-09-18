@@ -1,0 +1,1844 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs ISO-14046 iso14046",
+    "captured_at": "2026-09-18T21:18:22.914Z",
+    "standard": "ISO-14046",
+    "slug": "iso14046",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 73,
+    "section_rows": 53,
+    "sections_total": 53,
+    "equation_rows": 1,
+    "gate_rows": 22
+  },
+  "ISO-14046-01 assessment_mode": {
+    "enum_values": [
+      {
+        "value": "standalone",
+        "label_de": "Eigenständige Bewertung",
+        "label_en": "Standalone assessment",
+        "order_index": 1,
+        "regulation_reference": "§5.1"
+      },
+      {
+        "value": "part_of_lca",
+        "label_de": "Teil einer Ökobilanz",
+        "label_en": "Part of an LCA",
+        "order_index": 2,
+        "regulation_reference": "§5.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-02",
+      "ISO-14046-06",
+      "ISO-14046-07"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-01 comprehensive_assessment": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04",
+      "ISO-14046-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-14046-01 consolidation_method": {
+    "enum_values": [
+      {
+        "value": "control",
+        "label_de": "Kontrolle",
+        "label_en": "Control",
+        "order_index": 1,
+        "regulation_reference": "Annex A.2"
+      },
+      {
+        "value": "equity_share",
+        "label_de": "Kapitalbeteiligung",
+        "label_en": "Equity share",
+        "order_index": 2,
+        "regulation_reference": "Annex A.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-02",
+      "ISO-14046-03"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-01 is_organization_assessment": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-02",
+      "ISO-14046-03"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-01 life_cycle_perspective": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-01 pcr_adopted": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-01 principles_applied": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-01 study_type": {
+    "enum_values": [
+      {
+        "value": "water_footprint_assessment",
+        "label_de": "Wasser-Fußabdruck-Bewertung",
+        "label_en": "Water footprint assessment",
+        "order_index": 1,
+        "regulation_reference": "§5.1"
+      },
+      {
+        "value": "water_footprint_inventory_study",
+        "label_de": "Wasser-Fußabdruck-Inventarstudie",
+        "label_en": "Water footprint inventory study",
+        "order_index": 2,
+        "regulation_reference": "§5.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-04",
+      "ISO-14046-06"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-01 water_footprint_qualifier": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04",
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-14046-02 allocation_procedure": {
+    "enum_values": [
+      {
+        "value": "avoided_subdivision",
+        "label_de": "Vermeidung durch Teilung",
+        "label_en": "Avoided by subdivision",
+        "order_index": 1,
+        "regulation_reference": "§5.3.3.2"
+      },
+      {
+        "value": "avoided_system_expansion",
+        "label_de": "Vermeidung durch Systemerweiterung",
+        "label_en": "Avoided by system expansion",
+        "order_index": 2,
+        "regulation_reference": "§5.3.3.2"
+      },
+      {
+        "value": "physical_relationship",
+        "label_de": "Physikalische Beziehung",
+        "label_en": "Physical relationship",
+        "order_index": 3,
+        "regulation_reference": "§5.3.3.2"
+      },
+      {
+        "value": "other_relationship_economic",
+        "label_de": "Andere Beziehung (z. B. ökonomischer Wert)",
+        "label_en": "Other relationship (e.g. economic value)",
+        "order_index": 4,
+        "regulation_reference": "§5.3.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 baseline_conditions": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 comparative_assertion_public": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04",
+      "ISO-14046-06",
+      "ISO-14046-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-02 critical_review_type": {
+    "enum_values": [
+      {
+        "value": "none",
+        "label_de": "Keine",
+        "label_en": "None",
+        "order_index": 1,
+        "regulation_reference": "§7.1"
+      },
+      {
+        "value": "expert_review",
+        "label_de": "Prüfung durch internen/externen Sachverständigen",
+        "label_en": "Review by internal/external expert",
+        "order_index": 2,
+        "regulation_reference": "§7.3"
+      },
+      {
+        "value": "panel_review",
+        "label_de": "Prüfung durch einen Ausschuss",
+        "label_en": "Review by panel of interested parties",
+        "order_index": 3,
+        "regulation_reference": "§7.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-07"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 cutoff_criteria": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 data_quality_requirements": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-14046-02 forms_of_water_use": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-02 functional_unit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-04",
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 geographic_coverage": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 intended_applications": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-05",
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-02 lcia_methodology": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 missing_data_treatment": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-05"
+    ],
+    "data_type": "text",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-14046-02 no_offsetting": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04",
+      "ISO-14046-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "H",
+    "section_id_is_null": false,
+    "section_path": [
+      "H"
+    ]
+  },
+  "ISO-14046-02 organization_boundary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03"
+    ],
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-14046-02 primary_data_preference": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03"
+    ],
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-14046-02 report_type": {
+    "enum_values": [
+      {
+        "value": "internal",
+        "label_de": "Interner Bericht",
+        "label_en": "Internal report",
+        "order_index": 1,
+        "regulation_reference": "§5.2.2"
+      },
+      {
+        "value": "third_party",
+        "label_de": "Bericht an Dritte",
+        "label_en": "Third-party report",
+        "order_index": 2,
+        "regulation_reference": "§6.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 results_type": {
+    "enum_values": [
+      {
+        "value": "impact_indicator_result",
+        "label_de": "Wirkungsindikatorergebnis",
+        "label_en": "Impact indicator result",
+        "order_index": 1,
+        "regulation_reference": "§5.4.1"
+      },
+      {
+        "value": "water_footprint_profile",
+        "label_de": "Wasser-Fußabdruck-Profil",
+        "label_en": "Water footprint profile",
+        "order_index": 2,
+        "regulation_reference": "§5.4.1"
+      },
+      {
+        "value": "weighted_water_footprint",
+        "label_de": "Gewichteter Wasser-Fußabdruck",
+        "label_en": "Weighted water footprint",
+        "order_index": 3,
+        "regulation_reference": "§5.4.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04",
+      "ISO-14046-06"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 seasonal_aspects": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-02 study_reasons": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-02 system_boundary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-14046-02 target_audience": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-02 temporal_aspects": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-02 temporal_coverage": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-02 water_quality_data": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-02 water_quantities": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-02 water_resource_types": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-02 water_use_locations": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-03",
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-03 allocation_balance_preserved": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-14046-03 allocation_sensitivity_done": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-14046-03 calculation_procedures_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-03 data_validation_done": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-03 elementary_flow_quantity": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-03 flow_form_of_use": {
+    "enum_values": [
+      {
+        "value": "evaporation",
+        "label_de": "Verdunstung",
+        "label_en": "Evaporation",
+        "order_index": 1,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "transpiration",
+        "label_de": "Transpiration",
+        "label_en": "Transpiration",
+        "order_index": 2,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "product_integration",
+        "label_de": "Integration in das Produkt",
+        "label_en": "Integration in the product",
+        "order_index": 3,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "release_other_watershed_or_sea",
+        "label_de": "Freisetzung in andere Wasserscheide/ins Meer",
+        "label_en": "Release into a different watershed or the sea",
+        "order_index": 4,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "displacement_between_resources",
+        "label_de": "Verlagerung zwischen Wasserressourcentypen",
+        "label_en": "Displacement between water resource types",
+        "order_index": 5,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "instream_use",
+        "label_de": "Nutzung im Gewässer",
+        "label_en": "Instream use",
+        "order_index": 6,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "other",
+        "label_de": "Andere",
+        "label_en": "Other",
+        "order_index": 7,
+        "regulation_reference": "§5.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-03 flow_geographic_location": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-03 flow_quality_parameters": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-03 flow_releases_to_environment": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-03 flow_temporal_aspects": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-03 flow_water_resource_type": {
+    "enum_values": [
+      {
+        "value": "rainwater",
+        "label_de": "Regenwasser",
+        "label_en": "Rainwater",
+        "order_index": 1,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "surface_water",
+        "label_de": "Oberflächenwasser",
+        "label_en": "Surface water",
+        "order_index": 2,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "seawater",
+        "label_de": "Meerwasser",
+        "label_en": "Seawater",
+        "order_index": 3,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "brackish_water",
+        "label_de": "Brackwasser",
+        "label_en": "Brackish water",
+        "order_index": 4,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "groundwater",
+        "label_de": "Grundwasser",
+        "label_en": "Groundwater (excluding fossil water)",
+        "order_index": 5,
+        "regulation_reference": "§5.3.2"
+      },
+      {
+        "value": "fossil_water",
+        "label_de": "Fossiles Wasser",
+        "label_en": "Fossil water",
+        "order_index": 6,
+        "regulation_reference": "§5.3.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-04"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-03 inventory_balance_explained": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-03 recycling_allocation_type": {
+    "enum_values": [
+      {
+        "value": "closed_loop",
+        "label_de": "Geschlossener Kreislauf",
+        "label_en": "Closed-loop",
+        "order_index": 1,
+        "regulation_reference": "§5.3.3.3"
+      },
+      {
+        "value": "open_loop",
+        "label_de": "Offener Kreislauf",
+        "label_en": "Open-loop",
+        "order_index": 2,
+        "regulation_reference": "§5.3.3.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-14046-03 sensitivity_analysis_boundary": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-04 category_indicator_result": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-05",
+      "ISO-14046-06"
+    ],
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-04 category_indicators": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-05",
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-04 characterization_factor": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-04 characterization_model": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-04 geo_temporal_considered": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-14046-04 impact_categories": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-05",
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-04 lci_result": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-14046-04 water_footprint_profile": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-05",
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "H",
+    "section_id_is_null": false,
+    "section_path": [
+      "H"
+    ]
+  },
+  "ISO-14046-04 weighting_applied": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "H",
+    "section_id_is_null": false,
+    "section_path": [
+      "H"
+    ]
+  },
+  "ISO-14046-05 completeness_check": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-05 conclusions": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-05 consistency_check": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-05 limitations": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-05 sensitivity_check": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-05 significant_issues": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-05 uncertainty_assessment": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-06 comparative_study_equivalence": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-14046-06 report_prepared": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-06 third_party_report": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-14046-06 water_types_impacts_explicit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-07 critical_review_performed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-14046-07 critical_review_statement": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-14046-06"
+    ],
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-14046-07 review_panel_members": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "sections": {
+    "ISO-14046-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-01 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-01 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 G": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 H": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-03 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-03 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 G": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 H": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-07 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-14046-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "ISO-14046-04 EQ-01": {
+      "id": "db1f6227-b23a-4d7e-b0c1-56a80b1977da",
+      "output_symbol": "category_indicator_result",
+      "input_symbols": [
+        "lci_result",
+        "characterization_factor"
+      ]
+    }
+  },
+  "gates": {
+    "ISO-14046-01 REQ-01": {
+      "condition": "study_type IN {water_footprint_assessment,water_footprint_inventory_study}",
+      "severity": "block",
+      "symbols": [
+        "study_type"
+      ]
+    },
+    "ISO-14046-01 REQ-02": {
+      "condition": "principles_applied  ==  true AND life_cycle_perspective  ==  true",
+      "severity": "block",
+      "symbols": [
+        "life_cycle_perspective",
+        "principles_applied"
+      ]
+    },
+    "ISO-14046-01 REQ-13": {
+      "condition": "comprehensive_assessment  ==  true OR water_footprint_qualifier IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "comprehensive_assessment",
+        "water_footprint_qualifier"
+      ]
+    },
+    "ISO-14046-01 REQ-21": {
+      "condition": "TRUE",
+      "severity": "warn",
+      "symbols": []
+    },
+    "ISO-14046-02 REQ-03": {
+      "condition": "intended_applications IS NOT EMPTY AND study_reasons IS NOT EMPTY AND target_audience IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "intended_applications",
+        "study_reasons",
+        "target_audience"
+      ]
+    },
+    "ISO-14046-02 REQ-04": {
+      "condition": "functional_unit IS NOT EMPTY AND system_boundary IS NOT EMPTY AND geographic_coverage IS NOT EMPTY AND temporal_coverage IS NOT EMPTY AND cutoff_criteria IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "cutoff_criteria",
+        "functional_unit",
+        "geographic_coverage",
+        "system_boundary",
+        "temporal_coverage"
+      ]
+    },
+    "ISO-14046-02 REQ-05": {
+      "condition": "water_quantities IS NOT EMPTY AND water_resource_types IS NOT EMPTY AND water_quality_data IS NOT EMPTY AND forms_of_water_use IS NOT EMPTY AND water_use_locations IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "forms_of_water_use",
+        "water_quality_data",
+        "water_quantities",
+        "water_resource_types",
+        "water_use_locations"
+      ]
+    },
+    "ISO-14046-02 REQ-06": {
+      "condition": "data_quality_requirements IS NOT NULL AND primary_data_preference IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "data_quality_requirements",
+        "primary_data_preference"
+      ]
+    },
+    "ISO-14046-02 REQ-07": {
+      "condition": "missing_data_treatment IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "missing_data_treatment"
+      ]
+    },
+    "ISO-14046-02 REQ-08": {
+      "condition": "no_offsetting  ==  true",
+      "severity": "block",
+      "symbols": [
+        "no_offsetting"
+      ]
+    },
+    "ISO-14046-02 REQ-22": {
+      "condition": "is_organization_assessment IS NOT NULL AND consolidation_method IS NOT NULL AND organization_boundary IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "consolidation_method",
+        "is_organization_assessment",
+        "organization_boundary"
+      ]
+    },
+    "ISO-14046-03 REQ-09": {
+      "condition": "calculation_procedures_documented  ==  true AND data_validation_done  ==  true",
+      "severity": "block",
+      "symbols": [
+        "calculation_procedures_documented",
+        "data_validation_done"
+      ]
+    },
+    "ISO-14046-03 REQ-10": {
+      "condition": "flow_water_resource_type IS NOT EMPTY AND flow_quality_parameters IS NOT EMPTY AND flow_form_of_use IS NOT EMPTY AND flow_geographic_location IS NOT EMPTY AND inventory_balance_explained  ==  true",
+      "severity": "block",
+      "symbols": [
+        "flow_form_of_use",
+        "flow_geographic_location",
+        "flow_quality_parameters",
+        "flow_water_resource_type",
+        "inventory_balance_explained"
+      ]
+    },
+    "ISO-14046-03 REQ-11": {
+      "condition": "allocation_procedure IS NOT NULL AND allocation_balance_preserved IS NOT NULL AND allocation_sensitivity_done IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "allocation_balance_preserved",
+        "allocation_procedure",
+        "allocation_sensitivity_done"
+      ]
+    },
+    "ISO-14046-04 REQ-12": {
+      "condition": "impact_categories IS NOT EMPTY AND category_indicators IS NOT EMPTY AND characterization_model IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "category_indicators",
+        "characterization_model",
+        "impact_categories"
+      ]
+    },
+    "ISO-14046-04 REQ-14": {
+      "condition": "geo_temporal_considered  ==  true",
+      "severity": "block",
+      "symbols": [
+        "geo_temporal_considered"
+      ]
+    },
+    "ISO-14046-04 REQ-15": {
+      "condition": "weighting_applied IS NOT NULL AND comparative_assertion_public IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "comparative_assertion_public",
+        "weighting_applied"
+      ]
+    },
+    "ISO-14046-05 REQ-16": {
+      "condition": "significant_issues IS NOT EMPTY AND completeness_check  ==  true AND sensitivity_check  ==  true AND consistency_check  ==  true AND conclusions IS NOT EMPTY AND limitations IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "completeness_check",
+        "conclusions",
+        "consistency_check",
+        "limitations",
+        "sensitivity_check",
+        "significant_issues"
+      ]
+    },
+    "ISO-14046-06 REQ-17": {
+      "condition": "report_prepared  ==  true AND water_types_impacts_explicit  ==  true",
+      "severity": "block",
+      "symbols": [
+        "report_prepared",
+        "water_types_impacts_explicit"
+      ]
+    },
+    "ISO-14046-06 REQ-18": {
+      "condition": "report_type  ==  internal OR third_party_report  ==  true",
+      "severity": "block",
+      "symbols": [
+        "report_type",
+        "third_party_report"
+      ]
+    },
+    "ISO-14046-06 REQ-19": {
+      "condition": "comparative_assertion_public IS NOT NULL AND critical_review_performed IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "comparative_assertion_public",
+        "critical_review_performed"
+      ]
+    },
+    "ISO-14046-07 REQ-20": {
+      "condition": "comparative_assertion_public  ==  false OR critical_review_performed  ==  true",
+      "severity": "block",
+      "symbols": [
+        "comparative_assertion_public",
+        "critical_review_performed"
+      ]
+    }
+  }
+}

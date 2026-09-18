@@ -708,6 +708,28 @@ the G-block and pin the non-exemption. (8) Prod VR strings can name a field that
 the capture (exit 1), CREATE the driver as the inventory names it, and stage the VR's own rule as a compound `IF type == 'x' AND driver ==
 true THEN pct == 100` gate (evaluate.ts grammar, verified both ways).
 
+**Encoding traps (Plan 3 Task 26, ISO-14046).** (1) Whole-worksheet applicability by a study type (the -04 impact assessment ← `study_type`)
+where EVERY field-bearing section holds consumed producers or gate-read symbols is ONE G-block: the IF-guards on the worksheet's own gates
+(REQ-12 / -14 / -15 here) and the section hides in the SAME transaction (the hides are exempt only once the guards read the same driver / op /
+literal); the emitter ACCEPTS a rule on a field-less section (A / B / F / G / K / M) — inert, never emit it, pin the acceptance and the field count
+instead. (2) A prod equation printed as `SUM(a * b)` over two SCALARS (EQ-01 characterisation) becomes a register with the product as a `derived`
+column plus a worksheet Σ over ALL rows; the Σ PER GROUP by an engineer-typed name is not expressible — `sum_rows(reg, if(category == 'x', …, 0))`
+computes only with the literal typed in (probed) — so the per-group result stays a TYPED number column with an F-block (grouped aggregate /
+cross-register row reference), never a fake equation over an invented enum; the prod row stays (R-block, archive pattern) and the scalar pairs are
+D-blocks. (3) A printed word-number ("al menos tres miembros") may be a formula literal (`>= 3`) when the controller sanctions it and the sentence
+is quoted beside the equation — pin the literal against the span; a one-row constant table is the alternative when no ruling exists. (4) OCR I/l
+swaps in DISPLAYED cells ("Ias aplicaciones", "Ios resultados", "ii)cualquier", "$y$") keep the table `imported_unverified` (amendment F) even
+though every row quote is verbatim; assert the quirks PRESENT at build time (`S6_2_TP_OCR_QUIRKS`) so a well-meant correction cannot slip in
+silently, and put the clean heading line into the checklist value while the sub-items sit in a table column. (5) Name a text table after the
+PRINTED clause, not the brief's pointer (the brief's "§5.2.2 a)–j)" is 5.2.4.2 "Calidad de los datos"; §5.2.2 is the scope list a) – p)) — the
+modal of the printed lead-in ("deberían tratar" vs "debe cubrir") decides the policy per table. (6) A register on a worksheet whose prod text
+field already carries the register's natural name (`impact_categories`, `significant_issues`) takes the `_<std>` suffix (iso46001 trap 5) and
+the column that twins a prod NUMBER (`lci_result`) is renamed (`lci_value`) — the field-config test's shadow lint catches both. (7) A brief's
+"hide X unless allocation is performed" can contradict the standard's own taxonomy: §5.3.3.3 a) prints that a closed-loop procedure ITSELF
+avoids allocation, so `recycling_allocation_type` must not be keyed on "not avoided" — withhold with a J-block and the sentence; likewise a §6.3.2
+duty that binds every "estudio comparativo" is not keyed on the public-assertion boolean. (8) `count_rows(reg, a == true AND b == true)` over two
+optional boolean columns is decidable on every complete row (unset boxes read false) — an "independent chair" count needs no derived badge.
+
 **Staged DELETE rollbacks (controller ruling, Plan 3 Task 6 fix round 1 — corpus-wide).** A STAGED block that deletes rows
 from a table without an `active` column (`equations`, `compliance_requirements`) (1) copies the full rows into an archive table
 created in the SAME transaction (`CREATE TABLE IF NOT EXISTS <table>_archive_<slug> AS SELECT * FROM <table> WHERE false;
