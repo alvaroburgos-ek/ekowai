@@ -5030,6 +5030,248 @@ Report: `reports/plan-3-m820_1.md` (fix round 1 appended). STAGED SQL: `scripts/
 
 ---
 
+## Task 19 — DWA-M-820-2 (m820_2)
+
+Report: `reports/plan-3-m820_2.md`. STAGED SQL: `scripts/verification/m820_2-STAGED-plan3-rulings.sql` (same ids; every line a comment, 26 ☐ blocks). Prod facts from `src/lib/eval/field-configs/m820_2.prior.json` (read-only capture 2026-09-18: 113 fields, 252 sections, 0 equations, 59 gates — 4 with an empty condition) and `prod-query.mjs` (gate ids / md5, labels, VR, `is_required`, the 2 stored parameters of the standard — none on a register, `standards.version` 'April 2023'). Transcript lines refer to `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-820-2\DWA-M_820-2.md`. Worksheet codes are prod's `820-2-NN`.
+
+### m820_2-G-1 · DWA-M-820-2 · 820-2-22 · REQ-46 / REQ-47 IF-guarded on `testbetrieb_vs_abnahme_choice` (the inventory's top win)
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-46 (`testbetrieb_planned == true`, block) and REQ-47 (`abnahme_per_bild4 == true`, block) untouched; the brief's hide rules on the two booleans were REFUSED (producer guard: consumed by -23 / -24; gate guard: read by the unconditional gates) and are NOT emitted — today one of the two blocks fires wrongly for every project that chose the other model.
+- Evidence (verbatim, transcript line): "In den Vergabeunterlagen für die ausführenden Firmen muss der Auftraggeber formulieren, ob er sich für den Testbetrieb mit anschließender Abnahme, die Abnahmeprüfungen ohne Testbetrieb oder eine Mischform zwischen beiden entscheidet." (L1621); "Der Regelfall ist der Testbetrieb mit anschließender Abnahmeprüfung." (L1625); "Der Testbetrieb ersetzt nicht zwingend die Abnahmeprüfung" (L1623)
+- Proposed SQL / config: STAGED block G-1 — two md5-guarded UPDATEs with the archive pattern: `(IF testbetrieb_vs_abnahme_choice == 'testbetrieb' THEN testbetrieb_planned == true) AND (IF … == 'mischform' THEN …)` and the `abnahmepruefung` / `mischform` pair for REQ-47 (both halves parenthesised — the unparenthesised text folds into ONE guard, pinned). Verified both ways in-session through `evalCondition`. Owner's alternative: leave REQ-47 unconditional (L1623 / L1597: an Abnahme happens in every model) and guard REQ-46 only.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-C-1 · DWA-M-820-2 · 820-2-22 · `testbetrieb_planned` / `abnahme_per_bild4` hide rules (consumers -23 / -24)
+- Class: consumer-edit
+- Chosen now (fail-safe): both stay visible (consumed; no gate on -23 / -24 names them — what those worksheets read them for is not in the capture). G-1 makes the hide cosmetic.
+- Evidence (verbatim, transcript line): as G-1 (L1621).
+- Proposed SQL / config: STAGED block C-1 (`visible_when IS NULL`-guarded UPDATEs) — apply ONLY after G-1 and the owner's word that -23 / -24 do not need the inherited value when the model was not chosen.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-2 · DWA-M-820-2 · 820-2-16 · REQ-35 IF-guarded on the created attestation `einleitung_vorhanden`
+- Class: gate-guard
+- Chosen now (fail-safe): the boolean `einleitung_vorhanden` is CREATED (attestation, -16 C, 20260917101910) as the driver; REQ-35 (`discharge_permit_extension IN {"applied","granted","not_required"}`, warn) stays unconditional (the enum's `not_required` remains the only escape today); `discharge_permit_extension` stays visible (C-2).
+- Evidence (verbatim, transcript line): "Also laufen insbesondere die Erlaubnisse für die Einleitungen aus Kläranlagen oder Kanalnetzen regelmäßig wieder ab und müssen rechtzeitig verlängert oder neu beantragt werden." (L1313); "Rechtzeitig vor Ablauf werden die notwenigen Schritte für die Verlängerung oder die Neubeantragung von Erlaubnissen eingeleitet." (L1341)
+- Proposed SQL / config: STAGED block G-2 (`IF einleitung_vorhanden == true THEN discharge_permit_extension IN {…}`, md5-guarded, archive pattern; verified: false ⇒ pass, true + pending ⇒ fail, true + granted ⇒ pass). Whether `not_required` should leave the option set once a driver exists is a separate ruling.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-C-2 · DWA-M-820-2 · 820-2-16 · `discharge_permit_extension` hide rule (consumer -19)
+- Class: consumer-edit
+- Chosen now (fail-safe): visible (consumed by -19 AND read by REQ-35 — refused twice).
+- Evidence (verbatim, transcript line): as G-2 (L1313).
+- Proposed SQL / config: STAGED block C-2 (`einleitung_vorhanden == true`, after G-2 — the gate side is then exempt; the producer side needs the owner's word on -19).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-3 · DWA-M-820-2 · 820-2-17 · REQ-38 (Nebenangebote) IF-guarded on `vob_applicable`
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-38 (`nebenangebote_conditions == true`, block) untouched; the hide rule was refused (consumed by -19, gate-read).
+- Evidence (verbatim, transcript line): "Bei zugelassenen Nebenangeboten sind, wie es in der VOB/A gefordert ist, Mindestanforderungen an die Leistung zu formulieren. Der Bieter muss die Mindestanforderungen erfüllen und die Gleichwertigkeit nachweisen." (L1406); "Vor Ausschluss eines Nebenangebots wird geprüft, ob die Abweichung ein Nebenangebot oder ein (weiteres) Hauptangebot gemäß § 16d EU Absatz 3, VOB/A ist." (L1408)
+- Proposed SQL / config: STAGED block G-3 (`IF vob_applicable == true THEN nebenangebote_conditions == true`, md5-guarded; verified both ways).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-4 · DWA-M-820-2 · 820-2-17 / -18 · REQ-39 / REQ-40 under `vob_applicable` — the brief's driver is a reading, not a printed rule
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-39 (`eignungskriterien_set == true`, block) and REQ-40 (`leistungsbeschreibung_type IS NOT NULL`, warn) untouched. § 5.5.2 / § 5.5.3 name the PHASE ("Vorbereitung und Durchführen der Vergabe (Bauleistungen)"), not the VOB (R-5 on the brief's row 4 for these two).
+- Evidence (verbatim, transcript line): "In der Phase der Ausführungsplanung bzw. der Vorbereitung der Vergabe ist die Art der Vergabeverfahren für die Bauleistungen im konkreten Projekt zu definieren." (L1442); "In den Projekten der Wasserwirtschaft sollten globale funktionale Leistungsbeschreibungen vermieden werden." (L1450); heading "5.5 Phase „Vorbereitung und Durchführen der Vergabe“ (Bauleistungen)" (L1384)
+- Proposed SQL / config: STAGED block G-4 (the brief's guard on both, md5-guarded) — or REJECT and keep both unconditional (they apply to every Bauleistungs-Vergabe).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-C-3 · DWA-M-820-2 · 820-2-17 / -18 · the VOB trio hide rules (consumer -19)
+- Class: consumer-edit
+- Chosen now (fail-safe): all three visible (consumed by -19; gate-read by REQ-38 / -39 / -40).
+- Evidence (verbatim, transcript line): as G-3 / G-4.
+- Proposed SQL / config: STAGED block C-3 (`vob_applicable == true` on the three rows, after G-3 / G-4).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-5 · DWA-M-820-2 · 820-2-25 → 820-2-27 · REQ-59 "BIM basics established (if applicable)" — empty condition, wrong worksheet
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-59 untouched (empty ⇒ `manual`); the attestation `bim_methode_angewendet` is CREATED on -27 C as the driver (20260917101910).
+- Evidence (verbatim, transcript line): "Es ist geprüft, ob die BIM-Methode beim Auftraggeber angewendet werden kann, ob das Know-how und die Ressourcen zur Verfügung stehen." (L2303); "Es wird geklärt, ob das Projekt für die Anwendung der BIM-Methodik geeignet ist und ob die Beteiligten sowohl beim Auftraggeber als auch bei den Auftragnehmern die nötigen Kompetenzen und Qualifikationen aufweisen." (L2311). Prod: REQ-59 sits on 820-2-25 (Richtlinienverwaltung) where no BIM symbol resolves.
+- Proposed SQL / config: STAGED block G-5 (move to -27 + `IF bim_methode_angewendet == true THEN bim_basics_established == true`, archive pattern restores the empty condition and the -25 id).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-C-4 · DWA-M-820-2 · 820-2-26 / -27 · `liability_clarified` / `ip_rights_defined` / `bim_basics_established` hide rules (consumers -09 / -28)
+- Class: consumer-edit
+- Chosen now (fail-safe): all visible (consumed; `ip_rights_defined` also gate-read by REQ-56). The -28 fields are consumer-free but not BIM-conditional (J-3) — nothing staged for them.
+- Evidence (verbatim, transcript line): as G-5 / G-6 / G-7.
+- Proposed SQL / config: STAGED block C-4 (`innovation_scope_defined == true` on the two -26 rows, `bim_methode_angewendet == true` on `bim_basics_established`), after G-5 / G-6 / G-7.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-6 · DWA-M-820-2 · 820-2-26 · REQ-56 (Ideenschutz / Nutzungsrechte) IF-guarded on `innovation_scope_defined`
+- Class: gate-guard (+ severity question)
+- Chosen now (fail-safe): REQ-56 (`ip_rights_defined == true`, block) untouched.
+- Evidence (verbatim, transcript line): "Es werden klare Vereinbarungen über Ideen und Innovationen geschaffen, um einen Anreiz zu geben, neue Ideen zu entwickeln und so den technischen Fortschritt voranzutreiben." (L2166); "Im Vertrag mit dem Auftraggeber sollten der Umfang der Nutzung und die Nutzungsbefugnis sowie die dafür zu zahlende Vergütung angemessen und klar geregelt werden." (L2172); "Werden Innovationen von Planungsschaffenden bzw. Firmen verlangt, müssen Risiken im Rahmen einer systematischen Risikoanalyse erfasst und die Risikoverteilung vertraglich festgelegt werden." (L2062)
+- Proposed SQL / config: STAGED block G-6 (`IF innovation_scope_defined == true THEN ip_rights_defined == true`, md5-guarded). Whether prod's "Innovationsspielraum definiert" = "Innovationen werden verlangt", and whether L2172 "sollten" argues for warn, is the owner's.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-7 · DWA-M-820-2 · 820-2-25 → 820-2-26 · REQ-55 "Innovation scope and liability clarified" — empty condition, wrong worksheet
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-55 untouched (empty ⇒ `manual` on -25).
+- Evidence (verbatim, transcript line): "Die Haftungsfragen, die sich insbesondere mit neuartigen, innovativen Lösungsansätzen ergeben, die nicht die anerkannten Regeln der Technik erfüllen, sind vertraglich fair verteilt." (L2136); "Um Innovationen umzusetzen, braucht es eine faire Risikoverteilung." (L2142)
+- Proposed SQL / config: STAGED block G-7 (move to -26 + `IF innovation_scope_defined == true THEN liability_clarified == true`, warn kept).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-8 · DWA-M-820-2 · 820-2-05 · NEW warn gate REQ-61 over the `projekthandbuch_kapitel` checklist (all eight Anhang-B chapters)
+- Class: gate-guard (new gate on an anhaltswert outline)
+- Chosen now (fail-safe): the checklist is CREATED (json select_many, options = the seeded ANHANGB rows) beside `project_handbook_complete` (REQ-07 block keeps reading the boolean); no gate on the checklist.
+- Evidence (verbatim, transcript line): "Inhalte und Umfang des projektspezifischen Projekthandbuchs richten sich nach der Komplexität des jeweiligen Projekts und sind auf das Notwendige beschränkt. Im Anhang B ist ein Gliederungsvorschlag enthalten." (L663); "Häufig wird das Projekthandbuch nicht vollständig erstellt oder nicht gelebt." (L649)
+- Proposed SQL / config: STAGED block G-8 (`contains(projekthandbuch_kapitel, '<chapter>') == true AND …` ×8, warn — a bare `contains()` does not parse as a condition, probed).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-9 · DWA-M-820-2 · 820-2-06 · NEW warn gate REQ-62 over the `statusbericht_abschnitte` checklist (the 19 numbered Anhang-A sections)
+- Class: gate-guard (new gate on an anhaltswert outline)
+- Chosen now (fail-safe): the checklist is CREATED (21 options grouped Inhaltsverzeichnis / Anhang); REQ-08 (warn) keeps reading `status_report_frequency IS NOT NULL` only.
+- Evidence (verbatim, transcript line): "Es empfiehlt sich, einen Muster-Statusbericht (Gliederungsbeispiel siehe Anhang A), gegebenenfalls mit externer Unterstützung, aufzubauen, der zu Kosten, Terminen, Qualitäten, Entscheidungen, erreichten Etappenzielen etc. informiert." (L681); "Abhängig von den Anforderungen im Projekt kann der Statusbericht auf 1 bis 2 Seiten in stark zusammengefasster Form oder auch in textlicher Form in einem längeren Bericht erarbeitet werden." (L2525)
+- Proposed SQL / config: STAGED block G-9 (19 `contains(…) == true` terms, warn; the two annexes excluded).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-10 · DWA-M-820-2 · 820-2-06 · REQ-09 / REQ-15 read `lop_count` instead of the boolean `change_log_present`
+- Class: gate-guard (register-based rewrite)
+- Chosen now (fail-safe): the LOP register `offene_punkte` + `lop_count` / `lop_open` are CREATED; REQ-09 (`change_log_present == true AND change_impact_documented == true`, block) and REQ-15 (warn) keep reading the boolean (consumed by -08 / -09 — it stays).
+- Evidence (verbatim, transcript line): "Besprechungen werden mindestens mit Tagesordnung, Liste offener Punkte (LOP) und Zeitplanung vorbereitet." (L1130); "Regelmäßige (Jour fixe) Termine enthalten einen standardisierten Aufbau, der zum Beispiel Tagesordnungspunkte wie Freigabe letztes Protokoll, LOP-Liste, Kosten- und Terminsituation umfasst." (L1130)
+- Proposed SQL / config: STAGED block G-10 (`lop_count >= 1 AND change_impact_documented == true` / `lop_count >= 1`, md5-guarded, archive pattern). CAUTION: prod's boolean conflates the LOP (§ 5.3.1) with the Änderungsliste (§ 4.3.7 — the `change_orders` register lives on -21, unreachable from a -06 gate); the owner decides whether "Änderungsliste vorhanden" needs its own gate on -21 (`change_orders_count`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-11 · DWA-M-820-2 · 820-2-12 · REQ-25 reads the `entscheidungen` register instead of the boolean `decisions_documented`
+- Class: gate-guard (register-based rewrite)
+- Chosen now (fail-safe): register + `decisions_count` / `decisions_ohne_begruendung` CREATED; REQ-25 (block) keeps reading the boolean (consumed by -15 / -21 — stays).
+- Evidence (verbatim, transcript line): "Eine tabellarische Entscheidungsdokumentation wird geführt." (L1134); "Entscheidungen müssen, einschließlich der Gründe, transparent und nachvollziehbar dokumentiert sein und dauerhaft Bestand haben." (L1146); "Bei der Dokumentation von Entscheidungen werden auch die Gründe, die dazu geführt haben, dokumentiert." (L1150)
+- Proposed SQL / config: STAGED block G-11 — (b) `decisions_count >= 1 AND decisions_ohne_begruendung == 0` (staged) or (a) `decisions_count >= 1` (variant in the block). `begruendung IS NULL` counts absent AND empty-string cells (probed).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-12 · DWA-M-820-2 · 820-2-13 · NEW warn gate REQ-63 `third_parties_count >= 1` (REQ-28 stays)
+- Class: gate-guard (new gate)
+- Chosen now (fail-safe): register `dritte` + `third_parties_count` CREATED; REQ-28 (`third_parties_engaged_early == true`, block) untouched — "frühzeitig" is a timing fact the count cannot prove.
+- Evidence (verbatim, transcript line): "Der Bedarf an Fachplanungen, Gutachten, Rechtsberatung etc. ist intensiv zu recherchieren und realistisch zu ermitteln. Beteiligte Dritte sind möglichst frühzeitig in das Projekt einzubinden und, falls erforderlich, frühzeitig zu beauftragen." (L1198); "Im Rahmen der Projektvorbereitung wird eine umfassende Liste der Projektbeteiligten (Zuarbeit beispielsweise durch die Bedarfsplanung und die Objektplaner in LPH 1 „Grundlagenermittlung“) erstellt, erforderliche Leistungen werden möglichst früh beauftragt." (L1202)
+- Proposed SQL / config: STAGED block G-12.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-13 · DWA-M-820-2 · 820-2-16 · REQ-37 reads the `auflagen` register (open Auflagen) beside the boolean
+- Class: gate-guard (+ severity question)
+- Chosen now (fail-safe): register `auflagen` + `auflagen_count` / `auflagen_offen` CREATED; REQ-37 (`permit_conditions_tracked == true`, block) untouched (the boolean is consumed by -20 / -22 — stays).
+- Evidence (verbatim, transcript line): "Die von den Behörden erteilten Auflagen werden vollständig und sorgfältig beachtet." (L1374); "Eine aktive Nachverfolgung der Auflagen findet statt und hilft dabei, die Erledigung der Auflagen zu den erforderlichen Zeitpunkten nachweisen zu können." (L1380)
+- Proposed SQL / config: STAGED block G-13 (`permit_conditions_tracked == true AND (IF auflagen_count >= 1 THEN auflagen_offen == 0)`). Severity: an open Auflage during construction is normal — block at project close only, or warn; the owner's call.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-14 · DWA-M-820-2 · 820-2-19 · NEW warn gate REQ-64 `lots_count >= 1` (REQ-31 on -13 stays)
+- Class: gate-guard (new gate)
+- Chosen now (fail-safe): register `vergaben_los` + `lots_count` / `final_contract_value_calc` CREATED on -19; REQ-31 (`lot_strategy_documented == true`, block, on -13) untouched — a -13 gate cannot read a -19 register.
+- Evidence (verbatim, transcript line): "Die für den Projekterfolg erforderliche Aufteilung von Losen und Gewerken wird nach technischen Erfordernissen intensiv durchdacht und transparent begründet." (L1247); "Der Auftraggeber ist sich nicht immer darüber im Klaren, dass er die Bauleistungen abnehmen muss und bei Losen und Gewerken zu unterschiedlichen Zeitpunkten." (L1666)
+- Proposed SQL / config: STAGED block G-14.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-G-15 · DWA-M-820-2 · 820-2-24 · REQ-51 reads `warranty_count` (the Gewährleistungskalender) instead of the single date pair
+- Class: gate-guard (register-based rewrite)
+- Chosen now (fail-safe): register `gewaehrleistungen` (three REQUIRED dates per row) + `warranty_count` / `warranty_open_defects` CREATED; REQ-51 (`warranty_start_date IS NOT NULL AND warranty_end_date IS NOT NULL`, block) untouched; the pair stays (D-4 / D-5).
+- Evidence (verbatim, transcript line): "Es wird ein Gewährleistungskalender, mit Angabe des Beginns und des Endes der jeweiligen Gewährleistungsfristen, für jeden Auftragnehmer und für jede ausführende Firma geführt." (L1812); "Es gibt einen eindeutigen Abnahmezeitpunkt für jeden Auftragnehmer." (L1798); "Das Ende der Gewährleistungszeit wird jeweils durch ein Datum benannt." (L1803)
+- Proposed SQL / config: STAGED block G-15 (`warranty_count >= 1`, md5-guarded, archive pattern).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-D-1 · DWA-M-820-2 · 820-2-19 · `final_contract_value` ↔ `vergaben_los.auftragswert` (Σ `final_contract_value_calc`)
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the register column STAYS; the scalar (number, EUR, required, consumer-free, no gate, 0 stored values) stays typeable; the Σ twin `final_contract_value_calc` (820-2-19-D2) is created beside it — no second source is emitted for the typed value.
+- Evidence (verbatim, transcript line): as G-14 (L1666).
+- Proposed SQL / config: STAGED block D-1 (scalar → `derived`, equation D2 re-pointed onto `final_contract_value`, twin retired, footer re-pointed; archive rollback).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-D-2 · DWA-M-820-2 · 820-2-19 · `vergabeverfahren_used` ↔ `vergaben_los.verfahren`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): both stay (a single text cannot carry one Verfahren per lot; no derivation is meaningful for a text).
+- Evidence (verbatim, transcript line): "In der Phase der Ausführungsplanung bzw. der Vorbereitung der Vergabe ist die Art der Vergabeverfahren für die Bauleistungen im konkreten Projekt zu definieren." (L1442)
+- Proposed SQL / config: STAGED block D-2 (retire the scalar on ratification).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-D-3 · DWA-M-820-2 · 820-2-19 · `zuschlag_erteilt_datum` ↔ `vergaben_los.zuschlag`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): both stay (no date aggregation exists — F-1).
+- Evidence (verbatim, transcript line): as G-14 (L1666 — "bei Losen und Gewerken zu unterschiedlichen Zeitpunkten").
+- Proposed SQL / config: STAGED block D-3 (retire the scalar on ratification).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-D-4 · DWA-M-820-2 · 820-2-24 · `warranty_start_date` ↔ `gewaehrleistungen.beginn`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): both stay; REQ-51 keeps reading the pair until G-15.
+- Evidence (verbatim, transcript line): as G-15 (L1812).
+- Proposed SQL / config: STAGED block D-4 / D-5 (retire the pair after G-15).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-D-5 · DWA-M-820-2 · 820-2-24 · `warranty_end_date` ↔ `gewaehrleistungen.ende`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): both stay (as D-4).
+- Evidence (verbatim, transcript line): "Das Ende der Gewährleistungszeit wird jeweils durch ein Datum benannt." (L1803)
+- Proposed SQL / config: STAGED block D-4 / D-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-E-1 · DWA-M-820-2 · 820-2-15 / 820-2-01 · `lph_completed` value-format mismatch (prod enum tokens vs the Plan-1 label-string checklist)
+- Class: interface-gap (data format; D-1 keeps prod)
+- Chosen now (fail-safe): NO UPDATE emitted for `lph_completed` (its prod `enum_values` `lph_0 … lph_9` are non-null — `keep_prod`; the Plan-1 pair `lph_completed` / `included_hoai_phases` stays un-migrated, playbook I-1) — the Plan-1 TS checklists keep storing the label strings ("LPH 0 – Bedarfsplanung", …); `included_hoai_phases` has NULL `enum_values`. 0 stored values for either field (read-only count).
+- Evidence (verbatim, transcript line): "Teil 2 umfasst die Leistungserbringung aller Projektbeteiligten über alle Phasen hinweg, d. h. von der Bedarfsplanung (LPH 0) bis zur Objektbetreuung (LPH 9), inklusive Inbetriebnahme und Übergabe an den Betrieb." (L338)
+- Proposed SQL / config: STAGED block E-1 (copy the token set onto `included_hoai_phases`, switch both to DB `select_many`; nothing to convert). OPEN [CODE] item: the ChecklistEditor renders `enum_values[].value`, not the label — a DB checklist over `lph_0 …` would show the tokens until the editor takes `{value,label}` pairs.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-M-1 · DWA-M-820-2 · 820-2-15 · `lph_completed ⊆ included_hoai_phases` (both multi-select) as a gate
+- Class: multi-select-driver
+- Chosen now (fail-safe): no rule, no gate (a `visible_when` cannot be keyed on a multi-select; a gate can — via `contains()`).
+- Evidence (verbatim, transcript line): as E-1 (L338); "Nach jeder Leistungsphase werden dem Auftraggeber die Planungsinhalte vorgestellt und die Einhaltung der Projektziele (Termine, Kosten, Qualitäten) nachgewiesen." (L355)
+- Proposed SQL / config: STAGED block M-1 — NEW warn gate REQ-65 on -15: ten parenthesised `(IF contains(lph_completed, 'lph_N') == true THEN contains(included_hoai_phases, 'lph_N') == true)` terms (probed: completed-not-included ⇒ fail, both ⇒ pass, not completed ⇒ pass; a bare `contains()` does not parse). Depends on E-1 (same token strings in both carriers).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-F-1 · DWA-M-820-2 · 820-2-24 · earliest warranty start / latest end from the Gewährleistungskalender
+- Class: text-only-formula (no date arithmetic in the expression language)
+- Chosen now (fail-safe): not encoded — the register carries the dates per row; the pair `warranty_start_date` / `warranty_end_date` stays as the project-level entry (D-4 / D-5). Probed: date cells are strings; `min_rows(gewaehrleistungen, beginn)` / `max_rows(…, ende)` ⇒ `manual_required` "Operand ist keine Zahl: 2026-03-01".
+- Evidence (verbatim, transcript line): "Es wird ein Gewährleistungskalender, mit Angabe des Beginns und des Endes der jeweiligen Gewährleistungsfristen, für jeden Auftragnehmer und für jede ausführende Firma geführt." (L1812)
+- Proposed SQL / config: none — a [CODE] item (date functions / date-typed `min_rows`) if the owner wants the two derived dates.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-J-1 · DWA-M-820-2 · 820-2-11 · Bedarfsplanung Konzept / Projekt hide by `project_category` (brief Step 4 row 8) — refuted
+- Class: gate-guard (withheld rule)
+- Chosen now (fail-safe): no rule. The guideline requires the Bedarfsplanung for the Gesamtkonzept AND every (Teil-)Projekt — a hide keyed on `project_category == 'konzept'` would contradict it; the -11 booleans are consumed (-12 / -15) and gate-read (REQ-21 … REQ-23) anyway.
+- Evidence (verbatim, transcript line): "Er erstreckt sich auch auf die zugehörigen Bedarfsplanungen, da sowohl die Konzepte als auch alle Projekte einer umfangreichen Vorbereitung durch den Auftraggeber bedürfen." (L336); "Aufstellung einer umfassenden Bedarfsplanung gemäß Merkblatt DWA-M 820-1:2020, sowohl für das Gesamtkonzept als auch für die zur Umsetzung erforderlichen (Teil-)Projekte." (L1058)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-J-2 · DWA-M-820-2 · 820-2-03 · `hoai_compliance` ← `contract_type == 'planning'` (brief Step 4 row 6) — no printed rule
+- Class: gate-guard (withheld rule; R-5)
+- Chosen now (fail-safe): no rule. The transcript has no §2.2 / §4.6 sentence limiting HOAI conformity to planning contracts; its HOAI mentions delimit the Grundleistungen (L747 / L756 / L772 / L824 / L855). `hoai_compliance` is consumed by -15 / -19 anyway (producer refusal).
+- Evidence (verbatim, transcript line): "Die Terminmanagementleistungen werden von den Leistungen, die nach HOAI erbracht werden müssen, abgegrenzt." (L747) — the closest printed sentence; no conditional.
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-J-3 · DWA-M-820-2 · 820-2-27 / -28 · "BIM fields" hide under `bim_basics_established` (brief Step 4 row 5) — refuted
+- Class: gate-guard (withheld rule)
+- Chosen now (fail-safe): no rule. The -27 / -28 fields are § 8.2.1 software, § 8.2.2 data quality, § 8.3.3 Datenplattform, § 8.7 GIS, § 8.8 TOM, § 8.9 Rechte an digitalen Daten — none is conditional on BIM in the transcript; `gis_data_quality` (consumer-free, gate-free — the one EMITTABLE rule) is § 8.7 Geoinformationssysteme. The only BIM-conditional item is `bim_basics_established` itself (G-5).
+- Evidence (verbatim, transcript line): "Ein besonderes Augenmerk ist aber auf die Datenqualität, die in Metadaten dokumentiert sein sollte, zu legen." (L2485 — § 8.7, GIS); "Es ist geprüft, ob die BIM-Methode beim Auftraggeber angewendet werden kann" (L2303 — § 8.3.2)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-I-1 · DWA-M-820-2 · 820-2-16 · `auflagen.genehmigung` is free text — no reference to the `permit_inventory_complete` rows
+- Class: interface-gap
+- Chosen now (fail-safe): text column with placeholder "wie in der Genehmigungsinventur" (the brief's "G-10 flattening"); a register column cannot pick a row of another register (`reference` is a scalar-field widget).
+- Evidence (verbatim, transcript line): "Neben den wasserrechtlichen Genehmigungstatbeständen sind frühzeitig die erforderlichen Genehmigungen aus anderen Bereichen projektspezifisch zusammenzustellen." (L1317); "Eine aktive Nachverfolgung der Auflagen findet statt" (L1380)
+- Proposed SQL / config: none — a [CODE] item (register column type `reference` over another carrier's rows) if wanted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-O-1 · DWA-M-820-2 · Anhang A / Anhang B · `anhaltswert` policy of the two outline catalogues
+- Class: override-policy
+- Chosen now (fail-safe): `anhaltswert` on ANHANGA and ANHANGB (the checklists pick rows, nothing is overwritten — the policy matters only for a future `lookup_fill`). The brief's cue "Ein erster Gliederungsvorschlag" is NOT printed (R-5); the printed heads and sentences carry the same meaning.
+- Evidence (verbatim, transcript line): "Anhang A Gliederungsvorschlag für einen Statusbericht" (L2523); "Anhang B Gliederungsvorschlag für ein Projekthandbuch" (L2559); "Im Anhang B ist ein Gliederungsvorschlag enthalten." (L663); "Es empfiehlt sich, einen Muster-Statusbericht (Gliederungsbeispiel siehe Anhang A) … aufzubauen" (L681)
+- Proposed SQL / config: none (seed as emitted).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_2-X-1 · DWA-M-820-2 · 820-2-19 · `vergaben_los` → Teil 1 Loseausnahme (DWA-M-820-1 M820-09 `lose`)
+- Class: cross-standard
+- Chosen now (fail-safe): the Teil-2 lot register is self-contained; nothing feeds the Teil-1 `lose` register (no cross-standard inheritance exists — Phase 6).
+- Evidence (verbatim, transcript line): "Bei der Losbildung ist der vergaberechtliche Spielraum berücksichtigt, indem insbesondere technische Aspekte berücksichtigt und bewertet werden." (L1251)
+- Proposed SQL / config: none (Phase 6 item: one lot list shared by both parts).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (no signature needed)
+- REQ-13 ("Cost estimation tuned to project (Auftragnehmer)", warn, 820-2-05) and REQ-50 ("Testbetrieb / Inbetriebnahme organised, responsibilities …", warn, 820-2-20) carry EMPTY conditions (`manual` on every project); REQ-55 / REQ-59 (also empty) sit on 820-2-25 where none of their symbols resolves — G-5 / G-7 propose their moves; REQ-13 / REQ-50 have no field to read (§ 4.5.3 / § 5.7.6 are procedural sentences) and stay observations.
+- `status_report_frequency` / `controlling_reports_frequency` (enum weekly … ad_hoc) and `mgmt_cycle_frequency` (2/3/4-wöchentlich): the transcript prints a DEFAULT sentence ("Es bietet sich in der Regel ein vierteljährlicher Turnus an." L688; "kontinuierlich in meist zwei- bis vierwöchigen Abständen" L549), no value table — nothing seeded, no rule (inventory §1 confirmed).
+- No captured field of this standard lists its own worksheet as a consumer (Task 12b class) — pinned; 97 of 113 fields carry consumers, the 16 orphans have no section.
+- Every Plan-3 equation of this standard is register-fed and lives on its register's worksheet — all 14 outputs are materialised by the save path (no scalar-only row; amendment D has nothing to note here).
+- The Plan-1 `change_orders` config typed `datum` as text (placeholder TT.MM.JJJJ); the in-place upgrade types it `date` (0 stored rows in prod — checked read-only 2026-09-18; the Plan-1 selection migration is unapplied, so no stored text date exists to convert).
+
 ## Plan 3 tooling rulings
 
 ### plan3-T-12c · [CODE] · `emit-field-configs-sql.ts` gate-aware guard · a `visible_when` may not silently disarm a same-worksheet gate

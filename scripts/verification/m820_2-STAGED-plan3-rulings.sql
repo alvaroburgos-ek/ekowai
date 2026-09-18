@@ -1,0 +1,476 @@
+-- DWA-M-820-2 — Plan 3 Task 19 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, gate ids / conditions / md5, column lists) were
+-- captured read-only on 2026-09-18 (src/lib/eval/field-configs/m820_2.prior.json; prod-query.mjs for the
+-- compliance_requirements ids / md5(condition) quoted below — the md5 read from prod, the long cells never retyped).
+-- Transcript lines refer to C:\Users\Ekowai\Desktop\Guidelines\DWA-M-820-2\DWA-M_820-2.md.
+--
+-- Conventions: `s.code = 'DWA-M-820-2'`, worksheets by code (prod codes are `820-2-NN`), never by id; every UPDATE is
+-- guarded by the prior value (or md5) it replaces so a re-run is a no-op; each block names its rollback. A staged
+-- gate rewrite archives the full compliance_requirements row into `compliance_requirements_archive_m820_2` in the
+-- SAME transaction (CREATE TABLE … AS SELECT * … WHERE false; INSERT … SELECT c.* WHERE c.id = … AND md5(c.condition) = …),
+-- guards the UPDATE on md5(condition), and rolls back by restoring `condition` / `description` /
+-- `worksheet_template_id` from the archive by id with an EXPLICIT column list; the archive table is dropped by the
+-- LAST rollback that uses it OR by the owner once every gate change is signed off as final. (No block below DELETES
+-- a compliance row or an equation: prod holds 0 equations for this standard; every gate change is an UPDATE, every
+-- new gate an INSERT with its DELETE rollback.)
+-- The Plan-3 DATA migrations (20260917101900 seed · 20260917101910 field configs · 20260917101920 equations) must be
+-- applied BEFORE any block that reads a created symbol (einleitung_vorhanden, bim_methode_angewendet, lop_count,
+-- decisions_count, third_parties_count, auflagen_count, lots_count, final_contract_value_calc, warranty_count,
+-- projekthandbuch_kapitel, statusbericht_abschnitte).
+--
+-- Column lists (information_schema, read-only 2026-09-18):
+--   fields: id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values,
+--     validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status,
+--     source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value,
+--     verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote (+ the Plan-1
+--     columns widget, ui_config, lookup, visible_when after 20260911100000)
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference,
+--     severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes,
+--     audited_at, audited_by, requires_attestation   (no `active` column — every row is live; max code today REQ-60)
+--
+-- Shorthand used below:  WS(code) = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--                                    WHERE s.code = 'DWA-M-820-2' AND w.code = '<code>')
+--                        FLD(ws, sym) = UPDATE fields f … FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--                                       WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND w.code = '<ws>' AND f.symbol = '<sym>' AND f.active
+--                        ARCHIVE(id, md5) = CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m820_2 AS SELECT * FROM compliance_requirements WHERE false;
+--                                           INSERT INTO compliance_requirements_archive_m820_2 SELECT c.* FROM compliance_requirements c WHERE c.id = '<id>' AND md5(c.condition) = '<md5>';
+--                        RESTORE(id) = UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity
+--                                        FROM compliance_requirements_archive_m820_2 a WHERE a.id = c.id AND c.id = '<id>';
+
+-- =====================================================================================================================
+-- m820_2-G-1 · 820-2-22 · REQ-46 (id 3b7c3831-a29b-41b2-99b6-11b5d4577fa8, block, md5 eab8c4028cb5e1e3e6076dc369e50b08)
+--                       and REQ-47 (id 182a4c10-de59-44fe-a474-aa5e35015759, block, md5 96861060f66a9baf54914986e6f36ef5)
+--   — IF-guard the Testbetrieb / Abnahmeprüfung pair on testbetrieb_vs_abnahme_choice (the inventory's top win)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1621 "In den Vergabeunterlagen für die ausführenden Firmen muss der Auftraggeber formulieren, ob er sich für den Testbetrieb
+-- mit anschließender Abnahme, die Abnahmeprüfungen ohne Testbetrieb oder eine Mischform zwischen beiden entscheidet."; L1625 "Der Regelfall
+-- ist der Testbetrieb mit anschließender Abnahmeprüfung."; L1623 "Der Testbetrieb ersetzt nicht zwingend die Abnahmeprüfung".
+-- Prod: REQ-46 'testbetrieb_planned == true' and REQ-47 'abnahme_per_bild4 == true' are UNCONDITIONAL blocks on 820-2-22; the driver
+-- testbetrieb_vs_abnahme_choice (820-2-18, enum testbetrieb | abnahmepruefung | mischform, required) is inherited on -22
+-- (consumer_worksheets ["820-2-22"]). Today a project that chose "Abnahmeprüfungen ohne Testbetrieb" is blocked by REQ-46 and one that
+-- chose the Testbetrieb by REQ-47. The brief's hide rules on the two booleans were REFUSED (consumed by -23 / -24 — C-1 — and read by
+-- these gates); the guard below is the fix the words support. CAUTION (m820_1 fix-round lesson): both halves MUST be parenthesised —
+-- `IF a THEN x AND IF b THEN y` parses as ONE guard whose body swallows the second IF (pinned in field-configs-m820-2.test.ts).
+-- Owner's call on REQ-47: L1623 / L1597 say an Abnahme happens in EVERY model (the Testbetrieb is followed by an Abnahmeprüfung that
+-- may reuse its documentation) — the alternative is to leave REQ-47 unconditional and guard only REQ-46; the brief's reading
+-- ("abnahme_per_bild4" = the Bild-4 scheme WITHOUT Testbetrieb) is staged.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m820_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m820_2 SELECT c.* FROM compliance_requirements c
+--  WHERE (c.id = '3b7c3831-a29b-41b2-99b6-11b5d4577fa8' AND md5(c.condition) = 'eab8c4028cb5e1e3e6076dc369e50b08')
+--     OR (c.id = '182a4c10-de59-44fe-a474-aa5e35015759' AND md5(c.condition) = '96861060f66a9baf54914986e6f36ef5');
+-- UPDATE compliance_requirements c SET
+--   condition = '(IF testbetrieb_vs_abnahme_choice == ''testbetrieb'' THEN testbetrieb_planned == true) AND (IF testbetrieb_vs_abnahme_choice == ''mischform'' THEN testbetrieb_planned == true)',
+--   description = 'Plan 3 (m820_2-G-1): Testbetrieb nur gefordert, wenn der Auftraggeber sich für den Testbetrieb mit anschließender Abnahme oder eine Mischform entschieden hat (L1621).'
+--  WHERE c.id = '3b7c3831-a29b-41b2-99b6-11b5d4577fa8' AND md5(c.condition) = 'eab8c4028cb5e1e3e6076dc369e50b08';
+-- UPDATE compliance_requirements c SET
+--   condition = '(IF testbetrieb_vs_abnahme_choice == ''abnahmepruefung'' THEN abnahme_per_bild4 == true) AND (IF testbetrieb_vs_abnahme_choice == ''mischform'' THEN abnahme_per_bild4 == true)',
+--   description = 'Plan 3 (m820_2-G-1): Abnahmeprüfungen nach Bild 4 nur gefordert, wenn der Auftraggeber sich für die Abnahmeprüfungen ohne Testbetrieb oder eine Mischform entschieden hat (L1621).'
+--  WHERE c.id = '182a4c10-de59-44fe-a474-aa5e35015759' AND md5(c.condition) = '96861060f66a9baf54914986e6f36ef5';
+-- COMMIT;
+-- Rollback: RESTORE('3b7c3831-a29b-41b2-99b6-11b5d4577fa8'); RESTORE('182a4c10-de59-44fe-a474-aa5e35015759'); DROP the archive when no
+--   other block uses it. Verified both ways in-session through evalCondition: choice abnahmepruefung + planned=false ⇒ pass (REQ-46 no
+--   longer fires), choice testbetrieb + planned=false ⇒ fail, mischform + true ⇒ pass, choice unset ⇒ pending.
+
+-- =====================================================================================================================
+-- m820_2-C-1 · 820-2-22 · testbetrieb_planned / abnahme_per_bild4 hide rules (brief Step 4 rows 1–2) — consumers -23 / -24
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1621 (as G-1). Prod: both booleans carry consumer_worksheets ["820-2-23","820-2-24"] (the emitter's producer guard refused
+-- the rules; a hidden producer nulls the inherited copy). The gate guard G-1 makes the hide cosmetic; the rules are staged ONLY for the
+-- case the owner confirms -23 / -24 do not need the inherited value when the model was not chosen (what those worksheets read the two
+-- booleans for is not visible in the capture — no gate on -23 / -24 names them).
+-- BEGIN;
+-- FLD(820-2-22, testbetrieb_planned) SET visible_when = 'testbetrieb_vs_abnahme_choice IN {''testbetrieb'', ''mischform''}' … AND f.visible_when IS NULL;
+-- FLD(820-2-22, abnahme_per_bild4) SET visible_when = 'testbetrieb_vs_abnahme_choice IN {''abnahmepruefung'', ''mischform''}' … AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on both rows WHERE visible_when = '<the text above>'.
+-- Apply ONLY after G-1 (a hidden symbol under the unguarded gates would turn them not_applicable instead of pass).
+
+-- =====================================================================================================================
+-- m820_2-G-2 · 820-2-16 · REQ-35 (id 4b609e49-c54e-4e88-b5c5-00849c0a958b, warn, md5 2bb9d50c92d791a9b0ae64d9702941aa)
+--   — IF-guard the Einleitungserlaubnis gate on the created attestation einleitung_vorhanden
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1313 "Also laufen insbesondere die Erlaubnisse für die Einleitungen aus Kläranlagen oder Kanalnetzen regelmäßig wieder ab und
+-- müssen rechtzeitig verlängert oder neu beantragt werden."; L1341 "Rechtzeitig vor Ablauf werden die notwenigen Schritte für die
+-- Verlängerung oder die Neubeantragung von Erlaubnissen eingeleitet." Prod: REQ-35 'discharge_permit_extension IN {"applied","granted",
+-- "not_required"}' (warn, title "Discharge permit extension applied for") has NO driver — the enum's not_required is the only escape;
+-- the created boolean einleitung_vorhanden (20260917101910, 820-2-16 C) is the driver. The prod option set is kept as is (fail-safe;
+-- with a driver, not_required may be the owner's candidate for removal — separate ruling).
+-- BEGIN;
+-- ARCHIVE('4b609e49-c54e-4e88-b5c5-00849c0a958b', '2bb9d50c92d791a9b0ae64d9702941aa');
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF einleitung_vorhanden == true THEN discharge_permit_extension IN {"applied","granted","not_required"}',
+--   description = 'Plan 3 (m820_2-G-2): nur wenn das Projekt eine befristete Einleitungserlaubnis umfasst (L1313).'
+--  WHERE c.id = '4b609e49-c54e-4e88-b5c5-00849c0a958b' AND md5(c.condition) = '2bb9d50c92d791a9b0ae64d9702941aa';
+-- COMMIT;
+-- Rollback: RESTORE('4b609e49-c54e-4e88-b5c5-00849c0a958b'). Verified: einleitung false ⇒ pass; true + pending ⇒ fail; true + granted ⇒ pass.
+
+-- =====================================================================================================================
+-- m820_2-C-2 · 820-2-16 · discharge_permit_extension hide rule (brief Step 4 row 3) — consumer -19
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1313 (as G-2). Prod: consumer_worksheets ["820-2-19"] AND read by REQ-35 (IN, not an IF guard) — refused twice. After G-2
+-- the rule `einleitung_vorhanden == true` would be exempt on the gate side (same driver / op / literal) but still hides a producer.
+-- BEGIN;
+-- FLD(820-2-16, discharge_permit_extension) SET visible_when = 'einleitung_vorhanden == true' … AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL WHERE visible_when = 'einleitung_vorhanden == true'. Apply ONLY after G-2 and only if -19 does not
+--   need the inherited value for a project without Einleitung (no -19 gate names it — the field is display-only there today).
+
+-- =====================================================================================================================
+-- m820_2-G-3 · 820-2-17 · REQ-38 (id 5aacd93e-bfab-45b7-94f7-ecc8e1274683, block, md5 83d8cdd4a19cfa2586d02bb3b72166cb)
+--   — IF-guard the Nebenangebote gate on vob_applicable (the printed VOB/A sentence)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1406 "Bei zugelassenen Nebenangeboten sind, wie es in der VOB/A gefordert ist, Mindestanforderungen an die Leistung zu
+-- formulieren. Der Bieter muss die Mindestanforderungen erfüllen und die Gleichwertigkeit nachweisen."; L1408 "… gemäß § 16d EU Absatz 3,
+-- VOB/A". Prod: REQ-38 'nebenangebote_conditions == true' (block) unconditional; vob_applicable (820-2-03, boolean, required) is
+-- inherited on -17 (consumer_worksheets ["820-2-09","820-2-17","820-2-18"]).
+-- BEGIN;
+-- ARCHIVE('5aacd93e-bfab-45b7-94f7-ecc8e1274683', '83d8cdd4a19cfa2586d02bb3b72166cb');
+-- UPDATE compliance_requirements c SET condition = 'IF vob_applicable == true THEN nebenangebote_conditions == true',
+--   description = 'Plan 3 (m820_2-G-3): Mindestanforderungen an Nebenangebote "wie es in der VOB/A gefordert ist" (L1406) — nur bei VOB-Anwendung.'
+--  WHERE c.id = '5aacd93e-bfab-45b7-94f7-ecc8e1274683' AND md5(c.condition) = '83d8cdd4a19cfa2586d02bb3b72166cb';
+-- COMMIT;
+-- Rollback: RESTORE('5aacd93e-bfab-45b7-94f7-ecc8e1274683'). Verified: vob false ⇒ pass; vob true + false ⇒ fail.
+
+-- =====================================================================================================================
+-- m820_2-G-4 · 820-2-17 / -18 · REQ-39 (id 34814ca2-fea7-474b-8cd4-59a0a998d126, block, md5 6bbf8408017e86eb5af299489d9ba2b7)
+--                              and REQ-40 (id 6e1ab13f-cb65-4552-aea5-912431684d8c, warn, md5 d4417634fb104153b4002059561b172d)
+--   — the brief's vob_applicable guard on Eignungskriterien and Leistungsbeschreibung: the words name the PHASE, not the VOB
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: § 5.5 heading L1384 "Phase „Vorbereitung und Durchführen der Vergabe“ (Bauleistungen)"; L1442 "In der Phase der
+-- Ausführungsplanung bzw. der Vorbereitung der Vergabe ist die Art der Vergabeverfahren für die Bauleistungen im konkreten Projekt zu
+-- definieren."; L1450 "In den Projekten der Wasserwirtschaft sollten globale funktionale Leistungsbeschreibungen vermieden werden."
+-- Neither § 5.5.2 nor § 5.5.3 mentions the VOB — the brief's driver is the executor's reading ("Bauleistungen ⇒ VOB/A"), NOT a printed
+-- rule (R-5). Staged as proposed by the brief; the owner may prefer to leave both unconditional (they apply to every Bauleistungs-Vergabe).
+-- BEGIN;
+-- ARCHIVE('34814ca2-fea7-474b-8cd4-59a0a998d126', '6bbf8408017e86eb5af299489d9ba2b7'); ARCHIVE('6e1ab13f-cb65-4552-aea5-912431684d8c', 'd4417634fb104153b4002059561b172d');
+-- UPDATE compliance_requirements c SET condition = 'IF vob_applicable == true THEN eignungskriterien_set == true',
+--   description = 'Plan 3 (m820_2-G-4): nur bei VOB-Anwendung (Lesart des Bearbeiters — § 5.5.2 nennt die VOB nicht).'
+--  WHERE c.id = '34814ca2-fea7-474b-8cd4-59a0a998d126' AND md5(c.condition) = '6bbf8408017e86eb5af299489d9ba2b7';
+-- UPDATE compliance_requirements c SET condition = 'IF vob_applicable == true THEN leistungsbeschreibung_type IS NOT NULL',
+--   description = 'Plan 3 (m820_2-G-4): nur bei VOB-Anwendung (Lesart des Bearbeiters — § 5.5.3 nennt die VOB nicht).'
+--  WHERE c.id = '6e1ab13f-cb65-4552-aea5-912431684d8c' AND md5(c.condition) = 'd4417634fb104153b4002059561b172d';
+-- COMMIT;
+-- Rollback: RESTORE both ids.
+
+-- =====================================================================================================================
+-- m820_2-C-3 · 820-2-17 / -18 · nebenangebote_conditions / eignungskriterien_set / leistungsbeschreibung_type hide rules — consumer -19
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Prod: all three carry consumer_worksheets ["820-2-19"] (producer guard) and are read by REQ-38 / -39 / -40 (gate guard) — refused.
+-- After G-3 / G-4 the gate side is exempt for `vob_applicable == true`; the producer side needs the owner's word that -19 does not
+-- read them for a non-VOB project.
+-- BEGIN;
+-- FLD(820-2-17, nebenangebote_conditions) SET visible_when = 'vob_applicable == true' … AND f.visible_when IS NULL;
+-- FLD(820-2-17, eignungskriterien_set) SET visible_when = 'vob_applicable == true' … AND f.visible_when IS NULL;
+-- FLD(820-2-18, leistungsbeschreibung_type) SET visible_when = 'vob_applicable == true' … AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on the three rows WHERE visible_when = 'vob_applicable == true'. Apply ONLY after G-3 / G-4.
+
+-- =====================================================================================================================
+-- m820_2-G-5 · 820-2-25 → 820-2-27 · REQ-59 (id efc3b96a-b83a-4034-af94-e77195f3b29c, warn, EMPTY condition, md5 d41d8cd98f00b204e9800998ecf8427e)
+--   — "BIM basics established (if applicable)": give it a condition on the created driver bim_methode_angewendet and move it to -27
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2303 "Es ist geprüft, ob die BIM-Methode beim Auftraggeber angewendet werden kann, ob das Know-how und die Ressourcen zur
+-- Verfügung stehen."; L2311 "Es wird geklärt, ob das Projekt für die Anwendung der BIM-Methodik geeignet ist und ob die Beteiligten sowohl
+-- beim Auftraggeber als auch bei den Auftragnehmern die nötigen Kompetenzen und Qualifikationen aufweisen." Prod: REQ-59 sits on 820-2-25
+-- (Richtlinienverwaltung) with an EMPTY condition (manual on every project, pending nowhere); bim_basics_established lives on 820-2-27
+-- (boolean, optional, consumed by -28). The created attestation bim_methode_angewendet (20260917101910, -27 C) is the driver.
+-- BEGIN;
+-- ARCHIVE('efc3b96a-b83a-4034-af94-e77195f3b29c', 'd41d8cd98f00b204e9800998ecf8427e');
+-- UPDATE compliance_requirements c SET worksheet_template_id = WS(820-2-27),
+--   condition = 'IF bim_methode_angewendet == true THEN bim_basics_established == true',
+--   description = 'Plan 3 (m820_2-G-5): BIM-Grundlagen (Ziele, AIA, Know-how, Ressourcen) gefordert, wenn das Projekt mit der BIM-Methode abgewickelt wird (L2303 / L2311).'
+--  WHERE c.id = 'efc3b96a-b83a-4034-af94-e77195f3b29c' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- Rollback: RESTORE('efc3b96a-b83a-4034-af94-e77195f3b29c') (restores the empty condition AND the -25 worksheet id from the archive).
+
+-- =====================================================================================================================
+-- m820_2-C-4 · 820-2-26 / -27 · liability_clarified / ip_rights_defined / bim_basics_established hide rules — consumers -09 / -28
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Prod: liability_clarified → ["820-2-09"], ip_rights_defined → ["820-2-28"] (and read by REQ-56), bim_basics_established → ["820-2-28"]
+-- — every hide rule of the brief's rows 4 and 7 was refused by the producer guard (ip_rights_defined also by the gate guard).
+-- The -28 fields are consumer-free but NOT BIM-conditional in the transcript (J-3) — no rule staged for them.
+-- BEGIN;
+-- FLD(820-2-26, liability_clarified) SET visible_when = 'innovation_scope_defined == true' … AND f.visible_when IS NULL;
+-- FLD(820-2-26, ip_rights_defined) SET visible_when = 'innovation_scope_defined == true' … AND f.visible_when IS NULL;
+-- FLD(820-2-27, bim_basics_established) SET visible_when = 'bim_methode_angewendet == true' … AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on the three rows WHERE visible_when = '<text>'. Apply ONLY after G-5 / G-6 / G-7 and the owner's word
+--   that -09 / -28 do not need the inherited booleans when the driver is false.
+
+-- =====================================================================================================================
+-- m820_2-G-6 · 820-2-26 · REQ-56 (id cd4f5220-450e-4f97-b9c0-e3d904a833b3, block, md5 143165ae017ac5504f4c18dd0948d8da)
+--   — IF-guard the Ideenschutz / Nutzungsrechte gate on innovation_scope_defined
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2166 "Es werden klare Vereinbarungen über Ideen und Innovationen geschaffen, um einen Anreiz zu geben, neue Ideen zu
+-- entwickeln und so den technischen Fortschritt voranzutreiben."; L2172 "Im Vertrag mit dem Auftraggeber sollten der Umfang der Nutzung
+-- und die Nutzungsbefugnis sowie die dafür zu zahlende Vergütung angemessen und klar geregelt werden."; L2062 "Werden Innovationen von
+-- Planungsschaffenden bzw. Firmen verlangt, müssen Risiken im Rahmen einer systematischen Risikoanalyse erfasst und die Risikoverteilung
+-- vertraglich festgelegt werden." Prod: REQ-56 'ip_rights_defined == true' (block) unconditional; innovation_scope_defined (-26, boolean,
+-- optional, label "Innovationsspielraum definiert") is the worksheet's own field. Whether "Innovationsspielraum definiert" == "Innovationen
+-- werden verlangt" is the owner's reading — L2172 ("sollten") may also argue for warn instead of block.
+-- BEGIN;
+-- ARCHIVE('cd4f5220-450e-4f97-b9c0-e3d904a833b3', '143165ae017ac5504f4c18dd0948d8da');
+-- UPDATE compliance_requirements c SET condition = 'IF innovation_scope_defined == true THEN ip_rights_defined == true',
+--   description = 'Plan 3 (m820_2-G-6): Ideenschutz / Vergütung / Nutzungsrechte vertraglich geregelt, wenn Innovationen verlangt werden (§ 7.6, L2166 / L2172).'
+--  WHERE c.id = 'cd4f5220-450e-4f97-b9c0-e3d904a833b3' AND md5(c.condition) = '143165ae017ac5504f4c18dd0948d8da';
+-- COMMIT;
+-- Rollback: RESTORE('cd4f5220-450e-4f97-b9c0-e3d904a833b3').
+
+-- =====================================================================================================================
+-- m820_2-G-7 · 820-2-25 → 820-2-26 · REQ-55 (id 84d7fe78-4083-47c8-842e-71203915a7fa, warn, EMPTY condition, md5 d41d8cd98f00b204e9800998ecf8427e)
+--   — "Innovation scope and liability clarified": give it a condition and move it to -26
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2136 "Die Haftungsfragen, die sich insbesondere mit neuartigen, innovativen Lösungsansätzen ergeben, die nicht die
+-- anerkannten Regeln der Technik erfüllen, sind vertraglich fair verteilt."; L2142 "Um Innovationen umzusetzen, braucht es eine faire
+-- Risikoverteilung." Prod: REQ-55 sits on 820-2-25 with an EMPTY condition; liability_clarified / innovation_scope_defined live on -26.
+-- BEGIN;
+-- ARCHIVE('84d7fe78-4083-47c8-842e-71203915a7fa', 'd41d8cd98f00b204e9800998ecf8427e');
+-- UPDATE compliance_requirements c SET worksheet_template_id = WS(820-2-26),
+--   condition = 'IF innovation_scope_defined == true THEN liability_clarified == true',
+--   description = 'Plan 3 (m820_2-G-7): Haftungsfragen bei innovativen Lösungsansätzen vertraglich fair verteilt (§ 7.5, L2136 / L2142).'
+--  WHERE c.id = '84d7fe78-4083-47c8-842e-71203915a7fa' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- Rollback: RESTORE('84d7fe78-4083-47c8-842e-71203915a7fa').
+
+-- =====================================================================================================================
+-- m820_2-G-8 · 820-2-05 · NEW warn gate REQ-61 on the projekthandbuch_kapitel checklist (all eight Anhang-B chapters ticked)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L663 "Inhalte und Umfang des projektspezifischen Projekthandbuchs richten sich nach der Komplexität des jeweiligen Projekts
+-- und sind auf das Notwendige beschränkt. Im Anhang B ist ein Gliederungsvorschlag enthalten."; L649 "Häufig wird das Projekthandbuch
+-- nicht vollständig erstellt oder nicht gelebt." Prod: REQ-07 'project_handbook_complete == true' (block) reads the boolean only. The
+-- outline is a PROPOSAL scaled to the project (anhaltswert) — hence warn, and the owner may prefer a subset. `contains()` needs the
+-- `== true` comparison form (a bare `contains(...)` does not parse as a condition — probed).
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-61', 'Projekthandbuch deckt die Kapitel des Anhangs B ab',
+--   'contains(projekthandbuch_kapitel, ''1 Aufbau und Organisation des Organisationshandbuchs'') == true AND contains(projekthandbuch_kapitel, ''2 Projektinformationen'') == true AND contains(projekthandbuch_kapitel, ''3 Aufbauorganisation'') == true AND contains(projekthandbuch_kapitel, ''4 Aufgabenbeschreibungen'') == true AND contains(projekthandbuch_kapitel, ''5 Projekt- und Planungsorganisation'') == true AND contains(projekthandbuch_kapitel, ''6 EDV-, CAD-, BIM-Regelungen'') == true AND contains(projekthandbuch_kapitel, ''7 Terminliche Abwicklung'') == true AND contains(projekthandbuch_kapitel, ''8 Kostenmanagement'') == true',
+--   '§ 4.3.5; Anhang B', 'warn', 'Plan 3 (m820_2-G-8): alle acht Kapitel des Gliederungsvorschlags (Anhang B) sind im Projekthandbuch vorhanden — Vorschlag, projektspezifisch anpassbar (L663).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-05'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-61');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-61' AND worksheet_template_id = WS(820-2-05) AND description LIKE 'Plan 3 (m820_2-G-8)%'.
+
+-- =====================================================================================================================
+-- m820_2-G-9 · 820-2-06 · NEW warn gate REQ-62 on the statusbericht_abschnitte checklist (the 19 numbered Anhang-A sections)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L681 "Es empfiehlt sich, einen Muster-Statusbericht (Gliederungsbeispiel siehe Anhang A) … aufzubauen"; L2525 "Abhängig von
+-- den Anforderungen im Projekt kann der Statusbericht auf 1 bis 2 Seiten in stark zusammengefasster Form oder auch in textlicher Form in
+-- einem längeren Bericht erarbeitet werden." Prod: REQ-08 'status_report_frequency IS NOT NULL' (warn, "Status reports recognised and
+-- used") reads the frequency only. A Gliederungsbeispiel is a proposal — warn; the two annexes are NOT in the condition (optional attachments).
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-62', 'Statusbericht folgt dem Gliederungsvorschlag des Anhangs A',
+--   'contains(statusbericht_abschnitte, ''1 Einleitung'') == true AND contains(statusbericht_abschnitte, ''2 Organisation'') == true AND contains(statusbericht_abschnitte, ''3 Stand der Arbeiten'') == true AND contains(statusbericht_abschnitte, ''3.1 Planung und Ausschreibungen'') == true AND contains(statusbericht_abschnitte, ''3.2 Baufortschritt'') == true AND contains(statusbericht_abschnitte, ''3.3 Spezielle Ereignisse'') == true AND contains(statusbericht_abschnitte, ''4 Kostenübersicht'') == true AND contains(statusbericht_abschnitte, ''4.1 Stand der Rechnungen und Zahlungen'') == true AND contains(statusbericht_abschnitte, ''4.2 Arbeitsvergaben'') == true AND contains(statusbericht_abschnitte, ''4.3 Projektänderungen und Nachträge'') == true AND contains(statusbericht_abschnitte, ''4.4 Puffer (Reserven)'') == true AND contains(statusbericht_abschnitte, ''4.5 Prognose'') == true AND contains(statusbericht_abschnitte, ''5 Finanz- und Liquiditätsplan'') == true AND contains(statusbericht_abschnitte, ''6 Termine'') == true AND contains(statusbericht_abschnitte, ''7 Öffentlichkeitsarbeit'') == true AND contains(statusbericht_abschnitte, ''8 Qualitätsüberwachung'') == true AND contains(statusbericht_abschnitte, ''9 Risikoanalyse und Arbeitssicherheit'') == true AND contains(statusbericht_abschnitte, ''9.1 Risikoanalyse'') == true AND contains(statusbericht_abschnitte, ''9.2 Arbeitssicherheit'') == true',
+--   '§ 4.3.6; Anhang A', 'warn', 'Plan 3 (m820_2-G-9): der Muster-Statusbericht enthält die 19 Abschnitte des Gliederungsvorschlags (Anhang A) — Vorschlag, Umfang projektabhängig (L681 / L2525).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-06'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-62');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-62' AND worksheet_template_id = WS(820-2-06) AND description LIKE 'Plan 3 (m820_2-G-9)%'.
+
+-- =====================================================================================================================
+-- m820_2-G-10 · 820-2-06 · REQ-09 (id f9f5a459-1824-445a-b784-8306fe150aba, block, md5 b8ca89054af97083fbb2b0d6deb57798)
+--                        and REQ-15 (id 8b691c7e-2dd1-4a9f-ad76-f69c81e5567a, warn, md5 28203d1792af65496d587eb4aa0937b5)
+--   — read the LOP register instead of the boolean change_log_present
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1130 "Besprechungen werden mindestens mit Tagesordnung, Liste offener Punkte (LOP) und Zeitplanung vorbereitet."; L702 "…
+-- werden Änderungen … nach einem klar festgelegten Ablauf, beispielweise mithilfe von Formblättern, bearbeitet." Prod: REQ-09
+-- 'change_log_present == true AND change_impact_documented == true' (block), REQ-15 'change_log_present == true' (warn); the boolean's
+-- label is "LOP / Änderungsliste vorhanden" (consumed by -08 / -09 — the boolean STAYS; the gates read the register count instead).
+-- CAUTION: the boolean conflates the LOP (§ 5.3.1, meetings) with the Änderungsliste (§ 4.3.7, change management — the change_orders
+-- register on -21, a different worksheet: a gate on -06 cannot read it). The proposal reads the LOP only; the owner decides whether
+-- "Änderungsliste vorhanden" should instead be change_orders_count on -21 (a new gate there).
+-- BEGIN;
+-- ARCHIVE('f9f5a459-1824-445a-b784-8306fe150aba', 'b8ca89054af97083fbb2b0d6deb57798'); ARCHIVE('8b691c7e-2dd1-4a9f-ad76-f69c81e5567a', '28203d1792af65496d587eb4aa0937b5');
+-- UPDATE compliance_requirements c SET condition = 'lop_count >= 1 AND change_impact_documented == true',
+--   description = 'Plan 3 (m820_2-G-10): Liste offener Punkte geführt (mindestens ein Eintrag) und Auswirkungen dokumentiert (L1130 / L702).'
+--  WHERE c.id = 'f9f5a459-1824-445a-b784-8306fe150aba' AND md5(c.condition) = 'b8ca89054af97083fbb2b0d6deb57798';
+-- UPDATE compliance_requirements c SET condition = 'lop_count >= 1',
+--   description = 'Plan 3 (m820_2-G-10): Liste offener Punkte geführt (L1130).'
+--  WHERE c.id = '8b691c7e-2dd1-4a9f-ad76-f69c81e5567a' AND md5(c.condition) = '28203d1792af65496d587eb4aa0937b5';
+-- COMMIT;
+-- Rollback: RESTORE both ids. Note: lop_count is register-fed and materialised on save (0 on an empty register — the gate FAILS on a
+--   project without LOP entries, never silently passes).
+
+-- =====================================================================================================================
+-- m820_2-G-11 · 820-2-12 · REQ-25 (id 6c35feb6-d486-444f-ac5a-de7e2dd4f426, block, md5 259f1121a8a297e83d5cb90c6486b190)
+--   — read the Entscheidungsdokumentation register instead of the boolean decisions_documented
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1134 "Eine tabellarische Entscheidungsdokumentation wird geführt."; L1146 "Entscheidungen müssen, einschließlich der Gründe,
+-- transparent und nachvollziehbar dokumentiert sein und dauerhaft Bestand haben." Prod: REQ-25 'decisions_documented == true' (block);
+-- the boolean is consumed by -15 / -21 and STAYS. Two proposals (the owner picks one): (a) presence only; (b) presence AND every row
+-- carries a reason (decisions_ohne_begruendung == 0).
+-- BEGIN;
+-- ARCHIVE('6c35feb6-d486-444f-ac5a-de7e2dd4f426', '259f1121a8a297e83d5cb90c6486b190');
+-- UPDATE compliance_requirements c SET condition = 'decisions_count >= 1 AND decisions_ohne_begruendung == 0',
+--   description = 'Plan 3 (m820_2-G-11): tabellarische Entscheidungsdokumentation geführt (mindestens ein Eintrag) und jede Entscheidung mit Begründung (L1134 / L1146).'
+--  WHERE c.id = '6c35feb6-d486-444f-ac5a-de7e2dd4f426' AND md5(c.condition) = '259f1121a8a297e83d5cb90c6486b190';
+-- COMMIT;
+-- Rollback: RESTORE('6c35feb6-d486-444f-ac5a-de7e2dd4f426'). Variant (a): condition = 'decisions_count >= 1'.
+
+-- =====================================================================================================================
+-- m820_2-G-12 · 820-2-13 · NEW warn gate REQ-63 on the dritte register (REQ-28 stays — "frühzeitig" is a timing fact the count cannot prove)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1198 "Der Bedarf an Fachplanungen, Gutachten, Rechtsberatung etc. ist intensiv zu recherchieren und realistisch zu ermitteln.
+-- Beteiligte Dritte sind möglichst frühzeitig in das Projekt einzubinden und, falls erforderlich, frühzeitig zu beauftragen."; L1202 "…
+-- eine umfassende Liste der Projektbeteiligten … erstellt, erforderliche Leistungen werden möglichst früh beauftragt." Prod: REQ-28
+-- 'third_parties_engaged_early == true' (block) reads the boolean; it STAYS. The register documents WHICH third parties were identified.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-63', 'Bedarf an Drittleistungen ermittelt (mindestens ein Eintrag)', 'third_parties_count >= 1', '§ 5.3.5', 'warn',
+--        'Plan 3 (m820_2-G-12): der Bedarf an Fachplanungen, Gutachten, Rechtsberatung ist als Liste erfasst (L1198 / L1202).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-13'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-63');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-63' AND worksheet_template_id = WS(820-2-13) AND description LIKE 'Plan 3 (m820_2-G-12)%'.
+
+-- =====================================================================================================================
+-- m820_2-G-13 · 820-2-16 · REQ-37 (id 554da4ec-3780-4dfa-a52e-720d22168a6a, block, md5 c76cfd2bb7fb44264127def74b1a2c2c)
+--   — read the Auflagen register instead of the boolean permit_conditions_tracked
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1374 "Die von den Behörden erteilten Auflagen werden vollständig und sorgfältig beachtet."; L1380 "Eine aktive Nachverfolgung
+-- der Auflagen findet statt und hilft dabei, die Erledigung der Auflagen zu den erforderlichen Zeitpunkten nachweisen zu können." Prod:
+-- REQ-37 'permit_conditions_tracked == true' (block, VR "all conditions tracked"); the boolean is consumed by -20 / -22 and STAYS.
+-- A project whose permits carry NO Auflagen would fail `auflagen_count >= 1` — the proposal therefore keeps the boolean as the escape:
+-- BEGIN;
+-- ARCHIVE('554da4ec-3780-4dfa-a52e-720d22168a6a', 'c76cfd2bb7fb44264127def74b1a2c2c');
+-- UPDATE compliance_requirements c SET condition = 'permit_conditions_tracked == true AND (IF auflagen_count >= 1 THEN auflagen_offen == 0)',
+--   description = 'Plan 3 (m820_2-G-13): Auflagen aktiv nachverfolgt; erfasste Auflagen sind erledigt (L1374 / L1380) — offene Auflagen blockieren erst bei Projektabschluss (Anwendung im Bauverlauf: warn erwägen).'
+--  WHERE c.id = '554da4ec-3780-4dfa-a52e-720d22168a6a' AND md5(c.condition) = 'c76cfd2bb7fb44264127def74b1a2c2c';
+-- COMMIT;
+-- Rollback: RESTORE('554da4ec-3780-4dfa-a52e-720d22168a6a'). The severity question (block during construction) is the owner's — recorded on the sheet.
+
+-- =====================================================================================================================
+-- m820_2-G-14 · 820-2-19 · NEW warn gate REQ-64 on the vergaben_los register (REQ-31 on -13 stays)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1247 "Die für den Projekterfolg erforderliche Aufteilung von Losen und Gewerken wird nach technischen Erfordernissen intensiv
+-- durchdacht und transparent begründet."; L1666 "… dass er die Bauleistungen abnehmen muss und bei Losen und Gewerken zu unterschiedlichen
+-- Zeitpunkten." Prod: REQ-31 'lot_strategy_documented == true' (block) on 820-2-13 — a gate on -13 cannot read a -19 register; the
+-- boolean STAYS (consumed by -17 / -18 / -19).
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-64', 'Vergaben je Los / Gewerk erfasst', 'lots_count >= 1', '§ 5.3.8; § 5.5', 'warn',
+--        'Plan 3 (m820_2-G-14): die losweisen Vergaben sind mit Verfahren, Zuschlagsdatum und Auftragswert je Los erfasst (L1247 / L1666).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-19'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-64');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-64' AND worksheet_template_id = WS(820-2-19) AND description LIKE 'Plan 3 (m820_2-G-14)%'.
+
+-- =====================================================================================================================
+-- m820_2-G-15 · 820-2-24 · REQ-51 (id e7378176-c00e-45fb-87f5-28559feb8a48, block, md5 113c7ddde973cd282d3bc727d2ddc50e)
+--   — read the Gewährleistungskalender instead of the single date pair
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1812 "Es wird ein Gewährleistungskalender, mit Angabe des Beginns und des Endes der jeweiligen Gewährleistungsfristen, für
+-- jeden Auftragnehmer und für jede ausführende Firma geführt."; L1798 "Es gibt einen eindeutigen Abnahmezeitpunkt für jeden
+-- Auftragnehmer."; L1803 "Das Ende der Gewährleistungszeit wird jeweils durch ein Datum benannt." Prod: REQ-51 'warranty_start_date IS NOT
+-- NULL AND warranty_end_date IS NOT NULL' (block) on the single pair (both consumer-free, required). Every register row REQUIRES the three
+-- dates (row completeness), so `warranty_count >= 1` = at least one complete calendar entry. The pair stays until D-4 / D-5.
+-- BEGIN;
+-- ARCHIVE('e7378176-c00e-45fb-87f5-28559feb8a48', '113c7ddde973cd282d3bc727d2ddc50e');
+-- UPDATE compliance_requirements c SET condition = 'warranty_count >= 1',
+--   description = 'Plan 3 (m820_2-G-15): Gewährleistungskalender mit Abnahme, Beginn und Ende je Auftragnehmer / ausführender Firma geführt (L1812).'
+--  WHERE c.id = 'e7378176-c00e-45fb-87f5-28559feb8a48' AND md5(c.condition) = '113c7ddde973cd282d3bc727d2ddc50e';
+-- COMMIT;
+-- Rollback: RESTORE('e7378176-c00e-45fb-87f5-28559feb8a48').
+
+-- =====================================================================================================================
+-- m820_2-D-1 · 820-2-19 · final_contract_value (number, EUR, required, orphan) ↔ vergaben_los.auftragswert (Σ = final_contract_value_calc)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1666 (as G-14). Prod: final_contract_value is consumer-free and read by no gate; 0 stored values. Amendment K: the
+-- register column stays; on ratification the scalar becomes the Σ (its equation row is re-pointed) and the twin retires.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m820_2 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m820_2 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-19' AND f.symbol IN ('final_contract_value', 'final_contract_value_calc') AND f.active;
+-- FLD(820-2-19, final_contract_value) SET widget = 'derived', is_required = false … AND f.widget IS NULL;
+-- UPDATE equations e SET formula = 'final_contract_value = sum_rows(vergaben_los, auftragswert)', output_symbol = 'final_contract_value'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND w.code = '820-2-19' AND e.equation_number = '820-2-19-D2' AND e.output_symbol = 'final_contract_value_calc';
+-- FLD(820-2-19, final_contract_value_calc) SET active = false … AND f.description LIKE 'Plan 3:%';
+-- UPDATE fields f SET ui_config = jsonb_set(f.ui_config, '{footer}', '["lots_count","final_contract_value"]'::jsonb) … (FLD(820-2-19, vergaben_los)) AND f.ui_config->'footer' = '["lots_count","final_contract_value_calc"]'::jsonb;
+-- COMMIT;
+-- Rollback: restore final_contract_value (widget, is_required) from fields_archive_m820_2 by id; equation formula / output_symbol back to
+--   'final_contract_value_calc = …' / 'final_contract_value_calc' WHERE equation_number = '820-2-19-D2'; reactivate the twin; footer back;
+--   DROP fields_archive_m820_2 when no other block uses it (D-2 … D-5 share it — the LAST user carries the DROP).
+
+-- =====================================================================================================================
+-- m820_2-D-2 · 820-2-19 · vergabeverfahren_used (text, required, orphan) ↔ vergaben_los.verfahren
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1442 "… ist die Art der Vergabeverfahren für die Bauleistungen im konkreten Projekt zu definieren." Prod: consumer-free,
+-- no gate; a single text cannot carry one Verfahren per lot. No footer derivation is meaningful for a text — retire on ratification.
+-- BEGIN;
+-- (archive as D-1) FLD(820-2-19, vergabeverfahren_used) SET active = false … ;
+-- COMMIT;
+-- Rollback: UPDATE fields SET active = true WHERE id = <archived id>.
+
+-- =====================================================================================================================
+-- m820_2-D-3 · 820-2-19 · zuschlag_erteilt_datum (date, required, orphan) ↔ vergaben_los.zuschlag
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1666 (Abnahme "bei Losen und Gewerken zu unterschiedlichen Zeitpunkten" — the same holds for the Zuschlag per lot).
+-- Prod: consumer-free, no gate. No date aggregation exists (F-1) — retire on ratification, the register carries the dates.
+-- BEGIN;
+-- (archive as D-1) FLD(820-2-19, zuschlag_erteilt_datum) SET active = false … ;
+-- COMMIT;
+-- Rollback: UPDATE fields SET active = true WHERE id = <archived id>.
+
+-- =====================================================================================================================
+-- m820_2-D-4 · 820-2-24 · warranty_start_date (date, required, B) ↔ gewaehrleistungen.beginn
+-- m820_2-D-5 · 820-2-24 · warranty_end_date (date, required, D) ↔ gewaehrleistungen.ende
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER   (one box per pair on the sheet)
+-- Evidence: L1812 (as G-15); L1803 "Das Ende der Gewährleistungszeit wird jeweils durch ein Datum benannt." Prod: both consumer-free,
+-- read by REQ-51 (G-15 re-points it to warranty_count). The earliest start / latest end cannot be derived (F-1) — the pair is retired on
+-- ratification of G-15; until then it stays as the project-level pair beside the calendar.
+-- BEGIN;
+-- (archive as D-1) FLD(820-2-24, warranty_start_date) SET active = false … ; FLD(820-2-24, warranty_end_date) SET active = false … ;
+-- COMMIT;
+-- Rollback: UPDATE fields SET active = true WHERE id IN (<archived ids>). Apply ONLY after G-15 (REQ-51 would otherwise read retired fields).
+
+-- =====================================================================================================================
+-- m820_2-E-1 · 820-2-15 / 820-2-01 · lph_completed value-format mismatch (prod enum tokens lph_0 … lph_9 vs the Plan-1 checklist's label strings)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L338 "Teil 2 umfasst die Leistungserbringung aller Projektbeteiligten über alle Phasen hinweg, d. h. von der Bedarfsplanung
+-- (LPH 0) bis zur Objektbetreuung (LPH 9), inklusive Inbetriebnahme und Übergabe an den Betrieb." Prod: lph_completed (json, required,
+-- orphan) carries enum_values [lph_0 … lph_9] with labels; the Plan-1 SELECTION_CONFIGS.lph_completed / included_hoai_phases checklists
+-- store the LABEL strings ("LPH 0 – Bedarfsplanung", …); included_hoai_phases has NULL enum_values. D-1: no enum_values is overwritten
+-- (keep_prod — this task emits NO UPDATE for lph_completed; the Plan-1 pair stays un-migrated, playbook I-1). A DB select_many over the
+-- prod enum would SHOW the tokens (the checklist renders enum value strings, not labels — fromDbField maps options = value). Proposal:
+-- BEGIN;
+-- (archive both rows into fields_archive_m820_2)
+-- FLD(820-2-01, included_hoai_phases) SET enum_values = (SELECT f2.enum_values FROM fields f2 JOIN worksheet_templates w2 ON w2.id = f2.worksheet_template_id
+--     WHERE w2.code = '820-2-15' AND f2.symbol = 'lph_completed' AND w2.standard_id = w.standard_id) … AND f.enum_values IS NULL;   -- same token set on both
+-- FLD(820-2-15, lph_completed) SET widget = 'select_many', ui_config = '{"title":"Abgeschlossene Leistungsphasen","subtitle":"§5.3 · §5.4 — je LPH Freigabe nach Abschluss"}'::jsonb … AND f.widget IS NULL;
+-- FLD(820-2-01, included_hoai_phases) SET widget = 'select_many', ui_config = '{"title":"Beauftragte Leistungsphasen (HOAI)","subtitle":"§1 — von der Bedarfsplanung (LPH 0) bis zur Objektbetreuung (LPH 9)"}'::jsonb … AND f.widget IS NULL;
+-- (value migration — 0 stored project_parameters for either field today, checked read-only 2026-09-18: nothing to convert)
+-- COMMIT;
+-- Rollback: restore enum_values / widget / ui_config of both rows from the archive by id. OPEN for the owner: the checklist would show
+--   the tokens "lph_0" … unless the ChecklistEditor renders enum labels (a [CODE] item: options as {value,label} pairs) — until then the
+--   Plan-1 label-string checklists stay the better UX and M-1 cannot evaluate (the two carriers must store the same tokens).
+
+-- =====================================================================================================================
+-- m820_2-M-1 · 820-2-15 · NEW gate REQ-65: lph_completed ⊆ included_hoai_phases (multi-select driver — contains() per phase)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L338 (as E-1); L355 "Nach jeder Leistungsphase werden dem Auftraggeber die Planungsinhalte vorgestellt und die Einhaltung der
+-- Projektziele (Termine, Kosten, Qualitäten) nachgewiesen." Prod: included_hoai_phases (-01) is inherited on -15 (consumer_worksheets
+-- ["820-2-03","820-2-15","820-2-19"]); REQ-01 reads it IS NOT EMPTY on -01. Probed forms: a bare `contains(x, 'a')` does NOT parse as a
+-- condition; `contains(x, 'a') == true` and the IF-guard pair do (completed-not-included ⇒ fail, both ⇒ pass, not completed ⇒ pass).
+-- Depends on E-1: both carriers must store the same token strings (today one stores labels, the other would store tokens).
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-65', 'Abgeschlossene Leistungsphasen liegen im beauftragten Umfang',
+--   '(IF contains(lph_completed, ''lph_0'') == true THEN contains(included_hoai_phases, ''lph_0'') == true) AND (IF contains(lph_completed, ''lph_1'') == true THEN contains(included_hoai_phases, ''lph_1'') == true) AND (IF contains(lph_completed, ''lph_2'') == true THEN contains(included_hoai_phases, ''lph_2'') == true) AND (IF contains(lph_completed, ''lph_3'') == true THEN contains(included_hoai_phases, ''lph_3'') == true) AND (IF contains(lph_completed, ''lph_4'') == true THEN contains(included_hoai_phases, ''lph_4'') == true) AND (IF contains(lph_completed, ''lph_5'') == true THEN contains(included_hoai_phases, ''lph_5'') == true) AND (IF contains(lph_completed, ''lph_6'') == true THEN contains(included_hoai_phases, ''lph_6'') == true) AND (IF contains(lph_completed, ''lph_7'') == true THEN contains(included_hoai_phases, ''lph_7'') == true) AND (IF contains(lph_completed, ''lph_8'') == true THEN contains(included_hoai_phases, ''lph_8'') == true) AND (IF contains(lph_completed, ''lph_9'') == true THEN contains(included_hoai_phases, ''lph_9'') == true)',
+--   '§ 1; § 5.3 / § 5.4', 'warn', 'Plan 3 (m820_2-M-1): eine als abgeschlossen markierte Leistungsphase muss beauftragt sein (L338).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-15'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-65');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-65' AND worksheet_template_id = WS(820-2-15) AND description LIKE 'Plan 3 (m820_2-M-1)%'.
+-- Alternative compact form (same semantics, probed): `if(contains(lph_completed, 'lph_N'), 1, 0) <= if(contains(included_hoai_phases, 'lph_N'), 1, 0)` per phase.
+
+-- =====================================================================================================================
+-- Sheet-only items (no SQL): m820_2-F-1 (earliest warranty start / latest end — no date functions; date cells are strings), m820_2-J-1
+-- (Bedarfsplanung Konzept / Projekt hide refuted by L336 / L1058), m820_2-J-2 (hoai_compliance ← contract_type: no printed rule),
+-- m820_2-J-3 ("BIM fields" hide refuted: § 8.2 / § 8.3.3 / § 8.7 / § 8.8 / § 8.9 are not BIM-conditional), m820_2-I-1
+-- (auflagen.genehmigung is free text — no cross-register reference to permit_inventory_complete rows), m820_2-O-1 (Anhang A / B policy
+-- anhaltswert from the printed "Gliederungsvorschlag" / "empfiehlt sich" — the brief's cue is not printed), m820_2-X-1 (vergaben_los →
+-- Teil 1 Loseausnahme needs a cross-standard feed, Phase 6), observations (REQ-13 / REQ-50 empty conditions on -05 / -20).
