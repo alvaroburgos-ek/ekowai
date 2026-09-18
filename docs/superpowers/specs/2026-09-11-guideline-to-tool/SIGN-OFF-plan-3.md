@@ -3138,6 +3138,326 @@ Report: `reports/plan-3-m187.md` · STAGED SQL: `scripts/verification/m187-STAGE
 - **Bundle growth:** ~35 KB of lifted quotes (`Q`, 101 spans) ride in the client bundle via the seed fallback (Task-0 observation; Task 30 measures).
 - **Fix round 1 (after Task 12b's guard change):** 27 self-consumer-only inputs on M187-05 / -06 / -07 / -09 / -16 / -20 and four field-bearing sections (M187-16 B / D, M187-22 B / D) took branch rules (79 field entries, 4 section rules); C-5 closed; G-12 + `M187-22-D7` added for the carbonate precondition; `S5_5_KLEIN.h_fk_carbonat.comparator` → null.
 
+## Task 13 — DIN-276 (din276)
+
+Report: `reports/plan-3-din276.md` · STAGED SQL: `scripts/verification/din276-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-276\DIN-276.md` (English translation of DIN 276:2018-12; lines cited) · prod capture `src/lib/eval/field-configs/din276.prior.json` (2026-09-18, read-only). Ids follow the Task-13 brief where they exist (M-1 / M-2, G-1 / G-2, D-1, F-1, R-1 → E-1, R-2 → D-3, S-1, X-1 … X-3, J-1); every further refused / withheld / read item got its own block. Nothing below is applied.
+
+### din276-C-1 · DIN-276 · prod · range tokens in `consumer_worksheets` (14 fields reach no worksheet)
+- Class: consumer-edit
+- Chosen now (fail-safe): nothing changed; the emitted rule on `GK_mwst_satz_pct` and every STAGED rule keyed on `applicable_cost_groups` / `planning_stage_active` / `cost_breakdown_depth` / `vat_treatment` / `separate_calculations_per_building` read `pending` (visible, inert) until the tokens are expanded.
+- Evidence (verbatim, capture 2026-09-18): `applicable_cost_groups` consumers `["DIN-276-09..16"]`, `planning_stage_active` `["DIN-276-18..22"]`, `cost_breakdown_depth` `["DIN-276-09..16","DIN-276-18..22"]`, `vat_treatment` `["DIN-276-09..16","DIN-276-18..23"]`, `separate_calculations_per_building` `["DIN-276-09..29"]`, `building_count` `["DIN-276-04..16"]`, `client_name` / `lead_engineer` / `project_name` / `project_number` `["DIN-276-02..29"]`, `cost_status_date` `["DIN-276-04..28"]`, `input_documents_register` `["DIN-276-04..08","DIN-276-18..22"]`, `ekowai_sector` `["DIN-276-09..16"]`; `loadInheritedFields` matches `code = ANY(consumer_worksheets)` (fll_gar trap 1).
+- Proposed SQL / config: STAGED block din276-C-1 (one UPDATE expanding every `DIN-276-a..b` token).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-M-1 · DIN-276 · DIN-276-09 … -16 · KG worksheet sections ← `applicable_cost_groups` (select_many)
+- Class: multi-select-driver
+- Chosen now (fail-safe): no section rule emitted (rule 8); the KG registers and their outputs are created unconditionally.
+- Evidence (verbatim, transcript line): "In the first level of the cost breakdown, the total costs are divided into the following eight cost groups:" (L426); "These first-level cost groups are further subdivided into second- and third-level cost groups." (L436). Capture: `applicable_cost_groups` is a Plan-1 select_many (json, enum_values NULL until `20260911120000_selection_configs_DIN_276.sql`), consumers `["DIN-276-09..16"]`.
+- Proposed SQL / config: STAGED block din276-M-1 (`contains(applicable_cost_groups, 'KG 300 – Bauwerk – Baukonstruktionen')` per worksheet, after C-1 + C-2; the IDENT-01 consequence is named there).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-M-2 · DIN-276 · DIN-276-18 … -22 · stage worksheet sections ← `planning_stage_active` (select_many)
+- Class: multi-select-driver
+- Chosen now (fail-safe): no section rule; the matrix on DIN-276-18 is created unconditionally.
+- Evidence (verbatim, transcript line): "In the cost framework, the total costs must be determined according to cost groups in the first level of the cost breakdown." (L296); "In the cost estimate, the total costs must be determined according to cost groups in the second level of the cost breakdown." (L310); "In the cost calculation, the total costs must be determined according to cost groups in the third level of the cost breakdown." (L322). Capture: `planning_stage_active` select_many, consumers `["DIN-276-18..22"]`.
+- Proposed SQL / config: STAGED block din276-M-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-C-2 · DIN-276 · DIN-276-09 … -16 · the 266 third-level `kg_NNN` inputs ← `cost_breakdown_depth` (refused: transitive producer chain)
+- Class: consumer-edit (transitive producer guard, amendment H)
+- Chosen now (fail-safe): not emitted; the emitter refuses `kg_311 ← cost_breakdown_depth == 'level_3'` (chain `kg_311 → KG3-01 kg_310_total → KG3-10 kg_300_total`, consumed by DIN-276-17 / -23 / -25) and the section rule on "KG 310" — pinned in `field-configs-din276.test.ts`.
+- Evidence (verbatim, transcript line): "In the cost framework, the total costs must be determined according to cost groups in the first level of the cost breakdown." (L296); "The level of detail to be applied in cost calculations or the level of cost breakdown to be selected depends on the requirements specified for the respective level of cost calculation in accordance with 4.3 or on the project-specific circumstances in accordance with 4.2.2." (L441). Capture: every `kg_NNN` is an `input_symbols` member of a KGx-xx roll-up; every `kg_N00_total` is consumed by DIN-276-17 / -23.
+- Proposed SQL / config: STAGED block din276-C-2 — only together with D-3 (a hidden third level nulls the roll-ups otherwise).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-C-3 · DIN-276 · DIN-276-18 → -26 / -27 / -28 · consumer edit for the matrix outputs
+- Class: consumer-edit
+- Chosen now (fail-safe): the matrix derivations live on DIN-276-18 (a register-fed equation lives on its register's worksheet); the -26 / -27 typed inputs stay.
+- Evidence (verbatim, transcript line): "During cost control, current cost determinations must be continuously compared with previous cost determinations and cost estimates. This also applies to cost developments between the individual stages of cost determination." (L380); "Deviations in the individual cost groups from the cost calculations must be presented, explained and documented according to type and scope." (L386).
+- Proposed SQL / config: STAGED block din276-C-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-C-4 · DIN-276 · DIN-276-02 / -08 · `separate_calculations_per_building` ← `multi_building`; `existing_substance_value` ← `construction_activity` (refused: consumed)
+- Class: consumer-edit
+- Chosen now (fail-safe): neither rule emitted (both targets carry consumers; `construction_activity` does not reach DIN-276-08).
+- Evidence (verbatim, transcript line): "If a construction project consists of different buildings or facilities (e.g. buildings, engineering structures, infrastructure facilities, open spaces), separate cost calculations must be prepared for each." (L239); "If the value of the existing substance (e.g. land, building structures, technical installations) is to be determined for the construction project, this must be shown separately for the relevant cost groups." (L247). Capture: `separate_calculations_per_building` consumers `["DIN-276-09..29"]` (REQ-08 block reads it), `existing_substance_value` `["DIN-276-23"]`, `construction_activity` `["DIN-276-03","DIN-276-07"]`.
+- Proposed SQL / config: STAGED block din276-C-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-C-5 · DIN-276 · DIN-276-23 / -11 / -13 → -24 · `GK_total`, `kg_300_total`, `kg_500_total` reach the Kennwert analysis
+- Class: consumer-edit
+- Chosen now (fail-safe): `GK_kennwert_BGF_calc` (DIN-276-24-D3) and `KKW_analyse_kg300_anteil_calc` (-D4) are emitted and read `manual_required` ("Fehlende Eingabe GK_total") until the edit; the `kg_500_total / outdoor_area_AF` twin is NOT emitted (`kg_500_total` does not reach -24 today; `outdoor_area_AF` does).
+- Evidence (verbatim, transcript line): "Value that represents the ratio of costs to a reference unit" (L175); "Costs resulting from the sum of cost groups 100 to 800" (L163). Capture: `GK_total` consumers NULL; `kg_300_total` `["DIN-276-17","DIN-276-23","DIN-276-25"]`; `kg_500_total` `["DIN-276-17","DIN-276-23"]`; `building_costs` / `gross_floor_area_BGF` / `gross_volume_BRI` / `outdoor_area_AF` DO reach -24 (so -D1 / -D2 compute today).
+- Proposed SQL / config: STAGED block din276-C-5 (+ the AF twin as its E-follow-up).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-G-1 · DIN-276 · DIN-276-01 · REQ-09 (warn, attestation, empty condition) — §4.2.9
+- Class: gate-guard
+- Chosen now (fail-safe): untouched (fires `manual`).
+- Evidence (verbatim, transcript line): "In the case of cost calculations for existing building projects, the level of detail of the calculations and the cost calculation methods and cost parameters used depend on the special circumstances of existing building projects and the project-specific requirements." (L243) — no measurable requirement; the brief's `existing_substance_value ← construction_activity` reading is a visibility (C-4), not a gate.
+- Proposed SQL / config: STAGED block din276-G-1 (an optional guarded condition over the Sonderkosten sum).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-G-2 · DIN-276 · DIN-276-08 · REQ-10 … REQ-14 (block) → the Sonderkosten register
+- Class: gate-guard
+- Chosen now (fail-safe): the five typed-pair gates stay; `sonderkosten_<art>_sum` (5) and `sonderkosten_nicht_separat` are visible twins.
+- Evidence (verbatim, transcript line): "The values of goods and services provided free of charge (e.g. materials, own work) must be allocated to the relevant cost groups but recognised separately." (L251); "Costs that are forecast at the time of cost determination must be shown separately at the relevant points in the cost breakdown. The assumptions on which the forecast is based must be stated." (L259). Capture: REQ-10 … 14 ids / md5 in the STAGED header.
+- Proposed SQL / config: STAGED block din276-G-2 (archive pattern; `sonderkosten_nicht_separat == 0` block + the forecast-assumptions gate).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-G-3 · DIN-276 · DIN-276-07 · new gate `kennwert_quellen_count >= 1`
+- Class: gate-guard
+- Chosen now (fail-safe): no gate; the count is a visible output.
+- Evidence (verbatim, transcript line): "The cost calculation methods used in the cost calculation and the sources of the cost parameters used must be stated." (L235). Capture: REQ-07 (DIN-276-03, block) checks the method only (`cost_calculation_method IS NOT EMPTY`).
+- Proposed SQL / config: STAGED block din276-G-3 (block — "must be stated").
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-T-1 · DIN-276 · DIN-276-21 · `KA_kostenstatus` (text) → select_one (offer / order / invoice)
+- Class: data_type
+- Chosen now (fail-safe): the text field stays; the register column `vergabeeinheiten.status` carries the three printed tokens per award unit.
+- Evidence (verbatim, transcript line): "The cost estimate is prepared in several steps in accordance with the project sequence selected for the construction project by compiling the costs on the basis of the current cost status (offer, order or invoice)." (L346). Capture: description 'Angebot|Auftrag|Rechnung', data_type text.
+- Proposed SQL / config: STAGED block din276-T-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-T-2 · DIN-276 · DIN-276-26 / -23 · `KK_stage_aktuell`, `KK_stage_vorher`, `GK_quelle_stage` (text 'KR|KSch|KBer|KA|KF') → select_one over the five stages
+- Class: data_type
+- Chosen now (fail-safe): text stays; the matrix `stufe` column carries the tokens.
+- Evidence (verbatim, transcript line): "\subsection*{4.3.2 Cost framework}" (L286); "\subsection*{4.3.3 Cost estimate}" (L298); "\subsection*{4.3.4 Cost calculation}" (L312); "\subsection*{4.3.5 Cost estimate}" (L324); "\subsection*{4.3.6 Cost estimate}" (L343); "\subsection*{4.3.7 Determination of costs}" (L360).
+- Proposed SQL / config: STAGED block din276-T-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-D-1 · DIN-276 · DIN-276-18 … -22 · the five stage worksheets (≈ 90 typed values, `*_gesamt` "Σ KG 100-800" hand-typed) ↔ `kostenstufen_matrix`
+- Class: deactivation
+- Chosen now (fail-safe): every input stays; `KR_gesamt_calc` … `KF_gesamt_calc` and the matrix are twins. Resolution: RETIRE ON RATIFICATION (Phase 6, X-2).
+- Evidence (verbatim, transcript line): "In the cost estimate, the total costs must be determined according to cost groups in the third level of the cost breakdown and further subdivided according to technical characteristics or manufacturing aspects." (L339); "In the cost determination, the total costs must be broken down according to cost groups up to the third level of the cost breakdown or according to the structure of the cost estimate defined for the construction project." (L370); "Costs resulting from the sum of cost groups 100 to 800" (L163). Capture: 90 consumer-free inputs, no equation on -18 … -22.
+- Proposed SQL / config: STAGED block din276-D-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-D-2 · DIN-276 · DIN-276-26 / -27 · `current_stage_total`, `previous_stage_total`, `KK_kosten_aktuell`, `KK_kosten_vorher`, `KK_delta_abs`, `KK_delta_pct`, `deviation_percentage` ↔ `stufe_aktuell_gesamt` / `stufe_vorher_gesamt` / `stufen_abweichung` / `stufen_abweichung_pct`
+- Class: deactivation (single-source pairs; after C-3)
+- Chosen now (fail-safe): all stay (IDENT-04 reads the typed pair; `deviation_percentage` is consumed by -28 / -29).
+- Evidence (verbatim, transcript line): L380 (quoted under C-3). Capture: `current_stage_total` / `previous_stage_total` section B, consumer-free, description "Eingang (Engineer: Label/Einheit pruefen)."
+- Proposed SQL / config: STAGED block din276-D-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-D-3 · DIN-276 · DIN-276-09 … -16 · the 266 typed third-level `kg_NNN` inputs + 48 KGx-xx roll-ups ↔ `kg1_positionen` … `kg8_positionen` (`kg_NN0_from_rows` × 52, `kgN_positionen_sum` × 8)
+- Class: deactivation + equation-replacement (the brief's R-2)
+- Chosen now (fail-safe): everything stays; each register footer shows the Σ twins beside the typed totals; a row picked under a foreign KG is flagged (`im_kg`) and excluded from every Σ.
+- Evidence (verbatim, transcript line): "The cost breakdown is shown in Table 1. It provides for three levels, which are characterised by three-digit ordinal numbers." (L424); "Value that represents the ratio of costs to a reference unit" (L175); "\hline 311 & Manufacture & Soil removal, soil securing and soil application; excavation of construction pits and trenches including working areas and embankments; storage, soil delivery and soil removal; backfilling and backfilling; levelling, swales, verges \\" (L545). Capture: 48 roll-ups `verified_against_standard` (replacing a verified equation is always sign-off).
+- Proposed SQL / config: STAGED block din276-D-3 (archive pattern over the 48 rows; ids / md5 captured at ratification).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-D-4 · DIN-276 · DIN-276-08 · the five `*_value` + six `separately_shown_*` / `forecasted_costs_assumptions_stated` ↔ `sonderkosten`
+- Class: deactivation (consumed by -23 / -26; after G-2)
+- Chosen now (fail-safe): all stay.
+- Evidence (verbatim, transcript line): "Costs that are threatened by risks due to uncertainties and imponderables must be recognised separately at the relevant points in the cost breakdown." (L263). Capture: the five values consumed by DIN-276-23, the booleans by -23 / -26.
+- Proposed SQL / config: STAGED block din276-D-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-D-5 · DIN-276 · DIN-276-21 · `KA_angebote_eingegangen` ↔ `KA_angebote_count`; `KA_vergabeeinheiten_struktur` / `KA_kostenstatus` ↔ `vergabeeinheiten`
+- Class: deactivation (consumer-free)
+- Chosen now (fail-safe): stay. Resolution: RETIRE ON RATIFICATION.
+- Evidence (verbatim, transcript line): "Irrespective of the type of determination or the cost determination procedure selected, the costs determined must also be organised according to the award units intended for the construction project so that the offers, orders and invoices (including supplements) can be compiled, checked and compared in an up-to-date manner." (L341).
+- Proposed SQL / config: STAGED block din276-D-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-D-6 · DIN-276 · DIN-276-27 · `AA_betroffene_kg` / `AA_abweichungsursache` / `AA_typ` / `AA_massnahmen` / `AA_dokumentiert` (one typed row) ↔ `abweichungen`
+- Class: deactivation (consumer-free)
+- Chosen now (fail-safe): stay.
+- Evidence (verbatim, transcript line): "Deviations in the individual cost groups from the cost calculations must be presented, explained and documented according to type and scope." (L386) — plural, per cost group.
+- Proposed SQL / config: STAGED block din276-D-6.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-D-7 · DIN-276 · DIN-276-04 / -06 · `flurstuecksnummer` ("Komma-getrennt"), `gemarkung`, `flur`, `grundstuecksflaeche_GF`, `BU_GF` ↔ `flurstuecke` / `grundstuecksflaeche_GF_calc`
+- Class: deactivation (consumer-free)
+- Chosen now (fail-safe): stay.
+- Evidence (verbatim, transcript line): "\hline 100 & Property & $\mathrm{m}^{2}$ & Plot area (GF) & Total plot area according to DIN 277-1 \\" (L1030).
+- Proposed SQL / config: STAGED block din276-D-7 (+ the consumer edit that makes GF inherited on -06 / -24).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-D-8 · DIN-276 · DIN-276-07 · the seven `KKW_*` fields (one typed set) ↔ `kennwert_quellen`
+- Class: deactivation (consumer-free)
+- Chosen now (fail-safe): stay.
+- Evidence (verbatim, transcript line): L235 (quoted under G-3).
+- Proposed SQL / config: STAGED block din276-D-8.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-D-9 · DIN-276 · DIN-276-23 / -24 · Kennwert copies (`GK_kennwert_BGF`, `cost_parameter_per_BGF`, `cost_parameter_per_AF`, `KKW_analyse_eur_m2_BGF`, `KKW_analyse_eur_m2_GF`, `KKW_analyse_eur_m3_BRI`, `KKW_analyse_kg300_anteil`) ↔ DIN-276-24-D1 … D4
+- Class: deactivation (after C-5)
+- Chosen now (fail-safe): stay; `KKW_bauwerk_eur_m2_BGF` / `KKW_bauwerk_eur_m3_BRI` compute today, `GK_kennwert_BGF_calc` / `KKW_analyse_kg300_anteil_calc` after C-5.
+- Evidence (verbatim, transcript line): "Value that represents the ratio of costs to a reference unit" (L175); "Unit to which the costs in a cost characteristic value relate" (L181). Capture: `cost_parameter_per_BGF` / `_AF` consumed by -26 / -28; prod labels "Kennwert €/m² BGF" (×2) and "KG 300-Anteil".
+- Proposed SQL / config: STAGED block din276-D-9.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-E-1 · DIN-276 · DIN-276-26 · IDENT-04 `deviation_amount = current_stage_total - previous_stage_total` (imported_unverified) → the matrix outputs (the brief's R-1)
+- Class: equation-replacement
+- Chosen now (fail-safe): IDENT-04 untouched; `stufen_abweichung` (DIN-276-18-D9) is the twin.
+- Evidence (verbatim, transcript line): L380 / L386 (quoted under C-3). Capture: IDENT-04 `95a489fe-5f24-40f9-96f9-764ad008db85`, md5 `cc7480af1d0d844d891ba4352d90989c`, consumers of `deviation_amount`: -27 / -28 / -29.
+- Proposed SQL / config: STAGED block din276-E-1 (archive pattern).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-E-2 · DIN-276 · DIN-276-24 · `reference_unit` (number, IDENT-03 input) — not re-bound; derive from the DIN 277 quantities by `kg_selector`
+- Class: equation-replacement (amendment J)
+- Chosen now (fail-safe): `kg_selector` (select_one over the Table-2 KGs) + three TEXT lookup_fill twins (`reference_unit_einheit` / `_bezeichnung` / `_ermittlung`) beside the typed quantity; IDENT-03 untouched.
+- Evidence (verbatim, transcript line): "Unit to which the costs in a cost characteristic value relate" (L181); "\hline 500 & Outdoor facilities and open spaces & $\mathrm{m}^{2}$ & Outdoor area (AF) & Total outdoor area according to DIN 277-1 \\" (L1034). Capture: `reference_unit` data_type number, description "Eingang (Engineer: Label/Einheit pruefen)."; GF is not inherited on -24.
+- Proposed SQL / config: STAGED block din276-E-2 (`reference_unit_calc` by `kg_selector` + IDENT-03 re-point).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-S-1 · DIN-276 · DIN-276-24 / -26 · the "(Engineer: Label/Einheit pruefen)" placeholders (`cost`, `reference_unit`, `cost_parameter`, `current_stage_total`, `previous_stage_total`)
+- Class: interface-gap (description hygiene)
+- Chosen now (fail-safe): descriptions untouched (the emitters never edit an existing row's description); the Table-2 fills answer the "Einheit?" question on the form.
+- Evidence (verbatim, transcript line): L181; L175; "It is recommended that the quantities and reference units in Table 2 be used for cost parameters of the cost groups of the first level of the cost breakdown in Table 1." (L1022). Capture: the five descriptions.
+- Proposed SQL / config: STAGED block din276-S-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-U-1 · DIN-276 · TABLE3 · row 340 prints an EMPTY unit cell
+- Class: unreadable-cell
+- Chosen now (fail-safe): `unit` null for `kg_340`; TABLE3 `imported_unverified`; the KG register's `einheit` column reads blank for KG 340.
+- Evidence (verbatim, transcript line): "\hline 340 & Interior walls/vertical building structures, interior & & Interior wall area/area of vertical building structures, interior & Area of interior walls/area of vertical building structures, interior \\" (L1093) — every sibling row (330, 350 …) prints "$\mathrm{m}^{2}$".
+- Proposed SQL / config: after the PDF page is read (SR-3): `UPDATE regulation_table_rows … SET row_values = jsonb_set(row_values, '{unit}', '"m²"') WHERE row_key = 'kg_340'` and TABLE3 → `md_verified`; never filled from memory.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-U-2 · DIN-276 · TABLE4 · printed-blank / odd cells (440 head row, 458 item 6, 474 item 3)
+- Class: unreadable-cell
+- Chosen now (fail-safe): kept as printed — 440/0 `unit` null with the designation "Electrical system for heavy current"; 458/6 `unit` null; 474/3 `unit` "m."; TABLE4 `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline 440 & Electrical systems & & Electrical system for heavy current & \\" (L1287); "\hline & 6) Transport telematics & & Function of transport telematics & Number of functions for traffic telematics \\" (L1375); "\hline & 3) Extinguishing water pipes & m. & Extinguishing water pipe & Length of the extinguishing water pipes \\" (L1450).
+- Proposed SQL / config: read the PDF page (SR-3); then the three cells and `md_verified`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-O-1 · DIN-276 · TABLE4 · override policy `kann` vs `anhaltswert`
+- Class: override-policy
+- Chosen now (fail-safe): `kann` — the table-specific sentence is the first hit (spec §7 first-hit-wins); nothing binds to TABLE4's policy today (only the KG register's `einheit` derivation reads it).
+- Evidence (verbatim, transcript line): "In addition to the cost breakdown in Table 1, the extended breakdown in Table 4 with the quantities and reference units can be used for cost group 400 Building technical installations." (L1166); the §6.1 lead "It is therefore recommended that the following specifications be used as a basis when drawing up and applying cost indicators." (L1018) covers every §6 table.
+- Proposed SQL / config: `UPDATE regulation_tables SET override_policy = 'anhaltswert' WHERE standard_code = 'DIN-276' AND table_code = 'TABLE4' AND override_policy = 'kann';` if the owner reads L1018 as governing.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-J-1 · DIN-276 · DIN-276-18 … -22 / -27 / -22 / -23 · option lists the description prints but the standard does not (`*_lph` HOAI phases, `AA_typ`, `KF_rechnungspruefung_status`, `GK_freigabe_status`)
+- Class: text-only (no printed list — content boundary)
+- Chosen now (fail-safe): no select created / no retype; the `abweichungen.typ` column is free text with the prod description's words as a datalist (suggestions, not values).
+- Evidence (verbatim, transcript line): "Deviations in the individual cost groups from the cost calculations must be presented, explained and documented according to type and scope." (L386) — "type" without a printed list; HOAI phases are not printed anywhere in the transcript (grep "HOAI" → 0 hits).
+- Proposed SQL / config: none — an owner-supplied list would be a project convention, not a guideline value.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-J-2 · DIN-276 · TABLE1 · `level`, `parent_kg`, `kg1`, `kg2` are structural columns, not printed cells
+- Class: text-only-formula (structure from the ordinal)
+- Chosen now (fail-safe): derived from the three-digit code by the standard's own rule; `kg1` / `kg2` printed as "KG 300" / "KG 310" so a row condition can never resolve them as symbols.
+- Evidence (verbatim, transcript line): "The cost breakdown is shown in Table 1. It provides for three levels, which are characterised by three-digit ordinal numbers." (L424); "These first-level cost groups are further subdivided into second- and third-level cost groups." (L436).
+- Proposed SQL / config: none (TABLE1 stays `md_verified` — the four columns are not quoted cells).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-J-3 · DIN-276 · matrix `stufe` labels · the English transcript translates three stages as "Cost estimate"
+- Class: text-only (translation collision)
+- Chosen now (fail-safe): tokens kr / ksch / kber / ka / kf; labels from prod's own worksheet titles (Kostenrahmen … Kostenfeststellung) with the clause numbers.
+- Evidence (verbatim, transcript line): "\subsection*{4.3.3 Cost estimate}" (L298); "\subsection*{4.3.5 Cost estimate}" (L324); "\subsection*{4.3.6 Cost estimate}" (L343).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-J-4 · DIN-276 · `sonderkosten.art` tokens vs the Plan-1 `special_cost_flags` values
+- Class: interface-gap (token shape)
+- Chosen now (fail-safe): the register enum uses bausubstanz / beigestellt / besondere / prognose / risiko with the Plan-1 German headings as labels; prod `special_cost_flags` has NULL enum_values in the capture (its Plan-1 migration writes the German headings incl. "§4.2.10" as VALUES — unusable as expression literals).
+- Evidence (verbatim, transcript line): "\subsection*{4.2.10 Existing substance}" (L245); "\subsection*{4.2.11 Contributed goods and services}" (L249); "\subsection*{4.2.12 Special costs}" (L253); "\subsection*{4.2.13 Forecasted costs}" (L257); "\subsection*{4.2.14 Risk-related costs}" (L261).
+- Proposed SQL / config: none; a `contains(special_cost_flags, …)`-driven visibility per row is not expressible (row scope reads no checklist).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-J-5 · DIN-276 · DIN-276-28 · `cost_target_upper_limit` / `cost_target_lower_limit` visibility by `cost_target_type` — refuted
+- Class: text-only (brief premise refuted)
+- Chosen now (fail-safe): no rule (both limits may apply with either type; the fields are consumed by -29 anyway).
+- Evidence (verbatim, transcript line): "In conjunction with an upper limit, a lower limit can also be defined if necessary. In conjunction with a target value, a range with an upper and lower limit can also be defined if necessary." (L416).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-J-6 · DIN-276 · `kostenstufen_matrix` · all eight KG columns required per stage row
+- Class: text-only (completeness reading)
+- Chosen now (fail-safe): `kg100` … `kg800` required (an engineer types 0 for a KG without costs) so `gesamt` is always computable on a complete row; a row with a blank KG is incomplete and enters no Σ.
+- Evidence (verbatim, transcript line): "The total costs must be recorded and documented in full. If parts of the total costs cannot be recorded or documented, this must be indicated and labelled at the relevant point." (L219).
+- Proposed SQL / config: if the owner prefers optional KG cells: `required` off + `gesamt = if(kg100 IS NULL, 0, kg100) + …` (blank = 0, silently) — a J-decision.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-J-7 · DIN-276 · `kgN_positionen` · the typed EUR is required, Menge / Kennwert optional, no `override` block
+- Class: text-only (brief deviation)
+- Chosen now (fail-safe): `kosten_eur` required; `kosten_calc = menge * kennwert` and the `abw` badge ("Kosten ≠ Menge × Kennwert") are derived beside it; the brief's `kosten_override` boolean + `override { applies_to: ['kosten_eur'] }` is not encodable — the mechanism's override toggle governs `lookup_value` cells only (I-4), never a typed number.
+- Evidence (verbatim, transcript line): "Value that represents the ratio of costs to a reference unit" (L175); "The goods, services, taxes and duties listed in the "Notes" column of this table are examples of the respective cost group. The list is not exhaustive." (L457).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-F-1 · DIN-276 · DIN-276-18-D7 / -D8 · "current" / "previous" determination = the last two COMPLETE matrix rows in entry order
+- Class: text-only-formula
+- Chosen now (fail-safe): `last_rows(kostenstufen_matrix, 1)` / `last_rows(…, 2)` — no date sort (the engine has no `sort_by`); the register note says so; `stufe_vorher_gesamt` is guarded so one row reads `manual_required`, never 0.
+- Evidence (verbatim, transcript line): L380 (quoted under C-3).
+- Proposed SQL / config: a date-ordered pick needs an engine `sort_by` (Plan-2a gap G-5) — deferred.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-F-2 · DIN-276 · every Σ (matrix `gesamt` / `bauwerk`, KG register Σ, Sonderkosten Σ, Flurstücke Σ) · sums printed as sentences, not equations
+- Class: text-only-formula
+- Chosen now (fail-safe): encoded as `sum_rows` / `+` per the printed definitions; the sentences are the `verification_quote`s.
+- Evidence (verbatim, transcript line): "Costs resulting from the sum of cost groups 100 to 800" (L163); "Costs resulting from the sum of cost groups 300 and 400" (L169); "Total plot area according to DIN 277-1" (L1030).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-F-3 · DIN-276 · DIN-276-18-D9 / -D10, DIN-276-24-D1 … D4 · deviation and cost parameters as words
+- Class: text-only-formula
+- Chosen now (fail-safe): `stufen_abweichung = aktuell − vorher`, `stufen_abweichung_pct = · 100 / vorher`, `Kennwert = Kosten / Bezugseinheit`.
+- Evidence (verbatim, transcript line): "Value that represents the ratio of costs to a reference unit" (L175); L380; L386.
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-I-1 · DIN-276 · all tables · edition token `'2018-12'`
+- Class: interface-gap
+- Chosen now (fail-safe): `'2018-12'` (prod `standards.version` 'December 2018 (DIN 276:2018-12)').
+- Evidence (verbatim, transcript line): "Replacement for DIN 277-3:2005-04, DIN 276-1:2008-12 and DIN 276-4:2009-08" (L1); "\caption{DIN 276:2018-12}" (L516).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-I-2 · DIN-276 · DIN-276-18-D9 / -D10, DIN-276-24-D1 … D4 · scalar-only equations are not server-materialised
+- Class: interface-gap (amendment D)
+- Chosen now (fail-safe): the six scalar chains compute on hook / report / snapshot / PDF only; the 109 register-fed rows materialise on save.
+- Evidence: Plan-2a design (register-scoped materialiser, sign-off D-8).
+- Proposed SQL / config: none (engine-output-materialization workstream).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-I-3 · DIN-276 · prod · 29 worksheets, 544 fields, 53 equations, 32 compliance rows (9 with an EMPTY condition)
+- Class: interface-gap (prod facts)
+- Chosen now (fail-safe): recorded. REQ-09 (-01), REQ-27 / -28 / -29 (-04), REQ-26 (-23) carry `''` conditions (fire `manual`); the brief's "REQ-26…29 empty" is confirmed. 12 orphan fields = the `attest_*` booleans.
+- Evidence: capture 2026-09-18 (`din276.prior.json` `_meta`; the compliance query in the STAGED header).
+- Proposed SQL / config: none here (REQ-27 … 29 / REQ-26 conditions are outside this task's tables).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-I-4 · DIN-276 · bundle · the seed module is ≈ 299 KB (671 lifted spans, Table 1 notes included)
+- Class: interface-gap (bundle growth, Task-0 observation)
+- Chosen now (fail-safe): explicit cells + spans (m820_3 pattern); the seed migration is 639 KB.
+- Evidence: `src/lib/eval/regulation-tables-seed-din276.ts` size; `SEED_BUILDERS` is imported by the runtime fallback.
+- Proposed SQL / config: Task 30 measures; a per-standard lazy import once the seed is applied (Phase 6).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-X-1 · DIN-276 · DIN-276-24 · the engine's string-literal rule — `status == 'auftrag'` resolves a VALUED symbol named `auftrag`
+- Class: cross-standard (engine semantics; every Plan-3 register is affected)
+- Chosen now (fail-safe): DIN-276 avoids the collision by construction (amount columns `angebot_eur` / `auftrag_eur` / `rechnung_eur`; `kg1` / `kg2` printed "KG 300"); pinned in `field-configs-din276.test.ts`; playbook trap added.
+- Evidence: probe 2026-09-18 through `prepareRegisterRows` — `if(status == 'rechnung', rechnung, …)` read the amount column for every row (a3 = 1000 / 500 / 300 instead of 950 / 500 / 320); `src/lib/expr/evaluate.ts` `case 'compare'` resolves a string RHS via `readSymbol` when valued (the C-1 legacy var-vs-var rule, whose comment claims "enum literals never resolve as symbols").
+- Proposed SQL / config: [CODE] candidate for the controller — either the evaluator skips the symbol resolution for a QUOTED RHS (an enforcement change: gates written `x == 'tok'` where `tok` is also a valued symbol would flip), or the emitter gains a guard "enum option token ∉ column keys ∪ worksheet symbols" (data-side, no runtime change). Not changed here.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-X-2 · DIN-276 · DIN-276-17 / -25 / -06 / -23 · the copy worksheets (`klassif_*` 10, `BKO_*` 4, `BU_*` 7, `GK_bauwerkskosten`) → inheritance
+- Class: deactivation (Phase 6)
+- Chosen now (fail-safe): untouched.
+- Evidence (verbatim, transcript line): "Costs resulting from the sum of cost groups 300 and 400" (L169); "Cost groups 300 and 400 can be summarised as building costs (see 3.12)." (L440). Capture: every copy consumer-free; IDENT-01 / IDENT-02 exist.
+- Proposed SQL / config: STAGED block din276-X-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din276-X-3 · DIN-276 · DIN-276-23 · `GK_brutto_netto` (text 'brutto_inkl_MwSt|netto') vs `vat_treatment` (enum gross / net / mixed)
+- Class: deactivation
+- Chosen now (fail-safe): untouched; the emitted `GK_mwst_satz_pct ← vat_treatment IN {gross, mixed}` reads the enum (pending until C-1).
+- Evidence (verbatim, transcript line): "The form in which VAT has been taken into account must always be stated in cost calculations and in cost parameters." (L272); "- VAT is only shown for individual cost details (e.g. for higher-level cost groups)." (L270).
+- Proposed SQL / config: STAGED block din276-X-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (no signature needed)
+
+- **Codebase vs brief:** (1) ONE KG-item register per KG worksheet (`kg1_positionen` … `kg8_positionen`) instead of one register on DIN-276-09 — a register-fed Σ lives on its register's worksheet, and the Σ twins must sit beside the `kg_NN0_total` they replace; (2) the matrix derivations incl. current / previous / deviation live on DIN-276-18, not on -26 / -27 (same rule; C-3 / D-2 / E-1 carry the re-point); (3) the brief's `kosten_override` / `override` block on a typed number is not encodable (J-7); (4) TABLE2 / 3 / 4 stay three tables (the brief's `TABLE234` union cannot be keyed by `kg` alone — Table 4 is keyed (kg, nr)) and the register's `einheit` is one derived `lookup()` chain over them; (5) `reference_unit` is a NUMBER — three text fills instead of a re-bind (E-2); (6) the -28 limit visibility is refuted by L416 (J-5); (7) `existing_substance_value` / `separate_calculations_per_building` / every `kg_NNN` are consumed or producers → C-2 / C-4; (8) 115 equations (brief ≈ 18): the 52 second-level Σ twins + counts / badges per register; (9) `vat_treatment IN {gross, mixed}` (not `== gross`) because L270 prints the third form; (10) `sonderkosten.art` tokens are this task's own (J-4).
+- **Prod section layout:** every DIN-276 worksheet carries the flat sections A … M; the KG worksheets add one coded subsection per second-level KG ("KG 110" …, parent C). Registers were created in C, outputs in D, the selector / fills in C.
+- **Range consumer tokens** (`DIN-276-09..16` etc.) are the reason five of the six brief conditionals are pending / withheld — C-1 is the single most valuable ratification for this standard.
+- **Table sizes:** TABLE1 326 rows = the 326 prod `kg_*` fields (1:1, pinned); TABLE4 259 rows = 72 KG rows + 187 printed items; TABLE3 78 rows; TABLE2 8 rows; 671/671 quotes verbatim.
+- **The English transcript** is a translation — designations / notes are seeded as printed in English (the German field labels of prod are not in the transcript); the owner's ruling on md-verified English cells vs the German DIN text (SR-3) is the same as for every translated transcript in Plan 3.
+
 ## Plan 3 tooling rulings
 
 ### plan3-T-12b · [CODE] · `emit-field-configs-sql.ts` producer guard · self-only `consumer_worksheets` entries are no longer treated as producers

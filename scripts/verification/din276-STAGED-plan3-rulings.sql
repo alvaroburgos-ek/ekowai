@@ -1,0 +1,427 @@
+-- DIN-276 — Plan 3 Task 13 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the 53 equation rows — the 4 IDENT rows by id /
+-- md5(formula) —, the 32 compliance rows — ids / severities / md5(condition) —, worksheet titles, field labels /
+-- descriptions / data_type, standards.version 'December 2018 (DIN 276:2018-12)') were captured read-only on
+-- 2026-09-18 (src/lib/eval/field-configs/din276.prior.json; scripts/verification/prod-query.mjs). Transcript lines
+-- refer to C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-276\DIN-276.md (English translation). This task
+-- changes NO gate severity by itself; every proposed severity below is named per block (the guideline's own modal
+-- verb decides: "must" / "are to be" → block, "should" / "recommended" / "can" → warn).
+--
+-- Conventions: `s.code = 'DIN-276'`, worksheets by code, never by id (equations and gates by their captured uuid + a
+-- guard on md5(formula) / md5(condition) of the text they replace so a re-run is a no-op); each block names its
+-- rollback. Every block that DELETEs or rewrites an equation / gate row follows the amendment-I archive pattern: the
+-- affected rows are copied into `equations_archive_din276` / `compliance_requirements_archive_din276` in the SAME
+-- transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE false; INSERT … SELECT * … WHERE (id = … AND
+-- md5(…) = …)`), the DELETE / UPDATE is guarded on the md5 read read-only from prod, and the rollback restores from the
+-- archive by id with an EXPLICIT column list (never `SELECT *`, never retyped — prod-query.mjs truncates cells at 120
+-- chars); the archive table is dropped by the rollback or on the owner's sign-off that the change is final. A field
+-- retirement is `active = false` (reversible). New gates are INSERTs with a DELETE-by-description rollback. The Plan-3
+-- DATA migrations (20260917101300 seed · 20260917101310 field configs · 20260917101320 equations) must be applied
+-- BEFORE any block that reads a created symbol (kostenstufen_matrix, KR_gesamt_calc … KF_gesamt_calc, stufen_count,
+-- stufe_aktuell_gesamt, stufe_vorher_gesamt, stufen_abweichung, stufen_abweichung_pct, bauwerk_aktuell,
+-- kg1_positionen … kg8_positionen, kgN_positionen_sum / _count / _fremd / _abweichend, kg_NN0_from_rows (52),
+-- sonderkosten, sonderkosten_<art>_sum (5), sonderkosten_nicht_separat, vergabeeinheiten, KA_kostenstand_calc,
+-- vergabeeinheiten_count, KA_angebote_count, KA_auftraege_count, KA_rechnungen_count, abweichungen, abweichungen_sum,
+-- abweichungen_count, flurstuecke, grundstuecksflaeche_GF_calc, flurstuecke_count, kennwert_quellen,
+-- kennwert_quellen_count, kg_selector, reference_unit_einheit / _bezeichnung / _ermittlung, KKW_bauwerk_eur_m2_BGF,
+-- KKW_bauwerk_eur_m3_BRI, GK_kennwert_BGF_calc, KKW_analyse_kg300_anteil_calc).
+-- Consumer edits write `fields.consumer_worksheets` (text[]); the guards keep a re-run idempotent.
+--
+-- Captured compliance rows (md5 = md5(condition)):
+--   REQ-01  af4398ec-d5b4-4041-a045-3db6c674a9d4 (DIN-276-01, block) 'project_type IN {building,civil_engineering,infrastructure,open_space}'  ecb7ebad0bb98c133d6caa43feb8bba0
+--   REQ-09  febc9e47-2da7-4373-9006-53071cb3ec14 (DIN-276-01, warn, attestation) ''  d41d8cd98f00b204e9800998ecf8427e
+--   REQ-06  d7ced71f-faf6-4c0f-bed6-5712210ace12 (DIN-276-02, block) 'project_scope_description IS NOT EMPTY'  1b834ab80ac0da5583c37c3d5ed646bc
+--   REQ-08  1698ebf9-e650-4e2e-aa5f-123f6956ca2f (DIN-276-02, block) 'IF multi_building THEN separate_calculations_per_building'  216904537bf78da2262cd5d2a99d71f2
+--   REQ-04  10b675f9-86e1-4440-80f2-898493b5b06e (DIN-276-03, block) 'cost_status_date IS NOT NULL'  72ca57dcd148e82a4e9eed8afb45ba78
+--   REQ-05  7bf20537-85b1-487c-b9de-9bbc85eb7f58 (DIN-276-03, block) 'input_documents_register IS NOT EMPTY'  40053a4ee6e96471ada1d14ab56e1430
+--   REQ-07  d489a297-54e7-44be-9d37-c34d83ad16f1 (DIN-276-03, block) 'cost_calculation_method IS NOT EMPTY'  2ea95efd75753518b7fd1de7c3aa137d
+--   REQ-15  1f5e6cc9-454a-4c74-acc5-c2a288687cfc (DIN-276-03, block) 'vat_treatment IN {gross,net,mixed}'  93cd4f84dd67d0d30dc35a3d12df3296
+--   REQ-27 / -28 / -29  dc90603f-c616-41a7-ba41-e71bea523571 / 7d510503-2f39-499b-94f2-5384cd78a695 / f355ec86-bc33-40ba-9738-84b045c58b55 (DIN-276-04, warn, attestation) ''  d41d8cd98f00b204e9800998ecf8427e
+--   REQ-10  dfaeabf3-a790-4e79-82ff-2ece6e218655 (DIN-276-08, block) 'IF existing_substance_value > 0 THEN separately_shown_existing_substance == true'  b4c232e250a2cb03c51d04c675bb1be8
+--   REQ-11  ffde797e-c71c-4df5-a35b-a3858b61a03c (DIN-276-08, block) 'IF contributed_goods_value > 0 THEN separately_shown_contributed_goods == true'  1758ba6c16193ab070a2143066627464
+--   REQ-12  a1d6966f-cd8a-4cf3-b1fe-4e523fdf7724 (DIN-276-08, block) 'IF special_costs_value > 0 THEN separately_shown_special_costs == true'  a1b6bdbe7eddbdf5fbac61a824a1372d
+--   REQ-13  fffa187d-43ed-40ec-89b2-57265a4a9ab6 (DIN-276-08, block) 'IF forecasted_costs_value > 0 THEN forecasted_costs_assumptions_stated == true'  45df77a9956192c066361dc9ef6524ca
+--   REQ-14  dbdfd905-125f-42b8-96a5-1783fdf093fa (DIN-276-08, block) 'IF risk_costs_value > 0 THEN separately_shown_risk_costs == true'  d3ce6724cab52566667b070c662db225
+--   REQ-02  0dac55d6-443e-4c7c-b55b-738e3b4f24c8 (DIN-276-09, block, attestation) 'attest_din_276_09_req_02 == True'  1bda1ab26806475fa501b66bbea94aca
+--   REQ-16 … REQ-20, REQ-30 (DIN-276-18, block, attestations) 5286b220-af86-45cc-85a0-f483e0f123d4 / d7fed0d0-3b99-4f37-8ef4-9740f251233c / 6ac29ce4-3650-43b1-b2db-a7008613f4c6 / 54b69646-cfd1-4abe-8d17-fe1880c9ebbe / d5d046fa-d8e0-4eb6-b3a7-062716dcb896 / 6d3e575d-51a6-4820-8af0-32ed1a5a489f
+--   REQ-03  6c4696ca-3b3a-4dad-9adf-b1d816258e21 (DIN-276-23, block) 'GK_total IS NOT NULL'  34640e23e597cb1cd1c433869c4741b2
+--   REQ-26  7559df73-919c-4460-8545-e48a29492916 (DIN-276-23, warn) ''  d41d8cd98f00b204e9800998ecf8427e
+--   REQ-25  0e174b13-33a5-4f97-9f84-c04d1bc13d5d (DIN-276-25, block) 'building_costs == kg_300_total + kg_400_total'  a30845fbbf95836389081d718b2676c0
+--   REQ-21 … REQ-23, REQ-31, REQ-32 (DIN-276-26, block, attestations) bb71a717-1b3b-47f1-bb6d-155d95b0899a / c234f75d-b7a1-41c1-9219-31d2eb08207c / b564422a-43c3-4250-99ea-f862ba830cfc / 3b3fafaf-5801-4ed3-9c22-d6c3a36412dc / 88ee3e24-8df7-422c-b94a-de45ae70a74c
+--   REQ-24  3d783d47-c020-4f91-884d-f8e963ca934d (DIN-276-28, block) 'cost_target_value IS NOT NULL AND feasibility_checked == true'  5ae0f8186c72e811aa6704a2ce45be44
+-- Captured IDENT equation rows (md5 = md5(formula)):
+--   IDENT-01  bcd6a7f0-f369-43e0-a0a1-3279219e8618 (DIN-276-23) 'GK_total = kg_100_total + … + kg_800_total'  64222da6be5849297faffbf2a24947b0  verified_against_standard
+--   IDENT-02  e7e1658e-dfba-4da2-81b1-e757a1c708e7 (DIN-276-25) 'building_costs = kg_300_total + kg_400_total'  5380e3a57680ccf660f3ac03883bd681  verified_against_standard
+--   IDENT-03  a3d5a206-47f9-4a1f-89b5-b0de7875913a (DIN-276-24) 'cost_parameter = cost / reference_unit'  3286a405fedd6bf593d9dbffa01ef09a  verified_against_standard
+--   IDENT-04  95a489fe-5f24-40f9-96f9-764ad008db85 (DIN-276-26) 'deviation_amount = current_stage_total - previous_stage_total'  cc7480af1d0d844d891ba4352d90989c  imported_unverified
+-- Explicit column lists (information_schema, read-only 2026-09-18):
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+-- Range consumer tokens in prod (never matched by loadInheritedFields `code = ANY(consumer_worksheets)`):
+--   'DIN-276-02..29' (client_name, lead_engineer, project_name, project_number), 'DIN-276-09..16' (ekowai_sector, applicable_cost_groups, cost_breakdown_depth, vat_treatment),
+--   'DIN-276-04..16' (building_count), 'DIN-276-18..22' (cost_breakdown_depth, cost_planning_principle, planning_stage_active, input_documents_register, cost_calculation_method),
+--   'DIN-276-09..29' (separate_calculations_per_building), 'DIN-276-04..28' (cost_status_date), 'DIN-276-04..08' (input_documents_register), 'DIN-276-18..23' (vat_treatment).
+
+-- =====================================================================================================================
+-- din276-C-1 · prod · range tokens in `consumer_worksheets` → explicit worksheet codes (14 fields reach NO worksheet today)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: capture 2026-09-18 (see the token list above); `loadInheritedFields` matches `code = ANY(consumer_worksheets)` only.
+-- Why staged: a consumer edit (always sign-off). Every visibility rule and lookup keyed on these drivers (the emitted
+-- GK_mwst_satz_pct rule, M-1 / M-2, C-2, T-2) is `pending` (visible, inert) until this block lands.
+-- Option (helper expands a token 'DIN-276-a..b' into the codes a…b; run once per field):
+-- BEGIN;
+-- CREATE OR REPLACE FUNCTION pg_temp.din276_expand(tok text) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$
+--   SELECT CASE WHEN tok ~ '^DIN-276-\d\d\.\.\d\d$'
+--     THEN ARRAY(SELECT 'DIN-276-' || lpad(g::text, 2, '0') FROM generate_series(substr(tok, 9, 2)::int, substr(tok, 13, 2)::int) g)
+--     ELSE ARRAY[tok] END $$;
+-- UPDATE fields f SET consumer_worksheets = (SELECT array_agg(DISTINCT c ORDER BY c) FROM unnest(f.consumer_worksheets) t(tok), unnest(pg_temp.din276_expand(tok)) c)
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND f.active
+--    AND EXISTS (SELECT 1 FROM unnest(f.consumer_worksheets) t(tok) WHERE tok ~ '^DIN-276-\d\d\.\.\d\d$');
+-- COMMIT;
+-- Note: '(system terminus)' on final_verdict is left untouched. Affected: the 14 fields listed under "Range consumer tokens".
+-- Rollback: restore the captured arrays (din276.prior.json, `consumer_worksheets` per field) — 14 UPDATE statements, one per field, e.g.
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-276-09..16'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code = 'DIN-276-02' AND f.symbol = 'applicable_cost_groups';
+
+-- =====================================================================================================================
+-- din276-M-1 · DIN-276-09 … -16 · KG worksheet sections on `applicable_cost_groups` (select_many)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §5.1 L426–L434 (the eight first-level cost groups); prod `applicable_cost_groups` is a Plan-1 select_many
+-- checklist (values = the German labels 'KG 100 – Grundstück' … 'KG 800 – Finanzierung', 20260911120000_selection_configs_DIN_276.sql;
+-- enum_values NULL in the capture until that migration is applied).
+-- Why staged: visibility driven by a select_many is ALWAYS a sign-off (rule 8); needs C-1 first (range token) and C-2 for the
+-- producer sections (section C of every KG worksheet holds the roll-up inputs).
+-- Option (after C-1 + C-2; one UPDATE per KG worksheet, every coded section A … M + the "KG NNN" subsections):
+-- BEGIN;
+-- UPDATE worksheet_sections ws SET visible_when = 'contains(applicable_cost_groups, ''KG 100 – Grundstück'')' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code = 'DIN-276-09' AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'contains(applicable_cost_groups, ''KG 200 – Vorbereitende Maßnahmen'')' … w.code = 'DIN-276-10' …;
+-- UPDATE worksheet_sections ws SET visible_when = 'contains(applicable_cost_groups, ''KG 300 – Bauwerk – Baukonstruktionen'')' … w.code = 'DIN-276-11' …;
+-- UPDATE worksheet_sections ws SET visible_when = 'contains(applicable_cost_groups, ''KG 400 – Bauwerk – Technische Anlagen'')' … w.code = 'DIN-276-12' …;
+-- UPDATE worksheet_sections ws SET visible_when = 'contains(applicable_cost_groups, ''KG 500 – Außenanlagen und Freiflächen'')' … w.code = 'DIN-276-13' …;
+-- UPDATE worksheet_sections ws SET visible_when = 'contains(applicable_cost_groups, ''KG 600 – Ausstattung und Kunstwerke'')' … w.code = 'DIN-276-14' …;
+-- UPDATE worksheet_sections ws SET visible_when = 'contains(applicable_cost_groups, ''KG 700 – Baunebenkosten'')' … w.code = 'DIN-276-15' …;
+-- UPDATE worksheet_sections ws SET visible_when = 'contains(applicable_cost_groups, ''KG 800 – Finanzierung'')' … w.code = 'DIN-276-16' …;
+-- COMMIT;
+-- Consequence to accept: a hidden KG worksheet nulls its kg_N00_total → IDENT-01 GK_total (DIN-276-23) is manual_required until
+-- every applicable KG is filled — i.e. the checklist must ALSO drive IDENT-01 (a `if(contains(…), kg_100_total, 0)` rewrite: E-class, not staged here).
+-- Rollback: UPDATE worksheet_sections … SET visible_when = NULL WHERE … visible_when LIKE 'contains(applicable_cost_groups%'.
+
+-- =====================================================================================================================
+-- din276-M-2 · DIN-276-18 … -22 · stage worksheet sections on `planning_stage_active` (select_many)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.3.2–4.3.7 (L286 … L370); prod `planning_stage_active` = Plan-1 select_many (values 'Kostenrahmen', 'Kostenschätzung',
+-- 'Kostenberechnung', 'Kostenanschlag', 'Kostenfeststellung').
+-- Why staged: select_many driver (rule 8); needs C-1. The five stage worksheets hold NO producers (capture: every KR_/KSch_/KBer_/KA_/KF_
+-- field is consumer-free) — once the matrix (DIN-276-18) is the ratified source (D-1 / X-2) the worksheets -19 … -22 retire instead.
+-- Option (after C-1):
+-- BEGIN;
+-- UPDATE worksheet_sections ws SET visible_when = 'contains(planning_stage_active, ''Kostenrahmen'')' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code = 'DIN-276-18' AND ws.code IN ('C', 'D') AND ws.visible_when IS NULL;
+-- UPDATE … 'contains(planning_stage_active, ''Kostenschätzung'')' … w.code = 'DIN-276-19' …;
+-- UPDATE … 'contains(planning_stage_active, ''Kostenberechnung'')' … w.code = 'DIN-276-20' …;
+-- UPDATE … 'contains(planning_stage_active, ''Kostenanschlag'')' … w.code = 'DIN-276-21' …;
+-- UPDATE … 'contains(planning_stage_active, ''Kostenfeststellung'')' … w.code = 'DIN-276-22' …;
+-- COMMIT;
+-- Note: on DIN-276-18 section C now also holds the matrix (Plan 3) — hide C only if the matrix should follow the Kostenrahmen tick.
+-- Rollback: UPDATE worksheet_sections … SET visible_when = NULL WHERE … visible_when LIKE 'contains(planning_stage_active%'.
+
+-- =====================================================================================================================
+-- din276-C-2 · DIN-276-09 … -16 · the 266 third-level `kg_NNN` inputs by `cost_breakdown_depth` (refused: transitive producer chain)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.3.2 L296 "first level", §4.3.3 L310 "second level", §4.3.4 L322 "third level"; §5.2 L441. Capture: every kg_NNN feeds a
+-- KGx-xx roll-up (e.g. kg_311 → KG3-01 kg_310_total → KG3-10 kg_300_total, consumed by DIN-276-17 / -23 / -25) — the emitter refused
+-- `kg_311 ← cost_breakdown_depth == 'level_3'` and the section rule on "KG 310" (pinned in field-configs-din276.test.ts).
+-- Why staged: hiding an input nulls the roll-up (a hidden symbol is null for every equation) → kg_3N0_total → kg_300_total → GK_total
+-- read manual_required for a Kostenrahmen / Kostenschätzung project. The rule is only safe TOGETHER with D-3 (the totals derived from
+-- the KG registers) or with an engine change that lets a hidden third level fall back to a typed second-level total (not built).
+-- Option (after C-1 and D-3, per KG worksheet):
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'cost_breakdown_depth == ''level_3'''
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code BETWEEN 'DIN-276-09' AND 'DIN-276-16' AND f.active
+--    AND f.symbol ~ '^kg_\d\d[1-9]$' AND f.visible_when IS NULL;                                            -- 266 third-level inputs
+-- UPDATE fields f SET visible_when = 'cost_breakdown_depth IN {level_2, level_3}'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code BETWEEN 'DIN-276-09' AND 'DIN-276-16' AND f.active
+--    AND f.symbol ~ '^kg_\d[1-9]0(_total)?$' AND f.visible_when IS NULL;                                    -- 52 second-level inputs / totals
+-- COMMIT;
+-- Rollback: UPDATE fields … SET visible_when = NULL WHERE … f.symbol ~ '^kg_\d{3}(_total)?$' AND f.visible_when LIKE 'cost_breakdown_depth%'.
+
+-- =====================================================================================================================
+-- din276-C-3 · DIN-276-18 → -26 / -27 / -28 · consumer edit for the matrix outputs
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.4.2 L380; §4.4.3 L386; §4.6.2 L414. A `create` never sets consumer_worksheets; the -26 comparison and the -27 deviation
+-- analysis read the typed current_stage_total / previous_stage_total / KK_* today.
+-- Why staged: consumer edit (always sign-off). Prerequisite of D-2 and E-1.
+-- Option:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-276-26', 'DIN-276-27', 'DIN-276-28']
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code = 'DIN-276-18' AND f.active AND f.description LIKE 'Plan 3:%'
+--    AND f.symbol IN ('stufe_aktuell_gesamt', 'stufe_vorher_gesamt', 'stufen_abweichung', 'stufen_abweichung_pct', 'bauwerk_aktuell', 'KR_gesamt_calc', 'KSch_gesamt_calc', 'KBer_gesamt_calc', 'KA_gesamt_calc', 'KF_gesamt_calc')
+--    AND f.consumer_worksheets IS NULL;
+-- COMMIT;
+-- Rollback: the same UPDATE with `SET consumer_worksheets = NULL` and `AND f.consumer_worksheets = ARRAY['DIN-276-26', 'DIN-276-27', 'DIN-276-28']`.
+
+-- =====================================================================================================================
+-- din276-C-4 · DIN-276-02 / -08 · `separate_calculations_per_building` ← multi_building; `existing_substance_value` ← construction_activity (refused: consumed)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.2.8 L239 ("If a construction project consists of different buildings or facilities … separate cost calculations must be
+-- prepared for each"); §4.2.9 L243 + §4.2.10 L247. Capture: separate_calculations_per_building consumers ['DIN-276-09..29'] (a range token,
+-- but non-empty → the guard refuses); existing_substance_value consumed by DIN-276-23; construction_activity reaches DIN-276-03 / -07 only.
+-- Why staged: hiding a consumed field nulls the inherited value; REQ-08 (block) reads separate_calculations_per_building on -02.
+-- Option (after C-1): (a) DIN-276-02: `UPDATE fields SET visible_when = 'multi_building == true' … symbol = 'separate_calculations_per_building'`
+--   — safe because REQ-08 is itself guarded by multi_building; (b) DIN-276-08: add 'DIN-276-08' to construction_activity's consumers, then
+--   `visible_when = 'construction_activity IN {umbau, modernisierung, bestand}'` on existing_substance_value (its -23 consumer then reads null
+--   for a Neubau — accepted: no existing substance). Rollback: SET visible_when = NULL on both; restore construction_activity's array.
+
+-- =====================================================================================================================
+-- din276-C-5 · DIN-276-23 / -11 / -13 → -24 · `GK_total`, `kg_300_total`, `kg_500_total` reach the Kennwert analysis
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §3.13 L175; §3.11 L163; Tab. 2 L1030–L1037 (KG 500 → AF). Capture: GK_total consumers NULL; kg_300_total ['DIN-276-17',
+-- 'DIN-276-23', 'DIN-276-25']; kg_500_total ['DIN-276-17', 'DIN-276-23'] — none reaches DIN-276-24, so DIN-276-24-D3 / -D4 read
+-- manual_required and no `kg_500_total / outdoor_area_AF` twin could be emitted at all.
+-- Why staged: consumer edit. Option:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-276-24', 'DIN-276-26', 'DIN-276-28'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code = 'DIN-276-23' AND f.symbol = 'GK_total' AND f.consumer_worksheets IS NULL;
+-- UPDATE fields f SET consumer_worksheets = array_append(f.consumer_worksheets, 'DIN-276-24') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code IN ('DIN-276-11', 'DIN-276-13') AND f.symbol IN ('kg_300_total', 'kg_500_total') AND NOT ('DIN-276-24' = ANY(f.consumer_worksheets));
+-- COMMIT;
+-- Then (E-class follow-up, same block): INSERT the equation DIN-276-24-D5 `cost_parameter_per_AF_calc = kg_500_total / outdoor_area_AF` + its derived field.
+-- Rollback: GK_total → NULL; array_remove(consumer_worksheets, 'DIN-276-24') on the two totals; DELETE the D5 row by description.
+
+-- =====================================================================================================================
+-- din276-G-1 · DIN-276-01 · REQ-09 (warn, attestation, EMPTY condition) — the §4.2.9 existing-building clause
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.2.9 L243 "In the case of cost calculations for existing building projects, the level of detail of the calculations and the
+-- cost calculation methods and cost parameters used depend on the special circumstances of existing building projects and the
+-- project-specific requirements." (no measurable requirement); §4.2.10 L247 "If the value of the existing substance … is to be determined
+-- … this must be shown separately for the relevant cost groups."
+-- Why staged: REQ-09 has an empty condition (fires as `manual`); a guarded condition is a gate change. The sentence itself yields no
+-- machine rule — the brief's `existing_substance_value ← construction_activity` reading is a visibility, not a gate.
+-- Option (warn, attestation kept): UPDATE compliance_requirements SET condition = 'IF construction_activity IN {umbau, modernisierung, bestand} THEN sonderkosten_bausubstanz_sum IS NOT NULL'
+--   WHERE id = 'febc9e47-2da7-4373-9006-53071cb3ec14' AND md5(condition) = 'd41d8cd98f00b204e9800998ecf8427e';   -- needs the Plan-3 migrations + C-1 (construction_activity → -01 is own)
+-- Rollback: SET condition = '' WHERE id = … AND condition LIKE 'IF construction_activity%'.
+
+-- =====================================================================================================================
+-- din276-G-2 · DIN-276-08 · REQ-10 … REQ-14 (block) → the Sonderkosten register
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L247 / L251 / L255 / L259 / L263 (each kind "must be shown / recognised separately"; forecast "The assumptions on which the
+-- forecast is based must be stated"). Capture: five block gates on the typed *_value / separately_shown_* pairs (ids + md5 above).
+-- Why staged: replacing five gates by register-based gates is a gate-condition change. Fail-safe now: the five stay; the register sums and
+-- `sonderkosten_nicht_separat` are visible twins.
+-- Option (after the Plan-3 migrations; the five typed pairs retire under D-4):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din276 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din276 SELECT * FROM compliance_requirements
+--  WHERE (id = 'dfaeabf3-a790-4e79-82ff-2ece6e218655' AND md5(condition) = 'b4c232e250a2cb03c51d04c675bb1be8')
+--     OR (id = 'ffde797e-c71c-4df5-a35b-a3858b61a03c' AND md5(condition) = '1758ba6c16193ab070a2143066627464')
+--     OR (id = 'a1d6966f-cd8a-4cf3-b1fe-4e523fdf7724' AND md5(condition) = 'a1b6bdbe7eddbdf5fbac61a824a1372d')
+--     OR (id = 'fffa187d-43ed-40ec-89b2-57265a4a9ab6' AND md5(condition) = '45df77a9956192c066361dc9ef6524ca')
+--     OR (id = 'dbdfd905-125f-42b8-96a5-1783fdf093fa' AND md5(condition) = 'd3ce6724cab52566667b070c662db225');
+-- DELETE FROM compliance_requirements WHERE id IN (SELECT id FROM compliance_requirements_archive_din276);
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-10P3', 'Sonderkosten separat ausgewiesen', 'sonderkosten_nicht_separat == 0', '§4.2.10–4.2.14', 'block',
+--        'Plan 3 (din276-G-2): jede Zeile des Sonderkosten-Registers ist separat ausgewiesen ("must be shown separately", L247 / L251 / L255 / L259 / L263).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-276' AND w.code = 'DIN-276-08';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-13P3', 'Prognosekosten: Annahmen angegeben', 'IF sonderkosten_prognose_sum > 0 THEN forecasted_costs_assumptions_stated == true', '§4.2.13', 'block',
+--        'Plan 3 (din276-G-2): "The assumptions on which the forecast is based must be stated." (L259) — die Annahmen-Spalte des Registers ersetzt das Attest auf Ratifikation.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-276' AND w.code = 'DIN-276-08';
+-- COMMIT;
+-- Rollback:
+-- BEGIN;
+-- DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (din276-G-2):%';
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_din276
+--  WHERE id IN ('dfaeabf3-a790-4e79-82ff-2ece6e218655', 'ffde797e-c71c-4df5-a35b-a3858b61a03c', 'a1d6966f-cd8a-4cf3-b1fe-4e523fdf7724', 'fffa187d-43ed-40ec-89b2-57265a4a9ab6', 'dbdfd905-125f-42b8-96a5-1783fdf093fa')
+--    AND id NOT IN (SELECT id FROM compliance_requirements);
+-- DELETE FROM compliance_requirements_archive_din276 WHERE id IN ('dfaeabf3-a790-4e79-82ff-2ece6e218655', 'ffde797e-c71c-4df5-a35b-a3858b61a03c', 'a1d6966f-cd8a-4cf3-b1fe-4e523fdf7724', 'fffa187d-43ed-40ec-89b2-57265a4a9ab6', 'dbdfd905-125f-42b8-96a5-1783fdf093fa');
+-- DROP TABLE IF EXISTS compliance_requirements_archive_din276; -- only once every din276 block that uses it is rolled back or signed off
+-- COMMIT;
+
+-- =====================================================================================================================
+-- din276-G-3 · DIN-276-07 · new gate: at least one cost-parameter source (§4.2.7)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L235 "The cost calculation methods used in the cost calculation and the sources of the cost parameters used must be stated."
+-- Capture: REQ-07 (DIN-276-03, block) covers the method only ('cost_calculation_method IS NOT EMPTY'); the sources are the free-text KKW_quelle.
+-- Why staged: a new gate (always sign-off). Option (block — "must be stated"):
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-07P3', 'Kostenkennwert-Quellen angegeben', 'kennwert_quellen_count >= 1', '§4.2.7', 'block',
+--        'Plan 3 (din276-G-3): "the sources of the cost parameters used must be stated" (L235) — mindestens eine Zeile im Register kennwert_quellen.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-276' AND w.code = 'DIN-276-07';
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (din276-G-3):%'.
+
+-- =====================================================================================================================
+-- din276-T-1 · DIN-276-21 · `KA_kostenstatus` (text, description 'Angebot|Auftrag|Rechnung') → select_one
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.3.6 L346 "… on the basis of the current cost status (offer, order or invoice)." — the three options are printed.
+-- Why staged: data_type change (always sign-off). Fail-safe now: the text field stays; the register column `status` carries the printed
+-- three tokens per Vergabeeinheit (D-5 retires the worksheet-level field).
+-- Option: UPDATE fields f SET data_type = 'enum', widget = 'select_one', enum_values = '[{"value":"angebot","label_de":"Angebot (offer)","order_index":0},{"value":"auftrag","label_de":"Auftrag (order)","order_index":1},{"value":"rechnung","label_de":"Rechnung (invoice)","order_index":2}]'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code = 'DIN-276-21' AND f.symbol = 'KA_kostenstatus' AND f.data_type = 'text' AND f.enum_values IS NULL;
+-- Stored text values ('Angebot' …) must be mapped to the tokens in project_parameters before the switch (owner script). Rollback: data_type = 'text', widget = NULL, enum_values = NULL.
+
+-- =====================================================================================================================
+-- din276-T-2 · DIN-276-26 / -23 · `KK_stage_aktuell`, `KK_stage_vorher`, `GK_quelle_stage` (text, description 'KR|KSch|KBer|KA|KF') → select_one over the five stages
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.3.2 … §4.3.7 headings (L286, L298, L312, L324, L343, L360) — five stages; the English transcript prints "Cost estimate" for three
+-- of them (din276-J-3), so the labels are prod's own worksheet titles (Kostenrahmen … Kostenfeststellung).
+-- Why staged: data_type change. Fail-safe now: text stays; the matrix `stufe` column carries the tokens; after C-3 / D-2 the -26 pair is derived
+-- from the matrix (last two rows) and the three text fields retire.
+-- Option (per field): UPDATE fields f SET data_type = 'enum', widget = 'select_one', enum_values = '[{"value":"kr","label_de":"Kostenrahmen (§4.3.2)","order_index":0},{"value":"ksch","label_de":"Kostenschätzung (§4.3.3)","order_index":1},{"value":"kber","label_de":"Kostenberechnung (§4.3.4)","order_index":2},{"value":"ka","label_de":"Kostenanschlag (§4.3.5)","order_index":3},{"value":"kf","label_de":"Kostenfeststellung (§4.3.7)","order_index":4}]'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND ((w.code = 'DIN-276-26' AND f.symbol IN ('KK_stage_aktuell', 'KK_stage_vorher')) OR (w.code = 'DIN-276-23' AND f.symbol = 'GK_quelle_stage')) AND f.data_type = 'text' AND f.enum_values IS NULL;
+-- Rollback: data_type = 'text', widget = NULL, enum_values = NULL on the three rows.
+
+-- =====================================================================================================================
+-- din276-D-1 · DIN-276-18 … -22 · the five stage worksheets (KR_KG_100 … KF_risiko_anteil, 5 × `*_gesamt` "Σ KG 100-800" hand-typed) ↔ `kostenstufen_matrix`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L296 / L310 / L322 / L339 / L370 (one sentence per stage: "the total costs must be determined according to cost groups in the
+-- first / second / third level"); §3.11 L163. Capture: 90 consumer-free inputs on -18 … -22; no equation on any of them.
+-- Why staged: deactivation (always sign-off). Fail-safe now: every input stays; the matrix + KR_gesamt_calc … KF_gesamt_calc are twins.
+-- Option (Phase 6 — retire the 40 KG inputs + 5 totals + 15 Eigenleistung / Prognose / Risiko + 5 stand_datum; keep the stage-specific
+-- inputs KR_kostenziel, KR_genauigkeit_pct, KR_grundlage_DIN18205, *_lph, *_planungsdokumente, *_bereits_entstandene_kosten, KA_* / KF_* status fields):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code BETWEEN 'DIN-276-18' AND 'DIN-276-22' AND f.active
+--    AND (f.symbol ~ '^(KR|KSch|KBer|KA|KF)_KG_\d00$' OR f.symbol ~ '^(KR|KSch|KBer|KA|KF)_(gesamt|eigenleistung_anteil|prognose_anteil|risiko_anteil|stand_datum)$');
+-- Rollback: the same predicate with `SET active = true`.
+
+-- =====================================================================================================================
+-- din276-D-2 · DIN-276-26 / -27 · `current_stage_total`, `previous_stage_total`, `KK_kosten_aktuell`, `KK_kosten_vorher`, `KK_delta_abs`, `KK_delta_pct`, `deviation_percentage` ↔ the DIN-276-18 outputs
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.4.2 L380 "current cost determinations must be continuously compared with previous cost determinations"; §4.4.3 L386.
+-- Capture: current_stage_total / previous_stage_total (B, consumer-free, "Eingang (Engineer: Label/Einheit pruefen)"); deviation_percentage consumed by -28 / -29.
+-- Why staged: deactivation + (after C-3) the -26 / -27 rows read the inherited matrix outputs. Option (after C-3, E-1):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND ((w.code = 'DIN-276-26' AND f.symbol IN ('current_stage_total', 'previous_stage_total', 'KK_kosten_aktuell', 'KK_kosten_vorher', 'KK_delta_abs', 'KK_delta_pct'))
+--     OR (w.code = 'DIN-276-27' AND f.symbol = 'deviation_percentage')) AND f.active;
+-- deviation_percentage has consumers (-28 / -29): re-point them to stufen_abweichung_pct (add 'DIN-276-28', 'DIN-276-29' to its consumers — C-3 covers -28; -29 to add) before deactivating.
+-- Rollback: SET active = true on the seven rows.
+
+-- =====================================================================================================================
+-- din276-D-3 · DIN-276-09 … -16 · the 266 typed third-level `kg_NNN` inputs + the 48 KGx-xx roll-ups ↔ `kg1_positionen` … `kg8_positionen` (Σ per second-level KG = `kg_NN0_from_rows`, per first level = `kgN_positionen_sum`)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Table 1 (L464–L1010); §3.13 L175 (Kosten = Menge · Kennwert, the inverted definition); §6.2 L1022 (Tab. 2 / 3 / 4 units).
+-- Capture: 266 third-level inputs (consumer-free), 52 second-level totals / inputs, 8 first-level totals consumed by -17 / -23 (-25); 48 roll-up equations.
+-- Why staged: switching the roll-ups from typed inputs to the register is an equation replacement of verified rows (48 × KGx-xx are
+-- `verified_against_standard` per capture — replacing a verified equation is always sign-off) and a deactivation of 266 inputs.
+-- Fail-safe now: everything stays; each register footer shows the Σ twins beside the typed totals.
+-- Option (per KG worksheet, after the Plan-3 migrations; archive pattern for the 48 rows — one INSERT … SELECT * per KGx-xx id with its md5;
+-- ids / md5 are NOT listed here: capture them read-only at ratification with
+--   SELECT e.id, e.equation_number, md5(e.formula) FROM equations e JOIN worksheet_templates w ON w.id = e.worksheet_template_id JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DIN-276' AND e.equation_number ~ '^KG\d-\d\d$';):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_din276 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_din276 SELECT * FROM equations WHERE id IN (<the 48 captured ids>) AND md5(formula) IN (<their md5s>);
+-- -- second-level totals: kg_310_total = kg_310_from_rows (one UPDATE per KGx-0n row, e.g.)
+-- UPDATE equations SET formula = 'kg_310_total = kg_310_from_rows', input_symbols = ARRAY['kg_310_from_rows'], verification_status = 'imported_unverified',
+--        description = 'Plan 3 (din276-D-3): aus dem Register kg3_positionen (Σ der Positionen der KG 310 und ihrer Untergruppen).'
+--  WHERE id = '<KG3-01 id>' AND md5(formula) = '<KG3-01 md5>';
+-- -- first-level totals keep their KGx-last form (Σ of the second-level totals) — unchanged.
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-276' AND w.code BETWEEN 'DIN-276-09' AND 'DIN-276-16' AND f.active AND f.symbol ~ '^kg_\d\d[1-9]$';
+-- COMMIT;
+-- Note: second-level KGs WITHOUT printed children (110, 230, 610, 620, 630, 690, 810 … 890) are typed inputs today; on ratification they become
+-- `kg_110 = kg_110_from_rows` equations (INSERT) and the inputs deactivate. The stored project_parameters of the 266 inputs are not deleted.
+-- Rollback: UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, verification_status = a.verification_status, description = a.description
+--   FROM equations_archive_din276 a WHERE a.id = e.id AND e.id IN (<the 48 ids>); DELETE FROM equations_archive_din276 WHERE id IN (<the 48 ids>); SET active = true on the 266 inputs; DROP TABLE IF EXISTS equations_archive_din276 once every din276 block using it is rolled back or signed off.
+
+-- =====================================================================================================================
+-- din276-D-4 · DIN-276-08 · `existing_substance_value`, `contributed_goods_value`, `special_costs_value`, `forecasted_costs_value`, `risk_costs_value` + the six `separately_shown_*` / `forecasted_costs_assumptions_stated` ↔ `sonderkosten`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L247 / L251 / L255 / L259 / L263. Capture: the five values consumed by DIN-276-23; the booleans by -23 / -26; REQ-10 … 14 read them.
+-- Why staged: deactivation of consumed inputs (after G-2 and the consumer re-point). Option (after G-2): re-point the -23 / -26 consumers to
+-- sonderkosten_<art>_sum (add 'DIN-276-23', 'DIN-276-26' to their consumer_worksheets — a C-edit inside this block), then
+-- UPDATE fields f SET active = false … w.code = 'DIN-276-08' AND f.symbol IN ('existing_substance_value', 'contributed_goods_value', 'special_costs_value', 'forecasted_costs_value', 'risk_costs_value', 'separately_shown_existing_substance', 'separately_shown_contributed_goods', 'separately_shown_special_costs', 'separately_shown_forecasted', 'separately_shown_risk_costs', 'forecasted_costs_assumptions_stated');
+-- Rollback: SET active = true; remove the added consumer codes.
+
+-- =====================================================================================================================
+-- din276-D-5 · DIN-276-21 · `KA_angebote_eingegangen` ↔ `KA_angebote_count`; `KA_vergabeeinheiten_struktur` / `KA_kostenstatus` ↔ `vergabeeinheiten`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L341 ("organised according to the award units … offers, orders and invoices"), L346. Capture: all three consumer-free.
+-- Option: UPDATE fields f SET active = false … w.code = 'DIN-276-21' AND f.symbol IN ('KA_angebote_eingegangen', 'KA_vergabeeinheiten_struktur', 'KA_kostenstatus') AND f.active;  (T-1 becomes moot)
+-- Rollback: SET active = true.
+
+-- =====================================================================================================================
+-- din276-D-6 · DIN-276-27 · `AA_betroffene_kg`, `AA_abweichungsursache`, `AA_typ`, `AA_massnahmen`, `AA_dokumentiert` (one typed row) ↔ `abweichungen`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L386 "Deviations in the individual cost groups … must be presented, explained and documented according to type and scope." (plural — per KG).
+-- Capture: all five consumer-free. Option: UPDATE fields f SET active = false … w.code = 'DIN-276-27' AND f.symbol IN ('AA_betroffene_kg', 'AA_abweichungsursache', 'AA_typ', 'AA_massnahmen', 'AA_dokumentiert') AND f.active;
+-- Rollback: SET active = true.
+
+-- =====================================================================================================================
+-- din276-D-7 · DIN-276-04 / -06 · `flurstuecksnummer` ("Komma-getrennt"), `gemarkung`, `flur`, `grundstuecksflaeche_GF` (+ -06 `BU_GF`) ↔ `flurstuecke` / `grundstuecksflaeche_GF_calc`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 2 L1030 / L1031 "Plot area (GF) — Total plot area according to DIN 277-1". Capture: all consumer-free (-04 C; -06 C).
+-- Option: UPDATE fields f SET active = false … ((w.code = 'DIN-276-04' AND f.symbol IN ('flurstuecksnummer', 'gemarkung', 'flur', 'grundstuecksflaeche_GF')) OR (w.code = 'DIN-276-06' AND f.symbol = 'BU_GF')) AND f.active;
+--   and give grundstuecksflaeche_GF_calc the consumers ARRAY['DIN-276-06', 'DIN-276-24'] (C-edit) so the DIN 277 quantity is inherited where prod re-types it (X-2).
+-- Rollback: SET active = true; consumer_worksheets = NULL on the _calc.
+
+-- =====================================================================================================================
+-- din276-D-8 · DIN-276-07 · `KKW_quelle`, `KKW_stand`, `KKW_region`, `KKW_preisstand`, `KKW_standard`, `KKW_gebaeudeart`, `KKW_bemerkungen` (one typed set) ↔ `kennwert_quellen`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L235 (the sources "must be stated" — per cost parameter used, i.e. N rows). Capture: all consumer-free.
+-- Option: UPDATE fields f SET active = false … w.code = 'DIN-276-07' AND f.symbol LIKE 'KKW\_%' AND f.active;   Rollback: SET active = true.
+
+-- =====================================================================================================================
+-- din276-D-9 · DIN-276-23 / -24 · Kennwert copies `GK_kennwert_BGF` (-23), `cost_parameter_per_BGF`, `cost_parameter_per_AF`, `KKW_analyse_eur_m2_BGF`, `KKW_analyse_eur_m2_GF`, `KKW_analyse_eur_m3_BRI`, `KKW_analyse_kg300_anteil` (-24) ↔ DIN-276-24-D1 … D4
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §3.13 L175; §3.14 L181; Tab. 2. Capture: cost_parameter_per_BGF / _AF consumed by -26 / -28; the KKW_analyse_* and GK_kennwert_BGF consumer-free.
+-- Why staged: deactivation + consumer re-point (after C-5). The `_GF` copy has no twin (grundstuecksflaeche_GF is not inherited on -24 — D-7 adds it).
+-- Option (after C-5): re-point -26 / -28 to GK_kennwert_BGF_calc (consumers ARRAY['DIN-276-26', 'DIN-276-28']) and to the C-5 AF twin; then
+-- UPDATE fields f SET active = false … ((w.code = 'DIN-276-23' AND f.symbol = 'GK_kennwert_BGF') OR (w.code = 'DIN-276-24' AND f.symbol IN ('cost_parameter_per_BGF', 'cost_parameter_per_AF', 'KKW_analyse_eur_m2_BGF', 'KKW_analyse_eur_m3_BRI', 'KKW_analyse_kg300_anteil'))) AND f.active;
+-- Rollback: SET active = true; consumer_worksheets = NULL on the twins.
+
+-- =====================================================================================================================
+-- din276-E-1 · DIN-276-26 · IDENT-04 `deviation_amount = current_stage_total - previous_stage_total` (imported_unverified) → the matrix outputs
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.4.2 L380; §4.4.3 L386. Capture: IDENT-04 95a489fe-5f24-40f9-96f9-764ad008db85, md5 cc7480af1d0d844d891ba4352d90989c, consumers of deviation_amount: -27 / -28 / -29.
+-- Why staged: equation replacement (the row reads typed inputs; after C-3 it can read the inherited matrix outputs).
+-- Option (after C-3):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_din276 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_din276 SELECT * FROM equations WHERE id = '95a489fe-5f24-40f9-96f9-764ad008db85' AND md5(formula) = 'cc7480af1d0d844d891ba4352d90989c';
+-- UPDATE equations SET formula = 'deviation_amount = stufe_aktuell_gesamt - stufe_vorher_gesamt', input_symbols = ARRAY['stufe_aktuell_gesamt', 'stufe_vorher_gesamt'],
+--        description = 'Plan 3 (din276-E-1): aus den letzten beiden Zeilen der Matrix kostenstufen_matrix (DIN-276-18), nicht mehr aus den getippten Eingaben.'
+--  WHERE id = '95a489fe-5f24-40f9-96f9-764ad008db85' AND md5(formula) = 'cc7480af1d0d844d891ba4352d90989c';
+-- COMMIT;
+-- Rollback: UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, description = a.description FROM equations_archive_din276 a WHERE a.id = e.id AND e.id = '95a489fe-5f24-40f9-96f9-764ad008db85';
+--   DELETE FROM equations_archive_din276 WHERE id = '95a489fe-5f24-40f9-96f9-764ad008db85'; DROP TABLE IF EXISTS equations_archive_din276 once every din276 block using it is rolled back or signed off.
+
+-- =====================================================================================================================
+-- din276-E-2 · DIN-276-24 · `reference_unit` (number, IDENT-03 input, "(Engineer: Label/Einheit pruefen)") — not re-bound; derive from the DIN 277 quantities by `kg_selector`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §3.14 L181 "Unit to which the costs in a cost characteristic value relate"; Tab. 2 L1030–L1037 (KG 100 / 200 → GF, 300 / 400 / 600 / 700 / 800 → GFA, 500 → AF).
+-- Capture: reference_unit is a NUMBER (the reference quantity); gross_floor_area_BGF / outdoor_area_AF reach -24, grundstuecksflaeche_GF does not.
+-- Why staged (amendment J): a lookup_fill on a number over a string cell writes nothing; a derivation would take an input away from IDENT-03's typed path.
+-- Fail-safe now: kg_selector + the three TEXT fills (unit / designation / determination) beside the typed quantity (din276-S-1).
+-- Option (after D-7's consumer edit for GF): INSERT equation DIN-276-24-D6 `reference_unit_calc = if(kg_selector == 'kg_500', outdoor_area_AF, if(kg_selector IN {kg_100, kg_200}, grundstuecksflaeche_GF_calc, gross_floor_area_BGF))`
+--   + its derived field; then IDENT-03 → `cost_parameter = cost / reference_unit_calc` (archive pattern on a3d5a206-47f9-4a1f-89b5-b0de7875913a / md5 3286a405fedd6bf593d9dbffa01ef09a) and reference_unit retires.
+--   Engine note: every named input must be entered (an `if()` branch does not exempt inputs) — a project without AF must type 0.
+-- Rollback: restore IDENT-03 from the archive; DELETE the D6 row / field by description.
+
+-- =====================================================================================================================
+-- din276-S-1 · DIN-276-24 / -26 · the "(Engineer: Label/Einheit pruefen)" placeholders in `description`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: capture — cost, reference_unit, cost_parameter (-24), current_stage_total, previous_stage_total (-26) carry the placeholder; Tab. 2 / §3.13 / §3.14 supply the wording.
+-- Why staged: description edits on existing rows are not emitted by the Plan-3 emitters (data hygiene, no value change). Option:
+-- UPDATE fields f SET description = 'Kosten der gewählten Kostengruppe (Zähler des Kostenkennwerts, §3.13).' … w.code = 'DIN-276-24' AND f.symbol = 'cost' AND f.description LIKE '%Engineer: Label/Einheit pruefen%';
+-- UPDATE fields f SET description = 'Menge der Bezugseinheit nach Tab. 2 (m² GF / GFA / AF — siehe reference_unit_einheit / _bezeichnung / _ermittlung; §3.14).' … f.symbol = 'reference_unit' …;
+-- UPDATE fields f SET description = 'Kostenkennwert = Kosten / Bezugseinheit (§3.13, IDENT-03).' … f.symbol = 'cost_parameter' …;
+-- UPDATE fields f SET description = 'Σ KG 100–800 der aktuellen Kostenermittlung (§4.4.2) — Zwilling: stufe_aktuell_gesamt (DIN-276-18).' … w.code = 'DIN-276-26' AND f.symbol = 'current_stage_total' …;
+-- UPDATE fields f SET description = 'Σ KG 100–800 der vorherigen Kostenermittlung (§4.4.2) — Zwilling: stufe_vorher_gesamt (DIN-276-18).' … f.symbol = 'previous_stage_total' …;
+-- Rollback: restore the captured descriptions ('Eingang (Engineer: Label/Einheit pruefen).' / 'Berechneter Output (Engineer: Label/Einheit pruefen).').
+
+-- =====================================================================================================================
+-- din276-X-2 · DIN-276-17 / -25 / -06 · the copy worksheets (`klassif_*` 10, `BKO_*` 4, `BU_*` 7 = 21 fields + `GK_bauwerkskosten` -23) → inheritance
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §3.11 L163, §3.12 L169 (IDENT-01 / IDENT-02 exist); Tab. 2 (the DIN 277 quantities live on -05). Capture: every copy is consumer-free.
+-- Why staged: deactivation (Phase 6). Option:
+-- UPDATE fields f SET active = false … ((w.code = 'DIN-276-17' AND f.symbol LIKE 'klassif\_%') OR (w.code = 'DIN-276-25' AND f.symbol LIKE 'BKO\_%') OR (w.code = 'DIN-276-06' AND f.symbol LIKE 'BU\_%') OR (w.code = 'DIN-276-23' AND f.symbol = 'GK_bauwerkskosten')) AND f.active;
+--   + consumer edits: building_costs (-25) → add 'DIN-276-23'; kg_N00_total → already reach -17 / -23. Rollback: SET active = true.
+
+-- =====================================================================================================================
+-- din276-X-3 · DIN-276-23 · `GK_brutto_netto` (text, 'brutto_inkl_MwSt|netto') vs `vat_treatment` (enum gross / net / mixed, DIN-276-03)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §4.2.15 L267–L272 (three printed forms; "The form in which VAT has been taken into account must always be stated"). Capture: REQ-15 reads vat_treatment.
+-- Option (after C-1, vat_treatment inherited on -23): UPDATE fields f SET active = false … w.code = 'DIN-276-23' AND f.symbol = 'GK_brutto_netto' AND f.active;   Rollback: SET active = true.
