@@ -40,6 +40,7 @@ import { m8202SeedTables } from './regulation-tables-seed-m820_2';
 import { iso566710SeedTables } from './regulation-tables-seed-iso5667_10';
 import { iso59020SeedTables } from './regulation-tables-seed-iso59020';
 import { iso46001SeedTables } from './regulation-tables-seed-iso46001';
+import { iso56676SeedTables } from './regulation-tables-seed-iso5667_6';
 
 export type SeedBuilder = { build: () => RegulationTable[]; ts: string; slugFile: string; supersedes?: string };
 
@@ -67,7 +68,8 @@ export const SEED_BUILDERS: Record<string, SeedBuilder> = {
   iso5667_10: { build: iso566710SeedTables, ts: '20260917102000', slugFile: 'iso5667_10' }, // Plan 3 Task 20: ISO-5667-10 (eight sentence-rule tables — §4.3.2 formula switch, §7.2.1 interval, §7.2.2.1 tube / pump, §7.2.2.4 CV, §3.4 qualified grab, §9.1 homogeniser, §5 site figures)
   iso59020: { build: iso59020SeedTables, ts: '20260917102100', slugFile: 'iso59020' }, // Plan 3 Task 21: ISO-59020 (one table — Table 3 core circularity indicators, 13 rows keyed on the prod selected_core_indicator tokens)
   iso46001: { build: iso46001SeedTables, ts: '20260917102200', slugFile: 'iso46001' }, // Plan 3 Task 22: ISO-46001 (two informative catalogues — Table A.1 monitoring areas 39 rows, Table D.1 one settled sector row)
-  // Plan-3 tasks append one line each, e.g. iso5667_6: { build: iso56676SeedTables, ts: '20260917102300', slugFile: 'iso5667_6' }
+  iso5667_6: { build: iso56676SeedTables, ts: '20260917102300', slugFile: 'iso5667_6' }, // Plan 3 Task 23: ISO-5667-6 (six tables — Anexo A Chézy example, §13.1 report items a) – q), §7.1 30 cm, §5.1.3 five flows / 10 %, §5.1.4 six samples / three flows / 90 %, §10.8 5 min)
+  // Plan-3 tasks append one line each, e.g. vsme: { build: vsmeSeedTables, ts: '20260917102400', slugFile: 'vsme' }
 };
 
 /** Slugs that no other builder supersedes — the set the runtime fallback serves. */
