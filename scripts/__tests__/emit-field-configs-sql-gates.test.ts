@@ -5,9 +5,11 @@
  * symbol is `null` for the engine and the gate silently stops enforcing (an
  * enforcement change ⇒ sign-off G-block, never an emitted default). The one
  * exemption: a gate `IF <driver> <op> <value> THEN …` whose guard is exactly the
- * rule's `visible_when`. A `parse_error` gate (symbols unknown) refuses
- * conservatively; a legacy prior without `gates` degrades with a CLI warning;
- * `gate_guard: 'warn'` turns refusals into `GATE-REFUSAL` warnings with identical SQL.
+ * rule's `visible_when` (round 2: a bare literal equals a quoted one when no field of
+ * that name exists on the worksheet). A `parse_error` gate (symbols unknown) refuses
+ * conservatively (round 2: an EMPTY condition is `manual` and never refuses); a legacy
+ * prior without `gates` degrades with a CLI warning; `gate_guard: 'warn'` turns refusals
+ * into `GATE-REFUSAL` warnings with identical SQL.
  */
 import { describe, it, expect } from 'vitest';
 import {
@@ -63,7 +65,7 @@ describe('gate-aware guard (Task 12c)', () => {
     expect(() => emitFieldConfigSql('x', [field('k_f')], [], prior)).toThrow(/A138-12 k_f: visible_when hides k_f read by gate CR-03 \(block: "IF method == 'manual' THEN k_f > 0"\)/);
     expect(guardExempts("IF shaft_type != 'typ_B' THEN d_S >= 1", DRIVER)).toBe(false); // op
     expect(guardExempts("IF shaft_type == 'typ_A' THEN d_S >= 1", DRIVER)).toBe(false); // literal
-    expect(guardExempts('IF shaft_type == typ_B THEN d_S >= 1', DRIVER)).toBe(false); // bare vs quoted
+    expect(guardExempts('IF shaft_type == typ_B THEN d_S >= 1', DRIVER)).toBe(false); // bare vs quoted — conservative default without a prior (round 2 test below covers the equivalence)
     expect(guardExempts("IF shaft_type == 'typ_B' AND k_f > 0 THEN d_S >= 1", DRIVER)).toBe(false); // compound guard
     expect(guardExempts('IF shaft_type IS NOT NULL THEN d_S >= 1', 'shaft_type IS NOT NULL')).toBe(false); // exists guard — compare only
     expect(guardExempts("shaft_type == 'typ_B' AND d_S >= 1", DRIVER)).toBe(false); // not an IF guard
@@ -98,6 +100,37 @@ describe('gate-aware guard (Task 12c)', () => {
     expect(() => emitFieldConfigSql('x', [field('loose')], [], p)).toThrow('A138-12 loose: visible_when hides loose read by gate CR-09 (block: "Engineer attestation" — parse_error, symbols unknown) — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block');
     // the IF-exemption never applies to a parse_error gate; the section rule on C is refused through it too
     expect(() => emitFieldConfigSql('x', [], [section('C')], p)).toThrow(/section A138-12 C: .*hides loose read by gate CR-09 .*parse_error/);
+  });
+  it('round 2: an EMPTY (or whitespace) condition is `manual` whatever is hidden — captured as parse_error, but never a refusal', () => {
+    const empty = (condition: string): PriorSnapshot => ({ ...prior, gates: { ...prior.gates, 'A138-12 CR-08': { condition, severity: 'warn', symbols: [], parse_error: true } } });
+    for (const cond of ['', '   ', '\n\t']) {
+      expect(gateReaders(empty(cond), 'A138-12', 'loose', DRIVER)).toEqual([]);
+      expect(emitFieldConfigSql('x', [field('loose')], [section('C')], empty(cond)).up).toContain("f.symbol = 'loose'");
+      expect(emitFieldConfigSql('x', [field('loose')], [], empty(cond), { gate_guard: 'warn' }).warnings).toEqual([]);
+    }
+    // a prose parse_error still refuses (the rule above), and an empty gate never masks a real reader on the same worksheet
+    expect(() => emitFieldConfigSql('x', [field('A_min')], [], empty(''))).toThrow(/read by gate CR-01 /);
+    expect(() => emitFieldConfigSql('x', [field('A_min')], [], empty(''))).not.toThrow(/CR-08/);
+  });
+  it('round 2: bare ↔ quoted literal equivalence in the IF-guard — equal when NO field of that name exists on the worksheet, refused when one does', () => {
+    const bareGate = 'IF shaft_type == typ_B THEN d_S >= 1';
+    // library default (no prior): conservative — the bare token is assumed resolvable ⇒ not exempt
+    expect(guardExempts(bareGate, DRIVER)).toBe(false);
+    expect(guardExempts(bareGate, DRIVER, () => false)).toBe(true); // no such field ⇒ same literal
+    expect(guardExempts(bareGate, DRIVER, (tok) => tok === 'typ_B')).toBe(false); // a field typ_B exists ⇒ resolves ⇒ refuse
+    // vice versa: quoted gate literal, bare rule literal
+    expect(guardExempts("IF shaft_type == 'typ_B' THEN d_S >= 1", 'shaft_type == typ_B', () => false)).toBe(true);
+    expect(guardExempts("IF shaft_type == 'typ_B' THEN d_S >= 1", 'shaft_type == typ_B', () => true)).toBe(false);
+    // both bare (same token) is the same literal regardless of fields; a different token never is
+    expect(guardExempts(bareGate, 'shaft_type == typ_B')).toBe(true);
+    expect(guardExempts(bareGate, "shaft_type == 'typ_A'", () => false)).toBe(false);
+    // through the prior: A138-12 has no field `typ_B` ⇒ exempt; add one ⇒ refused, naming the gate
+    const p: PriorSnapshot = { ...prior, gates: { ...prior.gates, 'A138-12 CR-02': gate(bareGate, ['d_S', 'shaft_type'], 'warn') } };
+    expect(gateReaders(p, 'A138-12', 'd_S', DRIVER)).toEqual([]);
+    expect(emitFieldConfigSql('x', [field('d_S')], [], p).up).toContain("f.symbol = 'd_S'");
+    const withField: PriorSnapshot = { ...p, 'A138-12 typ_B': row() };
+    expect(gateReaders(withField, 'A138-12', 'd_S', DRIVER).map((r) => r.code)).toEqual(['CR-02']);
+    expect(() => emitFieldConfigSql('x', [field('d_S')], [], withField)).toThrow(/A138-12 d_S: visible_when hides d_S read by gate CR-02 \(warn: "IF shaft_type == typ_B THEN d_S >= 1"\)/);
   });
   it('create entries run the same check (uniformity): a created symbol that a captured gate happens to read is refused', () => {
     const create = { section_code: 'B', label_de: 'L', data_type: 'number' as const, clause_reference: '§1', description: 'Plan 3: x' };

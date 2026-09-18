@@ -185,12 +185,8 @@ describe('DIN-276 field configs (Plan 3 Task 13)', () => {
     expect(() => emitFieldConfigSql('din276', [{ standard: STD, worksheet: 'DIN-276-02', symbol: 'separate_calculations_per_building', widget: 'attestation', ui_config: null, visible_when: 'multi_building == true', verification_quote: 'q' }], [], prior)).toThrow(/consumed/);
     expect(() => emitFieldConfigSql('din276', [{ standard: STD, worksheet: 'DIN-276-08', symbol: 'existing_substance_value', widget: 'scalar', ui_config: null, visible_when: 'construction_activity IN {umbau, modernisierung, bestand}', verification_quote: 'q' }], [], prior)).toThrow(/consumed/);
     expect(() => emitFieldConfigSql('din276', [{ standard: STD, worksheet: 'DIN-276-28', symbol: 'cost_target_upper_limit', widget: 'scalar', ui_config: null, visible_when: "cost_target_type == 'upper_limit'", verification_quote: 'q' }], [], prior)).toThrow(/consumed/);
-    // the emitted rule passes the producer guard (warn mode isolates it) — but since Task 12c the gate-aware guard refuses it:
-    // DIN-276-23 REQ-26 ("Total cost aggregation (§3.11)", warn) carries an EMPTY condition (parse_error, symbols unknown ⇒ conservative);
-    // listed in task-12c-refusals.md for the fix round, pinned here until the executor moves it to STAGED or signs it off.
-    const accepted = emitFieldConfigSql('din276', [byKey('DIN-276-23', 'GK_mwst_satz_pct')], [], prior, { gate_guard: 'warn' });
-    expect(accepted.warnings).toEqual([expect.stringContaining('GATE-REFUSAL (warn mode) DIN-276-23 GK_mwst_satz_pct: visible_when hides GK_mwst_satz_pct read by gate REQ-26 (warn: "" — parse_error, symbols unknown)')]);
-    expect(() => emitFieldConfigSql('din276', [byKey('DIN-276-23', 'GK_mwst_satz_pct')], [], prior)).toThrow(/read by gate REQ-26/);
+    // the emitted rule is accepted (Task 12c round 2: DIN-276-23 REQ-26 carries an EMPTY condition — `manual` at the engine, exempt from the gate-aware guard)
+    expect(() => emitFieldConfigSql('din276', [byKey('DIN-276-23', 'GK_mwst_satz_pct')], [], prior)).not.toThrow();
     // the -24 Kennwert inputs: building_costs / BGF / BRI reach -24 (capture), GK_total / kg_300_total do not (din276-C-5)
     expect(priorRow('DIN-276-25 building_costs').consumer_worksheets).toContain('DIN-276-24');
     expect(priorRow('DIN-276-05 gross_floor_area_BGF').consumer_worksheets).toContain('DIN-276-24');
@@ -200,14 +196,9 @@ describe('DIN-276 field configs (Plan 3 Task 13)', () => {
   });
 
   it('the committed migration + rollback equal a fresh emit (freshness pin): 133 INSERT … WHERE NOT EXISTS, 1 UPDATE fields, 0 UPDATE worksheet_sections', () => {
-    // Task 12c: the re-captured prior carries `gates`; the module still holds 1 rule the gate-aware guard refuses
-    // (DIN-276-23 GK_mwst_satz_pct ← REQ-26 (empty condition, parse_error)) — listed in
-    // .superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-12c-refusals.md for the fix round
-    // (move to STAGED or sign off as a G-block). Until then the pin emits in warn mode and pins the EXACT count so a
-    // fix round that clears them must flip this back to the default (refuse) mode.
-    expect(() => emitFieldConfigSql('din276', FIELD_CONFIGS, SECTION_VISIBILITY, prior)).toThrow(/read by gate .* — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block/);
-    const { up, down, warnings } = emitFieldConfigSql('din276', FIELD_CONFIGS, SECTION_VISIBILITY, prior, { gate_guard: 'warn' });
-    expect(warnings.filter((w) => w.startsWith('GATE-REFUSAL (warn mode) '))).toHaveLength(1);
+    // Task 12c (round 2): the committed prior carries `gates`; every rule of this module passes the gate-aware guard in the
+    // default (refuse) mode — 0 refusals, so this pin runs the guard for real (no warn mode).
+    const { up, down } = emitFieldConfigSql('din276', FIELD_CONFIGS, SECTION_VISIBILITY, prior);
     const files = fieldConfigFilesFor('din276', '20260917101310');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));

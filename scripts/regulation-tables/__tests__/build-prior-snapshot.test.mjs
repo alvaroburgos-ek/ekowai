@@ -8,7 +8,7 @@
  * No network: main() only runs when the file is the CLI entry.
  */
 import { describe, it, expect } from 'vitest';
-import { detectColumns, buildQueries, foldSnapshot, sectionPath, OPTIONAL_FIELD_COLUMNS } from '../build-prior-snapshot.mjs';
+import { detectColumns, buildQueries, foldSnapshot, sectionPath, OPTIONAL_FIELD_COLUMNS } from '../prior-snapshot-fold.mjs';
 import { assertPriorSnapshot, emitFieldConfigSql, PRIOR_SQL } from '../emit-field-configs-sql';
 import { extractConditionSymbols } from '../../../src/lib/compliance/evaluate';
 
@@ -152,10 +152,12 @@ describe('sectionPath / foldSnapshot', () => {
       'A138-12 CR-04': { condition: '', severity: 'info', symbols: [], parse_error: true },
       'A138-12 CR-05': { condition: 'count_rows(reg, v > lim) > 0 AND lookup(t, k) == x', severity: 'block', symbols: ['k', 'reg', 't'] }, // row-scoped idents are column names (C-2)
     });
-    // the emitter consumes it: A_min is refused through CR-01 (and CR-03 / CR-04 conservatively); d_S only through the parse_error rows
+    // the emitter consumes it: A_min is refused through CR-01 (and the prose CR-03 conservatively); d_S only through the prose row;
+    // the EMPTY-condition CR-04 is captured as parse_error but never refuses (round 2 — `manual` whatever is hidden)
     const rule = (symbol) => ({ standard: 'DWA-A-138-1', worksheet: 'A138-12', symbol, widget: 'scalar', visible_when: "shaft_type == 'typ_B'", verification_quote: 'q' });
-    expect(() => emitFieldConfigSql('a138', [rule('A_min')], [], snap)).toThrow('hides A_min read by gate CR-01 (block: "max_d IS NOT NULL AND A_min IS NOT NULL"), CR-03 (block: "Engineer attestation" — parse_error, symbols unknown), CR-04 (info: "" — parse_error, symbols unknown)');
-    expect(() => emitFieldConfigSql('a138', [rule('d_S')], [], snap)).toThrow(/hides d_S read by gate CR-03 .*parse_error.*, CR-04 .*parse_error/);
+    expect(() => emitFieldConfigSql('a138', [rule('A_min')], [], snap)).toThrow('hides A_min read by gate CR-01 (block: "max_d IS NOT NULL AND A_min IS NOT NULL"), CR-03 (block: "Engineer attestation" — parse_error, symbols unknown) — hidden');
+    expect(() => emitFieldConfigSql('a138', [rule('A_min')], [], snap)).not.toThrow(/CR-04/);
+    expect(() => emitFieldConfigSql('a138', [rule('d_S')], [], snap)).toThrow('hides d_S read by gate CR-03 (block: "Engineer attestation" — parse_error, symbols unknown) — hidden');
     expect(() => emitFieldConfigSql('a138', [rule('d_S')], [], snap)).not.toThrow(/CR-02/);
     // gate rows without the engine extractor are refused (never a re-implemented walk); duplicate keys too
     expect(() => foldSnapshot([], [], {}, [], gates)).toThrow(/gate rows need the engine extractor/);

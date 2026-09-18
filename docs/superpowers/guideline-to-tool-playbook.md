@@ -333,12 +333,16 @@ message names the gate(s): `hides A_min read by gate CR-01 (block: "max_d IS NOT
 — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`. Rules:
 - **The IF-guard exemption** — the ONE way a rule passes over a gate that reads its symbol: the gate is
   `IF <driver> <op> <value> THEN …` and the rule's `visible_when` is exactly `<driver> <op> <value>` (same
-  driver symbol, same op, same literal — a quoted `'C2'` and a bare `C2` are NOT the same literal). Then the
-  field is hidden precisely when the gate would not fire anyway. A compound guard, an `IS NOT NULL` / `IN`
-  guard, a different driver, or a rule that adds `AND …` all refuse — write the gate guard to match the rule
-  (a gate edit is itself a G-block) or STAGE the rule.
+  driver symbol, same op, same literal). Then the field is hidden precisely when the gate would not fire anyway.
+  A compound guard, an `IS NOT NULL` / `IN` guard, a different driver, or a rule that adds `AND …` all refuse —
+  write the gate guard to match the rule (a gate edit is itself a G-block) or STAGE the rule. Bare vs quoted
+  literal (round 2 ruling): a bare `C2` in the gate and a quoted `'C2'` in the rule (or vice versa) ARE the same
+  literal when no field with symbol `C2` exists on that worksheet in the captured prior — by the Task 13b rule the
+  bare identifier then compares as the token string; when such a field exists the bare identifier resolves to it
+  and the guard refuses.
 - **`parse_error` gates refuse conservatively** — their symbols are unknown, so every rule on that worksheet is
-  refused naming `parse_error`. An empty `condition` counts (runtime `manual`; the fix is on the gate side).
+  refused naming `parse_error`. Exception (round 2 ruling): an EMPTY / whitespace `condition` is `manual` at the
+  engine whatever is hidden — still captured (`parse_error: true`), never a refusal.
 - **`create` entries** run the same check (a created field cannot be in an existing gate; uniformity).
 - **Legacy priors** without `gates` degrade to the producer-only guard; the CLI prints
   `warning: <slug>.prior.json carries no "gates" map …` — re-capture before emitting.
@@ -349,9 +353,10 @@ message names the gate(s): `hides A_min read by gate CR-01 (block: "max_d IS NOT
   standard.
 - **The refusal file** `.superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-12c-refusals.md`
   lists every rule the re-audit refused on the 13 encoded standards (standard · worksheet · symbol/section ·
-  gate · condition · why, three classes: real unguarded read / bare-vs-quoted IF guard / empty-condition gate).
-  An executor's fix round on one of those standards works its rows: move the rule to STAGED, or file the G-block
-  and keep it; nothing in the modules or migrations was changed by the audit itself.
+  gate · condition · why — after round 2: 10 real unguarded reads on din1989_1 and a262e; the bare-vs-quoted and
+  empty-condition classes cleared by the two rulings). An executor's fix round on one of those standards works
+  its rows: move the rule to STAGED, or file the G-block and keep it; nothing in the modules or migrations was
+  changed by the audit itself.
 
 **`visible_when` is evaluated since Plan 2a** (`src/lib/compliance/visibility.ts`,
 `computeVisibility`) — on the form, the approval gate, the report, the snapshot, the PDF

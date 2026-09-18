@@ -41,10 +41,12 @@
  *     and the gate silently stops enforcing (`hiddenReferences` ⇒ `not_applicable`), an
  *     enforcement change that must be a sign-off (G-block), never an emitted default;
  *     a gate whose condition the engine cannot parse (`parse_error`) is refused
- *     CONSERVATIVELY for every hidden symbol of its worksheet (its symbols are unknown);
+ *     CONSERVATIVELY for every hidden symbol of its worksheet (its symbols are unknown)
+ *     — except an EMPTY condition, which is `manual` whatever is hidden (round 2);
  *     the ONE exemption is a gate of the form `IF <driver> <op> <value> THEN …` whose
  *     guard is exactly the rule's `visible_when` (`<driver> <op> <value>` — same driver
- *     symbol, same op, same literal incl. quotedness; `guardExempts`): the gate never
+ *     symbol, same op, same literal; a bare `tok` equals a quoted `'tok'` only when no
+ *     field `tok` exists on the worksheet, round 2; `guardExempts`): the gate never
  *     fires while the field is hidden anyway; anything else refuses. `create` entries run
  *     the same check for uniformity (a created field cannot be in an existing gate).
  *     A legacy prior without `gates` degrades to the producer-only guard (the CLI warns);
@@ -192,19 +194,30 @@ export function priorSnapshotWarnings(slug: string, prior: PriorSnapshot): strin
 /**
  * Task 12c — the ONE exemption of the gate-aware guard, checked conservatively: the gate condition is
  * `IF <driver> <op> <value> THEN …` (a top-level `guard` node whose guard is a plain `compare`) and the rule's
- * `visible_when` is exactly `<driver> <op> <value>` — same driver symbol, same comparison op, same literal
- * (value AND quotedness: `'x'` vs bare `x` differ for the engine). Then the field is hidden exactly when the
- * guard is false, i.e. when the gate would not fire anyway — hiding turns a `pass` into `not_applicable`, never
- * a `fail` into a non-fail. Anything else (a compound guard, an `exists` / `IN` guard, a different driver, op
- * or literal, an unparseable side) refuses.
+ * `visible_when` is exactly `<driver> <op> <value>` — same driver symbol, same comparison op, same literal. Then
+ * the field is hidden exactly when the guard is false, i.e. when the gate would not fire anyway — hiding turns a
+ * `pass` into `not_applicable`, never a `fail` into a non-fail. Anything else (a compound guard, an `exists` /
+ * `IN` guard, a different driver, op or literal, an unparseable side) refuses.
+ *
+ * Literal quotedness (round 2 ruling): a BARE identifier `tok` in one literal position and the QUOTED `'tok'` in
+ * the other are the same literal WHEN no field with symbol `tok` exists on the worksheet (`hasField`) — by the
+ * Task 13b rule the bare identifier then compares as the token string at runtime, exactly like the quoted one.
+ * When such a field exists the bare identifier resolves to it and the two are NOT the same literal ⇒ refuse.
+ * `hasField` defaults to "exists" (the conservative answer) so a caller without a prior cannot widen the exemption.
  */
-export function guardExempts(condition: string, visibleWhen: string): boolean {
+export function guardExempts(condition: string, visibleWhen: string, hasField: (symbol: string) => boolean = () => true): boolean {
   const gate = parseCondition(condition);
   const rule = parseCondition(visibleWhen);
   if (!gate || !rule || gate.kind !== 'guard' || gate.guard.kind !== 'compare' || rule.kind !== 'compare') return false;
   const g = gate.guard;
-  return g.symbol === rule.symbol && g.op === rule.op && g.rhs.value === rule.rhs.value && !!g.rhs.quoted === !!rule.rhs.quoted;
+  if (g.symbol !== rule.symbol || g.op !== rule.op || g.rhs.value !== rule.rhs.value) return false;
+  if (!!g.rhs.quoted === !!rule.rhs.quoted) return true;
+  // one side bare, the other quoted: the same literal only if the bare token cannot resolve to a field of this worksheet
+  return typeof g.rhs.value === 'string' && !hasField(g.rhs.value);
 }
+
+/** Round 2 ruling: an EMPTY (or whitespace) condition is `manual` at the engine whatever is hidden — captured, never a refusal. */
+const isEmptyCondition = (gate: PriorGateRow): boolean => gate.condition.trim() === '';
 
 /** One gate the guard names in a refusal. */
 export type GateReader = { code: string; gate: PriorGateRow; reason: 'reads' | 'parse_error' };
@@ -219,12 +232,14 @@ export function gateReaders(prior: PriorSnapshot, worksheet: string, symbol: str
   if (!prior.gates) return [];
   const prefix = `${worksheet} `;
   const sym = normalizeSymbol(symbol);
+  const hasField = (tok: string): boolean => `${worksheet} ${tok}` in prior;
   const out: GateReader[] = [];
   for (const [key, gate] of Object.entries(prior.gates)) {
     if (!key.startsWith(prefix)) continue;
+    if (gate.parse_error && isEmptyCondition(gate)) continue; // round 2: empty ⇒ `manual`, hiding changes nothing
     const reason: GateReader['reason'] | null = gate.parse_error ? 'parse_error' : gate.symbols.some((s) => normalizeSymbol(s) === sym) ? 'reads' : null;
     if (!reason) continue;
-    if (reason === 'reads' && guardExempts(gate.condition, visibleWhen)) continue;
+    if (reason === 'reads' && guardExempts(gate.condition, visibleWhen, hasField)) continue;
     out.push({ code: key.slice(prefix.length), gate, reason });
   }
   return out;

@@ -141,8 +141,8 @@ describe('DIN-1989-1 field configs (Plan 3 Task 2)', () => {
   });
 
   it('the committed migration + rollback equal a fresh emit against the committed prior (freshness pin)', () => {
-    // Task 12c: the re-captured prior carries `gates`; the module still holds 1 rule the gate-aware guard refuses
-    // (DIN-1989-1-05 versickerung_bemessung_a138 ← CR-11) — listed in
+    // Task 12c (round 2 counts): the committed prior carries `gates`; the module still holds 1 rule the gate-aware guard refuses
+    // (DIN-1989-1-05 versickerung_bemessung_a138 ← CR-11 (disjunction, not an IF guard)) — listed in
     // .superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-12c-refusals.md for the fix round
     // (move to STAGED or sign off as a G-block). Until then the pin emits in warn mode and pins the EXACT count so a
     // fix round that clears them must flip this back to the default (refuse) mode.

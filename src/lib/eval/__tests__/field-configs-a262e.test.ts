@@ -170,8 +170,8 @@ describe('DWA-A-262E field configs (Plan 3 Task 3)', () => {
   });
 
   it('the committed migration + rollback equal a fresh emit against the committed prior (freshness pin)', () => {
-    // Task 12c: the re-captured prior carries `gates`; the module still holds 9 rules the gate-aware guard refuses
-    // (A262-05 m_multiplier ← REQ-05; sections A262-11 C/D, -13 C/D, -16 C, -20 C, -22 C, -26 D) — listed in
+    // Task 12c (round 2 counts): the committed prior carries `gates`; the module still holds 9 rules the gate-aware guard refuses
+    // (A262-05 m_multiplier ← REQ-05; sections A262-11 C/D, -13 C/D, -16 C, -20 C, -22 C, -26 D (unguarded Tab. 17 / Tab. 18 minima)) — listed in
     // .superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-12c-refusals.md for the fix round
     // (move to STAGED or sign off as a G-block). Until then the pin emits in warn mode and pins the EXACT count so a
     // fix round that clears them must flip this back to the default (refuse) mode.
