@@ -13,7 +13,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { EQUATIONS } from '../equations/iso59020';
+import { EQUATIONS, MANDATORY_TOKENS, MANDATORY_ALL_ONCE } from '../equations/iso59020';
 import { FIELD_CONFIGS } from '../field-configs/iso59020';
 import { table3AsTable } from '../regulation-tables-seed-iso59020';
 import { evaluateFormula, type EvalState } from '../formula';
@@ -54,13 +54,19 @@ const ENERGY = [
 ];
 
 describe('ISO-59020 Plan-3 equations', () => {
-  it('47 entries, every output has a created derived field on its worksheet, every input is the register of that worksheet; no prod output re-produced; emitter accepts them with no lint warning', () => {
-    expect(EQUATIONS).toHaveLength(47);
+  it('38 entries (fix round 1: the nine Σ/Σ aggregates are WITHHELD — J-1), every output has a created derived field on its worksheet, every input is the register of that worksheet; no prod output re-produced; emitter accepts them with no lint warning', () => {
+    expect(EQUATIONS).toHaveLength(38);
+    // fix round 1 (controller ruling, J-1): no mass-weighted Σ/Σ aggregate is emitted until the aggregation rule is ratified
+    for (const sym of ['pct_reui_agg', 'pct_reci_agg', 'pct_reni_agg', 'pct_linear_agg', 'pct_reuo_agg', 'pct_reco_agg', 'pct_reno_agg', 'pct_linear_out_agg', 'pct_econre_agg']) {
+      expect(EQUATIONS.find((e) => e.output_symbol === sym), sym).toBeUndefined();
+      expect(FIELD_CONFIGS.find((f) => f.symbol === sym), sym).toBeUndefined();
+    }
+    for (const e of EQUATIONS) expect(e.formula, e.equation_number).not.toMatch(/\* 100 \/ sum_rows|\) \* 100$/);
     expect(EQUATIONS.map((e) => e.equation_number)).toEqual([
       ...Array.from({ length: 11 }, (_, i) => `ISO-59020-04-D${i + 1}`),
-      ...Array.from({ length: 11 }, (_, i) => `ISO-59020-05-D${i + 1}`),
-      ...Array.from({ length: 12 }, (_, i) => `ISO-59020-06-D${i + 1}`),
-      ...Array.from({ length: 7 }, (_, i) => `ISO-59020-07-D${i + 1}`),
+      ...Array.from({ length: 7 }, (_, i) => `ISO-59020-05-D${i + 1}`),
+      ...Array.from({ length: 8 }, (_, i) => `ISO-59020-06-D${i + 1}`),
+      ...Array.from({ length: 6 }, (_, i) => `ISO-59020-07-D${i + 1}`),
       ...Array.from({ length: 5 }, (_, i) => `ISO-59020-08-D${i + 1}`),
       'ISO-59020-09-D1',
     ]);
@@ -77,10 +83,16 @@ describe('ISO-59020 Plan-3 equations', () => {
       expect(parseNumeric(rhs(e.equation_number)).ok, e.equation_number).toBe(true);
       expect(PROD_OUTPUTS).not.toContain(e.output_symbol); // A.1 … A.13 keep their verified rows (R-1 is STAGED)
     }
-    // the only typed figure: the "6" of -04-D5 = the number of Mandatory rows printed in Table 3
-    expect(rhs('ISO-59020-04-D5')).toContain('== 6');
-    expect(table3AsTable().rows.filter((r) => r.values.mandatory === true)).toHaveLength(6);
-    for (const e of EQUATIONS.filter((x) => x.equation_number !== 'ISO-59020-04-D5')) expect(rhs(e.equation_number).replace(/\* 100|== 0|== 1|, 0\)|== true|== false/g, '')).not.toMatch(/\b\d+\b/);
+    // no typed figure: -04-D5 names the six Mandatory rows of Table 3 by token (per-token exactly-once form, fix round 1 / J-2)
+    expect([...MANDATORY_TOKENS]).toEqual(table3AsTable().rows.filter((r) => r.values.mandatory === true).map((r) => r.row_key));
+    expect(rhs('ISO-59020-04-D5')).toBe(`if(${MANDATORY_ALL_ONCE}, 1, 0)`);
+    expect(MANDATORY_ALL_ONCE.split(' AND count_rows(')).toHaveLength(6);
+    expect(MANDATORY_ALL_ONCE).not.toContain('AND (');   // the emitter's legacy CALL regex would read `AND (` as a call
+    // no other formula carries a typed figure (D5's digits are the Table-3 tokens and the 1 / 0 code)
+    for (const e of EQUATIONS.filter((x) => x.equation_number !== 'ISO-59020-04-D5')) expect(rhs(e.equation_number).replace(/== 0|== 1|, 0\)|== true|== false/g, '')).not.toMatch(/\b\d+\b/);
+    expect(rhs('ISO-59020-04-D5').replace(/'[^']*'/g, '').replace(/== 1|, 1, 0\)/g, '')).not.toMatch(/\b\d+\b/);
+    // the four energy Σ carry the §A.4.2 precondition (fix round 1)
+    for (const n of ['D2', 'D3', 'D4', 'D5']) expect(eq(`ISO-59020-07-${n}`).description).toContain('nur sinnvoll bei energy_unit_mismatch == 0');
     const { warnings } = emitEquationsSql('iso59020', EQUATIONS);
     expect(warnings).toEqual([]);
   });
@@ -91,10 +103,10 @@ describe('ISO-59020 Plan-3 equations', () => {
     const files = equationFilesFor('iso59020', '20260917102120');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/ON CONFLICT \(worksheet_template_id, equation_number\) DO NOTHING/g) ?? []).length).toBe(47);
+    expect((up.match(/ON CONFLICT \(worksheet_template_id, equation_number\) DO NOTHING/g) ?? []).length).toBe(38);
   });
 
-  it('-05 inflows: Formula (A.1) – (A.3) per row (Stahl 20 / 50 / 0 %, linear 30 % = 300 kg; Holz 0 / 0 / 75 %, linear 25 %), mass-weighted Σ (14,29 / 35,71 / 21,43 / 28,57 %), Σ masses 1400 / 200 / 500 / 300 / 400 kg, count 2, unbalanced 0; a row whose circular masses exceed mTI is unbalanced (linear −10); a blank REQUIRED mass leaves the row INCOMPLETE (excluded, never a silent 0); an empty register is manual_required for Σ and 0 for the count', () => {
+  it('-05 inflows: Formula (A.1) – (A.3) per row (Stahl 20 / 50 / 0 %, linear 30 % = 300 kg; Holz 0 / 0 / 75 %, linear 25 %), Σ masses 1400 / 200 / 500 / 300 / 400 kg, count 2, unbalanced 0; a row whose circular masses exceed mTI is unbalanced (linear −10); a blank REQUIRED mass leaves the row INCOMPLETE (excluded, never a silent 0); an empty register is manual_required for Σ and 0 for the count', () => {
     const reg = prep('ISO-59020-05', 'inflows', INFLOWS);
     expect(reg.rows.map((r) => r.complete)).toEqual([true, true]);
     expect(reg.diagnostics).toBeUndefined();
@@ -106,32 +118,28 @@ describe('ISO-59020 Plan-3 equations', () => {
     expect(computed(run('ISO-59020-05-D4', { inflows: reg }))).toBe(500);
     expect(computed(run('ISO-59020-05-D5', { inflows: reg }))).toBe(300);
     expect(computed(run('ISO-59020-05-D6', { inflows: reg }))).toBe(400);
-    expect(computed(run('ISO-59020-05-D7', { inflows: reg }))).toBeCloseTo(200 / 1400 * 100, 6); // 14,2857
-    expect(computed(run('ISO-59020-05-D8', { inflows: reg }))).toBeCloseTo(500 / 1400 * 100, 6); // 35,7143
-    expect(computed(run('ISO-59020-05-D9', { inflows: reg }))).toBeCloseTo(300 / 1400 * 100, 6); // 21,4286
-    expect(computed(run('ISO-59020-05-D10', { inflows: reg }))).toBeCloseTo(400 / 1400 * 100, 6); // 28,5714 = 100 − (14,29 + 35,71 + 21,43)
-    expect(computed(run('ISO-59020-05-D11', { inflows: reg }))).toBe(0);
+    expect(computed(run('ISO-59020-05-D7', { inflows: reg }))).toBe(0);
     // unbalanced row + blank required cell
     const reg2 = prep('ISO-59020-05', 'inflows', [...INFLOWS, { id: '3', label: 'zu viel', m_ti: 100, m_reui: 60, m_reci: 50, m_reni: 0 }, { id: '4', label: 'ohne mREUI', m_ti: 100, m_reci: 10, m_reni: 0 }]);
     expect(reg2.rows.map((r) => r.complete)).toEqual([true, true, true, false]);
     expect(reg2.rows[2].values).toMatchObject({ pct_linear: -10, m_linear: -10, balanced: 0 });
     expect(reg2.rows[3].values).toMatchObject({ m_reui: null, pct_reui: null, pct_linear: null, balanced: null });
-    expect(computed(run('ISO-59020-05-D11', { inflows: reg2 }))).toBe(1);
+    expect(computed(run('ISO-59020-05-D7', { inflows: reg2 }))).toBe(1);
     expect(computed(run('ISO-59020-05-D1', { inflows: reg2 }))).toBe(3);      // the incomplete row never counts
     expect(computed(run('ISO-59020-05-D2', { inflows: reg2 }))).toBe(1500);   // … nor sums
     // a zero-mass row: the percentages are null (division by zero, silent) and the row stays complete
     const reg3 = prep('ISO-59020-05', 'inflows', [{ id: 'z', label: 'null', m_ti: 0, m_reui: 0, m_reci: 0, m_reni: 0 }]);
     expect(reg3.rows[0]).toMatchObject({ complete: true, values: { pct_reui: null, balanced: 1 } });
     expect(reg3.diagnostics).toBeUndefined();
-    expect(manual(run('ISO-59020-05-D7', { inflows: reg3 }))).toMatch(/Division durch Null/);
+    expect(computed(run('ISO-59020-05-D2', { inflows: reg3 }))).toBe(0);
     const empty = prep('ISO-59020-05', 'inflows', []);
     expect(manual(run('ISO-59020-05-D2', { inflows: empty }))).toMatch(/Keine vollständigen Zeilen/);
-    expect(manual(run('ISO-59020-05-D7', { inflows: empty }))).toMatch(/Keine vollständigen Zeilen/);
+    expect(manual(run('ISO-59020-05-D6', { inflows: empty }))).toMatch(/Keine vollständigen Zeilen/);
     expect(computed(run('ISO-59020-05-D1', { inflows: empty }))).toBe(0);
-    expect(computed(run('ISO-59020-05-D11', { inflows: empty }))).toBe(0);
+    expect(computed(run('ISO-59020-05-D7', { inflows: empty }))).toBe(0);
   });
 
-  it('-06 outflows: Formula (A.4) – (A.7) per row (Produkt 10 / 30 / 0 %, linear 60 %, RLP 1,2; Reststoff without traceable recycling data reads PRECO 0 % (A.3.4), mRECO hidden, complete); Σ 1500 / 100 / 300 / 100 / 1000 kg; mass-weighted 6,67 / 20 / 6,67 / 66,67 %; untraceable 1; a traceable row with a blank mRECO is incomplete', () => {
+  it('-06 outflows: Formula (A.4) – (A.7) per row (Produkt 10 / 30 / 0 %, linear 60 %, RLP 1,2; Reststoff without traceable recycling data reads PRECO 0 % (A.3.4), mRECO hidden, complete); Σ 1500 / 100 / 300 / 100 / 1000 kg; untraceable 1; a traceable row with a blank mRECO is incomplete', () => {
     const reg = prep('ISO-59020-06', 'outflows', OUTFLOWS);
     expect(reg.rows.map((r) => r.complete)).toEqual([true, true]);
     expect(reg.diagnostics).toBeUndefined();
@@ -143,23 +151,19 @@ describe('ISO-59020 Plan-3 equations', () => {
     expect(computed(run('ISO-59020-06-D4', { outflows: reg }))).toBe(300);
     expect(computed(run('ISO-59020-06-D5', { outflows: reg }))).toBe(100);
     expect(computed(run('ISO-59020-06-D6', { outflows: reg }))).toBe(1000);
-    expect(computed(run('ISO-59020-06-D7', { outflows: reg }))).toBeCloseTo(100 / 1500 * 100, 6);
-    expect(computed(run('ISO-59020-06-D8', { outflows: reg }))).toBe(20);
-    expect(computed(run('ISO-59020-06-D9', { outflows: reg }))).toBeCloseTo(100 / 1500 * 100, 6);
-    expect(computed(run('ISO-59020-06-D10', { outflows: reg }))).toBeCloseTo(1000 / 1500 * 100, 6);
-    expect(computed(run('ISO-59020-06-D11', { outflows: reg }))).toBe(0);
-    expect(computed(run('ISO-59020-06-D12', { outflows: reg }))).toBe(1);
+    expect(computed(run('ISO-59020-06-D7', { outflows: reg }))).toBe(0);
+    expect(computed(run('ISO-59020-06-D8', { outflows: reg }))).toBe(1);
     const reg2 = prep('ISO-59020-06', 'outflows', [...OUTFLOWS, { id: 'c', label: 'offen', m_to: 500, m_reuo: 0, m_reno: 100, traceable_recycling: true }]);
     expect(reg2.rows[2]).toMatchObject({ complete: false, values: { pct_reco: null, pct_linear: null, balanced: null } });
     expect(computed(run('ISO-59020-06-D1', { outflows: reg2 }))).toBe(2);
-    expect(computed(run('ISO-59020-06-D8', { outflows: reg2 }))).toBe(20);
+    expect(computed(run('ISO-59020-06-D4', { outflows: reg2 }))).toBe(300);
     // over-balanced row
     const reg3 = prep('ISO-59020-06', 'outflows', [{ id: 'o', label: 'zu viel', m_to: 100, m_reuo: 80, traceable_recycling: true, m_reco: 30, m_reno: 0 }]);
     expect(reg3.rows[0].values).toMatchObject({ balanced: 0, pct_linear: -10 });
-    expect(computed(run('ISO-59020-06-D11', { outflows: reg3 }))).toBe(1);
+    expect(computed(run('ISO-59020-06-D7', { outflows: reg3 }))).toBe(1);
   });
 
-  it('-07 energy flows: Formula (A.8) per row with · 100 (Strom 30 %, Wärme 25 %; a zero net-consumption row reads a null cell and stays complete); Σ 350 / 10 / 1300 / 140 in the common unit; (A.8) over the sums = 29,31 %; the kWh row mismatches the worksheet\'s MJ (1); without energy_unit_common every row mismatches (3)', () => {
+  it('-07 energy flows: Formula (A.8) per row with · 100 (Strom 30 %, Wärme 25 %; a zero net-consumption row reads a null cell and stays complete); Σ 350 / 10 / 1300 / 140 in the common unit (meaningful only at mismatch 0 — J-1 withholds the Σ/Σ share); the kWh row mismatches the worksheet\'s MJ (1); without energy_unit_common every row mismatches (3)', () => {
     const reg = prep('ISO-59020-07', 'energy_flows', ENERGY, { energy_unit_common: 'MJ' });
     expect(reg.rows.map((r) => r.complete)).toEqual([true, true, true]);
     expect(reg.diagnostics).toBeUndefined();
@@ -171,17 +175,13 @@ describe('ISO-59020 Plan-3 equations', () => {
     expect(computed(run('ISO-59020-07-D3', { energy_flows: reg }))).toBe(10);
     expect(computed(run('ISO-59020-07-D4', { energy_flows: reg }))).toBe(1300);
     expect(computed(run('ISO-59020-07-D5', { energy_flows: reg }))).toBe(140);
-    expect(computed(run('ISO-59020-07-D6', { energy_flows: reg }))).toBeCloseTo(340 / 1160 * 100, 6); // 29,3103
-    expect(computed(run('ISO-59020-07-D7', { energy_flows: reg }))).toBe(1);
+    expect(computed(run('ISO-59020-07-D6', { energy_flows: reg }))).toBe(1);
     const unset = prep('ISO-59020-07', 'energy_flows', ENERGY, {});
     expect(unset.rows.map((r) => r.values.unit_ok)).toEqual([0, 0, 0]);
-    expect(computed(run('ISO-59020-07-D7', { energy_flows: unset }))).toBe(3);
-    // Σ in = Σ out ⇒ (A.8) over the sums divides by zero ⇒ manual_required (never a phantom %)
-    const flat = prep('ISO-59020-07', 'energy_flows', [ENERGY[2]], { energy_unit_common: 'MJ' });
-    expect(manual(run('ISO-59020-07-D6', { energy_flows: flat }))).toMatch(/Division durch Null/);
+    expect(computed(run('ISO-59020-07-D6', { energy_flows: unset }))).toBe(3);
   });
 
-  it('-04 indicators over the seeded TABLE3: a Mandatory row neither selected nor N/A is missing (A.2.3 ⇒ mandatory_missing 1), an N/A row without explanation is unjustified (A.2.4 ⇒ 1), covered 5 of 6 ⇒ code 0; with all six Mandatory rows selected or justified ⇒ covered 6, missing 0, code 1; per-category selection counts; a row without an indicator is incomplete; empty register ⇒ 0 / 0 / 0 / 0 / code 0 (never a phantom pass)', () => {
+  it('-04 indicators over the seeded TABLE3: a Mandatory row neither selected nor N/A is missing (A.2.3 ⇒ mandatory_missing 1), an N/A row without explanation is unjustified (A.2.4 ⇒ 1), covered 5 of 6 ⇒ code 0; with all six Mandatory rows selected or justified ⇒ covered 6, missing 0, code 1; a DUPLICATE Mandatory row ⇒ code 0 (per-token exactly-once, fix round 1); per-category selection counts; a row without an indicator is incomplete; empty register ⇒ 0 / 0 / 0 / 0 / code 0 (never a phantom pass)', () => {
     const rows = [
       { id: '1', indicator: 'A.2.2_reused_content_inflow', selected: true, value: 20, unit: '%' },
       { id: '2', indicator: 'A.2.3_recycled_content_inflow' },
@@ -218,6 +218,15 @@ describe('ISO-59020 Plan-3 equations', () => {
     expect(computed(run('ISO-59020-04-D4', { indicators: full }))).toBe(6);
     expect(computed(run('ISO-59020-04-D5', { indicators: full }))).toBe(1);
     expect(computed(run('ISO-59020-04-D6', { indicators: full }))).toBe(2); // A.2.4 is N/A, not selected
+    // fix round 1: the per-token form — a duplicate Mandatory row (A.2.2 twice) ⇒ 0 even though every token is present; a duplicate that masks a missing token ⇒ 0; an extra Optional row changes nothing
+    const dup = prep('ISO-59020-04', 'indicators', [...table3AsTable().rows.filter((r) => r.values.mandatory === true).map((r, i) => ({ id: String(i), indicator: r.row_key, selected: true })), { id: 'dup', indicator: 'A.2.2_reused_content_inflow', selected: true }]);
+    expect(computed(run('ISO-59020-04-D4', { indicators: dup }))).toBe(7);
+    expect(computed(run('ISO-59020-04-D5', { indicators: dup }))).toBe(0);
+    const masked = prep('ISO-59020-04', 'indicators', [...table3AsTable().rows.filter((r) => r.values.mandatory === true).slice(0, 5).map((r, i) => ({ id: String(i), indicator: r.row_key, selected: true })), { id: 'dup', indicator: 'A.2.2_reused_content_inflow', selected: true }]);
+    expect(computed(run('ISO-59020-04-D4', { indicators: masked }))).toBe(6); // the count alone would read "six covered"
+    expect(computed(run('ISO-59020-04-D5', { indicators: masked }))).toBe(0);
+    const extra = prep('ISO-59020-04', 'indicators', [...table3AsTable().rows.filter((r) => r.values.mandatory === true).map((r, i) => ({ id: String(i), indicator: r.row_key, selected: true })), { id: 'w', indicator: 'A.5.2_water_circular_sources' }]);
+    expect(computed(run('ISO-59020-04-D5', { indicators: extra }))).toBe(1);
     const empty = prep('ISO-59020-04', 'indicators', []);
     for (const n of ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10']) expect(computed(run(`ISO-59020-04-${n}`, { indicators: empty })), n).toBe(0);
     // additional indicators

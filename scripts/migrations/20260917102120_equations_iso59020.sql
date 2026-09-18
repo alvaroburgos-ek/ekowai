@@ -94,7 +94,7 @@ Copyright International Organization for Standardization
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-04' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-04-D5', 'mandatory_core_indicators_included_code = if(count_rows(indicators, ok == 0) == 0 AND count_rows(indicators, mandatory_flag == 1 AND ok == 1) == 6, 1, 0)', ARRAY['indicators']::text[], 'mandatory_core_indicators_included_code', NULL, '§7.3.1, Table 3', 'Plan 3: 1, wenn keine verbindliche Zeile fehlt und alle sechs verbindlichen Indikatoren von Tabelle 3 erfasst sind (die 6 = Anzahl der „Mandatory“-Zeilen, iso59020-J-2); Zwilling des Eingabefelds mandatory_core_indicators_included (iso59020-D-4 / G-4).', 'imported_unverified', '             The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced
+SELECT w.id, 'ISO-59020-04-D5', 'mandatory_core_indicators_included_code = if(count_rows(indicators, indicator == ''A.2.2_reused_content_inflow'' AND ok == 1) == 1 AND count_rows(indicators, indicator == ''A.2.3_recycled_content_inflow'' AND ok == 1) == 1 AND count_rows(indicators, indicator == ''A.2.4_renewable_content_inflow'' AND ok == 1) == 1 AND count_rows(indicators, indicator == ''A.3.3_reused_from_outflow'' AND ok == 1) == 1 AND count_rows(indicators, indicator == ''A.3.4_recycled_from_outflow'' AND ok == 1) == 1 AND count_rows(indicators, indicator == ''A.3.5_biological_recirculation'' AND ok == 1) == 1, 1, 0)', ARRAY['indicators']::text[], 'mandatory_core_indicators_included_code', NULL, '§7.3.1, Table 3', 'Plan 3: 1, wenn jeder der sechs verbindlichen Indikatoren von Tabelle 3 (A.2.2, A.2.3, A.2.4, A.3.3, A.3.4, A.3.5 — L1085–L1111) GENAU EINMAL als ausgewählt oder begründet nicht anwendbar erfasst ist (eine fehlende oder doppelte Zeile ⇒ 0; iso59020-J-2); Zwilling des Eingabefelds mandatory_core_indicators_included (iso59020-D-4 / G-4).', 'imported_unverified', '             The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced
              with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in stocks into account. If a
              core circularity indicator is not applicable, the organization should explain why and can count the indicator
              value as zero.'
@@ -219,42 +219,7 @@ SELECT w.id, 'ISO-59020-05-D6', 'm_linear_total = sum_rows(inflows, m_linear)', 
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-05' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-05-D7', 'pct_reui_agg = sum_rows(inflows, m_reui) * 100 / sum_rows(inflows, m_ti)', ARRAY['inflows']::text[], 'pct_reui_agg', '%', 'A.2.2, Annex G.2', 'Plan 3: wiederverwendeter Anteil über alle Zuflüsse, massengewichtet (Σ mREUI / Σ mTI · 100 — die Summe-dann-Teilen-Aggregation des Anhangs G.2 EXAMPLE c, iso59020-J-1).', 'imported_unverified', '             c)       representative data of technical performance, e.g. when adding data for similar recycling systems for, for example,
-                      aluminium cans to:
-
-                      1)       form a total amount of material recycled by the sector;
-
-                      2)       divide the sum with the total amount aluminium of aluminium cans to calculate an average for the recycling
-                               rate of aluminium can recycling.'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-05' AND s.code = 'ISO-59020'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-05-D8', 'pct_reci_agg = sum_rows(inflows, m_reci) * 100 / sum_rows(inflows, m_ti)', ARRAY['inflows']::text[], 'pct_reci_agg', '%', 'A.2.3, Annex G.2', 'Plan 3: recycelter Anteil über alle Zuflüsse, massengewichtet (Σ mRECI / Σ mTI · 100; A.2.3: „the mass that is recycled material can be calculated and then aggregated with other similar resources“, iso59020-J-1).', 'imported_unverified', '             If a resource flowing through the system boundary into the system in focus contains a portion of recycled
-             material, the portion can be used directly as the calculated circularity indicator value for the resource.
-             Alternately, the mass that is recycled material can be calculated and then aggregated with other similar
-             resources to calculate the recycled content for all similar resources.'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-05' AND s.code = 'ISO-59020'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-05-D9', 'pct_reni_agg = sum_rows(inflows, m_reni) * 100 / sum_rows(inflows, m_ti)', ARRAY['inflows']::text[], 'pct_reni_agg', '%', 'A.2.4, Annex G.2', 'Plan 3: erneuerbarer Anteil über alle Zuflüsse, massengewichtet (Σ mRENI / Σ mTI · 100, iso59020-J-1).', 'imported_unverified', '             c)       representative data of technical performance, e.g. when adding data for similar recycling systems for, for example,
-                      aluminium cans to:
-
-                      1)       form a total amount of material recycled by the sector;
-
-                      2)       divide the sum with the total amount aluminium of aluminium cans to calculate an average for the recycling
-                               rate of aluminium can recycling.'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-05' AND s.code = 'ISO-59020'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-05-D10', 'pct_linear_agg = sum_rows(inflows, m_linear) * 100 / sum_rows(inflows, m_ti)', ARRAY['inflows']::text[], 'pct_linear_agg', '%', 'A.2.1, Annex G.2', 'Plan 3: linearer Anteil über alle Zuflüsse, massengewichtet (Σ linear / Σ mTI · 100 = 100 − zirkuläre Anteile); Zwilling des Eingabefelds pct_linear_inflow (iso59020-D-10).', 'imported_unverified', '             These four types of content are intended to be mutually exclusive and add up to represent 100 % of the
-             resource inflow (see Figure A.1). The first three types (recycled, reused and virgin, renewable content) are
-             considered as circular; whereas the fourth type (virgin, non-renewable content) is the remaining portion
-             that is from a non-circular source. The non-circular (linear) inflow can be calculated by subtracting the
-             circular inflows from 100 %. For a material to be described as a “renewable material”, it shall adhere to the'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-05' AND s.code = 'ISO-59020'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-05-D11', 'inflows_unbalanced = count_rows(inflows, balanced == 0)', ARRAY['inflows']::text[], 'inflows_unbalanced', NULL, 'A.2.1', 'Plan 3: Zuflüsse, deren zirkuläre Massen die Gesamtmasse übersteigen („add up to represent 100 % of the resource inflow“); CR-014 → iso59020-G-3.', 'imported_unverified', '             These four types of content are intended to be mutually exclusive and add up to represent 100 % of the
+SELECT w.id, 'ISO-59020-05-D7', 'inflows_unbalanced = count_rows(inflows, balanced == 0)', ARRAY['inflows']::text[], 'inflows_unbalanced', NULL, 'A.2.1', 'Plan 3: Zuflüsse, deren zirkuläre Massen die Gesamtmasse übersteigen („add up to represent 100 % of the resource inflow“); CR-014 → iso59020-G-3.', 'imported_unverified', '             These four types of content are intended to be mutually exclusive and add up to represent 100 % of the
              resource inflow (see Figure A.1). The first three types (recycled, reused and virgin, renewable content) are
              considered as circular; whereas the fourth type (virgin, non-renewable content) is the remaining portion
              that is from a non-circular source. The non-circular (linear) inflow can be calculated by subtracting the
@@ -316,47 +281,7 @@ SELECT w.id, 'ISO-59020-06-D6', 'm_linear_out_total = sum_rows(outflows, m_linea
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-06' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-06-D7', 'pct_reuo_agg = sum_rows(outflows, m_reuo) * 100 / sum_rows(outflows, m_to)', ARRAY['outflows']::text[], 'pct_reuo_agg', '%', 'A.3.3, Annex G.2', 'Plan 3: wiederverwendeter Anteil über alle Abflüsse, massengewichtet (iso59020-J-1).', 'imported_unverified', '             c)       representative data of technical performance, e.g. when adding data for similar recycling systems for, for example,
-                      aluminium cans to:
-
-                      1)       form a total amount of material recycled by the sector;
-
-                      2)       divide the sum with the total amount aluminium of aluminium cans to calculate an average for the recycling
-                               rate of aluminium can recycling.'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-06' AND s.code = 'ISO-59020'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-06-D8', 'pct_reco_agg = sum_rows(outflows, if(traceable_recycling == true, m_reco, 0)) * 100 / sum_rows(outflows, m_to)', ARRAY['outflows']::text[], 'pct_reco_agg', '%', 'A.3.4, Annex G.2', 'Plan 3: recycelter Anteil über alle Abflüsse, massengewichtet — Anhang G.2 EXAMPLE c („form a total amount of material recycled … divide the sum with the total amount“, iso59020-J-1); nicht rückverfolgbare Zeilen zählen 0.', 'imported_unverified', '             c)       representative data of technical performance, e.g. when adding data for similar recycling systems for, for example,
-                      aluminium cans to:
-
-                      1)       form a total amount of material recycled by the sector;
-
-                      2)       divide the sum with the total amount aluminium of aluminium cans to calculate an average for the recycling
-                               rate of aluminium can recycling.'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-06' AND s.code = 'ISO-59020'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-06-D9', 'pct_reno_agg = sum_rows(outflows, m_reno) * 100 / sum_rows(outflows, m_to)', ARRAY['outflows']::text[], 'pct_reno_agg', '%', 'A.3.5, Annex G.2', 'Plan 3: biologisch rezirkulierter Anteil über alle Abflüsse, massengewichtet (iso59020-J-1).', 'imported_unverified', '             c)       representative data of technical performance, e.g. when adding data for similar recycling systems for, for example,
-                      aluminium cans to:
-
-                      1)       form a total amount of material recycled by the sector;
-
-                      2)       divide the sum with the total amount aluminium of aluminium cans to calculate an average for the recycling
-                               rate of aluminium can recycling.'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-06' AND s.code = 'ISO-59020'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-06-D10', 'pct_linear_out_agg = sum_rows(outflows, m_linear) * 100 / sum_rows(outflows, m_to)', ARRAY['outflows']::text[], 'pct_linear_out_agg', '%', 'A.3.1, Annex G.2', 'Plan 3: linearer Anteil über alle Abflüsse, massengewichtet („subtracting the circular outflows from 100 %“); Zwilling des Eingabefelds pct_linear_outflow (iso59020-D-17).', 'imported_unverified', '             The following three core circularity indicators are intended to represent outflows that are mutually
-             exclusive and represent the circular outflows:
-             — components and products that are reused (see A.3.3);
-             — per cent recycled material derived from outflow (see A.3.4),
-             — products and materials for renewable recirculation (see A.3.5).
-             The remaining outflows are considered as linear and do not count towards circularity. The linear (non-
-             circular) outflow can be calculated by subtracting the circular outflows from 100 %.'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-06' AND s.code = 'ISO-59020'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-06-D11', 'outflows_unbalanced = count_rows(outflows, balanced == 0)', ARRAY['outflows']::text[], 'outflows_unbalanced', NULL, 'A.3.1', 'Plan 3: Abflüsse, deren zirkuläre Massen die Gesamtmasse übersteigen („represent 100 % of the resource outflows“); CR-019 → iso59020-G-3.', 'imported_unverified', '             The sum of the circular outflows and the remaining non-circular outflows represent 100 % of the resource
+SELECT w.id, 'ISO-59020-06-D7', 'outflows_unbalanced = count_rows(outflows, balanced == 0)', ARRAY['outflows']::text[], 'outflows_unbalanced', NULL, 'A.3.1', 'Plan 3: Abflüsse, deren zirkuläre Massen die Gesamtmasse übersteigen („represent 100 % of the resource outflows“); CR-019 → iso59020-G-3.', 'imported_unverified', '             The sum of the circular outflows and the remaining non-circular outflows represent 100 % of the resource
              outflows from the system in focus, see Figure A.2. The resource outflow circularity indicators specified in
              A.3.3, A.3.4 and A.3.5 shall be calculated and documented. In cases where the circularity indicator is not
              relevant, it can be counted at value zero. The circularity indicators for each outflow can be calculated and
@@ -364,7 +289,7 @@ SELECT w.id, 'ISO-59020-06-D11', 'outflows_unbalanced = count_rows(outflows, bal
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-06' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-06-D12', 'outflows_untraceable = count_rows(outflows, traceable_recycling == false)', ARRAY['outflows']::text[], 'outflows_untraceable', NULL, 'A.3.4', 'Plan 3: Abflüsse ohne rückverfolgbare Recyclingdaten (PRECO(X) = 0 % nach A.3.4; ein nicht gesetztes Kästchen zählt als „keine Daten“, iso59020-J-7).', 'imported_unverified', '             If traceable recyclability data are not available for a specific resource outflow, 0 % should be recorded.'
+SELECT w.id, 'ISO-59020-06-D8', 'outflows_untraceable = count_rows(outflows, traceable_recycling == false)', ARRAY['outflows']::text[], 'outflows_untraceable', NULL, 'A.3.4', 'Plan 3: Abflüsse ohne rückverfolgbare Recyclingdaten (PRECO(X) = 0 % nach A.3.4; ein nicht gesetztes Kästchen zählt als „keine Daten“, iso59020-J-7).', 'imported_unverified', '             If traceable recyclability data are not available for a specific resource outflow, 0 % should be recorded.'
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-06' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
@@ -380,7 +305,7 @@ SELECT w.id, 'ISO-59020-07-D1', 'energy_flows_count = count_rows(energy_flows)',
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-07' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-07-D2', 'ei_rene_total = sum_rows(energy_flows, ei_rene)', ARRAY['energy_flows']::text[], 'ei_rene_total', NULL, 'A.4.2', 'Plan 3: Σ EIRENE(X) („the renewable energy (X) inflow, in MJ (or in kWh)“) — in der gemeinsamen Einheit energy_unit_common.', 'imported_unverified', '                       PECONRE( X )                 is the average energy (X) consumed that is renewable energy, in %;
+SELECT w.id, 'ISO-59020-07-D2', 'ei_rene_total = sum_rows(energy_flows, ei_rene)', ARRAY['energy_flows']::text[], 'ei_rene_total', NULL, 'A.4.2', 'Plan 3: Σ EIRENE(X) („the renewable energy (X) inflow, in MJ (or in kWh)“) — in der gemeinsamen Einheit energy_unit_common; nur sinnvoll bei energy_unit_mismatch == 0 (§A.4.2 gemeinsame Einheit, L2271–L2272 — Gate STAGED iso59020-G-6).', 'imported_unverified', '                       PECONRE( X )                 is the average energy (X) consumed that is renewable energy, in %;
 
                        E IRENE( X )                 is the renewable energy (X) inflow, in MJ (or in kWh);
 
@@ -392,7 +317,7 @@ SELECT w.id, 'ISO-59020-07-D2', 'ei_rene_total = sum_rows(energy_flows, ei_rene)
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-07' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-07-D3', 'eo_rene_total = sum_rows(energy_flows, eo_rene)', ARRAY['energy_flows']::text[], 'eo_rene_total', NULL, 'A.4.2', 'Plan 3: Σ EORENE(X) („the renewable energy (X) outflow“).', 'imported_unverified', '                       PECONRE( X )                 is the average energy (X) consumed that is renewable energy, in %;
+SELECT w.id, 'ISO-59020-07-D3', 'eo_rene_total = sum_rows(energy_flows, eo_rene)', ARRAY['energy_flows']::text[], 'eo_rene_total', NULL, 'A.4.2', 'Plan 3: Σ EORENE(X) („the renewable energy (X) outflow“); nur sinnvoll bei energy_unit_mismatch == 0 (§A.4.2 gemeinsame Einheit, L2271–L2272 — Gate STAGED iso59020-G-6).', 'imported_unverified', '                       PECONRE( X )                 is the average energy (X) consumed that is renewable energy, in %;
 
                        E IRENE( X )                 is the renewable energy (X) inflow, in MJ (or in kWh);
 
@@ -404,7 +329,7 @@ SELECT w.id, 'ISO-59020-07-D3', 'eo_rene_total = sum_rows(energy_flows, eo_rene)
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-07' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-07-D4', 'ei_te_total = sum_rows(energy_flows, ei_te)', ARRAY['energy_flows']::text[], 'ei_te_total', NULL, 'A.4.2', 'Plan 3: Σ EITE(X) („the total energy (X) inflow“).', 'imported_unverified', '                       PECONRE( X )                 is the average energy (X) consumed that is renewable energy, in %;
+SELECT w.id, 'ISO-59020-07-D4', 'ei_te_total = sum_rows(energy_flows, ei_te)', ARRAY['energy_flows']::text[], 'ei_te_total', NULL, 'A.4.2', 'Plan 3: Σ EITE(X) („the total energy (X) inflow“); nur sinnvoll bei energy_unit_mismatch == 0 (§A.4.2 gemeinsame Einheit, L2271–L2272 — Gate STAGED iso59020-G-6).', 'imported_unverified', '                       PECONRE( X )                 is the average energy (X) consumed that is renewable energy, in %;
 
                        E IRENE( X )                 is the renewable energy (X) inflow, in MJ (or in kWh);
 
@@ -416,7 +341,7 @@ SELECT w.id, 'ISO-59020-07-D4', 'ei_te_total = sum_rows(energy_flows, ei_te)', A
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-07' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-07-D5', 'eo_te_total = sum_rows(energy_flows, eo_te)', ARRAY['energy_flows']::text[], 'eo_te_total', NULL, 'A.4.2', 'Plan 3: Σ EOTE(X) („the total energy (X) outflow“).', 'imported_unverified', '                       PECONRE( X )                 is the average energy (X) consumed that is renewable energy, in %;
+SELECT w.id, 'ISO-59020-07-D5', 'eo_te_total = sum_rows(energy_flows, eo_te)', ARRAY['energy_flows']::text[], 'eo_te_total', NULL, 'A.4.2', 'Plan 3: Σ EOTE(X) („the total energy (X) outflow“); nur sinnvoll bei energy_unit_mismatch == 0 (§A.4.2 gemeinsame Einheit, L2271–L2272 — Gate STAGED iso59020-G-6).', 'imported_unverified', '                       PECONRE( X )                 is the average energy (X) consumed that is renewable energy, in %;
 
                        E IRENE( X )                 is the renewable energy (X) inflow, in MJ (or in kWh);
 
@@ -428,28 +353,7 @@ SELECT w.id, 'ISO-59020-07-D5', 'eo_te_total = sum_rows(energy_flows, eo_te)', A
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-07' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-07-D6', 'pct_econre_agg = (sum_rows(energy_flows, ei_rene) - sum_rows(energy_flows, eo_rene)) / (sum_rows(energy_flows, ei_te) - sum_rows(energy_flows, eo_te)) * 100', ARRAY['energy_flows']::text[], 'pct_econre_agg', '%', 'A.4.2, Annex G.2', 'Plan 3: erneuerbarer Anteil der netto verbrauchten Energie über alle Flüsse — Formula (A.8) über die Summen ((Σ EIRENE − Σ EORENE) / (Σ EITE − Σ EOTE) · 100; · 100 nach der Legende „in %“, der Block druckt „⋅1000“ — iso59020-U-2; Aggregation iso59020-J-1).', 'imported_unverified', '             The calculation of the circularity indicator is performed by applying Formula (A.8):
-
-                                                     (
-                                E IRENE( X ) − EORENE( X )
-                PECONRE( X ) = 
-                                                                            )  ⋅1000                                   (A.8)
-                                  E ITE( X ) − EOTE( X )                   
-             where
-
-                       PECONRE( X )                 is the average energy (X) consumed that is renewable energy, in %;
-
-                       E IRENE( X )                 is the renewable energy (X) inflow, in MJ (or in kWh);
-
-                       EORENE( X )                  is the renewable energy (X) outflow, in MJ (or in kWh);
-
-                       E ITE( X )                   is the total energy (X) inflow, in MJ (or in kWh);
-
-                       EOTE( X )                    is the total energy (X) outflow, in MJ (or in kWh).'
-FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-07' AND s.code = 'ISO-59020'
-ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
-INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
-SELECT w.id, 'ISO-59020-07-D7', 'energy_unit_mismatch = count_rows(energy_flows, unit_ok == 0)', ARRAY['energy_flows']::text[], 'energy_unit_mismatch', NULL, 'A.4.2', 'Plan 3: Energieflüsse, deren Einheit nicht die gemeinsame Einheit ist oder solange keine gemeinsame Einheit gewählt ist („A common suitable measurement unit (e.g. MJ, kWh) shall be selected“); Gate STAGED (iso59020-G-5).', 'imported_unverified', '             A common suitable measurement unit (e.g. MJ, kWh) shall be selected for the quantification of all relevant
+SELECT w.id, 'ISO-59020-07-D6', 'energy_unit_mismatch = count_rows(energy_flows, unit_ok == 0)', ARRAY['energy_flows']::text[], 'energy_unit_mismatch', NULL, 'A.4.2', 'Plan 3: Energieflüsse, deren Einheit nicht die gemeinsame Einheit ist oder solange keine gemeinsame Einheit gewählt ist („A common suitable measurement unit (e.g. MJ, kWh) shall be selected“); Gates STAGED (iso59020-G-5 block / G-6 warn).', 'imported_unverified', '             A common suitable measurement unit (e.g. MJ, kWh) shall be selected for the quantification of all relevant
              energies (e.g. thermal, electrical) that are involved in the measurement.'
 FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'ISO-59020-07' AND s.code = 'ISO-59020'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;

@@ -59,11 +59,11 @@ describe('ISO-59020 field configs (Plan 3 Task 21)', () => {
     expect(SECTION_VISIBILITY).toEqual([]);
   });
 
-  it('counts: 55 entries, ALL create (7 registers, 47 derived outputs, 1 text input); exactly one visibility rule (temporal_boundary_note ← temporal_boundary_shortened, inherited on -09)', () => {
-    expect(FIELD_CONFIGS).toHaveLength(55);
+  it('counts: 46 entries, ALL create (7 registers, 38 derived outputs, 1 text input — the nine Σ/Σ aggregates withheld, J-1); exactly one visibility rule (temporal_boundary_note ← temporal_boundary_shortened, inherited on -09)', () => {
+    expect(FIELD_CONFIGS).toHaveLength(46);
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('register')).toEqual(REGISTERS);
-    expect(byWidget('derived')).toHaveLength(47);
+    expect(byWidget('derived')).toHaveLength(38);
     expect(byWidget('scalar')).toEqual(['ISO-59020-09 temporal_boundary_note']);
     expect(byWidget('select_one')).toEqual([]);
     expect(byWidget('select_many')).toEqual([]);
@@ -76,7 +76,7 @@ describe('ISO-59020 field configs (Plan 3 Task 21)', () => {
     const outputs = new Map(EQUATIONS.map((e) => [`${e.worksheet} ${e.output_symbol}`, e.equation_number]));
     for (const e of FIELD_CONFIGS.filter((x) => x.widget === 'derived')) expect(outputs.has(`${e.worksheet} ${e.symbol}`), `${e.symbol} equation`).toBe(true);
     for (const e of FIELD_CONFIGS.filter((x) => x.widget === 'register')) for (const f of (e.ui_config as RegisterUiConfig).footer ?? []) expect(outputs.has(`${e.worksheet} ${f}`), `${e.symbol} footer ${f}`).toBe(true);
-    expect(outputs.size).toBe(47);
+    expect(outputs.size).toBe(38);
   });
 
   it('G-A3 key-string equality: TABLE3 keys = the captured selected_core_indicator enum values; category tokens = indicator_category; energy units = energy_unit_common; the data-source pairs are the data_category tokens split by the printed §7.6.2 axes (J-4)', () => {
@@ -147,7 +147,7 @@ describe('ISO-59020 field configs (Plan 3 Task 21)', () => {
       const symbols = Object.keys(prior).filter((k) => k.startsWith(`${q.worksheet} `)).map((k) => k.slice(q.worksheet.length + 1));
       for (const l of lits(q.formula)) { expect(reg, `${q.equation_number}: '${l}'`).not.toContain(l); expect(symbols, `${q.equation_number}: '${l}'`).not.toContain(l); }
     }
-    expect(walked).toBe(23 + 47); // 23 column exprs / row rules (inflows 6, outflows 7 + 1 rule, energy 3, indicators 4 + 1 rule, data_sources 1) + 47 formulas
+    expect(walked).toBe(23 + 38); // 23 column exprs / row rules (inflows 6, outflows 7 + 1 rule, energy 3, indicators 4 + 1 rule, data_sources 1) + 38 formulas
   });
 
   it('the refused / withheld rules are asserted through the guards: information_verifiable ← CR-035 (J-5), aggregation_method consumed (J-6), the -05 / -06 / -07 single-X scalars gate-read and producer-chained (R-1), mandatory_core_indicators_included ← CR-009 + consumed (G-4); no self-consumer entries; the ALL / range tokens', () => {
@@ -182,8 +182,8 @@ describe('ISO-59020 field configs (Plan 3 Task 21)', () => {
     // amendment-K pairs: the register columns that twin a prod scalar (one D-block each — 25)
     const PAIRS: Array<[string, string, string]> = [
       ['ISO-59020-04', 'indicators.indicator', 'selected_core_indicator'], ['ISO-59020-04', 'indicators.category', 'indicator_category'], ['ISO-59020-04', 'indicators.not_applicable / justification', 'indicator_not_applicable_justified'], ['ISO-59020-04', 'mandatory_core_indicators_included_code', 'mandatory_core_indicators_included'], ['ISO-59020-04', 'additional_indicators.name', 'additional_indicator'],
-      ['ISO-59020-05', 'inflows.m_ti', 'mTI_X'], ['ISO-59020-05', 'inflows.m_reui', 'mREUI_X'], ['ISO-59020-05', 'inflows.m_reci', 'mRECI_X'], ['ISO-59020-05', 'inflows.m_reni', 'mRENI_X'], ['ISO-59020-05', 'pct_linear_agg', 'pct_linear_inflow'],
-      ['ISO-59020-06', 'outflows.m_to', 'mTO_X'], ['ISO-59020-06', 'outflows.m_reuo', 'mREUO_X'], ['ISO-59020-06', 'outflows.m_reco', 'mRECO_X'], ['ISO-59020-06', 'outflows.m_reno', 'mRENO_X'], ['ISO-59020-06', 'outflows.t_lp', 'tLP_X'], ['ISO-59020-06', 'outflows.t_ialp', 'tIALP_X'], ['ISO-59020-06', 'pct_linear_out_agg', 'pct_linear_outflow'],
+      ['ISO-59020-05', 'inflows.m_ti', 'mTI_X'], ['ISO-59020-05', 'inflows.m_reui', 'mREUI_X'], ['ISO-59020-05', 'inflows.m_reci', 'mRECI_X'], ['ISO-59020-05', 'inflows.m_reni', 'mRENI_X'], ['ISO-59020-05', 'inflows.pct_linear (per row; pct_linear_agg withheld, J-1)', 'pct_linear_inflow'],
+      ['ISO-59020-06', 'outflows.m_to', 'mTO_X'], ['ISO-59020-06', 'outflows.m_reuo', 'mREUO_X'], ['ISO-59020-06', 'outflows.m_reco', 'mRECO_X'], ['ISO-59020-06', 'outflows.m_reno', 'mRENO_X'], ['ISO-59020-06', 'outflows.t_lp', 'tLP_X'], ['ISO-59020-06', 'outflows.t_ialp', 'tIALP_X'], ['ISO-59020-06', 'outflows.pct_linear (per row; pct_linear_out_agg withheld, J-1)', 'pct_linear_outflow'],
       ['ISO-59020-07', 'energy_flows.ei_rene', 'EIRENE_X'], ['ISO-59020-07', 'energy_flows.eo_rene', 'EORENE_X'], ['ISO-59020-07', 'energy_flows.ei_te', 'EITE_X'], ['ISO-59020-07', 'energy_flows.eo_te', 'EOTE_X'],
       ['ISO-59020-08', 'data_sources (rows)', 'system_breakdown_done'], ['ISO-59020-08', 'data_sources.origin / scope / specificity', 'data_category'], ['ISO-59020-08', 'data_sources.traceable', 'data_traceability'],
       ['ISO-59020-09', 'complementary_methods.method', 'complementary_method'],
@@ -199,7 +199,7 @@ describe('ISO-59020 field configs (Plan 3 Task 21)', () => {
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
     expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(0);
-    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(55);
+    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(46);
     expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
   });

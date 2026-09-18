@@ -9,18 +9,22 @@
  * prod equations A.1 … A.13 (`pct_REUI_X` … `IRII`, one flow X each, consumed by
  * -09) keep their verified rows; the registers of `field-configs/iso59020.ts`
  * reproduce Formula (A.1) … (A.8) PER ROW (row-scope exprs, not equations), and
- * the rows below are the cross-X aggregates the standard prints only as the
- * Annex-G.2 EXAMPLE c) sum-then-divide (mass-weighted: Σ mass of the content /
- * Σ total mass · 100 — iso59020-J-1) plus counts and the per-row badge counts.
+ * the rows below are counts, Σ masses / energies and the per-row badge counts.
  * Every aggregate is INLINED over the register (never chained on another new
- * output — the save-path materialiser would lag one save, m1200_2 trap 2). The
- * only figure typed into a formula is the "6" of ISO-59020-04-D5 = the number
- * of "Mandatory" rows printed in Table 3 (pinned against the seed, iso59020-J-2).
+ * output — the save-path materialiser would lag one save, m1200_2 trap 2). No
+ * figure is typed into a formula: the -04-D5 code names the six "Mandatory"
+ * rows of Table 3 by their prod tokens (source-settled by L1085–L1111).
  *
- * All 47 rows are register-fed and materialise on save (their inputs are the
+ * All 38 rows are register-fed and materialise on save (their inputs are the
  * register carriers of their own worksheet); none is scalar-only.
  *
  * NOT emitted (STAGED in scripts/verification/iso59020-STAGED-plan3-rulings.sql):
+ *   - the nine cross-X Σ/Σ aggregates (pct_reui_agg / pct_reci_agg /
+ *     pct_reni_agg / pct_linear_agg on -05, pct_reuo_agg / pct_reco_agg /
+ *     pct_reno_agg / pct_linear_out_agg on -06, pct_econre_agg on -07): Annex G.2
+ *     prints EXAMPLE b) (average) and EXAMPLE c) (sum-then-divide) as options,
+ *     not a rule — the choice is iso59020-J-1 (fix round 1, controller ruling);
+ *     their exact intended forms are recorded in J-1 for a mechanical re-emit;
  *   - the retirement of A.1 … A.8 (single-X) in favour of the per-row versions,
  *     with the -09 consumer edits and the CR-011 … CR-020 rewrites → iso59020-R-1;
  *   - a mean of RLP(X) over the outflow rows — no printed aggregation rule for a
@@ -40,6 +44,17 @@ const rows = (ws: string, reg: string, specs: Spec[]): EquationEntry[] =>
 
 /** A.3.4 (L2175): the recycled mass of a row counts only with traceable recyclability data — else 0 %. */
 const RECO_ROW = 'if(traceable_recycling == true, m_reco, 0)';
+/** The six "Mandatory" rows of Table 3 (L1085–L1111), as the prod `selected_core_indicator` tokens = the TABLE3 keys. */
+export const MANDATORY_TOKENS = ['A.2.2_reused_content_inflow', 'A.2.3_recycled_content_inflow', 'A.2.4_renewable_content_inflow', 'A.3.3_reused_from_outflow', 'A.3.4_recycled_from_outflow', 'A.3.5_biological_recirculation'] as const;
+/**
+ * Per-token form (fix round 1): every Mandatory indicator present EXACTLY ONCE as selected or justified N/A — a duplicate or a
+ * missing row fails (closes F-2 for the mandatory rows). UNPARENTHESISED inside the formula: the equations emitter's legacy
+ * eligibility check (`engine-eligibility.ts` CALL regex) reads `AND (` as a call named AND and refuses; `==` binds tighter than
+ * AND, so the meaning is the same. The STAGED G-4 gate text carries the parenthesised clauses (conditions are not subject to that check).
+ */
+export const MANDATORY_ALL_ONCE = MANDATORY_TOKENS.map((t) => `count_rows(indicators, indicator == '${t}' AND ok == 1) == 1`).join(' AND ');
+/** §A.4.2 precondition of every energy Σ (fix round 1, controller ruling). */
+const ENERGY_PRE = 'nur sinnvoll bei energy_unit_mismatch == 0 (§A.4.2 gemeinsame Einheit, L2271–L2272 — Gate STAGED iso59020-G-6)';
 
 export const EQUATIONS: EquationEntry[] = [
   // ---- ISO-59020-04: the Table-3 indicator register (§7.3.1 / A.1) ----
@@ -48,7 +63,7 @@ export const EQUATIONS: EquationEntry[] = [
     { n: 'D2', out: 'mandatory_missing', rhs: 'count_rows(indicators, ok == 0)', unit: null, clause: '§7.3.1', what: 'verbindliche Indikatoren (Tabelle 3 „Mandatory“), die weder ausgewählt noch als nicht anwendbar erklärt sind („shall be quantified and fully balanced with the use of the mandatory indicators“); Gate CR-009 → iso59020-G-4.', quote: Q.L1068_1071 },
     { n: 'D3', out: 'na_unjustified', rhs: 'count_rows(indicators, na_justified == 0)', unit: null, clause: '§7.3.1, A.1', what: 'als nicht anwendbar erklärte Zeilen ohne Begründung („the organization should explain why“ / „explaining why it is not applicable“); CR-010 → iso59020-G-2.', quote: Q.L1827_1831 },
     { n: 'D4', out: 'mandatory_core_covered', rhs: 'count_rows(indicators, mandatory_flag == 1 AND ok == 1)', unit: null, clause: '§7.3.1, Table 3', what: 'erfasste verbindliche Indikatoren (ausgewählt oder begründet nicht anwendbar) — soll die sechs „Mandatory“-Zeilen von Tabelle 3 erreichen (A.2.2, A.2.3, A.2.4, A.3.3, A.3.4, A.3.5).', quote: Q.L1081_1148 },
-    { n: 'D5', out: 'mandatory_core_indicators_included_code', rhs: 'if(count_rows(indicators, ok == 0) == 0 AND count_rows(indicators, mandatory_flag == 1 AND ok == 1) == 6, 1, 0)', unit: null, clause: '§7.3.1, Table 3', what: '1, wenn keine verbindliche Zeile fehlt und alle sechs verbindlichen Indikatoren von Tabelle 3 erfasst sind (die 6 = Anzahl der „Mandatory“-Zeilen, iso59020-J-2); Zwilling des Eingabefelds mandatory_core_indicators_included (iso59020-D-4 / G-4).', quote: Q.L1068_1071 },
+    { n: 'D5', out: 'mandatory_core_indicators_included_code', rhs: `if(${MANDATORY_ALL_ONCE}, 1, 0)`, unit: null, clause: '§7.3.1, Table 3', what: '1, wenn jeder der sechs verbindlichen Indikatoren von Tabelle 3 (A.2.2, A.2.3, A.2.4, A.3.3, A.3.4, A.3.5 — L1085–L1111) GENAU EINMAL als ausgewählt oder begründet nicht anwendbar erfasst ist (eine fehlende oder doppelte Zeile ⇒ 0; iso59020-J-2); Zwilling des Eingabefelds mandatory_core_indicators_included (iso59020-D-4 / G-4).', quote: Q.L1068_1071 },
     { n: 'D6', out: 'inflow_indicators_selected', rhs: "count_rows(indicators, category_code == 'resource_inflow' AND selected == true)", unit: null, clause: 'Table 3, A.2', what: 'ausgewählte Zeilen der Kategorie „Resource Inflows“ (A.2.2 – A.2.4).', quote: Q.L1085_1087 },
     { n: 'D7', out: 'outflow_indicators_selected', rhs: "count_rows(indicators, category_code == 'resource_outflow' AND selected == true)", unit: null, clause: 'Table 3, A.3', what: 'ausgewählte Zeilen der Kategorie „Resource outflows“ (A.3.2 – A.3.5).', quote: Q.L1100_1103 },
     { n: 'D8', out: 'energy_indicator_selected', rhs: "count_rows(indicators, category_code == 'energy' AND selected == true)", unit: null, clause: 'Table 3, A.4', what: 'ausgewählte Zeilen der Kategorie „Energy“ (A.4.2) — Treiber für CR-020 / den Energieblock von -07 nach iso59020-C-1 / G-1 / M-1.', quote: Q.L1112_1116 },
@@ -67,11 +82,7 @@ export const EQUATIONS: EquationEntry[] = [
     { n: 'D4', out: 'm_reci_total', rhs: 'sum_rows(inflows, m_reci)', unit: 'kg', clause: 'A.2.3', what: 'Σ mRECI(X) („the mass of recycled material of an inflow (X)“).', quote: Q.L1950_1962 },
     { n: 'D5', out: 'm_reni_total', rhs: 'sum_rows(inflows, m_reni)', unit: 'kg', clause: 'A.2.4', what: 'Σ mRENI(X) („the mass of renewable material of an inflow (X)“).', quote: Q.L1992_2004 },
     { n: 'D6', out: 'm_linear_total', rhs: 'sum_rows(inflows, m_linear)', unit: 'kg', clause: 'A.2.1', what: 'Σ des linearen (nicht-zirkulären) Zuflusses je Zeile (mTI − mREUI − mRECI − mRENI).', quote: Q.L1850_1854 },
-    { n: 'D7', out: 'pct_reui_agg', rhs: 'sum_rows(inflows, m_reui) * 100 / sum_rows(inflows, m_ti)', unit: '%', clause: 'A.2.2, Annex G.2', what: 'wiederverwendeter Anteil über alle Zuflüsse, massengewichtet (Σ mREUI / Σ mTI · 100 — die Summe-dann-Teilen-Aggregation des Anhangs G.2 EXAMPLE c, iso59020-J-1).', quote: Q.L3783_3789 },
-    { n: 'D8', out: 'pct_reci_agg', rhs: 'sum_rows(inflows, m_reci) * 100 / sum_rows(inflows, m_ti)', unit: '%', clause: 'A.2.3, Annex G.2', what: 'recycelter Anteil über alle Zuflüsse, massengewichtet (Σ mRECI / Σ mTI · 100; A.2.3: „the mass that is recycled material can be calculated and then aggregated with other similar resources“, iso59020-J-1).', quote: Q.L1964_1967 },
-    { n: 'D9', out: 'pct_reni_agg', rhs: 'sum_rows(inflows, m_reni) * 100 / sum_rows(inflows, m_ti)', unit: '%', clause: 'A.2.4, Annex G.2', what: 'erneuerbarer Anteil über alle Zuflüsse, massengewichtet (Σ mRENI / Σ mTI · 100, iso59020-J-1).', quote: Q.L3783_3789 },
-    { n: 'D10', out: 'pct_linear_agg', rhs: 'sum_rows(inflows, m_linear) * 100 / sum_rows(inflows, m_ti)', unit: '%', clause: 'A.2.1, Annex G.2', what: 'linearer Anteil über alle Zuflüsse, massengewichtet (Σ linear / Σ mTI · 100 = 100 − zirkuläre Anteile); Zwilling des Eingabefelds pct_linear_inflow (iso59020-D-10).', quote: Q.L1850_1854 },
-    { n: 'D11', out: 'inflows_unbalanced', rhs: 'count_rows(inflows, balanced == 0)', unit: null, clause: 'A.2.1', what: 'Zuflüsse, deren zirkuläre Massen die Gesamtmasse übersteigen („add up to represent 100 % of the resource inflow“); CR-014 → iso59020-G-3.', quote: Q.L1850_1854 },
+    { n: 'D7', out: 'inflows_unbalanced', rhs: 'count_rows(inflows, balanced == 0)', unit: null, clause: 'A.2.1', what: 'Zuflüsse, deren zirkuläre Massen die Gesamtmasse übersteigen („add up to represent 100 % of the resource inflow“); CR-014 → iso59020-G-3.', quote: Q.L1850_1854 },
   ]),
 
   // ---- ISO-59020-06: resource outflows (A.3), one row per outflow X ----
@@ -82,23 +93,18 @@ export const EQUATIONS: EquationEntry[] = [
     { n: 'D4', out: 'm_reco_total', rhs: `sum_rows(outflows, ${RECO_ROW})`, unit: 'kg', clause: 'A.3.4', what: 'Σ mRECO(X) der Zeilen mit rückverfolgbaren Recyclingdaten (sonst 0 — „0 % should be recorded“).', quote: Q.L2175 },
     { n: 'D5', out: 'm_reno_total', rhs: 'sum_rows(outflows, m_reno)', unit: 'kg', clause: 'A.3.5', what: 'Σ mRENO(X) („the mass of outflow (X) that is renewable recirculation“).', quote: Q.L2228_2240 },
     { n: 'D6', out: 'm_linear_out_total', rhs: 'sum_rows(outflows, m_linear)', unit: 'kg', clause: 'A.3.1', what: 'Σ des linearen (nicht-zirkulären) Abflusses je Zeile („The remaining outflows are considered as linear“).', quote: Q.L2015_2021 },
-    { n: 'D7', out: 'pct_reuo_agg', rhs: 'sum_rows(outflows, m_reuo) * 100 / sum_rows(outflows, m_to)', unit: '%', clause: 'A.3.3, Annex G.2', what: 'wiederverwendeter Anteil über alle Abflüsse, massengewichtet (iso59020-J-1).', quote: Q.L3783_3789 },
-    { n: 'D8', out: 'pct_reco_agg', rhs: `sum_rows(outflows, ${RECO_ROW}) * 100 / sum_rows(outflows, m_to)`, unit: '%', clause: 'A.3.4, Annex G.2', what: 'recycelter Anteil über alle Abflüsse, massengewichtet — Anhang G.2 EXAMPLE c („form a total amount of material recycled … divide the sum with the total amount“, iso59020-J-1); nicht rückverfolgbare Zeilen zählen 0.', quote: Q.L3783_3789 },
-    { n: 'D9', out: 'pct_reno_agg', rhs: 'sum_rows(outflows, m_reno) * 100 / sum_rows(outflows, m_to)', unit: '%', clause: 'A.3.5, Annex G.2', what: 'biologisch rezirkulierter Anteil über alle Abflüsse, massengewichtet (iso59020-J-1).', quote: Q.L3783_3789 },
-    { n: 'D10', out: 'pct_linear_out_agg', rhs: 'sum_rows(outflows, m_linear) * 100 / sum_rows(outflows, m_to)', unit: '%', clause: 'A.3.1, Annex G.2', what: 'linearer Anteil über alle Abflüsse, massengewichtet („subtracting the circular outflows from 100 %“); Zwilling des Eingabefelds pct_linear_outflow (iso59020-D-17).', quote: Q.L2015_2021 },
-    { n: 'D11', out: 'outflows_unbalanced', rhs: 'count_rows(outflows, balanced == 0)', unit: null, clause: 'A.3.1', what: 'Abflüsse, deren zirkuläre Massen die Gesamtmasse übersteigen („represent 100 % of the resource outflows“); CR-019 → iso59020-G-3.', quote: Q.L2022_2026 },
-    { n: 'D12', out: 'outflows_untraceable', rhs: 'count_rows(outflows, traceable_recycling == false)', unit: null, clause: 'A.3.4', what: 'Abflüsse ohne rückverfolgbare Recyclingdaten (PRECO(X) = 0 % nach A.3.4; ein nicht gesetztes Kästchen zählt als „keine Daten“, iso59020-J-7).', quote: Q.L2175 },
+    { n: 'D7', out: 'outflows_unbalanced', rhs: 'count_rows(outflows, balanced == 0)', unit: null, clause: 'A.3.1', what: 'Abflüsse, deren zirkuläre Massen die Gesamtmasse übersteigen („represent 100 % of the resource outflows“); CR-019 → iso59020-G-3.', quote: Q.L2022_2026 },
+    { n: 'D8', out: 'outflows_untraceable', rhs: 'count_rows(outflows, traceable_recycling == false)', unit: null, clause: 'A.3.4', what: 'Abflüsse ohne rückverfolgbare Recyclingdaten (PRECO(X) = 0 % nach A.3.4; ein nicht gesetztes Kästchen zählt als „keine Daten“, iso59020-J-7).', quote: Q.L2175 },
   ]),
 
   // ---- ISO-59020-07: energy flows (A.4.2), one row per energy flow X ----
   ...rows('ISO-59020-07', 'energy_flows', [
     { n: 'D1', out: 'energy_flows_count', rhs: 'count_rows(energy_flows)', unit: null, clause: 'A.4.2', what: 'Anzahl der erfassten Energieflüsse X.', quote: Q.L2284_2292 },
-    { n: 'D2', out: 'ei_rene_total', rhs: 'sum_rows(energy_flows, ei_rene)', unit: null, clause: 'A.4.2', what: 'Σ EIRENE(X) („the renewable energy (X) inflow, in MJ (or in kWh)“) — in der gemeinsamen Einheit energy_unit_common.', quote: Q.L2284_2292 },
-    { n: 'D3', out: 'eo_rene_total', rhs: 'sum_rows(energy_flows, eo_rene)', unit: null, clause: 'A.4.2', what: 'Σ EORENE(X) („the renewable energy (X) outflow“).', quote: Q.L2284_2292 },
-    { n: 'D4', out: 'ei_te_total', rhs: 'sum_rows(energy_flows, ei_te)', unit: null, clause: 'A.4.2', what: 'Σ EITE(X) („the total energy (X) inflow“).', quote: Q.L2284_2292 },
-    { n: 'D5', out: 'eo_te_total', rhs: 'sum_rows(energy_flows, eo_te)', unit: null, clause: 'A.4.2', what: 'Σ EOTE(X) („the total energy (X) outflow“).', quote: Q.L2284_2292 },
-    { n: 'D6', out: 'pct_econre_agg', rhs: '(sum_rows(energy_flows, ei_rene) - sum_rows(energy_flows, eo_rene)) / (sum_rows(energy_flows, ei_te) - sum_rows(energy_flows, eo_te)) * 100', unit: '%', clause: 'A.4.2, Annex G.2', what: 'erneuerbarer Anteil der netto verbrauchten Energie über alle Flüsse — Formula (A.8) über die Summen ((Σ EIRENE − Σ EORENE) / (Σ EITE − Σ EOTE) · 100; · 100 nach der Legende „in %“, der Block druckt „⋅1000“ — iso59020-U-2; Aggregation iso59020-J-1).', quote: Q.L2275_2292 },
-    { n: 'D7', out: 'energy_unit_mismatch', rhs: 'count_rows(energy_flows, unit_ok == 0)', unit: null, clause: 'A.4.2', what: 'Energieflüsse, deren Einheit nicht die gemeinsame Einheit ist oder solange keine gemeinsame Einheit gewählt ist („A common suitable measurement unit (e.g. MJ, kWh) shall be selected“); Gate STAGED (iso59020-G-5).', quote: Q.L2271_2272 },
+    { n: 'D2', out: 'ei_rene_total', rhs: 'sum_rows(energy_flows, ei_rene)', unit: null, clause: 'A.4.2', what: `Σ EIRENE(X) („the renewable energy (X) inflow, in MJ (or in kWh)“) — in der gemeinsamen Einheit energy_unit_common; ${ENERGY_PRE}.`, quote: Q.L2284_2292 },
+    { n: 'D3', out: 'eo_rene_total', rhs: 'sum_rows(energy_flows, eo_rene)', unit: null, clause: 'A.4.2', what: `Σ EORENE(X) („the renewable energy (X) outflow“); ${ENERGY_PRE}.`, quote: Q.L2284_2292 },
+    { n: 'D4', out: 'ei_te_total', rhs: 'sum_rows(energy_flows, ei_te)', unit: null, clause: 'A.4.2', what: `Σ EITE(X) („the total energy (X) inflow“); ${ENERGY_PRE}.`, quote: Q.L2284_2292 },
+    { n: 'D5', out: 'eo_te_total', rhs: 'sum_rows(energy_flows, eo_te)', unit: null, clause: 'A.4.2', what: `Σ EOTE(X) („the total energy (X) outflow“); ${ENERGY_PRE}.`, quote: Q.L2284_2292 },
+    { n: 'D6', out: 'energy_unit_mismatch', rhs: 'count_rows(energy_flows, unit_ok == 0)', unit: null, clause: 'A.4.2', what: 'Energieflüsse, deren Einheit nicht die gemeinsame Einheit ist oder solange keine gemeinsame Einheit gewählt ist („A common suitable measurement unit (e.g. MJ, kWh) shall be selected“); Gates STAGED (iso59020-G-5 block / G-6 warn).', quote: Q.L2271_2272 },
   ]),
 
   // ---- ISO-59020-08: data sources (§7.6.1.2 / §7.6.2) ----
