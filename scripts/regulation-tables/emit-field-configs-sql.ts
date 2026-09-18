@@ -21,6 +21,15 @@
  *     chain is walked over the captured `prior.equations` (plus the Plan-2a
  *     `rewriteRules[id].remap` inputs) and named in the message; a legacy
  *     prior without `equations` degrades to the direct rule (the CLI warns);
+ *     the owner worksheet's own code is REMOVED from a field's
+ *     `consumer_worksheets` before any of this is decided (Task 12b ruling)
+ *     — the runtime never inherits a field from its own owner worksheet
+ *     (`loadInheritedFields` in `src/lib/db/queries/worksheet.ts` filters
+ *     `worksheetTemplateId <> currentTemplateId`), so a self-only entry is a
+ *     runtime no-op and must not count as a consumer; the CLI prints a
+ *     NOTICE for every symbol whose captured `consumer_worksheets` held such
+ *     a self-entry (a prod data oddity worth recording even though it
+ *     changes nothing here);
  *     the same refusal applies to a SECTION
  *     `visible_when` whose section — or any descendant section, coded or
  *     not, since the runtime hides descendants of a hidden section — contains
@@ -145,18 +154,24 @@ export function assertPriorSnapshot(prior: PriorSnapshot): void {
  * inputs); a prior without `equations` yields the direct answer only. Symbols are matched through the same
  * `normalizeSymbol` as `formula.ts` (`r_D(n)` ↔ `r_D_n`), so a function-like spelling cannot slip past.
  * `opts.skipDirect`: a CREATED field has no consumers of its own but may complete a dangling
- * `input_symbols` reference of a consumed equation — the chain walk still runs for it. A chain whose only
- * consumer is the owner worksheet itself is refused too and says so (prod data oddity).
+ * `input_symbols` reference of a consumed equation — the chain walk still runs for it.
+ *
+ * Task 12b ruling: the owner worksheet's own code is stripped out of `consumer_worksheets`
+ * before this function decides anything — the runtime (`loadInheritedFields`) never inherits a
+ * field from its own owner worksheet, so a self-only entry is a no-op at runtime and is not a
+ * producer. A chain whose only captured consumer is the owner worksheet itself is therefore NOT
+ * refused; a chain consumed by the owner AND another worksheet is still refused, naming only the
+ * other worksheet(s).
  */
 export function producerChain(prior: PriorSnapshot, worksheet: string, symbol: string, opts: { skipDirect?: boolean } = {}): string | null {
   const consumers = (sym: string): string[] | null => {
     const row = prior[`${worksheet} ${sym}` as PriorFieldKey];
-    return row?.consumer_worksheets?.length ? row.consumer_worksheets : null;
+    const others = row?.consumer_worksheets?.filter((w) => w !== worksheet) ?? [];
+    return others.length ? others : null;
   };
-  const consumedBy = (c: string[]) => (c.every((w) => w === worksheet) ? `consumed only by itself (${worksheet}) — prod data oddity` : `consumed by ${c.join(', ')}`);
   if (!opts.skipDirect) {
     const direct = consumers(symbol);
-    if (direct) return `${symbol} (${consumedBy(direct)})`;
+    if (direct) return `${symbol} (consumed by ${direct.join(', ')})`;
   }
   const prefix = `${worksheet} `;
   const eqs = Object.entries(prior.equations ?? {}).filter(([k]) => k.startsWith(prefix)).map(([k, e]) => {
@@ -176,7 +191,7 @@ export function producerChain(prior: PriorSnapshot, worksheet: string, symbol: s
       seen.add(out);
       const next = `${chain} → ${e.label} ${e.output}`;
       const c = consumers(e.output) ?? consumers(out);
-      if (c) return `${next} (${consumedBy(c)})`;
+      if (c) return `${next} (consumed by ${c.join(', ')})`;
       queue.push({ sym: out, chain: next });
     }
   }
@@ -357,6 +372,13 @@ if (process.argv[1]?.endsWith('emit-field-configs-sql.ts')) {
   const header = parseHeaderArgs(rest);
   const prior = loadPriorSnapshot(`src/lib/eval/field-configs/${slug}.prior.json`);
   if (!prior.equations) console.error(`warning: ${slug}.prior.json carries no "equations" map — the producer guard is direct-only; re-capture with build-prior-snapshot.mjs for the transitive check`);
+  // Task 12b: a self-entry in a field's own consumer_worksheets is a prod data oddity (the runtime
+  // never inherits a field from its own owner worksheet) — the guard ignores it, but it is worth
+  // recording so the executor can file it as an X-class observation when it next touches the standard.
+  const selfConsumed = priorFieldRows(prior)
+    .filter(([key, row]) => row.consumer_worksheets?.includes(key.slice(0, key.indexOf(' '))))
+    .map(([key]) => key);
+  if (selfConsumed.length) console.error(`NOTICE: prod data oddity — self-consumer ignored: ${selfConsumed.join(', ')}`);
   load().then((m) => {
     const { up, down } = emitFieldConfigSql(slug, m.FIELD_CONFIGS, m.SECTION_VISIBILITY, prior, header);
     writeFileSync(files.migration, up);

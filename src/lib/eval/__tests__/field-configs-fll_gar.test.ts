@@ -178,7 +178,11 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
       return () => emitFieldConfigSql('fll_gar', [], [{ standard: 'FLL-GAR-2023', worksheet, section_code, visible_when: `abdichtungs_art == '${tok}'`, verification_quote: 'x' }], prior);
     };
     expect(refusal('FLL-GAR-10', 'C')).toThrow(/kf_abdichtung|kornanteil_unter_2micron|schichtdicke_abdichtung_cm|schichtdicke_auflast_cm|verdichtungsgrad_Dpr/);
-    expect(refusal('FLL-GAR-12', 'C')).toThrow(/bauteildicke_cm \(consumed only by itself \(FLL-GAR-12\)/);
+    // FLL-GAR-12 C's only prod "producer" is bauteildicke_cm, and its consumer_worksheets lists ONLY FLL-GAR-12 itself (a prod data oddity, fix round 2) —
+    // since Task 12b the guard strips the owner worksheet before deciding, so this is no longer a producer and the section is NOT refused (fll_gar-C-2 candidate
+    // for re-emit on FLL-GAR-12 C specifically; the other three withheld sections are untouched by this ruling and stay refused).
+    expect(producerChain(prior, 'FLL-GAR-12', 'bauteildicke_cm')).toBeNull();
+    expect(refusal('FLL-GAR-12', 'C')).not.toThrow();
     expect(refusal('FLL-GAR-14', 'C')).toThrow(/gtd_auflast_funktion \(consumed by FLL-GAR-22\)/);
     expect(refusal('FLL-GAR-16', 'C')).toThrow(/bahnendicke_mm|fuegeverfahren|nahtbreite_min_mm/);
     // the brief's Step-4 rules on existing fields (fll_gar-C-3 / -C-4)

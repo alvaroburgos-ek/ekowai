@@ -156,7 +156,7 @@ describe('DWA-M-187 field configs (Plan 3 Task 12)', () => {
     for (const r of FIELD_CONFIGS.filter((x) => x.widget === 'register')) expect((r.ui_config as RegisterUiConfig).override).toBeUndefined();
   });
 
-  it('visibility never lands on a consumed producer; the refused / withheld targets are pinned (m187-C-2 … C-5); prod self-consumers (m187-X-3); created fields sit in captured sections', () => {
+  it('visibility never lands on a consumed producer; the refused / withheld targets are pinned (m187-C-2 … C-5); prod self-consumers (m187-X-3, now guard-inert since Task 12b); created fields sit in captured sections', () => {
     for (const e of FIELD_CONFIGS.filter((x) => x.visible_when && !x.create)) {
       const row = priorRow(`${e.worksheet} ${e.symbol}`);
       expect(row, `${e.worksheet} ${e.symbol} captured`).toBeDefined();
@@ -171,10 +171,17 @@ describe('DWA-M-187 field configs (Plan 3 Task 12)', () => {
     expect(priorRow('M187-05 beta_wert').consumer_worksheets).toEqual(['M187-05']);                // X-3
     for (const s of ['UV_dosis', 'h_FK_CaCO3', 'CaCO3_massenanteil_carbo', 'B_CSB', 'A_F_pro_AEb', 'h_FK', 'q_Dr_RBF']) expect(FIELD_CONFIGS.find((e) => e.symbol === s)).toBeUndefined();
     expect(() => emitFieldConfigSql('m187', [{ standard: STD, worksheet: 'M187-18', symbol: 'UV_dosis', widget: 'scalar', ui_config: null, visible_when: UV_JA, verification_quote: 'q' }], [], prior)).toThrow(/consumed/);
-    expect(() => emitFieldConfigSql('m187', [{ standard: STD, worksheet: 'M187-20', symbol: 'B_CSB', widget: 'scalar', ui_config: null, visible_when: DATEN_JA, verification_quote: 'q' }], [], prior)).toThrow(/consumed/);
-    // section rules: every field-bearing section of every worksheet holds a consumed producer (C-2)
-    for (const [ws, sec] of [['M187-06', 'B'], ['M187-11', 'B'], ['M187-13', 'B'], ['M187-16', 'B'], ['M187-19', 'B'], ['M187-20', 'B'], ['M187-21', 'B'], ['M187-22', 'D']] as const) {
+    // Task 12b: B_CSB's ONLY captured consumer is its own worksheet (M187-20, the C-5 self-consumer oddity above) — the guard now
+    // strips the owner worksheet before deciding, so this is no longer a producer and the rule is NOT refused (m187 X-3 candidate for re-emit).
+    expect(() => emitFieldConfigSql('m187', [{ standard: STD, worksheet: 'M187-20', symbol: 'B_CSB', widget: 'scalar', ui_config: null, visible_when: DATEN_JA, verification_quote: 'q' }], [], prior)).not.toThrow();
+    // section rules: every field-bearing section of every worksheet holds a consumed producer (C-2) — EXCEPT M187-16 B and M187-22 D, whose only
+    // in-section "producers" (KBE/logstufen_rueckhalt/MPN/PBE resp. A_b_a/A_F/A_F_anteil_Aba/AFS63/b_krit/b_R_a/eta_AFS63/h_RBF) are all self-consumer-only
+    // (the same X-3 oddity) — since Task 12b those two sections are NOT refused either (also re-emit candidates).
+    for (const [ws, sec] of [['M187-06', 'B'], ['M187-11', 'B'], ['M187-13', 'B'], ['M187-19', 'B'], ['M187-20', 'B'], ['M187-21', 'B']] as const) {
       expect(() => emitFieldConfigSql('m187', [], [{ standard: STD, worksheet: ws, section_code: sec, visible_when: MIKRO, verification_quote: 'q' }], prior), `${ws} ${sec}`).toThrow(/consumed/);
+    }
+    for (const [ws, sec] of [['M187-16', 'B'], ['M187-22', 'D']] as const) {
+      expect(() => emitFieldConfigSql('m187', [], [{ standard: STD, worksheet: ws, section_code: sec, visible_when: MIKRO, verification_quote: 'q' }], prior), `${ws} ${sec}`).not.toThrow();
     }
     // the consumer-free existing fields that DID take a rule
     expect(priorRow('M187-07 pufferschicht_carbonatbrechsand').consumer_worksheets).toBeNull();

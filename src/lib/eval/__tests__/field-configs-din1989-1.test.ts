@@ -61,7 +61,10 @@ describe('DIN-1989-1 field configs (Plan 3 Task 2)', () => {
       'DIN-1989-1-05 versickerung_bemessung_a138 :: ueberlauf_versickerung == true',
       'DIN-1989-1-05 whg_erlaubnis :: ueberlauf_versickerung == true',
     ]);
-    // the -04 section-B rule (bemessungsverfahren != 'verkuerzt', L796) was REFUSED by the transitive producer guard (Task 3 fix round 1) — STAGED din1989_1-C-3
+    // the -04 section-B rule (bemessungsverfahren != 'verkuerzt', L796) was REFUSED by the transitive producer guard (Task 3 fix round 1) — STAGED din1989_1-C-3.
+    // Task 12b re-checked this: the guard no longer counts E_R's self-only consumer_worksheets entry as a producer on its own, but the walk continues past it to
+    // Gl.4's real producer V_n (consumed by DIN-1989-1-02/-06) — the rule is STILL correctly refused, just via the true reason instead of the misleading "prod data
+    // oddity" wording; din1989_1-C-3 stays STAGED (NOT a re-emit candidate). See the 'visibility never lands on a consumed producer' test below for the proof.
     expect(SECTION_VISIBILITY).toEqual([]);
   });
 
@@ -119,12 +122,16 @@ describe('DIN-1989-1 field configs (Plan 3 Task 2)', () => {
       expect(row, `${e.worksheet} ${e.symbol} captured`).toBeDefined();
       expect(row.consumer_worksheets ?? []).toEqual([]);
     }
-    // the -04 section B: every captured field is consumer-free DIRECTLY, but each feeds Gl. 1–3 whose outputs (E_R, BW_a) are consumed — the transitive guard refuses the rule (din1989_1-C-3)
+    // the -04 section B: every captured field is consumer-free DIRECTLY, and each feeds Gl. 1–3 whose outputs (E_R, BW_a) list ONLY their own worksheet as consumer
+    // (a prod data oddity, fix round 2). Since Task 12b the guard strips the owner worksheet out of consumer_worksheets before deciding, so E_R / BW_a are no longer
+    // producers in their own right — but the walk does NOT stop there: it continues to Gl.4 (V_n = f(BW_a, E_R)), and V_n IS a real producer, consumed by
+    // DIN-1989-1-02 and DIN-1989-1-06. So the section-B rule is STILL refused for every field in the section, now via the genuine V_n chain instead of the
+    // misleading "prod data oddity" wording — din1989_1-C-3 stays STAGED; it is NOT a re-emit candidate (checked: every section-B symbol reaches V_n).
     const sectionB = Object.entries(prior).filter(([k, v]) => k.startsWith('DIN-1989-1-04 ') && (v as { section_code?: string | null }).section_code === 'B');
     expect(sectionB.map(([k]) => k.slice('DIN-1989-1-04 '.length)).sort()).toEqual(['A_A', 'A_Bew', 'BS_a', 'P_d', 'e', 'eta', 'h_N', 'n']);
     for (const [, v] of sectionB) expect((v as { consumer_worksheets?: string[] | null }).consumer_worksheets ?? []).toEqual([]);
-    expect(producerChain(prior, 'DIN-1989-1-04', 'A_A')).toBe('A_A → Gl.1 E_R (consumed only by itself (DIN-1989-1-04) — prod data oddity)'); // fix round 2: E_R / BW_a list their own worksheet as consumer
-    expect(() => emitFieldConfigSql('din1989_1', [], [{ standard: 'DIN-1989-1', worksheet: 'DIN-1989-1-04', section_code: 'B', visible_when: "bemessungsverfahren != 'verkuerzt'", verification_quote: 'q' }], prior)).toThrow(/A_A → Gl\.1 E_R/);
+    expect(producerChain(prior, 'DIN-1989-1-04', 'A_A')).toBe('A_A → Gl.1 E_R → Gl.4 V_n (consumed by DIN-1989-1-02, DIN-1989-1-06)');
+    expect(() => emitFieldConfigSql('din1989_1', [], [{ standard: 'DIN-1989-1', worksheet: 'DIN-1989-1-04', section_code: 'B', visible_when: "bemessungsverfahren != 'verkuerzt'", verification_quote: 'q' }], prior)).toThrow(/A_A → Gl\.1 E_R → Gl\.4 V_n/);
     // sicherungseinrichtung_typ IS consumed (by -05) — that is why its visibility is STAGED (din1989_1-C-1), not encoded
     expect(priorRow('DIN-1989-1-03 sicherungseinrichtung_typ').consumer_worksheets).toEqual(['DIN-1989-1-05']);
     expect(FIELD_CONFIGS.find((e) => e.symbol === 'sicherungseinrichtung_typ')).toBeUndefined();

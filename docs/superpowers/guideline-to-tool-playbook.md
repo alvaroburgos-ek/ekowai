@@ -313,6 +313,13 @@ inherit the null). The prior snapshot carries the standard's equations (`prior.e
 `rewriteRules[id].remap` inputs are honoured); the refusal names the chain (`hides m_T_aM → Gl.10 Q_F_d_aM → Gl.9 Q_T_d_aM (consumed
 by …)`). A legacy prior without `equations` degrades to the direct rule and the CLI prints a warning — re-capture before emitting.
 
+**Self-consumer entries are ignored (Task 12b).** A field's own worksheet code inside its `consumer_worksheets`
+is stripped before the guard decides anything: `loadInheritedFields` never inherits a field from its own owner
+worksheet, so a self-only entry is a runtime no-op, not a real consumer (the walk still continues past it —
+a self-only symbol feeding a further equation whose output IS consumed elsewhere stays refused). The CLI prints
+one NOTICE line per affected symbol so an executor touching that standard can check whether the now-unblocked
+rule is safe to re-emit (see SIGN-OFF-plan-3.md `plan3-T-12b`).
+
 **`visible_when` is evaluated since Plan 2a** (`src/lib/compliance/visibility.ts`,
 `computeVisibility`) — on the form, the approval gate, the report, the snapshot, the PDF
 assembler and the save-path materialiser, all through the one pure helper. Semantics you are

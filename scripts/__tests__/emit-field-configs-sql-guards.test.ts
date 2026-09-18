@@ -100,6 +100,23 @@ describe('emitFieldConfigSql — guards beyond the brief (fix round 1)', () => {
     expect(() => emitFieldConfigSql('x', [], [s], prior)).toThrow(/section S-01 S-01\.2: visible_when on a section \(or a descendant of it\) containing a symbol consumed by another worksheet: A_C \(consumed by S-02, S-04\)/);
     expect(emitFieldConfigSql('x', [], [{ ...s, section_code: 'S-01.3' }], prior).up).toContain("ws.code = 'S-01.3'");
   });
+  it('Task 12b: a self-only consumer_worksheets entry is not a producer — the rule is emitted, not refused; self + another worksheet is still refused, naming only the other', () => {
+    const selfOnly: PriorSnapshot = { 'S-01 n': row({ consumer_worksheets: ['S-01'] }) };
+    expect(() => emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar', visible_when: "typ == 'b'" }], [], selfOnly)).not.toThrow();
+    expect(emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar', visible_when: "typ == 'b'" }], [], selfOnly).up).toContain("f.symbol = 'n'");
+    const mixed: PriorSnapshot = { 'S-01 n': row({ consumer_worksheets: ['S-01', 'S-02'] }) };
+    expect(() => emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar', visible_when: "typ == 'b'" }], [], mixed)).toThrow(/hides n \(consumed by S-02\)/);
+  });
+  it('Task 12b: section visibility — a section whose only producer field is self-only-consumed is not refused; self + another worksheet is still refused, naming only the other', () => {
+    const s = { standard: 'S', worksheet: 'S-01', section_code: 'S-01.2', visible_when: "typ == 'b'", verification_quote: 'q' };
+    const selfOnly: PriorSnapshot = {
+      'S-01 A_C': row({ consumer_worksheets: ['S-01'], section_code: 'S-01.2' }),
+      sections: { 'S-01 S-01.2': { visible_when: null } },
+    };
+    expect(emitFieldConfigSql('x', [], [s], selfOnly).up).toContain("ws.code = 'S-01.2'");
+    const mixed: PriorSnapshot = { ...selfOnly, 'S-01 A_C': row({ consumer_worksheets: ['S-01', 'S-04'], section_code: 'S-01.2' }) };
+    expect(() => emitFieldConfigSql('x', [], [s], mixed)).toThrow(/A_C \(consumed by S-04\)/);
+  });
   it('section visibility walks the captured section_path: producers in a direct child or a null-coded grandchild are refused; an orphan or a sibling producer is not', () => {
     const target = (section_code: string) => ({ standard: 'S', worksheet: 'S-01', section_code, visible_when: "typ == 'b'", verification_quote: 'q' });
     // hierarchy: A (root) ⊃ A.1 (child) ⊃ <null-coded> (grandchild); B (root, sibling)

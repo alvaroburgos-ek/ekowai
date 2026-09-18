@@ -113,15 +113,15 @@ describe('transitive producer guard (Task 3 fix round 1)', () => {
     expect(producerChain({ 'S-01 n': row({ consumer_worksheets: ['S-02'] }) }, 'S-01', 'n', { skipDirect: true })).toBeNull();
     expect(emitFieldConfigSql('x', [{ ...entry, symbol: 'loose', worksheet: 'A262-24' }], [], prior).up).toContain("'loose'");
   });
-  it('(c) a chain whose only consumer is the owner worksheet itself is still refused and says so', () => {
+  it('(c) Task 12b: a chain whose terminal output is self-only-consumed is NOT refused — the owner worksheet is stripped from consumer_worksheets before deciding; self + another worksheet is still refused, naming only the other', () => {
     const prior: PriorSnapshot = {
       'DIN-1989-1-04 A_A': row(), 'DIN-1989-1-04 E_R': row({ consumer_worksheets: ['DIN-1989-1-04'] }),
       equations: { 'DIN-1989-1-04 1': { output_symbol: 'E_R', input_symbols: ['A_A', 'e', 'h_N', 'eta'] } },
     };
-    expect(producerChain(prior, 'DIN-1989-1-04', 'A_A')).toBe('A_A → Gl.1 E_R (consumed only by itself (DIN-1989-1-04) — prod data oddity)');
-    expect(producerChain(prior, 'DIN-1989-1-04', 'E_R')).toBe('E_R (consumed only by itself (DIN-1989-1-04) — prod data oddity)');
+    expect(producerChain(prior, 'DIN-1989-1-04', 'A_A')).toBeNull();
+    expect(producerChain(prior, 'DIN-1989-1-04', 'E_R')).toBeNull();
     const mixed: PriorSnapshot = { ...prior, 'DIN-1989-1-04 E_R': row({ consumer_worksheets: ['DIN-1989-1-04', 'DIN-1989-1-02'] }) };
-    expect(producerChain(mixed, 'DIN-1989-1-04', 'A_A')).toBe('A_A → Gl.1 E_R (consumed by DIN-1989-1-04, DIN-1989-1-02)');
+    expect(producerChain(mixed, 'DIN-1989-1-04', 'A_A')).toBe('A_A → Gl.1 E_R (consumed by DIN-1989-1-02)');
   });
   it('assertPriorSnapshot validates the equations map shape', () => {
     const bad = (equations: unknown) => ({ ...a26206, equations }) as unknown as PriorSnapshot;
