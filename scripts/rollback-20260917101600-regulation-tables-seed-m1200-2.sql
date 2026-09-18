@@ -1,0 +1,12 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'TAB3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'S3_3_3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'ANHANGC1';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'GL_C2_1';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'TAB4';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'TAB6';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'TABB2';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'S8_2_KOSTEN';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'TABE1_STUFEN';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-2' AND edition = '2025-07' AND table_code = 'TABE1_LEISTUNG';
+COMMIT;

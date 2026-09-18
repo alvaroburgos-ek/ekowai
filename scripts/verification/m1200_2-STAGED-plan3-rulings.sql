@@ -1,0 +1,345 @@
+-- DWA-M-1200-2 — Plan 3 Task 16 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the 4 equation rows — ids / md5(formula) —, the 15
+-- compliance rows — ids / severities / md5(condition) —, worksheet titles, standards.version 'Gelbdruck (Entwurf) — Juli
+-- 2025', field labels / units / is_required) were captured read-only on 2026-09-18 (src/lib/eval/field-configs/m1200_2.prior.json;
+-- scripts/verification/prod-query.mjs). Transcript lines refer to C:\Users\Ekowai\Desktop\Guidelines\DWA-M-1200-2\DWA-M_1200-2_GD.md.
+-- This task changes NO gate severity.
+--
+-- Conventions: `s.code = 'DWA-M-1200-2'`, worksheets by code, never by id (equations and gates by their captured uuid + a
+-- guard on md5(formula) / md5(condition) of the text they replace so a re-run is a no-op); each block names its rollback.
+-- Every block that DELETEs or rewrites an equation / gate row follows the amendment-I archive pattern: the affected rows are
+-- copied into `equations_archive_m1200_2` / `compliance_requirements_archive_m1200_2` / `fields_archive_m1200_2` in the SAME
+-- transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE false; INSERT … SELECT * … WHERE (id = … AND md5(…) = …)`),
+-- the DELETE / UPDATE is guarded on the md5 read read-only from prod, and the rollback restores from the archive by id with an
+-- EXPLICIT column list (never `SELECT *`, never retyped — prod-query.mjs truncates cells at 120 chars); the archive table is
+-- dropped by the rollback or on the owner's sign-off that the change is final. A field retirement is `active = false`
+-- (reversible). New gates are INSERTs with a DELETE-by-description rollback. The Plan-3 DATA migrations (20260917101600 seed ·
+-- 20260917101610 field configs · 20260917101620 equations) must be applied BEFORE any block that reads a created symbol
+-- (validierungsproben, n_proben_validierung, validierung_ok_<org>, perzentil_ok_<org>, mw_/sd_/p10_/p50_<org>_calc,
+-- k_faktor_tab, truebung_limit_1200_2 … nematoden_limit_1200_2, leistungsziel_<org>_tab3, routineproben_1200_2,
+-- konformitaet_calc, verfahrenskette_stufen, credit_sum_*, betriebsparameter, parameter_nicht_online,
+-- alarm_verzoegerung_max_calc, kostenpositionen, kosten_summe_calc). Consumer edits write `fields.consumer_worksheets`
+-- (text[]); the guards keep a re-run idempotent.
+--
+-- Captured equation rows (all on M12002-05, all verification_status verified_against_standard; md5 = md5(formula)):
+--   Gl. 1     0ad3e66f-58bc-4869-9dc6-f5e888345f06 'log10_reduktion = log10(c_zulauf / c_ablauf)'      b50eb31e46ec8cdd1ce9a2fdc160a30e
+--   Gl. C.2-1 e872edf5-09d1-4d27-9238-08a6dc519392 'perzentil_10_log10 = mw_log10 - 1.282 * sd_log10'  497b1fa9947cc194c185b5844438b969
+--   Gl. C.2-2 0f237c28-2fc3-451a-b557-9dfe44231ef2 'perzentil_50_log10 = median(log10_reduktionen)'    c163bd209e1d5af69a51bede419c7ed9
+--   Gl. C.2-3 93bc49a5-c3f8-4aa1-9226-85bc436ec4ef 'lrv_i = log10(x_i / y_i)'                          c688a24d55a6345b8af83cd0176eaf88
+-- Captured compliance rows this file touches (md5 = md5(condition)):
+--   REQ-03 96461a18-731b-4b80-9055-ca992fc93b97 (-13, block) 'perzentil_konformitaet >= 90'                                         bd6ca7b6175c86946864950f346e21fd
+--   REQ-04 42ddfeee-a2ba-4ea9-b884-cc9c9dce2571 (-05, block) 'log10_reduktion >= leistungsziel_log10'                               c270e3c8737d52f0381ba748271fa3c6
+--   REQ-05 c3097c01-d430-4ccc-8f6a-6010aa7db3c4 (-05, block) 'validierungsmonitoring_typ == ''vereinfacht'' AND probenanzahl_zulauf >= 16'
+--                                                                                                                                  dc0c6f24c879e4b4c23ee3c396f91c3a
+--   REQ-06 e08aa02a-faa9-42f6-93d7-027a390673fc (-03, block) 'IF wassergueteklasse == ''A'' THEN perzentil_10_log10 >= leistungsziel_log10 AND IF wassergueteklasse IN {''B-1'',''C-1''} THEN perzentil_50_log10 >= leistungsziel_log10'
+--                                                                                                                                  a93bdb99e92556f74c13b2fa73b03c67
+--   REQ-09 f8796c51-6d2b-4b37-b88e-910d6e20ef0c (-08, block) 'IF wassergueteklasse IN {''A'',''B-1'',''B-2'',''C-1'',''C-2''} THEN truebung_ablauf <= 2'
+--                                                                                                                                  76614b6f3359f2b47f92e892ce829d27
+--   REQ-11 92e88c19-d945-4a07-908b-8e62f68b023d (-13, block) 'messhauefigkeit == online AND alarm_verzoegerung_min <= 30'          991ac177d8e7932b915b6b28156e7b79
+-- Explicit column lists (information_schema, read-only 2026-09-18):
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   fields: id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote
+--   (the four Plan-1 columns widget / ui_config / lookup / visible_when are absent in prod until the schema migration — every block below assumes it applied)
+-- Data observation (no block): REQ-02 (-03), REQ-08 (-08) and REQ-15 (-15) carry an EMPTY condition (md5 d41d8cd9…, `manual` at the engine) — for the owning standard's next touch.
+
+-- =====================================================================================================================
+-- m1200_2-C-1 · -02 wassergueteklasse · consumer_worksheets += M12002-06 (the routine-sample register's per-row Tab.-3 value)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L534 "Die vorgegebenen Werte für E. coli, Legionella spp. und intestinale Nematoden in Tabelle 3 müssen in mindestens
+-- $90 \%$ der Proben eingehalten werden." Capture: wassergueteklasse consumers = {M12002-04, M12002-05, M12002-11, M12002-12};
+-- e_coli … truebung_ablauf are orphans of -06 consumed by -13 / -02. Without this edit every routineproben_1200_2 row reads
+-- "kein Tab.-3-Wert" and konformitaet_calc is undecidable (pinned in equations-m1200_2.test.ts).
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(f.consumer_worksheets, 'M12002-06')
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M12002-02' AND s.code = 'DWA-M-1200-2' AND f.symbol = 'wassergueteklasse' AND f.active
+--    AND NOT ('M12002-06' = ANY(f.consumer_worksheets));
+-- COMMIT;
+-- Rollback:
+-- UPDATE fields f SET consumer_worksheets = array_remove(f.consumer_worksheets, 'M12002-06')
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M12002-02' AND s.code = 'DWA-M-1200-2' AND f.symbol = 'wassergueteklasse';
+
+-- =====================================================================================================================
+-- m1200_2-C-2 · -04 / -05 · the brief's section rules `wassergueteklasse IN {'A','B-1','C-1'}` on the existing validation sections (REFUSED)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L553–L554 "B－2： －", L555–L556 "C－2：－", L573 "- ${ }^{\text {a) }}" — Tab. 3 prints no targets for B-2 / C-2 / D; L616.
+-- Why refused (emitter, pinned in field-configs-m1200_2.test.ts): M12002-04-B holds leistungsziel_log10 (consumed by -05, -12);
+-- M12002-05-B holds c_zulauf / c_ablauf (→ Gl. 1 log10_reduktion, consumed by -04, -12) and the REQ-05 drivers
+-- validierungsmonitoring_typ / probenanzahl_zulauf; M12002-05-D holds the consumed log10_reduktion. Chosen now: the created
+-- register, its 50 outputs and the five -04 target fills carry the rule; the existing fields stay visible for every class.
+-- Proposed: no SQL — the rule becomes emittable once D-1 … D-4 retire the scalars (then re-run the emitter with the section entries).
+
+-- =====================================================================================================================
+-- m1200_2-C-3 · -09 flux_membran · visible_when `filtrationsverfahren IN {'mf', 'uf', 'nf', 'uo', 'mbr'}` (REFUSED — consumed by -13)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L805 (Tab. 4 MF/UF) "Betriebsbedingungen (z. B. Permeatfluss, Transmembrandruck, Wasserausbeute, Überströmung)"; L806 (RO/NF).
+-- Chosen now: flux_membran stays visible for every filtration method (the -13 consumer inherits it). Proposed (after ratification —
+-- hiding a producer nulls the inherited value on -13 for non-membrane methods, which is the printed fact):
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'filtrationsverfahren IN {''mf'', ''uf'', ''nf'', ''uo'', ''mbr''}'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M12002-09' AND s.code = 'DWA-M-1200-2' AND f.symbol = 'flux_membran' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: the same UPDATE with `SET visible_when = NULL` guarded on the emitted string.
+
+-- =====================================================================================================================
+-- m1200_2-C-4 · -06 legionella / intest_nematoden · visibility by aerosol_risk / weide_oder_futter (REFUSED — consumed by -02; drivers reach -13 only)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L550 "Legionella spp．： $<1.000 \mathrm{KBE} / \mathrm{L}$ ， wenn das Risiko der Aerosolbil－ dung besteht；"; L551
+-- "intestinale Nematoden （Eier von Hel－ minthen）：$\leq 1$ Ei pro Liter für die Bewässerung von Weide－ flächen oder Futterpflanzen".
+-- Capture: legionella / intest_nematoden consumers = {M12002-02}; aerosol_risk / weide_oder_futter consumers = {M12002-13}.
+-- Chosen now: the created limit fills on -02 carry the rules (legionella_limit_1200_2 ← aerosol_risk == true,
+-- nematoden_limit_1200_2 ← weide_oder_futter == true); the -06 inputs stay visible. Proposed: consumer edits + the two rules.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(f.consumer_worksheets, 'M12002-06')
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M12002-02' AND s.code = 'DWA-M-1200-2' AND f.symbol IN ('aerosol_risk', 'weide_oder_futter') AND f.active
+--    AND NOT ('M12002-06' = ANY(f.consumer_worksheets));
+-- UPDATE fields f SET visible_when = 'aerosol_risk == true'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M12002-06' AND s.code = 'DWA-M-1200-2' AND f.symbol = 'legionella' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'weide_oder_futter == true'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M12002-06' AND s.code = 'DWA-M-1200-2' AND f.symbol = 'intest_nematoden' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: array_remove('M12002-06') on the two drivers; `SET visible_when = NULL` on the two fields guarded on the strings above.
+
+-- =====================================================================================================================
+-- m1200_2-G-1 · -05 REQ-05 (block) · `validierungsmonitoring_typ == 'vereinfacht' AND probenanzahl_zulauf >= 16` → the register's N and the per-organism §3.3.3 verdicts
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L679 "sind je 16 korrespondierende Proben im Zulauf und Ablauf zu nehmen"; L681 (A: 15 von 16, 1,0 log10); L683 (B-1 / C-1:
+-- 8 von 16, 2,0 log10); L668 "separat für jeden Indikatororganismus"; L706 (E. coli, somatische und F-spezifische Coliphagen, Clostridium-
+-- perfringens-Sporen bzw. alternativ sulfatreduzierende Sporenbildner). Chosen now: REQ-05 unchanged (reads the typed probenanzahl_zulauf).
+-- Proposed (the created verdicts are 0 / 1 per organism; an organism without rows leaves its verdict undecidable ⇒ gate pending):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m1200_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m1200_2 SELECT * FROM compliance_requirements
+--  WHERE id = 'c3097c01-d430-4ccc-8f6a-6010aa7db3c4' AND md5(condition) = 'dc0c6f24c879e4b4c23ee3c396f91c3a';
+-- UPDATE compliance_requirements SET condition = 'IF validierungsmonitoring_typ == ''vereinfacht'' THEN n_proben_validierung >= 16 AND validierung_ok_ecoli == 1 AND validierung_ok_somat_coliphagen == 1 AND validierung_ok_fspez_coliphagen == 1 AND (validierung_ok_clostridium == 1 OR validierung_ok_sulfatreduzierer == 1)'
+--  WHERE id = 'c3097c01-d430-4ccc-8f6a-6010aa7db3c4' AND md5(condition) = 'dc0c6f24c879e4b4c23ee3c396f91c3a';
+-- COMMIT;
+-- Rollback:
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = a.condition FROM compliance_requirements_archive_m1200_2 a WHERE c.id = a.id AND c.id = 'c3097c01-d430-4ccc-8f6a-6010aa7db3c4';
+-- DELETE FROM compliance_requirements_archive_m1200_2 WHERE id = 'c3097c01-d430-4ccc-8f6a-6010aa7db3c4';
+-- COMMIT;
+-- (the archive table is dropped on rollback of every block that uses it, or on the owner's sign-off that the rewrites are final)
+
+-- =====================================================================================================================
+-- m1200_2-G-2 · -03 REQ-06 (block) · Anhang-C percentile gate: MOVE to -05 and read the per-organism percentile verdicts
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1800 "Klasse A: Das 10. Perzentil der Verteilung der $\log _{10}$-Reduktionen muss das Leistungsziel erreichen oder
+-- übersteigen."; L1802 "Klassen B-1 und C-1: Das 50. Perzentil (Median) der Verteilung der $\log _{10}$-Reduktionen muss das Leistungsziel erreichen oder übersteigen."; L684 (umfängliches Validierungsmonitoring). Capture:
+-- REQ-06 sits on M12002-03 where NONE of its four symbols resolves (leistungsziel_log10 → -05 / -12; perzentil_* have no consumer;
+-- wassergueteklasse → -04 / -05 / -11 / -12) — the gate is `pending` on every project today (observation). Chosen now: unchanged.
+-- Proposed: move the row to -05 and read the created perzentil_ok_<org> (10th percentile for A, median for B-1 / C-1 via ANHANGC1):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m1200_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m1200_2 SELECT * FROM compliance_requirements
+--  WHERE id = 'e08aa02a-faa9-42f6-93d7-027a390673fc' AND md5(condition) = 'a93bdb99e92556f74c13b2fa73b03c67';
+-- UPDATE compliance_requirements c SET worksheet_template_id = w.id,
+--        condition = 'IF validierungsmonitoring_typ IN {''umfaenglich'', ''umfaenglich_basis''} THEN perzentil_ok_ecoli == 1 AND perzentil_ok_somat_coliphagen == 1 AND perzentil_ok_fspez_coliphagen == 1 AND (perzentil_ok_clostridium == 1 OR perzentil_ok_sulfatreduzierer == 1)'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE c.id = 'e08aa02a-faa9-42f6-93d7-027a390673fc' AND md5(c.condition) = 'a93bdb99e92556f74c13b2fa73b03c67' AND w.code = 'M12002-05' AND s.code = 'DWA-M-1200-2';
+-- COMMIT;
+-- Rollback: restore worksheet_template_id + condition from the archive by id; delete the archive row. The Monte-Carlo variant
+-- (umfaenglich_montecarlo, Anhang C.3) stays manual — no printed formula (m1200_2-F-2 on the sheet).
+
+-- =====================================================================================================================
+-- m1200_2-G-3 · -08 REQ-09 (block) · Filtration / Trübung ≤ 2 NTU for A … C-2: MOVE from the EMPTY -08 to -02 and read the Tab.-3 fill
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L894 "Für die Wassergüteklassen A bis C ist gemäß Tabelle 3 der Einsatz einer Filtration vor der Desinfektionsstufe gefordert,
+-- für die Wassergüteklasse D ist sie optional. Für die Güteklassen A bis C werden die Filtrationsanforderungen mit Trübungswerten von
+-- $\leqslant 2$ NTU spezifiziert."; L935. Capture: REQ-09 sits on M12002-08 (0 fields); truebung_ablauf (-06) is consumed by -13, -09, -02,
+-- -11 — never -08; wassergueteklasse never reaches -08 ⇒ the gate is `pending` on every project today. Chosen now: unchanged.
+-- Proposed: move to -02 (class + truebung_ablauf + the created truebung_limit_1200_2 all resolve there):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m1200_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m1200_2 SELECT * FROM compliance_requirements
+--  WHERE id = 'f8796c51-6d2b-4b37-b88e-910d6e20ef0c' AND md5(condition) = '76614b6f3359f2b47f92e892ce829d27';
+-- UPDATE compliance_requirements c SET worksheet_template_id = w.id,
+--        condition = 'IF wassergueteklasse IN {''A'', ''B-1'', ''B-2'', ''C-1'', ''C-2''} THEN truebung_ablauf <= truebung_limit_1200_2'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE c.id = 'f8796c51-6d2b-4b37-b88e-910d6e20ef0c' AND md5(c.condition) = '76614b6f3359f2b47f92e892ce829d27' AND w.code = 'M12002-02' AND s.code = 'DWA-M-1200-2';
+-- COMMIT;
+-- Rollback: restore worksheet_template_id + condition from the archive by id; delete the archive row.
+
+-- =====================================================================================================================
+-- m1200_2-G-4 · -11 · NEW warn gate: chlorine / chlorine dioxide only as residual (secondary) disinfection
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1135 "Daher sollte die Desinfektion mit chlorhaltigen Mitteln und Chlordioxid, ähnlich dem Ansatz bei der Trinkwasserversorgung,
+-- einzig als Restdesinfektion und zur Verhinderung von Wiederverkeimung bei längeren Transport- und Speicherdauern eingesetzt werden."
+-- ("sollte" ⇒ warn); L1050. Capture: REQ-10 is `desinfektionsverfahren IS NOT EMPTY` (block) — chlor / clo2 pass it as the PRIMARY
+-- disinfection today. Chosen now: no gate; the created rules show ct_wert / clo2_restkonz / restchlor_freies for those tokens.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-16', 'Chlor / Chlordioxid nur als Restdesinfektion', 'Chlorine / chlorine dioxide as residual disinfection only',
+--        'NOT desinfektionsverfahren IN {''chlor'', ''clo2''}', '§5.4.3', 'warn',
+--        'Plan 3 (m1200_2-G-4): "sollte … einzig als Restdesinfektion und zur Verhinderung von Wiederverkeimung … eingesetzt werden" (L1135) — chlorhaltige Mittel / Chlordioxid als primäres Desinfektionsverfahren lösen eine Warnung aus.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE w.code = 'M12002-11' AND s.code = 'DWA-M-1200-2'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-16');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements c USING worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--   WHERE c.worksheet_template_id = w.id AND w.code = 'M12002-11' AND s.code = 'DWA-M-1200-2' AND c.code = 'REQ-16' AND c.description LIKE 'Plan 3 (m1200_2-G-4)%';
+
+-- =====================================================================================================================
+-- m1200_2-G-5 · -13 REQ-03 (block) · `perzentil_konformitaet >= 90` → MOVE to -06 and read the register's konformitaet_calc
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L534; L1283 "dass $90 \%$ der Proben die Mindestanforderungen gemäß Tabelle 3 einhalten müssen und die weiteren Proben eine maximale
+-- Überschreitung von $1 \log _{10}$-Stufe für E. coli und Legionellen bzw. $100 \%$ für andere Parameter aufweisen dürfen". Chosen now:
+-- unchanged (reads the typed perzentil_konformitaet on -13). Requires C-1 first (the register needs the class on -06).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m1200_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m1200_2 SELECT * FROM compliance_requirements
+--  WHERE id = '96461a18-731b-4b80-9055-ca992fc93b97' AND md5(condition) = 'bd6ca7b6175c86946864950f346e21fd';
+-- UPDATE compliance_requirements c SET worksheet_template_id = w.id, condition = 'konformitaet_calc >= 90'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE c.id = '96461a18-731b-4b80-9055-ca992fc93b97' AND md5(c.condition) = 'bd6ca7b6175c86946864950f346e21fd' AND w.code = 'M12002-06' AND s.code = 'DWA-M-1200-2';
+-- COMMIT;
+-- Rollback: restore worksheet_template_id + condition from the archive by id; delete the archive row. The deviation limit
+-- (1 log10 / 100 %) stays unencoded (residue).
+
+-- =====================================================================================================================
+-- m1200_2-G-6 · -13 REQ-11 (block) · `messhauefigkeit == online AND alarm_verzoegerung_min <= 30` → the register's outputs
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1287 "Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand und die Einhaltung der Anforderungen zu
+-- allen Zeitpunkten sicherzustellen"; L1289 "Abweichungen vom zulässigen Betriebsfenster sollten je nach System nach 5 min bis 30 min eine
+-- Alarmierung auslösen." (SR-2 range; prod reads the maximum 30). Chosen now: unchanged.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m1200_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m1200_2 SELECT * FROM compliance_requirements
+--  WHERE id = '92e88c19-d945-4a07-908b-8e62f68b023d' AND md5(condition) = '991ac177d8e7932b915b6b28156e7b79';
+-- UPDATE compliance_requirements SET condition = 'parameter_nicht_online == 0 AND alarm_verzoegerung_max_calc <= 30'
+--  WHERE id = '92e88c19-d945-4a07-908b-8e62f68b023d' AND md5(condition) = '991ac177d8e7932b915b6b28156e7b79';
+-- COMMIT;
+-- Rollback: restore condition from the archive by id; delete the archive row.
+
+-- =====================================================================================================================
+-- m1200_2-G-7 · -05 REQ-04 (block) · `log10_reduktion >= leistungsziel_log10` (one scalar LRV against one scalar target) → RETIRE once G-1 / G-2 land
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L668 "der Nachweis der Einhaltung der Leistungsziele nach Tabelle 3 separat für jeden Indikatororganismus gemäß 3.3.4 erbracht wird";
+-- L681 / L683 (the 16-pair rule — a single LRV cannot express it). Chosen now: unchanged (Gl. 1's log10_reduktion is consumed by -04 / -12).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m1200_2 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m1200_2 SELECT * FROM compliance_requirements
+--  WHERE id = '42ddfeee-a2ba-4ea9-b884-cc9c9dce2571' AND md5(condition) = 'c270e3c8737d52f0381ba748271fa3c6';
+-- DELETE FROM compliance_requirements WHERE id = '42ddfeee-a2ba-4ea9-b884-cc9c9dce2571' AND md5(condition) = 'c270e3c8737d52f0381ba748271fa3c6';
+-- COMMIT;
+-- Rollback:
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_m1200_2 WHERE id = '42ddfeee-a2ba-4ea9-b884-cc9c9dce2571';
+-- DELETE FROM compliance_requirements_archive_m1200_2 WHERE id = '42ddfeee-a2ba-4ea9-b884-cc9c9dce2571';
+-- DROP TABLE IF EXISTS compliance_requirements_archive_m1200_2; -- when no other block's rows remain in it
+-- COMMIT;
+
+-- =====================================================================================================================
+-- m1200_2-R-1 · -05 Gl. C.2-1 / Gl. C.2-2 / Gl. C.2-3 (verified) · retire the scalar statistics once the per-organism register twins are ratified (atomic with D-2 / D-4)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1817 "$\log _{10}$-Reduktion $=\log _{10}$ ( $C_{\text {Zulauf }} / C_{\text {Ablauf }}$ )"; L1821 "wobei der Median, der Mittelwert (MW)
+-- und die Standardabweichung der Stichprobe (SD) verwendet werden"; L1822; L1823. Chosen now: the three rows stay the only producers of
+-- perzentil_10_log10 / perzentil_50_log10 / lrv_i (nothing emitted outputs them); the register computes mw_/sd_/p10_/p50_<org>_calc per
+-- organism. Gl. 1 (log10_reduktion) stays in any case — its output is consumed by -04 / -12.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_m1200_2 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_m1200_2 SELECT * FROM equations
+--  WHERE (id = 'e872edf5-09d1-4d27-9238-08a6dc519392' AND md5(formula) = '497b1fa9947cc194c185b5844438b969')
+--     OR (id = '0f237c28-2fc3-451a-b557-9dfe44231ef2' AND md5(formula) = 'c163bd209e1d5af69a51bede419c7ed9')
+--     OR (id = '93bc49a5-c3f8-4aa1-9226-85bc436ec4ef' AND md5(formula) = 'c688a24d55a6345b8af83cd0176eaf88');
+-- DELETE FROM equations e USING equations_archive_m1200_2 a WHERE e.id = a.id AND md5(e.formula) = md5(a.formula)
+--    AND e.id IN ('e872edf5-09d1-4d27-9238-08a6dc519392', '0f237c28-2fc3-451a-b557-9dfe44231ef2', '93bc49a5-c3f8-4aa1-9226-85bc436ec4ef');
+-- COMMIT;
+-- Rollback:
+-- BEGIN;
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_m1200_2 WHERE id IN ('e872edf5-09d1-4d27-9238-08a6dc519392', '0f237c28-2fc3-451a-b557-9dfe44231ef2', '93bc49a5-c3f8-4aa1-9226-85bc436ec4ef');
+-- DROP TABLE IF EXISTS equations_archive_m1200_2;
+-- COMMIT;
+
+-- =====================================================================================================================
+-- m1200_2-D-1 · -04 leistungsziel_log10 (required, consumed by -05 / -12) ↔ the five leistungsziel_<org>_tab3 fills
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L549 (Tab. 3 A row: "E．coli $\geqslant 5,0$ Somatische Coliphagen， insg．$\geq 6,0$ … Clostridium－perfrin－ gens－Sporen $\geqslant 4,0
+-- \mathrm{bzw}$ ．sulfatre－ duzierende Sporen－ bildner $\geqslant 5,0$"); L668. ONE typed target cannot carry five printed ones. Chosen now:
+-- both stay. Proposed: retire the scalar after G-1 / G-7 (REQ-04 reads it) — `active = false`, reversible:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m1200_2 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m1200_2 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-1200-2' AND w.code = 'M12002-04' AND f.symbol = 'leistungsziel_log10' AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M12002-04' AND s.code = 'DWA-M-1200-2' AND f.symbol = 'leistungsziel_log10' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM fields_archive_m1200_2 a WHERE f.id = a.id AND f.symbol = 'leistungsziel_log10'; DELETE FROM fields_archive_m1200_2 WHERE symbol = 'leistungsziel_log10';
+
+-- =====================================================================================================================
+-- m1200_2-D-2 · -05 x_i / y_i / lrv_i / log10_reduktionen ↔ validierungsproben (the sample set — ONE atomic retirement with R-1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1816–L1817 (paired LRV per sample), L1829–L1834 (the printed x_i / y_i table), L1843–L1848 (LRV_i). Grouped: the four scalars are
+-- the inputs and output of Gl. C.2-3 / C.2-2 — a subset retired while the rows still read them would null the prod outputs; retire all
+-- four together with R-1, never before. Chosen now: both stay.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m1200_2 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m1200_2 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-1200-2' AND w.code = 'M12002-05' AND f.symbol IN ('x_i', 'y_i', 'lrv_i', 'log10_reduktionen') AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M12002-05' AND s.code = 'DWA-M-1200-2' AND f.symbol IN ('x_i', 'y_i', 'lrv_i', 'log10_reduktionen') AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM fields_archive_m1200_2 a WHERE f.id = a.id AND f.symbol IN ('x_i', 'y_i', 'lrv_i', 'log10_reduktionen'); DELETE … from the archive.
+
+-- =====================================================================================================================
+-- m1200_2-D-3 · -05 probenanzahl_zulauf (required, REQ-05) ↔ n_proben_validierung
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L679. Chosen now: both stay (REQ-05 reads the scalar until G-1). Proposed: retire after G-1 — same `active = false` block shape
+-- as D-1 for symbol 'probenanzahl_zulauf' on M12002-05.
+
+-- =====================================================================================================================
+-- m1200_2-D-4 · -05 mw_log10 / sd_log10 / perzentil_10_log10 / perzentil_50_log10 ↔ mw_/sd_/p10_/p50_<org>_calc (ONE atomic retirement with R-1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1821, L1822, L1823; L1858–L1862 (the printed example MW 6,58 · SD 0,30 · k 1,282 · 10. Perzentil 6,20 · Leistungsziel 6,00 — reproduced
+-- by the twins in equations-m1200_2.test.ts). Grouped: mw / sd are the inputs of Gl. C.2-1 and the two percentiles its / C.2-2's outputs —
+-- retiring a subset nulls the prod rows; atomic with R-1. The typed scalars are per PROJECT, the twins per ORGANISM (L668) — a retirement
+-- also retires the one-organism reading. Chosen now: both stay. Proposed: the D-1 block shape for the four symbols on M12002-05, after R-1.
+
+-- =====================================================================================================================
+-- m1200_2-D-5 · -05 k_faktor_normal ↔ k_faktor_tab (GL_C2_1: 1,282)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1822; L1860 "\hline k-Faktor & k & 1,282 \\". The typed k stays typeable (amendment J: a re-bind to lookup_fill needs a key
+-- symbol; a constant has none — twin created instead). Proposed: retire the scalar (D-1 block shape) once the sheet confirms no project
+-- uses a k other than the printed 1,282.
+
+-- =====================================================================================================================
+-- m1200_2-D-6 · -13 perzentil_konformitaet (required, REQ-03) ↔ -06 konformitaet_calc
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L534 / L1283. Chosen now: both stay. Proposed: retire the -13 scalar after C-1 + G-5 (D-1 block shape, symbol
+-- 'perzentil_konformitaet' on M12002-13).
+
+-- =====================================================================================================================
+-- m1200_2-D-7 · -12 verfahrenskette (required text, consumed by -13) ↔ verfahrenskette_stufen
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L640 "werden … jeweils zu einer Gesamtreduktion addiert (Mehrfachbehandlung, Multibarrierenansatz)"; L1748. Chosen now: both stay
+-- (the -13 consumer inherits the text). Proposed: consumer_worksheets of the register += M12002-13 (a create never sets consumers), then
+-- retire the text (D-1 block shape on M12002-12):
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M12002-13'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'M12002-12' AND s.code = 'DWA-M-1200-2' AND f.symbol = 'verfahrenskette_stufen' AND f.active AND f.consumer_worksheets IS NULL;
+-- COMMIT;
+-- Rollback: SET consumer_worksheets = NULL on the register field.
+
+-- =====================================================================================================================
+-- m1200_2-D-8 · -13 messhauefigkeit (required, REQ-11) / alarm_verzoegerung_min (REQ-11) ↔ betriebsparameter rows (ONE atomic pair — both are REQ-11's inputs)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1287; L1289; Tab. 6 (L1297). Chosen now: both stay. Proposed: retire the two scalars after G-6 (D-1 block shape on M12002-13).
+
+-- =====================================================================================================================
+-- m1200_2-D-9 · -15 kostenkennwert_aufbereitung (REQ-14) ↔ kosten_summe_calc
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1450 "Für die einzelnen Stufen der Wasseraufbereitung sind nachfolgend spezifische Kosten in Euro je Kubikmeter … wiedergegeben.
+-- Hierbei handelt es sich um grobe Richtwerte". Chosen now: both stay (REQ-14 reads the scalar with baupreisindex_bezugsjahr). Proposed: retire
+-- the scalar and re-point REQ-14 at the register rows (per-row baupreisindex_jahr) — a later G-block; no SQL staged now.

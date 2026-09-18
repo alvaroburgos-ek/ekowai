@@ -33,6 +33,7 @@ import { m187SeedTables } from './regulation-tables-seed-m187';
 import { din276SeedTables } from './regulation-tables-seed-din276';
 import { a178SeedTables } from './regulation-tables-seed-a178';
 import { din169412SeedTables } from './regulation-tables-seed-din16941_2';
+import { m12002SeedTables } from './regulation-tables-seed-m1200_2';
 
 export type SeedBuilder = { build: () => RegulationTable[]; ts: string; slugFile: string; supersedes?: string };
 
@@ -53,7 +54,8 @@ export const SEED_BUILDERS: Record<string, SeedBuilder> = {
   din276: { build: din276SeedTables, ts: '20260917101300', slugFile: 'din276' }, // Plan 3 Task 13: DIN-276 (four tables — Table 1 KG catalogue, Tables 2 / 3 / 4 reference units)
   a178: { build: a178SeedTables, ts: '20260917101400', slugFile: 'a178' }, // Plan 3 Task 14: DWA-A-178 (seven tables — Tab. 1 split η / η_VS, §6.1.4.5 h_FK, three text-limit tables, Tab. 2 indicators)
   din16941_2: { build: din169412SeedTables, ts: '20260917101500', slugFile: 'din16941_2' }, // Plan 3 Task 15: DIN-EN-16941-2 (nine tables — Tab. A.1 / A.2 / A.3, Gl.-1 legend, Tab. D.1 / D.2 / D.3 / D.4, Anhang B)
-  // Plan-3 tasks append one line each, e.g. m1200_2: { build: m12002SeedTables, ts: '20260917101600', slugFile: 'm1200_2' }
+  m1200_2: { build: m12002SeedTables, ts: '20260917101600', slugFile: 'm1200_2' }, // Plan 3 Task 16: DWA-M-1200-2 (ten tables — Tab. 3, §3.3.3, Anhang C.1, Gl. C.2-1, Tab. 4, Tab. 6, Tab. B.2, §8.2, Tab. E.1 ×2)
+  // Plan-3 tasks append one line each, e.g. din1989_2: { build: din19892SeedTables, ts: '20260917101700', slugFile: 'din1989_2' }
 };
 
 /** Slugs that no other builder supersedes — the set the runtime fallback serves. */

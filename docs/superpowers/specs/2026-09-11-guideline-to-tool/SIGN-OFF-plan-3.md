@@ -4110,6 +4110,310 @@ Report: `reports/plan-3-din16941_2.md` · STAGED SQL: `scripts/verification/din1
 - **No worked numeric example is printed** — every equation pin is hand-derived from the printed forms and the Tab.-A.1 / D.1 / D.2 cells.
 - **Anhang D test methods** (EN ISO 9308-1 … 11731) are seeded as bare reference strings (content boundary) — displayed, never expanded.
 
+## Task 16 — DWA-M-1200-2 (m1200_2)
+
+Report: `reports/plan-3-m1200_2.md` · STAGED SQL: `scripts/verification/m1200_2-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-1200-2\DWA-M_1200-2_GD.md` (lines cited; the LaTeX is quoted as printed, fullwidth punctuation kept) · prod capture `src/lib/eval/field-configs/m1200_2.prior.json` (2026-09-18, read-only; 84 fields / 171 sections / 4 equations / 15 gates, 3 with an empty condition) · this task changes NO gate severity and emits NO `select_many`, NO `data_type` change and NO equation replacement.
+
+### m1200_2-C-1 · DWA-M-1200-2 · -02 `wassergueteklasse` · consumer_worksheets += M12002-06
+- Class: consumer-edit
+- Chosen now (fail-safe): the routine-sample register `routineproben_1200_2` (-06) reads the class in row scope; the capture lists the class for -04 / -05 / -11 / -12 only, so every row shows "kein Tab.-3-Wert (Klasse / Parameter)" and `konformitaet_calc` is undecidable (pinned) until this edit lands. Nothing else changes.
+- Evidence (verbatim, transcript line): "Die vorgegebenen Werte für E. coli, Legionella spp. und intestinale Nematoden in Tabelle 3 müssen in mindestens $90 \%$ der Proben eingehalten werden." (L534)
+- Proposed SQL / config: STAGED block C-1 (array_append, guarded; rollback array_remove).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-C-2 · DWA-M-1200-2 · -04 B / -05 B / -05 D · the brief's section rules `wassergueteklasse IN {'A','B-1','C-1'}` (REFUSED)
+- Class: consumer-edit (transitive producer guard + gate-aware guard)
+- Chosen now (fail-safe): no section rule emitted — the emitter refuses them (pinned: -04 B holds `leistungsziel_log10` consumed by -05 / -12; -05 B holds `c_zulauf` / `c_ablauf` → Gl. 1 `log10_reduktion` consumed by -04 / -12 and the REQ-05 drivers `validierungsmonitoring_typ` / `probenanzahl_zulauf`; -05 D the consumed output). The "not applicable for B-2 / C-2 / D" lives on the CREATED fields: the register, its 50 outputs and the five -04 target fills carry `visible_when wassergueteklasse IN {'A', 'B-1', 'C-1'}`; `validierung_erforderlich_tab3` (-02) shows 0 / 1.
+- Evidence (verbatim, transcript line): "\hline & & & & & & B－2： － \\" (L554); "\hline & & & & & & C－2：－ \\" (L556); "Wie in Tabelle 3 dargestellt, wird gemäß LAWA (2022) und der zu erwartenden Bundes-WVVO die laut Anhang I der EU-WasserWVVO für die Wassergüteklasse A vorgesehene Überwachung zur Validierung der Leistungsziele bei der landwirtschaftlichen Bewässerung in Deutschland auch für die Güteklassen B und C gefordert (entspricht den Güteklassen B-1 und C-1 nach Tabelle 2)." (L616)
+- Proposed SQL / config: none until D-1 … D-4 retire the scalars; then re-emit with the section entries.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-C-3 · DWA-M-1200-2 · -09 `flux_membran` · visibility for membrane methods (REFUSED — consumed by -13)
+- Class: consumer-edit
+- Chosen now (fail-safe): `flux_membran` stays visible for every `filtrationsverfahren`; the consumer-free siblings carry their rules (`mbr_porendurchmesser` ← mf / uf / mbr, `filtergeschw_langsam` ← langsamsand, `filtergeschw_schnellsand` ← raumfilter / schnellsand).
+- Evidence (verbatim, transcript line): "Betriebsbedingungen (z. B. Permeatfluss, Transmembrandruck, Wasserausbeute, Überströmung)" (L805, Tab. 4 MF/UF); "Betriebsbedingungen (Permeatfluss, Transmembrandruck, Wasserausbeute, Überströmung)" (L806, Tab. 4 RO/NF)
+- Proposed SQL / config: STAGED block C-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-C-4 · DWA-M-1200-2 · -06 `legionella` / `intest_nematoden` · visibility by `aerosol_risk` / `weide_oder_futter` (REFUSED — consumed by -02; drivers reach -13 only)
+- Class: consumer-edit
+- Chosen now (fail-safe): the two -06 inputs stay visible; the created limit fills on -02 (`legionella_limit_1200_2`, `nematoden_limit_1200_2`) carry the rules where both driver and value are in scope.
+- Evidence (verbatim, transcript line): "Legionella spp．： $<1.000 \mathrm{KBE} / \mathrm{L}$ ， wenn das Risiko der Aerosolbil－ dung besteht； \\" (L550); "intestinale Nematoden （Eier von Hel－ minthen）：$\leq 1$ Ei pro Liter für die Bewässerung von Weide－ flächen oder Futterpflanzen" (L551)
+- Proposed SQL / config: STAGED block C-4 (two consumer edits + two rules).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-G-1 · DWA-M-1200-2 · -05 · REQ-05 `validierungsmonitoring_typ == 'vereinfacht' AND probenanzahl_zulauf >= 16` → register N + per-organism §3.3.3 verdicts
+- Class: gate condition change
+- Chosen now (fail-safe): REQ-05 unchanged; the register computes `n_proben_validierung` and `validierung_ok_<org>` (16 pairs, 15 / 8 reached, shortfall ≤ 1,0 / 2,0 log10 from S3_3_3) as visible twins.
+- Evidence (verbatim, transcript line): "Abweichend von der Mindestanzahl gemäß EU-WasserWVVO (mindestens drei Proben pro Stichprobenpunkt) und in Anlehnung an die EU-Badegewässerrichtlinie 2006/7/EG sind je 16 korrespondierende Proben im Zulauf und Ablauf zu nehmen." (L679); "I Wassergüte-Klasse A: In mindestens 15 der 16 Proben muss das Leistungsziel für den jeweiligen Indikatororganismus erreicht oder überschritten werden. Falls das Leistungsziel einmal nicht erreicht wird, darf dieses um nicht mehr als $1,0 \log _{10}$-Stufen unterschritten werden." (L681); "I Wassergüte-Klassen B-1 und C-1: In mindestens 8 der 16 Proben … nicht mehr als $2,0 \log _{10}$-Stufen unterschritten werden." (L683)
+- Proposed SQL / config: STAGED block G-1 (archive + md5-guarded rewrite; an organism without rows leaves the gate pending — by design).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-G-2 · DWA-M-1200-2 · -03 → -05 · REQ-06 (Anhang-C percentiles) sits on a worksheet where none of its symbols resolves
+- Class: gate condition change + gate move
+- Chosen now (fail-safe): unchanged — observation: REQ-06 is on M12002-03; `perzentil_10_log10` / `perzentil_50_log10` have no consumer and `leistungsziel_log10` / `wassergueteklasse` never reach -03, so the gate is `pending` on every project today. The register computes `perzentil_ok_<org>` (ANHANGC1 10 / 50 via GL_C2_1 k = 1,282 and `median_rows`).
+- Evidence (verbatim, transcript line): "I Klasse A: Das 10. Perzentil der Verteilung der $\log _{10}$-Reduktionen muss das Leistungsziel erreichen oder übersteigen." (L1800); "I Klassen B-1 und C-1: Das 50. Perzentil (Median) der Verteilung der $\log _{10}$-Reduktionen muss das Leistungsziel erreichen oder übersteigen." (L1802)
+- Proposed SQL / config: STAGED block G-2 (move to -05 + rewrite under `validierungsmonitoring_typ IN {'umfaenglich', 'umfaenglich_basis'}`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-G-3 · DWA-M-1200-2 · -08 → -02 · REQ-09 (Filtration / Trübung ≤ 2 NTU for A … C-2) sits on the EMPTY worksheet -08
+- Class: gate move + condition change (reads the Tab.-3 fill)
+- Chosen now (fail-safe): unchanged — observation: M12002-08 has 0 fields and `truebung_ablauf` (-06) is consumed by -13 / -09 / -02 / -11, never -08; the gate is `pending` on every project today. The created `truebung_limit_1200_2` on -02 shows the printed 2 NTU for A … C-2 and is hidden for D.
+- Evidence (verbatim, transcript line): "2) Filtration: Für die Wassergüteklassen A bis C ist gemäß Tabelle 3 der Einsatz einer Filtration vor der Desinfektionsstufe gefordert, für die Wassergüteklasse D ist sie optional. Für die Güteklassen A bis C werden die Filtrationsanforderungen mit Trübungswerten von $\leqslant 2$ NTU spezifiziert." (L894)
+- Proposed SQL / config: STAGED block G-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-G-4 · DWA-M-1200-2 · -11 · new warn gate: chlorine / chlorine dioxide only as residual disinfection
+- Class: new gate (warn — "sollte")
+- Chosen now (fail-safe): no gate; REQ-10 (`desinfektionsverfahren IS NOT EMPTY`) accepts chlor / clo2 as the primary method; the dose switch shows `ct_wert` / `clo2_restkonz` / `restchlor_freies` for them.
+- Evidence (verbatim, transcript line): "Daher sollte die Desinfektion mit chlorhaltigen Mitteln und Chlordioxid, ähnlich dem Ansatz bei der Trinkwasserversorgung, einzig als Restdesinfektion und zur Verhinderung von Wiederverkeimung bei längeren Transport- und Speicherdauern eingesetzt werden. Dabei ist Chlordioxid das Desinfektionsmittel der Wahl." (L1135); "Unter bestimmten Umständen kann es sinnvoll bzw. erforderlich sein, eine Sekundärdesinfektion in das weitere Transport- bzw. Verteilungsnetz zu integrieren." (L1050)
+- Proposed SQL / config: STAGED block G-4 — `NOT desinfektionsverfahren IN {'chlor', 'clo2'}` (warn, parses; fails for chlor).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-G-5 · DWA-M-1200-2 · -13 → -06 · REQ-03 `perzentil_konformitaet >= 90` onto the register's `konformitaet_calc`
+- Class: gate move + condition change
+- Chosen now (fail-safe): unchanged (the typed -13 percentage stays the gate's input); `konformitaet_calc` is a visible twin on -06, undecidable until C-1.
+- Evidence (verbatim, transcript line): "Für die Qualitätsüberwachung ist angelehnt an die EU-WasserWVVO, Anhang 1, Abschnitt 2, weiterhin gefordert, dass $90 \%$ der Proben die Mindestanforderungen gemäß Tabelle 3 einhalten müssen und die weiteren Proben eine maximale Überschreitung von $1 \log _{10}$-Stufe für E. coli und Legionellen bzw. $100 \%$ für andere Parameter aufweisen dürfen." (L1283)
+- Proposed SQL / config: STAGED block G-5 (after C-1). The deviation limit (1 log10 / 100 %) stays unencoded (residue).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-G-6 · DWA-M-1200-2 · -13 · REQ-11 `messhauefigkeit == online AND alarm_verzoegerung_min <= 30` onto the register outputs
+- Class: gate condition change
+- Chosen now (fail-safe): unchanged; the register computes `parameter_nicht_online` and `alarm_verzoegerung_max_calc` as visible twins.
+- Evidence (verbatim, transcript line): "Durch Online-Monitoring von relevanten Betriebsparametern sind der Betriebszustand und die Einhaltung der Anforderungen zu allen Zeitpunkten sicherzustellen und Abweichungen vom zulässigen Betriebsfenster oder Havarien frühzeitig festzustellen, um Gegenmaßnahmen einzuleiten." (L1287); "Abweichungen vom zulässigen Betriebsfenster sollten je nach System nach 5 min bis 30 min eine Alarmierung auslösen." (L1289)
+- Proposed SQL / config: STAGED block G-6.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-G-7 · DWA-M-1200-2 · -05 · REQ-04 `log10_reduktion >= leistungsziel_log10` (one scalar LRV against one scalar target)
+- Class: gate retirement (after G-1 / G-2)
+- Chosen now (fail-safe): unchanged (Gl. 1's `log10_reduktion` is consumed by -04 / -12 and stays).
+- Evidence (verbatim, transcript line): "1. der Nachweis der Einhaltung der Leistungsziele nach Tabelle 3 separat für jeden Indikatororganismus gemäß 3.3.4 erbracht wird und gleichzeitig" (L668)
+- Proposed SQL / config: STAGED block G-7 (archive + DELETE, explicit-column rollback).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-R-1 · DWA-M-1200-2 · -05 · Gl. C.2-1 / C.2-2 / C.2-3 (verified) → retire once the per-organism register twins are ratified
+- Class: equation-replacement (retirement; atomic with D-2 / D-4)
+- Chosen now (fail-safe): the three prod rows stay the only producers of `perzentil_10_log10` / `perzentil_50_log10` / `lrv_i` — nothing emitted outputs them; the register computes `mw_/sd_/p10_/p50_<org>_calc` per organism (the printed example MW 6,58 · SD 0,30 → 6,20 reproduced). Gl. 1 stays regardless.
+- Evidence (verbatim, transcript line): "10. Perzentil $=\mathrm{MW}-1,282 \cdot \mathrm{SD}$ (als Schätzwert der Wahrscheinlichkeitsverteilung; Klasse A)" (L1822); "50. Perzentil = Median (Klassen B-1 und C-1)" (L1823); "Aus der Gesamtheit der ermittelten $\log _{10}$-Reduktionswerte kann das geforderte Perzentil analytisch berechnet werden, wobei der Median, der Mittelwert (MW) und die Standardabweichung der Stichprobe (SD) verwendet werden." (L1821)
+- Proposed SQL / config: STAGED block R-1 (archive + md5-guarded DELETE, explicit-column rollback).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-D-1 · DWA-M-1200-2 · -04 · `leistungsziel_log10` (required, consumed) ↔ five `leistungsziel_<org>_tab3` fills
+- Class: deactivation (register-column / fill vs existing scalar — amendment K)
+- Chosen now (fail-safe): both stay; the fills are `locked` TAB3 values per organism, visible for A / B-1 / C-1.
+- Evidence (verbatim, transcript line): "E．coli $\geqslant 5,0$ Somatische Coliphagen， insg．$\geq 6,0^{\text {g）}}$ f－spezifsche Coliphagen， insg．$\geq 6,0^{\text {g）}}$ Clostridium－perfrin－ gens－Sporen $\geqslant 4,0 \mathrm{bzw}$ ．sulfatre－ duzierende Sporen－ bildner $\geqslant 5,0$ \\" (L552)
+- Proposed SQL / config: STAGED block D-1 (after G-1 / G-7).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-D-2 · DWA-M-1200-2 · -05 · `x_i` / `y_i` / `lrv_i` / `log10_reduktionen` ↔ `validierungsproben` (one sample set — atomic with R-1)
+- Class: deactivation (K)
+- Chosen now (fail-safe): both stay. Grouped because the four scalars are the inputs / outputs of Gl. C.2-3 and C.2-2 — retiring a subset nulls the prod outputs.
+- Evidence (verbatim, transcript line): "$\log _{10}$-Reduktion $=\log _{10}$ ( $C_{\text {Zulauf }} / C_{\text {Ablauf }}$ )" (L1817); "Für den Fall, dass die Konzentration im Ablauf $C_{\text {Ablauf }}$ unterhalb der Nachweisgrenze ist, ist die $\log _{10}$ Reduktion mit der Nachweisgrenze zu ermitteln." (L1819)
+- Proposed SQL / config: STAGED block D-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-D-3 · DWA-M-1200-2 · -05 · `probenanzahl_zulauf` (required, REQ-05) ↔ `n_proben_validierung`
+- Class: deactivation (K)
+- Chosen now (fail-safe): both stay.
+- Evidence (verbatim, transcript line): L679 (see G-1)
+- Proposed SQL / config: STAGED block D-3 (after G-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-D-4 · DWA-M-1200-2 · -05 · `mw_log10` / `sd_log10` / `perzentil_10_log10` / `perzentil_50_log10` ↔ `mw_/sd_/p10_/p50_<org>_calc` (atomic with R-1)
+- Class: deactivation (K)
+- Chosen now (fail-safe): both stay; the two percentile outputs are hidden by class (A → P10, B-1 / C-1 → P50) — consumer-free, gate-free on -05 (REQ-06 is on -03), outside every chain (pinned). Grouped: mw / sd are Gl. C.2-1's inputs and the percentiles its / C.2-2's outputs; the typed scalars carry ONE organism, the twins five (L668).
+- Evidence (verbatim, transcript line): L1821 / L1822 / L1823 (see R-1); "\hline Mittelwert & MW & 6,58 \\" (L1858); "\hline Standardabweichung & SD & 0,30 \\" (L1859); "\hline 10. Perzentil & & 6,20 \\" (L1861)
+- Proposed SQL / config: STAGED block D-4 (after R-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-D-5 · DWA-M-1200-2 · -05 · `k_faktor_normal` ↔ `k_faktor_tab` (GL_C2_1 = 1,282)
+- Class: deactivation (K)
+- Chosen now (fail-safe): both stay; the typed k is hidden unless `validierungsmonitoring_typ IN {'umfaenglich', 'umfaenglich_basis'}` (J-1). Amendment J: a `lookup_fill` re-bind needs a key symbol — a printed constant has none, so the zero-input twin was created instead.
+- Evidence (verbatim, transcript line): "\hline k-Faktor & k & 1,282 \\" (L1860); L1822
+- Proposed SQL / config: STAGED block D-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-D-6 · DWA-M-1200-2 · -13 / -06 · `perzentil_konformitaet` (required, REQ-03) ↔ `konformitaet_calc`
+- Class: deactivation (K)
+- Chosen now (fail-safe): both stay (the Σ lives on the register's worksheet -06, the scalar on -13 — m277e trap 2).
+- Evidence (verbatim, transcript line): L534 / L1283 (see G-5)
+- Proposed SQL / config: STAGED block D-6 (after C-1 + G-5).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-D-7 · DWA-M-1200-2 · -12 · `verfahrenskette` (required text, consumed by -13) ↔ `verfahrenskette_stufen`
+- Class: deactivation (K) + consumer-edit for the register
+- Chosen now (fail-safe): both stay.
+- Evidence (verbatim, transcript line): "Für die drei in Tabelle 3 genannten Organismengruppen werden die aus den vorgenannten methodischen Ansätzen ermittelten $\log _{10}$-Reduktionen für einzelne Aufbereitungsstufen jeweils zu einer Gesamtreduktion addiert (Mehrfachbehandlung, Multibarrierenansatz), siehe Beispiel in Bild 1." (L640)
+- Proposed SQL / config: STAGED block D-7.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-D-8 · DWA-M-1200-2 · -13 · `messhauefigkeit` (required) / `alarm_verzoegerung_min` (REQ-11) ↔ `betriebsparameter` rows (atomic pair)
+- Class: deactivation (K)
+- Chosen now (fail-safe): both stay; REQ-11 keeps reading the scalars until G-6.
+- Evidence (verbatim, transcript line): L1287 / L1289 (see G-6)
+- Proposed SQL / config: STAGED block D-8 (after G-6).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-D-9 · DWA-M-1200-2 · -15 · `kostenkennwert_aufbereitung` (REQ-14) ↔ `kosten_summe_calc`
+- Class: deactivation (K)
+- Chosen now (fail-safe): both stay; REQ-14 (`IF kostenkennwert_aufbereitung > 0 THEN baupreisindex_bezugsjahr IS NOT NULL`) keeps reading the scalars; the register carries `baupreisindex_jahr` per row.
+- Evidence (verbatim, transcript line): "Für die einzelnen Stufen der Wasseraufbereitung sind nachfolgend spezifische Kosten in Euro je Kubikmeter ( $€ / \mathrm{m}^{3}$ ) Schmutzwasser (SW) wiedergegeben. Hierbei handelt es sich um grobe Richtwerte, die auf Basis von Kostenkurven und weiteren Erfahrungswerten zusammengestellt und mithilfe von Baupreisindizes auf das Jahr 2020 umgerechnet wurden." (L1450, first two sentences)
+- Proposed SQL / config: STAGED block D-9 (retire + a later REQ-14 re-point).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-U-1 · DWA-M-1200-2 · -02 · TAB3 class column (OCR glyphs)
+- Class: unreadable-cell
+- Chosen now (fail-safe): the class column prints glyphs — "く" (L549), "ம （B－1／B－2）" (L553), "ن نコ نコ" (L555), "ロ" (L570). Tokens A / B / C / D assigned from the header order (L547 = Tab. 2 L500–L520), the printed sub-labels "B－1：" / "B－2： －" (L553 / L554) and "C－1：" / "C－2：－" (L555 / L556) inside the rows, L616, L893 and L894 (the D row prints no "Filtration"); every value cell is legible. TAB3 stays `imported_unverified` (the DWA-M-1200-1 Tab. 8 twin carries the same U-1).
+- Evidence (verbatim, transcript line): "\hline く & Mechanisch－ biologische Behandlung， Filtration， Desinfektion & $\leq 10^{\mathrm{a})}$ & $\leq 100$ & \multirow{5}{*}{\begin{tabular}{l}" (L549); "\hline ロ & Mechanischbiologische Behandlung, Desinfektion & $\leq 10.000^{\mathrm{a})}$ & - ${ }^{\text {al,c) }}$ & \begin{tabular}{l}" (L570)
+- Proposed SQL / config: a PDF look at Tab. 3 (Gelbdruck p. 16–17) flips `verification_status` to `md_verified` — no value changes.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-U-2 · DWA-M-1200-2 · -02 · TAB3 C-row AFS unit ("mg/e")
+- Class: unreadable-cell
+- Chosen now (fail-safe): `afs_max` = 10 for C-1 / C-2 (the figure is unambiguous; the A / B rows print "mg/l"); the unit column carries mg/l from the table definition.
+- Evidence (verbatim, transcript line): "AFS $\leq 10 \mathrm{mg} / \mathrm{e}^{\mathrm{e}}$ Trübung $\leq 2$ NTU ${ }^{\text {fl }}$" (L555)
+- Proposed SQL / config: none (PDF look with U-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-U-3 · DWA-M-1200-2 · -13 · TAB6 MBR parameter cell (lost line break)
+- Class: unreadable-cell
+- Chosen now (fail-safe): the frequency cell prints two lines ("Online" / "Wöchentlich") but the parameter cell prints one run; `parameter_online` = "pH-Wert, Sauerstoff im Bioreaktor, Transmembrandruck, Durchfluss, Trübung" and `parameter_periodisch` = "Schlammalter, hydraulischer Verweilzeit, Trockensubstanz (TS) im Belebungsbecken" is the executor's reading of the split (the missing comma before "Schlammalter" marks the break); `parameter_gedruckt` keeps the whole cell; TAB6 `imported_unverified`. The Ozon/BAK row prints "Online / Online", so its split is immaterial.
+- Evidence (verbatim, transcript line): "\hline Membran-Bioreaktor (MBR) & pH-Wert, Sauerstoff im Bioreaktor, Transmembrandruck, Durchfluss, Trübung Schlammalter, hydraulischer Verweilzeit, Trockensubstanz (TS) im Belebungsbecken & \begin{tabular}{l}" (L1300)
+- Proposed SQL / config: PDF look at Tab. 6 (p. 52) confirms the split → `md_verified`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-U-4 · DWA-M-1200-2 · -07 · TABE1_LEISTUNG Clostridium 10th percentile ("24,7")
+- Class: unreadable-cell
+- Chosen now (fail-safe): `p10_log10` = null for `clostridium`, the printed cell kept in `p10_gedruckt`; TABE1_LEISTUNG `imported_unverified`. (The inventory reads "≥ 4,7" — not printed here; never seeded.)
+- Evidence (verbatim, transcript line): "\hline Clostridium-perfrin-gens-Sporen & 24,7 (Leistungsziel erreicht) & 12/13 & Stichproben ( 100 ml , ohne verbesserte Nachweisgrenze), ungepaarte Auswertung, 10. Perzentil (Alternativvariante) \\" (L2170)
+- Proposed SQL / config: PDF look at Tab. E.1 (p. 85) → seed the value.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-J-1 · DWA-M-1200-2 · -05 · `confidence_alpha` / `k_faktor_normal` visibility by monitoring type (the generic `umfaenglich` token)
+- Class: judgment (visibility driver semantics)
+- Chosen now (fail-safe): `confidence_alpha` ← `validierungsmonitoring_typ IN {'umfaenglich', 'umfaenglich_montecarlo'}` (α is the Monte-Carlo variant's input), `k_faktor_normal` ← `IN {'umfaenglich', 'umfaenglich_basis'}` (k is the Basisvariante's constant); the generic `umfaenglich` token keeps BOTH visible (the transcript names the two variants; prod carries a third, generic token).
+- Evidence (verbatim, transcript line): "Für die Berechnung von Vertrauensintervallen ist die Angabe eines Konfidenzniveaus $\alpha$ erforderlich. Für $10 \leqslant N<16$ wird ein Konfidenzniveau von $\alpha=0,1$ als ausreichend betrachtet." (L1885); "1. die analytische Berechnung des geforderten Perzentils über gepaarte Auswertung der $\log _{10}$-Reduktionswerte (Basisvariante) sowie" (L1805); "2. das Monte-Carlo-Verfahren zur Berechnung des geforderten Perzentils und die ungepaarte Auswertung (Alternativvariante, vorteilhaft bei ungleicher Probenanzahl im Zu- und Ablauf) (Seis et al. 2024 und 2025)." (L1806)
+- Proposed SQL / config: as emitted; alternative = drop the generic token from both rules.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-J-2 · DWA-M-1200-2 · -11 · `reaktor_hydraulik_charakterisiert` shown for every chemical method
+- Class: judgment (Tab. 4 "analog auch andere chemische Desinfektion")
+- Chosen now (fail-safe): visible for `desinfektionsverfahren IN {'ozon', 'chlor', 'clo2', 'pes', 'pfa', 'h2o2'}` — the printed row title extends the chlorine-based principles to other chemical disinfection; hidden for uv / membran only.
+- Evidence (verbatim, transcript line): "\hline Chlorbasierte Desinfektion lanalog auch andere chemische Desinfektion) & … & \begin{tabular}{l}" (L790); "Nachweis des Ct-Werts in der großtechnischen Anlage: hydraulische Charakterisierung (Verweilzeitverteilung) des Desinfektionsreaktors, ggf. durch Strömungssimulation und/oder Tracer-Versuch." (L791); "Der Reaktor muss hydraulisch charakterisiert sein" (L804)
+- Proposed SQL / config: as emitted; alternative = ozon / chlor / clo2 only.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-J-3 · DWA-M-1200-2 · -12 · `credit_ok_protozoen` compares against the Clostridium target (4,0), not the alternative sulfate-reducer target (5,0)
+- Class: judgment (two printed alternatives — "bzw.")
+- Chosen now (fail-safe): the badge (a planning hint, no gate) reads `log10_clostridium`; the stricter alternative 5,0 is named in the label. Viruses read the coliphage target 6,0 (both coliphage lines print the same), bacteria E. coli 5,0.
+- Evidence (verbatim, transcript line): L552 (see D-1) — "Clostridium－perfrin－ gens－Sporen $\geqslant 4,0 \mathrm{bzw}$ ．sulfatre－ duzierende Sporen－ bildner $\geqslant 5,0$"
+- Proposed SQL / config: as emitted; alternative = a second badge against 5,0 or the stricter of the two.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-J-4 · DWA-M-1200-2 · -11 · `ct_wert` shown for chlor AND clo2
+- Class: judgment
+- Chosen now (fail-safe): `desinfektionsverfahren IN {'chlor', 'clo2'}` (the brief: chlor only) — the Ct concept is printed for "Chlorbasierte Desinfektion", and chlorine dioxide is chlorine-based (L1127 lists it under the chlorine section); `restchlor_freies` (-13) stays chlor-only (Tab. 6 "Freies Restchlor").
+- Evidence (verbatim, transcript line): "Durchflussrate, Applizierte ChlorDosis (Ct-Wert = Konzentration • Kontaktzeit), pHWert (bestimmt Speziierung der ChlorKomponenten), Temperatur, Trübung, Zehrstoffe, residuale Chlor-Konzentration" (L790, Einflussfaktoren cell); "\hline Chlorung $\left(\mathrm{Cl}_{2}\right)$ & Freies Restchlor und Kontaktzeit, pH-Wert, Temperatur & Online oder zumindest täglich \\" (L1319)
+- Proposed SQL / config: as emitted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-J-5 · DWA-M-1200-2 · -12 · one stage vocabulary across Tab. B.2 / Tab. 6 / Tab. 4 / Tab. E.1
+- Class: judgment (token mapping)
+- Chosen now (fail-safe): TABB2's twelve printed stages are the register's `lookup_key`; TAB6 / TAB4 / TABE1_STUFEN reuse a token only where the printed stage is the same (mbr, mf_uf, ozon, ro, uv, uv_aop, chlor; E.1 "Mechanisch-biologische Behandlung mit Nachklärung" → `biologisch`, "Keramische Ultrafiltration" → `mf_uf`) and keep their own otherwise (`medienfiltration`, `belebung`, `ro_nf`, `schnellsand`, `bak`) — a stage without a row in a side table shows an empty hint (no diagnostic). Consequence: Tab. 6's "Medienfiltration" row is reachable through the -13 `betriebsparameter` register only, not from a B.2 "Koagulation, Flockung und Filtration" row.
+- Evidence (verbatim, transcript line): "\hline Medienfiltration & Trübung, Durchfluss & Online \\" (L1311); "\hline Koagulation, Flockung und Filtration & 2 & 4 & 4 & 1-2 & 2,5-4 & 2,5-4 & …" (L1755); "\hline Keramische Ultrafiltration & Nominale Porengröße 30 nm , Flux $=90 \mathrm{l} / \mathrm{m}^{2} / \mathrm{h} \mathrm{bis} 120 \mathrm{l} / \mathrm{m}^{2} / \mathrm{h}$, …" (L2173)
+- Proposed SQL / config: as seeded; alternative = map Medienfiltration ↔ Koagulation/Flockung/Filtration.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-J-6 · DWA-M-1200-2 · -05 · N = 16 encoded as `>= 16` (prod REQ-05's reading)
+- Class: judgment
+- Chosen now (fail-safe): `validierung_ok_<org>` requires `count_rows ≥ n_total` (16) — the prod gate reads `probenanzahl_zulauf >= 16`; the transcript says "je 16" (exactly). More than 16 pairs is not refused.
+- Evidence (verbatim, transcript line): L679 (see G-1); "ist eine Probenanzahl N von 16 je Zu- und Ablauf vorzusehen (in Anlehnung an die EU-Badegewässerrichtlinie, Richtlinie 2006/7/EG)." (L1814)
+- Proposed SQL / config: as emitted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-J-7 · DWA-M-1200-2 · -05 · below-detection pairs: LRV_i = log10(x_i / Nachweisgrenze) as a lower bound
+- Class: judgment (printed rule applied per row)
+- Chosen now (fail-safe): the engineer enters the detection limit as `y_i` and ticks `below_detection`; LRV_i is then the printed lower bound (L1846 "LRV_3 > 7,16"), the pair counts as reached (L681), its shortfall is 0; the statistics (MW / SD / percentiles) use the bound as printed in the example.
+- Evidence (verbatim, transcript line): L1819 (see D-2); "\hline $\operatorname{LRV}_{3}>7,16$ \\" (L1846); "Das Leistungsziel gilt hierbei ebenfalls als erreicht, wenn der Indikatororganismus in der Ablaufprobe mit < 1 KBE bzw. PFU je 100 ml Probenvolumen vorliegt." (L681)
+- Proposed SQL / config: as emitted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-O-1 · DWA-M-1200-2 · -12 · TAB4 override policy (`locked`)
+- Class: override-policy
+- Chosen now (fail-safe): `locked` — Tab. 4 is a text table of principles and references with no modal permitting a deviation; the register shows its `methodik` cell read-only.
+- Evidence (verbatim, transcript line): "In Tabelle 4 sind die Validierungsgrundsätze für ausgewählte Verfahren unter anderem gemäß den Australian Guidelines for Water Recycling (2020) zusammengefasst." (L754)
+- Proposed SQL / config: `UPDATE regulation_tables SET override_policy = 'anhaltswert' WHERE standard_code = 'DWA-M-1200-2' AND table_code = 'TAB4'` if the owner reads "zusammengefasst … unter anderem gemäß" as informative.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-O-2 · DWA-M-1200-2 · -13 · TAB6 override policy (`anhaltswert`) vs L663 "mindestens … zu berücksichtigen"
+- Class: override-policy
+- Chosen now (fail-safe): `anhaltswert` from the caption ("Beispiel") and L1293 ("beispielhaft") — the override toggle applies to the register's parameter / frequency cells; the PARAMETER SET is mandatory by L663.
+- Evidence (verbatim, transcript line): "\caption{Tabelle 6: Beispiel für Betriebsparameter und deren Messhäufigkeit zur Überwachung der zulässigen Betriebsbedingungen von ausgewählten Aufbereitungsstufen (Quelle: Australian Guidelines for Water Recycling 2020, Draft of Chapters 1, 2, 3 and 5 and Appendices 2 and 3, mit Ergänzungen)}" (L1297); "Es sind mindestens die Betriebsparameter gemäß Tabelle 6 zu berücksichtigen." (L663, sentence 3)
+- Proposed SQL / config: as seeded; alternative = `locked` for the parameter columns (needs a second table — one table, one policy).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-F-1 · DWA-M-1200-2 · -15 · `kosten_summe_calc` (Σ over the cost rows — no printed formula)
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted as `sum_rows(kostenpositionen, kostenkennwert)` (display-only twin, `imported_unverified`).
+- Evidence (verbatim, transcript line): L1450 (see D-9)
+- Proposed SQL / config: as emitted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-F-2 · DWA-M-1200-2 · -05 · Monte-Carlo variant (Anhang C.3) not encodable
+- Class: text-only-formula (interface gap)
+- Chosen now (fail-safe): `umfaenglich_montecarlo` keeps the typed `confidence_alpha` / `perzentil_*` inputs; no equation (the transcript prints no formula — "Für eine detaillierte Beschreibung … sei auf SeIS et al. (2025) verwiesen"). NOTE for the controller: the brief's F-1 / F-2 (SD / median over a subset "not expressible") are REFUTED — `stdev_rows` / `median_rows` / `mean_rows` take a row condition (G-16 closed; probed and pinned), so the per-organism SD and median ARE computed.
+- Evidence (verbatim, transcript line): "Die Alternativvariante (Monte-Carlo-Verfahren) liefert eine sehr hohe Flexibilität, kann nicht-normalverteilte $\log _{10}$-Reduktionen und ungleiche Probenumfänge in Zu- und Ablaufproben berücksichtigen." (L1885, sentence 1)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-X-1 · DWA-M-1200-2 · -02 · `wassergueteklasse` re-typed from DWA-M-1200-1 `gueteklasse_zugeordnet`
+- Class: cross-standard
+- Chosen now (fail-safe): the class is typed here (prod tokens identical to 1200-1: A B-1 B-2 C-1 C-2 D); every fill / rule keys on the local field. Inheriting it from the 1200-1 project (§5 win 5) is Phase 6.
+- Evidence (verbatim, transcript line): "Zu den Wassergüteklassen A bis D werden im Merkblatt DWA-M 1200-1:2025 in Tabelle 8, die aus den europäischen und deutschen Vorgaben zusammengeführten Mindestanforderungen an die Qualität des aufbereiteten Wassers dargestellt. Diese werden in Tabelle 3 wiedergegeben." (L532)
+- Proposed SQL / config: none (Phase 6).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-X-2 · DWA-M-1200-2 · -03 · `pfas_summe_20` unit µg/l (prod) vs DWA-M-1200-1 `pfas20_value` ng/l
+- Class: cross-standard (unit)
+- Chosen now (fail-safe): untouched — THIS transcript prints the value in µg/l, consistent with prod's unit; the 1200-1 side prints ng/l (its own X-block). No gate reads it here.
+- Evidence (verbatim, transcript line): "Gemäß LAWA (2022) wird in der erwartenden Bundes-WasserWVVO voraussichtlich ein Orientierungswert von $0,1 \mu \mathrm{~g} / \mathrm{l}$ für die Summe von 20 per- und polyfluorierten Alkylsubstanzen (Summe PFAS-20) eingeführt." (L596)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-X-3 · DWA-M-1200-2 · -02 / -09 · Tab. 3 notes a)–g) are NOT printed in this transcript (the note-f turbidity ceilings, note d) TOC, note e) Trübung/AFS)
+- Class: cross-standard (content boundary)
+- Chosen now (fail-safe): the brief's "Tab. 3 note f)" membrane-vs-sand turbidity ceilings (0,2 / 0,5 vs 2 / 5 / 10 NTU) are NOT seeded here — the mathpix transcript ends Tab. 3 at L573 and prints no notes; DWA-M-1200-1 Tab. 8 note f) is that standard's own table (Task 5 TAB8_NOTE_F) and is not re-seeded across the boundary. L894 references note e) by name only.
+- Evidence (verbatim, transcript line): "und somit die bei geringen Feststoffkonzentrationen aufwendige AFS-Messung nicht notwendig ist (siehe Fußnote e) zu Tabelle 3)." (L894, last sentence); "\caption{Tabelle 3 (Ende)}" (L563) — followed by the Salmonellen note only (L581)
+- Proposed SQL / config: none; a PDF look decides whether the notes exist on p. 17 and were dropped by OCR (then U-class next touch).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-X-4 · DWA-M-1200-2 · -06 · quoted-literal lint: `'e_coli'` / `'legionella'` equal prod symbols of -06
+- Class: observation (Task 13b lint)
+- Chosen now (fail-safe): harmless — the register's `limit` / `ok` exprs compare the row column `parameter` against QUOTED tokens (literals by the engine rule); the prod number fields `e_coli` / `legionella` on -06 are never read by those exprs. Three emitter warnings, pinned.
+- Evidence: emitter output `WARNING M12002-06 routineproben_1200_2.limit: expr compares against the quoted literal 'e_coli', which is also a symbol of M12002-06 …` (×3)
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-I-1 · DWA-M-1200-2 · -02 / -05 · scalar-only equations are not server-materialised
+- Class: interface-gap (controller amendment D — expected)
+- Chosen now (fail-safe): `validierung_erforderlich_tab3`, `n_pass_min_tab`, `max_unterschreitung_zul`, `perzentil_erforderlich`, `k_faktor_tab` compute on the hook / report / snapshot / PDF paths only; the 58 register-fed rows materialise on save.
+- Evidence: 2a design (register-scoped materialiser).
+- Proposed SQL / config: none (engine-output materialisation workstream).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m1200_2-I-2 · DWA-M-1200-2 · -12 · an overridden Verfahrenskette row is not refilled at all
+- Class: interface-gap (engine fact)
+- Chosen now (fail-safe): `register-rows.ts` `refillLookupValues` skips EVERY `lookup_value` cell of a row whose override flag is on — a credit left blank on an "abweichend" row is null and its Σ undecidable (pinned in `equations-m1200_2.test.ts`); the subtitle tells the engineer to enter all three values on such a row.
+- Evidence: code (`src/lib/eval/register-rows.ts` L111 `if (values[c.key] !== null || overridden) continue;`).
+- Proposed SQL / config: none here; a per-column override (refill the non-overridden cells) is a [CODE] candidate for the controller.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (no signature needed)
+- Prod facts: REQ-02 (-03), REQ-08 (-08) and REQ-15 (-15) carry an EMPTY condition (`manual` at the engine); REQ-06 (-03) and REQ-09 (-08) reference symbols that never resolve on their worksheets (G-2 / G-3); M12002-08 / -20 / -21 / -23 have 0 fields.
+- The brief's Step-5 G-16 premise ("row functions have no per-condition filter except count_rows") and its F-1 / F-2 SD / median gaps are refuted by the codebase (`src/lib/expr/evaluate.ts` — every aggregate takes `(reg, expr[, cond])`); the per-organism SD / median / mean are computed, no F-block was needed for them.
+- Every `verification_quote` in the three modules and every fragment on this sheet was read at the cited line in this session; the 58 table-row quotes pass `verify-regulation-tables.ts` 58/58.
+
+
 ## Plan 3 tooling rulings
 
 ### plan3-T-12c · [CODE] · `emit-field-configs-sql.ts` gate-aware guard · a `visible_when` may not silently disarm a same-worksheet gate

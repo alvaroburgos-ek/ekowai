@@ -1,0 +1,2457 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-1200-2 m1200_2",
+    "captured_at": "2026-09-18T09:56:32.226Z",
+    "standard": "DWA-M-1200-2",
+    "slug": "m1200_2",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 84,
+    "section_rows": 171,
+    "sections_total": 171,
+    "equation_rows": 4,
+    "gate_rows": 15
+  },
+  "M12002-01 anwendungsbereich": {
+    "enum_values": [
+      {
+        "value": "bewaesserung_landwirtschaft",
+        "label_de": "Bewässerung Landwirtschaft",
+        "label_en": "Agricultural irrigation",
+        "order_index": 1,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "bewaesserung_gartenbau",
+        "label_de": "Bewässerung Gartenbau",
+        "label_en": "Horticultural irrigation",
+        "order_index": 2,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "urbane_anwendung",
+        "label_de": "Urbane Anwendung (Parks, Sport, Straßenreinigung)",
+        "label_en": "Urban application",
+        "order_index": 3,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "industrie_ausgeschlossen",
+        "label_de": "Industrie/Brauchwasser (NICHT Gegenstand)",
+        "label_en": "Industrial (out of scope)",
+        "order_index": 4,
+        "regulation_reference": "§1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-02"
+    ],
+    "data_type": "enum",
+    "section_code": "M12002-01-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-01-B"
+    ]
+  },
+  "M12002-01 haeusliches_sw_anteil_ueberwiegend": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-01-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-01-B"
+    ]
+  },
+  "M12002-01 project_id": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "M12002-01-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-01-B"
+    ]
+  },
+  "M12002-02 aerosol_risk": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "M12002-02-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-02-B"
+    ]
+  },
+  "M12002-02 bewaesserungsmethode": {
+    "enum_values": [
+      {
+        "value": "alle_methoden",
+        "label_de": "Alle Bewässerungsmethoden",
+        "label_en": "All irrigation methods",
+        "order_index": 1,
+        "regulation_reference": "Tabelle 2"
+      },
+      {
+        "value": "tropfbewaesserung",
+        "label_de": "Tropfbewässerung",
+        "label_en": "Drip irrigation",
+        "order_index": 2,
+        "regulation_reference": "Tabelle 2"
+      },
+      {
+        "value": "bodennahe",
+        "label_de": "Bodennahe Bewässerung",
+        "label_en": "Near-soil irrigation",
+        "order_index": 3,
+        "regulation_reference": "Tabelle 2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-12"
+    ],
+    "data_type": "enum",
+    "section_code": "M12002-02-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-02-B"
+    ]
+  },
+  "M12002-02 wassergueteklasse": {
+    "enum_values": [
+      {
+        "value": "A",
+        "label_de": "Klasse A",
+        "label_en": "Class A",
+        "order_index": 1,
+        "regulation_reference": "Tabelle 2"
+      },
+      {
+        "value": "B-1",
+        "label_de": "Klasse B-1",
+        "label_en": "Class B-1",
+        "order_index": 2,
+        "regulation_reference": "Tabelle 2"
+      },
+      {
+        "value": "B-2",
+        "label_de": "Klasse B-2",
+        "label_en": "Class B-2",
+        "order_index": 3,
+        "regulation_reference": "Tabelle 2"
+      },
+      {
+        "value": "C-1",
+        "label_de": "Klasse C-1",
+        "label_en": "Class C-1",
+        "order_index": 4,
+        "regulation_reference": "Tabelle 2"
+      },
+      {
+        "value": "C-2",
+        "label_de": "Klasse C-2",
+        "label_en": "Class C-2",
+        "order_index": 5,
+        "regulation_reference": "Tabelle 2"
+      },
+      {
+        "value": "D",
+        "label_de": "Klasse D",
+        "label_en": "Class D",
+        "order_index": 6,
+        "regulation_reference": "Tabelle 2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-04",
+      "M12002-05",
+      "M12002-11",
+      "M12002-12"
+    ],
+    "data_type": "enum",
+    "section_code": "M12002-02-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-02-B"
+    ]
+  },
+  "M12002-02 weide_oder_futter": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13"
+    ],
+    "data_type": "boolean",
+    "section_code": "M12002-02-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-02-B"
+    ]
+  },
+  "M12002-03 hrt_belebung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-12"
+    ],
+    "data_type": "number",
+    "section_code": "M12002-03-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-03-B"
+    ]
+  },
+  "M12002-03 pfas_summe_20": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-10"
+    ],
+    "data_type": "number",
+    "section_code": "M12002-03-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-03-B"
+    ]
+  },
+  "M12002-03 schlammalter": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-12"
+    ],
+    "data_type": "number",
+    "section_code": "M12002-03-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-03-B"
+    ]
+  },
+  "M12002-04 leistungsziel_log10": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-05",
+      "M12002-12"
+    ],
+    "data_type": "number",
+    "section_code": "M12002-04-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-04-B"
+    ]
+  },
+  "M12002-05 c_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-B"
+    ]
+  },
+  "M12002-05 c_zulauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-B"
+    ]
+  },
+  "M12002-05 confidence_alpha": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-B"
+    ]
+  },
+  "M12002-05 k_faktor_normal": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-D"
+    ]
+  },
+  "M12002-05 log10_reduktion": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-04",
+      "M12002-12"
+    ],
+    "data_type": "number",
+    "section_code": "M12002-05-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-D"
+    ]
+  },
+  "M12002-05 log10_reduktionen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "json",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-05 lrv_i": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-D"
+    ]
+  },
+  "M12002-05 mw_log10": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-D"
+    ]
+  },
+  "M12002-05 perzentil_10_log10": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-D"
+    ]
+  },
+  "M12002-05 perzentil_50_log10": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-D"
+    ]
+  },
+  "M12002-05 probenanzahl_zulauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-B"
+    ]
+  },
+  "M12002-05 sd_log10": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-D"
+    ]
+  },
+  "M12002-05 validierungsdauer_wochen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-05 validierungsmonitoring_typ": {
+    "enum_values": [
+      {
+        "value": "vereinfacht",
+        "label_de": "Vereinfachtes Validierungsmonitoring",
+        "label_en": "Simplified validation monitoring",
+        "order_index": 1,
+        "regulation_reference": "§3.3.3; Anhang C"
+      },
+      {
+        "value": "umfaenglich",
+        "label_de": "Umfängliches Validierungsmonitoring",
+        "label_en": "Comprehensive validation monitoring",
+        "order_index": 2,
+        "regulation_reference": "§3.3.3; Anhang C"
+      },
+      {
+        "value": "umfaenglich_basis",
+        "label_de": "Umfänglich – Basisvariante (gepaarte analytische Auswertung)",
+        "label_en": "Comprehensive – base variant (paired analytical evaluation)",
+        "order_index": 3,
+        "regulation_reference": "§3.3.3; Anhang C.2"
+      },
+      {
+        "value": "umfaenglich_montecarlo",
+        "label_de": "Umfänglich – Alternativvariante (Monte-Carlo, ungepaart)",
+        "label_en": "Comprehensive – alternative variant (Monte Carlo, unpaired)",
+        "order_index": 4,
+        "regulation_reference": "§3.3.3; Anhang C.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "M12002-05-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-B"
+    ]
+  },
+  "M12002-05 x_i": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-B"
+    ]
+  },
+  "M12002-05 y_i": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-05-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-05-B"
+    ]
+  },
+  "M12002-06 afs_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13",
+      "M12002-02"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-06 analytisches_labor_akkreditiert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-06-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-06-B"
+    ]
+  },
+  "M12002-06 bsb5_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13",
+      "M12002-02"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-06 coliphagen_separat_gemessen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-06-C",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-06-C"
+    ]
+  },
+  "M12002-06 coliphagen_spiking": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-06-C",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-06-C"
+    ]
+  },
+  "M12002-06 e_coli": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13",
+      "M12002-05",
+      "M12002-02"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-06 elutionsvolumen_viradel": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-06-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-06-B"
+    ]
+  },
+  "M12002-06 intest_enterokokken": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13",
+      "M12002-02"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-06 intest_nematoden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-02"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-06 legionella": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-02"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-06 nachweisgrenze_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-05"
+    ],
+    "data_type": "number",
+    "section_code": "M12002-06-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-06-B"
+    ]
+  },
+  "M12002-06 probennahme_typ": {
+    "enum_values": [
+      {
+        "value": "mischprobe_24h",
+        "label_de": "24-h-Mischprobe",
+        "label_en": "24-h composite sample",
+        "order_index": 1,
+        "regulation_reference": "§3.3.4"
+      },
+      {
+        "value": "qualifizierte_stichprobe",
+        "label_de": "Qualifizierte Stichprobe",
+        "label_en": "Qualified grab sample",
+        "order_index": 2,
+        "regulation_reference": "§3.3.4"
+      },
+      {
+        "value": "stichprobe",
+        "label_de": "Stichprobe",
+        "label_en": "Grab sample",
+        "order_index": 3,
+        "regulation_reference": "§3.3.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "M12002-06-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-06-B"
+    ]
+  },
+  "M12002-06 probenstabilitaet_h": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-06-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-06-B"
+    ]
+  },
+  "M12002-06 probenvolumen_coliphagen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-06-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-06-B"
+    ]
+  },
+  "M12002-06 truebung_ablauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13",
+      "M12002-09",
+      "M12002-02",
+      "M12002-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-06 wiederfindungsrate_viradel": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-06-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-06-B"
+    ]
+  },
+  "M12002-07 begutachtung_unabhaengig": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-07-C",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-07-C"
+    ]
+  },
+  "M12002-09 filtergeschw_langsam": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-09-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-09-B"
+    ]
+  },
+  "M12002-09 filtergeschw_schnellsand": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-09-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-09-B"
+    ]
+  },
+  "M12002-09 filtrationsverfahren": {
+    "enum_values": [
+      {
+        "value": "raumfilter",
+        "label_de": "Raumfilter (Schnellsand)",
+        "label_en": "Granular media filter",
+        "order_index": 1,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "langsamsand",
+        "label_de": "Langsamsandfilter",
+        "label_en": "Slow sand filter",
+        "order_index": 2,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "polstofffilter",
+        "label_de": "Polstofffilter",
+        "label_en": "Cloth filter",
+        "order_index": 3,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "mikrosieb",
+        "label_de": "Mikrosieb",
+        "label_en": "Microscreen",
+        "order_index": 4,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "bodenfilter",
+        "label_de": "Bodenfilterverfahren",
+        "label_en": "Soil/constructed wetland filter",
+        "order_index": 5,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "mf",
+        "label_de": "Mikrofiltration",
+        "label_en": "Microfiltration",
+        "order_index": 6,
+        "regulation_reference": "§5.2; Bild 5"
+      },
+      {
+        "value": "uf",
+        "label_de": "Ultrafiltration",
+        "label_en": "Ultrafiltration",
+        "order_index": 7,
+        "regulation_reference": "§5.2; Bild 5"
+      },
+      {
+        "value": "nf",
+        "label_de": "Nanofiltration",
+        "label_en": "Nanofiltration",
+        "order_index": 8,
+        "regulation_reference": "§5.2; Bild 5"
+      },
+      {
+        "value": "uo",
+        "label_de": "Umkehrosmose",
+        "label_en": "Reverse osmosis",
+        "order_index": 9,
+        "regulation_reference": "§5.2; Bild 5"
+      },
+      {
+        "value": "mbr",
+        "label_de": "Membran-Bioreaktor (MBR)",
+        "label_en": "Membrane bioreactor",
+        "order_index": 10,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "schnellsand",
+        "label_de": "Schnellsandfilter",
+        "label_en": "Rapid sand filter",
+        "order_index": 99,
+        "regulation_reference": "§5.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13",
+      "M12002-10",
+      "M12002-12"
+    ],
+    "data_type": "enum",
+    "section_code": "M12002-09-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-09-B"
+    ]
+  },
+  "M12002-09 flux_membran": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13"
+    ],
+    "data_type": "number",
+    "section_code": "M12002-09-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-09-B"
+    ]
+  },
+  "M12002-09 helmintheneier_konz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-09-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-09-B"
+    ]
+  },
+  "M12002-09 mbr_porendurchmesser": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-09-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-09-B"
+    ]
+  },
+  "M12002-10 bettvolumen_durchgesetzt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-10-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-10-B"
+    ]
+  },
+  "M12002-10 ebct_bak_filter": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-10-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-10-B"
+    ]
+  },
+  "M12002-10 nf_uo_konzentratstrom": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-10-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-10-B"
+    ]
+  },
+  "M12002-10 pak_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-10-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-10-B"
+    ]
+  },
+  "M12002-11 clo2_restkonz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-11-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-11-B"
+    ]
+  },
+  "M12002-11 ct_wert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-11-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-11-D"
+    ]
+  },
+  "M12002-11 desinfektionsverfahren": {
+    "enum_values": [
+      {
+        "value": "uv",
+        "label_de": "UV-Desinfektion",
+        "label_en": "UV disinfection",
+        "order_index": 1,
+        "regulation_reference": "§5.4.3"
+      },
+      {
+        "value": "ozon",
+        "label_de": "Ozonung",
+        "label_en": "Ozonation",
+        "order_index": 2,
+        "regulation_reference": "§5.4.3"
+      },
+      {
+        "value": "clo2",
+        "label_de": "Chlordioxid",
+        "label_en": "Chlorine dioxide",
+        "order_index": 3,
+        "regulation_reference": "§5.4.3"
+      },
+      {
+        "value": "chlor",
+        "label_de": "Chlor/Hypochlorit (Sekundär)",
+        "label_en": "Chlorine/hypochlorite (secondary)",
+        "order_index": 4,
+        "regulation_reference": "§5.4.3"
+      },
+      {
+        "value": "pes",
+        "label_de": "Peressigsäure",
+        "label_en": "Peracetic acid (PAA)",
+        "order_index": 5,
+        "regulation_reference": "§5.4.3"
+      },
+      {
+        "value": "pfa",
+        "label_de": "Perameisensäure",
+        "label_en": "Performic acid (PFA)",
+        "order_index": 6,
+        "regulation_reference": "§5.4.3"
+      },
+      {
+        "value": "h2o2",
+        "label_de": "Wasserstoffperoxid",
+        "label_en": "Hydrogen peroxide",
+        "order_index": 7,
+        "regulation_reference": "§5.4.3"
+      },
+      {
+        "value": "membran",
+        "label_de": "Membranfiltration (Teildesinfektion)",
+        "label_en": "Membrane filtration (partial disinfection)",
+        "order_index": 8,
+        "regulation_reference": "§5.4.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-12",
+      "M12002-13"
+    ],
+    "data_type": "enum",
+    "section_code": "M12002-11-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-11-B"
+    ]
+  },
+  "M12002-11 ozon_dosis_spez": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-11-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-11-B"
+    ]
+  },
+  "M12002-11 perameisensaeure_konz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-11-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-11-B"
+    ]
+  },
+  "M12002-11 reaktor_hydraulik_charakterisiert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-11-C",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-11-C"
+    ]
+  },
+  "M12002-11 uv_dosis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-11-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-11-B"
+    ]
+  },
+  "M12002-11 uv_dosis_referenz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-11-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-11-B"
+    ]
+  },
+  "M12002-12 verfahrenskette": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M12002-13"
+    ],
+    "data_type": "text",
+    "section_code": "M12002-12-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-12-B"
+    ]
+  },
+  "M12002-13 alarm_verzoegerung_min": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-13-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-13-B"
+    ]
+  },
+  "M12002-13 delta_sak254": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-13-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-13-D"
+    ]
+  },
+  "M12002-13 messhauefigkeit": {
+    "enum_values": [
+      {
+        "value": "online",
+        "label_de": "Online",
+        "label_en": "Online",
+        "order_index": 1,
+        "regulation_reference": "Tabelle 6"
+      },
+      {
+        "value": "taeglich",
+        "label_de": "Täglich",
+        "label_en": "Daily",
+        "order_index": 2,
+        "regulation_reference": "Tabelle 6"
+      },
+      {
+        "value": "woechentlich",
+        "label_de": "Wöchentlich",
+        "label_en": "Weekly",
+        "order_index": 3,
+        "regulation_reference": "Tabelle 6"
+      },
+      {
+        "value": "monatlich",
+        "label_de": "Monatlich",
+        "label_en": "Monthly",
+        "order_index": 4,
+        "regulation_reference": "Tabelle 6"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "M12002-13-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-13-B"
+    ]
+  },
+  "M12002-13 messhauefigkeit_integritaet": {
+    "enum_values": [
+      {
+        "value": "online",
+        "label_de": "Online",
+        "label_en": "Online",
+        "order_index": 1,
+        "regulation_reference": "Tabelle 6"
+      },
+      {
+        "value": "taeglich",
+        "label_de": "Täglich",
+        "label_en": "Daily",
+        "order_index": 2,
+        "regulation_reference": "Tabelle 6"
+      },
+      {
+        "value": "woechentlich",
+        "label_de": "Wöchentlich",
+        "label_en": "Weekly",
+        "order_index": 3,
+        "regulation_reference": "Tabelle 6"
+      },
+      {
+        "value": "monatlich",
+        "label_de": "Monatlich",
+        "label_en": "Monthly",
+        "order_index": 4,
+        "regulation_reference": "Tabelle 6"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-13 notueberlauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-13 permeatfluss": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-13-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-13-B"
+    ]
+  },
+  "M12002-13 perzentil_konformitaet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-13-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-13-B"
+    ]
+  },
+  "M12002-13 redundanz_konzept": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-13-C",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-13-C"
+    ]
+  },
+  "M12002-13 reinigungskonzept": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M12002-13 restchlor_freies": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-13-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-13-B"
+    ]
+  },
+  "M12002-13 transmembrandruck": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-13-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-13-B"
+    ]
+  },
+  "M12002-13 uv_transmission": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-13-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-13-B"
+    ]
+  },
+  "M12002-14 ausgleichsvolumen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-14-D",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-14-D"
+    ]
+  },
+  "M12002-14 rohrfarbe": {
+    "enum_values": [
+      {
+        "value": "violett",
+        "label_de": "Violett (normkonforme Kennzeichnung gemäß ISO 16075-3)",
+        "label_en": "Violet (compliant marking per ISO 16075-3)",
+        "order_index": 1,
+        "regulation_reference": "§7.2; ISO 16075-3"
+      },
+      {
+        "value": "andere",
+        "label_de": "Andere Farbe (nicht normkonform)",
+        "label_en": "Other colour (non-compliant)",
+        "order_index": 2,
+        "regulation_reference": "§7.2; ISO 16075-3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "M12002-14-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-14-B"
+    ]
+  },
+  "M12002-14 sekundaerdesinfektion_erforderlich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-14-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-14-B"
+    ]
+  },
+  "M12002-14 sekundaerdesinfektion_verfahren": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "M12002-14-C",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-14-C"
+    ]
+  },
+  "M12002-14 speicherbauform": {
+    "enum_values": [
+      {
+        "value": "betonbecken_offen",
+        "label_de": "Betonbecken offen",
+        "label_en": "Open concrete basin",
+        "order_index": 1,
+        "regulation_reference": "§7.3"
+      },
+      {
+        "value": "betonbecken_abgedeckt",
+        "label_de": "Betonbecken abgedeckt",
+        "label_en": "Covered concrete basin",
+        "order_index": 2,
+        "regulation_reference": "§7.3"
+      },
+      {
+        "value": "erdbecken_kunststoffdichtung",
+        "label_de": "Erdbecken mit Kunststoffdichtung",
+        "label_en": "Earth basin (plastic lining)",
+        "order_index": 3,
+        "regulation_reference": "§7.3"
+      },
+      {
+        "value": "teich",
+        "label_de": "Teich (offen)",
+        "label_en": "Pond (open)",
+        "order_index": 4,
+        "regulation_reference": "§7.3; Anhang D.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "M12002-14-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-14-B"
+    ]
+  },
+  "M12002-15 baupreisindex_bezugsjahr": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-15-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-15-B"
+    ]
+  },
+  "M12002-15 kostenkennwert_aufbereitung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "M12002-15-B",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-15-B"
+    ]
+  },
+  "M12002-25 arbeitsschutz_unterweisung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-25-C",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-25-C"
+    ]
+  },
+  "M12002-25 schulungsnachweis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "M12002-25-C",
+    "section_id_is_null": false,
+    "section_path": [
+      "M12002-25-C"
+    ]
+  },
+  "sections": {
+    "M12002-01 M12002-01-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-01 M12002-01-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-01 M12002-01-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-01 M12002-01-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-01 M12002-01-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-01 M12002-01-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-01 M12002-01-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-01 M12002-01-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-01 M12002-01-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-02 M12002-02-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-02 M12002-02-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-02 M12002-02-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-02 M12002-02-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-02 M12002-02-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-02 M12002-02-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-02 M12002-02-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-02 M12002-02-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-02 M12002-02-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-03 M12002-03-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-03 M12002-03-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-03 M12002-03-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-03 M12002-03-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-03 M12002-03-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-03 M12002-03-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-03 M12002-03-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-03 M12002-03-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-03 M12002-03-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-04 M12002-04-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-04 M12002-04-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-04 M12002-04-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-04 M12002-04-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-04 M12002-04-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-04 M12002-04-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-04 M12002-04-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-04 M12002-04-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-04 M12002-04-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-05 M12002-05-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-05 M12002-05-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-05 M12002-05-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-05 M12002-05-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-05 M12002-05-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-05 M12002-05-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-05 M12002-05-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-05 M12002-05-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-05 M12002-05-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-06 M12002-06-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-06 M12002-06-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-06 M12002-06-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-06 M12002-06-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-06 M12002-06-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-06 M12002-06-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-06 M12002-06-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-06 M12002-06-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-06 M12002-06-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-07 M12002-07-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-07 M12002-07-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-07 M12002-07-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-07 M12002-07-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-07 M12002-07-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-07 M12002-07-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-07 M12002-07-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-07 M12002-07-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-07 M12002-07-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-08 M12002-08-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-08 M12002-08-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-08 M12002-08-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-08 M12002-08-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-08 M12002-08-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-08 M12002-08-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-08 M12002-08-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-08 M12002-08-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-08 M12002-08-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-09 M12002-09-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-09 M12002-09-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-09 M12002-09-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-09 M12002-09-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-09 M12002-09-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-09 M12002-09-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-09 M12002-09-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-09 M12002-09-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-09 M12002-09-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-10 M12002-10-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-10 M12002-10-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-10 M12002-10-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-10 M12002-10-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-10 M12002-10-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-10 M12002-10-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-10 M12002-10-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-10 M12002-10-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-10 M12002-10-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-11 M12002-11-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-11 M12002-11-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-11 M12002-11-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-11 M12002-11-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-11 M12002-11-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-11 M12002-11-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-11 M12002-11-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-11 M12002-11-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-11 M12002-11-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-12 M12002-12-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-12 M12002-12-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-12 M12002-12-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-12 M12002-12-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-12 M12002-12-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-12 M12002-12-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-12 M12002-12-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-12 M12002-12-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-12 M12002-12-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-13 M12002-13-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-13 M12002-13-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-13 M12002-13-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-13 M12002-13-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-13 M12002-13-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-13 M12002-13-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-13 M12002-13-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-13 M12002-13-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-13 M12002-13-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-14 M12002-14-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-14 M12002-14-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-14 M12002-14-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-14 M12002-14-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-14 M12002-14-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-14 M12002-14-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-14 M12002-14-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-14 M12002-14-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-14 M12002-14-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-15 M12002-15-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-15 M12002-15-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-15 M12002-15-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-15 M12002-15-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-15 M12002-15-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-15 M12002-15-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-15 M12002-15-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-15 M12002-15-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-15 M12002-15-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-20 M12002-20-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-20 M12002-20-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-20 M12002-20-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-20 M12002-20-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-20 M12002-20-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-20 M12002-20-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-20 M12002-20-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-20 M12002-20-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-20 M12002-20-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-21 M12002-21-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-21 M12002-21-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-21 M12002-21-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-21 M12002-21-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-21 M12002-21-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-21 M12002-21-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-21 M12002-21-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-21 M12002-21-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-21 M12002-21-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-23 M12002-23-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-23 M12002-23-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-23 M12002-23-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-23 M12002-23-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-23 M12002-23-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-23 M12002-23-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-23 M12002-23-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-23 M12002-23-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-23 M12002-23-M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-25 M12002-25-A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-25 M12002-25-B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-25 M12002-25-C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-25 M12002-25-D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-25 M12002-25-F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-25 M12002-25-J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-25 M12002-25-K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-25 M12002-25-L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M12002-25 M12002-25-M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "M12002-05 Gl. 1": {
+      "id": "0ad3e66f-58bc-4869-9dc6-f5e888345f06",
+      "output_symbol": "log10_reduktion",
+      "input_symbols": [
+        "c_zulauf",
+        "c_ablauf"
+      ]
+    },
+    "M12002-05 Gl. C.2-1": {
+      "id": "e872edf5-09d1-4d27-9238-08a6dc519392",
+      "output_symbol": "perzentil_10_log10",
+      "input_symbols": [
+        "mw_log10",
+        "sd_log10"
+      ]
+    },
+    "M12002-05 Gl. C.2-2": {
+      "id": "0f237c28-2fc3-451a-b557-9dfe44231ef2",
+      "output_symbol": "perzentil_50_log10",
+      "input_symbols": [
+        "log10_reduktionen"
+      ]
+    },
+    "M12002-05 Gl. C.2-3": {
+      "id": "93bc49a5-c3f8-4aa1-9226-85bc436ec4ef",
+      "output_symbol": "lrv_i",
+      "input_symbols": [
+        "x_i",
+        "y_i"
+      ]
+    }
+  },
+  "gates": {
+    "M12002-01 REQ-01": {
+      "condition": "haeusliches_sw_anteil_ueberwiegend == true AND anwendungsbereich IN {bewaesserung_landwirtschaft, bewaesserung_gartenbau, urbane_anwendung}",
+      "severity": "block",
+      "symbols": [
+        "anwendungsbereich",
+        "haeusliches_sw_anteil_ueberwiegend"
+      ]
+    },
+    "M12002-03 REQ-02": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12002-03 REQ-06": {
+      "condition": "IF wassergueteklasse == 'A' THEN perzentil_10_log10 >= leistungsziel_log10 AND IF wassergueteklasse IN {'B-1','C-1'} THEN perzentil_50_log10 >= leistungsziel_log10",
+      "severity": "block",
+      "symbols": [
+        "leistungsziel_log10",
+        "perzentil_10_log10",
+        "perzentil_50_log10",
+        "wassergueteklasse"
+      ]
+    },
+    "M12002-05 REQ-04": {
+      "condition": "log10_reduktion >= leistungsziel_log10",
+      "severity": "block",
+      "symbols": [
+        "leistungsziel_log10",
+        "log10_reduktion"
+      ]
+    },
+    "M12002-05 REQ-05": {
+      "condition": "validierungsmonitoring_typ == 'vereinfacht' AND probenanzahl_zulauf >= 16",
+      "severity": "block",
+      "symbols": [
+        "probenanzahl_zulauf",
+        "validierungsmonitoring_typ"
+      ]
+    },
+    "M12002-06 REQ-07": {
+      "condition": "analytisches_labor_akkreditiert == true AND probenstabilitaet_h <= 72 AND probennahme_typ == mischprobe_24h",
+      "severity": "block",
+      "symbols": [
+        "analytisches_labor_akkreditiert",
+        "probennahme_typ",
+        "probenstabilitaet_h"
+      ]
+    },
+    "M12002-08 REQ-08": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "M12002-08 REQ-09": {
+      "condition": "IF wassergueteklasse IN {'A','B-1','B-2','C-1','C-2'} THEN truebung_ablauf <= 2",
+      "severity": "block",
+      "symbols": [
+        "truebung_ablauf",
+        "wassergueteklasse"
+      ]
+    },
+    "M12002-11 REQ-10": {
+      "condition": "desinfektionsverfahren IS NOT EMPTY",
+      "severity": "block",
+      "symbols": [
+        "desinfektionsverfahren"
+      ]
+    },
+    "M12002-13 REQ-03": {
+      "condition": "perzentil_konformitaet >= 90",
+      "severity": "block",
+      "symbols": [
+        "perzentil_konformitaet"
+      ]
+    },
+    "M12002-13 REQ-11": {
+      "condition": "messhauefigkeit == online AND alarm_verzoegerung_min <= 30",
+      "severity": "block",
+      "symbols": [
+        "alarm_verzoegerung_min",
+        "messhauefigkeit"
+      ]
+    },
+    "M12002-13 REQ-13": {
+      "condition": "IF ausgleichsvolumen > 0 THEN speicherbauform IS NOT EMPTY AND notueberlauf IS NOT NULL AND reinigungskonzept IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "ausgleichsvolumen",
+        "notueberlauf",
+        "reinigungskonzept",
+        "speicherbauform"
+      ]
+    },
+    "M12002-14 REQ-12": {
+      "condition": "IF sekundaerdesinfektion_erforderlich == true THEN sekundaerdesinfektion_verfahren IS NOT EMPTY",
+      "severity": "warn",
+      "symbols": [
+        "sekundaerdesinfektion_erforderlich",
+        "sekundaerdesinfektion_verfahren"
+      ]
+    },
+    "M12002-15 REQ-14": {
+      "condition": "IF kostenkennwert_aufbereitung > 0 THEN baupreisindex_bezugsjahr IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "baupreisindex_bezugsjahr",
+        "kostenkennwert_aufbereitung"
+      ]
+    },
+    "M12002-15 REQ-15": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    }
+  }
+}
