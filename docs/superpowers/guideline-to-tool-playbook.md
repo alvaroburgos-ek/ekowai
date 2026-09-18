@@ -517,8 +517,13 @@ Ja/Nein segmented control stores `false`, so "nein" is a real key. (4) Pin every
 worked examples through the real register contract (Tab. 9 / 10 / 11 here reproduced k, α, k_10, i and the means to the
 printed digits) — a printed value that does not reproduce exposes a wrong γ_w / unit assumption immediately; where the
 standard rounds inside its inputs (Tab. 9 Versuch 2), pin to the digits that survive. (5) A discrete table with a
-worked example BETWEEN its rows (Tab. 3: S_ra = 0,88 → 720) is `anhaltswert`, not `locked`, unless the owner rules
-otherwise — a locked fill would block the standard's own practice (O-block). (6) `\multirow` Bauteil spans in a
+worked example BETWEEN its rows (Tab. 3: S_ra = 0,88 → 720) is emitted with the policy its own wording supports
+(`locked` — no sentence permits intermediate values; contrast Tab. 2 "Zwischenwerte können geradlinig eingeschaltet
+werden") and the example goes on the sheet as an O-block PROPOSING `anhaltswert` (controller ruling, Task 10 fix round 1).
+(5b) Never re-bind an EXISTING input as `lookup_fill` when it is consumed elsewhere or read by a gate (Task 7 E-2 rule):
+with the key unset the field turns read-only (`keys_missing`) and a legitimately printed "0" case (u_0 = 0) cannot be
+recorded — create a twin fill beside the key and STAGE the re-bind (`widget IS NULL`-guarded UPDATE + `fields_archive`
+rollback). (6) `\multirow` Bauteil spans in a
 suitability matrix: seed only the sub-rows whose mark is printed on the row itself, key the rest out (U-block with the
 alignment / cross-reference leads), and seed the printed "-" cells as explicit `nicht geeignet` rows so the fill
 distinguishes "not suitable" from "no row".

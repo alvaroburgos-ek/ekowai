@@ -160,7 +160,7 @@
 -- =====================================================================================================================
 -- din18130_1-D-2 · DIN-18130-1-01 · durchlaessigkeitsbereich (manual enum, consumed by -05) reversed onto the derived bereich_code
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Evidence: Tab. 1 L205–L209 (five bands of k); L196 "Für bautechnische Zwecke werden fünf Durchlässigkeitsbereiche
+-- Evidence: Tab. 1 L205–L209 (five bands of k); L195 "Für bautechnische Zwecke werden fünf Durchlässigkeitsbereiche
 -- definiert (siehe Tabelle 1)". Capture: the enum sits on -01 while k_10 is produced on -04 and consumed by -05 only —
 -- the class cannot be derived on -01 (k_10 not in scope). Plan 3 emits `bereich_code` on -04 (DIN-18130-1-04-D3).
 -- Why staged: deactivation of a consumed input + a consumer edit; the owner picks where the class is shown.
@@ -226,6 +226,80 @@
 -- (G-2 / G-4 share it). Interim (before this block): G-10 offers a consistency gate between the two.
 
 -- =====================================================================================================================
+-- din18130_1-E-2 · DIN-18130-1-02 u_0 — re-bind the existing Sättigungsdruck input as the Tab.-3 lookup_fill (withdrawn from 20260917101010 in fix round 1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: u_0 (DIN-18130-1-02, number, kN/m², not required, consumed by DIN-18130-1-05 — the §8.4 report item
+-- "Sättigungsdruck u_0"; validation_rules.raw 'u_0 >= 0'; widget / ui_config / lookup / visible_when all NULL). Its key
+-- s_r_band is a created select of -02 (visible while saettigung_aufgebracht == true); TAB3 (3 rows, locked) is seeded by
+-- 20260917101000. Plan 3 created the twin u_0_tab3 (lookup_fill, role limit) beside the band instead.
+-- Evidence: L417 "Dazu wird das Porenwasser in dem Probekörper mit einem hydrostatischen Druck (Sättigungsdruck, back
+-- pressure) belastet (siehe Tabelle 3)."; Tab. 3 L427–L429; the printed no-saturation cases §9.1 L919 "Sättigungsdruck: 0"
+-- and §9.2 L1045 "u_{\mathrm{o}}=0".
+-- Why staged (controller ruling, Task 7 E-2 rule): with s_r_band unset or hidden, resolveLookupFill returns keys_missing
+-- and the field is untypeable — the no-saturation test could not record u_0 = 0 and -05 would inherit null; and the
+-- APPLIED pressure (u_0) is not the same fact as the pressure Tab. 3 REQUIRES for a band (example 9.3: 720 vs the
+-- 600 / 900 rows). Not a fail-safe default.
+-- Option (after 20260917101000 + 20260917101010; Plan-3 columns present) — archive pattern on `fields`:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_din18130_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_din18130_1 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE f.symbol = 'u_0' AND w.code = 'DIN-18130-1-02' AND s.code = 'DIN-18130-1' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"Tab. 3"}'::jsonb,
+--        lookup = '{"table_code":"TAB3","role":"value","keys":[{"column":"s_r_band","from_symbol":"s_r_band"}],"value":"u_0_kn_m2"}'::jsonb,
+--        visible_when = NULL
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'u_0' AND w.code = 'DIN-18130-1-02' AND s.code = 'DIN-18130-1' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'u_0_tab3' AND w.code = 'DIN-18130-1-02' AND s.code = 'DIN-18130-1' AND f.active;
+-- COMMIT;
+-- Rollback (the four Plan-1 columns back from the archive row by id — explicit columns, never retyped; the twin re-activated):
+-- BEGIN;
+-- UPDATE fields f SET widget = a.widget, ui_config = a.ui_config, lookup = a.lookup, visible_when = a.visible_when
+--   FROM fields_archive_din18130_1 a WHERE f.id = a.id AND f.widget = 'lookup_fill';
+-- DELETE FROM fields_archive_din18130_1 a USING fields f WHERE f.id = a.id AND f.widget IS NOT DISTINCT FROM a.widget;
+-- UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'u_0_tab3' AND w.code = 'DIN-18130-1-02' AND s.code = 'DIN-18130-1' AND NOT f.active;
+-- COMMIT;
+-- The archive table `fields_archive_din18130_1` is dropped once every archived row of this file (E-2, E-3) is rolled back, or by the owner once the changes are signed off as final.
+
+-- =====================================================================================================================
+-- din18130_1-E-3 · DIN-18130-1-01 A_min — re-bind the existing Mindest-Querschnittsfläche input as the §5.8 lookup_fill (withdrawn from 20260917101010 in fix round 1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Class: widget re-bind on a GATE-BEARING field — prod CR-01 (3bf9d48b-7585-4ef6-807e-62d397d0ac76, DIN-18130-1-01, block,
+-- md5 2ea5eb111ec9dd5188c774dd252b2eff) reads 'max_d IS NOT NULL AND A_min IS NOT NULL'.
+-- Capture: A_min (DIN-18130-1-01, number, cm², not required, consumer_worksheets NULL, validation_rules.raw 'A_min >= 10',
+-- widget / ui_config / lookup / visible_when all NULL). Its key bindig_grobkoernig is a created select of -01 (section K);
+-- S5_8 (2 rows, anhaltswert) is seeded by 20260917101000. Plan 3 created the twin a_min_tab (lookup_fill, role limit)
+-- beside the select instead; G-1 keeps its consumer-edit + gate sketch (A ≥ A_min on -03).
+-- Evidence: L336 "Bei bindigen Böden sollte die Querschnittsfläche mindestens $A=10 \mathrm{~cm}^{2}$ betragen, bei
+-- grobkörnigen Böden mindestens A $=20 \mathrm{~cm}^{2}$, sofern die Versuchsgeräte nach Abschnitt 7 keine größeren
+-- Abmessungen bedingen."
+-- Why staged (controller ruling): a widget change on a field a block gate reads is a ruling, not a default — while the
+-- class select is unset the fill shows keys_missing and CR-01 cannot be satisfied by typing; "sofern die Versuchsgeräte …
+-- keine größeren Abmessungen bedingen" also allows a larger A_min than the table value.
+-- Option (after 20260917101000 + 20260917101010) — archive pattern on `fields`:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_din18130_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_din18130_1 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE f.symbol = 'A_min' AND w.code = 'DIN-18130-1-01' AND s.code = 'DIN-18130-1' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"§5.8"}'::jsonb,
+--        lookup = '{"table_code":"S5_8","role":"limit","keys":[{"column":"bodenklasse","from_symbol":"bindig_grobkoernig"}],"value":"a_min_cm2"}'::jsonb,
+--        visible_when = NULL
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'A_min' AND w.code = 'DIN-18130-1-01' AND s.code = 'DIN-18130-1' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'a_min_tab' AND w.code = 'DIN-18130-1-01' AND s.code = 'DIN-18130-1' AND f.active;
+-- COMMIT;
+-- Rollback (explicit columns from the archive row by id; the twin re-activated):
+-- BEGIN;
+-- UPDATE fields f SET widget = a.widget, ui_config = a.ui_config, lookup = a.lookup, visible_when = a.visible_when
+--   FROM fields_archive_din18130_1 a WHERE f.id = a.id AND f.widget = 'lookup_fill';
+-- DELETE FROM fields_archive_din18130_1 a USING fields f WHERE f.id = a.id AND f.widget IS NOT DISTINCT FROM a.widget;
+-- UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'a_min_tab' AND w.code = 'DIN-18130-1-01' AND s.code = 'DIN-18130-1' AND NOT f.active;
+-- COMMIT;
+
+-- =====================================================================================================================
 -- din18130_1-C-1 · DIN-18130-1-02 gefaelle_typ → also consumed by DIN-18130-1-05 (drives the emitted i_bereich rule and G-9)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Evidence: L832 "Bei Versuchen mit veränderlichem hydraulischen Gefälle ist dessen Bereich (größtes und kleinstes
@@ -260,7 +334,8 @@
 -- Evidence: L336 "Bei bindigen Böden sollte die Querschnittsfläche mindestens $A=10 \mathrm{~cm}^{2}$ betragen, bei
 -- grobkörnigen Böden mindestens A $=20 \mathrm{~cm}^{2}$, sofern die Versuchsgeräte nach Abschnitt 7 keine größeren
 -- Abmessungen bedingen." Capture: A (-03, m²) and A_min (-01, cm², consumer_worksheets NULL); CR-01 only checks
--- presence. Plan 3 binds A_min as a lookup_fill (role limit) from the created select bindig_grobkoernig (20260917101010).
+-- presence. Plan 3 created the twin a_min_tab (lookup_fill, role limit, from the created select bindig_grobkoernig,
+-- 20260917101010); the re-bind of A_min itself is E-3 (fix round 1) — this block keeps the consumer edit + gate sketch.
 -- Severity: "sollte" → warn (the owner may choose block).
 -- BEGIN;
 -- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-18130-1-03']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
@@ -455,7 +530,11 @@
 -- "h=(p / γ_w − Δh)"; Bild 9 "h=(p_2 − p_1)/γ_w"; Bild 3A Gl. 7) and Tab. 11 L1326 "h=h_o−h_u+(p_o−p_u)/γ_w".
 -- Chosen now: H_ROW_EXPR = the Tab.-11 form (Bild 6 with p_o = p_u = 0; Bild 9 with h_o = h_u = 0; Bild 8 by entering
 -- Δh as h_u with h_o = 0 and p_u = 0); the Bild-3A device (Gl. 7) stays the prod scalar h. A per-row arrangement
--- selector would be the alternative (four exprs) — not built.
+-- selector would be the alternative (four exprs) — not built. Length: K_ROW_EXPR's konstant branch divides by the
+-- worksheet `l`; §8.1 item 2) L802 "$l$ die Höhe des Probekörpers $l_{0}$;" (Bild 8 and Bild 9) and item 3) L806 (Bild 3A)
+-- make l = l_0 for those arrangements — the register note says so (l = l_0 eintragen); only Bild 6 (L799 "$l$ der Abstand
+-- der Ansatzpunkte der beiden Standrohre.") uses the standpipe distance. A per-row switch on the arrangement is the same
+-- alternative as above.
 
 -- =====================================================================================================================
 -- din18130_1-J-3 · DIN-18130-1-03 · α from the Gl.-6 closed form at the worksheet T (not the Tab.-2 interpolation, not per reading)
@@ -523,13 +602,18 @@
 -- 'k_f IS NOT NULL' until the engine-output-materialisation workstream lands. Recorded once.
 
 -- =====================================================================================================================
--- din18130_1-O-1 · TAB3 · override policy anhaltswert (the brief said locked)
+-- din18130_1-O-1 · TAB3 · override policy — emitted locked (the brief's policy); proposal: anhaltswert
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Evidence: Tab. 3 (L427–L429) prints three discrete rows; §6.5 L417 "… (siehe Tabelle 3)"; example 9.3 L1205 "S_ra =
--- 0,88" with L1215 "u_o = 720 kN/m²" — 720 = 900 − (0,03/0,05)·300, the linear interpolation between the 0,85 and 0,90
--- rows: the standard's own example applies a value the table does not print. Chosen now: anhaltswert (the u_0 fill
--- offers "abweichend wählen" + reason, so the example is reproducible with a justification); `locked` would block the
--- standard's own practice. Alternative: locked (owner's ruling flips `override_policy` in the seed → re-emit).
+-- Evidence: Tab. 3 (L427–L429) prints three discrete rows; §6.5 L417 "… (siehe Tabelle 3)"; no printed sentence permits
+-- intermediate values (contrast Tab. 2 L327 "Zwischenwerte können geradlinig eingeschaltet werden."). BUT example 9.3
+-- L1205 "S_ra = 0,88" with L1215 "u_o = 720 kN/m²" — 720 = 900 − (0,03/0,05)·300, the linear interpolation between the
+-- 0,85 and 0,90 rows: the standard's own example applies a value the table does not print.
+-- Chosen now (fix round 1, controller ruling): `locked` in the seed (20260917101000) — the u_0_tab3 fill shows the row
+-- value with no override control; the applied pressure is typed in the untouched u_0 input.
+-- Proposal: anhaltswert (`override_policy = 'anhaltswert'` on the TAB3 builder → re-emit; or after apply
+-- `UPDATE regulation_tables SET override_policy = 'anhaltswert', override_quote = '<L1205 — L1215>' WHERE standard_code =
+-- 'DIN-18130-1' AND table_code = 'TAB3' AND override_policy = 'locked'`; rollback the reverse) so the fill offers
+-- "abweichend wählen" + reason and the example's 720 is reproducible with a justification.
 
 -- =====================================================================================================================
 -- din18130_1-O-2 · TAB5 · override policy anhaltswert (suitability grading)

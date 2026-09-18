@@ -71,13 +71,12 @@ describe('DIN-18130-1 Plan-3 seed tables', () => {
     for (const a of TAB2_ALPHA) expect(1.359 / (1 + 0.0337 * Number(a.t_c) + 0.00022 * Number(a.t_c) ** 2)).toBeCloseTo(a.alpha, 3);
   });
 
-  it('TAB3 (L427–L429): ≥ 0,95 → 300 · 0,90 → 600 · 0,85 → 900 kN/m²; three discrete bands (SR-2 select); anhaltswert per example 9.3 (u_o = 720 for S_ra = 0,88, L1205/L1215)', () => {
+  it('TAB3 (L427–L429): ≥ 0,95 → 300 · 0,90 → 600 · 0,85 → 900 kN/m²; three discrete bands (SR-2 select); locked (L417) — O-1 proposes anhaltswert per example 9.3 (u_o = 720 for S_ra = 0,88, L1205/L1215)', () => {
     const t = tab3AsTable();
     expect(t.rows.map((r) => [r.keys.s_r_band, r.values.u_0_kn_m2])).toEqual([['ge095', 300], ['e090', 600], ['e085', 900]]);
     expect(TAB3_U0.map((r) => r.band)).toEqual(['ge095', 'e090', 'e085']);
-    expect(t.override_policy).toBe('anhaltswert');
-    expect(t.override_quote).toContain('S_{\\mathrm{ra}}=0,88');
-    expect(t.override_quote).toContain('u_{\\mathrm{o}}=720');
+    expect(t.override_policy).toBe('locked'); // fix round 1 (controller ruling): the brief's policy; O-1 carries the anhaltswert proposal
+    expect(t.override_quote).toContain('(siehe Tabelle 3)');
     expect(t.verification_status).toBe('md_verified');
     // linear interpolation between the 0,90 and 0,85 rows reproduces the example's 720 (900 − 0,03/0,05 · 300)
     expect(900 - ((0.88 - 0.85) / (0.9 - 0.85)) * 300).toBeCloseTo(720, 9);

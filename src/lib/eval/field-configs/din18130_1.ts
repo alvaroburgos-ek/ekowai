@@ -125,12 +125,16 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     ],
     verification_quote: L336,
     create: { section_code: 'K', label_de: 'Bodenklasse für die Mindest-Querschnittsfläche (§5.8: bindig / grobkörnig)', data_type: 'enum', unit: null, clause_reference: '§5.8',
-      description: 'Plan 3: Treiber der §5.8-Mindestfläche — bindige Böden A ≥ 10 cm², grobkörnige Böden A ≥ 20 cm² (füllt A_min); Gate A ≥ A_min STAGED (din18130_1-G-1).' },
+      description: 'Plan 3: Treiber der §5.8-Mindestfläche — bindige Böden A ≥ 10 cm², grobkörnige Böden A ≥ 20 cm² (füllt a_min_tab; Umstellung des Eingabefelds A_min STAGED, din18130_1-E-3); Gate A ≥ A_min STAGED (din18130_1-G-1).' },
   }),
+  // Fix round 1: the existing A_min (gate-bearing: CR-01 'max_d IS NOT NULL AND A_min IS NOT NULL', block) keeps its input;
+  // the §5.8 value is a created twin beside the class select — the re-bind is STAGED (din18130_1-E-3).
   WS01({
-    symbol: 'A_min', widget: 'lookup_fill', ui_config: { source_label: '§5.8' },
+    symbol: 'a_min_tab', widget: 'lookup_fill', ui_config: { source_label: '§5.8' },
     lookup: { table_code: 'S5_8', role: 'limit', keys: [{ column: 'bodenklasse', from_symbol: 'bindig_grobkoernig' }], value: 'a_min_cm2' },
     verification_quote: L336,
+    create: { section_code: 'K', label_de: 'Mindest-Querschnittsfläche nach §5.8 (bindig 10 cm² / grobkörnig 20 cm²)', data_type: 'number', unit: 'cm²', clause_reference: '§5.8',
+      description: 'Plan 3: aus der Bodenklasse (bindig / grobkörnig) gefüllt; das Eingabefeld A_min (CR-01) bleibt — Umstellung STAGED (din18130_1-E-3), Gate A ≥ A_min STAGED (din18130_1-G-1).' },
   }),
   WS01({
     symbol: 'groesstkorn_verhaeltnis', widget: 'lookup_fill', ui_config: { source_label: '§5.8' },
@@ -210,12 +214,18 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     visible_when: 'saettigung_aufgebracht == true', // L417: the Sättigungsdruck (Tab. 3) exists only when saturation is applied
     verification_quote: `${L417} — ${L421}`,
     create: { section_code: 'D', label_de: 'Sättigungszahl-Zeile der Tabelle 3 (≥ 0,95 / 0,90 / 0,85)', data_type: 'enum', unit: null, clause_reference: '§6.5, Tab. 3',
-      description: 'Plan 3: SR-2-Auswahl der Tab.-3-Zeile (Zwischenwerte sind in Tab. 3 nicht definiert; Beispiel 9.3 interpoliert linear: S_ra = 0,88 → u_o = 720 kN/m²) — füllt u_0; die Sättigungszahl S_r (DIN-18130-1-01) leitet die Wahl, ein Abgleich ist STAGED (din18130_1-G-11).' },
+      description: 'Plan 3: SR-2-Auswahl der Tab.-3-Zeile (Zwischenwerte sind in Tab. 3 nicht definiert; Beispiel 9.3 interpoliert linear: S_ra = 0,88 → u_o = 720 kN/m²) — füllt u_0_tab3 (Umstellung des Eingabefelds u_0 STAGED, din18130_1-E-2); die Sättigungszahl S_r (DIN-18130-1-01) leitet die Wahl, ein Abgleich ist STAGED (din18130_1-G-11).' },
   }),
+  // Fix round 1: the existing u_0 (consumed by -05; §9.1 L919 "Sättigungsdruck: 0" / §9.2 L1045 "u_o = 0" record the
+  // no-saturation case) keeps its input; the Tab.-3 value is a created twin beside the band select (role limit — the
+  // pressure Tab. 3 REQUIRES for the band) — the re-bind is STAGED (din18130_1-E-2).
   WS02({
-    symbol: 'u_0', widget: 'lookup_fill', ui_config: { source_label: 'Tab. 3' },
-    lookup: { table_code: 'TAB3', role: 'value', keys: [{ column: 's_r_band', from_symbol: 's_r_band' }], value: 'u_0_kn_m2' },
+    symbol: 'u_0_tab3', widget: 'lookup_fill', ui_config: { source_label: 'Tab. 3' },
+    lookup: { table_code: 'TAB3', role: 'limit', keys: [{ column: 's_r_band', from_symbol: 's_r_band' }], value: 'u_0_kn_m2' },
+    visible_when: 'saettigung_aufgebracht == true', // L417 — as its band select
     verification_quote: `${L417} — ${L421}`,
+    create: { section_code: 'D', label_de: 'Sättigungsdruck u_0 nach Tabelle 3 (zur gewählten Sättigungszahl-Zeile)', data_type: 'number', unit: 'kN/m²', clause_reference: '§6.5, Tab. 3',
+      description: 'Plan 3: 300 / 600 / 900 kN/m² aus der Tab.-3-Zeile (locked); das Eingabefeld u_0 (aufgebrachter Druck, Berichtsangabe) bleibt — Umstellung STAGED (din18130_1-E-2); Zwischenwerte wie im Beispiel 9.3 (720 kN/m²) sind Sache des Eigentümers (din18130_1-O-1).' },
   }),
   WS02({
     symbol: 'filterstein_k', widget: 'scalar', ui_config: null, visible_when: "versuchsanordnung == 'TX'", // L642 / L668 (Triaxialzelle)
@@ -249,7 +259,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'h_2', label: 'h_2', type: 'number', unit: 'm', required: true, min: 0, visible_when: VERAENDERLICH, aria_label: 'Wasserhöhe im Standrohr bei Versuchsende h_2' },
         { key: 't_c', label: 'T', type: 'number', unit: '°C', required: true, aria_label: 'Wassertemperatur T' },
         { key: 'h_row', label: 'h', type: 'derived', expr: H_ROW_EXPR },
-        { key: 'i_row', label: 'i', type: 'derived', expr: I_ROW_EXPR },
+        { key: 'i_row', label: 'i (konstant: h/l · veränderlich: Beginn h_1/l_0)', type: 'derived', expr: I_ROW_EXPR },
         { key: 'k_row', label: 'k (Ablesung)', type: 'derived', expr: K_ROW_EXPR },
         // L850 "Der k-Wert solle als ein Vielfaches eines Exponentialfaktors zur Basis 10 angegeben werden." — mantissa · 10^exponent
         // (the register's cell formatter prints |k| < 5·10⁻⁵ as "0"; din18130_1-I-2 — the raw k_row / k10_row stay the engine inputs)
@@ -261,7 +271,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'k10_mant', label: 'k_10: Mantisse', type: 'derived', expr: 'k10_row / 10^floor(log10(k10_row))' },
       ],
       footer: ['k_T_mean', 'k_10_calc', 'i_max_calc', 'i_min_calc'],
-      note: `${L526} γ_w, l, l_0, A und a sind die Felder dieses Arbeitsblatts (Zeilenwerte lesen sie mit); drucklose Anordnungen (Bild 6): p_o = p_u = 0 eintragen. Alle vollständigen Zeilen gehen in die Mittelwerte ein (din18130_1-J-1).`,
+      note: `${L526} γ_w, l, l_0, A und a sind die Felder dieses Arbeitsblatts (Zeilenwerte lesen sie mit); drucklose Anordnungen (Bild 6): p_o = p_u = 0 eintragen; bei den Anordnungen nach Bild 8 und Bild 9 ist l die Höhe des Probekörpers l_0 (§8.1, L802) — l = l_0 eintragen. Alle vollständigen Zeilen gehen in die Mittelwerte ein (din18130_1-J-1).`,
     },
     verification_quote: `${L526} — ${L787} — ${L797} — ${L813} — ${L1326}`, // L526 (Ablesung/Versuchsende), Gl. 8 (L787), the §8.1 h/l variants (L797–L806), Gl. 9 (L813), Tab. 11 h (L1326)
     create: { section_code: 'C', label_de: 'Ablesungen (je Messintervall: t, h_o/h_u/p_o/p_u/V_w bzw. h_1/h_2, T)', data_type: 'json', unit: null, clause_reference: '§7.1.4.4, §8.1, §8.2, Tab. 7, Tab. 8, Tab. 11',

@@ -43,16 +43,16 @@ describe('DIN-18130-1 field configs (Plan 3 Task 10)', () => {
     expect(SECTION_VISIBILITY).toEqual([]);
   });
 
-  it('counts: 27 field entries (24 create, 3 update), widgets by kind, visibility list', () => {
+  it('counts: 27 field entries (26 create, 1 update), widgets by kind, visibility list', () => {
     expect(FIELD_CONFIGS).toHaveLength(27);
-    expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(24);
-    expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['DIN-18130-1-01 A_min', 'DIN-18130-1-02 u_0', 'DIN-18130-1-05 i_bereich']);
+    expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(26);
+    expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['DIN-18130-1-05 i_bereich']); // fix round 1: the A_min / u_0 re-binds are STAGED (E-3 / E-2), twins created instead
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('register')).toEqual(['DIN-18130-1-03 ablesungen', 'DIN-18130-1-04 versuche']);
     expect(byWidget('lookup_fill')).toEqual([
-      'DIN-18130-1-01 A_min', 'DIN-18130-1-01 groesstkorn_verhaeltnis',
+      'DIN-18130-1-01 a_min_tab', 'DIN-18130-1-01 groesstkorn_verhaeltnis',
       'DIN-18130-1-02 tab5_erreichbare_klasse', 'DIN-18130-1-02 tab5_geeignet', 'DIN-18130-1-02 tab5_sb', 'DIN-18130-1-02 tab5_u0',
-      'DIN-18130-1-02 versuchsklasse_tab4', 'DIN-18130-1-02 u_0',
+      'DIN-18130-1-02 versuchsklasse_tab4', 'DIN-18130-1-02 u_0_tab3',
     ]);
     expect(byWidget('select_one')).toEqual(['DIN-18130-1-01 bindig_grobkoernig', 'DIN-18130-1-02 bodenart_tab5', 'DIN-18130-1-02 messung_gefaelle', 'DIN-18130-1-02 s_r_band']);
     expect(byWidget('select_many')).toEqual(['DIN-18130-1-05 pflichtangaben']);
@@ -64,6 +64,7 @@ describe('DIN-18130-1 field configs (Plan 3 Task 10)', () => {
     ]);
     expect(FIELD_CONFIGS.filter((e) => e.visible_when).map((e) => `${e.worksheet} ${e.symbol} :: ${e.visible_when}`)).toEqual([
       'DIN-18130-1-02 s_r_band :: saettigung_aufgebracht == true',
+      'DIN-18130-1-02 u_0_tab3 :: saettigung_aufgebracht == true',
       "DIN-18130-1-02 filterstein_k :: versuchsanordnung == 'TX'",
       "DIN-18130-1-02 probe_durchmesser_mm :: versuchsanordnung == 'KD'",
       "DIN-18130-1-05 i_bereich :: gefaelle_typ == 'veraenderlich'",
@@ -113,7 +114,11 @@ describe('DIN-18130-1 field configs (Plan 3 Task 10)', () => {
       expect(['number', 'text', 'enum']).toContain(dt);
       for (const k of e.lookup!.keys) expect(symbolsOn(e.worksheet).has(k.from_symbol), `${e.symbol} key ${k.from_symbol} on ${e.worksheet}`).toBe(true);
     }
-    expect(byKey('DIN-18130-1-01', 'A_min').lookup!.role).toBe('limit');
+    expect(byKey('DIN-18130-1-01', 'a_min_tab').lookup!.role).toBe('limit');
+    expect(byKey('DIN-18130-1-02', 'u_0_tab3').lookup!.role).toBe('limit');
+    // the existing A_min (gate-bearing, CR-01) and u_0 (consumed by -05; u_0 = 0 is a printed case) keep their inputs — re-binds STAGED E-3 / E-2
+    expect(FIELD_CONFIGS.find((e) => e.symbol === 'A_min')).toBeUndefined();
+    expect(FIELD_CONFIGS.find((e) => e.symbol === 'u_0')).toBeUndefined();
     expect(priorRow('DIN-18130-1-01 A_min').data_type).toBe('number');
     expect(priorRow('DIN-18130-1-02 u_0').data_type).toBe('number');
     // the two-key fills on -02 read the prod select versuchsanordnung + the created bodenart_tab5 (a138 trap 1: keys on the fill's worksheet)
@@ -156,8 +161,7 @@ describe('DIN-18130-1 field configs (Plan 3 Task 10)', () => {
       expect(priorRow(`DIN-18130-1-03 ${s}`).consumer_worksheets, s).toEqual(['DIN-18130-1-04']);
       expect(FIELD_CONFIGS.find((e) => e.worksheet === 'DIN-18130-1-03' && e.symbol === s)).toBeUndefined();
     }
-    expect(priorRow('DIN-18130-1-02 u_0').consumer_worksheets).toEqual(['DIN-18130-1-05']);           // no visible_when on u_0 (lookup_fill only)
-    expect(byKey('DIN-18130-1-02', 'u_0').visible_when).toBeUndefined();
+    expect(priorRow('DIN-18130-1-02 u_0').consumer_worksheets).toEqual(['DIN-18130-1-05']);           // u_0 untouched (E-2)
     expect(priorRow('DIN-18130-1-02 statische_belastung').consumer_worksheets).toEqual(['DIN-18130-1-05']); // G-8, not a rule
     expect(priorRow('DIN-18130-1-01 alpha').consumer_worksheets).toEqual(['DIN-18130-1-04']);              // D-1, stays visible
     // h_0 / gamma_org are consumer-free but feed Gl. 7 whose h is consumed by -04 → the transitive guard refuses
@@ -178,8 +182,8 @@ describe('DIN-18130-1 field configs (Plan 3 Task 10)', () => {
     const files = fieldConfigFilesFor('din18130_1', '20260917101010');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(3);
-    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(24);
+    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(1);
+    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(26);
     expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
   });

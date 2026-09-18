@@ -2196,7 +2196,7 @@ Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din1
 ### din18130_1-D-2 · DIN-18130-1 · DIN-18130-1-01 · durchlaessigkeitsbereich ← bereich_code
 - Class: deactivation · consumer-edit
 - Chosen now (fail-safe): the manual enum stays (consumed by -05); `bereich_code` (DIN-18130-1-04-D3) is a created derived twin on -04 where k_10 lives (the brief's -01 placement cannot compute: k_10 is not in scope there).
-- Evidence (verbatim, transcript line): "\hline unter $10^{-8}$ & sehr schwach durchlässig \\" … "\hline über $10^{-2}$ & sehr stark durchlässig \\" (L205–L209); "ANMERKUNG: Für bautechnische Zwecke werden fünf Durchlässigkeitsbereiche definiert (siehe Tabelle 1)." (L196)
+- Evidence (verbatim, transcript line): "\hline unter $10^{-8}$ & sehr schwach durchlässig \\" … "\hline über $10^{-2}$ & sehr stark durchlässig \\" (L205–L209); "ANMERKUNG: Für bautechnische Zwecke werden fünf Durchlässigkeitsbereiche definiert (siehe Tabelle 1)." (L195)
 - Proposed SQL / config: STAGED block D-2 — option (a) `bereich_code.consumer_worksheets = {DIN-18130-1-05}` + retire the -01 enum; option (b) keep both.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -2212,6 +2212,20 @@ Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din1
 - Chosen now (fail-safe): the -01 enum keeps its input; the Tab.-4 fill `versuchsklasse_tab4` (text, -02, keyed on `saettigung_aufgebracht` × `stroemung_stationaer`) is created beside its drivers (a262e trap 1 — a fill on -01 would read "Schlüssel fehlt" forever).
 - Evidence (verbatim, transcript line): "\hline 1a & ja & ja \\" (L480); "\hline 1b & ja & nein*) \\" (L481); "\hline 2 & nein & ja \\" (L482); "\hline 3 & nein & nein \\" (L483); "Entsprechend diesen Bedingungen werden die Versuche in drei Versuchsklassen eingeteilt (siehe Tabelle 4)." (L447)
 - Proposed SQL / config: STAGED block E-1 — consumer edit on the fill, CR-03 (6e9f0d8c-…, md5 1e37033f…) rewritten onto `versuchsklasse_tab4 IN {'2', '3'}`, the -01 enum retired; archive-pattern rollback. Interim: G-10.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-E-2 · DIN-18130-1 · DIN-18130-1-02 · u_0 ← TAB3 (widget re-bind of a consumed input; withdrawn in fix round 1)
+- Class: widget re-bind (equation-replacement class) on a consumed input
+- Chosen now (fail-safe): `u_0` keeps its number input (consumed by -05; the no-saturation tests record u_0 = 0); the Tab.-3 value is the created twin `u_0_tab3` (lookup_fill, role limit, beside `s_r_band`, visible while `saettigung_aufgebracht == true`). The UPDATE emitted in the first commit is withdrawn from 20260917101010.
+- Evidence (verbatim, transcript line): "Dazu wird das Porenwasser in dem Probekörper mit einem hydrostatischen Druck (Sättigungsdruck, back pressure) belastet (siehe Tabelle 3)." (L417); "Sättigungsdruck: 0" (L919, §9.1); "u_{\mathrm{o}}=0" (L1045, §9.2); "S_{\mathrm{ra}}=0,88" (L1205) with "u_{\mathrm{o}}=720 \mathrm{kN} / \mathrm{m}^{2}" (L1215, §9.3 — the applied pressure is not the table's)
+- Proposed SQL / config: STAGED block E-2 — `widget IS NULL`-guarded UPDATE to the TAB3 lookup_fill with the row archived into `fields_archive_din18130_1` and the twin deactivated; rollback restores the four Plan-1 columns by id and re-activates the twin (fll_gar-E-2 pattern).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-E-3 · DIN-18130-1 · DIN-18130-1-01 · A_min ← S5_8 (widget re-bind of a gate-bearing input; withdrawn in fix round 1)
+- Class: widget re-bind (equation-replacement class) on a gate-bearing input — prod CR-01 (3bf9d48b-…, block) reads `max_d IS NOT NULL AND A_min IS NOT NULL`
+- Chosen now (fail-safe): `A_min` keeps its number input (CR-01 unchanged); the §5.8 value is the created twin `a_min_tab` (lookup_fill, role limit, beside `bindig_grobkoernig`). The UPDATE emitted in the first commit is withdrawn from 20260917101010; G-1 keeps its consumer-edit + gate sketch.
+- Evidence (verbatim, transcript line): "Bei bindigen Böden sollte die Querschnittsfläche mindestens $A=10 \mathrm{~cm}^{2}$ betragen, bei grobkörnigen Böden mindestens A $=20 \mathrm{~cm}^{2}$, sofern die Versuchsgeräte nach Abschnitt 7 keine größeren Abmessungen bedingen." (L336)
+- Proposed SQL / config: STAGED block E-3 — `widget IS NULL`-guarded UPDATE to the S5_8 lookup_fill with the row archived into `fields_archive_din18130_1` and the twin deactivated; rollback by id + twin re-activated.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din18130_1-C-1 · DIN-18130-1 · DIN-18130-1-02 · gefaelle_typ → DIN-18130-1-05
@@ -2230,7 +2244,7 @@ Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din1
 
 ### din18130_1-G-1 · DIN-18130-1 · DIN-18130-1-03 · A >= A_min (§5.8)
 - Class: gate-guard · consumer-edit
-- Chosen now (fail-safe): `A_min` is filled from S5_8 by the created `bindig_grobkoernig` (lookup_fill role limit, UPDATE); CR-01 keeps checking presence only; no new gate.
+- Chosen now (fail-safe): the §5.8 value is filled into the created twin `a_min_tab` from `bindig_grobkoernig` (fix round 1 — the re-bind of `A_min` itself is E-3); `A_min` stays the input CR-01 reads; no new gate.
 - Evidence (verbatim, transcript line): "Bei bindigen Böden sollte die Querschnittsfläche mindestens $A=10 \mathrm{~cm}^{2}$ betragen, bei grobkörnigen Böden mindestens A $=20 \mathrm{~cm}^{2}$, sofern die Versuchsgeräte nach Abschnitt 7 keine größeren Abmessungen bedingen." (L336)
 - Proposed SQL / config: STAGED block G-1 — `A_min → -03` consumer edit + CR-08 `A * 10000 >= A_min` (warn; "sollte").
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -2328,9 +2342,9 @@ Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din1
 
 ### din18130_1-J-2 · DIN-18130-1 · DIN-18130-1-03 · h per reading (arrangement variants)
 - Class: text-only-formula
-- Chosen now (fail-safe): `h_row = h_o - h_u + (p_o - p_u) / gamma_w` (Tab. 11); Bild 6 = p_o = p_u = 0; Bild 9 = h_o = h_u = 0; Bild 8 by entering Δh as h_u; Gl. 7 stays the prod scalar.
-- Evidence (verbatim, transcript line): "& h=h_{\mathrm{o}}-h_{\mathrm{u}}+\left(p_{\mathrm{o}}-p_{\mathrm{u}}\right) / \gamma_{\mathrm{w}}" (L1326); "$h=\left(p / \gamma_{\mathrm{w}}-\Delta h\right)$, wobei $p$ Wasserdruck im Druckzylinder, (siehe Bild 8);" (L801); "$h=\left(p_{2}-p_{1}\right) / \gamma_{\mathrm{w}}$, (siehe Bild 9)." (L803)
-- Proposed SQL / config: a per-row arrangement selector with four exprs (not built).
+- Chosen now (fail-safe): `h_row = h_o - h_u + (p_o - p_u) / gamma_w` (Tab. 11); Bild 6 = p_o = p_u = 0; Bild 9 = h_o = h_u = 0; Bild 8 by entering Δh as h_u; Gl. 7 stays the prod scalar. Length (fix round 1): the konstant branch of `K_ROW_EXPR` divides by the worksheet `l`; for Bild 8 / Bild 9 (L802) and Bild 3A (L806) the printed l is the sample height l_0 — the register note says "l = l_0 eintragen"; only Bild 6 (L799) uses the standpipe distance.
+- Evidence (verbatim, transcript line): "& h=h_{\mathrm{o}}-h_{\mathrm{u}}+\left(p_{\mathrm{o}}-p_{\mathrm{u}}\right) / \gamma_{\mathrm{w}}" (L1326); "$h=\left(p / \gamma_{\mathrm{w}}-\Delta h\right)$, wobei $p$ Wasserdruck im Druckzylinder, (siehe Bild 8);" (L801); "$h=\left(p_{2}-p_{1}\right) / \gamma_{\mathrm{w}}$, (siehe Bild 9)." (L803); "$l$ die Höhe des Probekörpers $l_{0}$;" (L802); "$l$ der Abstand der Ansatzpunkte der beiden Standrohre." (L799)
+- Proposed SQL / config: a per-row arrangement selector (four h exprs + the l / l_0 switch) — not built.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din18130_1-J-3 · DIN-18130-1 · DIN-18130-1-03 · α: Gl.-6 closed form at the worksheet T
@@ -2373,7 +2387,7 @@ Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din1
 - Chosen now (fail-safe): mantissa / exponent derived columns (`k_mant · 10^k_exp`, `k10_mant · 10^k10_exp`) per row — the printed representation; raw cells and the footer render through the Plan-2b `fmt` (4 fraction digits) as "0"; the equation cards are correct (toPrecision).
 - Evidence (verbatim, transcript line): "ANMERKUNG: Der $k$-Wert solle als ein Vielfaches eines Exponentialfaktors zur Basis 10 angegeben werden." (L850)
 - Proposed SQL / config: CODE — scientific notation in `register-editor.tsx` `fmt()` for 0 < |v| < 1e-3 (one line + pin); outside this DATA task.
-- **fixed on branch (Task 10b, 4536468)** — `fmt()` threshold implemented as `0 < |v| < 0.01` (matching the equation card's `formatNumber` scientific-branch threshold, per controller ruling, not the `1e-3` figure floated above); scientific notation with a German decimal comma, up to 4 significant digits (`toExponential(3)`, e.g. `3,48e-10`); pinned by `src/components/worksheet/__tests__/register-fmt.test.ts`. `SUM_NUM` (legacy `sum_column` footer) untouched — `k_T_mean` / `k_10_calc` read through `fmt()`, not `SUM_NUM`.
+- **fixed on branch (Task 10b, 5b88dc1)** — `fmt()` threshold implemented as `0 < |v| < 0.01` (matching the equation card's `formatNumber` scientific-branch threshold, per controller ruling, not the `1e-3` figure floated above); scientific notation with a German decimal comma, up to 4 significant digits (`toExponential(3)`, e.g. `3,48e-10`); pinned by `src/components/worksheet/__tests__/register-fmt.test.ts`. `SUM_NUM` (legacy `sum_column` footer) untouched — `k_T_mean` / `k_10_calc` read through `fmt()`, not `SUM_NUM`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din18130_1-I-3 · DIN-18130-1 · DIN-18130-1-03 / -04 · scalar outputs not persisted
@@ -2383,11 +2397,11 @@ Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din1
 - Proposed SQL / config: none (engine-output-materialisation workstream).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### din18130_1-O-1 · DIN-18130-1 · TAB3 · override policy anhaltswert (brief: locked)
+### din18130_1-O-1 · DIN-18130-1 · TAB3 · override policy — emitted locked (the brief's policy); proposal anhaltswert
 - Class: override-policy
-- Chosen now (fail-safe): `anhaltswert` — the `u_0` fill offers "abweichend wählen" + reason, so the standard's own example (720 kN/m² between the rows) is reproducible with a justification; `locked` would block it.
+- Chosen now (fail-safe, fix round 1 — controller ruling): `locked` in the seed (no printed sentence permits intermediate values — contrast Tab. 2 L327); the `u_0_tab3` fill shows the row value without an override control, the applied pressure is typed in the untouched `u_0` input. Proposal: `anhaltswert`, because the standard's own example applies 720 kN/m² between the rows (the linear interpolation) and an override-with-reason would make it reproducible on the fill.
 - Evidence (verbatim, transcript line): "S_{\mathrm{ra}}=0,88" (L1205); "u_{\mathrm{o}}=720 \mathrm{kN} / \mathrm{m}^{2}" (L1215) = 900 − (0,03/0,05)·300; Tab. 3 L427–L429.
-- Proposed SQL / config: `locked` alternative = one word in the seed builder → re-emit.
+- Proposed SQL / config: STAGED block O-1 — `override_policy = 'anhaltswert'` (+ the L1205 — L1215 cue as `override_quote`) on the TAB3 builder → re-emit 20260917101000 before apply, or the post-apply UPDATE named in the block.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din18130_1-O-2 · DIN-18130-1 · TAB5 · override policy anhaltswert

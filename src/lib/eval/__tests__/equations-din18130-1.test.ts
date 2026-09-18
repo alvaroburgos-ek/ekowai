@@ -169,7 +169,7 @@ describe('DIN-18130-1 Plan-3 equations', () => {
     expect(noE.rows[0].values.n_pore_row).toBeNull();
   });
 
-  it('DIN-18130-1-04-D3 bereich_code bands k_10 exactly on the printed Tab. 1 bounds (L205–L209): 3,48·10⁻¹⁰ → 1; 3,77·10⁻⁹ → 2; 2,1·10⁻⁴ → 4; 1e-6 → 2 (inclusive); 1e-8 → 2; > 1e-2 → 5', () => {
+  it('DIN-18130-1-04-D3 bereich_code bands k_10 exactly on the printed Tab. 1 bounds (L205–L209): 3,48·10⁻¹⁰ → 1; 3,77·10⁻⁹ → 1; 3,34·10⁻⁸ → 2; 2,1·10⁻⁴ → 4; 1e-6 → 2 (inclusive); 1e-8 → 2; > 1e-2 → 5', () => {
     const code = (k: number) => computed(run('DIN-18130-1-04-D3', { inputs: [num('k_10', k, 'm/s')] }));
     expect(code(3.48e-10)).toBe(1); // §9.4 → sehr schwach durchlässig
     expect(code(3.34e-8)).toBe(2);  // §9.1

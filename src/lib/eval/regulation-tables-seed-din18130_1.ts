@@ -61,7 +61,7 @@ export function tab1AsTable(): RegulationTable {
   return { standard_code: STD, edition: ED, table_code: 'TAB1', title_de: 'Durchlässigkeitsbereiche in Abhängigkeit vom Durchlässigkeitsbeiwert', clause_reference: '§3.7, Tab. 1', page_ref: null,
     key_columns: ['bereich_code'], value_columns: [{ name: 'bereich', type: 'string' }, { name: 'k_lower', type: 'number', unit: 'm/s' }, { name: 'k_upper', type: 'number', unit: 'm/s' }],
     override_policy: 'locked',
-    override_quote: 'ANMERKUNG: Für bautechnische Zwecke werden fünf Durchlässigkeitsbereiche definiert (siehe Tabelle 1).', // L196
+    override_quote: 'ANMERKUNG: Für bautechnische Zwecke werden fünf Durchlässigkeitsbereiche definiert (siehe Tabelle 1).', // L195
     verification_status: 'md_verified', rows };
 }
 
@@ -97,9 +97,10 @@ export function tab2AsTable(): RegulationTable {
 // ---------------------------------------------------------------------------
 // Tab. 3 — Sättigungsdruck u_0 in Abhängigkeit von der Sättigungszahl S_r (§6.5, L419–L432). Three discrete printed
 // rows (≥ 0,95 / 0,90 / 0,85); in-between values are undefined by the table → the band is an engineer selection
-// (SR-2, created select `s_r_band`). Policy `anhaltswert`, NOT `locked`: the standard's own example 9.3 applies
-// u_o = 720 kN/m² for S_ra = 0,88 (L1205 / L1215 — the linear interpolation between the 0,90 and 0,85 rows), so a
-// locked fill would block the standard's own practice (sign-off din18130_1-O-1; `locked` is the owner's alternative).
+// (SR-2, created select `s_r_band`). Policy `locked` (the brief's policy; fix round 1): no printed sentence permits
+// intermediate values (contrast Tab. 2 L327). The standard's own example 9.3 nevertheless applies u_o = 720 kN/m² for
+// S_ra = 0,88 (L1205 / L1215 — the linear interpolation between the 0,90 and 0,85 rows) — sign-off din18130_1-O-1
+// proposes `anhaltswert` on that evidence; the owner rules.
 // ---------------------------------------------------------------------------
 export const TAB3_U0: ReadonlyArray<{ band: string; label: string; u_0: number; printed: string; quote: string }> = [
   { band: 'ge095', label: 'S_r ≥ 0,95', u_0: 300, printed: '300', quote: String.raw`\hline$\geq 0,95$ & 300 \\` }, // L427
@@ -113,9 +114,10 @@ export function tab3AsTable(): RegulationTable {
   });
   return { standard_code: STD, edition: ED, table_code: 'TAB3', title_de: 'Sättigungsdruck u_0 in Abhängigkeit von der Sättigungszahl S_r', clause_reference: '§6.5, Tab. 3', page_ref: null,
     key_columns: ['s_r_band'], value_columns: [{ name: 'u_0_kn_m2', type: 'number', unit: 'kN/m²' }],
-    override_policy: 'anhaltswert',
-    // L1205 (S_ra = 0,88) — L1215 (u_o = 720 kN/m²): example 9.3 applies a value between the printed rows.
-    override_quote: String.raw`S_{\mathrm{ra}}=0,88 — u_{\mathrm{o}}=720 \mathrm{kN} / \mathrm{m}^{2}`,
+    override_policy: 'locked',
+    // L417 (the table is the rule; no printed sentence permits intermediate values — contrast Tab. 2 L327). O-1 proposes
+    // anhaltswert on the example-9.3 evidence L1205 "S_ra = 0,88" → L1215 "u_o = 720 kN/m²".
+    override_quote: 'Dazu wird das Porenwasser in dem Probekörper mit einem hydrostatischen Druck (Sättigungsdruck, back pressure) belastet (siehe Tabelle 3).',
     verification_status: 'md_verified', rows };
 }
 
