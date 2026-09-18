@@ -1,0 +1,401 @@
+-- DWA-M-820-1 — Plan 3 Task 18 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, gate ids / conditions / md5, column lists) were
+-- captured read-only on 2026-09-18 (src/lib/eval/field-configs/m820_1.prior.json; prod-query.mjs for the
+-- compliance_requirements ids / md5(condition) quoted below — the md5 read from prod, the long cells never retyped).
+-- Transcript lines refer to C:\Users\Ekowai\Desktop\Guidelines\DWA-M-820-1\DWA-M_820-1.md.
+--
+-- Conventions: `s.code = 'DWA-M-820-1'`, worksheets by code, never by id; every UPDATE is guarded by the prior
+-- value (or md5) it replaces so a re-run is a no-op; each block names its rollback. A staged DELETE on a table
+-- without `active` (equations, compliance_requirements) copies the full rows into an archive table created in the
+-- same transaction, guards the DELETE on md5(<content column>), re-inserts on rollback with an EXPLICIT column list,
+-- and the archive table is dropped by the rollback OR by the owner once the deletion is signed off as final.
+-- (No block below deletes a row: prod holds 0 equations for this standard and every gate change is an UPDATE.)
+-- The Plan-3 DATA migrations (20260917101800 seed · 20260917101810 field configs · 20260917101820 equations) must be
+-- applied BEFORE any block that reads a created symbol (eu_threshold_value_anhb23, oberschwellig_code,
+-- eu_threshold_konsistent_code, loseausnahme_code, stakeholder_kategorien_abgedeckt, price_weight_calc_pct,
+-- bewertungskommission_size_calc, applicant_count_calc, shortlisted_count_calc, winner_count, negotiation_rounds_calc,
+-- liability_*_ok, min_annual_revenue_multiplier_max, required_standstill_days_gwb).
+--
+-- Column lists (information_schema, read-only 2026-09-18):
+--   fields: id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values,
+--     validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status,
+--     source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value,
+--     verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote (+ the Plan-1
+--     columns widget, ui_config, lookup, visible_when after 20260911100000)
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference,
+--     severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes,
+--     audited_at, audited_by, requires_attestation
+--
+-- Shorthand used below:  WS(code) = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--                                    WHERE s.code = 'DWA-M-820-1' AND w.code = '<code>')
+--                        FLD(ws, sym) = UPDATE fields f … FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--                                       WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = '<ws>' AND f.symbol = '<sym>' AND f.active
+
+-- =====================================================================================================================
+-- m820_1-E-1 · M820-09 · eu_threshold_value → lookup_fill (ANHB23 by client_organization_type) — the twin retires
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1327 "Die EU-Schwellenwerte betragen laut Verordnung (EU) 2019/1828 vom 30.10.2019 ab dem 01.01.2020 für Planungsleistungen
+-- von Auftraggebern:" L1329 "I der obersten oder oberen Bundesbehörden oder vergleichbarer Institutionen $139.000 €$," L1330 "- für alle
+-- anderen $214.000 €$." Prod: eu_threshold_value (number, EUR, required, VR "either 139000 or 214000 per organization_type") is consumed
+-- by M820-10 and read by REQ-07 (on M820-04) — amendment J: not re-bound by the emitted migration; the twin eu_threshold_value_anhb23
+-- (20260917101810) sits beside it. client_organization_type reaches -09 (consumer_worksheets ["M820-08","M820-09"]).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m820_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m820_1 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-820-1' AND w.code = 'M820-09' AND f.symbol IN ('eu_threshold_value', 'eu_threshold_value_anhb23') AND f.active;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"Anh. B.2.3 — Verordnung (EU) 2019/1828, ab 01.01.2020"}'::jsonb,
+--   lookup = '{"table_code":"ANHB23","role":"value","keys":[{"column":"organisation","from_symbol":"client_organization_type"}],"value":"schwellenwert_eur"}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-09' AND f.symbol = 'eu_threshold_value' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-09' AND f.symbol = 'eu_threshold_value_anhb23' AND f.active AND f.description LIKE 'Plan 3:%';
+-- (eu_threshold_konsistent_code, M820-09-D3, would then always read 1 — its field is retired with the twin:)
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-09' AND f.symbol = 'eu_threshold_konsistent_code' AND f.active AND f.description LIKE 'Plan 3:%';
+-- COMMIT;
+-- Rollback: restore the four Plan-1 columns of eu_threshold_value from fields_archive_m820_1 by id (widget, ui_config, lookup, visible_when);
+--   UPDATE fields SET active = true for the two twins (id from the archive); DROP TABLE fields_archive_m820_1 when no other block uses it
+--   (E-2 shares it — the LAST user carries the DROP).
+-- Note: after E-1 the engineer can no longer type a threshold while client_organization_type is unset (keys_missing renders read-only) —
+--   the field is required today, so the owner should confirm the ordering (-01 before -09) is acceptable. J-1 stays: a newer regulation is
+--   a new ANHB23 edition row, never an in-place update.
+
+-- =====================================================================================================================
+-- m820_1-E-2 · M820-23 · required_standstill_days → lookup_fill (S8_10_3_6 by electronic_transmission) — the twin retires
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1064 "Der Auftraggeber darf den Vertrag frühestens 15 Kalendertage (bei Versendung auf elektronischem Weg 10 Kalendertage) nach
+-- Absendung dieser Informationen schließen (§ 134 Abs. 2 GWB)." Prod: required_standstill_days (number, days, required, description
+-- "Computed: 15 if electronic_transmission==false, else 10") is consumed by M820-24 — amendment J: twin required_standstill_days_gwb emitted.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m820_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m820_1 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-820-1' AND w.code = 'M820-23' AND f.symbol IN ('required_standstill_days', 'required_standstill_days_gwb') AND f.active;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"§ 134 Abs. 2 GWB (§ 8.10.3.6)"}'::jsonb,
+--   lookup = '{"table_code":"S8_10_3_6","role":"value","keys":[{"column":"uebermittlung","from_symbol":"electronic_transmission"}],"value":"frist_tage"}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-23' AND f.symbol = 'required_standstill_days' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-23' AND f.symbol = 'required_standstill_days_gwb' AND f.active AND f.description LIKE 'Plan 3:%';
+-- COMMIT;
+-- Rollback: restore required_standstill_days (four Plan-1 columns) from the archive by id; reactivate the twin; DROP the archive (last user).
+
+-- =====================================================================================================================
+-- m820_1-G-1 · M820-14 · REQ-15 (id a03f78f9-5077-4e85-989d-42c0d1fe1723, block, md5 bb8bdc5d4a88cfe09143542ada518a6e)
+--   — IF-guard the price-weight gate on festpreis_used, then hide price_weight_percent under a Festpreis (needs C-3 too)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1698 "Der Preis ist in diesem Fall kein Zuschlagskriterium mehr."; L1696 "Wird der Preis gewertet, sollte seine Wertung aber
+-- nicht ein so hohes Gewicht erlangen, dass der Preis allein ausschlaggebend für die Vergabeentscheidung wird". Prod: REQ-15 condition
+-- 'price_weight_percent <= 20 OR festpreis_used=true' — a disjunction, not an IF guard; the brief's rule `price_weight_percent ←
+-- festpreis_used == false` was REFUSED by the gate-aware guard (and by the producer guard: consumed by M820-19 — C-3). The "≤ 20"
+-- figure is NOT printed in the Merkblatt (prod VR "<=20% recommended"; L1696 prints no number) — the rewrite keeps prod's 20 as is
+-- and only adds the guard; the figure itself is the owner's (recorded on the sheet).
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'IF festpreis_used == false THEN price_weight_percent <= 20',
+--   description = 'Plan 3 (m820_1-G-1): Preisgewicht ≤ 20 % nur wenn der Preis gewertet wird (kein Festpreis, L1698).'
+--  WHERE c.id = 'a03f78f9-5077-4e85-989d-42c0d1fe1723' AND md5(c.condition) = 'bb8bdc5d4a88cfe09143542ada518a6e';
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements SET condition = 'price_weight_percent <= 20 OR festpreis_used=true' WHERE id = 'a03f78f9-…'
+--   AND condition = 'IF festpreis_used == false THEN price_weight_percent <= 20'.
+-- The field rule (`FLD(M820-14, price_weight_percent) SET visible_when = 'festpreis_used == false' … AND f.visible_when IS NULL`) follows
+-- ONLY together with C-3 (the consumer M820-19 would inherit null for a hidden field).
+
+-- =====================================================================================================================
+-- m820_1-G-2 · M820-09 · NEW warn gate on eu_threshold_konsistent_code (typed threshold = Anh. B.2.3)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1327–L1330 (the two printed thresholds). Prod: no gate compares the typed eu_threshold_value with the printed value.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-27', 'EU-Schwellenwert entspricht Anh. B.2.3', 'eu_threshold_konsistent_code == 1', 'Anhang B.2.3', 'warn',
+--        'Plan 3 (m820_1-G-2): der eingetragene EU-Schwellenwert entspricht dem gedruckten Wert zum Organisationstyp (139.000 € / 214.000 €, VO (EU) 2019/1828).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-1' AND w.code = 'M820-09'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-27');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-27' AND worksheet_template_id = WS(M820-09) AND description LIKE 'Plan 3 (m820_1-G-2)%'.
+-- Note: eu_threshold_konsistent_code is scalar-only (not materialised by the save path — amendment D); the gate evaluates on the
+-- form / report / snapshot where the engine computes it. After E-1 the code is always 1 and this gate retires with it.
+
+-- =====================================================================================================================
+-- m820_1-G-3 · M820-04 → M820-09 · REQ-07 (fc792f58-0530-4e0b-80cc-e70b9431c5de, block, md5 2a0ff00c0efd0d54f3c34ff21b24c16d) and
+--   M820-10 · REQ-08 (46e473fc-b132-4441-98af-8714d5e35586, block, md5 05c772bcfc41d111251f7aa2c900f845) — onto oberschwellig_code
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L864 "Erreicht oder übersteigt der geschätzte Netto-Gesamtwert den EU-Schwellenwert ist ein VgV-F-Verfahren durchzuführen. Liegt er
+-- darunter, hat der Auftraggeber ein Suchverfahren durchzuführen oder er kann in zugelassenen Ausnahmefällen eine Direktvergabe (siehe 8.8)
+-- vornehmen." Prod: REQ-07 '(IF estimated_engineering_fee >= eu_threshold_value THEN threshold_status == ''oberschwellig'') AND (IF
+-- threshold_status == ''oberschwellig'' THEN estimated_engineering_fee >= eu_threshold_value)' sits on M820-04, where NONE of its three
+-- symbols resolves (capture: estimated_engineering_fee reaches -09 / -13, eu_threshold_value and threshold_status live on -09) — the gate is
+-- `pending` on every project today (data observation). REQ-08 'IF oberschwellig_check == true THEN procurement_procedure == ''vgv_f''' reads
+-- the manual boolean oberschwellig_check (inherited on -10).
+-- Step 1 (move REQ-07 to the worksheet where its symbols live and read the code):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = WS(M820-09),
+--   condition = 'IF oberschwellig_code == 1 THEN threshold_status == ''oberschwellig'' AND IF oberschwellig_code == 0 THEN threshold_status == ''unterschwellig''',
+--   description = 'Plan 3 (m820_1-G-3): Schwellenwert-Status folgt dem berechneten Vergleich Netto-Gesamtwert ≥ EU-Schwellenwert (§ 8.6).'
+--  WHERE c.id = 'fc792f58-0530-4e0b-80cc-e70b9431c5de' AND md5(c.condition) = '2a0ff00c0efd0d54f3c34ff21b24c16d';
+-- COMMIT;
+-- Step 2 (REQ-08 reads the code instead of the manual boolean — oberschwellig_code must first reach M820-10: consumer edit inside this block):
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M820-10'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-09' AND f.symbol = 'oberschwellig_code' AND f.active AND f.consumer_worksheets IS NULL;
+-- UPDATE compliance_requirements c SET condition = 'IF oberschwellig_code == 1 THEN procurement_procedure == ''vgv_f'''
+--  WHERE c.id = '46e473fc-b132-4441-98af-8714d5e35586' AND md5(c.condition) = '05c772bcfc41d111251f7aa2c900f845';
+-- COMMIT;
+-- Rollback: Step 2 — restore the REQ-08 condition text (guard on the new text), consumer_worksheets = NULL on oberschwellig_code; Step 1 —
+--   worksheet_template_id = WS(M820-04) and the archived condition (guard on the new text; the 191-char original is in the prior capture).
+-- CAUTION: oberschwellig_code is scalar-only and NOT server-materialised (amendment D / I-2): a consumer on M820-10 would inherit nothing
+--   until the engine-output materialisation workstream lands — Step 2 waits for that; Step 1 is safe today (same-worksheet read).
+--   The compound guard in Step 1 is a hand-applied text (the emitter's IF-exemption accepts plain compares only).
+
+-- =====================================================================================================================
+-- m820_1-G-4 · M820-04 → M820-09 · REQ-24 (662aa41f-cce5-41c6-9d8c-31657c5433fa, warn, EMPTY condition) — Loseausnahme onto loseausnahme_code
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1366 (§ 3 Abs. 9 VgV) "… unter 80000 Euro und bei Bauleistungen unter 1 Million Euro liegt und die Summe der Nettowerte dieser Lose
+-- 20 Prozent des Gesamtwertes aller Lose nicht übersteigt." Prod: REQ-24 "Loseausnahme korrekt angewendet" has an empty condition (manual) and
+-- sits on M820-04; loseausnahme_applicable (boolean, -09, consumed by -10) is typed.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = WS(M820-09),
+--   condition = 'IF loseausnahme_applicable == true THEN loseausnahme_code == 1',
+--   description = 'Plan 3 (m820_1-G-4): eine angewendete Loseausnahme muss die Grenzen des § 3 Abs. 9 VgV einhalten (Register lose).'
+--  WHERE c.id = '662aa41f-cce5-41c6-9d8c-31657c5433fa' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- Rollback: condition = '' and worksheet_template_id = WS(M820-04), guarded on the new text. loseausnahme_code is register-fed (materialised on
+--   save) — the gate evaluates on the persisted value. Severity stays warn (the owner may raise it to block: "kann … abweichen" is a permission
+--   whose conditions are statutory).
+
+-- =====================================================================================================================
+-- m820_1-G-5 · M820-01 → M820-03 · REQ-04 (a1e39e32-c3d3-4ded-8726-8d14ab4d100b, warn, EMPTY condition) — Beteiligte dokumentiert
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L603 "Bei jeder Planung gibt es einen Auftraggeber und oftmals mehrere Auftragnehmer. … Die Arbeit des Projektteams wirkt auf die
+-- Öffentlichkeit. Behörden stellen weitere wesentliche Beteiligte dar. In einer späteren Phase ergänzen ausführende Firmen das Team."
+-- The Merkblatt names five parties but does not print "all five must be listed" — the threshold below (≥ 2: Auftraggeber and at least one
+-- further party) is the executor's reading; the owner may choose 5.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = WS(M820-03), condition = 'stakeholder_kategorien_abgedeckt >= 2',
+--   description = 'Plan 3 (m820_1-G-5): mindestens zwei §5-Kategorien in der Beteiligten-Matrix (Auftraggeber + weitere Beteiligte).'
+--  WHERE c.id = 'a1e39e32-c3d3-4ded-8726-8d14ab4d100b' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- Rollback: condition = '' and worksheet_template_id = WS(M820-01), guarded on the new text.
+
+-- =====================================================================================================================
+-- m820_1-G-6 · M820-10 · NEW gate: Direktvergabe needs a documented reason (with C-2)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L914 "Die Gründe für eine Direktvergabe sind in jedem Fall zu dokumentieren, entweder im Vergabevermerk oder an anderer Stelle."
+-- Prod: procedure_rationale (text, required, VR "non-empty") is unconditional; no gate reads it.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-28', 'Gründe der Direktvergabe dokumentiert', 'IF procurement_procedure == direktvergabe THEN procedure_rationale IS NOT NULL', '§ 8.8', 'block',
+--        'Plan 3 (m820_1-G-6): die Gründe für eine Direktvergabe sind in jedem Fall zu dokumentieren (L914).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-1' AND w.code = 'M820-10'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-28');
+-- COMMIT;
+-- Rollback: DELETE … WHERE code = 'REQ-28' AND description LIKE 'Plan 3 (m820_1-G-6)%'. No field named direktvergabe exists on -10 (capture) —
+--   the bare token compares as the literal (Task 13b). The field rule `procedure_rationale ← procurement_procedure == 'direktvergabe'` is C-2.
+
+-- =====================================================================================================================
+-- m820_1-G-7 · M820-13 · NEW warn gate: Faktor 1,5 for large, long-running projects (REQ-12 ≤ 2,0 stays)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1623 "Als Mindestjahresumsatz nach § 45 Abs .2 VgV darf der Auftraggeber nicht mehr als das Zweifache des geschätzten Auftragswerts
+-- verlangen. … Bei großen, langlaufenden Projekten sollte das geforderte Verhältnis Jahresumsatz zu Jahresauftragswert den Faktor 1,5 nicht
+-- überschreiten." Prod: REQ-12 (6fc6a2fd-0f53-46f9-a0fd-6e6ef92bd8c2, block) 'min_annual_revenue_multiplier <= 2.0' (untouched — the statutory
+-- bound). The 1,5 is "sollte" ⇒ warn.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-29', 'Mindestjahresumsatz-Faktor bei großen, langlaufenden Projekten ≤ 1,5', 'IF large_long_project == true THEN min_annual_revenue_multiplier <= 1.5', 'Anhang E.1.4.1', 'warn',
+--        'Plan 3 (m820_1-G-7): "sollte … den Faktor 1,5 nicht überschreiten" (L1623) — Empfehlung, daher warn.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-1' AND w.code = 'M820-13'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-29');
+-- COMMIT;
+-- Rollback: DELETE … WHERE code = 'REQ-29' AND description LIKE 'Plan 3 (m820_1-G-7)%'. Alternative (register-free, same effect): the created
+--   min_annual_revenue_multiplier_ok == 1 (reads the lookup_fill twin; anhaltswert override possible — O-1).
+
+-- =====================================================================================================================
+-- m820_1-G-8 · M820-16 · REQ-09 (c4b0fd61-6fa8-45fd-8305-2a751c229095, block, md5 a560b1d79ac836305ed9a7cbed904236) — onto the register count
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L843–L844 "Insbesondere bei VgV-F-Verfahren hat der öffentliche Auftraggeber gemäß § 58 Abs .5 VgV mindestens zwei Personen für die
+-- Wertung einzusetzen." Prod: 'IF procurement_procedure == ''vgv_f'' THEN bewertungskommission_size >= 2' reads the manual size.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'IF procurement_procedure == ''vgv_f'' THEN bewertungskommission_size_calc >= 2'
+--  WHERE c.id = 'c4b0fd61-6fa8-45fd-8305-2a751c229095' AND md5(c.condition) = 'a560b1d79ac836305ed9a7cbed904236';
+-- COMMIT;
+-- Rollback: restore the condition text (guard on the new text). Apply together with D-14 (the manual size retires). bewertungskommission_size_calc
+--   is register-fed (materialised on save).
+
+-- =====================================================================================================================
+-- m820_1-G-9 · M820-18 · REQ-19 (242a59b8-dcdb-455f-a5c0-78eff7addb6c, block, md5 5ba06773511c88dec26fb0b422312c6d) — onto the register counts,
+--   plus exactly one Zuschlag
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1000 "… die vorab bekannt gegebene Zahl geeigneter Bewerber ermittelt hat, werden diese zur Abgabe der Erstangebote aufgefordert";
+-- L1060 "… an denjenigen Bieter, der gemäß den Zuschlagskriterien die höchste Punktzahl erreicht hat." Prod: 'applicant_count >= shortlisted_count'.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'applicant_count_calc >= shortlisted_count_calc'
+--  WHERE c.id = '242a59b8-dcdb-455f-a5c0-78eff7addb6c' AND md5(c.condition) = '5ba06773511c88dec26fb0b422312c6d';
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'REQ-30', 'Genau ein erfolgreicher Bieter', 'IF winner_count >= 1 THEN winner_count == 1', '§ 8.10.3.6; Anhang F Nr. 9', 'block',
+--        'Plan 3 (m820_1-G-9): der Zuschlag geht an denjenigen Bieter mit der höchsten Punktzahl (L1060) — höchstens eine Zeile mit Zuschlag.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-1' AND w.code = 'M820-18'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'REQ-30');
+-- COMMIT;
+-- Rollback: restore REQ-19's text (guard on the new text); DELETE REQ-30 by description. Apply with D-16 / D-17. Note: with the register the
+--   inequality is true by construction (a shortlisted row is a row) — the owner may prefer to retire REQ-19 and keep only REQ-30.
+
+-- =====================================================================================================================
+-- m820_1-G-10 · M820-20 · REQ-20 (f7248e57-b84e-48a4-b6be-d99c85178ce7, block, md5 e8414a0f3aad33ad8e7ca784b4511198) — onto negotiation_rounds_calc
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1025 "Die Verhandlungsrunde schließt sich an die Abgabe des Erstangebots an. Weitere Verhandlungsrunden können folgen."; L1780 "Das
+-- Verhandlungsgespräch jeden Bieters muss zusammengefasst und dargestellt werden". Prod: 'negotiation_rounds >= 1'.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'negotiation_rounds_calc >= 1'
+--  WHERE c.id = 'f7248e57-b84e-48a4-b6be-d99c85178ce7' AND md5(c.condition) = 'e8414a0f3aad33ad8e7ca784b4511198';
+-- COMMIT;
+-- Rollback: restore 'negotiation_rounds >= 1' (guard on the new text). Apply with D-20. Note: negotiation_rounds_calc is open (null) without a row,
+--   so the gate reads pending — never a phantom pass — until the first Verhandlungsgespräch is entered. A stricter reading ("jeden Bieters") is
+--   `verhandlungsgespraeche_count >= shortlisted_count_calc` — needs the -18 count to reach -20 (consumer edit) and is left to the owner.
+
+-- =====================================================================================================================
+-- m820_1-G-11 · M820-10 → M820-22 · REQ-13 (69fe64df-d33c-419c-8068-51b3332b75c5, warn, EMPTY condition) — Haftpflicht ≥ Tab. D.1 Anhaltswert
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1629 "Anhaltspunkt für die Höhe der geforderten Versicherungssumme kann Tabelle D. 1 in Anhang D geben. Dabei sind für die Festlegung
+-- der Höhe auch projektspezifische Risiken abzuschätzen."; Tab. D.1 L1465–L1470. Prod: REQ-13 "Haftpflichtversicherung-Anforderungen" has an
+-- empty condition on M820-10. The table is an Anhaltswert (RBBau recommendation, L1454) ⇒ warn.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = WS(M820-22), condition = 'liability_personen_ok == 1 AND liability_sonstige_ok == 1',
+--   description = 'Plan 3 (m820_1-G-11): geforderte Deckungssummen mindestens in Höhe der Tab.-D.1-Anhaltswerte zu den geschätzten Baukosten (Anhang D / E.1.4.2).'
+--  WHERE c.id = '69fe64df-d33c-419c-8068-51b3332b75c5' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- Rollback: condition = '' and worksheet_template_id = WS(M820-10), guarded on the new text. CAUTION: the two codes are scalar-only (not
+--   server-materialised) and read the INHERITED estimated_construction_cost / liability_insurance_* — they compute on the form / report /
+--   snapshot, but the save-path visibility / materialiser resolves own fields only (I-2); above 50 Mio. € the codes are open (J-2) and the gate
+--   reads pending.
+
+-- =====================================================================================================================
+-- m820_1-C-1 · M820-17 · publication_date / ted_notice_id ← procurement_procedure == 'vgv_f' (REFUSED by the producer guard)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L965 (§ 8.10.2.3) "Die beabsichtigte Auftragsvergabe muss beim Amt für Veröffentlichungen der Europäischen Union mit dem vorgegebenen
+-- Bekanntmachungsmuster (siehe http://simap.europa.eu) europaweit bekannt gemacht werden, § 37 VgV ." — the VgV-F procedure (§ 8.10); REQ-18
+-- already reads both fields IF-guarded on vgv_f.
+-- Prod: publication_date consumed by M820-18, ted_notice_id by M820-18 / M820-24 — a hidden producer nulls the inherited values. The gate-aware
+-- guard PASSES (REQ-18 'IF procurement_procedure == ''vgv_f'' THEN (publication_date IS NOT NULL AND ted_notice_id IS NOT NULL)' — same
+-- driver / op / literal). Option A (drop the consumers — -18 / -24 read the dates for display only):
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-17' AND f.symbol = 'publication_date' AND f.active AND f.consumer_worksheets = ARRAY['M820-18'];
+-- UPDATE fields f SET consumer_worksheets = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-17' AND f.symbol = 'ted_notice_id' AND f.active AND f.consumer_worksheets = ARRAY['M820-18','M820-24'];
+-- UPDATE fields f SET visible_when = 'procurement_procedure == ''vgv_f''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-17' AND f.symbol IN ('publication_date', 'ted_notice_id') AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: consumer_worksheets back to the captured arrays; visible_when = NULL (guard on the rule text). Option B: keep the consumers and
+--   leave the two dates visible for every procedure (today's state — fail-safe).
+
+-- =====================================================================================================================
+-- m820_1-C-2 · M820-10 · procedure_rationale ← procurement_procedure == 'direktvergabe' (REFUSED by the producer guard; with G-6)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L914 "Die Gründe für eine Direktvergabe sind in jedem Fall zu dokumentieren". Prod: consumed by M820-24 (Dokumentationsabschluss
+-- displays it). The field is required + VR "non-empty" for EVERY procedure today; the guideline requires the reason for a Direktvergabe.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-10' AND f.symbol = 'procedure_rationale' AND f.active AND f.consumer_worksheets = ARRAY['M820-24'];
+-- UPDATE fields f SET is_required = false, visible_when = 'procurement_procedure == ''direktvergabe''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-10' AND f.symbol = 'procedure_rationale' AND f.active AND f.is_required AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: consumer_worksheets = ARRAY['M820-24'], is_required = true, visible_when = NULL (guards on the new values). Requires G-6 (the
+--   conditional gate) in the same ratification — otherwise the reason is no longer enforced for a Direktvergabe. Alternative: keep the field
+--   visible for every procedure and only apply G-6 (no hide — the rationale is useful for any procedure choice).
+
+-- =====================================================================================================================
+-- m820_1-C-3 · M820-14 · price_weight_percent consumed by M820-19 — needed for the G-1 field rule; or switch the consumer to the twin (D-12)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Prod: consumer_worksheets ["M820-19"]. Option A: drop the consumer (M820-19 shows the weight for display only) and apply the G-1 field rule.
+-- Option B (with D-12): the twin price_weight_calc_pct takes over (register-fed, materialised) and reaches -19:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M820-19'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-14' AND f.symbol = 'price_weight_calc_pct' AND f.active AND f.consumer_worksheets IS NULL;
+-- COMMIT;
+-- Rollback: consumer_worksheets = NULL on the twin. CAUTION (fll_naturteich-G-1 class): once the twin carries consumers, the emitter refuses its
+--   emitted visible_when (`festpreis_used == false`) at the next re-emit — withdraw that rule then (a hidden producer nulls the inherited value)
+--   or keep the twin visible and let REQ-15 (G-1) carry the Festpreis switch.
+
+-- =====================================================================================================================
+-- m820_1-C-4 · M820-01 · estimated_construction_cost consumer_worksheets += M820-13 (so the Tab. D.1 twins could also sit beside the -13 inputs)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Prod: ["M820-09","M820-22"] — the brief placed the Tab. D.1 pair on M820-13, where the driver does not resolve; the pair was emitted on
+-- M820-22 instead (the inputs are inherited there). Optional:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M820-09','M820-22','M820-13'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-01' AND f.symbol = 'estimated_construction_cost' AND f.active AND f.consumer_worksheets = ARRAY['M820-09','M820-22'];
+-- COMMIT;
+-- Rollback: consumer_worksheets = ARRAY['M820-09','M820-22'] (guard on the new array). A second pair of twins on -13 would then be a new
+--   Plan-3 entry (not staged here — one Anhaltswert pair suffices).
+
+-- =====================================================================================================================
+-- m820_1-D-1 … D-24 · deactivation pairs (register / table twin ↔ existing typed scalar) — amendment K, one block per pair
+-- Generic switch (per pair; every UPDATE guarded on the prior value; apply only after the matching G-block where one exists):
+--   (a) manual field → derived:  FLD(ws, <manual>) SET widget = 'derived', ui_config = NULL WHERE f.widget IS NULL;
+--   (b) equation output → manual: UPDATE equations e SET output_symbol = '<manual>', formula = replace(e.formula, '<twin> = ', '<manual> = ')
+--        FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE e.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1'
+--        AND w.code = '<ws>' AND e.equation_number = '<n>' AND e.output_symbol = '<twin>' AND e.description LIKE 'Plan 3:%';
+--   (c) twin retires:             FLD(ws, <twin>) SET active = false WHERE f.description LIKE 'Plan 3:%';
+--   (d) register footer:          FLD(ws, <register>) SET ui_config = jsonb_set(ui_config, '{footer}', replace(ui_config->>'footer', '"<twin>"', '"<manual>"')::jsonb);
+--   Rollback = (d) reversed, (c) active = true, (b) output_symbol / formula back to the twin, (a) widget = NULL — each guarded on the forward value.
+--   Where the manual lives on ANOTHER worksheet (D-13 / D-18 / D-19) the equation cannot move (a register-fed row lives on its register's
+--   worksheet): the twin STAYS and gets `consumer_worksheets = ARRAY['<manual ws>']`, the manual is deactivated, its readers re-pointed.
+--   A text manual (D-15 chairperson, D-19 winning_bidder, D-21 … D-23) has no numeric twin: the register carries the fact (name / Vorsitz flag /
+--   Datum / Thema / Ergebnis) — the scalar is retired on ratification, its consumers re-pointed to the register (ReadOnlyRegisterTable).
+-- ---------------------------------------------------------------------------------------------------------------------
+-- m820_1-D-1  · M820-13 liability_insurance_personenschaden (consumed by -22; REQ-13 empty) ↔ M820-22 liability_personen_tabd1 (M820-22-D1)
+--   ☐ RATIFIED ☐ REJECTED ☐ DEFER — an Anhaltswert never REPLACES the required figure (L1629 "auch projektspezifische Risiken abzuschätzen"):
+--   proposed = keep the typed input as the requirement, the twin as the printed floor (G-11) — i.e. NO switch; retire nothing. Evidence L1629 / L1475.
+-- m820_1-D-2  · M820-13 liability_insurance_sonstige ↔ M820-22 liability_sonstige_tabd1 (M820-22-D2) — same ruling as D-1 (no switch proposed).
+-- m820_1-D-3  · M820-22 haftpflicht_versicherungssumme (orphan, required, no VR) ↔ the inherited liability_insurance_* pair + the Tab. D.1 twins
+--   ☐ RATIFIED ☐ REJECTED ☐ DEFER — inventory §4 re-typed duplicate: proposed = deactivate haftpflicht_versicherungssumme (the -13 pair is
+--   inherited on -22 and now compared with Tab. D.1): FLD(M820-22, haftpflicht_versicherungssumme) SET active = false WHERE f.active; rollback active = true.
+-- m820_1-D-4  · M820-09 oberschwellig_check (boolean, required, consumed by -10 / -17, read by REQ-08) ↔ oberschwellig_code (M820-09-D1)
+--   ☐ RATIFIED ☐ REJECTED ☐ DEFER — a boolean cannot become a derived number output: proposed = after G-3 Step 2, deactivate the boolean
+--   (FLD(M820-09, oberschwellig_check) SET active = false) and let REQ-08 read the code; rollback active = true. Blocked by amendment D
+--   (scalar-only output not materialised — the -10 / -17 consumers need the engine-output workstream first).
+-- m820_1-D-5  · M820-09 threshold_status (enum, required, consumed by -10 / -11 / -12 / -17, REQ-07) ↔ oberschwellig_code — proposed = KEEP the
+--   enum (it is the driver the downstream worksheets switch on) and enforce consistency through G-3 Step 1; no switch. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-6  · M820-09 cost_estimate_near_threshold (boolean, consumed by -10) ↔ cost_estimate_near_threshold_code (M820-09-D2) — boolean:
+--   proposed = deactivate the boolean once the code reaches -10 (same materialisation caveat as D-4). ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-7  · M820-09 lot_value_threshold_services (number, consumed by -10, VR "fixed 80000") ↔ lot_value_threshold_services_calc (M820-09-D4)
+--   ☐ RATIFIED ☐ REJECTED ☐ DEFER — generic switch (a)–(c); the consumer -10 then needs the twin's consumer edit (scalar-only, not materialised —
+--   until then the manual stays; the "fixed" VR is display-dead today).
+-- m820_1-D-8  · M820-09 lot_value_threshold_construction (orphan) ↔ lot_value_threshold_construction_calc (M820-09-D5) — generic switch (a)–(c). ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-9  · M820-09 lot_share_threshold_pct (consumed by -10) ↔ lot_share_threshold_pct_calc (M820-09-D6) — as D-7. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-10 · M820-09 eu_threshold_review_interval_years (orphan, VR "fixed 2") ↔ eu_threshold_review_interval_years_calc (M820-09-D7) — generic switch. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-11 · M820-09 loseausnahme_applicable (boolean, consumed by -10) ↔ loseausnahme_code (M820-09-D14, register-fed, materialised)
+--   ☐ RATIFIED ☐ REJECTED ☐ DEFER — proposed = KEEP the boolean as the engineer's decision ("kann … abweichen" is a choice) and let G-4 check it
+--   against the code; no switch.
+-- m820_1-D-12 · M820-14 price_weight_percent (number, required, consumed by -19, REQ-15) ↔ price_weight_calc_pct (M820-14-D2, register-fed)
+--   ☐ RATIFIED ☐ REJECTED ☐ DEFER — generic switch (a)–(d) after G-1 + C-3 Option B; REQ-15 then reads the switched symbol unchanged.
+-- m820_1-D-13 · M820-11 qualitaets_kriterien_anzahl (orphan, required) ↔ M820-14 qualitaets_kriterien_count (M820-14-D3) — other worksheet:
+--   proposed = deactivate the -11 manual, twin gets consumer_worksheets = ARRAY['M820-11']. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-14 · M820-16 bewertungskommission_size (orphan, required, REQ-09) ↔ bewertungskommission_size_calc (M820-16-D1) — generic switch
+--   (a)–(d) together with G-8. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-15 · M820-16 bewertungskommission_chairperson (text, required) ↔ the `vorsitz` flag / bewertungskommission_vorsitz_count (M820-16-D2)
+--   — text: proposed = deactivate the text once a Vorsitz row exists (the name is in the register). ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-16 · M820-18 applicant_count (number, required, consumed by -19, REQ-19) ↔ applicant_count_calc (M820-18-D1) — generic switch with G-9. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-17 · M820-18 shortlisted_count (number, required, consumed by -19, REQ-19) ↔ shortlisted_count_calc (M820-18-D2) — generic switch with G-9. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-18 · M820-19 final_offers_count (number, required, consumed by -23) ↔ M820-18 final_offers_count_calc (M820-18-D3) — other worksheet:
+--   twin gets consumer_worksheets = ARRAY['M820-19','M820-23'], the -19 manual is deactivated, its VR ">=1" becomes a gate if the owner wants one. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-19 · M820-23 winning_bidder (text, required, consumed by -24 / -25) ↔ the `winner` flag / winner_count (M820-18-D4) — text: proposed =
+--   KEEP the text (the Zuschlag letter names the bidder — L1786) and add G-9's "exactly one winner" gate; no switch. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-20 · M820-20 negotiation_rounds (number, required, consumed by -23, REQ-20) ↔ negotiation_rounds_calc (M820-20-D1) — generic switch with G-10
+--   (twin gets consumer_worksheets = ARRAY['M820-23']). ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-21 · M820-20 verhandlung_datum (date, required) ↔ verhandlungsrunden.datum — the single scalar cannot hold N talks (L1780 "jeden
+--   Bieters"): proposed = deactivate the scalar. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-22 · M820-20 verhandlung_thema (text, required) ↔ verhandlungsrunden.thema — as D-21. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-23 · M820-20 verhandlung_ergebnis (text, required) ↔ verhandlungsrunden.ergebnis — as D-21. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-24 · M820-20 protokoll_signiert (boolean, required) ↔ verhandlungsrunden.protokoll_signiert / protokolle_unsigniert_count (M820-20-D3)
+--   — proposed = deactivate the scalar; optional gate 'protokolle_unsigniert_count == 0'. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+-- =====================================================================================================================
+-- m820_1-X-1 · M820-06 / M820-07 · risk_register / risk_mitigation_plan — bespoke editors (Plan 2b), untouched by this task (the brief's ruling).
+-- m820_1-I-1 · M820-23 · contract_invalidity_code over information_letters_sent (boolean) — not encodable as an equation (a boolean is not a
+--   formula input); REQ-26 (d4d49161-d568-4ff5-857d-04b4aee54885, block, 'information_letters_sent == true AND contract_invalidity_135_gwb_risk
+--   == false') already binds both booleans. No SQL. If the owner wants the risk flag derived: a gate 'IF information_letters_sent == false THEN
+--   contract_invalidity_135_gwb_risk == true' (warn) is the boolean-native form.
+-- Observation (no block): REQ-05 (3c03b875-ef9f-485d-8950-2e7675f28ae0, warn, 'risk_register IS NOT NULL AND risk_mitigation_plan IS NOT NULL')
+--   sits on M820-04 while risk_register lives on -06 (consumed by -07 / -25) and risk_mitigation_plan on -07 (consumed by -25) — pending on every
+--   project; a move to M820-07 (where both resolve) is the G-class fix for the owner's next touch of the bespoke editors.
