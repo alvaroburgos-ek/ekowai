@@ -1,0 +1,13 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'S5_LIMITS_P';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'S5_LIMITS_SPUR';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'S5_LIMITS_APP';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'S5_1_3_1_P';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'BILD3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'S5_4_3_ORG';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'S5_5_KLEIN';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'S5_3_3_5_UV';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'TABELLE3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'TABELLE4';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-187' AND edition = '2025-09' AND table_code = 'TABELLE5';
+COMMIT;

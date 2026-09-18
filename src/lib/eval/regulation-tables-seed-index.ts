@@ -29,6 +29,7 @@ import { fllNaturteichSeedTables } from './regulation-tables-seed-fll_naturteich
 import { m8203SeedTables } from './regulation-tables-seed-m820_3';
 import { din181301SeedTables } from './regulation-tables-seed-din18130_1';
 import { m205SeedTables } from './regulation-tables-seed-m205';
+import { m187SeedTables } from './regulation-tables-seed-m187';
 
 export type SeedBuilder = { build: () => RegulationTable[]; ts: string; slugFile: string; supersedes?: string };
 
@@ -45,7 +46,8 @@ export const SEED_BUILDERS: Record<string, SeedBuilder> = {
   m820_3: { build: m8203SeedTables, ts: '20260917100900', slugFile: 'm820_3' }, // Plan 3 Task 9: DWA-M-820-3 (ten QE catalogues, 193 items)
   din18130_1: { build: din181301SeedTables, ts: '20260917101000', slugFile: 'din18130_1' }, // Plan 3 Task 10: DIN-18130-1 (seven tables)
   m205: { build: m205SeedTables, ts: '20260917101100', slugFile: 'm205' }, // Plan 3 Task 11: DWA-M-205 (fifteen tables)
-  // Plan-3 tasks append one line each, e.g. m187: { build: m187SeedTables, ts: '20260917101200', slugFile: 'm187' }
+  m187: { build: m187SeedTables, ts: '20260917101200', slugFile: 'm187' }, // Plan 3 Task 12: DWA-M-187 (eleven tables)
+  // Plan-3 tasks append one line each, e.g. din276: { build: din276SeedTables, ts: '20260917101300', slugFile: 'din276' }
 };
 
 /** Slugs that no other builder supersedes — the set the runtime fallback serves. */

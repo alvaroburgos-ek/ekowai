@@ -2789,3 +2789,343 @@ Report: `reports/plan-3-m205.md` · STAGED SQL: `scripts/verification/m205-STAGE
 - **A c_out = 0 sample** ("nicht nachweisbar") has no log reduction: `M205-24-D1` / `-D2` filter on `c_out > 0` (conditional aggregate); the register note asks for the detection limit.
 - **`M205-17-D3` for Luft** is `manual_required: Operand ist keine Zahl: null` by design (no printed O₂ factor for air).
 - **Bundle growth:** ~26 KB of lifted quotes (`Q`) ride in the client bundle via the seed fallback (Task-0 observation; Task 30 measures).
+
+## Task 12 — DWA-M-187 (m187)
+
+Report: `reports/plan-3-m187.md` · STAGED SQL: `scripts/verification/m187-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-187\DWA-M_187_GD.md` (lines cited; 1252 lines read end-to-end) · prod capture `src/lib/eval/field-configs/m187.prior.json` (2026-09-18, read-only; 139 fields, 225 sections, 4 equations; 15 compliance rows read with `prod-query.mjs`). Ids follow the Task-12 brief where it names them (G-1 … G-6, R-1, U-1, J-1, X-1, X-2); the rest use the skeleton letters (G = gate, R = equation deactivation, C = consumer-edit / refused visibility, D = single-source pair, O = override policy, U = unreadable cell, J = judgment reading, F = text-only formula, I = interface gap, X = cross-standard / prod hygiene). Nothing below is applied.
+
+### m187-G-1 · DWA-M-187 · M187-05 / -06 / -07 → -06 / -11 / -16 / -22 · REQ-02 / REQ-03 (×2) / REQ-04 (×2) → variant-guarded limit gates
+- Class: gate-guard (replacement of five verified block gates)
+- Chosen now (fail-safe): the five gates stay (REQ-03 `q_Dr_RBF <= 0.03` and REQ-04 `q_Dr_RBF == 0.01 AND h_FK >= 1.0` contradict each other on M187-06 / -07 for every project); the fills `h_FK_min_p` (-06), `h_FK_min_spur` / `q_Dr_RBF_limit_spur` (-11), `q_Dr_RBF_limit_mikro` / `h_FK_min_mikro` (-16) and the derivation `h_FK_min_klein` (-22) are emitted as visible twins.
+- Evidence (verbatim, transcript line): "Der Filterkörper muss in Abweichung von den Festlegungen in Arbeitsblatt DWA-A 178 unabhängig von der Art des Entwässerungssystems (Misch- oder Trennsystem) eine Höhe von $h_{F K} \geqslant 1,00 \mathrm{~m}$ haben." (L514); "Zu a) Die Erhöhung der Kontaktzeit erfordert eine Begrenzung der Drosselabflussspende $q_{\text {Dr, RBF }}$ auf $0,01 \mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)$" (L599); "Zu b) Bei einer Beimischung von GAK ist eine Filterschichtstärke von 1 m vorzusehen. Die Drosselabflussspende ist auf $q_{\mathrm{Dr}, \mathrm{RBF}} \leqslant 0,03 \mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)$ zu begrenzen." (L601); "Es ist eine Filterkörperhöhe von $h_{\mathrm{FK}} \geqslant 1 \mathrm{~m}$ vorzusehen." (L603); "Abweichend ist jedoch sicherzustellen, dass bei Volleinstau des Retentionsraums die spezifische Drosselabflussspende auf $q_{\mathrm{Dr}, \mathrm{RBF}}=0,01 \mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)$ begrenzt ist." (L675); "sollte die Höhe des Filterkörpers $h_{\text {FK }} \geqslant 1,0 \mathrm{~m}$ betragen" (L677); "Die erforderliche Höhe des Filterkörpers beträgt im konsolidierten Zustand $h_{\mathrm{FK}} \geqslant 0,25 \mathrm{~m}$." (L926); "In diesem Fall kann die Filterstärke auf $h_{F K} 0,2 \mathrm{~m}$ verringert werden." (L930); capture: REQ-02 `2fd5094c…` (M187-05), REQ-03 `a1ff96c6…` / `68ffd495…`, REQ-04 `e2e0fa89…` / `7ecbff21…` (M187-06 / -07), all block, none reads a driver.
+- Proposed SQL / config: STAGED block m187-G-1 (archive into `compliance_requirements_archive_m187`, md5-guarded DELETE, six guarded INSERTs — the Mikroorganismen h_FK gate as warn ("sollte"), explicit-column rollback).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-2 · DWA-M-187 · M187-08 → -20 / -19 · REQ-05 / REQ-05-2 (both sizing rules at once) → `daten_vorhanden` either / or
+- Class: gate-guard + severity (q_krit "sollte" → warn) + worksheet move
+- Chosen now (fail-safe): REQ-05 / -05-2 stay on M187-08 (block; they demand `B_CSB <= 20 AND A_F_pro_AEb >= 750 …` together); the created select `daten_vorhanden` switches the twins `CSB_fracht_d` / `B_CSB_calc` (ja) and `A_F_min_ohne_daten` (nein) on M187-20.
+- Evidence (verbatim, transcript line): "Die Filterfläche ist so zu bemessen, dass die CSB-Fracht $\leqslant 20 \mathrm{~g}$ CSB $/\left(\mathrm{m}^{2} \cdot \mathrm{~d}\right)$ bezogen auf die Gesamtfilterfläche im Jahresdurchschnitt beträgt. Liegen keine Daten vor, muss die Gesamtfilterfläche mindestens $750 \mathrm{~m}^{2} / \mathrm{ha} A_{\mathrm{E}, \mathrm{b}}$ betragen." (L792); "Die Bemessung sollte für $q_{\text {krit }}=60 \mathrm{l} /(\mathrm{s} \cdot \mathrm{ha})$ erfolgen. Für einen effektiven Feststoffrückhalt muss die Vorstufe auf eine maximale Oberflächenbeschickung von $q_{\mathrm{A}, \max }=4 \mathrm{~m} / \mathrm{h}$ bemessen werden." (L784); capture: REQ-05 `025f8745…` / REQ-05-2 `7db4c2e0…` (M187-08 — the P-Rückhalt b) worksheet, X-2).
+- Proposed SQL / config: STAGED block m187-G-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-3 · DWA-M-187 · M187-19 · Stoffstromtrennung ab CSB > 3.000 mg/l; Sickerwasser nie in die RBFA
+- Class: gate-guard (new gates)
+- Chosen now (fail-safe): no gate; the created attestation `stoffstromtrennung` is visible from `CSB_konzentration > 3000`; `sickerwasser_in_rbf` stays a free boolean.
+- Evidence (verbatim, transcript line): "Bei häufiger auftretenden CSB-Konzentrationen von $>3.000 \mathrm{mg} / \mathrm{l}$ müssen die Abflüsse der Lagerflächen von denen der Verkehrsflächen getrennt werden (LAWA-Ad-hoc-AG BIOGASANLAGEN 2018). Das Niederschlagswasser der Betriebsflächen darf in die RBFA eingeleitet werden. Das Sickerwasser ist für eine Behandlung mit einem RBF zu hoch belastet und darf daher nicht in die RBFA eingeleitet werden." (L765); capture: `sickerwasser_in_rbf` (M187-19, boolean, consumer-free), `CSB_grenze_trennung` (VR > 3000, a constant typed as input — D-8).
+- Proposed SQL / config: STAGED block m187-G-3 (`IF CSB_konzentration > 3000 THEN stoffstromtrennung == True`; `sickerwasser_in_rbf == False`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-4 · DWA-M-187 · M187-21 · `filtervegetation` Gehölze / Schilf nicht geeignet
+- Class: gate-guard (new gate)
+- Chosen now (fail-safe): no gate (the enum lists gehoelze / schilf as pickable).
+- Evidence (verbatim, transcript line): "Nicht geeignet sind Gewächse, durch welche die Filterfähigkeit eingeschränkt und/oder die Anlagenkonstruktion gefährdet wird. Hierzu gehören starke Wurzelbildner wie Gehölze oder Schilf." (L934); capture: `filtervegetation` (M187-21, enum regio_stauden | gehoelze | schilf | keine, consumer-free, no gate).
+- Proposed SQL / config: STAGED block m187-G-4 (`NOT (filtervegetation IN {gehoelze, schilf})`, block).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-5 · DWA-M-187 · M187-21 · `dauerhafter_teileinstau` nicht zulässig
+- Class: gate-guard (new gate)
+- Chosen now (fail-safe): no gate.
+- Evidence (verbatim, transcript line): "Ein dauerhafter Teileinstau des Filterkörpers zur Verbesserung der Wasserversorgung der Filtervegetation im Regelbetrieb ist nicht zulässig." (L938); capture: `dauerhafter_teileinstau` (M187-21, boolean, consumer-free, no gate).
+- Proposed SQL / config: STAGED block m187-G-5 (`dauerhafter_teileinstau == False`, block).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-6 · DWA-M-187 · M187-09 → -22 / -21 · REQ-06 / REQ-06-2 (`A_F_anteil_Aba == 1.0` …) vs the printed A_F < 1,0 % with the b_krit proof (Gl. 2)
+- Class: gate-guard (replacement) + severity (two "sollte" rows → warn) + worksheet move
+- Chosen now (fail-safe): REQ-06 / -06-2 stay on M187-09 (block, forcing `A_F_anteil_Aba == 1.0`); the register `klein_rbf_elemente` with `A_F_anteil_calc` / `elemente_unter_1m2` / `A_b_a_sum_klein` is emitted beside them on M187-22.
+- Evidence (verbatim, transcript line): "Die spezifische Bodenfilteroberfläche beträgt $A_{\mathrm{F}}=1,0 \%$ der angeschlossenen befestigten Fläche $A_{\mathrm{b}, \mathrm{a}}$. Dies entspricht $A_{\mathrm{F}}=100 \mathrm{~m}^{2} / \mathrm{ha} A_{\mathrm{b}, \mathrm{a}}$ analog dem Arbeitsblatt DWA-A 178:2019 zur Bemessung für Straßenabflüsse. Aus bautechnischen Belangen sollte die absolute Bodenfilteroberfläche von Einzelelementen $A_{\mathrm{F}} \geqslant 1,0 \mathrm{~m}^{2}$ nicht unterschritten werden." (L964); "… unter der Einhaltung der maximal zulässigen AFS63-Filterflächenbelastung von $b_{\text {krit }}=7 \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right)$ gemäß Arbeitsblatt DWA-A 178:2019 auch geringere spezifische Filterflächen von $A_{\mathrm{F}}<1,0 \%$ der angeschlossenen befestigten Fläche $A_{\mathrm{b}, \mathrm{a}}$ möglich." (L968); "befestigten, angeschlossenen Fläche von $A_{\mathrm{b}, \mathrm{a}}<1$ ha" (L859); "Die Schichtdicke des Dränmaterials sollte mindestens $h_{\text {Drän }} \geqslant 0,1 \mathrm{~m}$ betragen." (L942); capture: REQ-06 `69015ae3…` / REQ-06-2 `1eeabd57…` (M187-09, the P-Rückhalt c) worksheet, X-2); Gl. 2 `75d9844f…` (M187-22) outputs `ok_boolean`.
+- Proposed SQL / config: STAGED block m187-G-6 (archive pattern; `A_F_anteil_calc >= 1.0 OR ok_boolean == True` block, `A_b_a_sum_klein < 10000` block, `elemente_unter_1m2 == 0` warn, `h_RR >= 0.2 AND h_RBF >= 0.6` block on -22, `h_Draen >= 0.1` warn on -21).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-7 · DWA-M-187 · M187-18 · `IF uv_eingesetzt == 'ja' THEN UV_dosis >= UV_dosis_min`
+- Class: gate-guard (new warn gate)
+- Chosen now (fail-safe): no gate; the fill `UV_dosis_min` (200 J/m², anhaltswert) is visible when UV is used.
+- Evidence (verbatim, transcript line): "Für die Bemessung einer nachgeschalteten UV-Bestrahlung sollte nach derzeitiger Kenntnis in Anlehnung an SCHÖLER (2002) eine Mindestdosis von $200 \mathrm{~J} / \mathrm{m}^{2}$ nicht unterschritten werden." (L703); capture: `UV_dosis` (M187-18, VR ≥ 200, not required, consumed by M187-16), no gate.
+- Proposed SQL / config: STAGED block m187-G-7 (warn).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-8 · DWA-M-187 · M187-09 · `sorptionsstufen_count >= 2` (empfohlen)
+- Class: gate-guard (new warn gate)
+- Chosen now (fail-safe): no gate; the register footer shows the count.
+- Evidence (verbatim, transcript line): "Um das P-Bindepotenzial des Sorptionsmittels auszunutzen und die Einhaltung der Zielkonzentration dauerhaft sicherstellen zu können, wird eine Reihenschaltung von mindestens zwei Sorptionsstufen empfohlen." (L499).
+- Proposed SQL / config: STAGED block m187-G-8 (guarded by `verfahrensvariante_p == 'nachgeschaltete_sorptionsstufe'`, warn).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-9 · DWA-M-187 · M187-14 · `segmente_count >= 2 AND segmente_unterdimensioniert == 0`
+- Class: gate-guard (new block gate)
+- Chosen now (fail-safe): no gate; footer counts only.
+- Evidence (verbatim, transcript line): "Bei RBF mit Beimischung von GAK zur Mitbehandlung des Kläranlagenablaufs bei Trockenwetter muss der Filter in hydraulisch entkoppelte Segmente aufgeteilt werden. … Das Retentionsvolumen eines Segments ist auf den mittleren täglichen Trockenwetterzufluss der Kläranlage ( $Q_{T, d, a M}$ ) zu dimensionieren." (L603).
+- Proposed SQL / config: STAGED block m187-G-9 (guarded by `verfahrensvariante_spurenstoffe == 'mitbehandlung_ka'`, block).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-10 · DWA-M-187 · M187-20 · `teilfilter_count >= 4 AND teilfilter_rest == 0`
+- Class: gate-guard (new gate; severity to decide — the sentence is descriptive "wird")
+- Chosen now (fail-safe): no gate; `teilfilter_rest` is shown in the footer.
+- Evidence (verbatim, transcript line): "Das RBF wird in vier (oder ein Vielfaches von vier) gleich große Teilfilterbecken aufgeteilt. Davon sind jeweils drei gleichzeitig in Betrieb und eins hat Betriebspause." (L794).
+- Proposed SQL / config: STAGED block m187-G-10 (proposed block; warn acceptable).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-G-11 · DWA-M-187 · M187-05 · REQ-02-2 `beta_wert >= 4` guarded by Variante a)
+- Class: gate-guard (condition change; "kann … angesetzt werden" — the owner may prefer warn)
+- Chosen now (fail-safe): unchanged (fires for b) / c) projects too).
+- Evidence (verbatim, transcript line): "Basierend auf einer mittleren $\mathrm{PO}_{4}$-Zulaufkonzentration von $S_{\text {P04-P, aM }}=0,5 \mathrm{mg} / \mathrm{l}$ kann die Menge des Fällmittels (Eisen-III-Salz) mit einem Beta-Wert von $\geqslant 4$ angesetzt werden. Diese Dosiermenge ist im laufenden Betrieb hinsichtlich der Zielkonzentration und der Fällmittelausnutzung zu optimieren." (L489); capture: REQ-02-2 `17ec0451…` (M187-05, block).
+- Proposed SQL / config: STAGED block m187-G-11 (archive + md5-guarded UPDATE of the condition).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-R-1 · DWA-M-187 · M187-09 · Gl. 1 / Gl. 2 duplicated on the P-Rückhalt c) worksheet
+- Class: deactivation (verified equation rows)
+- Chosen now (fail-safe): both copies stay (they compute from the Klein-RBF fields that M187-09 also holds — X-2).
+- Evidence (verbatim, transcript line): L964 / L968 (§5.5.4, quoted under G-6) belong to the Klein-RBF chapter; prod title of M187-09 "P-Rückhalt Variante c: Nachgeschaltete Sorptionsstufe"; capture: Gl. 1 `df181975…` / Gl. 2 `6b3dc34c…` (M187-09) = the M187-22 rows `a9fa96f7…` / `75d9844f…` (same md5).
+- Proposed SQL / config: STAGED block m187-R-1 (archive into `equations_archive_m187`, md5-guarded DELETE, explicit-column rollback).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-C-1 · DWA-M-187 · M187-01 · `sonderanwendung` consumer_worksheets → every field-bearing worksheet
+- Class: consumer-edit
+- Chosen now (fail-safe): untouched — the switch reaches M187-06 / -11 / -16 / -20 / -22 only; the emitted fills / rules keyed on it sit on those five; every other branch rule is `pending` (visible) until this edit.
+- Evidence (verbatim, transcript line): "Die in diesem Merkblatt beschriebenen Sonderanwendungen basieren auf den verfahrenstechnischen Grundlagen der RBF. Einzelne Komponenten sowie die Bemessungsvorgaben müssen angepasst werden, um die Reinigungsziele der Sonderanwendung zu erreichen." (L286); capture: `sonderanwendung` consumer_worksheets `['M187-06','M187-11','M187-16','M187-20','M187-22']`.
+- Proposed SQL / config: STAGED block m187-C-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-C-2 · DWA-M-187 · M187-05 … -22 · branch section rules (§5.1 … §5.5) — refused by the transitive producer guard
+- Class: consumer-edit (section visibility over consumed producers)
+- Chosen now (fail-safe): no section rule emitted (`SECTION_VISIBILITY = []`); every field-bearing B / D section holds a consumed producer (125 of 139 fields carry consumers), the refusals are pinned in `field-configs-m187.test.ts`.
+- Evidence (verbatim, transcript line): "In diesem Merkblatt werden folgende Ziele der Regenwasserbehandlung beschrieben, die über die im Arbeitsblatt DWA-A 178 beschriebene Standardanwendung hinausgehen:" (L288) followed by the five bullets L290–L295; capture: e.g. `h_FK` (M187-08) consumers `['M187-22','M187-16','M187-06','M187-14','M187-13','M187-11','M187-21']` cross every branch.
+- Proposed SQL / config: STAGED block m187-C-2 (five `visible_when IS NULL`-guarded section UPDATE groups after C-1; the owner accepts that hiding a branch hides its producers' inherited values, and rules on the X-2 misplaced blocks).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-C-3 · DWA-M-187 · M187-21 · `h_FK_CaCO3` / `CaCO3_massenanteil_carbo` ← `carbonatschicht_vorhanden == 'ja'` (refused: consumed by M187-22)
+- Class: consumer-edit (refused visibility)
+- Chosen now (fail-safe): both fields stay visible (not required); the toggle drives `h_FK_min_klein` (M187-22-D5) instead.
+- Evidence (verbatim, transcript line): "Alternativ zur Melioration des Filtermaterials kann für eine dauerhafte pH -Stabilisierung auch eine Carbonatschicht mit einer Schichtstärke $h_{\mathrm{FK}}, \mathrm{CaCO}_{3} \geqslant 0,10 \mathrm{~m}$ aus einem handelsüblichen Carbonatbrechsand ( 2 mm bis 8 mm ) mit einem $\mathrm{CaCO}_{3}$-Massenanteil von $80 \%$ hergestellt werden." (L930); capture: both consumer_worksheets `['M187-22']`.
+- Proposed SQL / config: STAGED block m187-C-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-C-4 · DWA-M-187 · M187-18 · `UV_dosis` ← `uv_eingesetzt == 'ja'` (refused: consumed by M187-16)
+- Class: consumer-edit (refused visibility)
+- Chosen now (fail-safe): `UV_dosis` stays visible; the created fill `UV_dosis_min` carries the rule.
+- Evidence (verbatim, transcript line): L703 (quoted under G-7); capture: `UV_dosis` (M187-18) consumer_worksheets `['M187-16']`.
+- Proposed SQL / config: STAGED block m187-C-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-C-5 · DWA-M-187 · M187-20 · `B_CSB` / `A_F_pro_AEb` ← `daten_vorhanden` (refused: self-consumed, X-3)
+- Class: consumer-edit (refused visibility; both fields are REQUIRED today)
+- Chosen now (fail-safe): both stay required inputs; the twins `B_CSB_calc` / `A_F_min_ohne_daten` are switched by `daten_vorhanden`.
+- Evidence (verbatim, transcript line): L792 (quoted under G-2); capture: `B_CSB` (required, VR ≤ 20) and `A_F_pro_AEb` (required, VR ≥ 750) both list `['M187-20']` — their own worksheet.
+- Proposed SQL / config: STAGED block m187-C-5 (after X-3, or retire in favour of the twins).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-D-1 · DWA-M-187 · M187-13 (+ -06 copies) · `filterschichten.gak_vol_pct/.caco3_pct` ↔ `GAK_volumenanteil_oben` / `GAK_volumenanteil_unten` / `CaCO3_massenanteil_GAK`
+- Class: deactivation (single-source pair; scalars consumed by M187-11)
+- Chosen now (fail-safe): the three scalars stay typed inputs beside the register. Resolution: RETIRE ON RATIFICATION with a consumer edit of the register to M187-11.
+- Evidence (verbatim, transcript line): "\hline 10 cm & Filtersand / Meliorationsschicht GAK-Volumenanteil: 10 \% bis 20 \% & \multirow{3}{*}{20 \% CaCO3-Massenanteil dem gesamten Filtersand beimischen} \\" (L614); "\hline 30 cm & Filtersand GAK-Volumenanteil: 30 \% bis 40 \% & \\" (L616); capture: the three scalars (not required, VR `range 10..20` / `range 30..40` / `== 20`) consumers `['M187-11']`; copies on M187-06 consumers `['M187-06']`.
+- Proposed SQL / config: STAGED block m187-D-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-D-2 · DWA-M-187 · M187-13 · `h_FK_lagen` ↔ `h_FK` (M187-05 / -08, seven consumers each)
+- Class: deactivation / equation (single-source pair with cross-branch consumers)
+- Chosen now (fail-safe): `h_FK` STAYS the input (both prod copies feed nine worksheets and the variant gates); `h_FK_lagen` is the Bild-3 sum on the GAK branch only. Resolution deferred to the X-2 re-homing — no SQL proposed.
+- Evidence (verbatim, transcript line): "\hline 60 cm & Filtersand & \\" (L615) + L614 / L616 (10 + 60 + 30 cm); "Zu b) Bei einer Beimischung von GAK ist eine Filterschichtstärke von 1 m vorzusehen." (L601); capture: `h_FK` (M187-05) consumers `['M187-06','M187-14','M187-13','M187-09','M187-07','M187-21','M187-05']`, (M187-08) `['M187-22','M187-16','M187-06','M187-14','M187-13','M187-11','M187-21']`.
+- Proposed SQL / config: STAGED block m187-D-2 (note only).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-D-3 · DWA-M-187 · M187-09 · `sorptionsstufen_count` ↔ `anzahl_sorptionsstufen`
+- Class: deactivation (single-source pair; consumer-free, optional)
+- Chosen now (fail-safe): the input stays (now hidden unless Variante c). Resolution: RETIRE ON RATIFICATION.
+- Evidence (verbatim, transcript line): L499 (quoted under G-8); capture: `anzahl_sorptionsstufen` (M187-09, optional, consumer-free, no VR).
+- Proposed SQL / config: STAGED block m187-D-3 (`active = false`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-D-4 · DWA-M-187 · M187-09 (+ -05 copies) · `sorptionsstufen.ebct_min/.v_filter_auf/.v_filter_ab/.h_fk_ss` ↔ `EBCT` / `v_filter_aufstrom` / `v_filter_abstrom` / `h_FK_SS`
+- Class: deactivation + equation (single-source pair with consumers on M187-06)
+- Chosen now (fail-safe): all four stay (required, consumed). Resolution: `h_FK_SS` → DERIVE from `h_FK_SS_calc` (M187-09-D1) on ratification; the three inputs stay until the register is the ratified source.
+- Evidence (verbatim, transcript line): "… können Filterkontaktzeiten (EBCT) $\geqslant 15 \mathrm{~min}$. und maximale Filtergeschwindigkeiten $<5,0 \mathrm{~m} / \mathrm{h}$ angesetzt werden. Das entspricht einer Mindesthöhe des Filterkörpers von $1,25 \mathrm{~m}$. Im Abstrombetrieb sollten die Filtergeschwindigkeiten auf $<2 \mathrm{~m} / \mathrm{h}$ reduziert werden." (L497); capture: EBCT (VR ≥ 15), v_filter_aufstrom (< 5.0), v_filter_abstrom (< 2.0), h_FK_SS (≥ 1.25) — all required, consumers `['M187-06']`.
+- Proposed SQL / config: STAGED block m187-D-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-D-5 · DWA-M-187 · M187-20 · `teilfilter_count` ↔ `anzahl_teilfilter`
+- Class: deactivation (consumer-free, optional)
+- Chosen now (fail-safe): stays. Resolution: RETIRE ON RATIFICATION.
+- Evidence (verbatim, transcript line): L794 (quoted under G-10); capture: `anzahl_teilfilter` (M187-20, optional, consumer-free).
+- Proposed SQL / config: STAGED block m187-D-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-D-6 · DWA-M-187 · M187-22 / -21 · `klein_rbf_elemente` ↔ `A_b_a` / `A_F` (Gl. 1) / `A_F_anteil_Aba` / `h_RR` / `h_RBF`
+- Class: deactivation + equation (single-source pairs; Gl. 1 / Gl. 2 / REQ-06 read the scalars)
+- Chosen now (fail-safe): every scalar stays. Resolution: `A_b_a` → DERIVE from `A_b_a_sum_klein / 10000` (ha), `A_F_anteil_Aba` → DERIVE from `A_F_anteil_calc` (with G-6), `A_F` keeps Gl. 1 (the printed 1,0 % rule) beside `A_F_sum_klein`, `h_RR` / `h_RBF` STAY as the system minima.
+- Evidence (verbatim, transcript line): L964 (quoted under G-6); capture: `A_b_a` (required, ha) input of Gl. 1 / Gl. 2; `A_F_anteil_Aba` (required, VR == 1.0); `h_RR` (M187-21 → -22, required), `h_RBF` (M187-22, required).
+- Proposed SQL / config: STAGED block m187-D-6.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-D-7 · DWA-M-187 · M187-16 (+ -07 copies) · `indikatororganismen` ↔ `KBE` / `MPN` / `PBE` / `logstufen_rueckhalt`
+- Class: deactivation + equation (single-source pair; self-consumed)
+- Chosen now (fail-safe): all stay. Resolution: `logstufen_rueckhalt` → DERIVE from `log_red_min`; KBE / MPN / PBE → RETIRE ON RATIFICATION (the register row carries organism + unit + Zulauf / Ablauf); the owner may keep `logstufen_rueckhalt` as the measured (frachtbezogene) input instead (F-5).
+- Evidence (verbatim, transcript line): "Der Rückhalt von pathogenen Mikroorganismen in RBF wurde überwiegend für die Indikatororganismen E. coli und intestinale Enterokokken sowie für somatische Coliphagen untersucht." (L661); "… beträgt im Mittel $90 \%$ ( 1,0 Log-Stufe)" (L667); capture: KBE / MPN / PBE (optional), `logstufen_rueckhalt` (required, VR > 1.0), all consumers `['M187-16']`.
+- Proposed SQL / config: STAGED block m187-D-7.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-D-8 · DWA-M-187 · M187-08 / -19 / -20 / -09 / -21 / -05 / -06 / -13 · printed constants typed as required inputs
+- Class: deactivation / interface-gap (constants as inputs with `==` validations)
+- Chosen now (fail-safe): untouched; every one is consumed (self or cross-worksheet), so no re-bind (E-2). Seed rows exist for each (S5_4_3_ORG, S5_1_3_1_P, S5_5_KLEIN, BILD3).
+- Evidence (verbatim, transcript line): L765 (3.000 mg/l), L770 ("muss der RBF auf eine Vollstrombehandlung mit $100 \%$ hydraulischem Wirkungsgrad ausgelegt werden"), L794 (20 l/m²), L784 (60 l/(s·ha)), L512 ("bei einem Eisenhydroxidmassenanteil von 7 \% gute Ergebnisse"), L922 ("5 cm starken Schicht"), L614 ("20 \% CaCO3-Massenanteil"), L930 ("$\mathrm{CaCO}_{3}$-Massenanteil von $80 \%$"); capture: CSB_grenze_trennung, wirkungsgrad_hydraulisch, beschickung_pro_ereignis, q_krit, Fe_massenanteil, deckschicht_staerke, CaCO3_massenanteil_GAK, CaCO3_massenanteil_carbo with `> 3000` / `== 100` / `== 20` / `== 60` / `== 7` / `== 0.05` / `== 20` / `== 80`.
+- Proposed SQL / config: STAGED block m187-D-8 (lookup_fill twins or derived constants on ratification).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-O-1 · DWA-M-187 · S5_LIMITS_SPUR · override policy locked vs L597 "sollten … angewendet werden"
+- Class: override-policy
+- Chosen now (fail-safe): `locked` (the sentences read "ist … zu begrenzen" / "vorzusehen" / "muss"); anhaltswert proposed.
+- Evidence (verbatim, transcript line): "Für die in 5.2.2 beschriebenen Verfahrensvarianten a bis d sollten die folgende Bemessungsvorgaben angewendet werden:" (L597); "Die Drosselabflussspende ist auf $q_{\mathrm{Dr}, \mathrm{RBF}} \leqslant 0,03 \mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)$ zu begrenzen." (L601).
+- Proposed SQL / config: STAGED block m187-O-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-O-2 · DWA-M-187 · S5_LIMITS_APP · `h_FK_min_mikro` is a "sollte" inside a locked table
+- Class: override-policy
+- Chosen now (fail-safe): `locked` (L675 "ist … sicherzustellen" governs the table); the G-1 gate for this row is proposed as warn.
+- Evidence (verbatim, transcript line): "Um einen Indikatororganismenrückhalt $>1,0$ Log-Stufe (> $90 \%$ ) zu erreichen, sollte die Höhe des Filterkörpers $h_{\text {FK }} \geqslant 1,0 \mathrm{~m}$ betragen (Waldhoff 2008, Ruppelt et al. 2018)." (L677).
+- Proposed SQL / config: STAGED block m187-O-2 (split the h_FK column into an anhaltswert table, or accept).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-O-3 · DWA-M-187 · S5_1_3_1_P / S5_4_3_ORG / S5_5_KLEIN · mixed modal rows in locked tables
+- Class: override-policy
+- Chosen now (fail-safe): `locked`; the `modal` column carries the printed verb per row; no fill reads these tables today (register `lookup()` only).
+- Evidence (verbatim, transcript line): "kann die Menge des Fällmittels (Eisen-III-Salz) mit einem Beta-Wert von $\geqslant 4$ angesetzt werden" (L489); "Es wird ein Mindestvolumen von $50 \mathrm{~m}^{3}$ empfohlen." (L784); "Pro Beschickungsereignis sollten $20 \mathrm{l} / \mathrm{m}^{2}$ bezogen auf die jeweils beschickte Filterfläche gefördert werden." (L794); "Die beschickte Filterfläche sollte $\leqslant 1 \mathrm{~m}^{2}$ /Austrittsöffnung betragen." (L817); L942 / L964 (sollte rows quoted under G-6).
+- Proposed SQL / config: STAGED block m187-O-3 (note).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-U-1 · DWA-M-187 · Tab. 2 · q_Dr,RBF unit printed "l/(s·m²)²" (OCR)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Tab. 2 (definitions) is not seeded; the seeded unit is the §5 form `l/(s·m²)` (L599 / L601 / L603 / L675 all print it without the exponent); the printed cell is quoted here.
+- Evidence (verbatim, transcript line): "\hline $q_{\text {Dr,RBF }}$ & $\mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)^{2}$ & Drosselabflussspende eines Retentionsbodenfilters \\" (L394).
+- Proposed SQL / config: none (PDF check of the Tab.-2 cell when the PDF is opened).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-U-2 · DWA-M-187 · TABELLE4 / TABELLE5 · "KSO" / "KAO" cells (letter O for the digit 0)
+- Class: unreadable-cell
+- Chosen now (fail-safe): cells kept verbatim as printed; both tables `imported_unverified`; no field target (J-1).
+- Evidence (verbatim, transcript line): "\hline Minderung stofflicher Emissionen & KS0 & KS0 & KSO & KS1 & KSO \\" (L995); "\hline Baustein der wasserbewussten Stadtentwicklung & KSO & KSO & KSO & KS1 & KSO \\" (L996); "\hline Minderung stofflicher Emissionen & KA0 & KA1 & KA1 & KAO & KAO & KA1 & KA1 \\" (L1007); "\hline Baustein der wasserbewussten Stadtentwicklung & KA1 & KA1 & KA1 & KAO & KA0 & KA1 & KA1 \\" (L1008); the legend L984–L986 prints "KAO / KSO" too.
+- Proposed SQL / config: none (normalise to KS0 / KA0 after a PDF read; the title page L79 / L80 states KA1 / KS1 for the Merkblatt).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-J-1 · DWA-M-187 · M187-23 · TABELLE4 / TABELLE5 have no field target
+- Class: interface-gap (judgment)
+- Chosen now (fail-safe): seeded for display / reference only; M187-23 stays empty.
+- Evidence (verbatim, transcript line): "In Tabelle 4 und Tabelle 5 sind die Klimaschutz- und Klimaanpassungsparameter für das Merkblatt DWA-M 187 zusammengestellt." (L982).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-J-2 · DWA-M-187 · S5_LIMITS_SPUR kontaktzeit · "Begrenzung … auf 0,01" prints no operator
+- Class: judgment reading
+- Chosen now (fail-safe): `q_dr_comparator` null, `q_dr_rbf` 0,01, the printed fragment in `q_dr_text` / the text fill; the STAGED gate (G-1) reads `<=` (more contact time is the safe side); prod REQ-04 reads `== 0.01`.
+- Evidence (verbatim, transcript line): L599 (quoted under G-1); "auf $q_{\mathrm{Dr}, \mathrm{RBF}}=0,01 \mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)$ begrenzt ist" (L675, the Mikroorganismen sentence prints "=").
+- Proposed SQL / config: the owner picks `<=` or `==` in G-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-J-3 · DWA-M-187 · S5_LIMITS_SPUR mitbehandlung_ka · "drei Segmente" is experience, not a minimum
+- Class: judgment reading
+- Chosen now (fail-safe): seeded as `segmente_erfahrung = 3`; the STAGED gate G-9 requires ≥ 2 ("in hydraulisch entkoppelte Segmente aufgeteilt"), not 3.
+- Evidence (verbatim, transcript line): "Positive Erfahrungen liegen bei einer Aufteilung auf drei Segmente vor." (L603); "Positive Erfahrungen liegen bei einer Aufteilung auf drei Segmente vor, wobei zum Beispiel Segment 1 an Tag 1 beschickt wird ( 24 h ), an Tag 2 leerläuft (Segment 2 wird beschickt) und an Tag 3 abtrocknen kann (Segment 3 wird beschickt)." (L631).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-J-4 · DWA-M-187 · S5_LIMITS_APP klein_rbf · the 0,2 m carbonate reduction IS printed (inventory "not found" refuted); no operator before 0,2 m
+- Class: judgment reading (R-5 reversal)
+- Chosen now (fail-safe): `h_fk_carbonat_m = 0.2` seeded from L930 and read by `M187-22-D5` as the reduced minimum when `carbonatschicht_vorhanden == 'ja'`; the brief's `m187-U-1` "claim NOT found" is withdrawn — the sentence exists.
+- Evidence (verbatim, transcript line): "In diesem Fall kann die Filterstärke auf $h_{F K} 0,2 \mathrm{~m}$ verringert werden." (L930) — the LaTeX prints `$h_{F K} 0,2 \mathrm{~m}$` without "=" or "≥"; prod description of h_FK: "Klein-RBF: >= 0,25 m bzw. 0,2 m mit Carbonatschicht".
+- Proposed SQL / config: none (encoded as the reduced minimum; PDF check of the glyph between h_FK and 0,2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-J-5 · DWA-M-187 · BILD3 · `filterwirksam` column is not printed
+- Class: judgment reading
+- Chosen now (fail-safe): true for the three Filtersand layers, false for Dränagekies — from the Tab.-2 definitions; `h_FK_lagen` / `h_Draen_lagen` sum accordingly (10 + 60 + 30 = 1,00 m = L601 "1 m").
+- Evidence (verbatim, transcript line): "\hline $h_{\text {Drän }}$ & m & Schichtdicke des Dränmaterials \\" (L382); "\hline $h_{\text {FK }}$ & m & Höhe Filterkörper \\" (L383); "\hline 25 cm & \multicolumn{2}{|l|}{Dränagekies} \\" (L617).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-J-6 · DWA-M-187 · sorptionsstufen · "< 5,0 m/h" vs the 1,25 m example computed with 5,0 m/h
+- Class: judgment reading
+- Chosen now (fail-safe): the row badge keeps the printed strict "<" (a stage at exactly 5,0 m/h reads "nein"); `h_FK_SS_calc` reproduces 1,25 m from 15 min · 5,0 m/h; prod VR `v_filter_aufstrom < 5.0` agrees.
+- Evidence (verbatim, transcript line): L497 (quoted under D-4).
+- Proposed SQL / config: none (the owner may relax to `<=`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-F-1 · DWA-M-187 · M187-14-D1 · `V_segment_soll = Q_T_d_aM * 86.4` (l/s → m³/d) is not printed as an equation
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted (unit conversion only, no interpretation).
+- Evidence (verbatim, transcript line): "Das Retentionsvolumen eines Segments ist auf den mittleren täglichen Trockenwetterzufluss der Kläranlage ( $Q_{T, d, a M}$ ) zu dimensionieren." (L603); "\hline $Q_{\mathrm{T}, \mathrm{d}, \mathrm{am}}$ & $\mathrm{l} / \mathrm{s}$ & täglicher Trockenwetterabfluss im Jahresmittel \\" (L392).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-F-2 · DWA-M-187 · M187-13-D1 / -D2 · h_FK / h_Drän as Σ of the Bild-3 layers is not printed as an equation
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted (the printed thicknesses sum to the printed 1 m).
+- Evidence (verbatim, transcript line): L614–L617 (quoted under D-1 / J-5); L601.
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-F-3 · DWA-M-187 · M187-09-D1 · `h_FK_SS_calc = EBCT * v_filter_aufstrom / 60` ("Das entspricht …")
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted; reproduces the printed 1,25 m.
+- Evidence (verbatim, transcript line): L497 (quoted under D-4); "\hline Filterkontaktzeit & EBCT & engl. Empty Bed Contact Time; hydraulische Filterkontaktzeit entspricht dem Quotienten aus Filtervolumen und Zufluss; …" (L335).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-F-4 · DWA-M-187 · M187-20-D4 / -D5 · `A_F_min_ohne_daten = 750 · A_E_b`, `B_CSB_calc = CSB_fracht_d / A_F_gesamt`
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted (the sentence states the ratio and the area basis; the brief's `/ A_F_aktiv` was replaced by the printed "bezogen auf die Gesamtfilterfläche").
+- Evidence (verbatim, transcript line): L792 (quoted under G-2).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-F-5 · DWA-M-187 · M187-16-D1 · log10(Zulauf / Ablauf) per organism vs the frachtbezogene Wirkungsgradermittlung
+- Class: text-only-formula
+- Chosen now (fail-safe): the register computes concentration-based Log-Stufen per row; the load-based plant efficiency (flows per event) is not modelled.
+- Evidence (verbatim, transcript line): "Die Ermittlung des Anlagenwirkungsgrads kann aufgrund der stofflichen und hydraulischen Schwankungen nur frachtbezogen durchgeführt werden, sodass eine Messung der Durchflüsse im Filterzulauf, Filterablauf und im Filterüberlauf je Ereignis für eine vollständige Stoffstrombilanz erforderlich ist (Waldhoff 2008)." (L727); L667.
+- Proposed SQL / config: none (residue).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-I-1 · DWA-M-187 · all tables · edition token `'2025-09'` for a Gelbdruck (Entwurf)
+- Class: interface-gap
+- Chosen now (fail-safe): `'2025-09'` (title page month); the draft status is not carried by the token; prod `standards.version` = 'September 2025 (Entwurf)'.
+- Evidence (verbatim, transcript line): "September 2025" (L9); "Entwurf" (L12); "Frist zur Stellungnahme: 30. November 2025" (L14); "© DWA, 1. Auflage, Hennef 2025" (L47).
+- Proposed SQL / config: none (re-seed on the Weißdruck).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-I-2 · DWA-M-187 · M187-09-D1, M187-14-D1, M187-20-D4 / -D5 / -D6, M187-22-D4 / -D5 · scalar-only equations are not server-materialised
+- Class: interface-gap
+- Chosen now (fail-safe): expected (amendment D — the materialiser is register-scoped); the seven scalar rows compute on hook / report / snapshot / PDF; the STAGED gates on `h_FK_min_klein`, `A_F_min_ohne_daten`, `B_CSB_calc`, `teilfilter_rest`, `A_F_anteil_calc` evaluate on the form.
+- Evidence (verbatim, transcript line): n/a (mechanism).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-I-3 · DWA-M-187 · prod · 15 compliance rows (brief: 21), 4 equations (2 unique), 139 fields, 25 worksheets (7 empty)
+- Class: interface-gap (brief vs capture)
+- Chosen now (fail-safe): the capture governs; every id / md5 in the STAGED file is from the in-session read.
+- Evidence (verbatim, transcript line): n/a (capture 2026-09-18).
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-X-1 · DWA-M-187 · all · the DWA-A 178 base design by reference (A_F, b_krit, b_R_a, h_RR, q_Dr_RBF, h_FK, AFS63, A_E_b)
+- Class: cross-standard (Phase 6)
+- Chosen now (fail-safe): the re-typed inputs stay; nothing is filled from DWA-A 178 (content-boundary rule).
+- Evidence (verbatim, transcript line): "Dies bedeutet, dass alle im Arbeitsblatt DWA-A 178 gegebenen Empfehlungen für die konstruktive Gestaltung und den Betrieb von RBFA gleichlautend für dieses Merkblatt gelten." (L420); "Bezogen auf die Bemessung des RBF keine Änderungen zu Arbeitsblatt DWA-A 178:2019." (L488 / L493 / L496).
+- Proposed SQL / config: none (Phase 6: cross-standard inheritance).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-X-2 · DWA-M-187 · M187-05 … -22 · ≈ 55 re-typed copies and the misplaced blocks (UV / KBE on -07, org-load on -08, Klein-RBF on -09, REQ-05 on -08, REQ-06 on -09)
+- Class: cross-standard / prod hygiene (Phase 6)
+- Chosen now (fail-safe): untouched; the registers and fills are placed on the worksheet the prod titles name for each branch.
+- Evidence (verbatim, transcript line): n/a (capture: the field list per worksheet in `m187.prior.json`; prod titles "P-Rückhalt Variante a: Fällung Filterzulauf" (-07) holds `uv_eingesetzt` / `KBE` / `MPN` / `PBE` / `UV_dosis`; "P-Rückhalt Variante b" (-08) holds `A_E_b` / `B_CSB` / `q_krit` …; "P-Rückhalt Variante c" (-09) holds `A_b_a` / `A_F` / `b_krit` / `h_RR` / `h_RBF` …).
+- Proposed SQL / config: none (Phase 6 re-homing; C-2 depends on it).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m187-X-3 · DWA-M-187 · prod · 86 of 139 fields list their OWN worksheet in `consumer_worksheets`
+- Class: prod hygiene (import artefact)
+- Chosen now (fail-safe): untouched; the self-entry blocks every visibility UPDATE on those fields (the guard treats them as consumed) — the branch rules live on created fields instead.
+- Evidence (verbatim, transcript line): n/a (capture: e.g. `beta_wert` (M187-05) consumers `['M187-05']`, `B_CSB` (M187-20) `['M187-20']`; 125 fields carry consumers, 86 of them their own code).
+- Proposed SQL / config: STAGED block m187-X-3 (`array_remove` of the own code; rollback from the prior).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (no signature needed)
+
+- **Codebase vs brief:** the one `S5_LIMITS` table keyed `sonderanwendung × variante` became three key-shape tables (`S5_LIMITS_P` / `S5_LIMITS_SPUR` / `S5_LIMITS_APP`) — a `lookup_fill` needs a `from_symbol` per key column and the `'-'` variant of the three non-variant applications has none; the P fills sit on M187-06 and the Spurenstoff fills on M187-11 (the brief's M187-01 holds neither variant driver); `q_Dr_RBF_limit` for Klein-RBF does not exist (drosselung "über den Fließwiderstand des Filtermaterials", L942 / L966); the carbonate toggle is a derivation (`M187-22-D5`) over one table, not a second lookup; `B_CSB_calc` divides by `A_F_gesamt` (L792 "bezogen auf die Gesamtfilterfläche"), not by the active area; `daten_vorhanden` is a ja / nein select (booleans are not formula inputs; the gate reads the string); 15 compliance rows in prod (brief 21); `sorptionsstufen` carries per-row EBCT / v badges; the Tab.-3 comparison is exposed as eight text fills on M187-06.
+- **Every section of every M187 worksheet is the same flat template** (A Zweck und Kontext · B Eingangsdaten · C Arbeitsblattspezifischer Teil · D Ergebnisse / Berechnete Werte · F · J · K · L · M; fields in B / D only, 75 of 139 orphans) — registers were created in C, outputs in D, fills / selects / attestations in B.
+- **The Merkblatt prints no numbered equations** — every derivation here is a `<WS>-D<n>` row with an F-block; prod's "Gl. 1 / Gl. 2" are the §5.5.4 sentences.
+- **Bundle growth:** ~34 KB of lifted quotes (`Q`, 97 spans) ride in the client bundle via the seed fallback (Task-0 observation; Task 30 measures).

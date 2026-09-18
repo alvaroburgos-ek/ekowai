@@ -1,0 +1,459 @@
+-- DWA-M-187 — Plan 3 Task 12 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the 4 equation rows — ids / md5(formula) —, the 15
+-- compliance rows — ids / severities / md5(condition) —, worksheet + section titles, standards.version
+-- 'September 2025 (Entwurf)', field labels / units / is_required / validation_rules) were captured read-only on
+-- 2026-09-18 (src/lib/eval/field-configs/m187.prior.json; scripts/verification/prod-query.mjs). Transcript lines refer
+-- to C:\Users\Ekowai\Desktop\Guidelines\DWA-M-187\DWA-M_187_GD.md. This task changes NO gate severity by itself; every
+-- proposed severity below is named per block (the guideline's own modal verb decides: muss / ist … zu → block,
+-- sollte / empfohlen → warn).
+--
+-- Conventions: `s.code = 'DWA-M-187'`, worksheets by code, never by id (equations and gates by their captured uuid + a
+-- guard on md5(formula) / md5(condition) of the text they replace so a re-run is a no-op); each block names its
+-- rollback. Every block that DELETEs or rewrites an equation / gate row follows the amendment-I archive pattern: the
+-- affected rows are copied into `equations_archive_m187` / `compliance_requirements_archive_m187` in the SAME
+-- transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE false; INSERT … SELECT * … WHERE (id = … AND
+-- md5(…) = …)`), the DELETE / UPDATE is guarded on the md5 read read-only from prod, and the rollback restores from the
+-- archive by id with an EXPLICIT column list (never `SELECT *`, never retyped — prod-query.mjs truncates cells at 120
+-- chars); the archive table is dropped by the rollback or on the owner's sign-off that the change is final. A field
+-- retirement is `active = false` (reversible). New gates are INSERTs with a DELETE-by-description rollback. The Plan-3
+-- DATA migrations (20260917101200 seed · 20260917101210 field configs · 20260917101220 equations) must be applied
+-- BEFORE any block that reads a created symbol (h_FK_min_p, tab3_*, h_FK_min_spur, q_Dr_RBF_limit_spur,
+-- q_Dr_RBF_vorgabe_spur, sorptionsstufen, sorptionsstufen_count, ebct_min_stufe, h_FK_SS_calc, filterschichten,
+-- h_FK_lagen, h_Draen_lagen, schichten_gak_verletzungen, filtersegmente, V_segment_soll, segmente_count,
+-- segmente_unterdimensioniert, A_F_segmente, q_Dr_RBF_limit_mikro, h_FK_min_mikro, indikatororganismen, log_red_min,
+-- organismen_count, UV_dosis_min, stoffstromtrennung, daten_vorhanden, CSB_fracht_d, teilfilterbecken, A_F_gesamt,
+-- A_F_aktiv, teilfilter_count, teilfilter_rest, A_F_min_ohne_daten, B_CSB_calc, klein_rbf_elemente, A_F_sum_klein,
+-- A_b_a_sum_klein, elemente_unter_1m2, A_F_anteil_calc, elemente_count, h_FK_min_klein).
+-- Consumer edits write `fields.consumer_worksheets` (text[]); the guards keep a re-run idempotent.
+-- Evidence lines in this file RENDER the transcript's LaTeX for readability ("$h_{mathrm{FK}} geqslant 0,25 mathrm{~m}$" → "h_FK ≥ 0,25 m");
+-- the VERBATIM spans with their lines are on the sign-off sheet (machine-checked against the transcript) and in the seed module's `Q`.
+--
+-- Captured compliance rows (md5 = md5(condition)):
+--   REQ-01   16ca8c15-2398-4db1-937c-26bf2ec1be07 (M187-01, block) 'sonderanwendung IN {p_rueckhalt,spurenstoffe,mikroorganismen,organische_belastung,klein_rbf}'  61e1ad499c488f0a1b08d337046875ee
+--   REQ-07   01d140e6-7446-4e09-b4c7-5ef5379bd2ac (M187-04, block, attestation) 'attest_m187_04_req_07 == True'  778271881da80c4915c3b18dcbb4de0e
+--   REQ-02   2fd5094c-ab25-4a01-8e51-0b30027a0a48 (M187-05, block) 'h_FK >= 1.0'                                   1329516a29811dda7afc23880678fab7
+--   REQ-02-2 17ec0451-4e15-40dc-928d-6e67cc3fde40 (M187-05, block) 'beta_wert >= 4'                                565f39b19ef66b053a8d3820e8a0103d
+--   REQ-07   3a14dae5-ed16-49f1-9f31-cdb82871b3fd (M187-05, block, attestation) 'attest_m187_05_req_07 == True'  9bbb01cc5f049a07d331d0f0ec096c5c
+--   REQ-03   a1ff96c6-228f-44e2-bd61-f69088489747 (M187-06, block) 'q_Dr_RBF <= 0.03'                              6e42742fafffd651ad44df6a91eed110
+--   REQ-04   e2e0fa89-c689-46ff-8ec7-7b8f61206067 (M187-06, block) 'q_Dr_RBF == 0.01 AND h_FK >= 1.0'              a55d4ab2aa69aa2aa361231663d692b0
+--   REQ-03   68ffd495-3249-4827-8ca0-657d925daf50 (M187-07, block) 'q_Dr_RBF <= 0.03'                              6e42742fafffd651ad44df6a91eed110
+--   REQ-04   7ecbff21-b792-4e69-ac15-4f240eee477b (M187-07, block) 'q_Dr_RBF == 0.01 AND h_FK >= 1.0'              a55d4ab2aa69aa2aa361231663d692b0
+--   REQ-05   025f8745-3556-4a91-9e9a-00c60359670b (M187-08, block) 'B_CSB <= 20 AND A_F_pro_AEb >= 750 AND q_krit == 60 AND q_A_max <= 4'  c317b78597521a5fa7dfa656a1b32e2c
+--   REQ-05-2 7db4c2e0-20a3-457a-a0e2-31f91e1d12a5 (M187-08, block) (same)                                            c317b78597521a5fa7dfa656a1b32e2c
+--   REQ-06   69015ae3-f9af-49f6-a9f1-a7fa8c142da7 (M187-09, block) 'A_b_a < 1 AND A_F_anteil_Aba == 1.0 AND A_F >= 1.0 AND h_RR >= 0.2 AND h_RBF >= 0.6 AND h_Draen >= 0.1'  48e9732a0b01eed4f8b17f8952d3c404
+--   REQ-06-2 1eeabd57-1efc-434e-acbc-6a23e02eea39 (M187-09, block) (same)                                            48e9732a0b01eed4f8b17f8952d3c404
+--   REQ-08   a056f2e4-368c-406e-88e3-17da86a9aca0 (M187-10, warn, attestation) 'engineer-verified'                 4a44a749a844bbc0cc7042e68d1e1a5e
+--   REQ-08   acadae66-788b-4458-a3d6-0bc1066eaf38 (M187-23, warn, attestation) ''                                   d41d8cd98f00b204e9800998ecf8427e
+-- Captured equation rows (md5 = md5(formula)):
+--   Gl. 1  df181975-34ae-474a-b1bc-a62e1bfef98e (M187-09) · a9fa96f7-f076-4688-963c-3ca15e9d7225 (M187-22)  'A_F = 0.01 * A_b_a * 10000'      475579af1b81520a96433a09cf94520d  verified_against_standard  input_symbols {A_b_a}
+--   Gl. 2  6b3dc34c-a3da-4cfd-9e3a-803109b1bd12 (M187-09) · 75d9844f-9f7f-45ba-a8fc-e2bf850be7a5 (M187-22)  'b_R_a / (A_F / A_b_a) <= b_krit'  c58e594c1f85470f55ebbb438e801c7b  needs_engineer_review      input_symbols {b_R_a,A_F,A_b_a,b_krit}
+-- Explicit column lists (information_schema, read-only 2026-09-18 — identical to the Task-11 capture of the same day):
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   fields: id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote
+
+-- =====================================================================================================================
+-- m187-G-1 · M187-05 / -06 / -07 · REQ-02 / REQ-03 (×2) / REQ-04 (×2) → the per-variant limit gates on M187-06 / -11 / -16 / -22
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L514 (b: "muss … h_FK ≥ 1,00 m haben"), L599 ("Begrenzung … auf 0,01 l/(s·m²)"), L601 ("Filterschichtstärke von 1 m",
+-- "ist auf q_Dr,RBF ≤ 0,03 l/(s·m²) zu begrenzen"), L603 ("q_Dr,RBF ≤ 0,03", "h_FK ≥ 1 m"), L675 ("… sicherzustellen, dass … auf
+-- q_Dr,RBF = 0,01 l/(s·m²) begrenzt ist"), L677 ("sollte die Höhe des Filterkörpers h_FK ≥ 1,0 m betragen"), L926 ("h_FK ≥ 0,25 m"),
+-- L930 ("kann die Filterstärke auf h_FK 0,2 m verringert werden"). Capture: REQ-02 (h_FK ≥ 1.0, M187-05), REQ-03 (q ≤ 0.03, M187-06 / -07),
+-- REQ-04 (q == 0.01 AND h_FK ≥ 1.0, M187-06 / -07) all block and unconditional — REQ-03 and REQ-04 contradict each other on the same
+-- worksheet for every project; none reads sonderanwendung or a variant.
+-- Why staged: replacing five verified block gates by variant-guarded gates is a gate-condition change (always sign-off).
+-- Option (after the three DATA migrations):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m187 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m187 SELECT * FROM compliance_requirements
+--  WHERE (id = '2fd5094c-ab25-4a01-8e51-0b30027a0a48' AND md5(condition) = '1329516a29811dda7afc23880678fab7')
+--     OR (id = 'a1ff96c6-228f-44e2-bd61-f69088489747' AND md5(condition) = '6e42742fafffd651ad44df6a91eed110')
+--     OR (id = '68ffd495-3249-4827-8ca0-657d925daf50' AND md5(condition) = '6e42742fafffd651ad44df6a91eed110')
+--     OR (id = 'e2e0fa89-c689-46ff-8ec7-7b8f61206067' AND md5(condition) = 'a55d4ab2aa69aa2aa361231663d692b0')
+--     OR (id = '7ecbff21-b792-4e69-ac15-4f240eee477b' AND md5(condition) = 'a55d4ab2aa69aa2aa361231663d692b0');
+-- DELETE FROM compliance_requirements WHERE id IN (SELECT id FROM compliance_requirements_archive_m187);
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-02P3', 'Filterkörperhöhe P-Rückhalt b) Melioration', 'IF sonderanwendung == ''p_rueckhalt'' AND verfahrensvariante_p == ''melioration_filtermaterial'' THEN h_FK >= h_FK_min_p', '§5.1.3.2 b)', 'block',
+--        'Plan 3 (m187-G-1): h_FK ≥ 1,00 m nur für Variante b) (L514); a) / c): keine Änderungen zu DWA-A 178.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-06';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-03P3', 'Drosselabflussspende Spurenstoffe je Variante', 'IF verfahrensvariante_spurenstoffe != ''nachgeschaltete_stufe'' THEN q_Dr_RBF <= q_Dr_RBF_limit_spur', '§5.2.3.1', 'block',
+--        'Plan 3 (m187-G-1): a) 0,01 (L599 "auf" — ≤ als sichere Lesart, m187-J-2), b) / c) ≤ 0,03 (L601 / L603); d) keine Vorgabe (L605).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-11';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-04P3', 'Filterkörperhöhe Spurenstoffe b) / c)', 'IF verfahrensvariante_spurenstoffe IN {gak, mitbehandlung_ka} THEN h_FK >= h_FK_min_spur', '§5.2.3.1 b) / c)', 'block',
+--        'Plan 3 (m187-G-1): b) Filterschichtstärke von 1 m (L601), c) h_FK ≥ 1 m (L603).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-11';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-04P3M', 'Drosselabflussspende Mikroorganismen bei Volleinstau', 'IF sonderanwendung == ''mikroorganismen'' THEN q_Dr_RBF == q_Dr_RBF_limit_mikro', '§5.3.3.1', 'block',
+--        'Plan 3 (m187-G-1): "sicherzustellen, dass bei Volleinstau des Retentionsraums die spezifische Drosselabflussspende auf q_Dr,RBF = 0,01 l/(s·m²) begrenzt ist" (L675).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-16';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-02P3M', 'Filterkörperhöhe Mikroorganismen (sollte)', 'IF sonderanwendung == ''mikroorganismen'' THEN h_FK >= h_FK_min_mikro', '§5.3.3.1', 'warn',
+--        'Plan 3 (m187-G-1): "sollte die Höhe des Filterkörpers h_FK ≥ 1,0 m betragen" (L677) — sollte → warn.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-16';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-02P3K', 'Filterkörperhöhe Klein-RBF (0,25 m; mit Carbonatschicht 0,2 m)', 'IF sonderanwendung == ''klein_rbf'' THEN h_FK >= h_FK_min_klein', '§5.5.3.2.2', 'block',
+--        'Plan 3 (m187-G-1): "beträgt im konsolidierten Zustand h_FK ≥ 0,25 m" (L926); "In diesem Fall kann die Filterstärke auf h_FK 0,2 m verringert werden." (L930).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-22';
+-- COMMIT;
+-- Note: h_FK is inherited on M187-06 / -11 / -16 / -22 from M187-08 (and -05 on -06), q_Dr_RBF on -11 / -16 from M187-12 (capture);
+-- h_FK_min_klein is a scalar-only equation output (computed on the form / report, not materialised — m187-I-2).
+-- Rollback:
+-- BEGIN;
+-- DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-1):%';
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_m187
+--  WHERE id IN ('2fd5094c-ab25-4a01-8e51-0b30027a0a48', 'a1ff96c6-228f-44e2-bd61-f69088489747', '68ffd495-3249-4827-8ca0-657d925daf50', 'e2e0fa89-c689-46ff-8ec7-7b8f61206067', '7ecbff21-b792-4e69-ac15-4f240eee477b')
+--    AND id NOT IN (SELECT id FROM compliance_requirements);
+-- DELETE FROM compliance_requirements_archive_m187 WHERE id IN ('2fd5094c-ab25-4a01-8e51-0b30027a0a48', 'a1ff96c6-228f-44e2-bd61-f69088489747', '68ffd495-3249-4827-8ca0-657d925daf50', 'e2e0fa89-c689-46ff-8ec7-7b8f61206067', '7ecbff21-b792-4e69-ac15-4f240eee477b');
+-- DROP TABLE IF EXISTS compliance_requirements_archive_m187; -- only once every m187 block that uses it is rolled back or signed off
+-- COMMIT;
+
+-- =====================================================================================================================
+-- m187-G-2 · M187-08 · REQ-05 / REQ-05-2 (B_CSB ≤ 20 AND A_F_pro_AEb ≥ 750 AND q_krit == 60 AND q_A_max ≤ 4) → the §5.4.3 either / or on M187-20 + the Vorstufe gates on M187-19
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L792 "Die Filterfläche ist so zu bemessen, dass die CSB-Fracht ≤ 20 g CSB/(m²·d) bezogen auf die Gesamtfilterfläche im
+-- Jahresdurchschnitt beträgt. Liegen keine Daten vor, muss die Gesamtfilterfläche mindestens 750 m²/ha A_E,b betragen."; L784 "Die
+-- Bemessung sollte für q_krit = 60 l/(s·ha) erfolgen. … muss die Vorstufe auf eine maximale Oberflächenbeschickung von q_A,max = 4 m/h
+-- bemessen werden."; capture: REQ-05 / -05-2 (block) sit on M187-08 (the P-Rückhalt Variante b worksheet — misplaced, m187-X-2) and
+-- demand BOTH sizing rules at once.
+-- Why staged: gate-condition change + severity (q_krit "sollte" → warn) + worksheet move.
+-- Option:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m187 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m187 SELECT * FROM compliance_requirements
+--  WHERE (id = '025f8745-3556-4a91-9e9a-00c60359670b' AND md5(condition) = 'c317b78597521a5fa7dfa656a1b32e2c')
+--     OR (id = '7db4c2e0-20a3-457a-a0e2-31f91e1d12a5' AND md5(condition) = 'c317b78597521a5fa7dfa656a1b32e2c');
+-- DELETE FROM compliance_requirements WHERE id IN ('025f8745-3556-4a91-9e9a-00c60359670b', '7db4c2e0-20a3-457a-a0e2-31f91e1d12a5') AND md5(condition) = 'c317b78597521a5fa7dfa656a1b32e2c';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-05P3A', 'CSB-Filterflächenbelastung (mit Daten)', 'IF daten_vorhanden == ''ja'' THEN B_CSB_calc <= 20', '§5.4.3', 'block', 'Plan 3 (m187-G-2): L792 erster Satz.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-20';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-05P3B', 'Mindest-Gesamtfilterfläche (ohne Daten)', 'IF daten_vorhanden == ''nein'' THEN A_F_gesamt >= A_F_min_ohne_daten', '§5.4.3', 'block', 'Plan 3 (m187-G-2): L792 zweiter Satz.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-20';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-05P3C', 'Vorstufe: q_krit = 60 l/(s·ha) (sollte)', 'q_krit == 60', '§5.4.3', 'warn', 'Plan 3 (m187-G-2): "Die Bemessung sollte für q_krit = 60 l/(s·ha) erfolgen." (L784) — sollte → warn.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-19';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-05P3D', 'Vorstufe: q_A,max ≤ 4 m/h', 'q_A_max <= 4', '§5.4.3', 'block', 'Plan 3 (m187-G-2): "muss die Vorstufe auf eine maximale Oberflächenbeschickung von q_A,max = 4 m/h bemessen werden" (L784).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-19';
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-2):%'; re-INSERT the two archived rows by id with the
+-- explicit compliance_requirements column list (pattern of m187-G-1); DELETE them from the archive.
+
+-- =====================================================================================================================
+-- m187-G-3 · M187-19 · Stoffstromtrennung ab CSB > 3.000 mg/l; Sickerwasser nie in die RBFA (new gates)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L765 "Bei häufiger auftretenden CSB-Konzentrationen von > 3.000 mg/l müssen die Abflüsse der Lagerflächen von denen der
+-- Verkehrsflächen getrennt werden (LAWA-Ad-hoc-AG BIOGASANLAGEN 2018). Das Niederschlagswasser der Betriebsflächen darf in die RBFA
+-- eingeleitet werden. Das Sickerwasser ist für eine Behandlung mit einem RBF zu hoch belastet und darf daher nicht in die RBFA eingeleitet
+-- werden."; capture: sickerwasser_in_rbf (M187-19, boolean, consumer-free, no gate); CSB_grenze_trennung (VR > 3000) is a constant typed as
+-- an input (m187-D-8). The created attestation stoffstromtrennung is visible from CSB_konzentration > 3000.
+-- Why staged: new gates.
+-- Option:
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-09P3', 'Stoffstromtrennung bei CSB > 3.000 mg/l', 'IF CSB_konzentration > 3000 THEN stoffstromtrennung == True', '§5.4.2.2.2', 'block', 'Plan 3 (m187-G-3): L765 erster Satz.', true
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-19';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-10P3', 'Sickerwasser der Lagerflächen nicht in die RBFA', 'sickerwasser_in_rbf == False', '§5.4.2.2.2', 'block', 'Plan 3 (m187-G-3): "Das Sickerwasser … darf daher nicht in die RBFA eingeleitet werden." (L765).', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-19';
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-3):%';
+
+-- =====================================================================================================================
+-- m187-G-4 · M187-21 · filtervegetation: Gehölze / Schilf nicht geeignet (new gate)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L934 "Nicht geeignet sind Gewächse, durch welche die Filterfähigkeit eingeschränkt und/oder die Anlagenkonstruktion gefährdet
+-- wird. Hierzu gehören starke Wurzelbildner wie Gehölze oder Schilf."; capture: filtervegetation (M187-21, enum regio_stauden | gehoelze |
+-- schilf | keine, consumer-free, no gate).
+-- Option:
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-11P3', 'Filtervegetation Klein-RBF: keine starken Wurzelbildner', 'NOT (filtervegetation IN {gehoelze, schilf})', '§5.5.3.2.2', 'block', 'Plan 3 (m187-G-4): L934.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-21';
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-4):%';
+
+-- =====================================================================================================================
+-- m187-G-5 · M187-21 · dauerhafter_teileinstau nicht zulässig (new gate)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L938 "Fremdbewuchs ist zu entfernen. Ein dauerhafter Teileinstau des Filterkörpers zur Verbesserung der Wasserversorgung der
+-- Filtervegetation im Regelbetrieb ist nicht zulässig."; capture: dauerhafter_teileinstau (M187-21, boolean, consumer-free, no gate).
+-- Option:
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-12P3', 'Kein dauerhafter Teileinstau des Filterkörpers', 'dauerhafter_teileinstau == False', '§5.5.3.2.2', 'block', 'Plan 3 (m187-G-5): L938.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-21';
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-5):%';
+
+-- =====================================================================================================================
+-- m187-G-6 · M187-09 · REQ-06 / REQ-06-2 (A_b_a < 1 AND A_F_anteil_Aba == 1.0 AND A_F >= 1.0 AND h_RR >= 0.2 AND h_RBF >= 0.6 AND h_Draen >= 0.1) → the §5.5 gates on M187-22 / -21, A_F < 1,0 % with the Gl.-2 proof
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L964 "Die spezifische Bodenfilteroberfläche beträgt A_F = 1,0 % der angeschlossenen befestigten Fläche A_b,a. … sollte die absolute
+-- Bodenfilteroberfläche von Einzelelementen A_F ≥ 1,0 m² nicht unterschritten werden."; L968 "… unter der Einhaltung der maximal zulässigen
+-- AFS63-Filterflächenbelastung von b_krit = 7 kg/(m²·a) gemäß Arbeitsblatt DWA-A 178:2019 auch geringere spezifische Filterflächen von
+-- A_F < 1,0 % der angeschlossenen befestigten Fläche A_b,a möglich."; L859 "A_b,a < 1 ha"; L914 "h_RR ≥ 0,2 m"; L954 "h_RBF ≥ 0,6 m";
+-- L942 "Die Schichtdicke des Dränmaterials sollte mindestens h_Drän ≥ 0,1 m betragen."; capture: REQ-06 / -06-2 (block) sit on M187-09
+-- (the P-Rückhalt Variante c worksheet — misplaced, m187-X-2) and force A_F_anteil_Aba == 1.0, which blocks the printed A_F < 1,0 % option;
+-- Gl. 2 (ok_boolean) exists on M187-22.
+-- Why staged: gate-condition change, severity (h_Drän "sollte" → warn; element ≥ 1,0 m² "sollte" → warn), worksheet move.
+-- Option:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m187 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m187 SELECT * FROM compliance_requirements
+--  WHERE (id = '69015ae3-f9af-49f6-a9f1-a7fa8c142da7' AND md5(condition) = '48e9732a0b01eed4f8b17f8952d3c404')
+--     OR (id = '1eeabd57-1efc-434e-acbc-6a23e02eea39' AND md5(condition) = '48e9732a0b01eed4f8b17f8952d3c404');
+-- DELETE FROM compliance_requirements WHERE id IN ('69015ae3-f9af-49f6-a9f1-a7fa8c142da7', '1eeabd57-1efc-434e-acbc-6a23e02eea39') AND md5(condition) = '48e9732a0b01eed4f8b17f8952d3c404';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-06P3A', 'Klein-RBF: A_F = 1,0 % A_b,a oder b_krit-Nachweis (Gl. 2)', 'A_F_anteil_calc >= 1.0 OR ok_boolean == True', '§5.5.4', 'block', 'Plan 3 (m187-G-6): L964 / L968.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-22';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-06P3B', 'Klein-RBF: Anwendungsbereich A_b,a < 1 ha', 'A_b_a_sum_klein < 10000', '§5.5.2', 'block', 'Plan 3 (m187-G-6): L859.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-22';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-06P3C', 'Klein-RBF: Einzelelemente A_F ≥ 1,0 m² (sollte)', 'elemente_unter_1m2 == 0', '§5.5.4', 'warn', 'Plan 3 (m187-G-6): L964 "sollte … nicht unterschritten werden".', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-22';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-06P3D', 'Klein-RBF: h_RR ≥ 0,2 m, h_RBF ≥ 0,6 m', 'h_RR >= 0.2 AND h_RBF >= 0.6', '§5.5.3.2.2', 'block', 'Plan 3 (m187-G-6): L914 / L954.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-22';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-06P3E', 'Klein-RBF: h_Drän ≥ 0,1 m (sollte)', 'h_Draen >= 0.1', '§5.5.3.2.2', 'warn', 'Plan 3 (m187-G-6): L942 "sollte mindestens h_Drän ≥ 0,1 m betragen".', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-21';
+-- COMMIT;
+-- Note: h_RR is inherited on M187-22 from M187-21; h_RBF is own on -22; h_Draen own on -21 (capture). ok_boolean is the Gl.-2 output on M187-22
+-- (needs_engineer_review — its formula is a comparison, not an assignment; the owner may prefer a rewrite to `ok = if(b_R_a / (A_F / A_b_a) <= b_krit, 1, 0)`).
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-6):%'; re-INSERT the two archived rows by id (explicit column list).
+
+-- =====================================================================================================================
+-- m187-G-7 · M187-18 · UV-Mindestdosis nur bei eingesetzter UV-Nachbehandlung (new warn gate)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L703 "Für die Bemessung einer nachgeschalteten UV-Bestrahlung sollte nach derzeitiger Kenntnis in Anlehnung an SCHÖLER (2002) eine
+-- Mindestdosis von 200 J/m² nicht unterschritten werden."; capture: UV_dosis (M187-18, VR ≥ 200, not required, consumed by M187-16), no gate.
+-- Option:
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-13P3', 'UV-Mindestdosis 200 J/m² (sollte)', 'IF uv_eingesetzt == ''ja'' THEN UV_dosis >= UV_dosis_min', '§5.3.3.5', 'warn', 'Plan 3 (m187-G-7): L703 — sollte → warn.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-18';
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-7):%';
+
+-- =====================================================================================================================
+-- m187-G-8 · M187-09 · mindestens zwei Sorptionsstufen (empfohlen → warn, new gate)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L499 "… wird eine Reihenschaltung von mindestens zwei Sorptionsstufen empfohlen."
+-- Option:
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-14P3', 'Reihenschaltung von mindestens zwei Sorptionsstufen (empfohlen)', 'IF verfahrensvariante_p == ''nachgeschaltete_sorptionsstufe'' THEN sorptionsstufen_count >= 2', '§5.1.3.1 c)', 'warn', 'Plan 3 (m187-G-8): L499.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-09';
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-8):%';
+
+-- =====================================================================================================================
+-- m187-G-9 · M187-14 · hydraulisch entkoppelte Segmente (muss → block, new gate; three segments are experience — m187-J-3)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L603 "Bei RBF mit Beimischung von GAK zur Mitbehandlung des Kläranlagenablaufs bei Trockenwetter muss der Filter in hydraulisch
+-- entkoppelte Segmente aufgeteilt werden. … Positive Erfahrungen liegen bei einer Aufteilung auf drei Segmente vor."
+-- Option:
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-15P3', 'RBFplus: Aufteilung in hydraulisch entkoppelte Segmente', 'IF verfahrensvariante_spurenstoffe == ''mitbehandlung_ka'' THEN segmente_count >= 2 AND segmente_unterdimensioniert == 0', '§5.2.3.1 c)', 'block', 'Plan 3 (m187-G-9): L603.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-14';
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-9):%';
+
+-- =====================================================================================================================
+-- m187-G-10 · M187-20 · vier (oder ein Vielfaches von vier) Teilfilterbecken (new gate)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L794 "Das RBF wird in vier (oder ein Vielfaches von vier) gleich große Teilfilterbecken aufgeteilt. Davon sind jeweils drei
+-- gleichzeitig in Betrieb und eins hat Betriebspause." — descriptive ("wird"); proposed block, the owner may prefer warn.
+-- Option:
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-16P3', 'Teilfilterbecken: Vielfaches von vier', 'teilfilter_count >= 4 AND teilfilter_rest == 0', '§5.4.3', 'block', 'Plan 3 (m187-G-10): L794.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-20';
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-10):%';
+
+-- =====================================================================================================================
+-- m187-G-11 · M187-05 · REQ-02-2 (beta_wert >= 4) guarded by Variante a) (gate-condition change)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L489 "Basierend auf einer mittleren PO4-Zulaufkonzentration von S_PO4-P,aM = 0,5 mg/l kann die Menge des Fällmittels
+-- (Eisen-III-Salz) mit einem Beta-Wert von ≥ 4 angesetzt werden. Diese Dosiermenge ist im laufenden Betrieb hinsichtlich der Zielkonzentration
+-- und der Fällmittelausnutzung zu optimieren."; capture: REQ-02-2 (block, M187-05) fires for every project incl. b) / c).
+-- Option:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m187 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m187 SELECT * FROM compliance_requirements WHERE id = '17ec0451-4e15-40dc-928d-6e67cc3fde40' AND md5(condition) = '565f39b19ef66b053a8d3820e8a0103d';
+-- UPDATE compliance_requirements SET condition = 'IF verfahrensvariante_p == ''faellung_filterzulauf'' THEN beta_wert >= 4', description = coalesce(description, '') || ' [Plan 3 (m187-G-11): guarded by Variante a) — "kann … angesetzt werden" (L489); the owner may prefer warn]'
+--  WHERE id = '17ec0451-4e15-40dc-928d-6e67cc3fde40' AND md5(condition) = '565f39b19ef66b053a8d3820e8a0103d';
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description FROM compliance_requirements_archive_m187 a WHERE a.id = c.id AND c.id = '17ec0451-4e15-40dc-928d-6e67cc3fde40'; DELETE FROM compliance_requirements_archive_m187 WHERE id = '17ec0451-4e15-40dc-928d-6e67cc3fde40';
+
+-- =====================================================================================================================
+-- m187-R-1 · M187-09 · Gl. 1 (A_F = 0.01 * A_b_a * 10000) and Gl. 2 (b_R_a / (A_F / A_b_a) <= b_krit) duplicated on the P-Rückhalt Variante c worksheet → deactivate the M187-09 copies
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L964 / L968 are §5.5.4 (Klein-RBF); M187-09 is "P-Rückhalt Variante c: Nachgeschaltete Sorptionsstufe" (prod title) and also holds
+-- the Klein-RBF field block (A_b_a, A_F, b_krit, b_R_a, h_RR, h_RBF, h_Draen, … — m187-X-2). The M187-22 copies stay.
+-- Why staged: deactivation of verified equation rows (always sign-off). Archive pattern (equations has no `active`).
+-- Option:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_m187 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_m187 SELECT * FROM equations
+--  WHERE (id = 'df181975-34ae-474a-b1bc-a62e1bfef98e' AND md5(formula) = '475579af1b81520a96433a09cf94520d')
+--     OR (id = '6b3dc34c-a3da-4cfd-9e3a-803109b1bd12' AND md5(formula) = 'c58e594c1f85470f55ebbb438e801c7b');
+-- DELETE FROM equations WHERE id IN (SELECT id FROM equations_archive_m187) AND id IN ('df181975-34ae-474a-b1bc-a62e1bfef98e', '6b3dc34c-a3da-4cfd-9e3a-803109b1bd12');
+-- COMMIT;
+-- Rollback:
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_m187 WHERE id IN ('df181975-34ae-474a-b1bc-a62e1bfef98e', '6b3dc34c-a3da-4cfd-9e3a-803109b1bd12') AND id NOT IN (SELECT id FROM equations);
+-- DROP TABLE IF EXISTS equations_archive_m187;
+
+-- =====================================================================================================================
+-- m187-C-1 · M187-01 · sonderanwendung consumer_worksheets → every field-bearing worksheet (the branch switch)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L286 "Die in diesem Merkblatt beschriebenen Sonderanwendungen basieren auf den verfahrenstechnischen Grundlagen der RBF. Einzelne
+-- Komponenten sowie die Bemessungsvorgaben müssen angepasst werden, um die Reinigungsziele der Sonderanwendung zu erreichen."; capture:
+-- sonderanwendung (M187-01) consumer_worksheets = {M187-06, M187-11, M187-16, M187-20, M187-22} — the switch reaches five of the 21
+-- field-bearing worksheets; the §5.1 / §5.2 / §5.3 / §5.4 / §5.5 section rules (C-2) and the STAGED gates keyed on it are `pending`
+-- elsewhere.
+-- Option:
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M187-04','M187-05','M187-06','M187-07','M187-08','M187-09','M187-10','M187-11','M187-12','M187-13','M187-14','M187-15','M187-16','M187-17','M187-18','M187-19','M187-20','M187-21','M187-22','M187-23','M187-25']
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code = 'M187-01' AND f.symbol = 'sonderanwendung' AND f.active
+--    AND f.consumer_worksheets = ARRAY['M187-06','M187-11','M187-16','M187-20','M187-22'];
+-- Rollback: the same UPDATE with the two arrays swapped.
+
+-- =====================================================================================================================
+-- m187-C-2 · M187-05 … -22 · branch section rules per sonderanwendung (refused by the producer guard — needs the ruling that hiding a branch hides its consumers too)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §5.1 (L424) / §5.2 (L570) / §5.3 (L645) / §5.4 (L733) / §5.5 (L849) are five independent Sonderanwendungen (L288–L295 lists them);
+-- capture: every field-bearing section B / D of every worksheet holds a field with non-empty consumer_worksheets (125 of 139 fields carry
+-- consumers, 86 of them their OWN worksheet — m187-X-3), so `emit-field-configs-sql.ts` refuses every section rule (pinned in
+-- field-configs-m187.test.ts). Hiding a branch hides producers whose consumers are in the SAME branch (e.g. h_FK M187-08 → -22 / -16 / -06 / -14 /
+-- -13 / -11 / -21 — a cross-branch chain the owner must accept or re-home first).
+-- Option (after C-1; one UPDATE per (worksheet, section), `visible_when IS NULL` guarded):
+-- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''p_rueckhalt'''         FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-05','M187-06','M187-07','M187-08','M187-09','M187-10') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''spurenstoffe'''        FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-11','M187-12','M187-13','M187-14','M187-15') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''mikroorganismen'''     FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-16','M187-17','M187-18') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''organische_belastung''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-19','M187-20') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''klein_rbf'''           FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-21','M187-22') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
+-- Rollback: UPDATE worksheet_sections … SET visible_when = NULL WHERE … AND visible_when LIKE 'sonderanwendung == %'.
+-- Caveat: M187-07 / -08 / -09 hold fields of OTHER branches (UV / KBE on -07, the org-load block on -08, the Klein-RBF block on -09 — X-2);
+-- hiding those sections under p_rueckhalt hides those copies — they are duplicates of the fields on -16 / -18 / -19 / -20 / -21 / -22.
+
+-- =====================================================================================================================
+-- m187-C-3 · M187-21 · h_FK_CaCO3 / CaCO3_massenanteil_carbo visible_when carbonatschicht_vorhanden == 'ja' (refused: consumed by M187-22)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L930 "Alternativ zur Melioration des Filtermaterials kann … auch eine Carbonatschicht mit einer Schichtstärke h_FK,CaCO3 ≥ 0,10 m aus
+-- einem handelsüblichen Carbonatbrechsand ( 2 mm bis 8 mm ) mit einem CaCO3-Massenanteil von 80 % hergestellt werden."; capture: both fields
+-- (M187-21, not required, VR ≥ 0.10 / == 80) consumer_worksheets = {M187-22}; carbonatschicht_vorhanden (M187-21, enum ja / nein) → -22.
+-- Option: UPDATE fields f SET visible_when = 'carbonatschicht_vorhanden == ''ja''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--   WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code = 'M187-21' AND f.symbol IN ('h_FK_CaCO3','CaCO3_massenanteil_carbo') AND f.active AND f.visible_when IS NULL;
+-- (the M187-22 copies inherit null when hidden — accepted by construction: no carbonate layer, no carbonate fields). Rollback: SET visible_when = NULL.
+
+-- =====================================================================================================================
+-- m187-C-4 · M187-18 · UV_dosis visible_when uv_eingesetzt == 'ja' (refused: consumed by M187-16)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L703 (quoted under G-7); capture: UV_dosis (M187-18) consumer_worksheets = {M187-16}; uv_eingesetzt (M187-18) → -16.
+-- Option: UPDATE fields f SET visible_when = 'uv_eingesetzt == ''ja''' … WHERE w.code = 'M187-18' AND f.symbol = 'UV_dosis' AND f.active AND f.visible_when IS NULL; Rollback: SET visible_when = NULL.
+
+-- =====================================================================================================================
+-- m187-C-5 · M187-20 · B_CSB / A_F_pro_AEb visible_when daten_vorhanden (refused: self-consumed — m187-X-3); the twins B_CSB_calc / A_F_min_ohne_daten are emitted
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L792 (quoted under G-2); capture: B_CSB (required, VR ≤ 20) and A_F_pro_AEb (required, VR ≥ 750) on M187-20 both list M187-20 as
+-- their consumer (an import artefact — a field cannot inherit itself), so the guard refuses; both are REQUIRED, so an engineer without CSB
+-- data must still type B_CSB today.
+-- Option (after X-3 clears the self-consumer): UPDATE fields f SET visible_when = 'daten_vorhanden == ''ja''' … f.symbol = 'B_CSB'; SET visible_when = 'daten_vorhanden == ''nein''' … f.symbol = 'A_F_pro_AEb';
+-- or retire both in favour of the twins (D-block on ratification). Rollback: SET visible_when = NULL.
+
+-- =====================================================================================================================
+-- m187-D-1 · M187-13 · filterschichten.gak_vol_pct / .caco3_pct ↔ GAK_volumenanteil_oben / GAK_volumenanteil_unten / CaCO3_massenanteil_GAK (M187-13 → M187-11; copies on M187-06)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The register row per layer is the N-instances shape (Bild 3 prints two GAK bands and one CaCO3 share over four layers); the three scalars
+-- (not required, VR range 10..20 / 30..40 / == 20, consumed by M187-11) are the retirement candidates. Resolution: RETIRE ON RATIFICATION
+-- (`active = false` on the M187-13 rows and the M187-06 copies) once M187-11 is re-pointed to the register mirror (consumer edit of
+-- filterschichten → M187-11); until then they stay as typed inputs beside the register.
+-- Option: UPDATE fields f SET active = false … WHERE w.code IN ('M187-13','M187-06') AND f.symbol IN ('GAK_volumenanteil_oben','GAK_volumenanteil_unten','CaCO3_massenanteil_GAK');
+--         UPDATE fields f SET consumer_worksheets = ARRAY['M187-11'] … WHERE w.code = 'M187-13' AND f.symbol = 'filterschichten';
+-- Rollback: active = true; consumer_worksheets = NULL.
+
+-- =====================================================================================================================
+-- m187-D-2 · M187-13 · h_FK_lagen ↔ h_FK (M187-05 → 7 consumers; M187-08 → 7 consumers)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- h_FK is the most consumed input of the standard (both prod copies feed -06 / -07 / -09 / -11 / -13 / -14 / -16 / -21 / -22) and carries the
+-- variant gates; h_FK_lagen is the Bild-3 sum on the Spurenstoff-b worksheet only. Resolution: h_FK STAYS an input; on ratification the
+-- M187-13 inherited h_FK could be DERIVED from h_FK_lagen for the GAK branch (`widget = 'derived'` on a re-homed h_FK) — owner ruling;
+-- nothing proposed as SQL until the branch re-homing (X-2) is decided.
+
+-- =====================================================================================================================
+-- m187-D-3 · M187-09 · sorptionsstufen_count ↔ anzahl_sorptionsstufen (consumer-free, optional)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Resolution: RETIRE ON RATIFICATION (no consumer, no gate; the register count is the single source).
+-- Option: UPDATE fields f SET active = false … WHERE w.code = 'M187-09' AND f.symbol = 'anzahl_sorptionsstufen' AND f.active; Rollback: active = true.
+
+-- =====================================================================================================================
+-- m187-D-4 · M187-09 · sorptionsstufen.ebct_min / .v_filter_auf / .v_filter_ab / .h_fk_ss ↔ EBCT / v_filter_aufstrom / v_filter_abstrom / h_FK_SS (M187-09 → M187-06; copies on M187-05)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- All four scalars are required, VR-bearing (≥ 15 / < 5.0 / < 2.0 / ≥ 1.25) and consumed by M187-06. Resolution: h_FK_SS → DERIVE from
+-- h_FK_SS_calc (M187-09-D1 = EBCT · v / 60; `widget = 'derived'`, consumers kept) on ratification; EBCT / v_filter_* STAY as the single-stage
+-- inputs until the register is the ratified source (then retire with a consumer edit of sorptionsstufen → M187-06).
+-- Option: UPDATE fields f SET widget = 'derived' … WHERE w.code = 'M187-09' AND f.symbol = 'h_FK_SS' AND f.widget IS NULL; plus the equation re-point
+--         (M187-09-D1 output_symbol → h_FK_SS, archive pattern). Rollback: widget = NULL; restore the equation row.
+
+-- =====================================================================================================================
+-- m187-D-5 · M187-20 · teilfilter_count ↔ anzahl_teilfilter (consumer-free, optional)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Resolution: RETIRE ON RATIFICATION. Option: UPDATE fields f SET active = false … WHERE w.code = 'M187-20' AND f.symbol = 'anzahl_teilfilter' AND f.active; Rollback: active = true.
+
+-- =====================================================================================================================
+-- m187-D-6 · M187-22 / -21 · klein_rbf_elemente.a_b_a_m2 / .a_f_m2 / .h_rr / .h_rbf ↔ A_b_a / A_F (Gl. 1) / A_F_anteil_Aba / h_RR / h_RBF
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- A_b_a (required, ha) feeds Gl. 1 (A_F) and Gl. 2 (ok_boolean) on M187-22; A_F_anteil_Aba is required and gate-bearing (REQ-06 on -09);
+-- h_RR (M187-21 → -22) / h_RBF (M187-22) are required. Resolution per pair: A_b_a → DERIVE from A_b_a_sum_klein / 10000 (ha) on ratification
+-- (new equation, Gl. 1 / Gl. 2 keep computing); A_F_anteil_Aba → DERIVE from A_F_anteil_calc (M187-22-D4) with G-6; h_RR / h_RBF → STAY (the
+-- system-level minima; the register columns are per-element checks); A_F → keep Gl. 1 (the printed 1,0 % rule) beside A_F_sum_klein.
+-- Option: equations INSERT `A_b_a = A_b_a_sum_klein / 10000` (input klein_rbf_elemente chain) + UPDATE fields SET widget = 'derived' for A_b_a
+--         and A_F_anteil_Aba; Rollback: DELETE the rows by description, widget = NULL.
+
+-- =====================================================================================================================
+-- m187-D-7 · M187-16 · indikatororganismen.zulauf / .ablauf / .log_red ↔ KBE / MPN / PBE / logstufen_rueckhalt (M187-16, self-consumed; copies on M187-07)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- KBE / MPN / PBE (optional, VR ≥ 0) are single concentrations without a Zulauf / Ablauf pair; logstufen_rueckhalt (required, VR > 1.0) is the
+-- per-plant reduction. Resolution: logstufen_rueckhalt → DERIVE from log_red_min (M187-16-D1) on ratification; KBE / MPN / PBE → RETIRE ON
+-- RATIFICATION (the register row carries organism + unit + both concentrations). The frachtbezogene Wirkungsgrad (§5.3.4.3 L727) is not
+-- computable from concentrations alone (m187-F-5) — the owner may prefer to keep logstufen_rueckhalt as the measured input.
+-- Option: UPDATE fields f SET active = false … f.symbol IN ('KBE','MPN','PBE') on M187-16 / -07; widget = 'derived' for logstufen_rueckhalt + equation re-point.
+
+-- =====================================================================================================================
+-- m187-D-8 · M187-08 / -19 / -20 / -09 / -21 / -05 / -06 / -13 · constants typed as required inputs with `==` validations
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: CSB_grenze_trennung (VR > 3000), wirkungsgrad_hydraulisch (== 100), beschickung_pro_ereignis (== 20), q_krit (== 60), Fe_massenanteil
+-- (== 7), deckschicht_staerke (== 0.05), CaCO3_massenanteil_GAK (== 20), CaCO3_massenanteil_carbo (== 80) are printed constants (L765 / L770 /
+-- L794 / L784 / L512 / L922 / B3 / L930) that the engineer must retype. Resolution: seed rows exist in S5_4_3_ORG / S5_1_3_1_P / S5_5_KLEIN /
+-- BILD3; on ratification convert each to a `lookup_fill` twin (created beside it) or a `derived` constant and retire the input — every one is
+-- consumed (self or by -19 / -20 / -22 / -06 / -11), so the E-2 rule forbids a re-bind now.
+
+-- =====================================================================================================================
+-- m187-O-1 · S5_LIMITS_SPUR · override_policy locked → anhaltswert?
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L597 "Für die in 5.2.2 beschriebenen Verfahrensvarianten a bis d sollten die folgende Bemessungsvorgaben angewendet werden:" (should)
+-- vs L601 "ist auf q_Dr,RBF ≤ 0,03 l/(s·m²) zu begrenzen" / L603 "muss der Filter … aufgeteilt werden", "ist … vorzusehen" (directive).
+-- Chosen: locked (fail-safe). Option: UPDATE regulation_tables SET override_policy = 'anhaltswert' WHERE standard_code = 'DWA-M-187' AND table_code = 'S5_LIMITS_SPUR';
+
+-- =====================================================================================================================
+-- m187-O-2 · S5_LIMITS_APP · h_FK_min_mikro is a "sollte" (L677) inside a locked table
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen: locked (the q row L675 "ist … sicherzustellen" governs the table). Option: split the h_FK column into its own table
+-- `S5_3_3_1_HFK` (anhaltswert) and re-point the fill h_FK_min_mikro — or accept locked with the warn gate (G-1 REQ-02P3M).
+
+-- =====================================================================================================================
+-- m187-O-3 · S5_1_3_1_P / S5_4_3_ORG / S5_5_KLEIN · mixed modal rows in locked tables
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- kann / sollte / empfohlen rows: beta_min, pufferschicht_cm, fe_massenanteil_pct, ebct_min_min, v_filter_auf_max, v_filter_ab_max,
+-- sorptionsstufen_min (S5_1_3_1_P); q_krit, v_vorstufe_min, beschickung_pro_ereignis, austritt_max (S5_4_3_ORG); h_draen_min,
+-- a_f_element_min_m2, h_fk_caco3_min, caco3_carbo_pct, h_fk_carbonat (S5_5_KLEIN). The `modal` column carries the printed verb per row; no
+-- fill reads these tables today (only lookup() in register rows) — the policy has no affordance yet. Chosen: locked.
+
+-- =====================================================================================================================
+-- m187-X-3 · prod · 86 of 139 fields list their OWN worksheet in consumer_worksheets (import artefact)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- A field cannot inherit itself; the self-entry makes the producer guard refuse every visibility rule on those fields and makes
+-- `loadInheritedFields` (code = ANY(consumer_worksheets)) return the field to its own worksheet. Option (hygiene, no value change):
+-- UPDATE fields f SET consumer_worksheets = array_remove(f.consumer_worksheets, w.code) FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND f.active AND w.code = ANY(f.consumer_worksheets);
+-- UPDATE fields SET consumer_worksheets = NULL WHERE … AND consumer_worksheets = '{}';
+-- Rollback: re-add w.code (array_append) for the 86 rows listed in m187.prior.json.

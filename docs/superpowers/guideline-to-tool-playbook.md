@@ -552,6 +552,26 @@ yields an empty set silently. (9) A discriminator register that mixes a `lookup_
 `visible_when` on every branch column, one `limit` derived by nested `if(quelle == …)`, no `override` block — the "authority
 sets the target" sentence is a `behoerde` branch with typed inputs, not an override of a table value.
 
+**Encoding traps (Plan 3 Task 12, DWA-M-187).** (1) A "text-limit" standard (no numbered equations, every figure a sentence) seeds one
+printed sentence per table ROW keyed `(driver, parameter)` with `wert / unit / comparator / modal` columns — the `modal` column carries the
+printed verb so the policy question stays visible per row; a `lookup_fill` still needs a table keyed by the DRIVER only (one `from_symbol` per
+key column), so a combined "sonderanwendung × variante" limits table splits into one table per key shape (`S5_LIMITS_P` / `_SPUR` / `_APP`) —
+a `'-'` variant token has no symbol to come from. (2) Prod may list a field's OWN worksheet in `consumer_worksheets` (86 of 139 here — an
+import artefact): the producer guard then refuses every visibility UPDATE on it; put the branch rules on CREATED fields, STAGE the hygiene fix
+(`array_remove`) and pin the self-consumer count from the capture, never from an estimate. (3) A yes/no toggle that changes a LIMIT (carbonate
+layer → h_FK 0,25 → 0,2 m) is one `derived` equation over ONE table row (`if(toggle == 'ja', lookup(…, 'h_fk_carbonat_m'), lookup(…, 'h_fk_min_m'))`),
+not a second lookup table keyed on the toggle. (4) A printed sentence with NO operator ("Begrenzung … auf 0,01", "auf h_FK 0,2 m verringert")
+is seeded with `comparator = null` plus the printed fragment in a text column / text fill, the gate proposal picks the physically safe side and
+the J-block records it — never seed the operator. (5) A standard's own worked figure may sit ON its strict bound (1,25 m from 15 min · 5,0 m/h
+under "< 5,0 m/h"): keep the printed strict comparator in the row badge and pin the boundary case. (6) Check the inventory's "NOT found"
+claims against the transcript before encoding a null cell — the "0,2 m mit Carbonatschicht" sentence exists at L930 (R-5 reversal, J-4).
+(7) A `lookup_value` string cell compares with `==` / `!=` in row scope and a boolean `lookup_value` with `== true` (probed) — a
+"filterwirksam" flag on the layer table lets one Σ formula split h_FK from h_Drän without a derived column. (8) `min_rows(reg, col, cond)` with
+`cond` over an OPTIONAL column is `manual_required` on every row where the cell is null — condition only on required columns (`ablauf > 0`).
+(9) A "muss … getrennt werden" that applies above a threshold is a CREATED attestation with `visible_when threshold` + a STAGED
+`IF threshold THEN attest == True` gate; the unconditional prohibition in the same sentence ("darf … nicht … eingeleitet werden") is a
+separate unconditional gate — never hide the boolean under the threshold.
+
 **Staged DELETE rollbacks (controller ruling, Plan 3 Task 6 fix round 1 — corpus-wide).** A STAGED block that deletes rows
 from a table without an `active` column (`equations`, `compliance_requirements`) (1) copies the full rows into an archive table
 created in the SAME transaction (`CREATE TABLE IF NOT EXISTS <table>_archive_<slug> AS SELECT * FROM <table> WHERE false;
