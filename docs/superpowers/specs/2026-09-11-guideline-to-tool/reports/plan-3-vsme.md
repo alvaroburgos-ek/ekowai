@@ -3,7 +3,7 @@
 - **Status:** DONE_WITH_CONCERNS (every concern is a sign-off block; nothing blocks Task 25)
 - **Model / effort:** the subagent session ran on Claude Opus 5 (`claude-opus-5[1m]`), effort as dispatched; the commit trailer carries `Co-Authored-By: Claude Fable 5.1` per the controller ruling · **CLI:** claude 2.1.260 (no update taken — the user declines updates) · **Date:** 2026-09-18
 - **Branch:** `feat/guideline-to-tool`, worktree `C:\Users\Ekowai\_wt-g2t`, base `dac13d5`
-- **Nothing applied to prod.** No `apply-migration`, `drizzle-kit`, `vercel`, or DB write; `git stash` not used. Prod was read ONLY by (a) `node scripts/verification/prod-query.mjs --sql "…"` (the `standards` row for `%VSME%` → code `VSME`, version `2026-02-01`; the `information_schema` column lists of `fields` / `compliance_requirements` / `equations` / `worksheet_templates` / `worksheet_sections`; the per-field count of stored `project_parameters` → 1 row on `VSME-B02.000 PracticePolicyAndOrFutureInitiativeIsPubliclyAvailable`, value never selected), (b) `node scripts/regulation-tables/build-prior-snapshot.mjs VSME vsme` (read-only tx) and (c) the NEW read-only full-text capture `node scripts/verification/vsme-capture-text.mjs` (committed; same mechanics as prod-query.mjs — `DATABASE_URL_PROD` from `.env.local` at runtime, READ ONLY transaction, full cells, no truncation). `.env.local` never printed.
+- **Nothing applied to prod.** No `apply-migration`, `drizzle-kit`, `vercel`, or DB write; `git stash` not used. Prod was read ONLY by (a) `node scripts/verification/prod-query.mjs --sql "…"` (the `standards` row for `%VSME%` → code `VSME`, version `2026-02-01`; the `information_schema` column lists of `fields` / `compliance_requirements` / `equations` / `worksheet_templates` / `worksheet_sections`; the per-field count of stored `project_parameters` → 1 row on `VSME-B02.000 PracticePolicyAndOrFutureInitiativeIsPubliclyAvailable`, value never selected), (b) `node scripts/regulation-tables/build-prior-snapshot.mjs VSME vsme` (read-only tx) and (c) the NEW read-only full-text capture `node scripts/verification/capture-text.mjs VSME vsme` (committed; generalised in fix round 1 — same mechanics as prod-query.mjs — `DATABASE_URL_PROD` from `.env.local` at runtime, READ ONLY transaction, full cells, no truncation). `.env.local` never printed.
 - **SR-1 source: NONE — this standard has no transcript.** The ONLY quotable text is what prod already carries: the 31 `compliance_requirements` rows whose `description` quotes the VSME paragraph ("Para 29: „The undertaking shall …“") and the 9 whose `source_quote` names the printed page ("VSME B3, §29 (p.9): …") — grade **EV**, cited `[prod verification_quote (Para NN, <CR code>)]`. Quote carriers in prod (capture counts): compliance_requirements 31 / 31 with a "Para NN" description, 9 / 31 with a source_quote naming the printed page; equations 10 / 10 with a source_quote (EQ-01 … EQ-10: paras 24(e)(v) / 39(a), 30, 50 / 53, 109, 38(a) / (b), 168, 170, 63(c) — none names B2, the B7 materials mass-flow, the C3 sector list, C7 or the B8 country metric) and 0 / 10 with a verification_quote; fields 0 / 144 for both columns. Every value, list or threshold not present in that text is a sign-off entry (U-1 / F-1 / F-2); nothing was typed from memory of the standard. `VSME Standard.pdf` was NOT opened. The XLSX template was read for STRUCTURE only (§3). The inventory was used for pointers only.
 
 ## 1. Counts table
@@ -88,7 +88,7 @@ node scripts/verification/prod-query.mjs --sql "SELECT code, version, issued_yea
 node scripts/regulation-tables/build-prior-snapshot.mjs VSME vsme
   → wrote src\lib\eval\field-configs\vsme.prior.json: 144 field rows (0 orphan), 40 coded sections of 40, 10 equations, 31 gates (0 unparseable …);
     optional columns present: {"fields":{"widget":false,"ui_config":false,"lookup":false,"visible_when":false},"worksheet_sections":{"visible_when":false}}
-node scripts/verification/vsme-capture-text.mjs
+node scripts/verification/capture-text.mjs VSME vsme
   → wrote src\lib\eval\field-configs\vsme.text.prior.json: worksheets 40, sections 40, fields 144, requirements 31, equations 10, stored parameters [{"n":1}], instances [{"n":40}]
 pnpm -s tsx scripts/regulation-tables/emit-field-configs-sql.ts vsme 20260917102410
   → wrote 31 field entries + 0 section entries for vsme -> scripts/migrations/20260917102410_field_configs_vsme.sql scripts/rollback-20260917102410-field-configs-vsme.sql
@@ -97,18 +97,29 @@ pnpm -s tsx scripts/regulation-tables/emit-equations-sql.ts vsme 20260917102420
 ```
 Both migrations are byte-pinned against a fresh emit (`field-configs-vsme.test.ts` / `equations-vsme.test.ts` against the committed `vsme.prior.json`, default refuse mode, `warnings` pinned `[]`). The equations rollback deletes the 14 `Plan 3:` rows. Apply order (owner, after the schema migration incl. plan1-D-3-1): `20260917102410` → `20260917102420`; rollback in reverse. Every file touches `VSME` rows only; neither mentions `pollutant_register` / `AmountOfEmissionTo*` (pinned). **Materialisation (amendment D, noted once — vsme-I-1):** 9 of the 14 rows are register-fed on their own worksheet and materialise on save; the 4 B03.300 intensity rows and VSME-B08.200-D2 read scalars of OTHER worksheets that are not inherited today — `manual_required` ("Fehlende oder leere Eingaben") until vsme-C-7 / C-9, then form / report / PDF only (Task 17 trap 1). Server-side `computeVisibility` reads templateFields only — relevant to NO emitted rule (every emitted rule keys on its own worksheet); the [CODE] item is recorded once as vsme-X-3 for the staged C-1 / C-2 / C-3 rules.
 
-The full-text capture script (committed as `scripts/verification/vsme-capture-text.mjs`, so R-1 holds — re-run it to reproduce `vsme.text.prior.json`):
+The full-text capture script (committed as `scripts/verification/capture-text.mjs`, generalised in fix round 1 — `node scripts/verification/capture-text.mjs VSME vsme` reproduces `vsme.text.prior.json`, so R-1 holds; the generic script is shown here, the original VSME-only version is in the git history at `fd8ea8e`):
 ```js
 #!/usr/bin/env node
-// READ-ONLY full-text capture for VSME (Plan 3 Task 24). Same mechanics as scripts/verification/prod-query.mjs
-// (DATABASE_URL_PROD from .env.local at runtime, NEVER printed; READ ONLY transaction) but writes FULL cells (no
-// 120-char truncation) to src/lib/eval/field-configs/vsme.text.prior.json — the only quotable VSME text (grade EV).
-// Usage: node scripts/verification/vsme-capture-text.mjs   (committed so the capture is re-executable — R-1)
+// READ-ONLY full-text capture of a standard's prod TEXT cells (Plan 3 — first used by Task 24 VSME; controller ruling
+// Task 24 fix round 1 generalised it for every standard WITHOUT a transcript, Tasks 27–29). Same mechanics as
+// scripts/verification/prod-query.mjs (DATABASE_URL_PROD from .env.local at runtime, NEVER printed; every statement inside
+// a READ ONLY transaction) but writes FULL cells (prod-query truncates at 120 chars and folding by hand is forbidden) to
+// src/lib/eval/field-configs/<slug>.text.prior.json — worksheets / sections / fields (labels, descriptions,
+// verification_quote, source_quote, clause_reference, …) / compliance_requirements (description, source_quote, condition +
+// md5, id, …) / equations (formula + md5, source_quote, verification_quote, …) plus the stored-parameter and instance
+// counts. The output is the ONLY quotable text of a transcript-less standard (grade EV) and the generators of its
+// quote / enum constants and STAGED file read it; nothing in it is retyped by hand.
+// Usage: node scripts/verification/capture-text.mjs <STANDARD CODE> <slug>     e.g. VSME vsme   (slug: [a-z0-9_]+)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import postgres from 'postgres';
 
+const [code, slug] = process.argv.slice(2);
+if (!code || !slug || !/^[a-z0-9_]+$/.test(slug)) {
+  console.error('usage: capture-text.mjs <STANDARD CODE> <slug>   (slug: [a-z0-9_]+)');
+  process.exit(1);
+}
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const envText = fs.readFileSync(path.join(root, '.env.local'), 'utf8');
 const m = envText.match(/^DATABASE_URL_PROD=(.+)$/m);
@@ -117,27 +128,28 @@ const url = m[1].trim().replace(/^"|"$/g, '');
 const sql = postgres(url, { prepare: false, max: 1, ssl: 'require',
   connection: { default_transaction_read_only: 'on', statement_timeout: '60000' } });
 const Q = {
-  standard: `select id, code, version, title_de, title_en from standards where code = 'VSME'`,
-  worksheets: `select w.id, w.code, w.title_de, w.title_en, w.order_index from worksheet_templates w join standards s on s.id = w.standard_id where s.code = 'VSME' order by w.code`,
-  sections: `select w.code as worksheet, ws.id, ws.code, ws.title_de, ws.title_en, ws.order_index, ws.parent_section_id from worksheet_sections ws join worksheet_templates w on w.id = ws.worksheet_template_id join standards s on s.id = w.standard_id where s.code = 'VSME' order by w.code, ws.order_index`,
+  standard: `select id, code, version, title_de, title_en from standards where code = $1`,
+  worksheets: `select w.id, w.code, w.title_de, w.title_en, w.order_index from worksheet_templates w join standards s on s.id = w.standard_id where s.code = $1 order by w.code`,
+  sections: `select w.code as worksheet, ws.id, ws.code, ws.title_de, ws.title_en, ws.order_index, ws.parent_section_id from worksheet_sections ws join worksheet_templates w on w.id = ws.worksheet_template_id join standards s on s.id = w.standard_id where s.code = $1 order by w.code, ws.order_index`,
   fields: `select w.code as worksheet, f.id, f.symbol, f.label_de, f.label_en, f.data_type, f.unit, f.is_required, f.clause_reference, f.description, f.consumer_worksheets, f.order_index, f.verification_status, f.verification_quote, f.source_quote, f.active, f.default_value, f.xbrl_element_id, ws.code as section_code, case when f.enum_values is null then null else jsonb_array_length(f.enum_values) end as enum_count
-from fields f join worksheet_templates w on w.id = f.worksheet_template_id join standards s on s.id = w.standard_id left join worksheet_sections ws on ws.id = f.section_id where s.code = 'VSME' order by w.code, f.order_index, f.symbol`,
+from fields f join worksheet_templates w on w.id = f.worksheet_template_id join standards s on s.id = w.standard_id left join worksheet_sections ws on ws.id = f.section_id where s.code = $1 order by w.code, f.order_index, f.symbol`,
   requirements: `select w.code as worksheet, cr.id, cr.code, cr.title_de, cr.title_en, cr.condition, md5(cr.condition) as condition_md5, cr.clause_reference, cr.severity, cr.description, cr.suggestion, cr.source_quote, cr.requires_attestation
-from compliance_requirements cr join worksheet_templates w on w.id = cr.worksheet_template_id join standards s on s.id = w.standard_id where s.code = 'VSME' order by w.code, cr.code`,
+from compliance_requirements cr join worksheet_templates w on w.id = cr.worksheet_template_id join standards s on s.id = w.standard_id where s.code = $1 order by w.code, cr.code`,
   equations: `select w.code as worksheet, e.id, e.equation_number, e.formula, md5(e.formula) as formula_md5, e.formula_latex, e.input_symbols, e.output_symbol, e.output_unit, e.clause_reference, e.description, e.verification_status, e.verification_quote, e.source_quote
-from equations e join worksheet_templates w on w.id = e.worksheet_template_id join standards s on s.id = w.standard_id where s.code = 'VSME' order by w.code, e.equation_number`,
-  stored: `select count(*)::int as n from project_parameters pp join fields f on f.id = pp.field_id join worksheet_templates w on w.id = f.worksheet_template_id join standards s on s.id = w.standard_id where s.code = 'VSME'`,
-  instances: `select count(*)::int as n from worksheet_instances wi join worksheet_templates w on w.id = wi.worksheet_template_id join standards s on s.id = w.standard_id where s.code = 'VSME'`,
+from equations e join worksheet_templates w on w.id = e.worksheet_template_id join standards s on s.id = w.standard_id where s.code = $1 order by w.code, e.equation_number`,
+  stored: `select count(*)::int as n from project_parameters pp join fields f on f.id = pp.field_id join worksheet_templates w on w.id = f.worksheet_template_id join standards s on s.id = w.standard_id where s.code = $1`,
+  instances: `select count(*)::int as n from worksheet_instances wi join worksheet_templates w on w.id = wi.worksheet_template_id join standards s on s.id = w.standard_id where s.code = $1`,
 };
-const out = { _meta: { command: 'node scripts/verification/vsme-capture-text.mjs', captured_at: new Date().toISOString(), standard: 'VSME', source: 'prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)' } };
+const out = { _meta: { command: `node scripts/verification/capture-text.mjs ${code} ${slug}`, captured_at: new Date().toISOString(), standard: code, source: 'prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)' } };
 try {
   await sql.begin('read only', async (tx) => {
     for (const [k, q] of Object.entries(Q)) {
-      try { out[k] = await tx.unsafe(q); } catch (e) { out[k] = { error: String(e.message || e).split('\n')[0] }; }
+      try { out[k] = await tx.unsafe(q, [code]); } catch (e) { out[k] = { error: String(e.message || e).split('\n')[0] }; }
     }
   });
 } finally { await sql.end(); }
-const file = path.join(root, 'src', 'lib', 'eval', 'field-configs', 'vsme.text.prior.json');
+if (!Array.isArray(out.standard) || out.standard.length === 0) { console.error(`no standards row with code ${JSON.stringify(code)} — nothing written`); process.exit(2); }
+const file = path.join(root, 'src', 'lib', 'eval', 'field-configs', `${slug}.text.prior.json`);
 fs.writeFileSync(file, JSON.stringify(out, null, 1) + '\n');
 const n = (k) => (Array.isArray(out[k]) ? out[k].length : `ERR ${out[k]?.error}`);
 console.log(`wrote ${path.relative(root, file)}: worksheets ${n('worksheets')}, sections ${n('sections')}, fields ${n('fields')}, requirements ${n('requirements')}, equations ${n('equations')}, stored parameters ${JSON.stringify(out.stored)}, instances ${JSON.stringify(out.instances)}`);
@@ -178,7 +190,7 @@ Data-quality gaps of the inventory: no transcript → every cue EV, U-1; `clause
 ## 7. Files changed
 
 Modified: `src/lib/eval/field-configs/index.ts`, `src/lib/eval/equations/index.ts` (vsme lines + next-slug example), `docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md` (+54 blocks, +5 observations, inserted before "Plan 3 tooling rulings"), `docs/superpowers/guideline-to-tool-playbook.md` ("Encoding traps (Plan 3 Task 24)" paragraph).
-Created: `scripts/verification/vsme-capture-text.mjs` (read-only full-text capture — committed for R-1), `src/lib/eval/field-configs/vsme.prior.json` + `vsme.text.prior.json` (captured), `src/lib/eval/field-configs/vsme-enums.ts` + `vsme-quotes.ts` (generated from the captures), `src/lib/eval/field-configs/vsme.ts`, `src/lib/eval/equations/vsme.ts`, `src/lib/eval/__tests__/field-configs-vsme.test.ts`, `src/lib/eval/__tests__/equations-vsme.test.ts`, `src/components/worksheet/__tests__/register-vsme-sites.test.tsx`, `scripts/verification/vsme-STAGED-plan3-rulings.sql`, `scripts/migrations/20260917102410_field_configs_vsme.sql` + `scripts/rollback-20260917102410-field-configs-vsme.sql`, `scripts/migrations/20260917102420_equations_vsme.sql` + `scripts/rollback-20260917102420-equations-vsme.sql`, this report (+ the copy at `.superpowers/sdd/…/task-24-report.md`).
+Created: `scripts/verification/capture-text.mjs` (read-only full-text capture, generic `<STANDARD CODE> <slug>` since fix round 1 — committed for R-1), `src/lib/eval/field-configs/vsme.prior.json` + `vsme.text.prior.json` (captured), `src/lib/eval/field-configs/vsme-enums.ts` + `vsme-quotes.ts` (generated from the captures), `src/lib/eval/field-configs/vsme.ts`, `src/lib/eval/equations/vsme.ts`, `src/lib/eval/__tests__/field-configs-vsme.test.ts`, `src/lib/eval/__tests__/equations-vsme.test.ts`, `src/components/worksheet/__tests__/register-vsme-sites.test.tsx`, `scripts/verification/vsme-STAGED-plan3-rulings.sql`, `scripts/migrations/20260917102410_field_configs_vsme.sql` + `scripts/rollback-20260917102410-field-configs-vsme.sql`, `scripts/migrations/20260917102420_equations_vsme.sql` + `scripts/rollback-20260917102420-equations-vsme.sql`, this report (+ the copy at `.superpowers/sdd/…/task-24-report.md`).
 Untouched: every other standard's file; the VSME harness files; the Plan-2a/2b VSME migrations (`20260916110000`, `20260916140000`) and `register-configs.ts`; `scripts/reasoning-map/` (the unit run churns five files there — checked out before staging); the scratch probes deleted; the generators (enums, quotes, STAGED + sheet, report) live in the scratchpad.
 
 ## 8. Discrepancies vs the brief (codebase / capture / reality won)
@@ -190,8 +202,9 @@ Untouched: every other standard's file; the VSME harness files; the Plan-2a/2b V
 5. **Row conditions in the `== true` form** (the brief wrote `in_biodiversity_area OR near_biodiversity_area` / `high_water_stress`): both parse and compute identically (probed + pinned); the module follows the playbook's boolean convention.
 6. **`policies.senior_accountable` boolean** (the brief) while prod's C02 twin is a text → J-1.
 7. **B03.300 twin names** `GHGIntensity_{total_location, total_market, s12_location, s12_market}_calc` (the brief: `GHGIntensity_<scope>_calc`).
-8. **One extra committed script** (`scripts/verification/vsme-capture-text.mjs`): the prior capture does not carry `description` / `source_quote`, `prod-query.mjs` truncates at 120 chars and amendment A forbids folding by hand — the script is the re-executable command behind every quote (R-1); it reads only, prints no secret.
+8. **One extra committed script** (`scripts/verification/capture-text.mjs`, generic since fix round 1): the prior capture does not carry `description` / `source_quote`, `prod-query.mjs` truncates at 120 chars and amendment A forbids folding by hand — the script is the re-executable command behind every quote (R-1); it reads only, prints no secret.
 9. **Sign-off ids 54 (brief ≈ 8)**: the 33 amendment-K pairs dominate; the brief's `vsme-U-1` / `F-1` / `F-2` / `G-1` / `G-2` / `X-1` / `X-2` ids kept.
+10. **Three-fragment `verification_quote` on the `sites` register** (`src/lib/eval/field-configs/vsme.ts`, Q_B01_09 — Q_B05_01 — Q_B06_01): amendment E allows a composed cue of TWO verbatim fragments; the register carries the B1 site list AND the per-site B5 / B6 facts, so its cue joins three byte-exact prod fragments (Para 24(e), Para 33, Para 35) — reviewer-accepted deviation (fix round 1, item 3), recorded, not changed.
 
 ## 9. Self-review
 
@@ -214,3 +227,26 @@ Untouched: every other standard's file; the VSME harness files; the Plan-2a/2b V
 ## 11. Residue (what the standard demands that the worksheets still do not ask, as far as prod text shows)
 
 B04.000 `URLOrLinkToThePubliclyAvailableDisclosure` ← `PubliclyAvailableDisclosure == true` and B11.000 convictions / fines ← "In case of convictions and fines in the reporting period" (Para 43, CR-B11-01) — natural pairs the brief does not list; no rule emitted (B11 has no driver field; B04 out of scope) — observation on the sheet. C07.000 `human_rights_incidents` rows are not gated on the two "confirmed incidents" booleans (no paragraph text carries the condition). C08.000 revenues (fixed list, EQ-10) untouched. D99.000 entity-specific disclosures untouched. The B1 `TypeOfNumberOfEmployees` / `EmployeeCountingMethodology` interpretation of every B8 count (inventory §1) is a display concern, not encodable as a rule. Everything else the inventory names is on the sign-off sheet.
+
+
+---
+
+# Fix round 1 (review verdict on `fd8ea8e`: "Approved with minors" — 0 inventions in the byte audit; the four items applied verbatim)
+
+- **Commit:** see the reply (one commit on top of `fd8ea8e`, Fable trailer; `git checkout -- scripts/reasoning-map/` before staging; tree clean after). **Nothing applied to prod** — the only prod read of this round is the smoke run of the generalised capture script into a throwaway slug (`VSME vsme_probe`, read-only, file deleted); the committed `vsme.text.prior.json` was NOT re-captured. `git stash` NOT used.
+- **Date:** 2026-09-18 · CLI claude 2.1.260 (no update taken) · the subagent ran on Opus 5; trailer per the controller ruling.
+
+1. **STAGED G-3 / G-4 no longer race on CR-C09-01** (`scripts/verification/vsme-STAGED-plan3-rulings.sql`, regenerated by the scratchpad generator). Apply order is now explicit in the file header ("G-3 before G-4, C-1 before G-4"), in G-3's Note and in both "Chosen now" texts. G-4's statement for CR-C09-01 (id `fafa0b33-bf99-477f-af6c-54f6b062cfc7`) no longer re-archives the row and is guarded on **G-3's POST-state** `md5(c.condition) = '4cd9d72ce0f5bfed75477bd453e426c8'` = md5 of the exact string G-3 writes (`IF governance_body_exists == true THEN GenderDiversityRatioInGovernanceBody IS NOT NULL`; computed with node:crypto in the generator, never typed), and writes the compound guard `IF BasisForPreparation == 'OptionBBasicModuleAndComprehensiveModuleMember' AND governance_body_exists == true THEN GenderDiversityRatioInGovernanceBody IS NOT NULL` (post-state md5 `e568febab20ba8241e8f6ac3d775f152`). Grammar: `src/lib/compliance/evaluate.ts` (header: the condition grammar accepts "`AND`/`OR`/`NOT`/parentheses, `IF cond THEN cond` guards"); verified in-session through `parseCondition` / `evaluateCondition` (scratch probe, deleted): parses; B + body + ratio ⇒ pass, B + body no ratio ⇒ fail, B no body ⇒ pass, A ⇒ pass, unset ⇒ pending (missing BasisForPreparation, governance_body_exists). G-4's rollback for that row is an explicit `UPDATE … FROM compliance_requirements_archive_vsme a WHERE a.id = c.id AND c.id = 'fafa0b33…' AND md5(c.condition) IN ('4cd9d72c…', 'e568feba…') AND md5(a.condition) = '6d28c9b6…'` — restores the ORIGINAL condition from the archive row G-3 wrote, guarded on either post-state md5; the other three gates keep `RESTORE(id)`. G-4's text also states the fallback when G-3 is REJECTED (apply G-3's archive line and the plain guard on the original md5 — one line the owner edits). The sign-off sheet section was regenerated from the same block list (54 blocks, same ids) and mirrors both texts. The STAGED file stays 100 % comments (`grep -vc "^--\\|^$"` → 0).
+2. **Playbook count corrected** (Task 24 traps, item (1)): "31 … descriptions + 9 CR `source_quote` cells; the 10 equation rows carry a `source_quote` too" (capture counts — the sheet / report / `vsme-quotes.ts` already carried 9 + 10 after the in-task correction).
+3. **Three-fragment `verification_quote` kept, deviation recorded (§8 item 10):** the `sites` register cue composes THREE byte-exact prod fragments (Para 24(e) CR-B01-09 — Para 33 CR-B05-01 — Para 35 CR-B06-01 source_quote) because the register carries the B1 site list AND the per-site B5 / B6 facts; amendment E allows two — accepted by the reviewer, noted, not changed.
+4. **Capture script generalised ([CODE], controller ruling):** `scripts/verification/vsme-capture-text.mjs` → `scripts/verification/capture-text.mjs <STANDARD CODE> <slug>` (git mv + rewrite): parameterised queries (`s.code = $1` via `tx.unsafe(q, [code])`), writes `src/lib/eval/field-configs/<slug>.text.prior.json`, `_meta.command = node scripts/verification/capture-text.mjs <CODE> <slug>`, usage error on missing args / bad slug (exit 1), exit 2 + nothing written when no `standards` row matches; READ ONLY transaction, URL never printed. Smoke (re-executable): `node scripts/verification/capture-text.mjs` → `usage: capture-text.mjs <STANDARD CODE> <slug>   (slug: [a-z0-9_]+)` (exit 1); `… NOPE nope` → `no standards row with code "NOPE" — nothing written` (exit 2); `… VSME vsme_probe` → `wrote src\\lib\\eval\\field-configs\\vsme_probe.text.prior.json: worksheets 40, sections 40, fields 144, requirements 31, equations 10, stored parameters [{"n":1}], instances [{"n":40}]` and a node comparison against the committed file → `identical apart from _meta: true` (probe file deleted). The committed `vsme.text.prior.json` was edited in ONE field only — `_meta.command` (JSON re-serialised with the script's own `JSON.stringify(out, null, 1) + '\\n'`, asserted byte-identical before the edit; `git diff` = 1 line) — so `captured_at` and every cell stay as captured; no freshness pin reads `_meta.command` (the vsme tests load the prior through `loadPriorSnapshot` / the generated modules only; `grep -rn vsme-capture-text src scripts --include=*.ts --include=*.tsx` → no hit). References updated: the playbook paragraph, this report (§0 / §4 / §7 / §8 / the embedded script), the STAGED header, the sheet section head (regenerated), the `vsme-quotes.ts` header (regenerated — data unchanged, both migrations byte-identical, freshness pins green).
+
+## Raw output (once, before the commit)
+
+```
+node <scratchpad>/gen-vsme-quotes.mjs → wrote vsme-quotes.ts 31 requirements, 144 fields, 40 worksheets   (header only; PROD_* data unchanged)
+node <scratchpad>/gen-vsme-staged.mjs → wrote STAGED (606 lines, 54 blocks) + sheet section (440 lines); grep -vc "^--\\|^$" scripts/verification/vsme-STAGED-plan3-rulings.sql → 0
+pnpm vitest run --project unit <field-configs-vsme, equations-vsme, register-vsme-sites, generated-sql-freshness> → Test Files  4 passed (4) · Tests  23 passed (23) · Start at  22:00:51 · Duration  2.67s (transform 1.97s, setup 478ms, import 3.74s, tests 790ms, environment 1.51s)
+pnpm test → Test Files  341 passed | 1 skipped (342) · Tests  3050 passed | 1 expected fail | 1 skipped (3052) · Start at  22:01:00 · Duration  57.82s (transform 17.61s, setup 58.13s, import 145.98s, tests 62.49s, environment 231.28s)
+pnpm -s typecheck → exit 0 · pnpm -s eslint scripts/verification/capture-text.mjs src/lib/eval/field-configs/vsme-quotes.ts → exit 0
+```

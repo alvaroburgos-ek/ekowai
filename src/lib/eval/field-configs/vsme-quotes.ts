@@ -1,7 +1,7 @@
 /**
  * VSME — Plan 3 Task 24: the ONLY quotable VSME text, COPIED VERBATIM from prod by a
  * generator (scratchpad gen-vsme-quotes.mjs over `vsme.text.prior.json`, the read-only
- * full-text capture written by `scripts/verification/vsme-capture-text.mjs` on
+ * full-text capture written by `scripts/verification/capture-text.mjs VSME vsme` on
  * 2026-09-18T19:08:52.204Z; JSON.stringify per cell, never retyped). There is NO
  * transcript of the VSME standard on disk; the compliance_requirements rows carry the
  * paragraph wording ("Para 29: „The undertaking shall …“" in `description`, the English

@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "command": "node scripts/verification/vsme-capture-text.mjs",
+  "command": "node scripts/verification/capture-text.mjs VSME vsme",
   "captured_at": "2026-09-18T19:08:52.204Z",
   "standard": "VSME",
   "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)"
