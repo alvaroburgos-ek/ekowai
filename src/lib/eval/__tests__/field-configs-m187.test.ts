@@ -10,7 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { FIELD_CONFIGS, SECTION_VISIBILITY, TAB3_FILL_SYMBOLS, P_A, P_B, P_C, SPUR_BC, SPUR_NOT_D, SPUR_C, MIKRO, UV_JA, CSB_HOCH, DATEN_JA, DATEN_NEIN, GAK_OK_EXPR, H_FK_SS_ROW_EXPR, V_SOLL_ROW_EXPR, LOG_RED_EXPR } from '../field-configs/m187';
+import { FIELD_CONFIGS, SECTION_VISIBILITY, TAB3_FILL_SYMBOLS, P_A, P_B, P_C, P_BC, SPUR_BC, SPUR_NOT_D, SPUR_C, MIKRO, KLEIN, UV_JA, CSB_HOCH, DATEN_JA, DATEN_NEIN, CARBONAT_JA, GAK_OK_EXPR, H_FK_SS_ROW_EXPR, V_SOLL_ROW_EXPR, LOG_RED_EXPR } from '../field-configs/m187';
 import type { PriorSnapshot } from '../field-configs/types';
 import { parseFieldConfig, type RegisterUiConfig } from '../field-config';
 import { parseCondition, parseNumeric, parseExpression, extractSymbols } from '@/lib/expr';
@@ -28,7 +28,7 @@ const registerCfg = (ws: string, sym: string) => parseFieldConfig({ widget: 'reg
 const STD = 'DWA-M-187';
 
 describe('DWA-M-187 field configs (Plan 3 Task 12)', () => {
-  it('every entry parses through parseFieldConfig; visible_when / register exprs parse; create descriptions carry the rollback selector; no section rules', () => {
+  it('every entry parses through parseFieldConfig; visible_when / register exprs parse; create descriptions carry the rollback selector; four section rules on field-bearing self-consumer-only sections', () => {
     for (const e of FIELD_CONFIGS) {
       expect(() => parseFieldConfig({ widget: e.widget, uiConfig: e.ui_config ?? null, lookup: e.lookup ?? null, visibleWhen: e.visible_when ?? null }), `${e.worksheet} ${e.symbol}`).not.toThrow();
       if (e.visible_when) expect(parseCondition(e.visible_when), `${e.symbol} visible_when`).not.toBeNull();
@@ -41,13 +41,28 @@ describe('DWA-M-187 field configs (Plan 3 Task 12)', () => {
         }
       }
     }
-    expect(SECTION_VISIBILITY).toEqual([]);
+    expect(SECTION_VISIBILITY.map((s) => `${s.worksheet} ${s.section_code} :: ${s.visible_when}`)).toEqual([`M187-16 B :: ${MIKRO}`, `M187-16 D :: ${MIKRO}`, `M187-22 B :: ${KLEIN}`, `M187-22 D :: ${KLEIN}`]);
+    // every rule targets a FIELD-BEARING captured section (a rule on a field-less section is inert and never counts)
+    const fieldsIn = (ws: string, sec: string) => Object.entries(prior).filter(([k, v]) => k.startsWith(`${ws} `) && (v as Row).section_code === sec).map(([k]) => k.slice(ws.length + 1));
+    expect(fieldsIn('M187-16', 'B')).toEqual(['KBE', 'MPN', 'PBE']);
+    expect(fieldsIn('M187-16', 'D')).toEqual(['logstufen_rueckhalt']);
+    expect(fieldsIn('M187-22', 'B')).toEqual(['A_b_a', 'AFS63', 'h_RBF']);
+    expect(fieldsIn('M187-22', 'D')).toEqual(['A_F', 'A_F_anteil_Aba', 'b_krit', 'b_R_a', 'eta_AFS63']);
+    for (const s of SECTION_VISIBILITY) expect(parseCondition(s.visible_when)).not.toBeNull();
   });
 
-  it('counts: 51 field entries (48 create, 3 update), widgets by kind, visibility list', () => {
-    expect(FIELD_CONFIGS).toHaveLength(51);
-    expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(48);
-    expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['M187-07 pufferschicht_carbonatbrechsand', 'M187-07 betriebsdauer_jahre', 'M187-09 anzahl_sorptionsstufen']);
+  it('counts: 79 field entries (49 create, 30 update — 27 of them self-consumer-only inputs re-emitted in fix round 1), widgets by kind, visibility list', () => {
+    expect(FIELD_CONFIGS).toHaveLength(79);
+    expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(49);
+    expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual([
+      'M187-05 S_PO4P_aM', 'M187-05 Fe_massenanteil', 'M187-05 feinmassenanteil', 'M187-05 fallhoehe_einbau', 'M187-05 Fe_gehalt', 'M187-05 p_grund_beladung',
+      'M187-05 EBCT', 'M187-05 v_filter_aufstrom', 'M187-05 v_filter_abstrom', 'M187-05 h_FK_SS', 'M187-05 S_PO4P_SS_zu', 'M187-05 S_PO4P_SS_ab',
+      'M187-06 GAK_volumenanteil_oben', 'M187-06 GAK_volumenanteil_unten', 'M187-06 CaCO3_massenanteil_GAK', 'M187-06 Q_T_d_aM', 'M187-06 beschickungsdauer_segment', 'M187-06 trockenzeit_nach_vollbeschickung',
+      'M187-07 UV_dosis', 'M187-07 pufferschicht_carbonatbrechsand', 'M187-07 betriebsdauer_jahre',
+      'M187-09 h_FK_CaCO3', 'M187-09 CaCO3_massenanteil_carbo', 'M187-09 anzahl_sorptionsstufen',
+      'M187-16 KBE', 'M187-16 MPN', 'M187-16 PBE', 'M187-16 logstufen_rueckhalt',
+      'M187-20 B_CSB', 'M187-20 A_F_pro_AEb',
+    ]);
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('register')).toEqual(['M187-09 sorptionsstufen', 'M187-13 filterschichten', 'M187-14 filtersegmente', 'M187-16 indikatororganismen', 'M187-20 teilfilterbecken', 'M187-22 klein_rbf_elemente']);
     expect(byWidget('lookup_fill')).toEqual([
@@ -57,22 +72,28 @@ describe('DWA-M-187 field configs (Plan 3 Task 12)', () => {
     ]);
     expect(byWidget('select_one')).toEqual(['M187-20 daten_vorhanden']);
     expect(byWidget('attestation')).toEqual(['M187-19 stoffstromtrennung']);
-    expect(byWidget('scalar')).toEqual(['M187-07 pufferschicht_carbonatbrechsand', 'M187-07 betriebsdauer_jahre', 'M187-09 anzahl_sorptionsstufen', 'M187-20 CSB_fracht_d']);
-    expect(byWidget('derived')).toHaveLength(24); // one per equation
+    expect(byWidget('scalar')).toHaveLength(31); // the 30 UPDATE rules + the created CSB_fracht_d
+    expect(byWidget('derived')).toHaveLength(25); // one per equation
     const rules = FIELD_CONFIGS.filter((e) => e.visible_when).map((e) => `${e.worksheet} ${e.symbol} :: ${e.visible_when}`);
     expect(rules).toEqual([
       `M187-06 h_FK_min_p :: ${P_B}`,
-      `M187-07 pufferschicht_carbonatbrechsand :: ${P_A}`, `M187-07 betriebsdauer_jahre :: ${P_A}`,
-      `M187-09 anzahl_sorptionsstufen :: ${P_C}`, `M187-09 sorptionsstufen :: ${P_C}`, `M187-09 sorptionsstufen_count :: ${P_C}`, `M187-09 ebct_min_stufe :: ${P_C}`, `M187-09 h_FK_SS_calc :: ${P_C}`,
+      `M187-05 S_PO4P_aM :: ${P_A}`, `M187-05 Fe_massenanteil :: ${P_B}`, `M187-05 feinmassenanteil :: ${P_B}`, `M187-05 fallhoehe_einbau :: ${P_B}`, `M187-05 Fe_gehalt :: ${P_BC}`, `M187-05 p_grund_beladung :: ${P_BC}`,
+      `M187-05 EBCT :: ${P_C}`, `M187-05 v_filter_aufstrom :: ${P_C}`, `M187-05 v_filter_abstrom :: ${P_C}`, `M187-05 h_FK_SS :: ${P_C}`, `M187-05 S_PO4P_SS_zu :: ${P_C}`, `M187-05 S_PO4P_SS_ab :: ${P_C}`,
+      `M187-06 GAK_volumenanteil_oben :: ${SPUR_BC}`, `M187-06 GAK_volumenanteil_unten :: ${SPUR_BC}`, `M187-06 CaCO3_massenanteil_GAK :: ${SPUR_BC}`, `M187-06 Q_T_d_aM :: ${SPUR_C}`, `M187-06 beschickungsdauer_segment :: ${SPUR_C}`, `M187-06 trockenzeit_nach_vollbeschickung :: ${SPUR_C}`,
+      `M187-07 UV_dosis :: ${UV_JA}`, `M187-07 pufferschicht_carbonatbrechsand :: ${P_A}`, `M187-07 betriebsdauer_jahre :: ${P_A}`,
+      `M187-09 h_FK_CaCO3 :: ${CARBONAT_JA}`, `M187-09 CaCO3_massenanteil_carbo :: ${CARBONAT_JA}`, `M187-09 anzahl_sorptionsstufen :: ${P_C}`, `M187-09 sorptionsstufen :: ${P_C}`, `M187-09 sorptionsstufen_count :: ${P_C}`, `M187-09 ebct_min_stufe :: ${P_C}`, `M187-09 h_FK_SS_calc :: ${P_C}`,
       `M187-11 h_FK_min_spur :: ${SPUR_BC}`, `M187-11 q_Dr_RBF_limit_spur :: ${SPUR_NOT_D}`, `M187-11 q_Dr_RBF_vorgabe_spur :: ${SPUR_NOT_D}`,
       `M187-13 filterschichten :: ${SPUR_BC}`, `M187-13 h_FK_lagen :: ${SPUR_BC}`, `M187-13 h_Draen_lagen :: ${SPUR_BC}`, `M187-13 schichten_gak_verletzungen :: ${SPUR_BC}`,
       `M187-14 filtersegmente :: ${SPUR_C}`, `M187-14 V_segment_soll :: ${SPUR_C}`, `M187-14 segmente_count :: ${SPUR_C}`, `M187-14 segmente_unterdimensioniert :: ${SPUR_C}`, `M187-14 A_F_segmente :: ${SPUR_C}`,
+      `M187-16 KBE :: ${MIKRO}`, `M187-16 MPN :: ${MIKRO}`, `M187-16 PBE :: ${MIKRO}`, `M187-16 logstufen_rueckhalt :: ${MIKRO}`,
       `M187-16 q_Dr_RBF_limit_mikro :: ${MIKRO}`, `M187-16 h_FK_min_mikro :: ${MIKRO}`, `M187-16 indikatororganismen :: ${MIKRO}`, `M187-16 log_red_min :: ${MIKRO}`, `M187-16 organismen_count :: ${MIKRO}`,
       `M187-18 UV_dosis_min :: ${UV_JA}`,
       `M187-19 stoffstromtrennung :: ${CSB_HOCH}`,
+      `M187-20 B_CSB :: ${DATEN_JA}`, `M187-20 A_F_pro_AEb :: ${DATEN_NEIN}`,
       `M187-20 CSB_fracht_d :: ${DATEN_JA}`, `M187-20 A_F_min_ohne_daten :: ${DATEN_NEIN}`, `M187-20 B_CSB_calc :: ${DATEN_JA}`,
+      `M187-22 carbonatschicht_nachweis :: ${CARBONAT_JA}`,
     ]);
-    expect(rules).toHaveLength(30);
+    expect(rules).toHaveLength(58);
   });
 
   it('G-A3 key-string equality: table keys equal the driving prod enum value strings exactly (capture 2026-09-18)', () => {
@@ -156,12 +177,13 @@ describe('DWA-M-187 field configs (Plan 3 Task 12)', () => {
     for (const r of FIELD_CONFIGS.filter((x) => x.widget === 'register')) expect((r.ui_config as RegisterUiConfig).override).toBeUndefined();
   });
 
-  it('visibility never lands on a consumed producer; the refused / withheld targets are pinned (m187-C-2 … C-5); prod self-consumers (m187-X-3, now guard-inert since Task 12b); created fields sit in captured sections', () => {
+  it('visibility never lands on a cross-worksheet producer (self-consumer entries are guard-inert since Task 12b); the refused targets are pinned (m187-C-2 … C-4); created fields sit in captured sections', () => {
     for (const e of FIELD_CONFIGS.filter((x) => x.visible_when && !x.create)) {
       const row = priorRow(`${e.worksheet} ${e.symbol}`);
       expect(row, `${e.worksheet} ${e.symbol} captured`).toBeDefined();
-      expect(row.consumer_worksheets ?? [], `${e.worksheet} ${e.symbol} consumers`).toEqual([]);
+      expect((row.consumer_worksheets ?? []).filter((w) => w !== e.worksheet), `${e.worksheet} ${e.symbol} cross-worksheet consumers`).toEqual([]);
     }
+    expect(FIELD_CONFIGS.filter((x) => x.visible_when && !x.create && (priorRow(`${x.worksheet} ${x.symbol}`).consumer_worksheets ?? []).length > 0)).toHaveLength(27); // the fix-round-1 re-emits
     // the brief's targets that are consumed (by another worksheet or by their own — an import artefact) — untouched, STAGED
     expect(priorRow('M187-18 UV_dosis').consumer_worksheets).toEqual(['M187-16']);                 // C-4
     expect(priorRow('M187-21 h_FK_CaCO3').consumer_worksheets).toEqual(['M187-22']);               // C-3
@@ -169,7 +191,8 @@ describe('DWA-M-187 field configs (Plan 3 Task 12)', () => {
     expect(priorRow('M187-20 B_CSB').consumer_worksheets).toEqual(['M187-20']);                    // C-5 (self-consumer)
     expect(priorRow('M187-20 A_F_pro_AEb').consumer_worksheets).toEqual(['M187-20']);              // C-5 (self-consumer)
     expect(priorRow('M187-05 beta_wert').consumer_worksheets).toEqual(['M187-05']);                // X-3
-    for (const s of ['UV_dosis', 'h_FK_CaCO3', 'CaCO3_massenanteil_carbo', 'B_CSB', 'A_F_pro_AEb', 'h_FK', 'q_Dr_RBF']) expect(FIELD_CONFIGS.find((e) => e.symbol === s)).toBeUndefined();
+    for (const [w, s] of [['M187-18', 'UV_dosis'], ['M187-21', 'h_FK_CaCO3'], ['M187-21', 'CaCO3_massenanteil_carbo'], ['M187-13', 'GAK_volumenanteil_oben'], ['M187-14', 'Q_T_d_aM']] as const) expect(FIELD_CONFIGS.find((e) => e.worksheet === w && e.symbol === s), `${w} ${s}`).toBeUndefined();
+    for (const s of ['h_FK', 'q_Dr_RBF', 'beta_wert']) expect(FIELD_CONFIGS.find((e) => e.symbol === s), s).toBeUndefined(); // multi-consumed / gate-bearing (G-11)
     expect(() => emitFieldConfigSql('m187', [{ standard: STD, worksheet: 'M187-18', symbol: 'UV_dosis', widget: 'scalar', ui_config: null, visible_when: UV_JA, verification_quote: 'q' }], [], prior)).toThrow(/consumed/);
     // Task 12b: B_CSB's ONLY captured consumer is its own worksheet (M187-20, the C-5 self-consumer oddity above) — the guard now
     // strips the owner worksheet before deciding, so this is no longer a producer and the rule is NOT refused (m187 X-3 candidate for re-emit).
@@ -180,7 +203,7 @@ describe('DWA-M-187 field configs (Plan 3 Task 12)', () => {
     for (const [ws, sec] of [['M187-06', 'B'], ['M187-11', 'B'], ['M187-13', 'B'], ['M187-19', 'B'], ['M187-20', 'B'], ['M187-21', 'B']] as const) {
       expect(() => emitFieldConfigSql('m187', [], [{ standard: STD, worksheet: ws, section_code: sec, visible_when: MIKRO, verification_quote: 'q' }], prior), `${ws} ${sec}`).toThrow(/consumed/);
     }
-    for (const [ws, sec] of [['M187-16', 'B'], ['M187-22', 'D']] as const) {
+    for (const [ws, sec] of [['M187-16', 'B'], ['M187-16', 'D'], ['M187-22', 'B'], ['M187-22', 'D']] as const) {
       expect(() => emitFieldConfigSql('m187', [], [{ standard: STD, worksheet: ws, section_code: sec, visible_when: MIKRO, verification_quote: 'q' }], prior), `${ws} ${sec}`).not.toThrow();
     }
     // the consumer-free existing fields that DID take a rule
@@ -204,9 +227,9 @@ describe('DWA-M-187 field configs (Plan 3 Task 12)', () => {
     const files = fieldConfigFilesFor('m187', '20260917101210');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(3);
-    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(48);
-    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
+    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(30);
+    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(49);
+    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(4);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
   });
 });

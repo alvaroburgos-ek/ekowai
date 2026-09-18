@@ -28,13 +28,13 @@
  *     on M187-14 (Q_T_d_aM own).
  *   - Mikroorganismen fills sit on M187-16 (inherited `sonderanwendung`, `q_Dr_RBF`
  *     from -12, `h_FK` from -08); the UV fill on M187-18 beside `uv_eingesetzt`.
- *   - Prod marks almost every existing field as consumed — mostly by its OWN
- *     worksheet (`consumer_worksheets = ['<own code>']`, an import artefact,
- *     m187-X-3) — so a `visible_when` UPDATE is possible on the few consumer-free
- *     inputs only (M187-07 `pufferschicht_carbonatbrechsand` / `betriebsdauer_jahre`,
- *     M187-09 `anzahl_sorptionsstufen`); every other branch rule is on CREATED
- *     fields, and every section rule is refused (consumed producers in every
- *     field-bearing B / D section) → m187-C-2 (STAGED).
+ *   - Prod marks almost every existing field as consumed — 86 of them ONLY by their
+ *     OWN worksheet (`consumer_worksheets = ['<own code>']`, an import artefact,
+ *     m187-X-3). Since Task 12b the emitter guard strips the owner worksheet before
+ *     deciding, so those fields (and the sections that hold only them: M187-16 B / D,
+ *     M187-22 B / D) take branch rules (fix round 1); fields with a REAL cross-worksheet
+ *     consumer (h_FK, q_Dr_RBF, the -18 UV_dosis, the -21 carbonate pair, the -13 GAK
+ *     trio …) stay refused → m187-C-2 … C-4 (STAGED).
  *
  * NOT here (each a sign-off block; STAGED SQL in scripts/verification/m187-STAGED-plan3-rulings.sql):
  *   the variant gates replacing REQ-02 / -03 / -04 (G-1), REQ-05's either/or (G-2), the
@@ -47,6 +47,7 @@ import { Q, TAB3_KRITERIEN } from '../regulation-tables-seed-m187';
 
 const STD = 'DWA-M-187';
 const on = (worksheet: string) => (e: Omit<FieldConfigEntry, 'standard' | 'worksheet'>): FieldConfigEntry => ({ standard: STD, worksheet, ...e });
+const WS05 = on('M187-05');
 const WS06 = on('M187-06');
 const WS07 = on('M187-07');
 const WS09 = on('M187-09');
@@ -67,10 +68,15 @@ export const SPUR_BC = 'verfahrensvariante_spurenstoffe IN {gak, mitbehandlung_k
 export const SPUR_NOT_D = "verfahrensvariante_spurenstoffe != 'nachgeschaltete_stufe'";
 export const SPUR_C = "verfahrensvariante_spurenstoffe == 'mitbehandlung_ka'";
 export const MIKRO = "sonderanwendung == 'mikroorganismen'";
+export const KLEIN = "sonderanwendung == 'klein_rbf'";
 export const UV_JA = "uv_eingesetzt == 'ja'";
 export const CSB_HOCH = 'CSB_konzentration > 3000';
 export const DATEN_JA = "daten_vorhanden == 'ja'";
 export const DATEN_NEIN = "daten_vorhanden == 'nein'";
+export const P_BC = 'verfahrensvariante_p IN {melioration_filtermaterial, nachgeschaltete_sorptionsstufe}';
+export const CARBONAT_JA = "carbonatschicht_vorhanden == 'ja'";
+/** L930: the 0,2 m reading needs the layer — h_FK,CaCO3 ≥ 0,10 m of Carbonatbrechsand with 80 % CaCO3 (fix round 1, m187-G-12). */
+export const CARBONAT_NACHWEIS_EXPR = 'if(h_FK_CaCO3 >= 0.10 AND CaCO3_massenanteil_carbo == 80, 1, 0)';
 
 // ---- register row expressions ----
 /** Bild 3: a layer with a printed GAK band is ok inside it; layers without a band (rows 2 / 4) are ok by construction. */
@@ -79,7 +85,7 @@ export const GAK_OK_EXPR = 'if(gak_min IS NULL, 1, if(gak_vol_pct >= gak_min AND
 export const H_FK_SS_ROW_EXPR = 'ebct_min * v_filter_auf / 60';
 export const EBCT_OK_EXPR = "if(ebct_min >= lookup('S5_1_3_1_P', 'nachgeschaltete_sorptionsstufe', 'ebct_min_min', 'wert'), 1, 0)";
 export const V_AUF_OK_EXPR = "if(v_filter_auf < lookup('S5_1_3_1_P', 'nachgeschaltete_sorptionsstufe', 'v_filter_auf_max', 'wert'), 1, 0)";
-/** §5.2.3.1 c) L603: the segment retention volume is sized on Q_T,d,aM (l/s → m³/d: · 86,4) — Q_T_d_aM is a worksheet symbol on M187-14 (G-13). */
+/** §5.2.3.1 c) L603: the segment retention volume is sized on Q_T,d,aM (l/s → m³/d: · 86,4) — Q_T_d_aM is a worksheet symbol of M187-14, read in row scope. */
 export const V_SOLL_ROW_EXPR = 'Q_T_d_aM * 86.4';
 export const V_OK_EXPR = 'if(retentionsvolumen_m3 >= v_soll_m3, 1, 0)';
 /** §5.4.3 L794: 6 l/(m²·min) and 20 l/m² "bezogen auf die jeweils beschickte Filterfläche" — per Teilfilterbecken. */
@@ -117,11 +123,25 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
       description: `Plan 3: die gedruckte Tab.-3-Zelle „${k.label_de}“ der gewählten Verfahrensvariante (qualitativ, Anwendungsgrenzen nach §5.1.5).` },
   })),
 
-  // ---- M187-07 P-Rückhalt Variante a: the two consumer-free a)-only inputs (L505 Pufferschicht, L554 Dosierstart) ----
+  // ---- M187-05 Verfahrenstechnische Grundlagen: the variant-specific inputs (fix round 1 — self-consumers, guard-inert since Task 12b) ----
+  WS05({ symbol: 'S_PO4P_aM', widget: 'scalar', ui_config: null, visible_when: P_A, verification_quote: Q.L489 }),
+  ...(['Fe_massenanteil', 'feinmassenanteil'] as const).map((symbol) => WS05({ symbol, widget: 'scalar', ui_config: null, visible_when: P_B, verification_quote: `${Q.L512} — ${Q.L516}` })),
+  WS05({ symbol: 'fallhoehe_einbau', widget: 'scalar', ui_config: null, visible_when: P_B, verification_quote: Q.L542 }),
+  ...(['Fe_gehalt', 'p_grund_beladung'] as const).map((symbol) => WS05({ symbol, widget: 'scalar', ui_config: null, visible_when: P_BC, verification_quote: `${Q.L512} — ${Q.L522}` })), // b) L512 and c) L522 print the same Fe / P limits
+  ...(['EBCT', 'v_filter_aufstrom', 'v_filter_abstrom', 'h_FK_SS'] as const).map((symbol) => WS05({ symbol, widget: 'scalar', ui_config: null, visible_when: P_C, verification_quote: Q.L497 })),
+  ...(['S_PO4P_SS_zu', 'S_PO4P_SS_ab'] as const).map((symbol) => WS05({ symbol, widget: 'scalar', ui_config: null, visible_when: P_C, verification_quote: `${Q.L459} — ${Q.L400} — ${Q.L401}` })),
+
+  // ---- M187-06 P-Rückhalt Übersicht: the Spurenstoff copies (self-consumers) follow the Spurenstoff variant (fix round 1) ----
+  ...(['GAK_volumenanteil_oben', 'GAK_volumenanteil_unten', 'CaCO3_massenanteil_GAK'] as const).map((symbol) => WS06({ symbol, widget: 'scalar', ui_config: null, visible_when: SPUR_BC, verification_quote: `${Q.L611} — ${Q.B3_SPAN}` })),
+  ...(['Q_T_d_aM', 'beschickungsdauer_segment', 'trockenzeit_nach_vollbeschickung'] as const).map((symbol) => WS06({ symbol, widget: 'scalar', ui_config: null, visible_when: SPUR_C, verification_quote: Q.L603 })),
+
+  // ---- M187-07 P-Rückhalt Variante a: the two consumer-free a)-only inputs (L505 Pufferschicht, L554 Dosierstart) + the UV copy (self-consumer) ----
+  WS07({ symbol: 'UV_dosis', widget: 'scalar', ui_config: null, visible_when: UV_JA, verification_quote: Q.L703 }), // the -18 copy is consumed by -16 → m187-C-4
   WS07({ symbol: 'pufferschicht_carbonatbrechsand', widget: 'scalar', ui_config: null, visible_when: P_A, verification_quote: Q.L505 }),
   WS07({ symbol: 'betriebsdauer_jahre', widget: 'scalar', ui_config: null, visible_when: P_A, verification_quote: Q.L554 }),
 
-  // ---- M187-09 P-Rückhalt Variante c: Sorptionsstufen in Reihe (§5.1.3.1 c) L497 / L499) ----
+  // ---- M187-09 P-Rückhalt Variante c: Sorptionsstufen in Reihe (§5.1.3.1 c) L497 / L499); the Klein-RBF carbonate copies (self-consumers) follow the toggle ----
+  ...(['h_FK_CaCO3', 'CaCO3_massenanteil_carbo'] as const).map((symbol) => WS09({ symbol, widget: 'scalar', ui_config: null, visible_when: CARBONAT_JA, verification_quote: Q.L930 })), // the -21 copies are consumed by -22 → m187-C-3
   WS09({ symbol: 'anzahl_sorptionsstufen', widget: 'scalar', ui_config: null, visible_when: P_C, verification_quote: Q.L499 }),
   WS09({
     symbol: 'sorptionsstufen', widget: 'register',
@@ -240,7 +260,9 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS14({ symbol: 'A_F_segmente', widget: 'derived', ui_config: null, visible_when: SPUR_C, verification_quote: Q.L603,
     create: { section_code: 'D', label_de: 'Filterfläche aller Segmente (Σ)', data_type: 'number', unit: 'm²', clause_reference: '§5.2.3.1 c)', description: 'Plan 3: Ausgabe der Gleichung M187-14-D4 (sum_rows über filtersegmente.flaeche_m2); der Filterflächenbedarf nach AFS63-Fracht (Mischwasser + Trockenwetterablauf) bleibt die DWA-A 178-Bemessung.' } }),
 
-  // ---- M187-16 Mikroorganismen: the §5.3.3.1 limits (sonderanwendung, q_Dr_RBF, h_FK inherited) + Indikatororganismen ----
+  // ---- M187-16 Mikroorganismen: the §5.3.3.1 limits (sonderanwendung, q_Dr_RBF, h_FK inherited) + Indikatororganismen; the four existing inputs (self-consumers) follow the branch ----
+  ...(['KBE', 'MPN', 'PBE'] as const).map((symbol) => WS16({ symbol, widget: 'scalar', ui_config: null, visible_when: MIKRO, verification_quote: `${Q.L661} — ${Q.L663}` })),
+  WS16({ symbol: 'logstufen_rueckhalt', widget: 'scalar', ui_config: null, visible_when: MIKRO, verification_quote: `${Q.L667} — ${Q.L677}` }),
   WS16({
     symbol: 'q_Dr_RBF_limit_mikro', widget: 'lookup_fill', ui_config: { source_label: '§5.3.3.1' },
     lookup: { table_code: 'S5_LIMITS_APP', role: 'limit', keys: [{ column: 'sonderanwendung', from_symbol: 'sonderanwendung' }], value: 'q_dr_rbf' },
@@ -301,7 +323,9 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
       description: 'Plan 3: „Bei häufiger auftretenden CSB-Konzentrationen von > 3.000 mg/l müssen die Abflüsse der Lagerflächen von denen der Verkehrsflächen getrennt werden“ — sichtbar ab CSB_konzentration > 3000; Gate IF CSB_konzentration > 3000 THEN stoffstromtrennung == true (+ sickerwasser_in_rbf == false, unbedingt) ist STAGED (m187-G-3). Das Eingabefeld CSB_grenze_trennung (VR > 3000) ist eine Konstante als Eingabe (m187-D-8).' },
   }),
 
-  // ---- M187-20 Hohe organische Belastung — RBF: the "Daten vorhanden?" switch (L792), Teilfilterbecken (L794) ----
+  // ---- M187-20 Hohe organische Belastung — RBF: the "Daten vorhanden?" switch (L792), Teilfilterbecken (L794); the two existing sizing inputs (self-consumers) follow the switch ----
+  WS20({ symbol: 'B_CSB', widget: 'scalar', ui_config: null, visible_when: DATEN_JA, verification_quote: Q.L792 }),
+  WS20({ symbol: 'A_F_pro_AEb', widget: 'scalar', ui_config: null, visible_when: DATEN_NEIN, verification_quote: Q.L792 }),
   WS20({
     symbol: 'daten_vorhanden', widget: 'select_one', ui_config: null,
     enum_values: [{ value: 'ja', label_de: 'ja — CSB-Frachtdaten liegen vor (Bemessung über B_CSB ≤ 20 g/(m²·d))', order_index: 0 }, { value: 'nein', label_de: 'nein — keine Daten (Gesamtfilterfläche ≥ 750 m²/ha A_E,b)', order_index: 1 }], // L792
@@ -376,17 +400,25 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     create: { section_code: 'D', label_de: 'spezifische Bodenfilteroberfläche (Σ A_F / Σ A_b,a, berechnet)', data_type: 'number', unit: '%', clause_reference: '§5.5.4', description: 'Plan 3: Ausgabe der Gleichung M187-22-D4 (A_F_sum_klein · 100 / A_b_a_sum_klein); Regelwert 1,0 % (= 100 m²/ha); „auch geringere spezifische Filterflächen von A_F < 1,0 % … möglich“ mit b_krit-Nachweis (Gl. 2) — REQ-06 erzwingt heute == 1.0 (m187-G-6). Das Eingabefeld A_F_anteil_Aba bleibt (m187-D-6).' } }),
   WS22({ symbol: 'elemente_count', widget: 'derived', ui_config: null, verification_quote: Q.L964,
     create: { section_code: 'D', label_de: 'Anzahl der Einzelelemente', data_type: 'number', unit: null, clause_reference: '§5.5.4', description: 'Plan 3: Ausgabe der Gleichung M187-22-D6 (count_rows über klein_rbf_elemente).' } }),
+  WS22({ symbol: 'carbonatschicht_nachweis', widget: 'derived', ui_config: null, visible_when: CARBONAT_JA, verification_quote: Q.L930,
+    create: { section_code: 'D', label_de: 'Carbonatschicht nachgewiesen (h_FK,CaCO3 ≥ 0,10 m aus Carbonatbrechsand mit 80 % CaCO3): 1 = ja, 0 = nein', data_type: 'number', unit: null, clause_reference: '§5.5.3.2.2', description: 'Plan 3: Ausgabe der Gleichung M187-22-D7 — if(h_FK_CaCO3 >= 0.10 AND CaCO3_massenanteil_carbo == 80, 1, 0); nur bei carbonatschicht_vorhanden = ja sichtbar („In diesem Fall“, L930). Gate IF carbonatschicht_vorhanden == ja THEN h_FK_CaCO3 >= 0.10 AND CaCO3_massenanteil_carbo == 80 ist STAGED (m187-G-12) — bis dahin ist h_FK_min_klein (0,2 m) die Erklärung des Ingenieurs, dieser Nachweis zeigt sie an.' } }),
   WS22({ symbol: 'h_FK_min_klein', widget: 'derived', ui_config: null, verification_quote: `${Q.L926} — ${Q.L930}`,
-    create: { section_code: 'D', label_de: 'Mindesthöhe des Filterkörpers Klein-RBF (0,25 m; mit Carbonatschicht h_FK,CaCO3 ≥ 0,10 m: 0,2 m)', data_type: 'number', unit: 'm', clause_reference: '§5.5.3.2.2', description: 'Plan 3: Ausgabe der Gleichung M187-22-D5 — if(carbonatschicht_vorhanden == ja, 0,2, 0,25) aus S5_LIMITS_APP (klein_rbf: h_fk_carbonat_m / h_fk_min_m); „In diesem Fall kann die Filterstärke auf h_FK 0,2 m verringert werden.“ (L930, ohne gedruckten Operator — m187-J-4). Gate h_FK ≥ h_FK_min_klein anstelle des unbedingten REQ-02 ist STAGED (m187-G-1); h_FK_CaCO3 / CaCO3_massenanteil_carbo sind an M187-22 übergeben — ihr Ausblenden ist m187-C-3.' } }),
+    create: { section_code: 'D', label_de: 'Mindesthöhe des Filterkörpers Klein-RBF (0,25 m; mit Carbonatschicht h_FK,CaCO3 ≥ 0,10 m: 0,2 m)', data_type: 'number', unit: 'm', clause_reference: '§5.5.3.2.2', description: 'Plan 3: Ausgabe der Gleichung M187-22-D5 — if(carbonatschicht_vorhanden == ja, 0,2, 0,25) aus S5_LIMITS_APP (klein_rbf: h_fk_carbonat_m / h_fk_min_m); „In diesem Fall kann die Filterstärke auf h_FK 0,2 m verringert werden.“ (L930, ohne gedruckten Operator — m187-J-4). Gate h_FK ≥ h_FK_min_klein anstelle des unbedingten REQ-02 ist STAGED (m187-G-1); die Vorbedingung des 0,2-m-Werts (h_FK,CaCO3 ≥ 0,10 m, 80 % CaCO3) ist die Gleichung M187-22-D7 / das STAGED Gate m187-G-12 — eine Verknüpfung in dieser Gleichung würde den Regelfall ohne Carbonatschicht unentscheidbar machen (Eingaben leer); h_FK_CaCO3 / CaCO3_massenanteil_carbo sind an M187-22 übergeben — ihr Ausblenden ist m187-C-3.' } }),
 ];
 
 /**
- * No section rules: `sonderanwendung` (M187-01) is inherited on M187-06 / -11 / -16 / -20 / -22 only (capture) and every
- * field-bearing section B / D of every worksheet holds a consumed producer (prod marks 125 of 139 fields as consumed, mostly by
- * their own worksheet — m187-X-3) — the transitive guard refuses each; the field-free sections A / C / F / J / K / L / M would be
- * inert rules. The five branch section rules and the consumer edit are m187-C-1 / C-2 (STAGED).
+ * Section rules (fix round 1): `sonderanwendung` (M187-01) is inherited on M187-06 / -11 / -16 / -20 / -22 only (capture). Of their
+ * field-bearing sections, M187-16 B (KBE / MPN / PBE) / D (logstufen_rueckhalt) and M187-22 B (A_b_a / AFS63 / h_RBF) / D (A_F / A_F_anteil_Aba /
+ * b_krit / b_R_a / eta_AFS63) hold self-consumer-only fields — guard-inert since Task 12b — and take the branch rule; M187-06 B
+ * (verfahrensvariante_p → -07 / -08 / -09), M187-11 B (verfahrensvariante_spurenstoffe → -12 … -15) and M187-20 B / D (betriebsmodus /
+ * wirkungsgrad_hydraulisch → -19) hold real producers and stay refused (m187-C-2, STAGED with C-1 for the other worksheets).
  */
-export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [];
+export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [
+  { standard: STD, worksheet: 'M187-16', section_code: 'B', visible_when: MIKRO, verification_quote: `${Q.L661} — ${Q.L675}` },
+  { standard: STD, worksheet: 'M187-16', section_code: 'D', visible_when: MIKRO, verification_quote: `${Q.L667} — ${Q.L677}` },
+  { standard: STD, worksheet: 'M187-22', section_code: 'B', visible_when: KLEIN, verification_quote: `${Q.L859} — ${Q.L964}` },
+  { standard: STD, worksheet: 'M187-22', section_code: 'D', visible_when: KLEIN, verification_quote: `${Q.L964} — ${Q.L968}` },
+];
 
 /** Type-level pin that this module has the shape the emitter's index expects. */
 export const MODULE: FieldConfigModule = { FIELD_CONFIGS, SECTION_VISIBILITY };

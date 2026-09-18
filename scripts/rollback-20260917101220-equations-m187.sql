@@ -23,5 +23,6 @@ DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.workshe
 DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-187' AND w.code = 'M187-22' AND e.equation_number = 'M187-22-D3' AND e.description LIKE 'Plan 3:%';
 DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-187' AND w.code = 'M187-22' AND e.equation_number = 'M187-22-D4' AND e.description LIKE 'Plan 3:%';
 DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-187' AND w.code = 'M187-22' AND e.equation_number = 'M187-22-D5' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-187' AND w.code = 'M187-22' AND e.equation_number = 'M187-22-D7' AND e.description LIKE 'Plan 3:%';
 DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-187' AND w.code = 'M187-22' AND e.equation_number = 'M187-22-D6' AND e.description LIKE 'Plan 3:%';
 COMMIT;

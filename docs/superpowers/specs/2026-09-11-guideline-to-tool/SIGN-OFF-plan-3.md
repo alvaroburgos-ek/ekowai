@@ -2871,6 +2871,13 @@ Report: `reports/plan-3-m187.md` · STAGED SQL: `scripts/verification/m187-STAGE
 - Proposed SQL / config: STAGED block m187-G-11 (archive + md5-guarded UPDATE of the condition).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
+### m187-G-12 · DWA-M-187 · M187-22 · carbonate toggle precondition: `IF carbonatschicht_vorhanden == 'ja' THEN h_FK_CaCO3 >= 0.10 AND CaCO3_massenanteil_carbo == 80` (fix round 1)
+- Class: gate-guard (new block gate)
+- Chosen now (fail-safe): no gate; `M187-22-D5` reads the toggle alone (a ticked toggle with empty layer fields yields 0,2 m); the new derivation `M187-22-D7 carbonatschicht_nachweis` (1 / 0, visible for 'ja', `manual_required` while the layer fields are empty) shows the proof state on the form. Folding the proof into D5 was probed and rejected: `evaluateFormula` requires every named input before evaluating, so a plain Klein-RBF ('nein', carbonate fields empty) would become undecidable instead of reading 0,25 m.
+- Evidence (verbatim, transcript line): "Alternativ zur Melioration des Filtermaterials kann für eine dauerhafte pH -Stabilisierung auch eine Carbonatschicht mit einer Schichtstärke $h_{\mathrm{FK}}, \mathrm{CaCO}_{3} \geqslant 0,10 \mathrm{~m}$ aus einem handelsüblichen Carbonatbrechsand ( 2 mm bis 8 mm ) mit einem $\mathrm{CaCO}_{3}$-Massenanteil von $80 \%$ hergestellt werden. In diesem Fall kann die Filterstärke auf $h_{F K} 0,2 \mathrm{~m}$ verringert werden." (L930); capture: `h_FK_CaCO3` (M187-21, optional, VR ≥ 0.10) / `CaCO3_massenanteil_carbo` (M187-21, optional, VR == 80) → M187-22.
+- Proposed SQL / config: STAGED block m187-G-12 (INSERT, block; DELETE-by-description rollback).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
 ### m187-R-1 · DWA-M-187 · M187-09 · Gl. 1 / Gl. 2 duplicated on the P-Rückhalt c) worksheet
 - Class: deactivation (verified equation rows)
 - Chosen now (fail-safe): both copies stay (they compute from the Klein-RBF fields that M187-09 also holds — X-2).
@@ -2885,33 +2892,33 @@ Report: `reports/plan-3-m187.md` · STAGED SQL: `scripts/verification/m187-STAGE
 - Proposed SQL / config: STAGED block m187-C-1.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### m187-C-2 · DWA-M-187 · M187-05 … -22 · branch section rules (§5.1 … §5.5) — refused by the transitive producer guard
+### m187-C-2 · DWA-M-187 · M187-05 … -22 · branch section rules (§5.1 … §5.5) — four emitted (fix round 1), the rest refused by the transitive producer guard
 - Class: consumer-edit (section visibility over consumed producers)
-- Chosen now (fail-safe): no section rule emitted (`SECTION_VISIBILITY = []`); every field-bearing B / D section holds a consumed producer (125 of 139 fields carry consumers), the refusals are pinned in `field-configs-m187.test.ts`.
+- Chosen now (fail-safe): **fix round 1 — four section rules emitted** on field-bearing sections whose fields are self-consumer-only (guard-inert since Task 12b): M187-16 B (KBE / MPN / PBE) and D (logstufen_rueckhalt) ← `sonderanwendung == 'mikroorganismen'`; M187-22 B (A_b_a / AFS63 / h_RBF) and D (A_F / A_F_anteil_Aba / b_krit / b_R_a / eta_AFS63) ← `sonderanwendung == 'klein_rbf'` — the hide is real on those four. M187-06 B / -11 B / -13 B / -19 B / -20 B / -21 B hold real cross-worksheet producers and stay refused (pinned); the other worksheets lack the driver (C-1).
 - Evidence (verbatim, transcript line): "In diesem Merkblatt werden folgende Ziele der Regenwasserbehandlung beschrieben, die über die im Arbeitsblatt DWA-A 178 beschriebene Standardanwendung hinausgehen:" (L288) followed by the five bullets L290–L295; capture: e.g. `h_FK` (M187-08) consumers `['M187-22','M187-16','M187-06','M187-14','M187-13','M187-11','M187-21']` cross every branch.
-- Proposed SQL / config: STAGED block m187-C-2 (five `visible_when IS NULL`-guarded section UPDATE groups after C-1; the owner accepts that hiding a branch hides its producers' inherited values, and rules on the X-2 misplaced blocks).
+- Proposed SQL / config: STAGED block m187-C-2 (the remaining `visible_when IS NULL`-guarded section UPDATE groups after C-1; the owner accepts that hiding a branch hides its producers' inherited values, and rules on the X-2 misplaced blocks).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m187-C-3 · DWA-M-187 · M187-21 · `h_FK_CaCO3` / `CaCO3_massenanteil_carbo` ← `carbonatschicht_vorhanden == 'ja'` (refused: consumed by M187-22)
 - Class: consumer-edit (refused visibility)
-- Chosen now (fail-safe): both fields stay visible (not required); the toggle drives `h_FK_min_klein` (M187-22-D5) instead.
+- Chosen now (fail-safe): the M187-21 copies stay visible (not required); the toggle drives `h_FK_min_klein` (M187-22-D5) instead. Fix round 1: the M187-09 copies (self-consumer-only) took the rule `carbonatschicht_vorhanden == 'ja'`.
 - Evidence (verbatim, transcript line): "Alternativ zur Melioration des Filtermaterials kann für eine dauerhafte pH -Stabilisierung auch eine Carbonatschicht mit einer Schichtstärke $h_{\mathrm{FK}}, \mathrm{CaCO}_{3} \geqslant 0,10 \mathrm{~m}$ aus einem handelsüblichen Carbonatbrechsand ( 2 mm bis 8 mm ) mit einem $\mathrm{CaCO}_{3}$-Massenanteil von $80 \%$ hergestellt werden." (L930); capture: both consumer_worksheets `['M187-22']`.
 - Proposed SQL / config: STAGED block m187-C-3.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m187-C-4 · DWA-M-187 · M187-18 · `UV_dosis` ← `uv_eingesetzt == 'ja'` (refused: consumed by M187-16)
 - Class: consumer-edit (refused visibility)
-- Chosen now (fail-safe): `UV_dosis` stays visible; the created fill `UV_dosis_min` carries the rule.
+- Chosen now (fail-safe): the M187-18 `UV_dosis` stays visible; the created fill `UV_dosis_min` carries the rule. Fix round 1: the M187-07 copy (self-consumer-only) took the rule `uv_eingesetzt == 'ja'`.
 - Evidence (verbatim, transcript line): L703 (quoted under G-7); capture: `UV_dosis` (M187-18) consumer_worksheets `['M187-16']`.
 - Proposed SQL / config: STAGED block m187-C-4.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### m187-C-5 · DWA-M-187 · M187-20 · `B_CSB` / `A_F_pro_AEb` ← `daten_vorhanden` (refused: self-consumed, X-3)
-- Class: consumer-edit (refused visibility; both fields are REQUIRED today)
-- Chosen now (fail-safe): both stay required inputs; the twins `B_CSB_calc` / `A_F_min_ohne_daten` are switched by `daten_vorhanden`.
+### m187-C-5 · DWA-M-187 · M187-20 · `B_CSB` / `A_F_pro_AEb` ← `daten_vorhanden` — CLOSED (fix round 1: emitted)
+- Class: consumer-edit (was: refused visibility) — **closed, no ruling needed**
+- Chosen now: the self-consumer entry is guard-inert since Task 12b; `B_CSB` ← `daten_vorhanden == 'ja'` and `A_F_pro_AEb` ← `== 'nein'` are emitted in `20260917101210` beside the twins `B_CSB_calc` / `A_F_min_ohne_daten` (a hidden required field is skipped by the approval gate).
 - Evidence (verbatim, transcript line): L792 (quoted under G-2); capture: `B_CSB` (required, VR ≤ 20) and `A_F_pro_AEb` (required, VR ≥ 750) both list `['M187-20']` — their own worksheet.
-- Proposed SQL / config: STAGED block m187-C-5 (after X-3, or retire in favour of the twins).
-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+- Proposed SQL / config: none (emitted); retiring the pair in favour of the twins stays a D-class option on ratification of G-2.
+- ☑ CLOSED
 
 ### m187-D-1 · DWA-M-187 · M187-13 (+ -06 copies) · `filterschichten.gak_vol_pct/.caco3_pct` ↔ `GAK_volumenanteil_oben` / `GAK_volumenanteil_unten` / `CaCO3_massenanteil_GAK`
 - Class: deactivation (single-source pair; scalars consumed by M187-11)
@@ -2943,7 +2950,7 @@ Report: `reports/plan-3-m187.md` · STAGED SQL: `scripts/verification/m187-STAGE
 
 ### m187-D-5 · DWA-M-187 · M187-20 · `teilfilter_count` ↔ `anzahl_teilfilter`
 - Class: deactivation (consumer-free, optional)
-- Chosen now (fail-safe): stays. Resolution: RETIRE ON RATIFICATION.
+- Chosen now (fail-safe): stays. Resolution: RETIRE ON RATIFICATION. Not a pair: `foerderleistung_beschickung` (l/(m²·min), the pump's specific rate the engineer chooses) and the register column `foerder_min_l_min` (l/min per basin = 6 · Fläche) are different quantities.
 - Evidence (verbatim, transcript line): L794 (quoted under G-10); capture: `anzahl_teilfilter` (M187-20, optional, consumer-free).
 - Proposed SQL / config: STAGED block m187-D-5.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -2964,7 +2971,7 @@ Report: `reports/plan-3-m187.md` · STAGED SQL: `scripts/verification/m187-STAGE
 
 ### m187-D-8 · DWA-M-187 · M187-08 / -19 / -20 / -09 / -21 / -05 / -06 / -13 · printed constants typed as required inputs
 - Class: deactivation / interface-gap (constants as inputs with `==` validations)
-- Chosen now (fail-safe): untouched; every one is consumed (self or cross-worksheet), so no re-bind (E-2). Seed rows exist for each (S5_4_3_ORG, S5_1_3_1_P, S5_5_KLEIN, BILD3).
+- Chosen now (fail-safe): untouched; every one is consumed (self or cross-worksheet), so no re-bind (E-2). Seed rows exist for each (S5_4_3_ORG, S5_1_3_1_P, S5_5_KLEIN, BILD3). `foerderleistung_beschickung` (VR ≥ 6, l/(m²·min)) is not in this list — a chosen rate, not a constant, and not a duplicate of `teilfilterbecken.foerder_min_l_min` (l/min per basin).
 - Evidence (verbatim, transcript line): L765 (3.000 mg/l), L770 ("muss der RBF auf eine Vollstrombehandlung mit $100 \%$ hydraulischem Wirkungsgrad ausgelegt werden"), L794 (20 l/m²), L784 (60 l/(s·ha)), L512 ("bei einem Eisenhydroxidmassenanteil von 7 \% gute Ergebnisse"), L922 ("5 cm starken Schicht"), L614 ("20 \% CaCO3-Massenanteil"), L930 ("$\mathrm{CaCO}_{3}$-Massenanteil von $80 \%$"); capture: CSB_grenze_trennung, wirkungsgrad_hydraulisch, beschickung_pro_ereignis, q_krit, Fe_massenanteil, deckschicht_staerke, CaCO3_massenanteil_GAK, CaCO3_massenanteil_carbo with `> 3000` / `== 100` / `== 20` / `== 60` / `== 7` / `== 0.05` / `== 20` / `== 80`.
 - Proposed SQL / config: STAGED block m187-D-8 (lookup_fill twins or derived constants on ratification).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -3027,7 +3034,7 @@ Report: `reports/plan-3-m187.md` · STAGED SQL: `scripts/verification/m187-STAGE
 
 ### m187-J-4 · DWA-M-187 · S5_LIMITS_APP klein_rbf · the 0,2 m carbonate reduction IS printed (inventory "not found" refuted); no operator before 0,2 m
 - Class: judgment reading (R-5 reversal)
-- Chosen now (fail-safe): `h_fk_carbonat_m = 0.2` seeded from L930 and read by `M187-22-D5` as the reduced minimum when `carbonatschicht_vorhanden == 'ja'`; the brief's `m187-U-1` "claim NOT found" is withdrawn — the sentence exists.
+- Chosen now (fail-safe): `h_fk_carbonat_m = 0.2` seeded from L930 and read by `M187-22-D5` as the reduced minimum when `carbonatschicht_vorhanden == 'ja'`; the brief's `m187-U-1` "claim NOT found" is withdrawn — the sentence exists. Fix round 1: "in diesem Fall" binds the 0,2 m to the layer (h_FK,CaCO3 ≥ 0,10 m, 80 % CaCO3) — precondition gate m187-G-12 + derivation `M187-22-D7`; `S5_5_KLEIN.h_fk_carbonat.comparator` is null (no operator printed).
 - Evidence (verbatim, transcript line): "In diesem Fall kann die Filterstärke auf $h_{F K} 0,2 \mathrm{~m}$ verringert werden." (L930) — the LaTeX prints `$h_{F K} 0,2 \mathrm{~m}$` without "=" or "≥"; prod description of h_FK: "Klein-RBF: >= 0,25 m bzw. 0,2 m mit Carbonatschicht".
 - Proposed SQL / config: none (encoded as the reduced minimum; PDF check of the glyph between h_FK and 0,2).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -3128,7 +3135,8 @@ Report: `reports/plan-3-m187.md` · STAGED SQL: `scripts/verification/m187-STAGE
 - **Codebase vs brief:** the one `S5_LIMITS` table keyed `sonderanwendung × variante` became three key-shape tables (`S5_LIMITS_P` / `S5_LIMITS_SPUR` / `S5_LIMITS_APP`) — a `lookup_fill` needs a `from_symbol` per key column and the `'-'` variant of the three non-variant applications has none; the P fills sit on M187-06 and the Spurenstoff fills on M187-11 (the brief's M187-01 holds neither variant driver); `q_Dr_RBF_limit` for Klein-RBF does not exist (drosselung "über den Fließwiderstand des Filtermaterials", L942 / L966); the carbonate toggle is a derivation (`M187-22-D5`) over one table, not a second lookup; `B_CSB_calc` divides by `A_F_gesamt` (L792 "bezogen auf die Gesamtfilterfläche"), not by the active area; `daten_vorhanden` is a ja / nein select (booleans are not formula inputs; the gate reads the string); 15 compliance rows in prod (brief 21); `sorptionsstufen` carries per-row EBCT / v badges; the Tab.-3 comparison is exposed as eight text fills on M187-06.
 - **Every section of every M187 worksheet is the same flat template** (A Zweck und Kontext · B Eingangsdaten · C Arbeitsblattspezifischer Teil · D Ergebnisse / Berechnete Werte · F · J · K · L · M; fields in B / D only, 75 of 139 orphans) — registers were created in C, outputs in D, fills / selects / attestations in B.
 - **The Merkblatt prints no numbered equations** — every derivation here is a `<WS>-D<n>` row with an F-block; prod's "Gl. 1 / Gl. 2" are the §5.5.4 sentences.
-- **Bundle growth:** ~34 KB of lifted quotes (`Q`, 97 spans) ride in the client bundle via the seed fallback (Task-0 observation; Task 30 measures).
+- **Bundle growth:** ~35 KB of lifted quotes (`Q`, 101 spans) ride in the client bundle via the seed fallback (Task-0 observation; Task 30 measures).
+- **Fix round 1 (after Task 12b's guard change):** 27 self-consumer-only inputs on M187-05 / -06 / -07 / -09 / -16 / -20 and four field-bearing sections (M187-16 B / D, M187-22 B / D) took branch rules (79 field entries, 4 section rules); C-5 closed; G-12 + `M187-22-D7` added for the carbonate precondition; `S5_5_KLEIN.h_fk_carbonat.comparator` → null.
 
 ## Plan 3 tooling rulings
 

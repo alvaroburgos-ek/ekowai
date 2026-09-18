@@ -19,7 +19,7 @@
  * the register's worksheet (M187-09 sorptionsstufen, -13 filterschichten, -14
  * filtersegmente, -16 indikatororganismen, -20 teilfilterbecken, -22
  * klein_rbf_elemente) and are materialised on save; the scalar rows (M187-09-D1
- * h_FK_SS_calc, M187-14-D1 V_segment_soll, M187-20-D4 / -D5, M187-22-D4 / -D5)
+ * h_FK_SS_calc, M187-14-D1 V_segment_soll, M187-20-D4 / -D5, M187-22-D4 / -D5 / -D7)
  * are computed on hook / report / snapshot / PDF only (amendment D, m187-I-2).
  */
 import type { EquationEntry, EquationModule } from '../field-configs/types';
@@ -221,6 +221,14 @@ export const EQUATIONS: EquationEntry[] = [
     input_symbols: ['carbonatschicht_vorhanden'], output_symbol: 'h_FK_min_klein', output_unit: 'm',
     clause_reference: '§5.5.3.2.2',
     description: 'Plan 3: Mindesthöhe des Filterkörpers Klein-RBF — 0,25 m (L926), mit Carbonatschicht h_FK,CaCO3 ≥ 0,10 m aus Carbonatbrechsand (80 % CaCO3) auf 0,2 m verringerbar (L930; kein Operator gedruckt, m187-J-4). carbonatschicht_vorhanden ist von M187-21 übergeben. Gate h_FK ≥ h_FK_min_klein STAGED (m187-G-1).',
+    verification_quote: Q.L930,
+  },
+  {
+    standard: STD, worksheet: 'M187-22', equation_number: 'M187-22-D7',
+    formula: 'carbonatschicht_nachweis = if(h_FK_CaCO3 >= 0.10 AND CaCO3_massenanteil_carbo == 80, 1, 0)',
+    input_symbols: ['h_FK_CaCO3', 'CaCO3_massenanteil_carbo'], output_symbol: 'carbonatschicht_nachweis', output_unit: null,
+    clause_reference: '§5.5.3.2.2',
+    description: 'Plan 3: Vorbedingung des 0,2-m-Werts von h_FK_min_klein — die Carbonatschicht ist nachgewiesen, wenn h_FK,CaCO3 ≥ 0,10 m aus Carbonatbrechsand mit 80 % CaCO3 („In diesem Fall kann die Filterstärke auf h_FK 0,2 m verringert werden“, L930). Beide Eingaben sind von M187-21 übergeben; ohne sie ist der Nachweis unentscheidbar (manual_required), sichtbar nur bei carbonatschicht_vorhanden = ja. Gate STAGED (m187-G-12). Nicht in M187-22-D5 verknüpft: evaluateFormula verlangt jede benannte Eingabe vor der Auswertung, der Regelfall ohne Carbonatschicht (Eingaben leer) würde sonst unentscheidbar.',
     verification_quote: Q.L930,
   },
   {

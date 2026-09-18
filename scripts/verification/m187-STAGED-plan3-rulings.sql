@@ -283,6 +283,22 @@
 -- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description FROM compliance_requirements_archive_m187 a WHERE a.id = c.id AND c.id = '17ec0451-4e15-40dc-928d-6e67cc3fde40'; DELETE FROM compliance_requirements_archive_m187 WHERE id = '17ec0451-4e15-40dc-928d-6e67cc3fde40';
 
 -- =====================================================================================================================
+-- m187-G-12 · M187-22 · the carbonate toggle's precondition (fix round 1): IF carbonatschicht_vorhanden == 'ja' THEN h_FK_CaCO3 >= 0.10 AND CaCO3_massenanteil_carbo == 80
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L930 "Alternativ zur Melioration des Filtermaterials kann für eine dauerhafte pH-Stabilisierung auch eine Carbonatschicht mit einer
+-- Schichtstärke h_FK,CaCO3 ≥ 0,10 m aus einem handelsüblichen Carbonatbrechsand ( 2 mm bis 8 mm ) mit einem CaCO3-Massenanteil von 80 %
+-- hergestellt werden. In diesem Fall kann die Filterstärke auf h_FK 0,2 m verringert werden." — "in diesem Fall" = the layer exists as printed.
+-- Capture: h_FK_CaCO3 (M187-21, optional, VR ≥ 0.10) and CaCO3_massenanteil_carbo (M187-21, optional, VR == 80) are inherited on M187-22;
+-- M187-22-D5 reads the toggle alone, so a ticked toggle with empty layer fields yields 0,2 m and REQ-02P3K (G-1) would pass. The derivation
+-- M187-22-D7 carbonatschicht_nachweis (1 / 0, visible for 'ja') shows the proof on the form; folding the proof into D5 was probed and rejected
+-- (evaluateFormula requires every named input before evaluating — a plain Klein-RBF with empty carbonate fields would become undecidable).
+-- Option (after the three DATA migrations):
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description, requires_attestation)
+-- SELECT w.id, 'REQ-17P3', 'Klein-RBF: Carbonatschicht nachgewiesen (h_FK,CaCO3 ≥ 0,10 m, 80 % CaCO3) bei verringerter Filterstärke', 'IF carbonatschicht_vorhanden == ''ja'' THEN h_FK_CaCO3 >= 0.10 AND CaCO3_massenanteil_carbo == 80', '§5.5.3.2.2', 'block', 'Plan 3 (m187-G-12): L930 "In diesem Fall" — the 0,2 m reading of h_FK_min_klein requires the layer.', false
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-187' AND w.code = 'M187-22';
+-- Rollback: DELETE FROM compliance_requirements WHERE description LIKE 'Plan 3 (m187-G-12):%';
+
+-- =====================================================================================================================
 -- m187-R-1 · M187-09 · Gl. 1 (A_F = 0.01 * A_b_a * 10000) and Gl. 2 (b_R_a / (A_F / A_b_a) <= b_krit) duplicated on the P-Rückhalt Variante c worksheet → deactivate the M187-09 copies
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Evidence: L964 / L968 are §5.5.4 (Klein-RBF); M187-09 is "P-Rückhalt Variante c: Nachgeschaltete Sorptionsstufe" (prod title) and also holds
@@ -318,25 +334,26 @@
 -- Rollback: the same UPDATE with the two arrays swapped.
 
 -- =====================================================================================================================
--- m187-C-2 · M187-05 … -22 · branch section rules per sonderanwendung (refused by the producer guard — needs the ruling that hiding a branch hides its consumers too)
+-- m187-C-2 · M187-05 … -22 · branch section rules per sonderanwendung — EMITTED for M187-16 B / D and M187-22 B / D (fix round 1, self-consumer-only sections, Task 12b guard); the rest refused by the producer guard (needs the ruling that hiding a branch hides its consumers too)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Evidence: §5.1 (L424) / §5.2 (L570) / §5.3 (L645) / §5.4 (L733) / §5.5 (L849) are five independent Sonderanwendungen (L288–L295 lists them);
 -- capture: every field-bearing section B / D of every worksheet holds a field with non-empty consumer_worksheets (125 of 139 fields carry
--- consumers, 86 of them their OWN worksheet — m187-X-3), so `emit-field-configs-sql.ts` refuses every section rule (pinned in
--- field-configs-m187.test.ts). Hiding a branch hides producers whose consumers are in the SAME branch (e.g. h_FK M187-08 → -22 / -16 / -06 / -14 /
+-- consumers, 86 of them their OWN worksheet — m187-X-3); since Task 12b a self-only entry is guard-inert, so the four sections whose fields
+-- are self-consumer-only (M187-16 B / D, M187-22 B / D) took the rule in 20260917101210 (fix round 1); M187-06 B / -11 B / -13 B / -19 B /
+-- -20 B / -21 B hold real cross-worksheet producers and stay refused (pinned in field-configs-m187.test.ts). Hiding a branch hides producers whose consumers are in the SAME branch (e.g. h_FK M187-08 → -22 / -16 / -06 / -14 /
 -- -13 / -11 / -21 — a cross-branch chain the owner must accept or re-home first).
 -- Option (after C-1; one UPDATE per (worksheet, section), `visible_when IS NULL` guarded):
 -- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''p_rueckhalt'''         FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-05','M187-06','M187-07','M187-08','M187-09','M187-10') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
 -- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''spurenstoffe'''        FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-11','M187-12','M187-13','M187-14','M187-15') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
--- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''mikroorganismen'''     FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-16','M187-17','M187-18') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''mikroorganismen'''     FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-17','M187-18') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL; -- M187-16 B / D emitted
 -- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''organische_belastung''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-19','M187-20') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
--- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''klein_rbf'''           FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code IN ('M187-21','M187-22') AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'sonderanwendung == ''klein_rbf'''           FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-M-187' AND w.code = 'M187-21' AND ws.code IN ('B','C','D') AND ws.visible_when IS NULL; -- M187-22 B / D emitted
 -- Rollback: UPDATE worksheet_sections … SET visible_when = NULL WHERE … AND visible_when LIKE 'sonderanwendung == %'.
 -- Caveat: M187-07 / -08 / -09 hold fields of OTHER branches (UV / KBE on -07, the org-load block on -08, the Klein-RBF block on -09 — X-2);
 -- hiding those sections under p_rueckhalt hides those copies — they are duplicates of the fields on -16 / -18 / -19 / -20 / -21 / -22.
 
 -- =====================================================================================================================
--- m187-C-3 · M187-21 · h_FK_CaCO3 / CaCO3_massenanteil_carbo visible_when carbonatschicht_vorhanden == 'ja' (refused: consumed by M187-22)
+-- m187-C-3 · M187-21 · h_FK_CaCO3 / CaCO3_massenanteil_carbo visible_when carbonatschicht_vorhanden == 'ja' (refused: consumed by M187-22; the M187-09 copies — self-consumers — took the rule in fix round 1)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Evidence: L930 "Alternativ zur Melioration des Filtermaterials kann … auch eine Carbonatschicht mit einer Schichtstärke h_FK,CaCO3 ≥ 0,10 m aus
 -- einem handelsüblichen Carbonatbrechsand ( 2 mm bis 8 mm ) mit einem CaCO3-Massenanteil von 80 % hergestellt werden."; capture: both fields
@@ -346,19 +363,17 @@
 -- (the M187-22 copies inherit null when hidden — accepted by construction: no carbonate layer, no carbonate fields). Rollback: SET visible_when = NULL.
 
 -- =====================================================================================================================
--- m187-C-4 · M187-18 · UV_dosis visible_when uv_eingesetzt == 'ja' (refused: consumed by M187-16)
+-- m187-C-4 · M187-18 · UV_dosis visible_when uv_eingesetzt == 'ja' (refused: consumed by M187-16; the M187-07 copy — self-consumer — took the rule in fix round 1)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Evidence: L703 (quoted under G-7); capture: UV_dosis (M187-18) consumer_worksheets = {M187-16}; uv_eingesetzt (M187-18) → -16.
 -- Option: UPDATE fields f SET visible_when = 'uv_eingesetzt == ''ja''' … WHERE w.code = 'M187-18' AND f.symbol = 'UV_dosis' AND f.active AND f.visible_when IS NULL; Rollback: SET visible_when = NULL.
 
 -- =====================================================================================================================
--- m187-C-5 · M187-20 · B_CSB / A_F_pro_AEb visible_when daten_vorhanden (refused: self-consumed — m187-X-3); the twins B_CSB_calc / A_F_min_ohne_daten are emitted
--- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Evidence: L792 (quoted under G-2); capture: B_CSB (required, VR ≤ 20) and A_F_pro_AEb (required, VR ≥ 750) on M187-20 both list M187-20 as
--- their consumer (an import artefact — a field cannot inherit itself), so the guard refuses; both are REQUIRED, so an engineer without CSB
--- data must still type B_CSB today.
--- Option (after X-3 clears the self-consumer): UPDATE fields f SET visible_when = 'daten_vorhanden == ''ja''' … f.symbol = 'B_CSB'; SET visible_when = 'daten_vorhanden == ''nein''' … f.symbol = 'A_F_pro_AEb';
--- or retire both in favour of the twins (D-block on ratification). Rollback: SET visible_when = NULL.
+-- m187-C-5 · M187-20 · B_CSB / A_F_pro_AEb visible_when daten_vorhanden — CLOSED (fix round 1): EMITTED in 20260917101210 (self-consumer-only, guard-inert since Task 12b)
+-- ☑ CLOSED (emitted — no ruling needed)
+-- Evidence: L792 (quoted under G-2); capture: B_CSB (required, VR ≤ 20) → visible_when daten_vorhanden == 'ja'; A_F_pro_AEb (required, VR ≥ 750) →
+-- visible_when daten_vorhanden == 'nein'. A hidden required field is skipped by the approval gate, so the engineer types only the sizing input of
+-- the printed case. Retiring both in favour of the twins B_CSB_calc / A_F_min_ohne_daten stays a D-class option on ratification of G-2.
 
 -- =====================================================================================================================
 -- m187-D-1 · M187-13 · filterschichten.gak_vol_pct / .caco3_pct ↔ GAK_volumenanteil_oben / GAK_volumenanteil_unten / CaCO3_massenanteil_GAK (M187-13 → M187-11; copies on M187-06)
@@ -397,7 +412,8 @@
 -- =====================================================================================================================
 -- m187-D-5 · M187-20 · teilfilter_count ↔ anzahl_teilfilter (consumer-free, optional)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Resolution: RETIRE ON RATIFICATION. Option: UPDATE fields f SET active = false … WHERE w.code = 'M187-20' AND f.symbol = 'anzahl_teilfilter' AND f.active; Rollback: active = true.
+-- Resolution: RETIRE ON RATIFICATION. Not a pair: foerderleistung_beschickung (l/(m²·min), the pump's specific rate) and the register column
+-- foerder_min_l_min (l/min per basin = 6 · Fläche) are different quantities — the scalar stays as the rate, the column is the resulting flow. Option: UPDATE fields f SET active = false … WHERE w.code = 'M187-20' AND f.symbol = 'anzahl_teilfilter' AND f.active; Rollback: active = true.
 
 -- =====================================================================================================================
 -- m187-D-6 · M187-22 / -21 · klein_rbf_elemente.a_b_a_m2 / .a_f_m2 / .h_rr / .h_rbf ↔ A_b_a / A_F (Gl. 1) / A_F_anteil_Aba / h_RR / h_RBF
@@ -422,7 +438,8 @@
 -- m187-D-8 · M187-08 / -19 / -20 / -09 / -21 / -05 / -06 / -13 · constants typed as required inputs with `==` validations
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Capture: CSB_grenze_trennung (VR > 3000), wirkungsgrad_hydraulisch (== 100), beschickung_pro_ereignis (== 20), q_krit (== 60), Fe_massenanteil
--- (== 7), deckschicht_staerke (== 0.05), CaCO3_massenanteil_GAK (== 20), CaCO3_massenanteil_carbo (== 80) are printed constants (L765 / L770 /
+-- (== 7), deckschicht_staerke (== 0.05), CaCO3_massenanteil_GAK (== 20), CaCO3_massenanteil_carbo (== 80) are printed constants; foerderleistung_beschickung
+-- (VR ≥ 6, l/(m²·min)) is NOT in this list — it is the rate the engineer chooses, not a constant, and not a duplicate of teilfilterbecken.foerder_min_l_min (l/min per basin) (L765 / L770 /
 -- L794 / L784 / L512 / L922 / B3 / L930) that the engineer must retype. Resolution: seed rows exist in S5_4_3_ORG / S5_1_3_1_P / S5_5_KLEIN /
 -- BILD3; on ratification convert each to a `lookup_fill` twin (created beside it) or a `derived` constant and retire the input — every one is
 -- consumed (self or by -19 / -20 / -22 / -06 / -11), so the E-2 rule forbids a re-bind now.

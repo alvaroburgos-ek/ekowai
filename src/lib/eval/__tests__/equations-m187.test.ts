@@ -38,11 +38,11 @@ const computed = (r: EvalState): number => { expect(r.kind, JSON.stringify(r)).t
 const num = (s: string, v: number | string | null, unit: string | null = null): Input => ({ symbol: s, value: v, unit });
 
 describe('DWA-M-187 Plan-3 equations', () => {
-  it('twenty-four entries, every output has a created derived field, every formula parses; single-source (no prod output re-produced); emitter accepts them', () => {
+  it('twenty-five entries, every output has a created derived field, every formula parses; single-source (no prod output re-produced); emitter accepts them', () => {
     expect(EQUATIONS.map((e) => e.equation_number)).toEqual([
       'M187-09-D1', 'M187-09-D2', 'M187-09-D3', 'M187-13-D1', 'M187-13-D2', 'M187-13-D3', 'M187-14-D1', 'M187-14-D2', 'M187-14-D3', 'M187-14-D4',
       'M187-16-D1', 'M187-16-D2', 'M187-20-D1', 'M187-20-D2', 'M187-20-D3', 'M187-20-D4', 'M187-20-D5', 'M187-20-D6',
-      'M187-22-D1', 'M187-22-D2', 'M187-22-D3', 'M187-22-D4', 'M187-22-D5', 'M187-22-D6',
+      'M187-22-D1', 'M187-22-D2', 'M187-22-D3', 'M187-22-D4', 'M187-22-D5', 'M187-22-D7', 'M187-22-D6',
     ]);
     const created = new Set(FIELD_CONFIGS.filter((f) => f.create && f.widget === 'derived').map((f) => `${f.worksheet} ${f.symbol}`));
     for (const e of EQUATIONS) {
@@ -61,7 +61,7 @@ describe('DWA-M-187 Plan-3 equations', () => {
     const files = equationFilesFor('m187', '20260917101220');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/ON CONFLICT \(worksheet_template_id, equation_number\) DO NOTHING/g) ?? []).length).toBe(24);
+    expect((up.match(/ON CONFLICT \(worksheet_template_id, equation_number\) DO NOTHING/g) ?? []).length).toBe(25);
   });
 
   it('M187-09-D1: EBCT 15 min · 5,0 m/h / 60 = 1,25 m ("Das entspricht einer Mindesthöhe des Filterkörpers von 1,25 m", L497); sorptionsstufen rows compute h_FK,SS and the EBCT / v badges; count 3, min EBCT 10', () => {
@@ -152,6 +152,11 @@ describe('DWA-M-187 Plan-3 equations', () => {
     expect(computed(run('M187-20-D5', { inputs: [num('CSB_fracht_d', 20000, 'g/d'), num('A_F_gesamt', 2000, 'm²')] }))).toBe(10);
     expect(run('M187-20-D5', { inputs: [num('CSB_fracht_d', 20000, 'g/d'), num('A_F_gesamt', 0, 'm²')] }).kind).toBe('manual_required'); // division by zero, never 0
     expect(computed(run('M187-20-D3', { registers: { teilfilterbecken: prep('M187-20', 'teilfilterbecken', []) } }))).toBe(0);
+    // fix round 1: a basin with in_betrieb left blank is complete (optional boolean → false) and does not count as active
+    const blank = prep('M187-20', 'teilfilterbecken', [{ id: '1', label: 'TF 1', flaeche_m2: 500, in_betrieb: true }, { id: '2', label: 'TF 2', flaeche_m2: 500 }]);
+    expect(blank.rows.map((r) => r.complete)).toEqual([true, true]);
+    expect(computed(run('M187-20-D1', { registers: { teilfilterbecken: blank } }))).toBe(1000);
+    expect(computed(run('M187-20-D2', { registers: { teilfilterbecken: blank } }))).toBe(500);
   });
 
   it('M187-22-D1…-D6: three elements (A_b,a 5000 / 3000 / 2000 m², A_F 50 / 30 / 0,8 m²) → Σ 10 000 / 80,8 m², 0,808 % (1,0 % = 100 m²/ha, L964), one element under 1,0 m²; h_FK_min_klein 0,25 m without and 0,2 m with the carbonate layer (L926 / L930)', () => {
@@ -170,6 +175,15 @@ describe('DWA-M-187 Plan-3 equations', () => {
     expect(computed(run('M187-22-D5', { inputs: [num('carbonatschicht_vorhanden', 'nein')] }))).toBe(0.25);
     expect(computed(run('M187-22-D5', { inputs: [num('carbonatschicht_vorhanden', 'ja')] }))).toBe(0.2);
     expect(run('M187-22-D5', { inputs: [] }).kind).toBe('manual_required');
+    // fix round 1 (m187-G-12): the carbonate proof — h_FK,CaCO3 ≥ 0,10 m AND 80 % CaCO3 (L930); the AND form was NOT folded into D5 because
+    // evaluateFormula requires every named input before evaluating (a plain Klein-RBF with empty carbonate fields would become undecidable)
+    expect(computed(run('M187-22-D7', { inputs: [num('h_FK_CaCO3', 0.1, 'm'), num('CaCO3_massenanteil_carbo', 80, '%')] }))).toBe(1);
+    expect(computed(run('M187-22-D7', { inputs: [num('h_FK_CaCO3', 0.05, 'm'), num('CaCO3_massenanteil_carbo', 80, '%')] }))).toBe(0);
+    expect(computed(run('M187-22-D7', { inputs: [num('h_FK_CaCO3', 0.1, 'm'), num('CaCO3_massenanteil_carbo', 20, '%')] }))).toBe(0);
+    expect(run('M187-22-D7', { inputs: [] })).toMatchObject({ kind: 'manual_required', missing: ['h_FK_CaCO3', 'CaCO3_massenanteil_carbo'] });
+    // the probed alternative: folding the proof into D5 makes the nominal 'nein' case undecidable
+    const folded = evaluateFormula({ equationId: 'probe', formula: "h = if(carbonatschicht_vorhanden == 'ja' AND h_FK_CaCO3 >= 0.10 AND CaCO3_massenanteil_carbo == 80, 0.2, 0.25)", inputSymbols: ['carbonatschicht_vorhanden', 'h_FK_CaCO3', 'CaCO3_massenanteil_carbo'], outputSymbol: 'h', inputs: [num('carbonatschicht_vorhanden', 'nein')], tableLookup: table });
+    expect(folded).toMatchObject({ kind: 'manual_required', missing: ['h_FK_CaCO3', 'CaCO3_massenanteil_carbo'] });
     // prod Gl. 1 on M187-22 (A_F = 0.01 · A_b_a · 10000, A_b_a in ha) gives the same 1,0 %: 0,5 ha → 50 m²
     expect(0.01 * 0.5 * 10000).toBe(50);
   });
