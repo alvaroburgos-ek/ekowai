@@ -61,8 +61,8 @@ describe('sampling_points_6 through the generic RegisterEditor (Plan 3 Task 23)'
     expect((screen.getAllByLabelText('Aguas arriba o aguas abajo del puente')[0] as HTMLSelectElement).value).toBe('upstream');
     const badges = screen.getAllByTestId('derived-badge-depth_ok');
     expect(badges).toHaveLength(2);
-    expect(badges[0]).toHaveTextContent('§7.1 ≥ 30 cm über Sohle und unter Oberfläche');
-    expect(badges[1]).toHaveTextContent('§7.1 ≥ 30 cm über Sohle und unter Oberfläche');
+    expect(badges[0]).toHaveTextContent('§7.1 ≥ 30 cm über Sohle und unter Oberfläche (Anhaltswert, iso5667_6-J-1)');
+    expect(badges[1]).toHaveTextContent('§7.1 ≥ 30 cm über Sohle und unter Oberfläche (Anhaltswert, iso5667_6-J-1)');
     expect(screen.queryByTestId('register-diagnostics')).toBeNull();
     expect(screen.queryAllByRole('button', { name: 'abweichend wählen' })).toHaveLength(0); // no lookup column — no override affordance
     expect(evalOut('ISO-5667-6-02-D1', storedRows(POINTS_ID))).toMatchObject({ kind: 'computed', value: 2 });
@@ -75,7 +75,7 @@ describe('sampling_points_6 through the generic RegisterEditor (Plan 3 Task 23)'
     const depth = screen.getAllByLabelText('Probenahmetiefe unter der Oberfläche in cm')[1];
     await user.clear(depth);
     await user.type(depth, '20');
-    expect(screen.getAllByTestId('derived-badge-depth_ok')[1]).toHaveTextContent('§7.1 Position nicht erfüllt oder nicht eingetragen');
+    expect(screen.getAllByTestId('derived-badge-depth_ok')[1]).toHaveTextContent('§7.1 Position nicht erfüllt oder nicht eingetragen (Anhaltswert, iso5667_6-J-1)');
     expect(evalOut('ISO-5667-6-02-D2', storedRows(POINTS_ID))).toMatchObject({ kind: 'computed', value: 1 });
     await user.click(screen.getByRole('button', { name: '+ Probenahmepunkt' }));
     expect(screen.getAllByTestId('register-row')).toHaveLength(3);

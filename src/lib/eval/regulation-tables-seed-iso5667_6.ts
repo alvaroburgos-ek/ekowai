@@ -37,6 +37,13 @@
  *     √g vs 2g is NOT decidable from the txt; no table cell depends on it (the
  *     prod equation A.1 is not rewritten; the EJEMPLO row carries the printed
  *     83 m / 683 m as text only).
+ *   - iso5667_6-U-2: S13_1 item i) wraps over a page break — its two printed
+ *     fragments ("i)   apariencia de la muestra (por ejemplo, el color del agua y
+ *     de los sólidos suspendidos, claridad," L1979 and "naturaleza y cantidad de
+ *     sólidos suspendidos, olor);" L1985) sit around the furniture line L1984
+ *     ("USO EXCLUSIVO …"); the seeded `text` is their JOIN (each fragment asserted
+ *     inside the span L1979–L1985, which keeps the furniture verbatim), the table
+ *     stays imported_unverified.
  */
 import type { RegulationTable, RegulationRow } from './regulation-tables';
 import { Q } from './regulation-tables-quotes-iso5667_6';

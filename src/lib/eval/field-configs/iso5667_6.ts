@@ -127,7 +127,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         // §7.1 position
         { key: 'depth_below_surface_cm', label: 'Tiefe unter Oberfläche', type: 'number', unit: 'cm', min: 0, aria_label: 'Probenahmetiefe unter der Oberfläche in cm' },
         { key: 'height_above_bed_cm', label: 'Höhe über Sohle', type: 'number', unit: 'cm', min: 0, aria_label: 'Höhe über der Gewässersohle in cm' },
-        { key: 'depth_ok', label: '§7.1 Position', type: 'derived', expr: DEPTH_OK_EXPR, display: 'badge', value_labels: { '1': '§7.1 ≥ 30 cm über Sohle und unter Oberfläche', '0': '§7.1 Position nicht erfüllt oder nicht eingetragen' } },
+        { key: 'depth_ok', label: '§7.1 Position', type: 'derived', expr: DEPTH_OK_EXPR, display: 'badge', value_labels: { '1': '§7.1 ≥ 30 cm über Sohle und unter Oberfläche (Anhaltswert, iso5667_6-J-1)', '0': '§7.1 Position nicht erfüllt oder nicht eingetragen (Anhaltswert, iso5667_6-J-1)' } },
       ],
       footer: ['sampling_point_count_calc', 'points_depth_fail'],
       note: `${Q.L1168_1169} Die Spalten nach dem Ortstyp zeigen nur die Prüfungen des gewählten §7-Abschnitts; die Einzelfelder derselben Angaben auf ISO-5667-6-02 / -03 / -07 bleiben bis zur Ratifizierung (iso5667_6-D-4 … D-16). Die Lesarten „alrededor de 30 cm“ (§7.3–7.5) und „dentro de 30 cm“ (§8.1) sind iso5667_6-J-1.`,
