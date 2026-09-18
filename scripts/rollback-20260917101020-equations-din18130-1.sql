@@ -1,0 +1,11 @@
+-- Generated rollback for din18130_1 equations (scripts/regulation-tables/emit-equations-sql.ts). Deletes only the 'Plan 3:' rows this migration inserted. Regenerate, do not hand-edit.
+BEGIN;
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-03' AND e.equation_number = 'DIN-18130-1-03-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-03' AND e.equation_number = 'DIN-18130-1-03-D2' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-03' AND e.equation_number = 'DIN-18130-1-03-D3' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-03' AND e.equation_number = 'DIN-18130-1-03-D4' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-03' AND e.equation_number = 'DIN-18130-1-03-D5' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-04' AND e.equation_number = 'DIN-18130-1-04-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-04' AND e.equation_number = 'DIN-18130-1-04-D2' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-04' AND e.equation_number = 'DIN-18130-1-04-D3' AND e.description LIKE 'Plan 3:%';
+COMMIT;

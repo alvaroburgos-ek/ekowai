@@ -1,0 +1,1180 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DIN-18130-1 din18130_1",
+    "captured_at": "2026-09-18T01:02:59.912Z",
+    "standard": "DIN-18130-1",
+    "slug": "din18130_1",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 54,
+    "section_rows": 22,
+    "sections_total": 22,
+    "equation_rows": 8
+  },
+  "DIN-18130-1-01 A_min": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-01 alpha": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-01 bezeichnung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-01 bodenart": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-02",
+      "DIN-18130-1-05"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-01 bodengruppe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-01 dichte_konstant": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-01 durchlaessigkeitsbereich": {
+    "enum_values": [
+      {
+        "value": "sehr_schwach_durchlaessig",
+        "label_de": "sehr schwach durchlässig (k < 1e-8 m/s)",
+        "label_en": "very low permeability (k < 1e-8 m/s)",
+        "order_index": 1,
+        "regulation_reference": "Tab.1"
+      },
+      {
+        "value": "schwach_durchlaessig",
+        "label_de": "schwach durchlässig (1e-8 bis 1e-6 m/s)",
+        "label_en": "low permeability (1e-8 to 1e-6 m/s)",
+        "order_index": 2,
+        "regulation_reference": "Tab.1"
+      },
+      {
+        "value": "durchlaessig",
+        "label_de": "durchlässig (>1e-6 bis 1e-4 m/s)",
+        "label_en": "permeable (>1e-6 to 1e-4 m/s)",
+        "order_index": 3,
+        "regulation_reference": "Tab.1"
+      },
+      {
+        "value": "stark_durchlaessig",
+        "label_de": "stark durchlässig (>1e-4 bis 1e-2 m/s)",
+        "label_en": "highly permeable (>1e-4 to 1e-2 m/s)",
+        "order_index": 4,
+        "regulation_reference": "Tab.1"
+      },
+      {
+        "value": "sehr_stark_durchlaessig",
+        "label_de": "sehr stark durchlässig (> 1e-2 m/s)",
+        "label_en": "very highly permeable (> 1e-2 m/s)",
+        "order_index": 5,
+        "regulation_reference": "Tab.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-01 max_d": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-02"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-01 S_r": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-02",
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-01 ungleichfoermig": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-02"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-01 versuchsklasse": {
+    "enum_values": [
+      {
+        "value": "1a",
+        "label_de": "Wassersättigung nachgewiesen, Strömung stationär nachgewiesen",
+        "label_en": "Saturation proven, steady flow proven",
+        "order_index": 1,
+        "regulation_reference": "Tab.4"
+      },
+      {
+        "value": "1b",
+        "label_de": "Wassersättigung nachgewiesen, Strömung stationär angenommen",
+        "label_en": "Saturation proven, steady flow assumed",
+        "order_index": 2,
+        "regulation_reference": "Tab.4"
+      },
+      {
+        "value": "2",
+        "label_de": "Keine Wassersättigung, Strömung stationär nachgewiesen",
+        "label_en": "No saturation, steady flow proven",
+        "order_index": 3,
+        "regulation_reference": "Tab.4"
+      },
+      {
+        "value": "3",
+        "label_de": "Keine Wassersättigung, Strömung nicht nachgewiesen",
+        "label_en": "No saturation, steady flow not proven",
+        "order_index": 4,
+        "regulation_reference": "Tab.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-02",
+      "DIN-18130-1-05"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-01 wasser_geeignet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-02"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-02 gamma_org": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-02 gefaelle_typ": {
+    "enum_values": [
+      {
+        "value": "konstant",
+        "label_de": "konstantes hydraulisches Gefälle",
+        "label_en": "constant hydraulic gradient",
+        "order_index": 1,
+        "regulation_reference": "§6.1.1"
+      },
+      {
+        "value": "veraenderlich",
+        "label_de": "veränderliches hydraulisches Gefälle",
+        "label_en": "variable hydraulic gradient",
+        "order_index": 2,
+        "regulation_reference": "§6.1.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-03",
+      "DIN-18130-1-04"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-02 h": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-02 h_0": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-02 messung_wassermenge": {
+    "enum_values": [
+      {
+        "value": "messzylinder",
+        "label_de": "Meßzylinder",
+        "label_en": "measuring cylinder",
+        "order_index": 1,
+        "regulation_reference": "§6.3; Tab.5"
+      },
+      {
+        "value": "standrohr_buerette",
+        "label_de": "Standrohr oder Bürette",
+        "label_en": "standpipe or burette",
+        "order_index": 2,
+        "regulation_reference": "§6.3; Tab.5"
+      },
+      {
+        "value": "kapillare",
+        "label_de": "kalibrierte Glaskapillare",
+        "label_en": "calibrated glass capillary",
+        "order_index": 3,
+        "regulation_reference": "§6.3; Tab.5"
+      },
+      {
+        "value": "druckerzeuger",
+        "label_de": "Druckerzeuger",
+        "label_en": "pressure generator",
+        "order_index": 4,
+        "regulation_reference": "Tab.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-03"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-02 saettigung_aufgebracht": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-03"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-18130-1-02 statische_belastung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-18130-1-02 stroemungsrichtung": {
+    "enum_values": [
+      {
+        "value": "unten_nach_oben",
+        "label_de": "von unten nach oben",
+        "label_en": "upward",
+        "order_index": 1,
+        "regulation_reference": "§6.1.3"
+      },
+      {
+        "value": "oben_nach_unten",
+        "label_de": "von oben nach unten",
+        "label_en": "downward",
+        "order_index": 2,
+        "regulation_reference": "§6.1.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-02 u_0": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-18130-1-02 umlaeufigkeit_verhindert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "DIN-18130-1-02 versuchsanordnung": {
+    "enum_values": [
+      {
+        "value": "KD",
+        "label_de": "Kompressions-Durchlässigkeitsgerät (statische Belastung)",
+        "label_en": "Compression permeameter (static load)",
+        "order_index": 1,
+        "regulation_reference": "§7.1; Tab.5"
+      },
+      {
+        "value": "ZY",
+        "label_de": "Versuchszylinder (Standrohre bzw. Durchlässigkeitsgerät)",
+        "label_en": "Test cylinder (standpipes / permeameter)",
+        "order_index": 2,
+        "regulation_reference": "§7.2; §7.4; Tab.5"
+      },
+      {
+        "value": "TX",
+        "label_de": "Triaxialzelle",
+        "label_en": "Triaxial cell",
+        "order_index": 3,
+        "regulation_reference": "§7.3; Tab.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-03",
+      "DIN-18130-1-04"
+    ],
+    "data_type": "enum",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "DIN-18130-1-03 a": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-03 A": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-03 e": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-03 gamma_w": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-02",
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-03 h_1": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-03 h_2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-03 h_o": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-03 h_u": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-03 l": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-03 l_0": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "DIN-18130-1-03 n_pore": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-03 p_o": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-03 p_u": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-03 rho": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-03 rho_d": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-03 rho_s": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-03 t": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-03 T": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-03 V_w": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "DIN-18130-1-03 w_a": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-03 w_e": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "DIN-18130-1-04 i": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "DIN-18130-1-04 k": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "DIN-18130-1-04 k_10": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-18130-1-05"
+    ],
+    "data_type": "number",
+    "section_code": "I",
+    "section_id_is_null": false,
+    "section_path": [
+      "I"
+    ]
+  },
+  "DIN-18130-1-04 k_T": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "I",
+    "section_id_is_null": false,
+    "section_path": [
+      "I"
+    ]
+  },
+  "DIN-18130-1-04 Q": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "DIN-18130-1-04 v": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "DIN-18130-1-05 freigabe_sachverstaendiger": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "L",
+    "section_id_is_null": false,
+    "section_path": [
+      "L"
+    ]
+  },
+  "DIN-18130-1-05 i_bereich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "J",
+    "section_id_is_null": false,
+    "section_path": [
+      "J"
+    ]
+  },
+  "DIN-18130-1-05 k_f": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "J",
+    "section_id_is_null": false,
+    "section_path": [
+      "J"
+    ]
+  },
+  "DIN-18130-1-05 versuchsbericht_vollstaendig": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "sections": {
+    "DIN-18130-1-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-02 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-04 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-04 G": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-04 H": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-04 I": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-05 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-18130-1-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "DIN-18130-1-02 7": {
+      "id": "92004c30-d370-4773-8c87-65346ec3abe1",
+      "output_symbol": "h",
+      "input_symbols": [
+        "h_0",
+        "gamma_w",
+        "gamma_org"
+      ]
+    },
+    "DIN-18130-1-04 1": {
+      "id": "b82db8f3-e49b-4318-b843-031dfd4d86a4",
+      "output_symbol": "Q",
+      "input_symbols": [
+        "V_w",
+        "t"
+      ]
+    },
+    "DIN-18130-1-04 2": {
+      "id": "94288a73-ebc1-4d02-8fbb-0bc2c6f35899",
+      "output_symbol": "v",
+      "input_symbols": [
+        "Q",
+        "A"
+      ]
+    },
+    "DIN-18130-1-04 3": {
+      "id": "6783ca37-3606-4f9a-8709-1f887f9f48f1",
+      "output_symbol": "i",
+      "input_symbols": [
+        "h",
+        "l"
+      ]
+    },
+    "DIN-18130-1-04 4": {
+      "id": "1a99d7dd-f20a-4b40-a65c-578554fb6057",
+      "output_symbol": "k",
+      "input_symbols": [
+        "v",
+        "i"
+      ]
+    },
+    "DIN-18130-1-04 6": {
+      "id": "21c8ff7a-28c2-46a2-bde3-7f5297d90977",
+      "output_symbol": "k_10",
+      "input_symbols": [
+        "T",
+        "k_T",
+        "alpha"
+      ]
+    },
+    "DIN-18130-1-04 8": {
+      "id": "25ab35d0-8eab-4a21-99ee-ea9aad5193df",
+      "output_symbol": "k",
+      "input_symbols": [
+        "Q",
+        "l",
+        "A",
+        "h"
+      ]
+    },
+    "DIN-18130-1-04 9": {
+      "id": "a464fee1-e159-4228-8081-cca885eefe37",
+      "output_symbol": "k",
+      "input_symbols": [
+        "a",
+        "l_0",
+        "A",
+        "t",
+        "h_1",
+        "h_2"
+      ]
+    }
+  }
+}

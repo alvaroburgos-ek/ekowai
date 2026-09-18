@@ -2160,3 +2160,252 @@ Report: `reports/plan-3-m820_3.md` · STAGED SQL: `scripts/verification/m820_3-S
 - **The Projektstopp codes require every named goal to be set** (the engine checks inputs before evaluating; an `if()` branch does not exempt them — Task 7 trap 3): a Gesamtsystem-only project sets the 54 Anhang-B goals `nicht_zutreffend` (or reads `manual_required` on `projektstopp_code`); `projektstopp_code_a` / `_b` compute per annex. Since fix round 1 the codes trigger on `nicht_erreicht` OR `teilweise_erreicht` (L307 — J-2).
 - **Engineer-visible effect of `gesamt_anhang_a_items_rated` / `gesamt_anhang_b_items_rated` until C-5:** the two cards on M8203-22 / -23 read `manual_required — Fehlende oder leere Eingaben: qe52_items_rated, qe53_items_rated, qe54_items_rated, qe55_items_rated` (resp. the eight B symbols) — the created outputs are not inherited there (fix round 1, minor 3).
 - **Bundle growth:** the 193 lifted spans (~95 KB incl. the multi-line cells) ship in the client bundle via the seed fallback (Task-0 observation; Task 30 measures) — the largest Plan-3 seed so far.
+
+## Task 10 — DIN-18130-1 (din18130_1)
+
+Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din18130_1-STAGED-plan3-rulings.sql` (same ids, full SQL + rollbacks there) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-18130-1\DIN-18130-1.md` (lines cited; the OCR sibling `DIN-18130-1_OCR.md` is cited only as a lead in U-1 / I-1) · prod capture `src/lib/eval/field-configs/din18130_1.prior.json` (2026-09-18, read-only; 54 fields, 22 sections, 8 equations). Ids follow the Task-10 brief (R = equation rewrite, J = judgment, as in earlier tasks; skeleton letters for the rest). Nothing below is applied.
+
+### din18130_1-R-1 · DIN-18130-1 · DIN-18130-1-04 · k (Gl. 4 / Gl. 8 / Gl. 9)
+- Class: equation-replacement
+- Chosen now (fail-safe): the three prod rows writing `k` are untouched (first-in-list wins — Gl. 4 today); the readings register computes k per row with the printed switch (`K_ROW_EXPR`) and `k_T_mean` / `k_10_calc` are separate created outputs — never a second producer of `k`.
+- Evidence (verbatim, transcript line): "k=\frac{Q \cdot l}{A \cdot h} \tag{8}" (L787); "k=\frac{a \cdot l_{0}}{A \cdot t} \ln \frac{h_{1}}{h_{2}} \tag{9}" (L813); "k=\frac{v}{i}=\text { const. } \tag{4}" (L186)
+- Proposed SQL / config: STAGED block R-1 — option (a) rewrite Gl. 8 (25ab35d0-…, md5 1637edb7…) as `k = if(gefaelle_typ == 'konstant', (Q * l) / (A * h), (a * l_0) / (A * t) * ln(h_1 / h_2))`, archive + delete Gl. 4 / Gl. 9; option (b) keep Gl. 4. Archive-pattern rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-R-2 · DIN-18130-1 · DIN-18130-1-04 · Gl. 6 (k_10) ← k_T_mean
+- Class: equation-replacement · consumer-edit
+- Chosen now (fail-safe): Gl. 6 keeps reading the hand-typed `k_T` (and demands `alpha`); `k_10_calc` (DIN-18130-1-03-D3) is a visible twin on -03.
+- Evidence (verbatim, transcript line): "k_{10}=\frac{1,359}{1+0,0337 \cdot T+0,00022 \cdot T^{2}} k_{\mathrm{T}}=\alpha \cdot k_{\mathrm{T}} \tag{6}" (L305); "$k_{\mathrm{T}}$ der ermittelte Durchlässigkeitsbeiwert bei der Temperatur $T$, in $\mathrm{m} / \mathrm{s}$;" (L311); "Durchlässigkeitsbeiwert $k_{10}=3,48 \times 10^{-10} \mathrm{~m} / \mathrm{s}$" (L1357, the mean of the three readings)
+- Proposed SQL / config: STAGED block R-2 — Gl. 6 (21c8ff7a-…, md5 046fed93…) formula `k_10 = (1.359 / (1 + 0.0337*T + 0.00022*T^2)) * k_T_mean`, input_symbols {T, k_T_mean}; `k_T_mean.consumer_worksheets = {DIN-18130-1-04}`; archived row restores.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-R-3 · DIN-18130-1 · DIN-18130-1-05 · k_f = k_10
+- Class: equation-replacement (ownership of a required manual input)
+- Chosen now (fail-safe): `k_f` stays a hand-typed required number (CR-07); no equation emitted.
+- Evidence (verbatim, transcript line): "Als Versuchsergebnis sind der Durchlässigkeitsbeiwert $k$, umgerechnet auf die Temperatur von $10^{\circ} \mathrm{C}$ und das hydraulische Gefälle $i$ anzugeben." (L831); prod label "Wasserdurchlässigkeitsbeiwert k_f (Transfer)".
+- Proposed SQL / config: STAGED block R-3 — INSERT `DIN-18130-1-05-D1 k_f = k_10` + `k_f.widget = 'derived'`; DELETE-by-description rollback. Scalar output — not materialised until the engine-output workstream (I-3).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-D-1 · DIN-18130-1 · DIN-18130-1-01 · alpha
+- Class: deactivation
+- Chosen now (fail-safe): `alpha` stays a required input (Gl. 6 lists it although the formula does not use it); `alpha_calc` (DIN-18130-1-03-D2) computes beside it.
+- Evidence (verbatim, transcript line): "$\alpha$ der Korrekturbeiwert (siehe Tabelle 2)." (L312); Tab. 2 "\hline$\alpha$ & 1,158 & 1,000 & 0,874 & 0,771 & 0,686 \\" (L322)
+- Proposed SQL / config: STAGED block D-1 — `active = false` on -01 `alpha` after R-2 removes it from Gl. 6's input list; rollback `active = true`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-D-2 · DIN-18130-1 · DIN-18130-1-01 · durchlaessigkeitsbereich ← bereich_code
+- Class: deactivation · consumer-edit
+- Chosen now (fail-safe): the manual enum stays (consumed by -05); `bereich_code` (DIN-18130-1-04-D3) is a created derived twin on -04 where k_10 lives (the brief's -01 placement cannot compute: k_10 is not in scope there).
+- Evidence (verbatim, transcript line): "\hline unter $10^{-8}$ & sehr schwach durchlässig \\" … "\hline über $10^{-2}$ & sehr stark durchlässig \\" (L205–L209); "ANMERKUNG: Für bautechnische Zwecke werden fünf Durchlässigkeitsbereiche definiert (siehe Tabelle 1)." (L196)
+- Proposed SQL / config: STAGED block D-2 — option (a) `bereich_code.consumer_worksheets = {DIN-18130-1-05}` + retire the -01 enum; option (b) keep both.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-D-3 · DIN-18130-1 · DIN-18130-1-03 / -04 · h_o, h_u, p_o, p_u, V_w, t, h_1, h_2, k_T
+- Class: deactivation
+- Chosen now (fail-safe): the single-reading scalars stay (required, consumed by -04 — they feed Gl. 1 / 8 / 9); the register runs in parallel.
+- Evidence (verbatim, transcript line): "Bei jeder Ablesung wird in der Regel auch die Temperatur gemessen. Der Durchlässigkeitsversuch darf beendet werden, wenn sich aus den Messungen ein annähernd gleichbleibender $k$-Wert ergibt." (L526); Tab. 7 (26 readings, L971–L999); Tab. 11 (3 readings, L1314–L1357)
+- Proposed SQL / config: STAGED block D-3 — `active = false` on the nine scalars once R-1 + R-2 are final; Gl. 1–3 consequence named there.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-E-1 · DIN-18130-1 · DIN-18130-1-01 · versuchsklasse ← versuchsklasse_tab4 (-02)
+- Class: equation-replacement (re-point) · consumer-edit · gate-guard (CR-03 text)
+- Chosen now (fail-safe): the -01 enum keeps its input; the Tab.-4 fill `versuchsklasse_tab4` (text, -02, keyed on `saettigung_aufgebracht` × `stroemung_stationaer`) is created beside its drivers (a262e trap 1 — a fill on -01 would read "Schlüssel fehlt" forever).
+- Evidence (verbatim, transcript line): "\hline 1a & ja & ja \\" (L480); "\hline 1b & ja & nein*) \\" (L481); "\hline 2 & nein & ja \\" (L482); "\hline 3 & nein & nein \\" (L483); "Entsprechend diesen Bedingungen werden die Versuche in drei Versuchsklassen eingeteilt (siehe Tabelle 4)." (L447)
+- Proposed SQL / config: STAGED block E-1 — consumer edit on the fill, CR-03 (6e9f0d8c-…, md5 1e37033f…) rewritten onto `versuchsklasse_tab4 IN {'2', '3'}`, the -01 enum retired; archive-pattern rollback. Interim: G-10.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-C-1 · DIN-18130-1 · DIN-18130-1-02 · gefaelle_typ → DIN-18130-1-05
+- Class: consumer-edit
+- Chosen now (fail-safe): the emitted rule `i_bereich ← gefaelle_typ == 'veraenderlich'` (20260917101010) is `pending` = visible and inert on -05 (the driver is consumed by -03 / -04 only).
+- Evidence (verbatim, transcript line): "Bei Versuchen mit veränderlichem hydraulischen Gefälle ist dessen Bereich (größtes und kleinstes hydraulisches Gefälle) anzugeben." (L832)
+- Proposed SQL / config: STAGED block C-1 — `gefaelle_typ.consumer_worksheets = {DIN-18130-1-03, DIN-18130-1-04, DIN-18130-1-05}` (guarded on the captured list); optionally `k_10_calc` / `i_max_calc` / `i_min_calc` → -05.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-C-2 · DIN-18130-1 · DIN-18130-1-03 / -02 / -04 · refused visibility (h_o … h_2, h_0 / gamma_org, sections G / H)
+- Class: consumer-edit
+- Chosen now (fail-safe): no `visible_when` on any existing measurement scalar or on -04 G / H; the konstant/veränderlich switch lives in the register columns (row-scope rules) instead.
+- Evidence (verbatim, transcript line): §8.1 / §8.2 headings "8.1 Versuch mit konstantem hydraulischen Gefälle" (L782) / "8.2 Versuch mit veränderlichem hydraulischen Gefälle" (L808); capture: every -03 scalar `consumer_worksheets = {DIN-18130-1-04}`, chain "h_0 → Gl.7 h (consumed by DIN-18130-1-04)", section G holds `k`, section H holds no field.
+- Proposed SQL / config: none (resolution = D-3); pinned in `field-configs-din18130-1.test.ts`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-1 · DIN-18130-1 · DIN-18130-1-03 · A >= A_min (§5.8)
+- Class: gate-guard · consumer-edit
+- Chosen now (fail-safe): `A_min` is filled from S5_8 by the created `bindig_grobkoernig` (lookup_fill role limit, UPDATE); CR-01 keeps checking presence only; no new gate.
+- Evidence (verbatim, transcript line): "Bei bindigen Böden sollte die Querschnittsfläche mindestens $A=10 \mathrm{~cm}^{2}$ betragen, bei grobkörnigen Böden mindestens A $=20 \mathrm{~cm}^{2}$, sofern die Versuchsgeräte nach Abschnitt 7 keine größeren Abmessungen bedingen." (L336)
+- Proposed SQL / config: STAGED block G-1 — `A_min → -03` consumer edit + CR-08 `A * 10000 >= A_min` (warn; "sollte").
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-2 · DIN-18130-1 · DIN-18130-1-03 · CR-04 "Stationäre Strömung" ← stroemung_stationaer
+- Class: gate-guard · consumer-edit
+- Chosen now (fail-safe): CR-04 keeps its proxy `V_w > 0 AND t > 0`; `stroemung_stationaer` (boolean, -02) is created and drives the Tab.-4 fill only.
+- Evidence (verbatim, transcript line): "Die zur Berechnung des Durchlässigkeitsbeiwerts maßgebende Wassermenge ist bei stationärer Strömung zu messen." (L387); "Auf einen stationären Strömungszustand kann auch geschlossen werden, wenn bei konstantem Strömungsgefälle die in der Zeiteinheit ein- oder ausströmende Wassermenge gleich bleibt." (L395); Tab. 4 head "Strömung stationär nachgewiesen" (L479)
+- Proposed SQL / config: STAGED block G-2 — CR-04 (c31a2a78-…, md5 d3cc8e8a…) → `IF versuchsklasse IN {1a,2} THEN stroemung_stationaer == true` (classes 1b / 3 are legitimate without the proof), consumer edit; archive-pattern rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-3 · DIN-18130-1 · DIN-18130-1-03 · T validation_rules "T > 0 AND T < 40"
+- Class: gate-guard (validation rule not from source)
+- Chosen now (fail-safe): untouched.
+- Evidence (verbatim, transcript line): "Die Versuche sind bei annähernd konstanter Raumtemperatur durchzuführen, wobei die Temperatur des Probekörpers und des Wassers sich dieser Temperatur angepaßt haben müssen." (L298); Tab. 2 prints 5 … 25 °C (L321); no printed bound.
+- Proposed SQL / config: STAGED block G-3 — drop the 40 °C bound (or NULL).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-4 · DIN-18130-1 · DIN-18130-1-05 · CR-06 completeness via contains(pflichtangaben, …)
+- Class: gate-guard
+- Chosen now (fail-safe): `pflichtangaben` (select_many, 14 lifted items in two printed groups) is created beside the boolean `versuchsbericht_vollstaendig`; CR-06 unchanged.
+- Evidence (verbatim, transcript line): "Ferner sind mit dem Versuchsergebnis mitzuteilen: 1) Angaben zum Versuch - Bezeichnung nach Abschnitt 4 - Versuchsdauer $t$ - Sättigungsdruck $u_{0}$ - Raumtemperatur $T$ - Durchströmungsrichtung 2) Angaben zur Probe - Bodenart nach DIN 4022-1 - Bodengruppe nach DIN 18196 - Größtkorn max. d" (L832–L842) … "- Maße des Probekörpers" (L848)
+- Proposed SQL / config: STAGED block G-4 — CR-06 (7704fc08-…, md5 9d313c95…) + 14 `contains()` terms; the L846 "(falls kein Sättigungsdruck aufgebracht)" item is conditional — noted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-5 · DIN-18130-1 · DIN-18130-1-04 · versuche_count >= 3 (§5.3)
+- Class: gate-guard
+- Chosen now (fail-safe): `versuche_count` (DIN-18130-1-04-D2) shown in the register footer; no gate (no field says whether the density influence is examined).
+- Evidence (verbatim, transcript line): "Ist der Einfluß der Dichte auf die Durchlässigkeit zu prüfen, dann sind mindestens drei Durchströmungsversuche mit jeweils unterschiedlichen Porenzahlen des Probekörpers auszuführen (siehe 8.3)." (L246)
+- Proposed SQL / config: STAGED block G-5 — CR-09 `versuche_count >= 3` (warn) or a created driver boolean first.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-6 · DIN-18130-1 · DIN-18130-1-02 / -04 · filterstein_k >= 10 · k (Triaxialzelle)
+- Class: gate-guard · consumer-edit
+- Chosen now (fail-safe): `filterstein_k` (number, m/s) created on -02, visible under `versuchsanordnung == 'TX'`; no gate.
+- Evidence (verbatim, transcript line): "3 Filterstein mit $k_{\text {Filter }} \geq 10 \cdot k_{\text {Probe }}$" (L668); "Diese Filtersteine müssen ausreichend durchlässig sein, d. h. ihr Durchlässigkeitsbeiwert muß mindestens um eine Zehnerpotenz über desjenigen des Probekörpers liegen." (L642)
+- Proposed SQL / config: STAGED block G-6 — CR-10 on -04 `IF versuchsanordnung == 'TX' THEN filterstein_k >= 10 * k` (block; "muß") + consumer edit; the KD absolute rule (L467 "k > 10⁻⁶ m/s") as a second gate.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-7 · DIN-18130-1 · DIN-18130-1-02 / -03 · KD sample size d ≥ 70 mm, l_0 ≥ 20 mm
+- Class: gate-guard
+- Chosen now (fail-safe): `probe_durchmesser_mm` created on -02 (visible under KD); `l_0` exists on -03; no gate.
+- Evidence (verbatim, transcript line): "Der Versuch eignet sich für feinkörnige Böden, insbesondere für Tone und Schluffe. Die Probe sollte einen Durchmesser von mindestens 70 mm und eine Höhe von mindestens 20 mm haben." (L456)
+- Proposed SQL / config: STAGED block G-7 — CR-11 / CR-12 (warn; "sollte"); the TX sizes (L635) as a third pair.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-8 · DIN-18130-1 · DIN-18130-1-02 · statische_belastung required with Sättigungsdruck or upward flow
+- Class: gate-guard
+- Chosen now (fail-safe): nothing (a `visible_when` on the consumed boolean was refused; a requirement is a gate, not visibility).
+- Evidence (verbatim, transcript line): "Eine äußere statische Belastung ist auch bei Aufbringen eines Sättigungsdrucks (siehe 6.6) oder bei Durchströmung von unten nach oben (siehe 6.2) aus Gleichgewichtsgründen erforderlich." (L442); "Bei Durchströmung von unten nach oben muß durch Auflast oder Einspannung verhindert werden, daß sich die Probe auflockert." (L379)
+- Proposed SQL / config: STAGED block G-8 — CR-13 `IF (saettigung_aufgebracht == true OR stroemungsrichtung == 'unten_nach_oben') THEN statische_belastung == true` (block).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-9 · DIN-18130-1 · DIN-18130-1-05 · i_bereich required for variable-head tests
+- Class: gate-guard
+- Chosen now (fail-safe): `i_bereich` gets the emitted (pending) visibility rule; not required.
+- Evidence (verbatim, transcript line): "Bei Versuchen mit veränderlichem hydraulischen Gefälle ist dessen Bereich (größtes und kleinstes hydraulisches Gefälle) anzugeben." (L832)
+- Proposed SQL / config: STAGED block G-9 — CR-14 `IF gefaelle_typ == 'veraenderlich' THEN i_bereich IS NOT NULL` (block) after C-1; the created `i_max_calc` / `i_min_calc` (-03) could replace the text.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-10 · DIN-18130-1 · DIN-18130-1-02 · versuchsklasse == versuchsklasse_tab4 (interim consistency)
+- Class: gate-guard
+- Chosen now (fail-safe): both values visible on -02 (the -01 enum inherited, the fill local); no gate.
+- Evidence (verbatim, transcript line): Tab. 4 rows (L480–L483); "Klasse, in der Durchlässigkeitsversuche erfaßt werden, die unter jeweils gleichen Bedingungen bezüglich Wassersättigung und Art der Strömung (siehe Tabelle 4) ablaufen." (L216)
+- Proposed SQL / config: STAGED block G-10 — CR-15 `versuchsklasse == versuchsklasse_tab4` (warn) until E-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-G-11 · DIN-18130-1 · DIN-18130-1-02 · S_r vs s_r_band consistency
+- Class: gate-guard · range-SR-2
+- Chosen now (fail-safe): `s_r_band` is the engineer's explicit Tab.-3 pick (SR-2; visible only while `saettigung_aufgebracht == true`); `u_0` filled from it (anhaltswert → deviation with reason); no consistency gate.
+- Evidence (verbatim, transcript line): "\hline$\geq 0,95$ & 300 \\" (L427); "\hline 0,90 & 600 \\" (L428); "\hline 0,85 & 900 \\" (L429); example 9.3 "S_{\mathrm{ra}}=0,88" (L1205) with "u_{\mathrm{o}}=720 \mathrm{kN} / \mathrm{m}^{2}" (L1215)
+- Proposed SQL / config: STAGED block G-11 — three warn gates (one per band) on -02.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-U-1 · DIN-18130-1 · TAB5 · Ton/Schluff KD + TX, Sand-Ton TX (rows not seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): 15 of 18 (bodenart × anordnung) combinations seeded — only rows whose Bauteil mark is printed on the row itself; the three sub-rows whose KD / TX marks are `\multirow` spans on the group's first line are left out (the fills read "keine Zeile"); TAB5 `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline \multirow[t]{3}{*}{Ton, Schluff} & 3 & x & \multirow{3}{*}{x} & \multirow[b]{3}{*}{X} & x & x & x & (X) & x & - & (X) & - \\" (L540); "\hline & 3 & \multirow{2}{*}{} & & & - & X & - & - & X & - & X & - \\" (L541); "\hline & 1 & & & & - & - & X & - & (X) & x & X & X \\" (L542); "\hline & 1 & & & & - & X & X & (X) & X & x & X & X \\" (L549); L548 "\hline & 3 & \multirow{2}{*}{} & x & & - & X & - & - & X & - & X & - \\" prints its own KD "x" and IS seeded (sand_ton|KD).
+- Proposed SQL / config: after the PDF read (p. 10, SR-3): three `TAB5_LINES` entries (leads: span alignment centred = middle row → KD, `[b]` bottom = last row → TX; the §4 example L222/L223 "KD - ES - ST - SB - 3" matches L541; OCR sibling L619–L621) → re-emit 20260917101000.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-U-2 · DIN-18130-1 · TAB5 · lower-case "x" marks
+- Class: unreadable-cell
+- Chosen now (fail-safe): "x" read as the legend's "X geeignet"; glyphs kept inside the quotes; table `imported_unverified`.
+- Evidence (verbatim, transcript line): "Dabei ist: X geeignet \\" (L553); "(X) bedingt geeignet \\" (L554); "- nicht geeignet" (L555); lower-case cells in L540 / L543 / L545 / L546 / L548 / L551.
+- Proposed SQL / config: none (PDF check flips U-1 / U-2 together).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-J-1 · DIN-18130-1 · DIN-18130-1-03 · readings entering the means
+- Class: text-only-formula (aggregation rule)
+- Chosen now (fail-safe): `mean_rows` over ALL complete rows (k_T_mean, i_max/i_min over all rows).
+- Evidence (verbatim, transcript line): "Der Durchlässigkeitsversuch darf beendet werden, wenn sich aus den Messungen ein annähernd gleichbleibender $k$-Wert ergibt." (L526); "Bestimmung von $k \cdot c$ durch lineare Ausgleichungsrechnung." (L934)
+- Proposed SQL / config: alternatives `last_rows(ablesungen, n)` or a regression (not in the language).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-J-2 · DIN-18130-1 · DIN-18130-1-03 · h per reading (arrangement variants)
+- Class: text-only-formula
+- Chosen now (fail-safe): `h_row = h_o - h_u + (p_o - p_u) / gamma_w` (Tab. 11); Bild 6 = p_o = p_u = 0; Bild 9 = h_o = h_u = 0; Bild 8 by entering Δh as h_u; Gl. 7 stays the prod scalar.
+- Evidence (verbatim, transcript line): "& h=h_{\mathrm{o}}-h_{\mathrm{u}}+\left(p_{\mathrm{o}}-p_{\mathrm{u}}\right) / \gamma_{\mathrm{w}}" (L1326); "$h=\left(p / \gamma_{\mathrm{w}}-\Delta h\right)$, wobei $p$ Wasserdruck im Druckzylinder, (siehe Bild 8);" (L801); "$h=\left(p_{2}-p_{1}\right) / \gamma_{\mathrm{w}}$, (siehe Bild 9)." (L803)
+- Proposed SQL / config: a per-row arrangement selector with four exprs (not built).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-J-3 · DIN-18130-1 · DIN-18130-1-03 · α: Gl.-6 closed form at the worksheet T
+- Class: text-only-formula
+- Chosen now (fail-safe): `alpha_calc` = closed form at the -03 `T`; `k_10_calc = k_T_mean · alpha_calc` (Tab. 11 practice); the register also shows α / k_10 per reading from the row's T (display).
+- Evidence (verbatim, transcript line): L305 (Gl. 6); "Zwischenwerte können geradlinig eingeschaltet werden." (L327); "\alpha & =0,754 \text { für } T=21^{\circ} \\" (L953 — the linear Tab.-2 interpolation; the closed form gives 0,753); "& \alpha \text { für } T=0,5 \times(20,5+22,0)" (L1114) → "0,7485" (L1120, closed form); "& \alpha \text { für } T=0,5 \times(19,0+22,0) \\" (L1335) → "0,762" (L1341)
+- Proposed SQL / config: alternative `k_10_calc = mean_rows(ablesungen, k10_row)` (per-reading α).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-F-1 · DIN-18130-1 · DIN-18130-1-04 · k_10 per Versuch typed (no nested registers)
+- Class: interface-gap · text-only-formula
+- Chosen now (fail-safe): `versuche.k_10_run` typed per run; `k_10_runs_mean` = mean over runs (Tab. 10: 3,77·10⁻⁹).
+- Evidence (verbatim, transcript line): L246; "\hline \multicolumn{5}{|l|}{Durchlässigkeitsbeiwert $k_{10}=3,77 \times 10^{-9} \mathrm{~m} / \mathrm{s}$} \\" (L1133)
+- Proposed SQL / config: Phase 6 run × readings structure, or a `versuch_nr` column with per-run aggregates.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-F-2 · DIN-18130-1 · DIN-18130-1-01 · bezeichnung (§4 code) stays free text
+- Class: text-only-formula (string assembly not in the language)
+- Chosen now (fail-safe): free text; the code elements exist as selects (versuchsanordnung, created `messung_gefaelle` ms/es/de, messung_wassermenge, statische_belastung, saettigung_aufgebracht, versuchsklasse).
+- Evidence (verbatim, transcript line): "Bezeichnung des Laborversuchs … im Kompressions-Durchlässigkeitsgerät (KD) mit Messung des hydraulischen Gefälles in einem Standrohr (ES) und des Wasservolumens im Standrohr (ST) sowie mit statischer Belastung (SB) des Probekörpers, Versuchsklasse 3:" (L222); "Versuch DIN 18130 - KD - ES - ST - SB - 3" (L223); "Versuch DIN 18130 - ZY - MS - MZ - 3" (L593); "TX - DE - MZ - SB - 2" (L688); "TX — DE — MZ — UO — 1" (L713); "ZY - DE - ST - 3" (L1233)
+- Proposed SQL / config: a code-assembly helper (Plan 2b amendment). Note: prod `messung_wassermenge` carries `druckerzeuger` — a Tab.-5 Gefälle token, not a Volumen token.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-F-3 · DIN-18130-1 · DIN-18130-1-04 · versuche.n_pore_row = e / (1 + e)
+- Class: text-only-formula
+- Chosen now (fail-safe): display-only derived column (no equation row; the prod scalar `n_pore` stays an input).
+- Evidence (verbatim, transcript line): "\hline $n$ & 29,8 \% & 28,9\% \\" (L878); "\hline $e$ & 0,424 & 0,406 \\" (L879) (0,424/1,424 = 0,298; 0,406/1,406 = 0,289); §9.2 "n & =27,2 \%" / "e & =0,373" (L1026–L1027); §9.3 "n=31,8 \%" (L1180) / "e=0,467" (L1185); §9.4 "n=0,411" (L1272) / "e=0,699" (L1277)
+- Proposed SQL / config: none (drop the column if the owner prefers printed-only content).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-I-1 · DIN-18130-1 · edition token '1998-05'
+- Class: interface-gap (unique-key component)
+- Chosen now (fail-safe): `'1998-05'` from prod `standards.version` "1998-05 (Ersatz für 1989-11)" (read-only query quoted in the STAGED header); the transcript prints no own date.
+- Evidence (verbatim, transcript line): "\hline \multicolumn{2}{|l|}{ICS 93.020} & Ersatz für Ausgabe 1989-11 \\" (L7); "DIN 18130-1: 1983-11, 1989-11" (L116); OCR sibling page header "DIN 18130-1 :1998-05" (its L616 — a lead).
+- Proposed SQL / config: re-emit the seed BEFORE apply if the PDF cover reads otherwise (UPDATE named in the STAGED block).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-I-2 · DIN-18130-1 · DIN-18130-1-03 · register formatter prints |k| < 5·10⁻⁵ as "0"
+- Class: interface-gap
+- Chosen now (fail-safe): mantissa / exponent derived columns (`k_mant · 10^k_exp`, `k10_mant · 10^k10_exp`) per row — the printed representation; raw cells and the footer render through the Plan-2b `fmt` (4 fraction digits) as "0"; the equation cards are correct (toPrecision).
+- Evidence (verbatim, transcript line): "ANMERKUNG: Der $k$-Wert solle als ein Vielfaches eines Exponentialfaktors zur Basis 10 angegeben werden." (L850)
+- Proposed SQL / config: CODE — scientific notation in `register-editor.tsx` `fmt()` for 0 < |v| < 1e-3 (one line + pin); outside this DATA task.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-I-3 · DIN-18130-1 · DIN-18130-1-03 / -04 · scalar outputs not persisted
+- Class: interface-gap
+- Chosen now (fail-safe): `alpha_calc`, `k_10_calc`, `bereich_code` compute on the card only (amendment D — register-scoped materialiser); `k_T_mean`, `i_max_calc`, `i_min_calc`, `k_10_runs_mean`, `versuche_count` materialise on save.
+- Evidence: capture / mechanism (no transcript item).
+- Proposed SQL / config: none (engine-output-materialisation workstream).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-O-1 · DIN-18130-1 · TAB3 · override policy anhaltswert (brief: locked)
+- Class: override-policy
+- Chosen now (fail-safe): `anhaltswert` — the `u_0` fill offers "abweichend wählen" + reason, so the standard's own example (720 kN/m² between the rows) is reproducible with a justification; `locked` would block it.
+- Evidence (verbatim, transcript line): "S_{\mathrm{ra}}=0,88" (L1205); "u_{\mathrm{o}}=720 \mathrm{kN} / \mathrm{m}^{2}" (L1215) = 900 − (0,03/0,05)·300; Tab. 3 L427–L429.
+- Proposed SQL / config: `locked` alternative = one word in the seed builder → re-emit.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-O-2 · DIN-18130-1 · TAB5 · override policy anhaltswert
+- Class: override-policy
+- Chosen now (fail-safe): `anhaltswert` (graded suitability; text fills).
+- Evidence (verbatim, transcript line): "Dabei ist: X geeignet \\ (X) bedingt geeignet \\ - nicht geeignet" (L553–L555); "Die Versuchsanordnung ist entsprechend den jeweiligen Erfordernissen des Anwendungsfalls zusammenzustellen." (L446)
+- Proposed SQL / config: `locked` alternative.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din18130_1-X-1 · DIN-18130-1 · DIN-18130-1-05 · k_f → DWA-A-138-1 A138-05 k_f (Laborverfahren)
+- Class: cross-standard
+- Chosen now (fail-safe): no link; `k_f` typed on -05 (R-3 covers the in-standard equation).
+- Evidence (verbatim, transcript line): L831 (k at 10 °C is the result); prod worksheet title "Ergebnisangabe und Transfer an DWA-A-138"; A138 Tab. 11 tokens `labor_ungestoert` / `labor_gestoert_sieblinie` (a138 seed).
+- Proposed SQL / config: project-level inheritance (Phase 6); content-boundary: DIN-18130-1 prints no transfer rule.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 10, no signature needed)
+
+- **Placement vs the brief:** `bodenart_tab5` and the four Tab.-5 fills sit on -02 (with `versuchsanordnung`), the Tab.-4 fill is a created twin on -02, the Tab.-1 class code and the runs register sit on -04 (with `k_10`), all -03 outputs sit on -03 (register-fed rows must live on the register's worksheet) — a created field never carries `consumer_worksheets`, so every fill / equation was placed where its inputs are in scope.
+- **`i_max_calc` / `i_min_calc` need `gefaelle_typ`, `l` AND `l_0`** (the engine checks every named input; an `if()` branch does not exempt them) — all three are required prod inputs on -03 / inherited, so the cards compute for every complete test.
+- **Tab. 9's Versuch 2** computes 2,6924·10⁻⁴ from the printed inputs (V_w = 510·10⁻⁶) while the table prints 2,693·10⁻⁴ — rounding inside the printed inputs; pinned to two decimals.
+- **Bundle growth:** ~12 KB of lifted quotes (Tab. 5 lines are the largest) ride in the client bundle via the seed fallback (Task-0 observation; Task 30 measures).

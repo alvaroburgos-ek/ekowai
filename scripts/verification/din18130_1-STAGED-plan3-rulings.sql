@@ -1,0 +1,549 @@
+-- DIN-18130-1 — Plan 3 Task 10 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the 8 equation rows — ids / md5(formula) —, the 7
+-- compliance rows — ids / severities / md5(condition) —, worksheet + section titles, standards.version
+-- '1998-05 (Ersatz für 1989-11)', field labels + validation_rules) were captured read-only on 2026-09-18
+-- (src/lib/eval/field-configs/din18130_1.prior.json; scripts/verification/prod-query.mjs). Transcript lines refer to
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-18130-1\DIN-18130-1.md. This task changes NO gate severity.
+--
+-- Conventions: `s.code = 'DIN-18130-1'`, worksheets by code, never by id (equations and gates by their captured uuid + a
+-- guard on md5(formula) / md5(condition) of the text they replace so a re-run is a no-op); each block names its
+-- rollback. Every block that DELETEs or rewrites an equation / gate row follows the amendment-I archive pattern: the
+-- affected rows are copied into `equations_archive_din18130_1` / `compliance_requirements_archive_din18130_1` in the
+-- SAME transaction (`CREATE TABLE IF NOT EXISTS … AS SELECT * … WHERE false; INSERT … SELECT * … WHERE (id = … AND
+-- md5(…) = …)`), the DELETE / UPDATE is guarded on the md5 read read-only from prod, and the rollback restores from the
+-- archive by id with an EXPLICIT column list (never `SELECT *`, never retyped — prod-query.mjs truncates cells at 120
+-- chars); the archive table is dropped by the rollback or on the owner's sign-off that the change is final. A field
+-- retirement is `active = false` (reversible). New gates are INSERTs with a DELETE-by-description rollback. The Plan-3
+-- DATA migrations (20260917101000 seed · 20260917101010 field configs · 20260917101020 equations) must be applied
+-- BEFORE any block that reads a created symbol (ablesungen, k_T_mean, alpha_calc, k_10_calc, i_max_calc, i_min_calc,
+-- versuche, k_10_runs_mean, versuche_count, bereich_code, stroemung_stationaer, versuchsklasse_tab4, s_r_band,
+-- bindig_grobkoernig, bodenart_tab5, tab5_*, filterstein_k, probe_durchmesser_mm, pflichtangaben, messung_gefaelle).
+-- Consumer edits write `fields.consumer_worksheets` (text[]); the guards keep a re-run idempotent.
+--
+-- Captured equation rows (all verification_status verified_against_standard; md5 = md5(formula)):
+--   Gl. 7  92004c30-d370-4773-8c87-65346ec3abe1 (DIN-18130-1-02) 'h = (h_0 * (gamma_w - gamma_org)) / gamma_w'  9e050e811635a1e54bb713e68d6d554d
+--   Gl. 1  b82db8f3-e49b-4318-b843-031dfd4d86a4 (-04) 'Q = V_w / t'                                              8fb11bf376200ddbe8e28926075d0d85
+--   Gl. 2  94288a73-ebc1-4d02-8fbb-0bc2c6f35899 (-04) 'v = Q / A'                                                21974b4075b6179ad05f4df132c7c66a
+--   Gl. 3  6783ca37-3606-4f9a-8709-1f887f9f48f1 (-04) 'i = h / l'                                                10358135fa1ae0c4f09e0e906125fa20
+--   Gl. 4  1a99d7dd-f20a-4b40-a65c-578554fb6057 (-04) 'k = v / i'                                                a1553004c845e1bedebf24137b2d63b2
+--   Gl. 6  21c8ff7a-28c2-46a2-bde3-7f5297d90977 (-04) 'k_10 = (1.359 / (1 + 0.0337*T + 0.00022*T^2)) * k_T'      046fed936e687b74172d10e59b3565fd  input_symbols {T, k_T, alpha}
+--   Gl. 8  25ab35d0-8eab-4a21-99ee-ea9aad5193df (-04) 'k = (Q * l) / (A * h)'                                    1637edb705106f050cba626bab262c81
+--   Gl. 9  a464fee1-e159-4228-8081-cca885eefe37 (-04) 'k = (a * l_0) / (A * t) * ln(h_1 / h_2)'                  e402a32fc7d3d97875c0936f3a29d894
+-- Captured compliance rows (all severity block; md5 = md5(condition)):
+--   CR-01 3bf9d48b-7585-4ef6-807e-62d397d0ac76 (-01) 'max_d IS NOT NULL AND A_min IS NOT NULL'                    2ea5eb111ec9dd5188c774dd252b2eff
+--   CR-02 ff50f812-c9d8-4cdc-814f-c358ec7a1fd8 (-02) 'umlaeufigkeit_verhindert == true'                           54a4bb62f48cbdf9d34c6dac9bf14e8e
+--   CR-03 6e9f0d8c-6e45-4934-b50c-a67789d94ce3 (-02) 'saettigung_aufgebracht == true OR versuchsklasse IN {2,3}'  1e37033f6a6d90dc3b6cde0b91b39b4b
+--   CR-04 c31a2a78-4205-4ed5-9682-46dda76e3ac3 (-03) 'V_w > 0 AND t > 0'                                          d3cc8e8a84dcd85aef81804e7e0ebdaa
+--   CR-05 58bf8cc3-bc96-49b1-9c97-28fb5df73033 (-04) 'k_10 > 0'                                                   631edec787dc7189df9d36858b5f09d0
+--   CR-06 7704fc08-5ed6-49f1-af77-ee689e5116d4 (-05) 'versuchsbericht_vollstaendig == true AND k_10 > 0'          9d313c95d5a87ca442cb928e5175d208
+--   CR-07 17039318-a7cf-442a-a0e5-96c878bd6119 (-05) 'k_f IS NOT NULL'                                            a3efe0fa136d970680a8671e13d04b07
+-- Explicit column lists (information_schema, read-only 2026-09-18):
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+
+-- =====================================================================================================================
+-- din18130_1-R-1 · DIN-18130-1-04 · one switching `k` equation (Gl. 8 / Gl. 9 on gefaelle_typ) instead of three rows writing `k`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L787 "k=\frac{Q \cdot l}{A \cdot h} \tag{8}" (§8.1 "Versuch mit konstantem hydraulischen Gefälle"); L813
+-- "k=\frac{a \cdot l_{0}}{A \cdot t} \ln \frac{h_{1}}{h_{2}} \tag{9}" (§8.2 "Versuch mit veränderlichem hydraulischen
+-- Gefälle"); Gl. 4 (L186) "k=\frac{v}{i}=\text { const. }" is the DARCY definition. Capture: Gl. 4, Gl. 8 and Gl. 9 all
+-- output `k` (consumed by -05) — the engine takes the first in list order, so Gl. 9 never governs a variable-head test.
+-- `gefaelle_typ` (-02, tokens konstant | veraenderlich) is consumed by -04.
+-- Why staged: replacing verified equations is an always-sign-off class.
+-- Option (a) — rewrite Gl. 8 as the switch, archive + delete Gl. 4 and Gl. 9 (one producer of k):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_din18130_1 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_din18130_1 SELECT * FROM equations
+--  WHERE (id = '1a99d7dd-f20a-4b40-a65c-578554fb6057' AND md5(formula) = 'a1553004c845e1bedebf24137b2d63b2')
+--     OR (id = '25ab35d0-8eab-4a21-99ee-ea9aad5193df' AND md5(formula) = '1637edb705106f050cba626bab262c81')
+--     OR (id = 'a464fee1-e159-4228-8081-cca885eefe37' AND md5(formula) = 'e402a32fc7d3d97875c0936f3a29d894');
+-- UPDATE equations SET formula = 'k = if(gefaelle_typ == ''konstant'', (Q * l) / (A * h), (a * l_0) / (A * t) * ln(h_1 / h_2))',
+--        input_symbols = ARRAY['gefaelle_typ', 'Q', 'l', 'A', 'h', 'a', 'l_0', 't', 'h_1', 'h_2']::text[],
+--        clause_reference = '§8.1 Gl.(8) / §8.2 Gl.(9)', verification_status = 'imported_unverified'
+--  WHERE id = '25ab35d0-8eab-4a21-99ee-ea9aad5193df' AND md5(formula) = '1637edb705106f050cba626bab262c81';
+-- DELETE FROM equations e USING equations_archive_din18130_1 a WHERE e.id = a.id AND md5(e.formula) = md5(a.formula)
+--    AND e.id IN ('1a99d7dd-f20a-4b40-a65c-578554fb6057', 'a464fee1-e159-4228-8081-cca885eefe37');
+-- COMMIT;
+-- Consequence to weigh: the engine checks EVERY named input before evaluating (an if() branch does not exempt inputs) —
+-- with option (a) the konstant test must also carry a, l_0, t, h_1, h_2 (all required prod inputs on -03 today), and the
+-- veränderlich test Q, l, h. The readings register (ablesungen) does not have this problem (per-row switch); the cleaner
+-- end state is R-2 + D-3 (k from the register, the scalar chain retired).
+-- Option (b) — keep Gl. 4 as the printed definition, rewrite Gl. 8, delete only Gl. 9 (two producers remain; first wins).
+-- Rollback (full rows from the archive, explicit column list, never retyped):
+-- BEGIN;
+-- UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, clause_reference = a.clause_reference, verification_status = a.verification_status
+--   FROM equations_archive_din18130_1 a WHERE e.id = a.id AND e.id = '25ab35d0-8eab-4a21-99ee-ea9aad5193df';
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_din18130_1
+--  WHERE id IN ('1a99d7dd-f20a-4b40-a65c-578554fb6057', 'a464fee1-e159-4228-8081-cca885eefe37')
+--  ON CONFLICT (id) DO NOTHING;
+-- DROP TABLE equations_archive_din18130_1;
+-- COMMIT;
+-- The archive table `equations_archive_din18130_1` is dropped by this rollback, or by the owner once the change is signed off as final
+-- (R-2 shares the table — drop it only after both are final).
+
+-- =====================================================================================================================
+-- din18130_1-R-2 · DIN-18130-1-04 · Gl. 6 reads k_T_mean (from the -03 readings register) instead of the hand-typed k_T; alpha input dropped
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L305 "k_{10}=\frac{1,359}{1+0,0337 \cdot T+0,00022 \cdot T^{2}} k_{\mathrm{T}}=\alpha \cdot k_{\mathrm{T}}
+-- \tag{6}"; L311 "$k_{\mathrm{T}}$ der ermittelte Durchlässigkeitsbeiwert bei der Temperatur $T$"; L526 "Der
+-- Durchlässigkeitsversuch darf beendet werden, wenn sich aus den Messungen ein annähernd gleichbleibender $k$-Wert
+-- ergibt."; Tab. 11 L1357 "k_{10}=3,48 \times 10^{-10}" = the mean over the three readings. Capture: Gl. 6
+-- (21c8ff7a-28c2-46a2-bde3-7f5297d90977) has input_symbols {T, k_T, alpha} although the formula uses T and k_T only —
+-- the engine demands `alpha` (a required -01 number, consumed by -04) before it computes; `k_T` (-04, required) is a
+-- second hand-typed copy of the register's mean. Plan 3 emits `k_T_mean` on -03 (DIN-18130-1-03-D1) and `k_10_calc`
+-- (-D3) as twins; this block re-points Gl. 6 and makes k_T_mean inheritable.
+-- Why staged: replacing a verified equation + a consumer edit + retiring a required input (D-1 / D-3).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_din18130_1 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_din18130_1 SELECT * FROM equations
+--  WHERE id = '21c8ff7a-28c2-46a2-bde3-7f5297d90977' AND md5(formula) = '046fed936e687b74172d10e59b3565fd';
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-18130-1-04']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-03' AND s.code = 'DIN-18130-1' AND f.symbol = 'k_T_mean' AND f.active
+--    AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE equations SET formula = 'k_10 = (1.359 / (1 + 0.0337*T + 0.00022*T^2)) * k_T_mean', input_symbols = ARRAY['T', 'k_T_mean']::text[],
+--        verification_status = 'imported_unverified'
+--  WHERE id = '21c8ff7a-28c2-46a2-bde3-7f5297d90977' AND md5(formula) = '046fed936e687b74172d10e59b3565fd';
+-- COMMIT;
+-- Note: `T` on -04 is the -03 field (consumed by -04); `alpha` leaves the input list (D-1 then retires the field).
+-- Rollback:
+-- BEGIN;
+-- UPDATE equations e SET formula = a.formula, input_symbols = a.input_symbols, verification_status = a.verification_status
+--   FROM equations_archive_din18130_1 a WHERE e.id = a.id AND e.id = '21c8ff7a-28c2-46a2-bde3-7f5297d90977';
+-- UPDATE fields f SET consumer_worksheets = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-03' AND s.code = 'DIN-18130-1' AND f.symbol = 'k_T_mean' AND f.consumer_worksheets = ARRAY['DIN-18130-1-04']::text[];
+-- COMMIT;
+-- (DROP TABLE equations_archive_din18130_1 once R-1 is also rolled back or final.)
+-- Latent guard note: after this block `k_T_mean` carries a consumer; the emitter's guard would refuse any later
+-- visible_when on `ablesungen` / `T` / `gamma_w` / `l` / `l_0` / `A` / `a` on -03 — none is emitted today.
+
+-- =====================================================================================================================
+-- din18130_1-R-3 · DIN-18130-1-05 · k_f = k_10 (the transfer value) as an equation instead of a hand-typed copy
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L831 "Als Versuchsergebnis sind der Durchlässigkeitsbeiwert $k$, umgerechnet auf die Temperatur von
+-- $10^{\circ} \mathrm{C}$ und das hydraulische Gefälle $i$ anzugeben."; prod field label "Wasserdurchlässigkeitsbeiwert
+-- k_f (Transfer)" (-05, required, VR k_f > 0); CR-07 'k_f IS NOT NULL' (block). `k_10` (-04) is consumed by -05.
+-- Why staged: an equation taking ownership of an existing required manual input (Task 9 lesson) and the transfer
+-- semantics (X-1: DWA-A-138-1 A138-05 k_f + permeability_test_method) are the owner's.
+-- BEGIN;
+-- INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
+-- SELECT w.id, 'DIN-18130-1-05-D1', 'k_f = k_10', ARRAY['k_10']::text[], 'k_f', 'm/s', '§8.4',
+--        'Plan 3 (STAGED din18130_1-R-3): k_f = k_10 — der auf 10 °C umgerechnete Durchlässigkeitsbeiwert ist das Versuchsergebnis und der Transferwert nach DWA-A-138-1.',
+--        'imported_unverified', 'Als Versuchsergebnis sind der Durchlässigkeitsbeiwert $k$, umgerechnet auf die Temperatur von $10^{\circ} \mathrm{C}$ und das hydraulische Gefälle $i$ anzugeben.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-18130-1-05' AND s.code = 'DIN-18130-1'
+--  ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
+-- UPDATE fields f SET widget = 'derived' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-05' AND s.code = 'DIN-18130-1' AND f.symbol = 'k_f' AND f.active AND f.widget IS NULL;
+-- COMMIT;
+-- Rollback: DELETE FROM equations e USING worksheet_templates w WHERE e.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-05' AND e.equation_number = 'DIN-18130-1-05-D1' AND e.description LIKE 'Plan 3 (STAGED din18130_1-R-3)%';
+--           UPDATE fields … SET widget = NULL WHERE … symbol = 'k_f' AND widget = 'derived';
+-- CR-07 keeps working (the materialiser writes k_f only for register-fed equations — scalar; the card computes, the
+-- stored value must still be entered or the equation-output materialisation workstream lands first: see I-3 note on the sheet).
+
+-- =====================================================================================================================
+-- din18130_1-D-1 · DIN-18130-1-01 · alpha (Korrekturbeiwert, required number, consumed by -04) → retired once R-2 drops it from Gl. 6
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L305 (Gl. 6 computes α from T); L312 "$\alpha$ der Korrekturbeiwert (siehe Tabelle 2)."; Tab. 2 L322
+-- "1,158 & 1,000 & 0,874 & 0,771 & 0,686". Plan 3 emits `alpha_calc` (DIN-18130-1-03-D2) and the per-reading
+-- `alpha_row`; the hand-typed `alpha` is a re-typed duplicate of a printed function of T.
+-- Why staged: deactivating a required input (data-safe only after R-2 removes it from Gl. 6's input list).
+-- BEGIN;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-01' AND s.code = 'DIN-18130-1' AND f.symbol = 'alpha' AND f.active;
+-- COMMIT;
+-- Rollback: the same UPDATE with `active = true … AND NOT f.active`.
+
+-- =====================================================================================================================
+-- din18130_1-D-2 · DIN-18130-1-01 · durchlaessigkeitsbereich (manual enum, consumed by -05) reversed onto the derived bereich_code
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 1 L205–L209 (five bands of k); L196 "Für bautechnische Zwecke werden fünf Durchlässigkeitsbereiche
+-- definiert (siehe Tabelle 1)". Capture: the enum sits on -01 while k_10 is produced on -04 and consumed by -05 only —
+-- the class cannot be derived on -01 (k_10 not in scope). Plan 3 emits `bereich_code` on -04 (DIN-18130-1-04-D3).
+-- Why staged: deactivation of a consumed input + a consumer edit; the owner picks where the class is shown.
+-- Option (a): bereich_code inherited by -05 (consumer edit) and the -01 enum retired:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-18130-1-05']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-04' AND s.code = 'DIN-18130-1' AND f.symbol = 'bereich_code' AND f.active
+--    AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-01' AND s.code = 'DIN-18130-1' AND f.symbol = 'durchlaessigkeitsbereich' AND f.active;
+-- COMMIT;
+-- Option (b): keep the enum as a display of the engineer's own classification beside the code (nothing applied).
+-- Rollback: active = true on the enum; consumer_worksheets = NULL on bereich_code.
+
+-- =====================================================================================================================
+-- din18130_1-D-3 · DIN-18130-1-03 / -04 · retire the single-reading scalars once R-1 + R-2 are final
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L526 (readings until k is "annähernd gleichbleibend"); Tab. 7 (26 readings, L971–L999), Tab. 11 (3 readings, L1314–L1357).
+-- Capture: -03 h_o, h_u, p_o, p_u, V_w, t, h_1, h_2 (all consumed by -04, feeding Gl. 1 / Gl. 8 / Gl. 9) and -04 k_T
+-- (required, feeding Gl. 6) are single-reading copies of the register columns. After R-1 (k from the switch — or better
+-- R-2 + this block: k_10 from the register) and R-2 these scalars are dead inputs that still block on `is_required`.
+-- Why staged: deactivation of required, consumed inputs; Gl. 1 / 2 / 3 / 8 / 9 lose their inputs (they become
+-- manual_required cards) — the owner decides whether Gl. 1–4 stay as printed definitions or are archived with R-1.
+-- BEGIN;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-18130-1' AND f.active
+--    AND ((w.code = 'DIN-18130-1-03' AND f.symbol IN ('h_o', 'h_u', 'p_o', 'p_u', 'V_w', 't', 'h_1', 'h_2')) OR (w.code = 'DIN-18130-1-04' AND f.symbol = 'k_T'));
+-- COMMIT;
+-- Rollback: the same statement with `active = true … AND NOT f.active`.
+-- Prerequisite: R-2 (k_10 no longer reads k_T) and either R-1 option (a) with Gl. 1–3 archived, or the owner accepts
+-- manual_required cards for Q / v / i / k on -04 (their outputs i and k are consumed by -05 — the -05 report items would
+-- then need the register outputs instead: consumer edits on k_10_calc / i_max_calc / i_min_calc, see C-1).
+
+-- =====================================================================================================================
+-- din18130_1-E-1 · DIN-18130-1-01 versuchsklasse ← DIN-18130-1-02 versuchsklasse_tab4 (Tab. 4 fill) — re-point
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 4 L480–L483 ("1a & ja & ja", "1b & ja & nein*)", "2 & nein & ja", "3 & nein & nein"); L447
+-- "Entsprechend diesen Bedingungen werden die Versuche in drei Versuchsklassen eingeteilt (siehe Tabelle 4)."
+-- Capture: `versuchsklasse` is a required enum on -01 (consumed by -02 and -05; CR-03 on -02 reads it) while its two
+-- printed drivers live on -02 (`saettigung_aufgebracht`, created `stroemung_stationaer`) — a fill on -01 would show
+-- "Schlüssel fehlt" forever (a262e trap 1), so Plan 3 created the fill `versuchsklasse_tab4` on -02 (text).
+-- Why staged: a consumer edit + a gate text change (CR-03) + retiring a required consumed input.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-18130-1-05']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-02' AND s.code = 'DIN-18130-1' AND f.symbol = 'versuchsklasse_tab4' AND f.active
+--    AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din18130_1 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din18130_1 SELECT * FROM compliance_requirements
+--  WHERE id = '6e9f0d8c-6e45-4934-b50c-a67789d94ce3' AND md5(condition) = '1e37033f6a6d90dc3b6cde0b91b39b4b';
+-- UPDATE compliance_requirements SET condition = 'saettigung_aufgebracht == true OR versuchsklasse_tab4 IN {''2'', ''3''}'
+--  WHERE id = '6e9f0d8c-6e45-4934-b50c-a67789d94ce3' AND md5(condition) = '1e37033f6a6d90dc3b6cde0b91b39b4b';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-01' AND s.code = 'DIN-18130-1' AND f.symbol = 'versuchsklasse' AND f.active;
+-- COMMIT;
+-- Rollback:
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = a.condition FROM compliance_requirements_archive_din18130_1 a WHERE c.id = a.id AND c.id = '6e9f0d8c-6e45-4934-b50c-a67789d94ce3';
+-- UPDATE fields … SET active = true WHERE … w.code = 'DIN-18130-1-01' AND f.symbol = 'versuchsklasse' AND NOT f.active;
+-- UPDATE fields … SET consumer_worksheets = NULL WHERE … w.code = 'DIN-18130-1-02' AND f.symbol = 'versuchsklasse_tab4' AND f.consumer_worksheets = ARRAY['DIN-18130-1-05']::text[];
+-- DROP TABLE compliance_requirements_archive_din18130_1;
+-- COMMIT;
+-- The archive table `compliance_requirements_archive_din18130_1` is dropped by the rollback, or by the owner once the change is final
+-- (G-2 / G-4 share it). Interim (before this block): G-10 offers a consistency gate between the two.
+
+-- =====================================================================================================================
+-- din18130_1-C-1 · DIN-18130-1-02 gefaelle_typ → also consumed by DIN-18130-1-05 (drives the emitted i_bereich rule and G-9)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L832 "Bei Versuchen mit veränderlichem hydraulischen Gefälle ist dessen Bereich (größtes und kleinstes
+-- hydraulisches Gefälle) anzugeben." Capture: gefaelle_typ consumer_worksheets = {DIN-18130-1-03, DIN-18130-1-04};
+-- the emitted rule `i_bereich ← gefaelle_typ == 'veraenderlich'` (20260917101010) is `pending` (visible, inert) on -05
+-- until the driver is inherited there (the fll_gar-C-1 class).
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-18130-1-03', 'DIN-18130-1-04', 'DIN-18130-1-05']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-02' AND s.code = 'DIN-18130-1' AND f.symbol = 'gefaelle_typ' AND f.active
+--    AND f.consumer_worksheets = ARRAY['DIN-18130-1-03', 'DIN-18130-1-04']::text[];
+-- COMMIT;
+-- Rollback: SET consumer_worksheets = ARRAY['DIN-18130-1-03', 'DIN-18130-1-04']::text[] on the same row.
+-- Also for the -05 report: k_10_calc / i_max_calc / i_min_calc (-03, created) would need consumer_worksheets =
+-- {DIN-18130-1-05} to show beside k_f / i_bereich there (same statement shape, symbols named) — part of D-3's end state.
+
+-- =====================================================================================================================
+-- din18130_1-C-2 · DIN-18130-1-03 / -02 / -04 · visibility rules REFUSED by the producer guard (no SQL — recorded)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Brief targets: hide h_o/h_u/p_o/p_u/V_w/h/l/Q under veränderlich and a/l_0/h_1/h_2 under konstant (§8.1 / §8.2);
+-- section -04 G "k bei konstantem Gefälle" / H "k bei veränderlichem Gefälle"; h_0/gamma_org (Bild 3A, Gl. 7).
+-- Capture: every -03 measurement scalar is consumed by -04 (inputs of Gl. 1 / 8 / 9 whose k is consumed by -05); -02 h
+-- is consumed by -04; h_0 / gamma_org feed Gl. 7 → h (transitive chain "h_0 → Gl.7 h (consumed by DIN-18130-1-04)");
+-- section G holds `k` (consumed); section H holds NO field (a rule there would be inert). Hiding a producer nulls the
+-- inherited value — the guard refused each (pinned in field-configs-din18130-1.test.ts). The switch lives in the
+-- readings register instead (row-scope visible_when on the columns, K_ROW_EXPR). Resolution path: D-3 (retire the
+-- scalars) — then the rules are moot. Nothing applied.
+
+-- =====================================================================================================================
+-- din18130_1-G-1 · DIN-18130-1-03 · new warn gate A >= A_min (§5.8 "sollte … mindestens") + consumer edit A_min → -03
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L336 "Bei bindigen Böden sollte die Querschnittsfläche mindestens $A=10 \mathrm{~cm}^{2}$ betragen, bei
+-- grobkörnigen Böden mindestens A $=20 \mathrm{~cm}^{2}$, sofern die Versuchsgeräte nach Abschnitt 7 keine größeren
+-- Abmessungen bedingen." Capture: A (-03, m²) and A_min (-01, cm², consumer_worksheets NULL); CR-01 only checks
+-- presence. Plan 3 binds A_min as a lookup_fill (role limit) from the created select bindig_grobkoernig (20260917101010).
+-- Severity: "sollte" → warn (the owner may choose block).
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-18130-1-03']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-01' AND s.code = 'DIN-18130-1' AND f.symbol = 'A_min' AND f.active
+--    AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'DIN-18130-1-CR-08', 'Mindest-Querschnittsfläche nach §5.8', 'A * 10000 >= A_min', '§5.8', 'warn',
+--        'Plan 3 (STAGED din18130_1-G-1): A [m²] · 10⁴ ≥ A_min [cm²] (10 cm² bindig / 20 cm² grobkörnig)'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-18130-1-03' AND s.code = 'DIN-18130-1'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'DIN-18130-1-CR-08');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'DIN-18130-1-CR-08' AND description LIKE 'Plan 3 (STAGED din18130_1-G-1)%';
+--           consumer_worksheets = NULL on A_min. The Größtkorn ratio (S5_8_KORN, 1 : 5 / 1 : 10 against max_d [mm] and the
+--           sample diameter / height) needs the diameter (probe_durchmesser_mm, KD only) — a second gate once the owner
+--           decides which dimension governs ("Probendurchmesser bzw. Probenhöhe").
+
+-- =====================================================================================================================
+-- din18130_1-G-2 · DIN-18130-1-03 · CR-04 "Stationäre Strömung" from the proxy `V_w > 0 AND t > 0` onto stroemung_stationaer == true
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L387 "Die zur Berechnung des Durchlässigkeitsbeiwerts maßgebende Wassermenge ist bei stationärer Strömung zu
+-- messen. Die stationäre Strömung kann exakt nur durch"; L395 "Vergleich der ein- und ausströmenden Wassermenge
+-- kontrolliert werden. Auf einen stationären Strömungszustand kann auch geschlossen werden, wenn bei konstantem
+-- Strömungsgefälle die in der Zeiteinheit ein- oder ausströmende Wassermenge gleich bleibt."; Tab. 4 L479 column
+-- "Strömung stationär nachgewiesen". Capture: CR-04 (c31a2a78-…, block) passes whenever any volume and time are typed —
+-- it never tests steadiness. Plan 3 created `stroemung_stationaer` (boolean, -02). Classes 1b / 3 are legitimate
+-- without the proof (Tab. 4) — so the gate must not block them: guard on the class.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-18130-1-03']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-18130-1-02' AND s.code = 'DIN-18130-1' AND f.symbol = 'stroemung_stationaer' AND f.active
+--    AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = ARRAY[]::text[]);
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din18130_1 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din18130_1 SELECT * FROM compliance_requirements
+--  WHERE id = 'c31a2a78-4205-4ed5-9682-46dda76e3ac3' AND md5(condition) = 'd3cc8e8a84dcd85aef81804e7e0ebdaa';
+-- UPDATE compliance_requirements SET condition = 'IF versuchsklasse IN {1a,2} THEN stroemung_stationaer == true'
+--  WHERE id = 'c31a2a78-4205-4ed5-9682-46dda76e3ac3' AND md5(condition) = 'd3cc8e8a84dcd85aef81804e7e0ebdaa';
+-- COMMIT;
+-- (versuchsklasse is not consumed by -03 today — add 'DIN-18130-1-03' to its consumer list in the same block, or key the
+-- guard on versuchsklasse_tab4 after E-1.)
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition FROM compliance_requirements_archive_din18130_1 a WHERE c.id = a.id AND c.id = 'c31a2a78-4205-4ed5-9682-46dda76e3ac3';
+--           consumer_worksheets = NULL on stroemung_stationaer; DROP TABLE … once E-1 / G-4 are also final.
+
+-- =====================================================================================================================
+-- din18130_1-G-3 · DIN-18130-1-03 · T validation_rules "T > 0 AND T < 40" — the 40 °C bound is not in the source
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L298 "Die Versuche sind bei annähernd konstanter Raumtemperatur durchzuführen …"; L302 "Der im Versuch
+-- festgestellte $k$-Wert wird auf eine Vergleichs-Temperatur von $10^{\circ} \mathrm{C}$ umgerechnet."; Tab. 2 prints
+-- 5 … 25 °C; no sentence bounds T. Capture: fields.validation_rules = {"raw": "T > 0 AND T < 40"} (-03 T).
+-- Option: drop the invented bound — `UPDATE fields f SET validation_rules = '{"raw": "T > 0"}'::jsonb … WHERE f.symbol = 'T'
+-- AND w.code = 'DIN-18130-1-03' AND f.validation_rules::text = '{"raw": "T > 0 AND T < 40"}'`; rollback restores the captured text.
+-- ("T > 0" itself is not printed either — a physical plausibility rule, not a source rule; the owner may prefer NULL.)
+
+-- =====================================================================================================================
+-- din18130_1-G-4 · DIN-18130-1-05 · CR-06 "Ergebnisangabe vollständig": the 14 §8.4 items via contains(pflichtangaben, …)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L832–L848 ("Ferner sind mit dem Versuchsergebnis mitzuteilen: 1) Angaben zum Versuch … 2) Angaben zur
+-- Probe …", 5 + 9 items). Capture: CR-06 (7704fc08-…, block) 'versuchsbericht_vollstaendig == true AND k_10 > 0' — one
+-- self-attested boolean. Plan 3 created `pflichtangaben` (select_many, 14 options). A select_many is not a register:
+-- completeness is per-item `contains()`.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din18130_1 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din18130_1 SELECT * FROM compliance_requirements
+--  WHERE id = '7704fc08-5ed6-49f1-af77-ee689e5116d4' AND md5(condition) = '9d313c95d5a87ca442cb928e5175d208';
+-- UPDATE compliance_requirements SET condition = 'versuchsbericht_vollstaendig == true AND k_10 > 0 AND contains(pflichtangaben, ''bezeichnung'') AND contains(pflichtangaben, ''versuchsdauer'') AND contains(pflichtangaben, ''saettigungsdruck'') AND contains(pflichtangaben, ''raumtemperatur'') AND contains(pflichtangaben, ''durchstroemungsrichtung'') AND contains(pflichtangaben, ''bodenart'') AND contains(pflichtangaben, ''bodengruppe'') AND contains(pflichtangaben, ''groesstkorn'') AND contains(pflichtangaben, ''trockendichte'') AND contains(pflichtangaben, ''porenzahl'') AND contains(pflichtangaben, ''wassergehalt'') AND contains(pflichtangaben, ''saettigungszahl'') AND contains(pflichtangaben, ''probenart'') AND contains(pflichtangaben, ''masse'')'
+--  WHERE id = '7704fc08-5ed6-49f1-af77-ee689e5116d4' AND md5(condition) = '9d313c95d5a87ca442cb928e5175d208';
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition FROM compliance_requirements_archive_din18130_1 a WHERE c.id = a.id AND c.id = '7704fc08-5ed6-49f1-af77-ee689e5116d4';
+-- Note (L846): "Sättigungszahl vor und nach dem Versuch (falls kein Sättigungsdruck aufgebracht)" — that item is conditional;
+-- the strict form above requires it always; the owner may guard it with `saettigung_aufgebracht == true OR contains(…)`
+-- (saettigung_aufgebracht is consumed by -03 only — a consumer edit to -05 would be needed).
+
+-- =====================================================================================================================
+-- din18130_1-G-5 · DIN-18130-1-04 · new gate versuche_count >= 3 when the density influence is examined (§5.3)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L246 "Ist der Einfluß der Dichte auf die Durchlässigkeit zu prüfen, dann sind mindestens drei
+-- Durchströmungsversuche mit jeweils unterschiedlichen Porenzahlen des Probekörpers auszuführen (siehe 8.3)." No prod
+-- field says whether the density influence IS examined — the gate needs a created boolean driver (dichteeinfluss_geprueft)
+-- or stays a warning on the count. Proposed (warn, unconditional until the driver exists):
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'DIN-18130-1-CR-09', 'Mindestens drei Durchströmungsversuche (§5.3)', 'versuche_count >= 3', '§5.3', 'warn',
+--        'Plan 3 (STAGED din18130_1-G-5): nur wenn der Einfluß der Dichte zu prüfen ist — Treiber fehlt'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-18130-1-04' AND s.code = 'DIN-18130-1'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c WHERE c.worksheet_template_id = w.id AND c.code = 'DIN-18130-1-CR-09');
+-- Rollback: DELETE … WHERE code = 'DIN-18130-1-CR-09' AND description LIKE 'Plan 3 (STAGED din18130_1-G-5)%'.
+
+-- =====================================================================================================================
+-- din18130_1-G-6 · DIN-18130-1-02 · Triaxialzelle: filterstein_k >= 10 · k (Bild 8 legend, §7.3.2.2)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L668 "3 Filterstein mit $k_{\text {Filter }} \geq 10 \cdot k_{\text {Probe }}$"; L642 "… ihr
+-- Durchlässigkeitsbeiwert muß mindestens um eine Zehnerpotenz über desjenigen des Probekörpers liegen." Capture: k
+-- (-04) is consumed by -05 only; filterstein_k (created, -02, visible under TX). A gate on -02 needs k inherited there
+-- (consumer edit k → -02) — or the gate sits on -04 with filterstein_k inherited. Proposed on -04:
+-- UPDATE fields … SET consumer_worksheets = ARRAY['DIN-18130-1-04'] WHERE … w.code = 'DIN-18130-1-02' AND f.symbol = 'filterstein_k' AND (consumer_worksheets IS NULL OR = '{}');
+-- INSERT … 'DIN-18130-1-CR-10', 'Filtersteine mindestens eine Zehnerpotenz durchlässiger (Triaxialzelle)',
+--        'IF versuchsanordnung == ''TX'' THEN filterstein_k >= 10 * k', '§7.3.2.2, Bild 8', 'block' … on DIN-18130-1-04
+-- ("muß" → block). Rollback: DELETE by code + description; consumer_worksheets = NULL. (§7.1.3 L467 prints the KD
+-- filter-stone rule as an absolute "k > 10⁻⁶ m/s" — a second gate `IF versuchsanordnung == 'KD' THEN filterstein_k > 1e-6`.)
+
+-- =====================================================================================================================
+-- din18130_1-G-7 · DIN-18130-1-02 / -03 · KD sample size: probe_durchmesser_mm >= 70 and l_0 >= 0,02 m (§7.1.1 "sollte")
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L456 "Die Probe sollte einen Durchmesser von mindestens 70 mm und eine Höhe von mindestens 20 mm haben."
+-- Capture: l_0 (-03, m, "Höhe des Probekörpers l0", consumed by -04); probe_durchmesser_mm created on -02 (visible
+-- under KD). "sollte" → warn. Two gates (the diameter on -02, the height on -03 with versuchsanordnung inherited there):
+-- INSERT … 'DIN-18130-1-CR-11', 'KD: Probendurchmesser ≥ 70 mm', 'IF versuchsanordnung == ''KD'' THEN probe_durchmesser_mm >= 70', '§7.1.1', 'warn' … on DIN-18130-1-02;
+-- INSERT … 'DIN-18130-1-CR-12', 'KD: Probenhöhe l_0 ≥ 20 mm', 'IF versuchsanordnung == ''KD'' THEN l_0 >= 0.02', '§7.1.1', 'warn' … on DIN-18130-1-03.
+-- Rollback: DELETE by code + 'Plan 3 (STAGED din18130_1-G-7)%' description. (§7.3.2.1 L635 prints the TX sizes
+-- "A ≥ 10 cm² bzw. d ≥ 5 × max. Korndurchmesser und Höhe h ≥ 5 × max. Korndurchmesser" — a third pair keyed on TX,
+-- reading max_d [mm] from -01 (consumed by -02 ✓).)
+
+-- =====================================================================================================================
+-- din18130_1-G-8 · DIN-18130-1-02 · statische_belastung required when a Sättigungsdruck is applied or the flow is upward (§6.6 / §6.1.3)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L442 "Eine äußere statische Belastung ist auch bei Aufbringen eines Sättigungsdrucks (siehe 6.6) oder bei
+-- Durchströmung von unten nach oben (siehe 6.2) aus Gleichgewichtsgründen erforderlich."; L379 "Bei Durchströmung von
+-- unten nach oben muß durch Auflast oder Einspannung verhindert werden, daß sich die Probe auflockert." Capture:
+-- statische_belastung (boolean, -02, consumed by -05 — a visible_when was refused), stroemungsrichtung (enum
+-- unten_nach_oben | oben_nach_unten), saettigung_aufgebracht (boolean). "erforderlich" / "muß" → block.
+-- INSERT … 'DIN-18130-1-CR-13', 'Statische Belastung bei Sättigungsdruck oder Durchströmung von unten nach oben',
+--        'IF (saettigung_aufgebracht == true OR stroemungsrichtung == ''unten_nach_oben'') THEN statische_belastung == true', '§6.6, §6.1.3', 'block' … on DIN-18130-1-02.
+-- (L379 names "Auflast oder Einspannung" — the boolean's label "Statische Belastung" covers Auflast; Einspannung is not a
+-- field: an attestation twin would be needed for the TX/Gummihülle case. Owner's call.)
+-- Rollback: DELETE by code + description.
+
+-- =====================================================================================================================
+-- din18130_1-G-9 · DIN-18130-1-05 · i_bereich required for variable-head tests (§8.4)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L832 "Bei Versuchen mit veränderlichem hydraulischen Gefälle ist dessen Bereich (größtes und kleinstes
+-- hydraulisches Gefälle) anzugeben." Capture: i_bereich (-05, text, not required); the emitted visible_when hides it for
+-- konstant tests (pending until C-1). Needs C-1 first.
+-- INSERT … 'DIN-18130-1-CR-14', 'Bereich des hydraulischen Gefälles bei veränderlichem Gefälle angeben',
+--        'IF gefaelle_typ == ''veraenderlich'' THEN i_bereich IS NOT NULL', '§8.4', 'block' … on DIN-18130-1-05.
+-- With C-1's second part (i_max_calc / i_min_calc inherited by -05) the text field could be replaced by the two numbers.
+-- Rollback: DELETE by code + description.
+
+-- =====================================================================================================================
+-- din18130_1-G-10 · DIN-18130-1-02 · interim consistency gate versuchsklasse (chosen on -01) == versuchsklasse_tab4 (Tab. 4 fill)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 4 (L480–L483) — the class IS the pair of booleans. Capture: versuchsklasse consumed by -02 ✓;
+-- versuchsklasse_tab4 created on -02. Until E-1 replaces the hand pick:
+-- INSERT … 'DIN-18130-1-CR-15', 'Versuchsklasse entspricht Tabelle 4', 'versuchsklasse == versuchsklasse_tab4', '§3.8, Tab. 4', 'warn' … on DIN-18130-1-02.
+-- Also Tab. 5 L505 "Bei Nachweis stationärer Strömung darf der Versuch der Versuchsklasse 2 zugeordnet werden" is a
+-- permission, not a constraint — no gate. Rollback: DELETE by code + description.
+
+-- =====================================================================================================================
+-- din18130_1-G-11 · DIN-18130-1-02 · S_r (measured, -01) vs the chosen Tab.-3 band s_r_band — consistency warning
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 3 L427–L429 (≥ 0,95 → 300 · 0,90 → 600 · 0,85 → 900); example 9.3 L1205 "S_ra = 0,88" with L1215
+-- "u_o = 720 kN/m²" (between the rows). Capture: S_r (-01, consumed by -02 ✓). A band chosen against the measured S_r
+-- (e.g. ge095 with S_r = 0,86) should warn, never block (the example itself sits between rows):
+-- INSERT … 'DIN-18130-1-CR-16', 'Tab.-3-Zeile passt zur Sättigungszahl S_r',
+--        'IF s_r_band == ''ge095'' THEN S_r >= 0.95', '§6.5, Tab. 3', 'warn' … on DIN-18130-1-02 (plus the two bands: e090 → S_r >= 0.90 AND S_r < 0.95; e085 → S_r >= 0.85 AND S_r < 0.90 — three rows, or one with nested IFs is not expressible: three gates).
+-- Rollback: DELETE by code + description.
+
+-- =====================================================================================================================
+-- din18130_1-U-1 · TAB5 · three Tab.-5 sub-rows NOT seeded (Bauteil cells printed as multirow spans)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Printed: L540 "\hline \multirow[t]{3}{*}{Ton, Schluff} & 3 & x & \multirow{3}{*}{x} & \multirow[b]{3}{*}{X} & x & x & x
+-- & (X) & x & - & (X) & - \\"; L541 "\hline & 3 & \multirow{2}{*}{} & & & - & X & - & - & X & - & X & - \\"; L542 "\hline
+-- & 1 & & & & - & - & X & - & (X) & x & X & X \\"; L547 "\hline \multirow[t]{3}{*}{Sand-TonGemisch} & 2 & X &
+-- \multirow{3}{*}{X} & \multirow[b]{3}{*}{X} & X & X & X & (X) & X & - & (X) & - \\"; L548 "\hline & 3 & \multirow{2}{*}{}
+-- & x & & - & X & - & - & X & - & X & - \\"; L549 "\hline & 1 & & & & - & X & X & (X) & X & x & X & X \\".
+-- The KD / TX marks of the Ton/Schluff and Sand-Ton groups are printed ONCE as a 3-row span on the first line; the
+-- sub-rows L541 / L542 / L549 carry no Bauteil mark of their own — which Bauteil each belongs to is not readable
+-- cell-by-cell from the transcript. Leads for the PDF check (p. 10): the span alignment (`\multirow{3}` centred → the
+-- middle row = KD, `\multirow[b]{3}` bottom → the last row = TX), the §4 example L222/L223 "KD - ES - ST - SB - 3"
+-- (matches L541: ein Standrohr X, Standrohr/Bürette X, SB X, Klasse 3), and the OCR sibling DIN-18130-1_OCR.md L619–L621
+-- ("Schluff 3 x _ x _ _ x _ x _" / "1 X _ _ X _ (X) x X X") — leads, not sources. L548 (Sand-Ton, Klasse 3) prints its
+-- own "x" in the KD cell and IS seeded as (sand_ton, KD) although the L547 span also covers it.
+-- Chosen now: rows ton_schluff|KD, ton_schluff|TX, sand_ton|TX absent (the fills read "keine Zeile"); TAB5 stays
+-- imported_unverified. After the PDF read: three more `TAB5_LINES` entries → re-emit 20260917101000.
+
+-- =====================================================================================================================
+-- din18130_1-U-2 · TAB5 · lower-case "x" marks read as "X geeignet"
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Legend L553–L555 defines "X geeignet", "(X) bedingt geeignet", "- nicht geeignet" only. Lower-case "x" is printed in
+-- L540 (ZY, MS, ES, DE, ST), L543 (ST), L545 (ST), L546 (MS, MZ), L548 (KD), L551 (TX, KP, U0). Chosen now: "x" =
+-- "geeignet" (TAB5_GLYPH); the cells keep the printed glyph inside their verbatim_quote. PDF check flips U-1/U-2 together.
+
+-- =====================================================================================================================
+-- din18130_1-J-1 · DIN-18130-1-03 · which readings enter k_T_mean / k_10_calc / i_max / i_min
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L526 "Der Durchlässigkeitsversuch darf beendet werden, wenn sich aus den Messungen ein annähernd
+-- gleichbleibender $k$-Wert ergibt."; §9.1 L934 "Bestimmung von $k \cdot c$ durch lineare Ausgleichungsrechnung." (a
+-- regression over Tab. 7's 26 readings); Tab. 11 (3 readings → the mean 3,48·10⁻¹⁰). Chosen now: mean over ALL complete
+-- rows (mean_rows). Alternatives: last_rows(ablesungen, n) (the "gleichbleibend" tail) or a regression (not in the
+-- language — F-4 class). The engineer controls the set by which readings he enters.
+
+-- =====================================================================================================================
+-- din18130_1-J-2 · DIN-18130-1-03 · h per reading = the Tab.-11 form; the Bild-8 form needs Δh typed as h_u
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L797–L806 (three printed h variants: Bild 6 "h die Differenz der Standrohrspiegelhöhen"; Bild 8
+-- "h=(p / γ_w − Δh)"; Bild 9 "h=(p_2 − p_1)/γ_w"; Bild 3A Gl. 7) and Tab. 11 L1326 "h=h_o−h_u+(p_o−p_u)/γ_w".
+-- Chosen now: H_ROW_EXPR = the Tab.-11 form (Bild 6 with p_o = p_u = 0; Bild 9 with h_o = h_u = 0; Bild 8 by entering
+-- Δh as h_u with h_o = 0 and p_u = 0); the Bild-3A device (Gl. 7) stays the prod scalar h. A per-row arrangement
+-- selector would be the alternative (four exprs) — not built.
+
+-- =====================================================================================================================
+-- din18130_1-J-3 · DIN-18130-1-03 · α from the Gl.-6 closed form at the worksheet T (not the Tab.-2 interpolation, not per reading)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L305 (Gl. 6 closed form); L327 "Zwischenwerte können geradlinig eingeschaltet werden." (Tab. 2); §9.1
+-- L953 "\alpha & =0,754 \text { für } T=21^{\circ}" = the LINEAR Tab.-2 interpolation (the closed form gives 0,753);
+-- §9.3 L1114/L1120 "α für T = 0,5 × (20,5 + 22,0)" → 0,7485 and §9.4 L1335/L1341 → 0,762 = the closed form at the MEAN
+-- test temperature. Chosen now: alpha_calc = closed form at T (the -03 scalar = the test's temperature); the register
+-- additionally shows α and k_10 per reading from the reading's own T (alpha_row / k10_row, display only). k_10_calc =
+-- k_T_mean · alpha_calc (= Tab. 11's practice). Alternative: k_10_calc = mean_rows(ablesungen, k10_row).
+
+-- =====================================================================================================================
+-- din18130_1-F-1 · DIN-18130-1-04 · k_10 per Versuch typed, not derived from that run's readings (nested registers)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L246 (three runs with different Porenzahlen); Tab. 10 (k_T / α / k_10 per Versuch). The readings register
+-- holds ONE run; a run × readings structure (Phase 6) is not built. Chosen now: `versuche.k_10_run` is typed per run
+-- (from that run's ablesungen result), k_10_runs_mean = mean over runs. Alternative: a `versuch_nr` column on
+-- ablesungen + per-run aggregates (mean_rows(ablesungen, k10_row, versuch_nr == 1) …) — needs a fixed run count.
+
+-- =====================================================================================================================
+-- din18130_1-F-2 · DIN-18130-1-01 · bezeichnung (§4 code "Versuch DIN 18130 - KD - ES - ST - SB - 3") stays free text
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L222–L223 (pattern: Bauteil – Gefälle-Messung – Volumen-Messung – SB – [U0] – Klasse); examples L593
+-- "ZY - MS - MZ - 3", L688 "TX - DE - MZ - SB - 2", L713 "TX — DE — MZ — UO — 1", L1233 "ZY - DE - ST - 3". The
+-- expression language has no string concatenation; the code elements exist as fields (versuchsanordnung KD/ZY/TX,
+-- created messung_gefaelle ms/es/de, messung_wassermenge messzylinder/standrohr_buerette/kapillare (= MZ/ST/KP;
+-- `druckerzeuger` is a Gefälle token, not a Volumen token — prod's enum mixes the two Tab.-5 column groups),
+-- statische_belastung, saettigung_aufgebracht, versuchsklasse). Chosen now: bezeichnung typed by hand; the label could
+-- list the pattern. Alternative: a code-assembly helper outside the language (Plan 2b amendment).
+
+-- =====================================================================================================================
+-- din18130_1-F-3 · DIN-18130-1-04 · versuche.n_pore_row = e / (1 + e) — identity not printed as a formula
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: four printed (n, e) pairs satisfy it: Tab. 6 L878/L879 "n & 29,8 % & 28,9%" / "e & 0,424 & 0,406"
+-- (0,424/1,424 = 0,2978; 0,406/1,406 = 0,2888); §9.2 "n = 27,2 %", "e = 0,373"; §9.3 "n = 31,8 %", "e = 0,467"; §9.4
+-- "n = 0,411", "e = 0,699". Chosen now: derived column (display only, no equation row); the prod scalar n_pore (-03)
+-- stays an input. Alternative: drop the column.
+
+-- =====================================================================================================================
+-- din18130_1-I-1 · edition token '1998-05' (unique-key component of the seeded tables)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The transcript's title page prints "Ersatz für Ausgabe 1989-11" (L7) and "Frühere Ausgaben DIN 18130-1: 1983-11,
+-- 1989-11" (L116) but no own date. Read-only query `select code, title_de, version, issued_year, valid_from from
+-- standards where code='DIN-18130-1'` → version = '1998-05 (Ersatz für 1989-11)', issued_year / valid_from NULL. The OCR
+-- sibling DIN-18130-1_OCR.md prints the page header "DIN 18130-1 :1998-05" (its L616) — corroboration, not the source.
+-- If the owner reads a different date on the PDF cover, re-emit 20260917101000 BEFORE applying (a later change would
+-- orphan the rows): `UPDATE regulation_tables SET edition = '<new>' WHERE standard_code = 'DIN-18130-1' AND edition = '1998-05'`.
+
+-- =====================================================================================================================
+-- din18130_1-I-2 · register cell / footer formatter prints |k| < 5·10⁻⁵ as "0" (Plan 2b `fmt`, maximumFractionDigits 4)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L850 "ANMERKUNG: Der $k$-Wert solle als ein Vielfaches eines Exponentialfaktors zur Basis 10 angegeben
+-- werden."; every k in this standard is 10⁻¹⁰ … 10⁻⁴ m/s. `register-editor.tsx` fmt() (de-DE, 4 fraction digits) renders
+-- the raw k_row / k10_row cells and the footer k_T_mean / k_10_calc as "0" (the equation cards use toPrecision(6) and are
+-- correct). Chosen now (DATA): mantissa / exponent derived columns (k_mant · 10^k_exp, k10_mant · 10^k10_exp) per row;
+-- the raw columns and the footer stay as they render. Proposed CODE fix (outside this DATA task): scientific notation in
+-- fmt() for 0 < |v| < 1e-3 (the engine card's rule) — a one-line Plan-2b amendment with a pin.
+
+-- =====================================================================================================================
+-- din18130_1-I-3 · scalar equation outputs are not persisted (materialiser is register-scoped)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- alpha_calc (D2), k_10_calc (D3) and bereich_code (-04-D3) are scalar-only: they compute on the card but are not written
+-- to project_parameters on save (amendment D — expected). k_T_mean / i_max_calc / i_min_calc / k_10_runs_mean /
+-- versuche_count are register-fed and materialise. Consequence for R-3 (k_f = k_10): a scalar equation cannot feed CR-07
+-- 'k_f IS NOT NULL' until the engine-output-materialisation workstream lands. Recorded once.
+
+-- =====================================================================================================================
+-- din18130_1-O-1 · TAB3 · override policy anhaltswert (the brief said locked)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 3 (L427–L429) prints three discrete rows; §6.5 L417 "… (siehe Tabelle 3)"; example 9.3 L1205 "S_ra =
+-- 0,88" with L1215 "u_o = 720 kN/m²" — 720 = 900 − (0,03/0,05)·300, the linear interpolation between the 0,85 and 0,90
+-- rows: the standard's own example applies a value the table does not print. Chosen now: anhaltswert (the u_0 fill
+-- offers "abweichend wählen" + reason, so the example is reproducible with a justification); `locked` would block the
+-- standard's own practice. Alternative: locked (owner's ruling flips `override_policy` in the seed → re-emit).
+
+-- =====================================================================================================================
+-- din18130_1-O-2 · TAB5 · override policy anhaltswert (suitability grading)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L553–L555 "Dabei ist: X geeignet \\ (X) bedingt geeignet \\ - nicht geeignet" (a graded suitability) and
+-- L446 "Die Versuchsanordnung ist entsprechend den jeweiligen Erfordernissen des Anwendungsfalls zusammenzustellen."
+-- The four Tab.-5 fills are text (display); an override reason would document a "bedingt geeignet" choice. Alternative:
+-- locked (pure display).
+
+-- =====================================================================================================================
+-- din18130_1-X-1 · DIN-18130-1-05 k_f → DWA-A-138-1 A138-05 k_f (Laborverfahren) — cross-standard link
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: prod -05 field "Wasserdurchlässigkeitsbeiwert k_f (Transfer)" and worksheet title "Ergebnisangabe und
+-- Transfer an DWA-A-138"; DIN-18130-1 prints no transfer rule (L831 names k at 10 °C as the result). DWA-A-138-1 Tab. 11
+-- (a138 TAB11, tokens labor_ungestoert / labor_gestoert_sieblinie, f_methode) classifies the method. Nothing in this
+-- standard's pages fixes the link (content-boundary rule) — an inter-standard inheritance (project-level) is Phase 6.
+-- Nothing applied; R-3 covers the in-standard equation.

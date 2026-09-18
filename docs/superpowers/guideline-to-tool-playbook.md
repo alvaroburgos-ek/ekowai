@@ -504,6 +504,25 @@ inputs; split such a flag per annex when projects of one type exist, and record 
 rule in the label. (7) Generating TS with `JSON.stringify` for every lifted span sidesteps the `${`/backtick hazards; the
 Bash heredoc on this machine collapses `\\` to `\` — write generator scripts with the Write tool, never a heredoc.
 
+**Encoding traps (Plan 3 Task 10, DIN-18130-1).** (1) A lab-test standard's core is a readings register whose row exprs read
+WORKSHEET scalars (`gefaelle_typ`, `A`, `l`, `l_0`, `a`, `gamma_w` via `ctx.symbol`, G-13) — pass a `symbolLookup` to
+`RegisterEditor` / `prepareRegisterRows` in tests, and switch the printed alternatives (Gl. 8 vs Gl. 9) INSIDE the row
+`derived` expr plus row-scope `visible_when` on the columns; the same switch on the prod scalar equations is a
+verified-equation replacement (STAGED). (2) The register cell / footer formatter (`fmt`, 4 fraction digits) prints
+|k| < 5·10⁻⁵ as "0" — for permeability-scale values add mantissa / exponent derived columns (`floor(log10(k))`,
+`k / 10^floor(log10(k))`; the standard itself asks for "Vielfaches eines Exponentialfaktors zur Basis 10") and record
+the formatter gap (din18130_1-I-2); the equation cards use `toPrecision` and are fine. (3) A two-boolean table (Tab. 4)
+keys on the stringified prod booleans `'true'` / `'false'` and the fill must sit on the worksheet of BOTH booleans; the
+Ja/Nein segmented control stores `false`, so "nein" is a real key. (4) Pin every equation against the standard's OWN
+worked examples through the real register contract (Tab. 9 / 10 / 11 here reproduced k, α, k_10, i and the means to the
+printed digits) — a printed value that does not reproduce exposes a wrong γ_w / unit assumption immediately; where the
+standard rounds inside its inputs (Tab. 9 Versuch 2), pin to the digits that survive. (5) A discrete table with a
+worked example BETWEEN its rows (Tab. 3: S_ra = 0,88 → 720) is `anhaltswert`, not `locked`, unless the owner rules
+otherwise — a locked fill would block the standard's own practice (O-block). (6) `\multirow` Bauteil spans in a
+suitability matrix: seed only the sub-rows whose mark is printed on the row itself, key the rest out (U-block with the
+alignment / cross-reference leads), and seed the printed "-" cells as explicit `nicht geeignet` rows so the fill
+distinguishes "not suitable" from "no row".
+
 **Staged DELETE rollbacks (controller ruling, Plan 3 Task 6 fix round 1 — corpus-wide).** A STAGED block that deletes rows
 from a table without an `active` column (`equations`, `compliance_requirements`) (1) copies the full rows into an archive table
 created in the SAME transaction (`CREATE TABLE IF NOT EXISTS <table>_archive_<slug> AS SELECT * FROM <table> WHERE false;

@@ -15,5 +15,6 @@ export const EQUATION_MODULES: Record<string, () => Promise<EquationModule>> = {
   fll_gar: () => import('./fll_gar'),
   fll_naturteich: () => import('./fll_naturteich'),
   m820_3: () => import('./m820_3'),
-  // Plan-3 tasks append one line each, e.g. din18130_1: () => import('./din18130_1'),
+  din18130_1: () => import('./din18130_1'),
+  // Plan-3 tasks append one line each, e.g. m205: () => import('./m205'),
 };
