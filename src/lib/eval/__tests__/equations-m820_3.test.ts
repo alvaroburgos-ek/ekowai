@@ -9,13 +9,14 @@
  * not count; the same row on M8203-13 does), an incomplete row (no rating) is not
  * rated, an empty register counts 0, a missing `items_total` makes the share
  * `manual_required`, the annex sums over the inherited constants (38 / 155), and
- * the Projektstopp codes over 13 / 54 / 67 enum inputs (any `nicht_erreicht` → 1,
- * `teilweise_erreicht` alone → 0, one unset goal → manual_required).
+ * the Projektstopp codes over 13 / 54 / 67 enum inputs (any `nicht_erreicht` OR
+ * `teilweise_erreicht` → 1 — L307 "nicht oder nur unvollständig erreicht", fix
+ * round 1 —, all erreicht / nicht_zutreffend → 0, one unset goal → manual_required).
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { EQUATIONS, PZ_SYMBOLS, PZ_SYMBOLS_A, PZ_SYMBOLS_B, NICHT_ERREICHT } from '../equations/m820_3';
+import { EQUATIONS, PZ_SYMBOLS, PZ_SYMBOLS_A, PZ_SYMBOLS_B, NICHT_ERREICHT, TEILWEISE_ERREICHT, PROJEKTSTOPP_TRIGGER } from '../equations/m820_3';
 import { FIELD_CONFIGS, QE_WORKSHEETS, outputSymbols, registerSymbol } from '../field-configs/m820_3';
 import { evaluateFormula, type EvalState } from '../formula';
 import { prepareRegisterRows } from '../register-rows';
@@ -144,11 +145,16 @@ describe('DWA-M-820-3 Plan-3 equations', () => {
     expect(computed(run('M8203-22-D2', {}, [3, 4, 5, 6].map((v, i) => ({ symbol: outputSymbols(QE_WORKSHEETS[i]).rated, value: v }))))).toBe(18);
   });
 
-  it('Projektstopp codes: any nicht_erreicht → 1; teilweise_erreicht alone → 0; nicht_zutreffend everywhere → 0; one unset goal → manual_required naming it', () => {
+  it('Projektstopp codes: any nicht_erreicht → 1; any teilweise_erreicht → 1 (L307 "nur unvollständig erreicht"); nicht_zutreffend everywhere → 0; one unset goal → manual_required naming it', () => {
     const all = (symbols: readonly string[], overrides: Record<string, string | null> = {}): Scalar[] => symbols.map((s) => ({ symbol: s, value: s in overrides ? overrides[s] : 'erreicht' }));
     expect(computed(run('M8203-22-D3', {}, all(PZ_SYMBOLS_A)))).toBe(0);
     expect(computed(run('M8203-22-D3', {}, all(PZ_SYMBOLS_A, { pz_53_4_status: NICHT_ERREICHT })))).toBe(1);
-    expect(computed(run('M8203-22-D3', {}, all(PZ_SYMBOLS_A, { pz_52_1_status: 'teilweise_erreicht' })))).toBe(0);
+    expect(computed(run('M8203-22-D3', {}, all(PZ_SYMBOLS_A, { pz_52_1_status: TEILWEISE_ERREICHT })))).toBe(1);
+    expect(computed(run('M8203-23-D3', {}, all(PZ_SYMBOLS_B, { pz_64_3_status: TEILWEISE_ERREICHT })))).toBe(1);
+    expect(computed(run('M8203-24-D1', {}, all(PZ_SYMBOLS, { pz_67_1_status: TEILWEISE_ERREICHT })))).toBe(1);
+    expect(PROJEKTSTOPP_TRIGGER).toBe("IN {'nicht_erreicht', 'teilweise_erreicht'}");
+    expect(eq('M8203-24-D1').formula.startsWith("projektstopp_code = if(pz_52_1_status IN {'nicht_erreicht', 'teilweise_erreicht'} OR pz_52_2_status IN {")).toBe(true);
+    expect(eq('M8203-22-D3').verification_quote).toBe('Werden Phasenziele nicht oder nur unvollständig erreicht, ist die Prüfung eines Projektstopps erforderlich. Im Rahmen einer Risikoanalyse muss bewertet werden, ob und wie das Projekt fortgeführt werden kann.');
     expect(computed(run('M8203-23-D3', {}, all(PZ_SYMBOLS_B, { pz_67_6_status: NICHT_ERREICHT })))).toBe(1);
     expect(computed(run('M8203-23-D3', {}, PZ_SYMBOLS_B.map((s) => ({ symbol: s, value: 'nicht_zutreffend' }))))).toBe(0);
     expect(computed(run('M8203-24-D1', {}, all(PZ_SYMBOLS)))).toBe(0);
@@ -156,5 +162,6 @@ describe('DWA-M-820-3 Plan-3 equations', () => {
     expect(reason(run('M8203-24-D1', {}, all(PZ_SYMBOLS, { pz_64_12_status: null })))).toContain('pz_64_12_status');
     expect(reason(run('M8203-24-D1', {}, all(PZ_SYMBOLS_A)))).toContain('pz_62_1_status'); // an Anhang-A-only project must set the B goals (nicht_zutreffend)
     expect(NICHT_ERREICHT).toBe('nicht_erreicht');
+    expect(TEILWEISE_ERREICHT).toBe('teilweise_erreicht');
   });
 });

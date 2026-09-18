@@ -24,10 +24,12 @@
  * m820_3-C-5); -D3 / M8203-24-D1 are the Projektstopp codes: §3 L307 "Werden
  * Phasenziele nicht oder nur unvollständig erreicht, ist die Prüfung eines
  * Projektstopps erforderlich." → 1 when any inherited `pz_*_status` equals the
- * prod token 'nicht_erreicht' (the 13 Anhang-A goals on -22, the 54 Anhang-B
- * goals on -23, all 67 on -24 — every pz_* row is consumed there per the
- * capture). "nur unvollständig erreicht" is read as `teilweise_erreicht` NOT
- * triggering the review (fail-safe; m820_3-J-2 — the owner may widen it).
+ * prod token 'nicht_erreicht' ("nicht … erreicht") OR 'teilweise_erreicht'
+ * ("nur unvollständig erreicht") — the printed sentence names both, so the
+ * emitted default follows it (source-settled; fix round 1, controller ruling);
+ * the narrower nicht-only reading is the alternative on m820_3-J-2. The 13
+ * Anhang-A goals on -22, the 54 Anhang-B goals on -23, all 67 on -24 — every
+ * pz_* row is consumed there per the capture.
  * Every named input must be set (the engine checks inputs before evaluating):
  * a project of one type sets the other annex's goals `nicht_zutreffend`.
  */
@@ -49,9 +51,12 @@ export const PZ_SYMBOLS_B = [
   ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((n) => `pz_66_${n}_status`), ...[1, 2, 3, 4, 5, 6].map((n) => `pz_67_${n}_status`),
 ];
 export const PZ_SYMBOLS = [...PZ_SYMBOLS_A, ...PZ_SYMBOLS_B];
-/** Prod token of the "nicht erreicht" status (captured enum_values of every pz_* field). */
+/** Prod tokens of the statuses L307 names — "nicht … erreicht" and "nur unvollständig erreicht" (captured enum_values of every pz_* field). */
 export const NICHT_ERREICHT = 'nicht_erreicht';
-export const projektstoppFormula = (out: string, symbols: readonly string[]) => `${out} = if(${symbols.map((s) => `${s} == '${NICHT_ERREICHT}'`).join(' OR ')}, 1, 0)`;
+export const TEILWEISE_ERREICHT = 'teilweise_erreicht';
+/** The printed trigger per goal: `pz IN {'nicht_erreicht', 'teilweise_erreicht'}` (fix round 1 — both readings of L307). */
+export const PROJEKTSTOPP_TRIGGER = `IN {'${NICHT_ERREICHT}', '${TEILWEISE_ERREICHT}'}`;
+export const projektstoppFormula = (out: string, symbols: readonly string[]) => `${out} = if(${symbols.map((s) => `${s} ${PROJEKTSTOPP_TRIGGER}`).join(' OR ')}, 1, 0)`;
 
 function worksheetEquations(w: QeWorksheet): EquationEntry[] {
   const o = outputSymbols(w);
@@ -94,7 +99,7 @@ export const EQUATIONS: EquationEntry[] = [
     verification_quote: CATALOGUE_CUE },
   { standard: STD, worksheet: 'M8203-22', equation_number: 'M8203-22-D3', output_symbol: 'projektstopp_code_a', output_unit: null,
     formula: projektstoppFormula('projektstopp_code_a', PZ_SYMBOLS_A), input_symbols: [...PZ_SYMBOLS_A],
-    clause_reference: '§3; §5.2–5.4', description: 'Plan 3: 1, wenn eines der 13 Phasenziele §5.2 / §5.3 / §5.4 (alle auf M8203-22 vererbt) den Status nicht_erreicht hat, sonst 0 — "teilweise_erreicht" löst nicht aus (m820_3-J-2); REQ-31 (M8203-22, leere Bedingung) darauf STAGED (m820_3-G-4).',
+    clause_reference: '§3; §5.2–5.4', description: 'Plan 3: 1, wenn eines der 13 Phasenziele §5.2 / §5.3 / §5.4 (alle auf M8203-22 vererbt) den Status nicht_erreicht („nicht … erreicht“) oder teilweise_erreicht („nur unvollständig erreicht“, L307) hat, sonst 0 (m820_3-J-2 trägt die engere Nur-nicht-Lesart als Alternative); REQ-31 (M8203-22, leere Bedingung) darauf STAGED (m820_3-G-4).',
     verification_quote: norm(Q_L307) },
   // ---- M8203-23: Anhang B aggregates + Projektstopp code B ----
   { standard: STD, worksheet: 'M8203-23', equation_number: 'M8203-23-D1', output_symbol: 'gesamt_anhang_b_items_total_calc', output_unit: null,
@@ -107,12 +112,12 @@ export const EQUATIONS: EquationEntry[] = [
     verification_quote: CATALOGUE_CUE },
   { standard: STD, worksheet: 'M8203-23', equation_number: 'M8203-23-D3', output_symbol: 'projektstopp_code_b', output_unit: null,
     formula: projektstoppFormula('projektstopp_code_b', PZ_SYMBOLS_B), input_symbols: [...PZ_SYMBOLS_B],
-    clause_reference: '§3; §6.2–6.7', description: 'Plan 3: 1, wenn eines der 54 Phasenziele §6.2 … §6.7 (alle auf M8203-23 vererbt) den Status nicht_erreicht hat, sonst 0 — "teilweise_erreicht" löst nicht aus (m820_3-J-2); REQ-31 darauf STAGED (m820_3-G-4).',
+    clause_reference: '§3; §6.2–6.7', description: 'Plan 3: 1, wenn eines der 54 Phasenziele §6.2 … §6.7 (alle auf M8203-23 vererbt) den Status nicht_erreicht oder teilweise_erreicht („nicht oder nur unvollständig erreicht“, L307) hat, sonst 0 (m820_3-J-2); REQ-31 darauf STAGED (m820_3-G-4).',
     verification_quote: norm(Q_L307) },
   // ---- M8203-24: overall Projektstopp code ----
   { standard: STD, worksheet: 'M8203-24', equation_number: 'M8203-24-D1', output_symbol: 'projektstopp_code', output_unit: null,
     formula: projektstoppFormula('projektstopp_code', PZ_SYMBOLS), input_symbols: [...PZ_SYMBOLS],
-    clause_reference: '§3', description: 'Plan 3: 1, wenn irgendeines der 67 Phasenziele (Anhang A oder B, alle auf M8203-24 vererbt) den Status nicht_erreicht hat, sonst 0; jedes Phasenziel muss gesetzt sein (nicht zutreffende Phasen: nicht_zutreffend) — sonst manual_required; die Booleans projektstopp_review_triggered / projektstopp_required bleiben Eingaben (m820_3-G-4).',
+    clause_reference: '§3', description: 'Plan 3: 1, wenn irgendeines der 67 Phasenziele (Anhang A oder B, alle auf M8203-24 vererbt) den Status nicht_erreicht oder teilweise_erreicht („nicht oder nur unvollständig erreicht“, L307) hat, sonst 0; jedes Phasenziel muss gesetzt sein (nicht zutreffende Phasen: nicht_zutreffend) — sonst manual_required; die Booleans projektstopp_review_triggered / projektstopp_required bleiben Eingaben (m820_3-G-4).',
     verification_quote: norm(Q_L307) },
 ];
 

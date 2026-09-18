@@ -2102,11 +2102,11 @@ Report: `reports/plan-3-m820_3.md` · STAGED SQL: `scripts/verification/m820_3-S
 - Proposed SQL / config: STAGED block J-1 (retire the booleans, re-point REQ-01 to `contains(sektoren, …)`).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### m820_3-J-2 · DWA-M-820-3 · M8203-22 / -23 / -24 · "nicht oder nur unvollständig erreicht" vs the prod enum
+### m820_3-J-2 · DWA-M-820-3 · M8203-22 / -23 / -24 · "nicht oder nur unvollständig erreicht" → both prod tokens (emitted default); nicht-only = the alternative
 - Class: text-only-formula
-- Chosen now (fail-safe, narrower): the three Projektstopp codes fire on `nicht_erreicht` only; `teilweise_erreicht` (which REQ-06 … REQ-14 accept as met) does not trigger the review.
-- Evidence (verbatim, transcript line): L307 (as G-4).
-- Proposed SQL / config: STAGED block J-2 (widen to `IN {'nicht_erreicht', 'teilweise_erreicht'}` per input).
+- Chosen now (fix round 1, controller ruling — source-settled by the printed text): the three Projektstopp codes fire on `pz IN {'nicht_erreicht', 'teilweise_erreicht'}` per goal — L307 names BOTH "nicht" and "nur unvollständig erreicht", and prod's enum maps them to exactly those two tokens (erreicht / nicht_zutreffend never trigger). The narrower nicht-only reading (a partially met goal passes REQ-06 … REQ-14 and would not trigger the review) is the ALTERNATIVE the owner may choose.
+- Evidence (verbatim, transcript line): "Werden Phasenziele nicht oder nur unvollständig erreicht, ist die Prüfung eines Projektstopps erforderlich. Im Rahmen einer Risikoanalyse muss bewertet werden, ob und wie das Projekt fortgeführt werden kann." (L307)
+- Proposed SQL / config: STAGED block J-2 (the narrower alternative: replace ` IN {'nicht_erreicht', 'teilweise_erreicht'}` by ` == 'nicht_erreicht'` on the three rows; rollback the reverse).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m820_3-J-3 · DWA-M-820-3 · M8203-07 … M8203-18 · share denominators = the manual `qeNN_items_total` constants
@@ -2118,7 +2118,7 @@ Report: `reports/plan-3-m820_3.md` · STAGED SQL: `scripts/verification/m820_3-S
 
 ### m820_3-U-1 · DWA-M-820-3 · M8203-10 · QE_A4 — two Nr. cells printed empty
 - Class: unreadable-cell
-- Chosen now (fail-safe): rows keyed n1 / n2 / n3 by printed position (Ökonomie before the printed "2", Sozioökonomie after it); QE_A4 stays `imported_unverified`; the three category rows and their 2 / 3 / 2 Hinweise lines are seeded verbatim.
+- Chosen now (fail-safe): rows keyed n1 / n2 / n3 by printed position (Ökonomie before the printed "2", Sozioökonomie after it); their `label_de` carries the category only — no synthesized "1 ·" / "3 ·" (fix round 1); QE_A4 stays `imported_unverified`; the three category rows and their 2 / 3 / 2 Hinweise lines are seeded verbatim. Related span note (QE_A3, `md_verified`): the Hinweise of rows n2 … n12 come from the `\multirow[t]{12}{*}{Kurzbeschreibungen zur Identifikation von Projekten aus dem Konzept}` cell printed on the n1 line (L732) — the only seeded cells not contained in their own row's `verbatim_quote` (LaTeX-explicit; the build-time `inSpan` check is skipped for that column).
 - Evidence (verbatim, transcript line): "\hline \multirow{2}{*}{} & \multirow[t]{2}{*}{Ökonomie/Wirtschaftlichkeit} & Minimierung der Lebenszykluskosten im Konzept/Projekt \\" (L752); "\hline \multirow[t]{3}{*}{2} & \multirow[t]{3}{*}{Ökologie/Umwelt} & Minimierung der ökologischen Auswirkungen ( $\mathrm{CO}_{2}$, Klimabilanz etc.) \\" (L754); "\hline \multirow{2}{*}{} & \multirow[t]{2}{*}{Sozioökonomie/Gesellschaft} & Wirkung auf Gesellschaft \\" (L757)
 - Proposed SQL / config: a PDF look at p. 24 (TOC L168) → `md_verified`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -2157,5 +2157,6 @@ Report: `reports/plan-3-m820_3.md` · STAGED SQL: `scripts/verification/m820_3-S
 - **A.3 Hinweise spans all twelve rows** (`\multirow[t]{12}{*}{Kurzbeschreibungen zur Identifikation von Projekten aus dem Konzept}`, L732) — stored on every QE_A3 row; LaTeX-explicit, not a judgment.
 - **OCR quirks kept verbatim in the cell values** (never de-hyphenated by guess): "..In Scope")" / "..Out of Scope")" (L737 / L738), "Automatisie-rungs-" (L833), "Außerund" (L849), "lausführendes" (L943), "Werkund" (L1070), "entsorgung" (L876), "Pla-nungs-" (L1089), "Inverkehrbringerl" (L1131); the A.4 "( $\mathrm{CO}_{2}$," is stored as "( CO2," (L754). A PDF pass may correct the display text; the quotes stay as printed.
 - **Every existing field of the standard is consumed** (246 of 250; the four unconsumed are the M8203-24 sign-off / verdict / Projektstopp rows) — no `visible_when` UPDATE on an existing field is possible for this standard without a consumer ruling; the task's 126 rules therefore all sit on created fields.
-- **The Projektstopp codes require every named goal to be set** (the engine checks inputs before evaluating; an `if()` branch does not exempt them — Task 7 trap 3): a Gesamtsystem-only project sets the 54 Anhang-B goals `nicht_zutreffend` (or reads `manual_required` on `projektstopp_code`); `projektstopp_code_a` / `_b` compute per annex.
+- **The Projektstopp codes require every named goal to be set** (the engine checks inputs before evaluating; an `if()` branch does not exempt them — Task 7 trap 3): a Gesamtsystem-only project sets the 54 Anhang-B goals `nicht_zutreffend` (or reads `manual_required` on `projektstopp_code`); `projektstopp_code_a` / `_b` compute per annex. Since fix round 1 the codes trigger on `nicht_erreicht` OR `teilweise_erreicht` (L307 — J-2).
+- **Engineer-visible effect of `gesamt_anhang_a_items_rated` / `gesamt_anhang_b_items_rated` until C-5:** the two cards on M8203-22 / -23 read `manual_required — Fehlende oder leere Eingaben: qe52_items_rated, qe53_items_rated, qe54_items_rated, qe55_items_rated` (resp. the eight B symbols) — the created outputs are not inherited there (fix round 1, minor 3).
 - **Bundle growth:** the 193 lifted spans (~95 KB incl. the multi-line cells) ship in the client bundle via the seed fallback (Task-0 observation; Task 30 measures) — the largest Plan-3 seed so far.

@@ -59,7 +59,9 @@ describe('DWA-M-820-3 seed builders (Plan 3 Task 9)', () => {
         expect(r.verbatim_quote.startsWith('\\hline '), `${t.table_code} ${r.row_key}`).toBe(true);
         expect(norm(r.verbatim_quote).length).toBeGreaterThan(10);
         expect(String(r.values.kriterium).length, `${t.table_code} ${r.row_key} kriterium`).toBeGreaterThan(0);
-        expect(r.label_de.startsWith(`${r.values.nr_num} · `)).toBe(true);
+        // label_de = "<Nr.> · <Kriterium>" where a Nr. is printed; the two QE_A4 rows with an EMPTY printed Nr. cell carry the category only (U-1, fix round 1)
+        const printed = t.rows.length === 3 && r.row_key !== 'n2' ? false : true;
+        expect(r.label_de.startsWith(`${r.values.nr_num} · `), `${t.table_code} ${r.row_key} label`).toBe(printed);
       }
     }
     expect(M820_3_EDITION).toBe('2026');
@@ -95,6 +97,9 @@ describe('DWA-M-820-3 seed builders (Plan 3 Task 9)', () => {
     expect(item(QE_A3_ITEMS, 7).kriterium).toBe('nicht im Projektumgriff (..Out of Scope")'); // L738
     // A.4: three category rows; Nr. printed only for Ökologie ("2", L754); the other two Nr. cells are empty multirows (m820_3-U-1)
     expect(QE_A4_ITEMS.map((i) => i.kriterium)).toEqual(['Ökonomie/Wirtschaftlichkeit', 'Ökologie/Umwelt', 'Sozioökonomie/Gesellschaft']);
+    expect(QE_A4_ITEMS.map((i) => i.nr_printed)).toEqual(['', '2', '']);
+    expect(by('QE_A4').rows.map((r) => r.label_de)).toEqual(['Ökonomie/Wirtschaftlichkeit', '2 · Ökologie/Umwelt', 'Sozioökonomie/Gesellschaft']);
+    for (const list of [QE_A1_ITEMS, QE_A2_ITEMS, QE_A3_ITEMS, QE_B1_ITEMS, QE_B2_ITEMS, QE_B3_ITEMS, QE_B4_ITEMS, QE_B5_ITEMS, QE_B6_ITEMS]) for (const i of list) expect(i.nr_printed).toBe(String(i.nr_num));
     expect(QE_A4_ITEMS[0].quote.startsWith('\\hline \\multirow{2}{*}{} & ')).toBe(true);
     expect(QE_A4_ITEMS[1].quote.startsWith('\\hline \\multirow[t]{3}{*}{2} & ')).toBe(true);
     expect(QE_A4_ITEMS[2].quote.startsWith('\\hline \\multirow{2}{*}{} & ')).toBe(true);
