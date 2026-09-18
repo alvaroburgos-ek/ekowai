@@ -224,15 +224,18 @@ describe('ISO 46001 — all 5 WARN gates never block (even in a would-violate st
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Trap demonstration — CR-037 `Win == Wout` bare-identifier-RHS equality trap
+// Trap demonstration — CR-037 `Win == Wout` bare-identifier-RHS equality (closed by plan3-T-13b for valued symbols)
 // ─────────────────────────────────────────────────────────────────────────────
-describe('ISO 46001 — CR-037 Win==Wout always-fails (bare-ident-RHS trap), documented on the sheet', () => {
-  it('evaluateCondition("Win == Wout") returns fail even when Win==Wout numerically (RHS → string "Wout")', () => {
-    const lookup = (s: string): Val | undefined => (s === 'Win' ? 100 : s === 'Wout' ? 100 : undefined);
-    const r = evaluateCondition('Win == Wout', lookup);
-    // RHS `Wout` is parsed as the string literal "Wout", so 100 == "Wout" → fail.
-    // (Warn severity ⇒ this never blocks; the balance check simply never truly runs.)
-    expect(r.kind).toBe('fail');
+describe('ISO 46001 — CR-037 Win==Wout (bare-ident RHS): the balance check truly runs since plan3-T-13b (var-vs-var); the string trap survives only while Wout is UNSET', () => {
+  it('evaluateCondition("Win == Wout") passes when both are set and equal, fails when unequal, and fails (RHS read as the literal "Wout") while Wout is unset', () => {
+    // Plan 3 Task 22 (2026-09-18): the pre-T-13b pin ("always fails — RHS → string") was stale on this branch —
+    // 7c82243 keeps the legacy var-vs-var rule for BARE identifiers, so a valued `Wout` resolves as the symbol.
+    const both = (a: number, b: number) => (s: string): Val | undefined => (s === 'Win' ? a : s === 'Wout' ? b : undefined);
+    expect(evaluateCondition('Win == Wout', both(100, 100)).kind).toBe('pass');
+    expect(evaluateCondition('Win == Wout', both(100, 90)).kind).toBe('fail');
+    // Wout unset ⇒ the bare RHS falls back to the string literal "Wout" ⇒ 100 == "Wout" ⇒ fail (never pending) — the
+    // register-driven rewrite `IF water_streams_count >= 1 THEN Win_calc == Wout_calc` is STAGED (iso46001-G-4).
+    expect(evaluateCondition('Win == Wout', (s: string): Val | undefined => (s === 'Win' ? 100 : undefined)).kind).toBe('fail');
   });
 });
 

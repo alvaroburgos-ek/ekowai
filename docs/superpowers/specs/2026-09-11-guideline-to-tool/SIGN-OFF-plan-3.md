@@ -6050,6 +6050,606 @@ Report: `reports/plan-3-iso59020.md`. STAGED SQL: `scripts/verification/iso59020
 - **Fix round 1 (2026-09-18):** equations 47 → 38 (the nine Σ/Σ aggregates withheld under J-1 with their exact forms), field entries 55 → 46, G-4 and -04-D5 in the per-token exactly-once form (closes F-2 for the mandatory rows), new G-6 (warn companion on the energy Σ), U-2 reclassified as J-9, X-3 prod-hygiene observation, D-4 / D-10 / D-17 corrected to name their twins.
 - **Inventory premise refuted (amendment O):** "§3.3.7 examples" — §3.3.7 prints the definition only (O-1, grep in the report); the inventory's "Table 3 continued rows not re-verified" is closed — all 13 rows are lifted from L1081–L1148 and pass the verifier 13/13.
 
+## Task 22 — ISO-46001 (iso46001)
+
+Encoded 2026-09-18 from `C:\Users\Ekowai\Desktop\Guidelines\_site_audit\ISO-46001\_46001_raw.txt` (BS ISO 46001:2019, raw plain text — VC grade; `_46001_layout.txt` consulted only for the Table A.1 / D.1 pairing). STAGED SQL: `scripts/verification/iso46001-STAGED-plan3-rulings.sql` (same ids). Report: `reports/plan-3-iso46001.md`.
+
+### iso46001-G-1 · ISO-46001 · ISO-46001-07 · CR-027 (block, `design_consideration == true`) — IF-guard on the created §8.2 scope boolean + the follow-up hide
+- Class: gate
+- Chosen now (fail-safe): CR-027 stays UNCONDITIONAL and design_consideration stays visible: the gate-aware guard REFUSES the hide (pinned: "read by gate CR-027"), so the rule goes here. The created boolean designing_new_facilities (-07 D, emitted by 20260917102210) is the printed applicability condition; once ratified, the gate reads IF designing_new_facilities == true THEN design_consideration == true (a project not designing new / modified / renovated facilities passes; one that is must still attest) and the hide UPDATE follows in the same transaction. Parse-checked in-session: driver false ⇒ pass; true + attestation false ⇒ fail; driver unset ⇒ pending.
+- Evidence (verbatim, transcript line): "When designing new, modified and renovated facilities, equipment, systems or processes that have a significant impact on its water efficiency performance, the organization shall consider, among other possibilities or options, the water efficiency performance improvement opportunities and operational control of the resulting design changes." (L648–L651)
+- Proposed SQL / config: STAGED block G-1 (rollback: RESTORE('fe480758-d4d2-4e6d-a9aa-dc29aa35dadb'); UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' A …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-C-1 · ISO-46001 · ISO-46001-07 → -06 · consumer edit — `procurement_significant` (created on -07 E) reaches -06 for the CR-028 guard
+- Class: consumer
+- Chosen now (fail-safe): Not emitted (a create never sets consumer_worksheets; consumer edits are structural). Without it the G-2 guard is pending on every project (an unresolved driver). The emitted -07 rules (procurement_criteria / supplier_informed) resolve on -07 itself and need nothing here.
+- Evidence (verbatim, transcript line): "When procuring water services, products and equipment that have, or may have, a significant impact on water use, the organization shall inform suppliers that procurement is partly evaluated on the basis of water efficiency performance." (L652–L655)
+- Proposed SQL / config: STAGED block C-1 (rollback: UPDATE fields f SET consumer_worksheets = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-07' AND f.symbol =  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-G-2 · ISO-46001 · ISO-46001-06 · CR-028 (block, attestation `attest_iso_46001_06_cr_028 == True`) — IF-guard on `procurement_significant` (after C-1)
+- Class: gate
+- Chosen now (fail-safe): CR-028 stays unconditional. The §8.3 attestation sits on -06 (prod), the created driver on -07 (where procurement_criteria / supplier_informed live — the brief's "-06" is refuted by the capture: both fields are on -07 E). After C-1 the gate reads IF procurement_significant == true THEN attest_iso_46001_06_cr_028 == True. Parse-checked in-session.
+- Evidence (verbatim, transcript line): "The organization shall establish and implement the criteria for assessing water use and water efficiency over the planned or expected operating lifetime when procuring water services, products and equipment which are expected to have a significant impact on the organization's water efficiency performance." (L652–L655)
+- Note: Apply C-1 FIRST.
+- Proposed SQL / config: STAGED block G-2 (rollback: RESTORE('220c34c6-0cc1-4821-8b56-e3b08e4d6117');)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-G-3 · ISO-46001 · ISO-46001-09 / -01 · the three EMPTY-condition gates CR-036 / CR-039 / CR-040 (warn, `manual` at runtime)
+- Class: gate
+- Chosen now (fail-safe): All three stay empty (manual). Proposals: CR-036 "measurement needs periodically reviewed" (§9.1 L681 "should") reads a NEW boolean measurement_needs_reviewed (-09 C, INSERT-class, not emitted — the inventory names no such attestation); CR-039 "water-meter verification tests" (A.12 L876 "should") MOVES to -08 and reads the created meters_unverified (20260917102220 -08-D8): IF water_streams_count >= 1 THEN meters_unverified == 0 (a stream without a documented meter check warns; the "e.g. once every 5 years" interval is an example and no date arithmetic exists — G-5); CR-040 (the ISO 24513 terms-and-definitions reference of L231 — a normative reference) has NO evaluable condition — proposal: keep as a manual note or delete; a ruling. A fourth proposal without a gate row: the §9.1 1) checklist completeness (all seven monitoring_items ticked) cannot be an equation today — the save-path materialiser passes no checklist carrier to contains() (iso46001-F-2, [CODE]).
+- Evidence (verbatim, transcript line): "The organization should define, periodically review and update/revise its measurement needs." (L681); "For water meters, the organization should ensure that verification/validation tests are carried out periodically (e.g. once every 5 years) or per frequency recommended by the meter manufacturer or supplier, whichever is more stringent, to ensure the accuracy of water meters (e.g. within ± 3 %)." (L876); "For the purposes of this document, the terms and definitions given in ISO 24513 and the following apply." (L231)
+- Note: CR-039 needs the DATA migrations first (meters_unverified / water_streams_count by 20260917102210 / 20260917102220). Parse-checked in-session: `IF water_streams_count >= 1 THEN meters_unverified == 0`, `measurement_needs_reviewed == true`.
+- Proposed SQL / config: STAGED block G-3 (rollback: RESTORE('0faa675f-aa23-40c5-9376-058765a33583'); RESTORE('6b2c6486-ecf8-4938-9909-c38df73191a9') (restores worksheet_template_id from the archive); DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.wo …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-G-4 · ISO-46001 · ISO-46001-08 · CR-037 (warn, `Win == Wout`) and CR-038 (warn, `plant_recycling_rate >= 0 AND process_recycling_rate >= 0`) onto the register twins
+- Class: gate
+- Chosen now (fail-safe): Both gates keep reading the prod scalars Win / Wout / plant_recycling_rate / process_recycling_rate (the fixed-slot equations C.1 / C.2b / C.3 / C.5). Proposals, on the created register outputs (20260917102220): CR-037 → IF water_streams_count >= 1 THEN Win_calc == Wout_calc (the printed C.1 equality; the alternative reading of L1114 — "Should total water input exceed total water output" — is IF water_streams_count >= 1 THEN leak_indicator <= 0, i.e. only an EXCESS warns — recorded, not chosen); CR-038 → IF recycling_streams_count >= 1 THEN plant_recycling_rate_calc >= 0 AND process_recycling_rate_calc >= 0 ("Where recycling is carried out" = at least one Rp / Rnp / Wp / Rpp row; a chart without recycling rows no longer warns on the typed rates). Parse-checked in-session (both forms).
+- Evidence (verbatim, transcript line): "Win is total water input; Wout is total water output. Should total water input exceed total water output, the difference could be due to leaks and uncontrolled losses." (L1106–L1114); "i) recycling streams from source to destination and the recycling rate if recycling is carried out;" (L1100–L1104)
+- Note: Needs the DATA migrations first (Win_calc … recycling_streams_count). Independent of R-1: the twins compute beside the prod scalars until R-1 retires them.
+- Proposed SQL / config: STAGED block G-4 (rollback: RESTORE('af0eea7f-00da-4c60-93a2-31f5b3e48ec8'); RESTORE('fdbce5e8-11fb-431d-b77b-cd0bc713dd18');)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-G-5 · ISO-46001 · ISO-46001-03 / -10 · the attestation gates CR-009 / CR-010 (objectives, block) and CR-034 (nonconformities, block) beside the registers
+- Class: gate
+- Chosen now (fail-safe): All three stay as attestations. Proposals (data-driven companions, block severity kept): CR-009 "Wassereffizienz-Ziele festlegen" → IF objectives_count >= 1 THEN attest_iso_46001_03_cr_009 == True is NOT proposed (an attestation is not a count); instead objectives_count >= 1 replaces the attestation ("shall establish water efficiency objectives") and CR-010 "Erreichung der Ziele planen" keeps its attestation (per-row completeness of 1) – 5) is text — no evaluable emptiness test on text cells today). CR-034 → a warn companion nc_open == 0 is NOT proposed (open nonconformities are the normal state of a live register); the attestation stays. Only CR-009 is rewritten here.
+- Evidence (verbatim, transcript line): "The organization shall establish water efficiency objectives at relevant functions and levels." (L492); "When planning how to achieve its water efficiency objectives, the organization shall determine: 1) what will be done; 2) what resources will be required; 3) who will be responsible; 4) when it will be completed; 5) how the results will be evaluated." (L492); "The organization shall retain documented information as evidence of: 1) the nature of the nonconformities and any subsequent actions taken; 2) the results of any corrective action." (L713)
+- Note: Needs 20260917102210 / 20260917102220 (objectives / objectives_count). Parse-checked: `objectives_count >= 1`. The attest boolean attest_iso_46001_03_cr_009 becomes orphaned (requires_attestation = true on the row — set it to false in the same transaction).
+- Proposed SQL / config: STAGED block G-5 (rollback: RESTORE('260880a4-132e-41e5-8f04-e7f83f54b4c0'); UPDATE compliance_requirements SET requires_attestation = true WHERE id = '260880a4-132e-41e5-8f04-e7f83f54b4c0';)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-G-6 · ISO-46001 · ISO-46001-04 · CR-017 (block, `water_efficiency_indicator >= 0`) onto the computed twin (conditional on D-29)
+- Class: gate
+- Chosen now (fail-safe): CR-017 keeps reading the typed water_efficiency_indicator. Proposal once D-29 retires the typed input: water_efficiency_indicator_calc >= 0 — note that -04-D1 is SCALAR-only (past_present_water_use / business_activity_indicator_value; not server-materialised), so a block gate on it is pending in the approval gate until the materialiser reads scalar equations ([CODE]); CR-018 (baseline) has no computed twin (the baseline is a recorded reference level, §3.2) and stays. Recorded, applied only together with D-29.
+- Evidence (verbatim, transcript line): "3.33 water efficiency indicator amount of water used per unit of business activity indicator (3.4)" (L393–L394); "3.2 baseline water efficiency indicator reference level of water used per business activity indicator (3.4)" (L248–L249)
+- Proposed SQL / config: STAGED block G-6 (rollback: RESTORE('f1f8b6c5-190d-4aa5-bdff-4a16ddbf3991');)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-C-2 · ISO-46001 · ISO-46001-08 → -09 / -04 / -05 · consumer edits — the register twins Win_calc / Wout_calc (→ -09) and plant_recycling_rate_calc / process_recycling_rate_calc (→ -04 / -05) replace the prod scalars' consumers (R-1 precondition)
+- Class: consumer
+- Chosen now (fail-safe): Not emitted (create never sets consumers). Today -09 inherits Win / Wout and -04 / -05 inherit the two rates (prod consumer_worksheets); after this block the twins reach the same worksheets so R-1 can retire the scalars without a consumer losing its source.
+- Evidence (verbatim, transcript line): "The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1128–L1129)
+- Proposed SQL / config: STAGED block C-2 (rollback: UPDATE fields SET consumer_worksheets = NULL for the four created symbols (guarded by the arrays written above).)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-R-1 · ISO-46001 · ISO-46001-08 · retirement of the fixed slots WD / R1 – R3 / O1 – O4 / Rp / Rnp / Wp / Rpp, the four verified equations C.1 / C.2b / C.3 / C.5 and the scalars Win / Wout / plant_recycling_rate / process_recycling_rate in favour of the register (archive pattern)
+- Class: retirement
+- Chosen now (fail-safe): NOT applied: the register water_streams and its twins compute BESIDE the prod slots; the four verified rows stay untouched (ON CONFLICT DO NOTHING). This block, on ratification of D-1 … D-16 together: archives the four equation rows (equations_archive_iso46001, md5-guarded DELETE, explicit-column re-INSERT on rollback), deactivates the 16 fields, and presupposes C-2 (consumers re-pointed) and G-4 (the gates read the twins). Data-free today: 0 stored values / 0 worksheet instances for ISO-46001 (read-only count 2026-09-18).
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129); "The plant/premises recycling rate (%) calculated by Formula (C.3) looks at all reused/reclaimed streams within the premises. Rp + Rnp ×100 % Rp + Rnp +WD where (C.3) Rp is total reused/recycled water from the process; Rnp is total reused/recycled water not from the process; An example of the plant/premise recycling rate, based on Figure C.2, is illustrated in Formula (C.4)." (L1144–L1150); "The process recycling rate (%) shown in Formula (C.5) only looks at reused/reclaimed streams within the process. Rp ×100 % Wp + Rpp where (C.5) Rp is total reused/recycled water from the process; Wp is incoming water to process; Rpp is reused/ recycled water from process back to process." (L1160–L1166)
+- Note: Apply C-2 and G-4 FIRST. The archive tables are dropped by the LAST rollback that uses them OR by the owner once the retirement is signed off as final.
+- Proposed SQL / config: STAGED block R-1 (rollback: INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_ …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-1 · ISO-46001 · ISO-46001-08 · `WD` ↔ `water_streams (Rolle wd — Σ enters Win_calc / C.3)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.1 / C.3 (Win → -09, plant_recycling_rate → -04 / -05; CR-037 / CR-038) — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129)
+- Proposed SQL / config: STAGED block D-1 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'WD' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-2 · ISO-46001 · ISO-46001-08 · `R1` ↔ `water_streams (Rolle r_other_source)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.1 — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129)
+- Proposed SQL / config: STAGED block D-2 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'R1' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-3 · ISO-46001 · ISO-46001-08 · `R2` ↔ `water_streams (Rolle r_other_source)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.1 — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129)
+- Proposed SQL / config: STAGED block D-3 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'R2' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-4 · ISO-46001 · ISO-46001-08 · `R3` ↔ `water_streams (Rolle r_other_source)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.1 — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129)
+- Proposed SQL / config: STAGED block D-4 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'R3' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-5 · ISO-46001 · ISO-46001-08 · `O1` ↔ `water_streams (Rolle output)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.2b (Wout → -09) — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129)
+- Proposed SQL / config: STAGED block D-5 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'O1' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-6 · ISO-46001 · ISO-46001-08 · `O2` ↔ `water_streams (Rolle output)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.2b — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129)
+- Proposed SQL / config: STAGED block D-6 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'O2' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-7 · ISO-46001 · ISO-46001-08 · `O3` ↔ `water_streams (Rolle output)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.2b — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129)
+- Proposed SQL / config: STAGED block D-7 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'O3' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-8 · ISO-46001 · ISO-46001-08 · `O4` ↔ `water_streams (Rolle output)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.2b — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129)
+- Proposed SQL / config: STAGED block D-8 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'O4' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-9 · ISO-46001 · ISO-46001-08 · `Rp` ↔ `water_streams (Rolle rp)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.3 / C.5 (CR-038) — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "The plant/premises recycling rate (%) calculated by Formula (C.3) looks at all reused/reclaimed streams within the premises. Rp + Rnp ×100 % Rp + Rnp +WD where (C.3) Rp is total reused/recycled water from the process; Rnp is total reused/recycled water not from the process; An example of the plant/premise recycling rate, based on Figure C.2, is illustrated in Formula (C.4)." (L1144–L1150)
+- Proposed SQL / config: STAGED block D-9 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'Rp' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-10 · ISO-46001 · ISO-46001-08 · `Rnp` ↔ `water_streams (Rolle rnp)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.3 — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "The plant/premises recycling rate (%) calculated by Formula (C.3) looks at all reused/reclaimed streams within the premises. Rp + Rnp ×100 % Rp + Rnp +WD where (C.3) Rp is total reused/recycled water from the process; Rnp is total reused/recycled water not from the process; An example of the plant/premise recycling rate, based on Figure C.2, is illustrated in Formula (C.4)." (L1144–L1150)
+- Proposed SQL / config: STAGED block D-10 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'Rnp' AND NOT …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-11 · ISO-46001 · ISO-46001-08 · `Wp` ↔ `water_streams (Rolle wp)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.5 — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "The process recycling rate (%) shown in Formula (C.5) only looks at reused/reclaimed streams within the process. Rp ×100 % Wp + Rpp where (C.5) Rp is total reused/recycled water from the process; Wp is incoming water to process; Rpp is reused/ recycled water from process back to process." (L1160–L1166)
+- Proposed SQL / config: STAGED block D-11 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'Wp' AND NOT  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-12 · ISO-46001 · ISO-46001-08 · `Rpp` ↔ `water_streams (Rolle rpp)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. input of C.5 — retire only inside R-1. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "The process recycling rate (%) shown in Formula (C.5) only looks at reused/reclaimed streams within the process. Rp ×100 % Wp + Rpp where (C.5) Rp is total reused/recycled water from the process; Wp is incoming water to process; Rpp is reused/ recycled water from process back to process." (L1160–L1166)
+- Proposed SQL / config: STAGED block D-12 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'Rpp' AND NOT …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-13 · ISO-46001 · ISO-46001-08 · `Win` ↔ `Win_calc (ISO-46001-08-D1) — TWIN`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the created twin computes beside the prod value; the prod field stays the authoritative, typeable / produced quantity (consumer_worksheets ["ISO-46001-09"]; number). TWIN: the prod output of C.1 is consumed by -09 and read by CR-037 (amendment J: never re-bound, a twin computes beside it); the typed / produced Win stays authoritative until R-1 + C-2 + G-4. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "The water balance equation can be represented by Formula (C.1): Win = Wout (C.1) where Win is total water input; Wout is total water output. Should total water input exceed total water output, the difference could be due to leaks and uncontrolled losses." (L1106–L1114)
+- Proposed SQL / config: STAGED block D-13 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'Win' AND NOT …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-14 · ISO-46001 · ISO-46001-08 · `Wout` ↔ `Wout_calc (ISO-46001-08-D2) — TWIN`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the created twin computes beside the prod value; the prod field stays the authoritative, typeable / produced quantity (consumer_worksheets ["ISO-46001-09"]; number). TWIN: the prod output of C.2b is consumed by -09 and read by CR-037; stays authoritative until R-1 + C-2 + G-4. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "The water balance equation can be represented by Formula (C.1): Win = Wout (C.1) where Win is total water input; Wout is total water output. Should total water input exceed total water output, the difference could be due to leaks and uncontrolled losses." (L1106–L1114)
+- Proposed SQL / config: STAGED block D-14 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'Wout' AND NO …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-15 · ISO-46001 · ISO-46001-08 · `plant_recycling_rate` ↔ `plant_recycling_rate_calc (ISO-46001-08-D4) — TWIN`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the created twin computes beside the prod value; the prod field stays the authoritative, typeable / produced quantity (consumer_worksheets ["ISO-46001-04","ISO-46001-05"]; number). TWIN: the prod output of C.3 is consumed by -04 / -05 and read by CR-038; stays authoritative until R-1 + C-2 + G-4. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "The plant/premises recycling rate (%) calculated by Formula (C.3) looks at all reused/reclaimed streams within the premises. Rp + Rnp ×100 % Rp + Rnp +WD where (C.3) Rp is total reused/recycled water from the process; Rnp is total reused/recycled water not from the process; An example of the plant/premise recycling rate, based on Figure C.2, is illustrated in Formula (C.4)." (L1144–L1150)
+- Proposed SQL / config: STAGED block D-15 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'plant_recycl …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-16 · ISO-46001 · ISO-46001-08 · `process_recycling_rate` ↔ `process_recycling_rate_calc (ISO-46001-08-D5) — TWIN`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the created twin computes beside the prod value; the prod field stays the authoritative, typeable / produced quantity (consumer_worksheets ["ISO-46001-04","ISO-46001-05"]; number). TWIN: the prod output of C.5 is consumed by -04 / -05 and read by CR-038; stays authoritative until R-1 + C-2 + G-4. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "The process recycling rate (%) shown in Formula (C.5) only looks at reused/reclaimed streams within the process. Rp ×100 % Wp + Rpp where (C.5) Rp is total reused/recycled water from the process; Wp is incoming water to process; Rpp is reused/ recycled water from process back to process." (L1160–L1166)
+- Proposed SQL / config: STAGED block D-16 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-08' AND f.symbol = 'process_recy …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-17 · ISO-46001 · ISO-46001-03 · `water_efficiency_objectives` ↔ `objectives (rows) → objectives_count (-03-D1)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-05","ISO-46001-09"]; text); no second equation for the typed value is emitted. consumed by -05 / -09 (text) — retire on ratification with a consumer re-point to objectives / objectives_count; CR-009 → G-5. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.1 General The organization shall establish water efficiency objectives at relevant functions and levels. The water efficiency objectives shall: a) be consistent with the water efficiency policy; b) be measurable (if practicable); c) take into account applicable requirements; d) be monitored; e) be communicated; f) be updated as appropriate (for example following internal or external benchmarking). The organization shall retain documented information on the water efficiency objectives. When planning how to achieve its water efficiency objectives, the organization shall determine: 1) what will be done; 2) what resources will be required; 3) who will be responsible; 4) when it will be completed; 5) how the results will be evaluated." (L492)
+- Proposed SQL / config: STAGED block D-17 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-03' AND f.symbol = 'water_effici …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-18 · ISO-46001 · ISO-46001-03 · `objective_action_what` ↔ `objectives.what`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; text); no second equation for the typed value is emitted. no consumers, no gate — retire on ratification. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.1 General The organization shall establish water efficiency objectives at relevant functions and levels. The water efficiency objectives shall: a) be consistent with the water efficiency policy; b) be measurable (if practicable); c) take into account applicable requirements; d) be monitored; e) be communicated; f) be updated as appropriate (for example following internal or external benchmarking). The organization shall retain documented information on the water efficiency objectives. When planning how to achieve its water efficiency objectives, the organization shall determine: 1) what will be done; 2) what resources will be required; 3) who will be responsible; 4) when it will be completed; 5) how the results will be evaluated." (L492)
+- Proposed SQL / config: STAGED block D-18 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-03' AND f.symbol = 'objective_ac …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-19 · ISO-46001 · ISO-46001-03 · `objective_resources` ↔ `objectives.resources`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-06"]; text); no second equation for the typed value is emitted. consumed by -06 (text) — retire on ratification with a consumer re-point to objectives. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.1 General The organization shall establish water efficiency objectives at relevant functions and levels. The water efficiency objectives shall: a) be consistent with the water efficiency policy; b) be measurable (if practicable); c) take into account applicable requirements; d) be monitored; e) be communicated; f) be updated as appropriate (for example following internal or external benchmarking). The organization shall retain documented information on the water efficiency objectives. When planning how to achieve its water efficiency objectives, the organization shall determine: 1) what will be done; 2) what resources will be required; 3) who will be responsible; 4) when it will be completed; 5) how the results will be evaluated." (L492)
+- Proposed SQL / config: STAGED block D-19 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-03' AND f.symbol = 'objective_re …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-20 · ISO-46001 · ISO-46001-03 · `objective_responsible` ↔ `objectives.responsible`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; text); no second equation for the typed value is emitted. no consumers — retire on ratification. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.1 General The organization shall establish water efficiency objectives at relevant functions and levels. The water efficiency objectives shall: a) be consistent with the water efficiency policy; b) be measurable (if practicable); c) take into account applicable requirements; d) be monitored; e) be communicated; f) be updated as appropriate (for example following internal or external benchmarking). The organization shall retain documented information on the water efficiency objectives. When planning how to achieve its water efficiency objectives, the organization shall determine: 1) what will be done; 2) what resources will be required; 3) who will be responsible; 4) when it will be completed; 5) how the results will be evaluated." (L492)
+- Proposed SQL / config: STAGED block D-20 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-03' AND f.symbol = 'objective_re …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-21 · ISO-46001 · ISO-46001-03 · `objective_deadline` ↔ `objectives.deadline`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; date); no second equation for the typed value is emitted. no consumers — retire on ratification. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.1 General The organization shall establish water efficiency objectives at relevant functions and levels. The water efficiency objectives shall: a) be consistent with the water efficiency policy; b) be measurable (if practicable); c) take into account applicable requirements; d) be monitored; e) be communicated; f) be updated as appropriate (for example following internal or external benchmarking). The organization shall retain documented information on the water efficiency objectives. When planning how to achieve its water efficiency objectives, the organization shall determine: 1) what will be done; 2) what resources will be required; 3) who will be responsible; 4) when it will be completed; 5) how the results will be evaluated." (L492)
+- Proposed SQL / config: STAGED block D-21 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-03' AND f.symbol = 'objective_de …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-22 · ISO-46001 · ISO-46001-03 · `objective_evaluation_method` ↔ `objectives.evaluation_method`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; text); no second equation for the typed value is emitted. no consumers — retire on ratification. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.1 General The organization shall establish water efficiency objectives at relevant functions and levels. The water efficiency objectives shall: a) be consistent with the water efficiency policy; b) be measurable (if practicable); c) take into account applicable requirements; d) be monitored; e) be communicated; f) be updated as appropriate (for example following internal or external benchmarking). The organization shall retain documented information on the water efficiency objectives. When planning how to achieve its water efficiency objectives, the organization shall determine: 1) what will be done; 2) what resources will be required; 3) who will be responsible; 4) when it will be completed; 5) how the results will be evaluated." (L492)
+- Proposed SQL / config: STAGED block D-22 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-03' AND f.symbol = 'objective_ev …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-23 · ISO-46001 · ISO-46001-03 · `legal_other_requirements` ↔ `legal_requirements (rows) → legal_requirements_count (-03-D2)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-05","ISO-46001-09"]; text); no second equation for the typed value is emitted. consumed by -05 / -09 (text) — retire on ratification with a consumer re-point. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.3Legal requirements or other requirements The organization shall ensure that legal requirements or other requirements are considered in establishing, implementing and maintaining the water efficiency management system and are reviewed at defined intervals." (L512–L513)
+- Proposed SQL / config: STAGED block D-23 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-03' AND f.symbol = 'legal_other_ …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-24 · ISO-46001 · ISO-46001-04 · `water_sources` ↔ `water_sources_46001 (rows) → water_sources_count (-04-D5)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-08"]; text); no second equation for the typed value is emitted. consumed by -08 (text); the register needed its own symbol (the brief's "create water_sources" is refuted by the capture) — retire on ratification with a consumer re-point; overlap with the -08 input rows: iso46001-J-2. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.4 Conduct water use review The organization shall develop, conduct and maintain a water use review to: a) identify the activities and functions that use water; b) record the water used for each identified activity and function; c) determine processes and services that affect the used water quality, with the aim of segregating the used water streams with the objective of water recycling; d) determine activities and functions with the potential for greater water efficiency. The methodology and criteria used to develop the water use review shall be maintained as documented information. To develop the water use review, the organization shall: 1) analyse water use based on measurement and other data as follows: -- identify current water sources; -- identify current water-using activities and functions; -- evaluate past and present water use; -- estimate future water use." (L515–L527)
+- Proposed SQL / config: STAGED block D-24 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-04' AND f.symbol = 'water_source …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-25 · ISO-46001 · ISO-46001-04 · `significant_water_use` ↔ `significant_uses (rows) → seu_count / seu_total / seu_share_max (-04-D4 / D2 / D3)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-05","ISO-46001-07","ISO-46001-09"]; text); no second equation for the typed value is emitted. consumed by -05 / -07 / -09 (text) — retire on ratification with a consumer re-point. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.4 Conduct water use review The organization shall develop, conduct and maintain a water use review to: a) identify the activities and functions that use water; b) record the water used for each identified activity and function; c) determine processes and services that affect the used water quality, with the aim of segregating the used water streams with the objective of water recycling; d) determine activities and functions with the potential for greater water efficiency. The methodology and criteria used to develop the water use review shall be maintained as documented information. To develop the water use review, the organization shall: 1) analyse water use based on measurement and other data as follows: -- identify current water sources; -- identify current water-using activities and functions; -- evaluate past and present water use; -- estimate future water use." (L515–L527)
+- Proposed SQL / config: STAGED block D-25 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-04' AND f.symbol = 'significant_ …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-26 · ISO-46001 · ISO-46001-04 · `business_activity_indicator` ↔ `business_activity_indicator_hint (lookup_fill, TABLED1) — TWIN; indicators_46001.indicator`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the created twin computes beside the prod value; the prod field stays the authoritative, typeable / produced quantity (consumer_worksheets ["ISO-46001-08","ISO-46001-09"]; text). TWIN: the typed text is required, consumed by -08 / -09 (amendment J: the lookup_fill twin fills beside it; the re-bind is staged here as widget IS NULL-guarded UPDATE + archive rollback, applicable only once the -08 / -09 consumers read the hint or the register). Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.5 Identify business activity indicator(s) The organization shall identify specific business activity indicator(s) appropriate for monitoring and measuring water efficiency performance. The methodology for determining and updating the business activity indicator(s) shall be retained as documented information, regularly reviewed and periodically updated as appropriate. Annex D gives examples of business activity indicator(s)." (L545–L546)
+- Proposed SQL / config: STAGED block D-26 (rollback: UPDATE fields f SET widget = NULL, lookup = NULL, ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001 …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-27 · ISO-46001 · ISO-46001-04 · `business_activity_indicator_value` ↔ `indicators_46001.activity_value`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; number); no second equation for the typed value is emitted. no consumers, input of -04-D1 (the scalar twin) — retire on ratification together with D-29 / D-31 (the scalar twin then moves to the register row value). Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "3.4 business activity indicator measure of business activity (3.3) that takes into account core business operations specific to the application site Note 1 to entry: Depending on the business activity indicator, water use (3.39) (including any water consumed) will vary. For example, m3 of water/kg of product; l/person supplied; m3 of water/guestroom. EXAMPLE Quantity of products produced, number of staff and visitors, number of guestrooms." (L254–L256)
+- Proposed SQL / config: STAGED block D-27 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-04' AND f.symbol = 'business_act …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-28 · ISO-46001 · ISO-46001-04 · `data_period` ↔ `indicators_46001.period`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; text); no second equation for the typed value is emitted. no consumers — retire on ratification. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Water efficiency indicator(s) may be a simple parameter, a simple ratio or a complex model. Examples of water efficiency indicator(s) may include water use per unit of product, water use per unit floor area, and multi-variable models. The organization may choose water efficiency indicator(s) that indicate the water efficiency of their operation and may update the water efficiency indicator(s) when changes occur in business activities or baseline, affecting the relevance of the water efficiency indicator(s) to the organization, as applicable. In the computation of the water efficiency indicator(s), all types of water should be included. A suitable data period should account for legal requirements or other requirements or variables that affect the organization's water use. Variables may include weather, business activity cycles and other conditions." (L820–L821)
+- Proposed SQL / config: STAGED block D-28 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-04' AND f.symbol = 'data_period' …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-29 · ISO-46001 · ISO-46001-04 · `water_efficiency_indicator` ↔ `water_efficiency_indicator_calc (ISO-46001-04-D1) — TWIN; indicators_46001.value (per row)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the created twin computes beside the prod value; the prod field stays the authoritative, typeable / produced quantity (consumer_worksheets ["ISO-46001-05","ISO-46001-09"]; number). TWIN: the typed input is required, consumed by -05 / -09 and read by CR-017 (block); the twin computes beside it (scalar-only, not materialised — G-6 names the gap); retire on ratification with C-edit + G-6. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "3.33 water efficiency indicator amount of water used per unit of business activity indicator (3.4) Note 1 to entry: "Used" in the context of this indicator means the net amount of water used (including any water consumed) in the course of the business activity (3.3), discounting the amount of water applied that is reclaimed or recycled for further use." (L393–L394)
+- Proposed SQL / config: STAGED block D-29 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-04' AND f.symbol = 'water_effici …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-30 · ISO-46001 · ISO-46001-04 · `baseline_water_efficiency_indicator` ↔ `indicators_46001.baseline`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-05","ISO-46001-09"]; number); no second equation for the typed value is emitted. consumed by -05 / -09 and read by CR-018 (block) — retire on ratification with a consumer re-point (no computed twin: the baseline is a recorded reference level). Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.2.7 Identify baseline water efficiency indicator(s) The organization shall identify baseline water efficiency indicator(s) appropriate for monitoring and measuring its water efficiency programme achievements. Changes in water efficiency performance shall be measured against the baseline water efficiency indicator(s). Adjustments to the baseline(s) shall be made in the case of one or more of the following: a) the specific business activity indicator(s) no longer reflect organizational water use; b) there have been changes to the process, operational patterns or water systems; c) variation from predetermined and documented methods. The organization shall retain documented information on its baseline water efficiency indicator(s)." (L551–L557)
+- Proposed SQL / config: STAGED block D-30 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-04' AND f.symbol = 'baseline_wat …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-31 · ISO-46001 · ISO-46001-04 · `past_present_water_use` ↔ `Win_calc (-08, K (3)) / indicators_46001.water_used_m3`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-08"]; number); no second equation for the typed value is emitted. K (3): consumed by -08; -04-D1 BINDS to this input (no second equation for the typed quantity); the register Σ Win_calc on -08 is the same site quantity read from meters (iso46001-X-2: "water used" §3.33 Note 1 discounts recycled water, A.7.5 says all types should be included — a ruling before the two are unified); retire on ratification with a re-point to Win_calc. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "The water balance equation can be represented by Formula (C.1): Win = Wout (C.1) where Win is total water input; Wout is total water output. Should total water input exceed total water output, the difference could be due to leaks and uncontrolled losses." (L1106–L1114)
+- Proposed SQL / config: STAGED block D-31 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-04' AND f.symbol = 'past_present …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-32 · ISO-46001 · ISO-46001-05 · `water_efficiency_target` ↔ `targets.target → targets_count (-05-D1)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-07","ISO-46001-09"]; text); no second equation for the typed value is emitted. consumed by -07 / -09 (text) — retire on ratification with a consumer re-point. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.3 Targets and action plans The organization shall establish, within or supplemental to the objectives, water efficiency targets at relevant functions, levels, processes or facilities within the organization. Time frames shall be established for achievement of the targets." (L559–L561)
+- Proposed SQL / config: STAGED block D-32 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-05' AND f.symbol = 'water_effici …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-33 · ISO-46001 · ISO-46001-05 · `target_time_frame` ↔ `targets.time_frame (required — "Time frames shall be established")`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; text); no second equation for the typed value is emitted. no consumers — retire on ratification. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "6.3 Targets and action plans The organization shall establish, within or supplemental to the objectives, water efficiency targets at relevant functions, levels, processes or facilities within the organization. Time frames shall be established for achievement of the targets." (L559–L561)
+- Proposed SQL / config: STAGED block D-33 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-05' AND f.symbol = 'target_time_ …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-34 · ISO-46001 · ISO-46001-05 · `action_plan` ↔ `targets.means (+ responsibility)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-07","ISO-46001-09"]; text); no second equation for the typed value is emitted. consumed by -07 / -09 (text) — retire on ratification with a consumer re-point. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "When establishing and reviewing objectives and targets on water use and efficiency, the organization shall take into account: a) legal requirements or other requirements related to its water use, water efficiency, wastewater discharge and pollution control; b) opportunities to improve water efficiency performance, as identified in the water use review; c) financial, operational and business conditions, technological options on process water use, general and hygienic considerations. The organization shall establish, implement and maintain action plans to achieve its targets on water use and water efficiency. The action plan shall include: 1) the designation of responsibility; 2) the means and time frame by which individual targets are to be achieved; 3) the method by which an improvement in water efficiency performance shall be verified; 4) the method of verifying the results. The action plans shall be maintained as documented information and updated at defined intervals. NOTE See A.7.7 for more information." (L570–L572)
+- Proposed SQL / config: STAGED block D-34 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-05' AND f.symbol = 'action_plan' …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-35 · ISO-46001 · ISO-46001-05 · `improvement_verification_method` ↔ `targets.improvement_verification (+ result_verification)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-09"]; text); no second equation for the typed value is emitted. consumed by -09 (text) — retire on ratification with a consumer re-point. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "When establishing and reviewing objectives and targets on water use and efficiency, the organization shall take into account: a) legal requirements or other requirements related to its water use, water efficiency, wastewater discharge and pollution control; b) opportunities to improve water efficiency performance, as identified in the water use review; c) financial, operational and business conditions, technological options on process water use, general and hygienic considerations. The organization shall establish, implement and maintain action plans to achieve its targets on water use and water efficiency. The action plan shall include: 1) the designation of responsibility; 2) the means and time frame by which individual targets are to be achieved; 3) the method by which an improvement in water efficiency performance shall be verified; 4) the method of verifying the results. The action plans shall be maintained as documented information and updated at defined intervals. NOTE See A.7.7 for more information." (L570–L572)
+- Proposed SQL / config: STAGED block D-35 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-05' AND f.symbol = 'improvement_ …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-36 · ISO-46001 · ISO-46001-01 · `interested_parties` ↔ `interested_parties_46001.party → interested_parties_count (-01-D1)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-03"]; text); no second equation for the typed value is emitted. consumed by -03 (text) — retire on ratification with a consumer re-point. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "4.2 Understanding the needs and expectations of interested parties The organization shall determine: a) the interested parties that are relevant to the water efficiency management system; b) the relevant requirements of these interested parties." (L428)
+- Proposed SQL / config: STAGED block D-36 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-01' AND f.symbol = 'interested_p …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-37 · ISO-46001 · ISO-46001-01 · `interested_party_requirements` ↔ `interested_parties_46001.requirement`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (consumer_worksheets ["ISO-46001-03"]; text); no second equation for the typed value is emitted. consumed by -03 (text) — retire on ratification with a consumer re-point. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "4.2 Understanding the needs and expectations of interested parties The organization shall determine: a) the interested parties that are relevant to the water efficiency management system; b) the relevant requirements of these interested parties." (L428)
+- Proposed SQL / config: STAGED block D-37 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-01' AND f.symbol = 'interested_p …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-38 · ISO-46001 · ISO-46001-09 · `monitoring_breakdown` ↔ `monitoring_items (select_many, the seven §9.1 1) items)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; text); no second equation for the typed value is emitted. no consumers, no gate — retire on ratification (CR-030 reads its attestation, not this text). Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "9.1Monitoring, measurement, analysis and evaluation The organization shall determine: a) what needs to be monitored and measured; b) the methods for monitoring, measurement, analysis and evaluation, as applicable to ensure valid results; c) when the monitoring and measuring shall be performed; d) when the results of the monitoring and measurement shall be analysed and evaluated; As a minimum, the water use shall be metered. In addition, the following shall be undertaken: 1) monitor and measure as a minimum: -- the breakdown of types of water supplied or used in the facility, including by source; -- the breakdown of significant water use and other outputs of the water use review;" (L660–L671)
+- Proposed SQL / config: STAGED block D-38 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-09' AND f.symbol = 'monitoring_b …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-39 · ISO-46001 · ISO-46001-10 · `nonconformity` ↔ `nonconformities.nc → nc_count / nc_open (-10-D1 / D2)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; text); no second equation for the typed value is emitted. no consumers, no gate (CR-034 reads its attestation) — retire on ratification. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "10.1 Nonconformity and corrective action When a nonconformity occurs, the organization shall: a) react to the nonconformity and, as applicable: -- take action to control and correct it; -- deal with the consequences; b) evaluate the need for action to eliminate the cause(s) of nonconformities, in order that it does not recur or occur elsewhere, by: -- reviewing the nonconformity; -- determining the cause of the nonconformity; -- determining if similar nonconformities exist, or could potentially occur; © ISO 2019 ­ All rights reserved" (L703–L706)
+- Proposed SQL / config: STAGED block D-39 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-10' AND f.symbol = 'nonconformit …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-D-40 · ISO-46001 · ISO-46001-10 · `corrective_action` ↔ `nonconformities.action (+ correction / cause / evidence / effectiveness_reviewed)`
+- Class: deactivation (amendment-K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (one row per stream / objective / requirement / source / use / indicator / target / party / item / nonconformity), the prod scalar stays typeable (no consumers; text); no second equation for the typed value is emitted. no consumers — retire on ratification. Prod holds 0 stored values and 0 worksheet instances for ISO-46001 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "c) implement any action needed; d) review the effectiveness of any corrective action taken; e) make changes to the water efficiency management system, if necessary. Corrective actions shall be appropriate to the effects of the nonconformities encountered. The organization shall retain documented information as evidence of: 1) the nature of the nonconformities and any subsequent actions taken; 2) the results of any corrective action. NOTE See A.15 for more information." (L713)
+- Proposed SQL / config: STAGED block D-40 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-46001' AND w.code = 'ISO-46001-10' AND f.symbol = 'corrective_a …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-J-1 · ISO-46001 · ISO-46001-08 · role tokens of `water_streams` — WD / R1 … R3 / O1 … O4 are printed in Formula (C.2) but defined by NO legend in the transcript; Formula (C.4) prints R1 … R4 as RECYCLED streams
+- Class: text-only-formula
+- Chosen now (fail-safe): Emitted as proposed by the controller: the tokens are the Annex-C symbols (wd, r_other_source, output, rp, rnp, wp, rpp — lower-case so no literal coincides with the prod symbols WD / Rp …). Delta vs the print: only Win / Wout (C.1), Rp / Rnp (C.3) and Rp / Wp / Rpp (C.5) carry a printed legend; WD, R1 – R3, O1 – O4 appear in (C.2) only and their meaning (utility supply / other sources / outputs) rests on the a) / b) input list, the 1) – 5) output list and prod's own labels ("Wasserversorgung durch Versorger", "Andere Wasserquelle 1 – 3", "Wasserausgang 1 – 4" — EV grade, encoded from the figure the txt does not carry); Formula (C.4) — the example of C.3 on Figure C.2 — prints R1 … R4 as RECYCLED streams and P1 / P2 / B without legend. The role labels say which C.x term the row enters; the output classes 1) – 5) are a closed printed list (enum); the Figure C.1 key prints only AHU / WWTP.
+- Evidence (verbatim, transcript line): "Key AHU air handling unit WWTP wastewater treatment plant Figure C.1 -- Example of a water balance chart The water balance can be computed using Formula (C.2). Win = Wout WD + R1 + R2 + R3 = O1 + O2 + O3 + O4" (L1126–L1129); "P1 + P2 + R1 + R2 + R3 ×100 % P1 + P2 + R1 + R2 + R3 + R4 + WD (C.4)" (L1152–L1158); "Water input to be included in a water balance chart consists of types and quantities of: a) water supplied by a water utility to the site; b) other water sources (e.g. sea water, demineralised water, ground water, reclaimed water, rain water)." (L1082–L1086)
+- Proposed SQL / config: STAGED block J-1 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-J-2 · ISO-46001 · ISO-46001-04 / -08 · `water_sources_46001` (-04, §6.2.4 1)) overlaps the INPUT rows of `water_streams` (-08, Annex C a) / b))
+- Class: duplicate
+- Chosen now (fail-safe): Both registers are emitted (the brief lists both; -04 lists the sources of the water use review, -08 the metered streams of the balance chart); -04 carries NO Σ over its m3_per_a column so Win is produced once (Win_calc on -08). A cross-register reference (a -08 row pointing at a -04 source) is the G-10 gap (no reference column type) — follow-up; the alternative is to drop the -04 register and let -04 inherit the -08 input rows (a consumer edit -08 → -04 that reverses today's direction: -08 consumes the -04 text water_sources).
+- Evidence (verbatim, transcript line): "1) analyse water use based on measurement and other data as follows: -- identify current water sources;" (L515–L527); "Water input to be included in a water balance chart consists of types and quantities of: a) water supplied by a water utility to the site; b) other water sources (e.g. sea water, demineralised water, ground water, reclaimed water, rain water)." (L1082–L1086)
+- Proposed SQL / config: STAGED block J-2 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-J-3 · ISO-46001 · ISO-46001-04 · `indicators_46001.delta_vs_baseline` — the difference to the baseline is described in words only
+- Class: text-only-formula
+- Chosen now (fail-safe): Emitted as a per-row derived column value − baseline (null while no baseline is entered — probed: an optional null operand yields a silent null cell). The standard prints no formula ("measured against the baseline"); a relative change ((value − baseline) / baseline) is the alternative reading — recorded, not emitted.
+- Evidence (verbatim, transcript line): "Changes in water efficiency performance shall be measured against the baseline water efficiency indicator(s)." (L551–L557)
+- Proposed SQL / config: STAGED block J-3 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-J-4 · ISO-46001 · ISO-46001-05 / -04 · REQUIRED register columns as the completeness rule — `targets.time_frame` ("shall be established"), `significant_uses.m3_per_a`, `indicators_46001.activity_value` / `water_used_m3`, `water_streams.role` / `volume_m3`
+- Class: is_required
+- Chosen now (fail-safe): A row without the required cell is INCOMPLETE (excluded from every count / Σ — never a silent 0; pinned). time_frame is required because §6.3 prints "shall"; the Σ / ratio columns are required because an empty number breaks sum_rows ("Unbekanntes Symbol", m820_1 trap 6). The prod scalars keep their is_required as captured (no change).
+- Evidence (verbatim, transcript line): "Time frames shall be established for achievement of the targets." (L559–L561)
+- Proposed SQL / config: STAGED block J-4 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-X-1 · ISO-46001 · ISO-46001-04 / -08 · site water volumes ← VSME B06 / ISO-59020 VAIW / VTWW / VTWU (inventory win 5)
+- Class: cross-standard
+- Chosen now (fail-safe): Typed here (the register rows); cross-standard inheritance is Phase 6. The -08 register is the natural producer for the other standards (Win_calc = total withdrawal; the rp / rnp rows = internal reuse) once Phase 6 lands.
+- Evidence (verbatim, transcript line): "Water input to be included in a water balance chart consists of types and quantities of:" (L1082–L1086)
+- Proposed SQL / config: STAGED block X-1 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-X-2 · ISO-46001 · ISO-46001-04 / -08 · `past_present_water_use` (-04) ≡ `Win` (-08)? — §3.33 Note 1 "net amount … discounting … reclaimed or recycled" vs A.7.5 "all types of water should be included"
+- Class: duplicate
+- Chosen now (fail-safe): Not unified: -04-D1 binds to the typed past_present_water_use (amendment K (3)); Win_calc is the register Σ of the INPUT roles (utility + other sources — the recycled streams rp / rnp / rpp are not inputs of Win, which matches the Note 1 discount for internally recycled water, while an external "reclaimed water" supply IS an input per Annex C b)). Whether the -04 quantity should read Win_calc after R-1 is the owner's ruling (D-31).
+- Evidence (verbatim, transcript line): "3.33 water efficiency indicator amount of water used per unit of business activity indicator (3.4) Note 1 to entry: "Used" in the context of this indicator means the net amount of water used (including any water consumed) in the course of the business activity (3.3), discounting the amount of water applied that is reclaimed or recycled for further use." (L393–L394); "In the computation of the water efficiency indicator(s), all types of water should be included." (L820–L821)
+- Proposed SQL / config: STAGED block X-2 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-S-1 · ISO-46001 · ISO-46001-04 · `baseline_adjustment_trigger` (enum, 3 tokens) — §6.2.7 "in the case of one or more of the following" is a multi-select cue
+- Class: data_type
+- Chosen now (fail-safe): Nothing emitted on the field (amendment N: a select_many widget on an enum row would render the ChecklistEditor and lose the selection on reload). The emitted baseline_adjustment_note rule keys on the existing single select (IS NOT NULL); the whole switch (data_type enum → json, widget select_many, ui_config, value migration of stored enum values into {type:'json', selected:[…]}) is ONE staged transaction.
+- Evidence (verbatim, transcript line): "Adjustments to the baseline(s) shall be made in the case of one or more of the following: a) the specific business activity indicator(s) no longer reflect organizational water use; b) there have been changes to the process, operational patterns or water systems; c) variation from predetermined and documented methods." (L551–L557)
+- Proposed SQL / config: STAGED block S-1 (rollback: UPDATE fields SET data_type = 'enum', widget = NULL, ui_config = NULL … WHERE data_type = 'json' AND symbol = 'baseline_adjustment_trigger'; value migration reversed (first selected element → value_enum).)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-F-1 · ISO-46001 · ISO-46001-04 · per-row share of a significant use (m3_per_a / Σ) — a Σ of the OWN register is not addressable from a row expression
+- Class: interface-gap
+- Chosen now (fail-safe): Worksheet-level seu_share_max (max_rows / sum_rows × 100) instead (emitted); the per-row share needs a row-scope reference to the register's own aggregate ([CODE], Plan 2b follow-up).
+- Evidence (verbatim, transcript line): "activity accounting for a substantial portion of total water used" (L370–L371)
+- Proposed SQL / config: STAGED block F-1 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-F-2 · ISO-46001 · ISO-46001-09 · checklist completeness (`monitoring_items` — all seven §9.1 1) items) is not readable by an equation on the save path
+- Class: interface-gap
+- Chosen now (fail-safe): The select_many is emitted (the seven printed items); a code "all seven ticked" is NOT emitted — the save-path materialiser passes register carriers only (materialize-derived.ts: json carriers are registers), so contains(monitoring_items, '…') would never materialise; G-3 lists the gate proposal for when [CODE] lands.
+- Evidence (verbatim, transcript line): "1) monitor and measure as a minimum:" (L660–L671)
+- Proposed SQL / config: STAGED block F-2 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-I-1 · ISO-46001 · ISO-46001-04 · `water_efficiency_indicator_calc` (-04-D1) is a SCALAR-only equation — computed on the form / report, not server-materialised
+- Class: interface-gap
+- Chosen now (fail-safe): Emitted (amendment K (3): bind to the existing inputs; amendment D: scalar-only rows are not materialised by the register-scoped materialiser — expected, noted once). The typed water_efficiency_indicator stays the persisted value (CR-017 reads it) until D-29 / G-6.
+- Evidence (verbatim, transcript line): "3.33 water efficiency indicator amount of water used per unit of business activity indicator (3.4) Note 1 to entry: "Used" in the context of this indicator means the net amount of water used (including any water consumed) in the course of the business activity (3.3), discounting the amount of water applied that is reclaimed or recycled for further use." (L393–L394)
+- Proposed SQL / config: STAGED block I-1 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-O-1 · ISO-46001 · ISO-46001-07 / -04 · brief premises refuted by the capture (not by the transcript): `procurement_criteria` / `supplier_informed` live on -07 E (brief: -06); `water_sources` already EXISTS on -04 as a text field (brief: create)
+- Class: observation
+- Chosen now (fail-safe): The register got its own symbol water_sources_46001 (the emitter refuses a create on an existing symbol — pinned); the two -07 rules are emitted on -07, the -06 gate CR-028 is G-2 + C-1. No transcript claim involved.
+- Evidence (verbatim, transcript line): "8.3 Procurement of water services, products and equipment" (L652–L655)
+- Proposed SQL / config: STAGED block O-1 (rollback: n/a)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-1 · ISO-46001 · ISO-46001-04 · TABLED1 row 2 — sector "Semiconductor" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Semiconductor" → "Number of units produced". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Semiconductor" (L1194–L1200, sector column, position 2); "Number of units produced" (L1202–L1216, indicator column, position 2)
+- Proposed SQL / config: STAGED block U-1 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'semiconductor'; UPDATE fi …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-2 · ISO-46001 · ISO-46001-04 · TABLED1 row 3 — sector "Electronics" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Electronics" → "Number of units produced". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Electronics" (L1194–L1200, sector column, position 3); "Number of units produced" (L1202–L1216, indicator column, position 3)
+- Proposed SQL / config: STAGED block U-2 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'electronics'; UPDATE fiel …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-3 · ISO-46001 · ISO-46001-04 · TABLED1 row 4 — sector "Chemical and pharmaceutical" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Chemical and pharmaceutical" → "Volume or mass of products". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Chemical and pharmaceutical" (L1194–L1200, sector column, position 4); "Volume or mass of products" (L1202–L1216, indicator column, position 4)
+- Proposed SQL / config: STAGED block U-3 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'chemical_and_pharmaceutic …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-4 · ISO-46001 · ISO-46001-04 · TABLED1 row 5 — sector "Food processing" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Food processing" → "Volume or mass of products". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Food processing" (L1194–L1200, sector column, position 5); "Volume or mass of products" (L1202–L1216, indicator column, position 5)
+- Proposed SQL / config: STAGED block U-4 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'food_processing'; UPDATE  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-5 · ISO-46001 · ISO-46001-04 · TABLED1 row 6 — sector "Other manufacturing" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Other manufacturing" → "Volume, mass or number of units produced as relevant to the manufacturing activity". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Other manufacturing" (L1194–L1200, sector column, position 6); "Volume, mass or number of units produced as relevant to the manufacturing activity" (L1202–L1216, indicator column, position 6)
+- Proposed SQL / config: STAGED block U-5 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'other_manufacturing'; UPD …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-6 · ISO-46001 · ISO-46001-04 · TABLED1 row 7 — sector "Mining" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Mining" → "Mass of ore produced". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Mining" (L1194–L1200, sector column, position 7); "Mass of ore produced" (L1202–L1216, indicator column, position 7)
+- Proposed SQL / config: STAGED block U-6 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'mining'; UPDATE fields f  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-7 · ISO-46001 · ISO-46001-04 · TABLED1 row 8 — sector "Pulp and paper" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Pulp and paper" → "Mass or number of rolls produced". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Pulp and paper" (L1194–L1200, sector column, position 8); "Mass or number of rolls produced" (L1202–L1216, indicator column, position 8)
+- Proposed SQL / config: STAGED block U-7 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'pulp_and_paper'; UPDATE f …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-8 · ISO-46001 · ISO-46001-04 · TABLED1 row 9 — sector "Wood" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Wood" → "Amount of products produced". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Wood" (L1194–L1200, sector column, position 9); "Amount of products produced" (L1202–L1216, indicator column, position 9)
+- Proposed SQL / config: STAGED block U-8 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'wood'; UPDATE fields f SE …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-9 · ISO-46001 · ISO-46001-04 · TABLED1 row 10 — sector "Power generation" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Power generation" → "Energy produced". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Power generation" (L1194–L1200, sector column, position 10); "Energy produced" (L1202–L1216, indicator column, position 10)
+- Proposed SQL / config: STAGED block U-9 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'power_generation'; UPDATE …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-10 · ISO-46001 · ISO-46001-04 · TABLED1 row 11 — sector "Agriculture" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Agriculture" → "Volume or mass of raw food products". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Agriculture" (L1194–L1200, sector column, position 11); "Volume or mass of raw food products" (L1202–L1216, indicator column, position 11)
+- Proposed SQL / config: STAGED block U-10 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'agriculture'; UPDATE fiel …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-11 · ISO-46001 · ISO-46001-04 · TABLED1 row 12 — sector "Livestock" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Livestock" → "Number of head of processed meat". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Livestock" (L1194–L1200, sector column, position 12); "Number of head of processed meat" (L1202–L1216, indicator column, position 12)
+- Proposed SQL / config: STAGED block U-11 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'livestock'; UPDATE fields …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-12 · ISO-46001 · ISO-46001-04 · TABLED1 row 13 — sector "Incineration plant" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Incineration plant" → "Mass of waste processed". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Incineration plant" (L1194–L1200, sector column, position 13); "Mass of waste processed" (L1202–L1216, indicator column, position 13)
+- Proposed SQL / config: STAGED block U-12 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'incineration_plant'; UPDA …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-13 · ISO-46001 · ISO-46001-04 · TABLED1 row 14 — sector "Petrochemical/refinery" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Petrochemical/refinery" → "Mass/volume of chemicals produced and/or mass/volume of throughput". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Petrochemical/refinery" (L1194–L1200, sector column, position 14); "Mass/volume of chemicals produced and/or mass/volume of throughput" (L1202–L1216, indicator column, position 14)
+- Proposed SQL / config: STAGED block U-13 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'petrochemical_refinery';  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-14 · ISO-46001 · ISO-46001-04 · TABLED1 row 15 — sector "Laundries" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Laundries" → "Mass of washloads". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Laundries" (L1194–L1200, sector column, position 15); "Mass of washloads" (L1202–L1216, indicator column, position 15)
+- Proposed SQL / config: STAGED block U-14 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'laundries'; UPDATE fields …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-15 · ISO-46001 · ISO-46001-04 · TABLED1 row 16 — sector "Tree nurseries" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Tree nurseries" → "Number of seedlings". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Tree nurseries" (L1194–L1200, sector column, position 16); "Number of seedlings" (L1202–L1216, indicator column, position 16)
+- Proposed SQL / config: STAGED block U-15 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'tree_nurseries'; UPDATE f …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-16 · ISO-46001 · ISO-46001-04 · TABLED1 row 17 — sector "Data centres" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Data centres" → "IT equipment energy load". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Data centres" (L1194–L1200, sector column, position 17); "IT equipment energy load" (L1202–L1216, indicator column, position 17)
+- Proposed SQL / config: STAGED block U-16 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'data_centres'; UPDATE fie …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-17 · ISO-46001 · ISO-46001-04 · TABLED1 row 18 — sector "Shipyards" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Shipyards" → "Number of ships/oil rigs serviced, repaired or built". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Shipyards" (L1194–L1200, sector column, position 18); "Number of ships/oil rigs serviced, repaired or built" (L1202–L1216, indicator column, position 18)
+- Proposed SQL / config: STAGED block U-17 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'shipyards'; UPDATE fields …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-18 · ISO-46001 · ISO-46001-04 · TABLED1 row 19 — sector "Commercial/office buildings" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Commercial/office buildings" → "Number of staff and visitors (calculate the full-time equivalent for visitors)". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Commercial/office buildings" (L1194–L1200, sector column, position 19); "Number of staff and visitors (calculate the full-time equivalent for visitors)" (L1202–L1216, indicator column, position 19)
+- Proposed SQL / config: STAGED block U-18 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'commercial_office_buildin …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-19 · ISO-46001 · ISO-46001-04 · TABLED1 row 20 — sector "Retail" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Retail" → "Number of staff and visitors (calculate the full-time equivalent for visitors)". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Retail" (L1194–L1200, sector column, position 20); "Number of staff and visitors (calculate the full-time equivalent for visitors)" (L1202–L1216, indicator column, position 20)
+- Proposed SQL / config: STAGED block U-19 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'retail'; UPDATE fields f  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-20 · ISO-46001 · ISO-46001-04 · TABLED1 row 21 — sector "Institutions/schools" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Institutions/schools" → "Number of staff/students and visitors (calculate the full-time equivalent for visitors)". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Institutions/schools" (L1194–L1200, sector column, position 21); "Number of staff/students and visitors (calculate the full-time equivalent for visitors)" (L1202–L1216, indicator column, position 21)
+- Proposed SQL / config: STAGED block U-20 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'institutions_schools'; UP …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-21 · ISO-46001 · ISO-46001-04 · TABLED1 row 22 — sector "Hospitals" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Hospitals" → "Number of staff and occasional occupants (calculate the full-time equivalent for occasional occupants, e.g. inpatients/outpatients/ visitors)". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Hospitals" (L1194–L1200, sector column, position 22); "Number of staff and occasional occupants (calculate the full-time equivalent for occasional occupants, e.g. inpatients/outpatients/ visitors)" (L1202–L1216, indicator column, position 22)
+- Proposed SQL / config: STAGED block U-21 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'hospitals'; UPDATE fields …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-22 · ISO-46001 · ISO-46001-04 · TABLED1 row 23 — sector "Hotels" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Hotels" → "Number of occupied guestrooms". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Hotels" (L1194–L1200, sector column, position 23); "Number of occupied guestrooms" (L1202–L1216, indicator column, position 23)
+- Proposed SQL / config: STAGED block U-22 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'hotels'; UPDATE fields f  …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso46001-U-23 · ISO-46001 · ISO-46001-04 · TABLED1 row 24 — sector "Prisons" — pairing with its indicator cell NOT settled by the layout file (NOT seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Not seeded; not in the industry_sector select. The raw file prints the 24 sectors (L1194–L1200) and the 24 indicator cells (L1202–L1216) as two separate column dumps; the layout file's vertical alignment drifts after the first line (one sector per line vs one indicator per two lines), so it settles only row 1. Print-order proposal (24 = 24 cells, no merged cell — "Number of units produced" is printed three times): "Prisons" → "Number of staff and inmates and visitors (calculate the full-time equivalent for visitors)". To be confirmed on the PDF page (SR-3) before the row and the enum value are added.
+- Evidence (verbatim, transcript line): "Prisons" (L1194–L1200, sector column, position 24); "Number of staff and inmates and visitors (calculate the full-time equivalent for visitors)" (L1202–L1216, indicator column, position 24)
+- Proposed SQL / config: STAGED block U-23 (rollback: DELETE FROM regulation_table_rows r USING regulation_tables t, standards s WHERE r.table_id = t.id AND t.standard_id = s.id AND s.code = 'ISO-46001' AND t.table_code = 'TABLED1' AND r.row_key = 'prisons'; UPDATE fields f …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 22, no signature needed)
+
+- **Field `visible_when` on existing inputs: 2 emitted** (`procurement_criteria` / `supplier_informed` ← `procurement_significant`, both on -07 E, no consumer, no gate — the emitter accepted them; the brief's `design_consideration` hide is refused by the gate-aware guard (CR-027) and lives in G-1). One rule on a created field (`baseline_adjustment_note` ← `baseline_adjustment_trigger IS NOT NULL`). `plant_recycling_rate` / `process_recycling_rate` stay visible (consumed + gate-read; no scalar driver — the recycling fact is a row of the register).
+- **The three empty-condition gates** (CR-036 / CR-039 / CR-040) never evaluate today (`manual`); G-3 proposes two conditions (one needs a new boolean, one moves to -08) and leaves CR-040 to a ruling.
+- **The 40 amendment-K pairs** are the price of a register model over a prod model that asks every fact once (WD / R1 – R3 / O1 – O4 fixed slots, one objective, one target, one indicator); 0 stored values / 0 instances make every retirement data-free today. Five are TWINS of consumed / gate-bearing quantities (D-13 … D-16 register twins of the four verified equations, D-26 the lookup_fill hint, D-29 the §3.33 scalar).
+- **Table D.1: 1 of 24 rows seeded.** The layout file settles only the first pairing; U-1 … U-23 carry the print-order proposal for the owner's PDF check (SR-3) with the INSERT + enum-append SQL per row. The `industry_sector` select therefore offers one option today (G-A3: exactly the seeded keys). Alternative the owner may prefer: seed the 24 printed SECTOR tokens as the select now (each label is a verbatim printed cell) and fill the indicator cells on ratification — not chosen, because the controller amendment reads "enum = TABLED1 keys".
+- **Table A.1 pairing settled by the letter sequence** (every sector restarts at (a)); the raw lines that merge two cells ("(f) Toilet (a) Guestroom") serve both rows' `verbatim_quote`; sector 8's name is two printed fragments.
+- **Brief premises refuted by the capture (O-1):** `procurement_criteria` / `supplier_informed` are on -07 E (brief "-06"); `water_sources` exists on -04 (the register became `water_sources_46001`); the brief's TABLED1 "≈ 20 rows" is 24 printed sectors.
+- **Scalar-only equation (amendment D, noted once):** `ISO-46001-04-D1` (I-1) — computed on the form / report, not server-materialised; the 19 register-fed rows materialise on save.
+
 ## Plan 3 tooling rulings
 
 ### plan3-T-12c · [CODE] · `emit-field-configs-sql.ts` gate-aware guard · a `visible_when` may not silently disarm a same-worksheet gate

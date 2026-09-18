@@ -27,5 +27,6 @@ export const EQUATION_MODULES: Record<string, () => Promise<EquationModule>> = {
   m820_2: () => import('./m820_2'),
   iso5667_10: () => import('./iso5667_10'),
   iso59020: () => import('./iso59020'),
-  // Plan-3 tasks append one line each, e.g. iso46001: () => import('./iso46001'),
+  iso46001: () => import('./iso46001'),
+  // Plan-3 tasks append one line each, e.g. iso5667_6: () => import('./iso5667_6'),
 };
