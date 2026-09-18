@@ -37,6 +37,7 @@ import { m12002SeedTables } from './regulation-tables-seed-m1200_2';
 import { din19892SeedTables } from './regulation-tables-seed-din1989_2';
 import { m8201SeedTables } from './regulation-tables-seed-m820_1';
 import { m8202SeedTables } from './regulation-tables-seed-m820_2';
+import { iso566710SeedTables } from './regulation-tables-seed-iso5667_10';
 
 export type SeedBuilder = { build: () => RegulationTable[]; ts: string; slugFile: string; supersedes?: string };
 
@@ -61,7 +62,8 @@ export const SEED_BUILDERS: Record<string, SeedBuilder> = {
   din1989_2: { build: din19892SeedTables, ts: '20260917101700', slugFile: 'din1989_2' }, // Plan 3 Task 17: DIN-1989-2 (five tables — Tab. 1 Filtertypen, Tab. 2 Prüfzeiten, Tab. 3 Prüfstoffe, Tab. 4 Quarzsand, Tab. 5 WPK)
   m820_1: { build: m8201SeedTables, ts: '20260917101800', slugFile: 'm820_1' }, // Plan 3 Task 18: DWA-M-820-1 (six tables — Tab. D.1, Anh. B.2.3 thresholds, § 134 GWB standstill, § 3 Abs. 9 VgV lots, Anh. B.1.1 interval, Anh. E.1.4.1 revenue factor)
   m820_2: { build: m8202SeedTables, ts: '20260917101900', slugFile: 'm820_2' }, // Plan 3 Task 19: DWA-M-820-2 (two outline catalogues — Anhang A Statusbericht 21 rows, Anhang B Projekthandbuch 8 rows)
-  // Plan-3 tasks append one line each, e.g. m1200_x: { build: m1200xSeedTables, ts: '20260917102000', slugFile: 'm1200_x' }
+  iso5667_10: { build: iso566710SeedTables, ts: '20260917102000', slugFile: 'iso5667_10' }, // Plan 3 Task 20: ISO-5667-10 (eight sentence-rule tables — §4.3.2 formula switch, §7.2.1 interval, §7.2.2.1 tube / pump, §7.2.2.4 CV, §3.4 qualified grab, §9.1 homogeniser, §5 site figures)
+  // Plan-3 tasks append one line each, e.g. iso59020: { build: iso59020SeedTables, ts: '20260917102100', slugFile: 'iso59020' }
 };
 
 /** Slugs that no other builder supersedes — the set the runtime fallback serves. */

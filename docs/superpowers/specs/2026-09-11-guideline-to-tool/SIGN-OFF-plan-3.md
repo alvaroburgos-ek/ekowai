@@ -5273,6 +5273,400 @@ Report: `reports/plan-3-m820_2.md`. STAGED SQL: `scripts/verification/m820_2-STA
 - The Plan-1 `change_orders` config typed `datum` as text (placeholder TT.MM.JJJJ); the in-place upgrade types it `date` (0 stored rows in prod — checked read-only 2026-09-18; the Plan-1 selection migration is unapplied, so no stored text date exists to convert).
 - `820-2-21 changes_record_date` ("Datum Erfassung") and `820-2-19 vergabesumme_summary_date` ("Datum Vergabe-Zusammenfassung") are "Stand vom" summary dates of their worksheets, not per-row facts of the new `change_orders` / `vergaben_los` registers — NOT amendment-K pairs; both stay untouched (fix round 1, minor 2).
 
+## Task 20 — ISO-5667-10 (iso5667_10)
+
+Report: `reports/plan-3-iso5667_10.md`. STAGED SQL: `scripts/verification/iso5667_10-STAGED-plan3-rulings.sql` (same ids; every line a comment, 51 ☐ blocks). Prod facts from `src/lib/eval/field-configs/iso5667_10.prior.json` (read-only capture 2026-09-18: 81 fields, 52 sections, 3 equations, 36 gates — none unparseable) and `prod-query.mjs` (gate / equation ids + md5, labels, units, VR, `is_required`, section titles, the 0 stored parameters and 0 worksheet instances of the standard, `standards.version` '2020 (ISO 5667-10:2020, second edition; ISO/TC 147/SC 6)'). Transcript lines refer to `C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 5667-10\ISO-5667-10.txt` — the SPANISH translation (AENOR licence copy, pdftotext): VC grade by ruling, every table `imported_unverified`, quotes in Spanish. Worksheet codes are prod's `ISO-5667-10-NN`. Ids: G gate-guard · C consumer-edit · D amendment-K pair (one ☐ each) · E token gap · U unreadable cell · J judgment · F text-only formula / capability · O override-policy / observation · I interface-gap · X cross-standard.
+
+### iso5667_10-G-1 · ISO-5667-10 · ISO-5667-10-06 · CR-021 (homogeneity_deviation < 20) — IF-guard on representativeness_mode == in_storage
+- Class: gate-guard
+- Chosen now (fail-safe): CR-021 stays UNCONDITIONAL (warn) and `homogeneity_deviation` stays visible on -06 (the brief's hide under in_storage was refused twice: consumed by -08 and read by CR-021). The guard is staged WITH a caveat — recommend REJECT / keep unconditional: the same < 20 % is printed for every homogenisation in §9.1 (which -08 consumes the field for), not only for tank sampling (§7.4).
+- Evidence (verbatim, transcript line): "la representatividad del muestreo. La desviación máxima tolerada entre dos mediciones del parámetro seleccionado para satisfacer el criterio de homogeneidad será preferentemente inferior al 20 %." (L1253–L1255); "Cuando sea posible, debe comprobarse la representatividad de una muestra, mediante el muestreo continuo del tubo de descarga, aguas abajo del tanque, durante toda la duración de la descarga. En este caso, se observará la coherencia (desviación inferior al 20 %) entre las mediciones de los parámetros elegidos para la validación. Esta medida se tomará si no hay mezcla antes o durante la descarga." (L1268–L1272); "Se recomienda llevar a cabo la etapa de homogeneización, utilizando un método validado. Se comprobará la eficacia del método de homogeneización (posición de la hélice, velocidad de agitación, duración de la homogeneización). La diferencia máxima entre dos mediciones del parámetro debe ser preferiblemente <20 %. Consulte la norma ISO 5667-14:2016, 7.4.4." (L1502–L1505)
+- Note: Prod: CR-021 sits on -06 (title "Cistern planned-discharge homogeneity") while the -08 worksheet ("Homogenization & Distribution") consumes homogeneity_deviation for §9.1 — the field serves BOTH printed rules (iso5667_10-J-3). Guarding CR-021 on in_storage leaves §9.1 unguarded on -08 (no gate there reads it).
+- Proposed SQL / config: STAGED block G-1 (6 statements; rollback: RESTORE('e82fa780-b38c-44c5-b0b2-a13f0e87e51e'); DROP the archive when no other block uses it. Verified in-session (evalCondition): in_flow ⇒ pass; in_storage +…)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-G-2 · ISO-5667-10 · ISO-5667-10-08 · NEW gate CR-037: homogeniser type by collected volume (§9.1)
+- Class: gate-guard
+- Chosen now (fail-safe): No gate emitted; the created derived `homogenizer_mechanical_required` (ISO-5667-10-08-D1: collected_volume > S9_1.threshold_l = 5 l ⇒ 1) shows the requirement beside `homogenizer_type`. Severity proposed WARN ("deberían utilizarse" = should). CR-025 (`homogenization_done == true`) is untouched.
+- Evidence (verbatim, transcript line): "Para volúmenes de muestra mayores (por ejemplo, > 5 l), los homogeneizadores con recipientes de muestra transportables y con agitador magnético o mecánico deberían utilizarse." (L1474–L1477); "Para volúmenes inferiores recogidos (≤5 l), puede aplicarse el método de laboratorio (por ejemplo, agitación manual, mezcla con varillas, etc.)." (L1486–L1487)
+- Note: Apply AFTER 20260917102010 / 20260917102020 (the gate reads the created output). Max prod code today CR-036 (read-only count 36).
+- Proposed SQL / config: STAGED block G-2 (4 statements; rollback: DELETE FROM compliance_requirements WHERE worksheet_template_id = WS('ISO-5667-10-08') AND code = 'CR-037' AND description LIKE 'Plan 3 (iso5667_10-G-2)%'. Veri…)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-G-3 · ISO-5667-10 · ISO-5667-10-06 · CR-016 (composite_interval <= 30) → two-branch limit via the created composite_interval_max fill
+- Class: gate-guard
+- Chosen now (fail-safe): CR-016 keeps the 24-h branch only (30 min, block); the created select `composite_duration_band` + fill `composite_interval_max` (S7_2_1: 5 / 30 min, locked) show the printed limit beside the input. The hide of `composite_interval` under `main_sampling_type == 'composite'` was refused (read by CR-016) and is the follow-up UPDATE below (exempt once the gate carries the same IF guard).
+- Evidence (verbatim, transcript line): "continuo es el más adecuado. Para el muestreo discontinuo, seleccione los intervalos más cortos posibles entre las muestras individuales. No deben superar los 5 minutos para la muestra mixta de 2 horas y los 30 minutos para la muestra mixta de 24 horas." (L860–L862); "La duración del muestreo depende de los parámetros especificados en los permisos de vertido de aguas. La información sobre la duración del muestreo (muestra aleatoria, muestra aleatoria cualificada, muestra mixta de 2 h, muestra compuesta de 24 h) se basa en la legislación (por ejemplo, los anexos relacionados con el origen de las aguas residuales de la Ordenanza de Aguas Residuales)." (L864–L867)
+- Note: With the band unset the rewritten gate is pending (visible, not blocking) — the owner may prefer to keep `composite_interval <= 30` as an unconditional floor AND add the 2-h branch: `(IF composite_duration_band == 'h2' THEN composite_interval <= 5) AND composite_interval <= 30` (variant B, no fill needed).
+- Proposed SQL / config: STAGED block G-3 (7 statements; rollback: RESTORE('96370649-be6d-40d6-8c86-db3d939e779a'); FLD(ISO-5667-10-06, composite_interval) SET visible_when = NULL … AND f.visible_when = 'main_sampling_type == '…)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-G-4 · ISO-5667-10 · ISO-5667-10-06 · CR-017 (tube_internal_diameter >= 9 AND suction_velocity >= 0.5) → velocity limit from suction_velocity_min (NOTA 1), guarded on the automatic composite modes
+- Class: gate-guard
+- Chosen now (fail-safe): CR-017 keeps the fixed 0,5 m/s (block); the created derived `suction_velocity_min` (ISO-5667-10-06-D4: 0,5 m/s; 0,3 m/s from 12 mm) shows the NOTA-1 relaxation beside the input. The guard on `composite_mode IN {CVVT, CTVV, CTCV}` is the reading "automatic sampler ⇔ automatic composite" (iso5667_10-J-4) — an automatic GRAB sampler (§6.1 a.3) would then be unguarded; alternative: rewrite the operand only, keep the gate unconditional.
+- Evidence (verbatim, transcript line): "- debe tener un diámetro interno mayor o igual a 9 mm;" (L903); "- Velocidad de aspiración: no debe ser inferior a 0,5 m/s para evitar la segregación de la materia en suspensión en el" (L922–L923); "NOTA 1 Pueden ser posibles velocidades de aspiración inferiores si se demuestra que son satisfactorias. Un ejemplo es cuando el diámetro interno del tubo de aspiración es de 12 mm o más, en cuyo caso se ha demostrado que una velocidad de aspiración de 0,3 m/s es aceptable[5]." (L928–L930); "Para el muestreo compuesto automático, existen varios tipos de muestra compuesta (véase la norma ISO 5667-1). Es posible implementar: - muestreo de volumen constante y tiempo variable (C.V.V.T) - muestreo de volumen variable de tiempo constante (C.T.V.V) - muestreo de volumen constante en tiempo constante (C.T.C.V)" (L737–L744)
+- Proposed SQL / config: STAGED block G-4 (6 statements; rollback: RESTORE('dc3e3e8e-1e30-4816-a9f6-c8e2bd94c489'). Verified in-session: CTCV + 12 mm + 0,35 m/s (min 0,3) ⇒ pass; manual ⇒ pass.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-G-5 · ISO-5667-10 · ISO-5667-10-06 · CR-018 (unit_volume >= 25 AND …) → minimum by pump technology (50 ml vacuum / 25 ml inline piston)
+- Class: gate-guard
+- Chosen now (fail-safe): CR-018 keeps the fixed 25 ml (block); the per-device check lives in the -07 `probenahmegeraete` register (unit_volume_min / unit_volume_ok per row, `geraete_unit_volume_fail`). Nothing on -06 reads the pump technology today (`pump_technology` lives on -07, not inherited on -06 — C-2). Two variants staged; variant B needs no consumer edit and reads the printed figures directly.
+- Evidence (verbatim, transcript line): "- Volumen de la unidad: - debe ser adecuado para garantizar un muestreo representativo (por ejemplo, al menos 50 ml para la bomba de vacío o 25 ml para el émbolo en línea);" (L934–L937); "El muestreo de los sistemas de bombeo puede realizarse mediante diferentes tecnologías [por ejemplo, mediante una bomba de vacío (VAP), mediante una bomba peristáltica (PP), mediante un émbolo en línea o utilizando sistemas de bombeo externos]. Las ventajas e inconvenientes de los dos tipos principales de muestreadores se presentan en el Anexo F." (L1318–L1321)
+- Note: peristaltic / external print no minimum (iso5667_10-E-1): variant A leaves the gate pending for them (lookup miss); variant B keeps the 25 ml floor for every technology and adds the 50 ml branch for the vacuum pump only.
+- Proposed SQL / config: STAGED block G-5 (15 statements; rollback: RESTORE('a536d673-3d7f-4de7-9b45-f61a1127a9ae'); DELETE FROM equations WHERE worksheet_template_id = WS('ISO-5667-10-06') AND equation_number = 'ISO-5667-10-06-…)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-G-6 · ISO-5667-10 · ISO-5667-10-04 · CR-011 / CR-012 — IF-guards on specific_site_type (sewer / cooling) + NEW gate CR-038 on stellen_site_fail
+- Class: gate-guard
+- Chosen now (fail-safe): CR-011 (`restriction_downstream_diameters >= 3`) and CR-012 (`cooling_runoff_time >= 30`) stay UNCONDITIONAL blocks; the hides of their inputs under the site type were refused (gate-read) and are the follow-up UPDATEs below (exempt once guarded). The -02 register carries the same checks per sampling point (`stellen_site_fail`); its gate is a NEW warn gate on -02.
+- Evidence (verbatim, transcript line): "El punto de toma de muestras debe estar siempre situado aguas abajo de la restricción y, como norma general, debe situarse al menos tres veces el diámetro de la tubería, o la anchura del canal, aguas abajo de la restricción. La entrada de la sonda de muestreo debe orientarse preferentemente" (L555–L557); "En una instalación de muestreo (grifo de muestreo que permita la desinfección, preferiblemente por flameo, y el vaciado) se dejará correr el agua durante al menos 30 s antes del muestreo. El muestreo" (L705–L706); "5.1. Muestreo de alcantarillas, canales y pozos de registro" (L541); "5.4 Muestreo de los sistemas de refrigeración" (L669)
+- Proposed SQL / config: STAGED block G-6 (15 statements; rollback: RESTORE('571e1790-2dc0-4e52-ac1f-99ee1c22e441'); RESTORE('b855b97c-6cb6-4c69-9b79-67fe39af3149'); the two visible_when back to NULL (guarded by the text); DELET…)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-G-7 · ISO-5667-10 · ISO-5667-10-06 · CR-019 (V_n >= 0) — IF-guard on composite_mode == CTCV + the CTCV hides of V_final / M3_total / M3_n / V_n
+- Class: gate-guard
+- Chosen now (fail-safe): CR-019 stays UNCONDITIONAL (warn); the four Fórmula-3 scalars stay visible in every mode (their hide under CTCV was refused: V_n read by CR-019, V_final / M3_total / M3_n feed prod equation 3 → V_n). The created `flaschen_ctcv` register (hidden unless CTCV) carries the per-bottle form beside them.
+- Evidence (verbatim, transcript line): "Cuando el muestreador automático no puede conectarse al caudalímetro (por incompatibilidad de los equipos o por una distancia demasiado grande entre ambos dispositivos), cuando el caudal y/o la composición del efluente son variables o por exigencias legales, se puede realizar un muestreo ponderado en el tiempo. Por lo tanto, es necesario construir la muestra compuesta (sujeto al uso de un muestreador automático de botellas múltiples)." (L985–L989); "𝑀3 𝑛 𝑉𝑛 = [𝑉𝑓𝑖𝑛𝑎𝑙 𝑥 ( )] 𝑀3 𝑡𝑜𝑡𝑎𝑙 Vn: volumen de la muestra (ml) a tomar en la botella n Vfinal: volumen total (ml) de las botellas del laboratorio M3total: volumen total descargado (M3) M3n: volumen descargado durante el muestreo de la botella n (M3)" (L1013–L1023); "En este caso, como el caudal no es relevante para los compuestos ponderados por tiempo, se recomienda que las muestras se recojan en una sola botella para evitar la etapa de transferencia." (L1030–L1031)
+- Note: Fórmula (3) is §7.2.2.3 (time-proportional MULTI-bottle composite reconstituted per flow); §7.2.2.4 CTCV recommends a SINGLE bottle. The prod enum has one token for both (iso5667_10-J-2) — the guard on CTCV follows the inventory / brief mapping.
+- Proposed SQL / config: STAGED block G-7 (10 statements; rollback: RESTORE('54506f66-2ce1-440f-865a-cf37a7597968'); the four visible_when back to NULL. Verified in-session: CVVT ⇒ pass.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-G-8 · ISO-5667-10 · ISO-5667-10-01 · CR-002 (qualified_grab_count >= 5 AND window <= 2 AND interval >= 2) — IF-guard on sample_type_definition == qualified_grab + the hides of the three scalars
+- Class: gate-guard
+- Chosen now (fail-safe): CR-002 stays UNCONDITIONAL (block) — today a grab or composite project is blocked by it unless the three qualified-grab numbers are typed; the created register `stichproben_qualifiziert` and its outputs are hidden unless qualified_grab (emitted). The hides of the three prod scalars were refused (gate-read) — follow-ups below.
+- Evidence (verbatim, transcript line): "3.4. muestra puntual cualificada Forma especial de una muestra compuesta (3.1), formada por al menos cinco muestras puntuales, tomadas y mezcladas en un plazo un período máximo de dos horas y con un intervalo no inferior a dos minutos." (L304–L307)
+- Proposed SQL / config: STAGED block G-8 (9 statements; rollback: RESTORE('1a6c3d97-7499-4a19-b3fc-e94120aafa50'); the three visible_when back to NULL. Verified in-session: grab ⇒ pass. The count operand → qualified_grab_count…)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-G-9 · ISO-5667-10 · ISO-5667-10-03 · CR-008 (sampling_day_k >= 0 OR sampling_week_k >= 0) → schedule complete + A in range, guarded on sampling_period == year; hides of A / k / sampling_day_k / sampling_week_k
+- Class: gate-guard
+- Chosen now (fail-safe): CR-008 stays as is (warn); the register `probenahmetermine` + `termine_count` / `A_in_range` (hidden unless year) are emitted. The hides of the prod scalars A / k / sampling_day_k / sampling_week_k under year were refused (A / k feed equations 1 / 2 whose outputs CR-008 reads) — follow-ups below.
+- Evidence (verbatim, transcript line): "si el período de muestreo abarca un año, los días de muestreo pueden determinarse mediante una fórmula. Un ejemplo es: Fórmula (1) para un número de muestras (n), superior a unas 25 y de la Fórmula (2) para un número de muestras inferior a unas 25." (L475–L479); "n Número de muestras; A Número aleatorio en un intervalo entre – 365/n y 0." (L488–L489); "n Número de muestras; A Número aleatorio en un intervalo entre – 52/n y 0." (L499–L500)
+- Note: `number_of_samples` is never hidden (consumed by -05 / -06; CR-007; §4.3.1 applies to every period).
+- Proposed SQL / config: STAGED block G-9 (10 statements; rollback: RESTORE('aa94c1a9-1308-4177-866b-6b4c5b3aa6ce'); the four visible_when back to NULL. Verified in-session: year + 30/30 + 1 ⇒ pass; weeks ⇒ pass; year + 3/30 ⇒ f…)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-C-1 · ISO-5667-10 · ISO-5667-10-02 · representativeness_mode.consumer_worksheets += ISO-5667-10-07
+- Class: consumer-edit
+- Chosen now (fail-safe): The two -07 tank rules (`tank_mixing_system` / `tank_sampling_device` ← in_storage) are EMITTED and `pending` (visible, inert) until the driver reaches -07 (today ["ISO-5667-10-04","ISO-5667-10-06"]).
+- Evidence (verbatim, transcript line): "- representatividad en un almacenamiento (depósito, lagunas, cuencas, etc.)." (L374); "8.4 Equipo de muestreo del tanque 8.4.1 Mezcla El sistema de mezcla se utiliza para garantizar la homogeneidad del contenido de un tanque antes de la descarga y para recoger una muestra representativa (véase el anexo A)." (L1404–L1407)
+- Proposed SQL / config: STAGED block C-1 (1 statements; rollback: UPDATE fields SET consumer_worksheets = array_remove(consumer_worksheets, 'ISO-5667-10-07') … same row.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-C-2 · ISO-5667-10 · ISO-5667-10-07 · pump_technology.consumer_worksheets += ISO-5667-10-06 (for G-5)
+- Class: consumer-edit
+- Chosen now (fail-safe): Not applied; the -06 `unit_volume` limit stays the fixed 25 ml of CR-018. SQL inside G-5.
+- Evidence (verbatim, transcript line): "El muestreo de los sistemas de bombeo puede realizarse mediante diferentes tecnologías [por ejemplo, mediante una bomba de vacío (VAP), mediante una bomba peristáltica (PP), mediante un émbolo en línea o utilizando sistemas de bombeo externos]. Las ventajas e inconvenientes de los dos tipos principales de muestreadores se presentan en el Anexo F." (L1318–L1321)
+- Proposed SQL / config: STAGED block C-2 (retirement pattern in the block; rollback: array_remove (see G-5).)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-C-3 · ISO-5667-10 · ISO-5667-10-05 · composite_mode hide under main_sampling_type == composite (brief Step 4 row 1) — consumed by -06
+- Class: consumer-edit
+- Chosen now (fail-safe): NOT emitted (producer guard: consumed by -06). Recommend REJECT: a hidden producer nulls the inherited `composite_mode` on -06, and every -06 rule on it (`== 'CTCV'`, `IN {…}`) then reads PENDING = VISIBLE — the grab project would SEE the composite fields it should not. Keep the select visible; `grab_method` is hidden under grab (emitted) and the composite inputs are the G-3 / G-7 follow-ups.
+- Evidence (verbatim, transcript line): "6.2 Muestreo compuesto El muestreo compuesto consiste en varias muestras discretas. Puede realizarse de forma automática o manual (véase el anexo B)." (L733–L735); "6.1 Muestreo puntual En el caso del muestreo puntual (véase el anexo B), es posible realizar:" (L719–L720)
+- Proposed SQL / config: STAGED block C-3 (1 statements; rollback: FLD(ISO-5667-10-05, composite_mode) SET visible_when = NULL … AND f.visible_when = 'main_sampling_type == ''composite''';)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-1 · ISO-5667-10 · ISO-5667-10-01 · `qualified_grab_count` ↔ `stichproben_qualifiziert (count → qualified_grab_count_calc, ISO-5667-10-01-D1)`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (number; CR-002 reads it (block)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Forma especial de una muestra compuesta (3.1), formada por al menos cinco muestras puntuales, tomadas y mezcladas en un plazo un período máximo de dos horas y con un intervalo no inferior a dos minutos." (L305–L307)
+- Note: Proposal: CR-002 operand → 'qualified_grab_count_calc >= 5' (after G-8; the calc is created by 20260917102010, hidden unless qualified_grab — the guard must come first).
+- Proposed SQL / config: STAGED block D-1 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-2 · ISO-5667-10 · ISO-5667-10-02 · `flow_type` ↔ `probenahmestellen.flow_type`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (enum; no gate, no consumer) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "información: identificación, ubicación del lugar, fotos, coordenadas geográficas, ubicación del lugar, tipo de flujo (abierto, cerrado), condiciones de acceso y técnica de muestreo. Si es necesario, describa" (L397–L398)
+- Note: Proposal: retire the scalar (per-point value lives in the register).
+- Proposed SQL / config: STAGED block D-2 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-3 · ISO-5667-10 · ISO-5667-10-02 · `well_mixed_section` ↔ `probenahmestellen.well_mixed`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (boolean; CR-004 reads it (block, `well_mixed_section == true`)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "La selección del punto de muestreo debe ser representativa del flujo de residuos que se va a examinar. En algunas aguas residuales esta representatividad puede ser difícil de obtener debido a la heterogeneidad espacial y temporal de la masa de agua. Es necesario realizar el muestreo en las secciones en las que el flujo está bien mezclado y es homogéneo." (L364–L367)
+- Note: Proposal: needs a created twin first: INSERT equation 'ISO-5667-10-02-D3 stellen_unmixed = count_rows(probenahmestellen, well_mixed == false)' + derived field, then CR-004 → 'stellen_unmixed == 0 AND stellen_count >= 1' (archive pattern), then retire the boolean.
+- Proposed SQL / config: STAGED block D-3 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-4 · ISO-5667-10 · ISO-5667-10-04 · `specific_site_type` ↔ `probenahmestellen.specific_site_type`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (enum; CR-010 reads it (block, IS NOT NULL); consumed by -06; drives the -04 rules emitted here) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "5 Muestreo en lugares específicos Los perfiles de concentración de sustancias disueltas y sólidos en suspensión medidos en un efluente son a menudo heterogéneos porque dependen de las condiciones hidráulicas y de transporte de la fase sólida en la masa de agua. Las observaciones son:" (L520–L523)
+- Note: Proposal: KEEP BOTH (recommend DEFER): the -04 scalar is the site type of the campaign the -04 / -06 checks address; the register column is per sampling point. No retirement proposed.
+- Proposed SQL / config: STAGED block D-4 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-5 · ISO-5667-10 · ISO-5667-10-04 · `sampling_depth_fraction` ↔ `probenahmestellen.sampling_depth_fraction (badge depth_ok)`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (number; no gate, no consumer (VR string only)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "depósitos o las biopelículas que se desarrollan. En general, puede recomendarse un punto de muestreo entre un tercio y la mitad de la profundidad del agua del efluente por debajo de la superficie del agua." (L562–L564)
+- Note: Proposal: retire the scalar.
+- Proposed SQL / config: STAGED block D-5 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-6 · ISO-5667-10 · ISO-5667-10-04 · `restriction_downstream_diameters` ↔ `probenahmestellen.restriction_downstream_diameters (badge restriction_ok)`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (number; CR-011 reads it (block)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "El punto de toma de muestras debe estar siempre situado aguas abajo de la restricción y, como norma general, debe situarse al menos tres veces el diámetro de la tubería, o la anchura del canal, aguas abajo de la restricción. La entrada de la sonda de muestreo debe orientarse preferentemente" (L555–L557)
+- Note: Proposal: after G-6 (CR-038 on stellen_site_fail): retire CR-011 (archive) and the scalar.
+- Proposed SQL / config: STAGED block D-6 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-7 · ISO-5667-10 · ISO-5667-10-04 · `wwtp_sampling_objective` ↔ `probenahmestellen.wwtp_objective`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (enum; no gate, no consumer) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "muestreo.Los objetivos típicos son - control del rendimiento de toda la planta de tratamiento: las muestras deben recogerse en los principales puntos de entrada y de salida; - control del funcionamiento de las unidades de tratamiento individuales, o de grupos de unidades: las muestras deben recogerse en la entrada y la salida de las unidades en cuestión." (L583–L589)
+- Note: Proposal: retire the scalar.
+- Proposed SQL / config: STAGED block D-7 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-8 · ISO-5667-10 · ISO-5667-10-04 · `bypass_flow_assessed` ↔ `probenahmestellen.bypass_assessed`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (boolean; no gate, no consumer) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Al tomar muestras en las plantas de tratamiento de aguas residuales, debe evaluarse la relevancia de cualquier flujo de derivación y del muestreo de estos flujos ya que puede ser necesario para que el muestreo sea representativo del efluente global." (L591–L593)
+- Note: Proposal: retire the scalar.
+- Proposed SQL / config: STAGED block D-8 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-9 · ISO-5667-10 · ISO-5667-10-04 · `cooling_system_type` ↔ `probenahmestellen.cooling_type`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (enum; no gate, no consumer) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "La selección de los puntos de muestreo en los procesos de refrigeración industrial que utilizan agua como refrigerante depende del sistema de agua de refrigeración que se vaya a analizar." (L670–L671)
+- Note: Proposal: retire the scalar.
+- Proposed SQL / config: STAGED block D-9 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-10 · ISO-5667-10 · ISO-5667-10-04 · `cooling_runoff_time` ↔ `probenahmestellen.cooling_runoff_s (badge runoff_ok)`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (number; CR-012 reads it (block)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "En una instalación de muestreo (grifo de muestreo que permita la desinfección, preferiblemente por flameo, y el vaciado) se dejará correr el agua durante al menos 30 s antes del muestreo. El muestreo" (L705–L706)
+- Note: Proposal: after G-6 (CR-038): retire CR-012 (archive) and the scalar.
+- Proposed SQL / config: STAGED block D-10 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-11 · ISO-5667-10 · ISO-5667-10-04 · `upstream_of_biocide` ↔ `probenahmestellen.upstream_of_biocide`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (boolean; no gate, no consumer) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "flameo, y el vaciado) se dejará correr el agua durante al menos 30 s antes del muestreo. El muestreo se realizará de manera que los resultados no se vean distorsionados por la dosificación de biocidas. El lugar de muestreo estará situado aguas arriba del punto de dosificación del biocida. Si el muestreo" (L706–L708)
+- Note: Proposal: retire the scalar.
+- Proposed SQL / config: STAGED block D-11 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-12 · ISO-5667-10 · ISO-5667-10-03 · `k` ↔ `probenahmetermine.k`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (number; input of prod equations 1 / 2 (→ CR-008)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "365 365𝑥2 365𝑥3 365𝑥𝑛 𝐴+ , 𝐴+ , 𝐴+ ,…., 𝐴 + 𝑛 𝑛 𝑛 𝑛" (L483–L485)
+- Note: Proposal: after G-9: retire the scalar together with equations 1 / 2 (archive pattern, md5 9562bb816142fb50e5e77edfd3a671ed / 6e5a8fa252273c3f68506b366e8786fc, ids ba1bf923-06cc-46aa-aab2-40f0dfa7ae22 / c7908fa3-c685-4d8d-a7cd-57e134794a85).
+- Proposed SQL / config: STAGED block D-12 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-13 · ISO-5667-10 · ISO-5667-10-03 · `sampling_day_k` ↔ `probenahmetermine.day_or_week (Fórmula 1 branch)`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (number; output of prod equation 1; CR-008 reads it (warn)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "La fórmula (1) indica el número de días durante los cuales debe realizarse el muestreo. 365 365𝑥2 365𝑥3 365𝑥𝑛 𝐴+ , 𝐴+ , 𝐴+ ,…., 𝐴 + 𝑛 𝑛 𝑛 𝑛" (L481–L485)
+- Note: Proposal: after G-9: retire with equation 1 (see D-12).
+- Proposed SQL / config: STAGED block D-13 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-14 · ISO-5667-10 · ISO-5667-10-03 · `sampling_week_k` ↔ `probenahmetermine.day_or_week (Fórmula 2 branch)`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (number; output of prod equation 2; CR-008 reads it (warn)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "La fórmula (2) indica el número de la semana durante la cual debe realizarse el muestreo. El día de cada semana debe determinarse de manera que las muestras se tomen todos los días de la semana. 52 52𝑥2 52𝑥3 52𝑥𝑛 𝐵+ , 𝐵+ , 𝐴+ ,…., 𝐴 + 𝑛 𝑛 𝑛 𝑛" (L491–L496)
+- Note: Proposal: after G-9: retire with equation 2 (see D-12).
+- Proposed SQL / config: STAGED block D-14 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-15 · ISO-5667-10 · ISO-5667-10-06 · `M3_n` ↔ `flaschen_ctcv.m3_n`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (number; input of prod equation 3 (→ V_n ← CR-019)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "M3n: volumen descargado durante el muestreo de la botella n (M3)" (L1023)
+- Note: Proposal: after G-7: retire with equation 3 (archive, id 6a587ea8-30d9-4eb9-ad5a-b8d8fd60228d, md5 2ac2c6cffbcecf7faeff80ab919defd1) and V_n (D-16); CR-019 → `v_n_sum >= 0` or retired.
+- Proposed SQL / config: STAGED block D-15 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-16 · ISO-5667-10 · ISO-5667-10-06 · `V_n` ↔ `flaschen_ctcv.v_n (Σ v_n_sum)`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (number; output of prod equation 3; CR-019 reads it (warn)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Vn: volumen de la muestra (ml) a tomar en la botella n" (L1017)
+- Note: Proposal: after G-7: retire with equation 3 (see D-15).
+- Proposed SQL / config: STAGED block D-16 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-17 · ISO-5667-10 · ISO-5667-10-07 · `sampler_mobility` ↔ `probenahmegeraete.mobility`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (enum; no gate, no consumer) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Los muestreadores automáticos pueden ser fijos o portátiles y también pueden estar equipados con una cámara refrigerada." (L1304–L1305)
+- Note: Proposal: retire the scalar.
+- Proposed SQL / config: STAGED block D-17 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-18 · ISO-5667-10 · ISO-5667-10-07 · `pump_technology` ↔ `probenahmegeraete.pump_technology`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (enum; no gate, no consumer today (C-2 would add -06)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "El muestreo de los sistemas de bombeo puede realizarse mediante diferentes tecnologías [por ejemplo, mediante una bomba de vacío (VAP), mediante una bomba peristáltica (PP), mediante un émbolo en línea o utilizando sistemas de bombeo externos]. Las ventajas e inconvenientes de los dos tipos principales de muestreadores se presentan en el Anexo F." (L1318–L1321)
+- Note: Proposal: KEEP BOTH while G-5 variant A / C-2 read the scalar; retire only if variant B / neither is ratified.
+- Proposed SQL / config: STAGED block D-18 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-19 · ISO-5667-10 · ISO-5667-10-07 · `sampler_refrigerated` ↔ `probenahmegeraete.refrigerated`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (boolean; CR-023 reads it (block, `sampler_refrigerated == True`)) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "El muestreador automático tendrá un compartimento cerrado para llenar y almacenar las muestras recogidas en la oscuridad, y un sistema que permita mantener las muestras a una temperatura compatible con los requisitos de conservación de la norma ISO 5667-3 durante todo el tiempo que dure el muestreo, que puede durar varios días. En algunos casos, y si se requiere de acuerdo con el cliente, es posible el uso de un muestreador automático portátil no refrigerado (por ejemplo, la accesibilidad del punto de muestreo, la estabilidad del analito en condiciones ambientales)." (L1307–L1312)
+- Note: Proposal: needs a twin first: INSERT equation 'ISO-5667-10-07-D3 geraete_unrefrigerated = count_rows(probenahmegeraete, refrigerated == false)' + derived field, CR-023 → 'geraete_unrefrigerated == 0 AND geraete_count >= 1' (L1310–L1312 allows an unrefrigerated portable sampler by agreement — the owner rules the exception), then retire.
+- Proposed SQL / config: STAGED block D-19 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-20 · ISO-5667-10 · ISO-5667-10-07 · `material_compatible` ↔ `probenahmegeraete.material_compatible`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (boolean; CR-022 reads it (block, on -05 — consumer_worksheets ["ALL"])) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "La naturaleza de los materiales del muestreador automático se elegirá en función de su compatibilidad con el componente objetivo y deberá garantizar la ausencia de interferencias físico- químicas con los parámetros a medir (véase el anexo E)." (L1335–L1337)
+- Note: Proposal: KEEP (recommend DEFER): the scalar is the campaign-level attestation gate CR-022 reads on -05; the register column is per device. No retirement proposed.
+- Proposed SQL / config: STAGED block D-20 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-D-21 · ISO-5667-10 · ISO-5667-10-07 · `equipment_cleaned_checked` ↔ `probenahmegeraete.cleaned_checked`
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): Both stay: the register column is the N-instances shape (per sampling point / date / bottle / device), the prod scalar (boolean; consumed by -09) stays typeable; no second equation for the typed value is emitted. Prod holds 0 stored values and 0 worksheet instances for ISO-5667-10 (read-only count 2026-09-18) — any retirement is data-free.
+- Evidence (verbatim, transcript line): "Antes de iniciar el muestreo, el equipo debe limpiarse (véase el anexo C) y comprobarse (véase 10.3)." (L1374)
+- Note: Proposal: KEEP (recommend DEFER): consumed by -09 (QA / reporting); the register column is per device.
+- Proposed SQL / config: STAGED block D-21 (retirement pattern in the block; rollback: UPDATE fields SET active = true … same row (guarded by active = false AND symbol); gate / equation restores from their archives.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-E-1 · ISO-5667-10 · ISO-5667-10-07 · S7_2_2_1_PUMP — no row for pump_technology tokens peristaltic / external
+- Class: interface-gap (token without a printed figure)
+- Chosen now (fail-safe): The table carries only the two printed figures (vacuum 50 ml, inline_piston 25 ml); a peristaltic / external device row shows no minimum (`unit_volume_min` null) and its badge reads 1 ("kein gedruckter Mindestwert") — never counted as a failure, never a guessed value.
+- Evidence (verbatim, transcript line): "- debe ser adecuado para garantizar un muestreo representativo (por ejemplo, al menos 50 ml para la bomba de vacío o 25 ml para el émbolo en línea);" (L936–L937); "El muestreo de los sistemas de bombeo puede realizarse mediante diferentes tecnologías [por ejemplo, mediante una bomba de vacío (VAP), mediante una bomba peristáltica (PP), mediante un émbolo en línea o utilizando sistemas de bombeo externos]. Las ventajas e inconvenientes de los dos tipos principales de muestreadores se presentan en el Anexo F." (L1318–L1321)
+- Proposed SQL / config: STAGED block E-1 (no SQL — recorded)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-U-1 · ISO-5667-10 · ISO-5667-10-03 · S4_3_2 lt25 — Formula (2) block prints "𝐵+" for its first two terms
+- Class: unreadable-cell
+- Chosen now (fail-safe): Encoded as A + 52·k/n — the legend (L500) defines only A ("A Número aleatorio en un intervalo entre – 52/n y 0"); the row quote keeps the printed glyphs verbatim; the table stays imported_unverified (every ISO-5667-10 table does — VC source).
+- Evidence (verbatim, transcript line): "52 52𝑥2 52𝑥3 52𝑥𝑛 𝐵+ , 𝐵+ , 𝐴+ ,…., 𝐴 + 𝑛 𝑛 𝑛 𝑛" (L494–L496); "n Número de muestras; A Número aleatorio en un intervalo entre – 52/n y 0." (L499–L500)
+- Proposed SQL / config: STAGED block U-1 (no SQL — recorded)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-J-1 · ISO-5667-10 · ISO-5667-10-03 · the "unas 25" band boundary (n = 25 exactly)
+- Class: text-only-formula (boundary)
+- Chosen now (fail-safe): `if(number_of_samples > 25, 'gt25', 'lt25')` — n = 25 exactly falls to Fórmula (2) (weeks). The text says "superior a unas 25" / "inferior a unas 25" and never places 25 itself; > 25 is the literal reading of "superior".
+- Evidence (verbatim, transcript line): "Fórmula (1) para un número de muestras (n), superior a unas 25 y de la Fórmula (2) para un número de muestras inferior a unas 25." (L478–L479)
+- Proposed SQL / config: STAGED block J-1 (retirement pattern in the block; rollback: —)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-J-2 · ISO-5667-10 · ISO-5667-10-06 · Fórmula (3) bound to composite_mode == CTCV
+- Class: cross-standard / token mapping
+- Chosen now (fail-safe): The `flaschen_ctcv` register and its Σ outputs are hidden unless CTCV (the inventory / brief mapping). Fórmula (3) belongs to §7.2.2.3 — the time-proportional MULTI-bottle composite reconstituted per flow ("sujeto al uso de un muestreador automático de botellas múltiples"); §7.2.2.4 CTCV recommends a SINGLE bottle. Prod has one token for both; a single-bottle CTCV leaves the register empty (Σ manual_required, never a phantom sum).
+- Evidence (verbatim, transcript line): "Cuando el muestreador automático no puede conectarse al caudalímetro (por incompatibilidad de los equipos o por una distancia demasiado grande entre ambos dispositivos), cuando el caudal y/o la composición del efluente son variables o por exigencias legales, se puede realizar un muestreo ponderado en el tiempo. Por lo tanto, es necesario construir la muestra compuesta (sujeto al uso de un muestreador automático de botellas múltiples)." (L985–L989); "En este caso, como el caudal no es relevante para los compuestos ponderados por tiempo, se recomienda que las muestras se recojan en una sola botella para evitar la etapa de transferencia." (L1030–L1031); "- Muestreo de tiempo constante y volumen constante (C.T.C.V): volúmenes iguales de muestra o submuestra recogidos en incrementos de tiempo iguales." (L293–L294)
+- Proposed SQL / config: STAGED block J-2 (retirement pattern in the block; rollback: —)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-J-3 · ISO-5667-10 · ISO-5667-10-06 · homogeneity_deviation serves §7.4 (tank) AND §9.1 (every homogenisation)
+- Class: judgment (no hide)
+- Chosen now (fail-safe): No visibility rule on the field (it is also consumed by -08 and read by CR-021); G-1 stages the guard with the caveat.
+- Evidence (verbatim, transcript line): "la representatividad del muestreo. La desviación máxima tolerada entre dos mediciones del parámetro seleccionado para satisfacer el criterio de homogeneidad será preferentemente inferior al 20 %." (L1253–L1255); "duración de la homogeneización). La diferencia máxima entre dos mediciones del parámetro debe ser preferiblemente <20 %. Consulte la norma ISO 5667-14:2016, 7.4.4." (L1504–L1505)
+- Proposed SQL / config: STAGED block J-3 (no SQL — recorded)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-J-4 · ISO-5667-10 · ISO-5667-10-06 · G-4 reads "automatic sampler" as composite_mode IN {CVVT, CTVV, CTCV}
+- Class: judgment
+- Chosen now (fail-safe): The §7.2.2.1 tube / velocity / unit-volume rules are printed for the automatic sampler; prod has no "sampler is automatic" driver except the automatic composite modes (§6.2) and grab_method == automatic (§6.1 a.3). G-4 / G-5 guard on the composite modes only — an automatic grab sampler would be unguarded.
+- Evidence (verbatim, transcript line): "7.2.2.1 Recomendaciones generales sobre el uso de un muestreador automático Para la instalación y utilización de un muestreador automático, se recomienda seguir los siguientes puntos" (L885–L887); "3. Utilizando un muestreador automático." (L725); "Para el muestreo compuesto automático, existen varios tipos de muestra compuesta (véase la norma ISO 5667-1). Es posible implementar: - muestreo de volumen constante y tiempo variable (C.V.V.T) - muestreo de volumen variable de tiempo constante (C.T.V.V) - muestreo de volumen constante en tiempo constante (C.T.C.V)" (L737–L744)
+- Proposed SQL / config: STAGED block J-4 (retirement pattern in the block; rollback: —)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-J-5 · ISO-5667-10 · ISO-5667-10-07 · probenahmegeraete.unit_volume_ok — a device with a printed minimum but no entered volume counts as a failure
+- Class: judgment (conservative badge)
+- Chosen now (fail-safe): `if(unit_volume_min IS NULL, 1, if(unit_volume_ml IS NULL, 0, …))` — a vacuum / inline-piston row without a unit volume reads 0 and is counted by `geraete_unit_volume_fail` (never a phantom pass).
+- Evidence (verbatim, transcript line): "- Volumen de la unidad: - debe ser adecuado para garantizar un muestreo representativo (por ejemplo, al menos 50 ml para la bomba de vacío o 25 ml para el émbolo en línea);" (L934–L937)
+- Proposed SQL / config: STAGED block J-5 (retirement pattern in the block; rollback: —)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-F-1 · ISO-5667-10 · ISO-5667-10-03 · probenahmetermine — the n rows are entered by hand (no row generator)
+- Class: text-only-formula (editor capability)
+- Chosen now (fail-safe): Fórmula (1) / (2) print a sequence k = 1 … n; the RegisterEditor has no "generate n rows" action (Plan-2b follow-up). The engineer adds n rows; each derives its day / week; `termine_count == number_of_samples` (G-9) checks completeness.
+- Evidence (verbatim, transcript line): "365 365𝑥2 365𝑥3 365𝑥𝑛 𝐴+ , 𝐴+ , 𝐴+ ,…., 𝐴 + 𝑛 𝑛 𝑛 𝑛" (L483–L485)
+- Proposed SQL / config: STAGED block F-1 (retirement pattern in the block; rollback: —)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-F-2 · ISO-5667-10 · ISO-5667-10-01 · qualified grab: window ≤ 2 h and interval ≥ 2 min need time arithmetic
+- Class: text-only-formula
+- Chosen now (fail-safe): Only the COUNT (≥ 5) is derived from the register (time is a text column HH:MM); window and interval stay the prod inputs `qualified_grab_window` / `qualified_grab_interval` (CR-002).
+- Evidence (verbatim, transcript line): "Forma especial de una muestra compuesta (3.1), formada por al menos cinco muestras puntuales, tomadas y mezcladas en un plazo un período máximo de dos horas y con un intervalo no inferior a dos minutos." (L305–L307)
+- Proposed SQL / config: STAGED block F-2 (retirement pattern in the block; rollback: —)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-F-3 · ISO-5667-10 · ISO-5667-10-03 · "fórmulas similares para otros períodos" — not printed
+- Class: text-only-formula
+- Chosen now (fail-safe): Only the year is encoded (Fórmula 1 / 2); the register and its outputs are hidden for the other `sampling_period` tokens (several_months / weeks / shorter). No monthly / quarterly form is printed, so none is invented.
+- Evidence (verbatim, transcript line): "Pueden utilizarse fórmulas similares para otros períodos, por ejemplo, un mes, tres meses, seis meses, etc." (L502–L503)
+- Proposed SQL / config: STAGED block F-3 (no SQL — recorded)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-O-1 · ISO-5667-10 · ISO-5667-10-03 · S4_3_2 override_policy anhaltswert (brief: locked)
+- Class: override-policy
+- Chosen now (fail-safe): Emitted `anhaltswert` from the guideline's own words — "pueden determinarse mediante una fórmula. Un ejemplo es:" and "Pueden utilizarse fórmulas similares" — the brief said locked. Runtime effect nil (no lookup_fill binds S4_3_2; the equations read it).
+- Evidence (verbatim, transcript line): "si el período de muestreo abarca un año, los días de muestreo pueden determinarse mediante una fórmula. Un ejemplo es:" (L475–L476); "Pueden utilizarse fórmulas similares para otros períodos, por ejemplo, un mes, tres meses, seis meses, etc." (L502–L503)
+- Proposed SQL / config: STAGED block O-1 (retirement pattern in the block; rollback: reverse UPDATE.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-O-2 · ISO-5667-10 · ISO-5667-10-06 · S7_2_2_1_TUBE — NOTA 1 permits demonstrated lower velocities (messwert candidate)
+- Class: override-policy
+- Chosen now (fail-safe): Emitted `locked` ("no debe ser inferior a 0,5 m/s"); NOTA 1 ("Pueden ser posibles velocidades de aspiración inferiores si se demuestra que son satisfactorias") is the `messwert` cue for a demonstrated exception beyond the printed 12 mm row.
+- Evidence (verbatim, transcript line): "- Velocidad de aspiración: no debe ser inferior a 0,5 m/s para evitar la segregación de la materia en suspensión en el" (L922–L923); "NOTA 1 Pueden ser posibles velocidades de aspiración inferiores si se demuestra que son satisfactorias. Un ejemplo es cuando el diámetro interno del tubo de aspiración es de 12 mm o más, en cuyo caso se ha demostrado que una velocidad de aspiración de 0,3 m/s es aceptable[5]." (L928–L930)
+- Proposed SQL / config: STAGED block O-2 (retirement pattern in the block; rollback: reverse UPDATE.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-O-3 · ISO-5667-10 · ISO-5667-10-07 · S7_2_2_1_PUMP override_policy anhaltswert (brief: locked)
+- Class: override-policy
+- Chosen now (fail-safe): Emitted `anhaltswert` — the figures are printed as an example ("por ejemplo, al menos 50 ml … o 25 ml …"); the brief said locked. The register reads the table in a derived column (no override affordance either way).
+- Evidence (verbatim, transcript line): "- Volumen de la unidad: - debe ser adecuado para garantizar un muestreo representativo (por ejemplo, al menos 50 ml para la bomba de vacío o 25 ml para el émbolo en línea);" (L934–L937)
+- Proposed SQL / config: STAGED block O-3 (retirement pattern in the block; rollback: reverse UPDATE.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-O-4 · ISO-5667-10 · ISO-5667-10-07 · inventory premise "pump-volume sentence NOT located in the Spanish txt" — REFUTED (R-5)
+- Class: observation (source present)
+- Chosen now (fail-safe): The sentence IS printed at L936–L937; S7_2_2_1_PUMP is seeded from it. Grep in the report: `grep -n "50 ml\|25 ml"` → 936 / 937 / 952 / 1351.
+- Evidence (verbatim, transcript line): "- debe ser adecuado para garantizar un muestreo representativo (por ejemplo, al menos 50 ml para la bomba de vacío o 25 ml para el émbolo en línea);" (L936–L937)
+- Proposed SQL / config: STAGED block O-4 (no SQL — recorded)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-O-5 · ISO-5667-10 · ISO-5667-10-02 · S5_SITE override_policy locked — the printed modals are softer
+- Class: override-policy
+- Chosen now (fail-safe): Emitted `locked` (the prod gates CR-011 / CR-012 block on these figures); the row `modal` cells record the printed verbs — "como norma general, debe situarse al menos tres veces", "puede recomendarse un punto de muestreo entre un tercio y la mitad", "se dejará correr … al menos 30 s". The depth range is a recommendation ("puede recomendarse") — the register badge checks it, no gate is proposed on it.
+- Evidence (verbatim, transcript line): "El punto de toma de muestras debe estar siempre situado aguas abajo de la restricción y, como norma general, debe situarse al menos tres veces el diámetro de la tubería, o la anchura del canal, aguas abajo de la restricción. La entrada de la sonda de muestreo debe orientarse preferentemente" (L555–L557); "depósitos o las biopelículas que se desarrollan. En general, puede recomendarse un punto de muestreo entre un tercio y la mitad de la profundidad del agua del efluente por debajo de la superficie del agua." (L562–L564); "En una instalación de muestreo (grifo de muestreo que permita la desinfección, preferiblemente por flameo, y el vaciado) se dejará correr el agua durante al menos 30 s antes del muestreo. El muestreo" (L705–L706)
+- Proposed SQL / config: STAGED block O-5 (retirement pattern in the block; rollback: reverse UPDATE.)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-I-1 · ISO-5667-10 · ISO-5667-10-06 / -07 · server-side visibility resolves the worksheet's OWN fields only
+- Class: interface-gap
+- Chosen now (fail-safe): The rules keyed on INHERITED drivers (`composite_mode` on -06, `main_sampling_type` on -06, `representativeness_mode` on -06 / -07) hide correctly on the form / report / PDF (client + report evaluators see inherited values) but are `pending` = visible for the server-side materialiser / approval gate — an inherited-driver rule never hides a required field on the server (fail-safe: nothing is skipped). Scalar-only equations (-03-D1 … D3, -05-D1 / D2, -06-D4, -08-D1) are not materialised (amendment D).
+- Evidence (verbatim, transcript line): "Para el muestreo compuesto automático, existen varios tipos de muestra compuesta (véase la norma ISO 5667-1). Es posible implementar: - muestreo de volumen constante y tiempo variable (C.V.V.T) - muestreo de volumen variable de tiempo constante (C.T.V.V) - muestreo de volumen constante en tiempo constante (C.T.C.V)" (L737–L744)
+- Proposed SQL / config: STAGED block I-1 (retirement pattern in the block; rollback: —)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-X-1 · ISO-5667-10 · ISO-5667-10-08 / -09 / -10 · shared "Probenahme-QA" block (transport (5 ± 3) °C, ISO 5667-3 preservation, ISO 5667-14 QA, traceability, PPE) across ISO-5667-1 / -6 / -10 and ATV-A-704E
+- Class: cross-standard
+- Chosen now (fail-safe): Recorded only (inventory §5 win 5, Phase 6): the -08 / -09 / -10 booleans stay per standard; CR-027 (2–8 °C) already encodes L1566–L1567.
+- Evidence (verbatim, transcript line): "Para garantizar la integridad de la muestra entre el muestreo y la recepción en el laboratorio, las muestras deben almacenarse en un dispositivo de refrigeración capaz de mantener una temperatura de (5 ± 3) °C. Para evaluar adecuadamente las condiciones durante el transporte, puede utilizarse un" (L1565–L1567)
+- Proposed SQL / config: STAGED block X-1 (no SQL — recorded)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_10-X-2 · ISO-5667-10 · ISO-5667-10-03 · number_of_samples ← ISO-5667-1 statistics (§4.3.1)
+- Class: cross-standard
+- Chosen now (fail-safe): Typed here (prod); §4.3.1 defers to ISO 2602 / ISO 3534 / ISO 5667-1 or the regulator — a bare reference, never expanded (content-boundary rule).
+- Evidence (verbatim, transcript line): "Los análisis deben basarse en muestras tomadas a intervalos regulares durante un período determinado (compuesto o puntual). La decisión sobre el número necesario de muestras tomadas durante cada período debe decidirse basándose en técnicas estadísticas (véase ISO 2602,[1] ISO 3534 (todas las partes)[2] e ISO 5667-1). Pero el número de muestras a tomar puede ser decidido a menudo por el organismo regulador o las autoridades de control de la contaminación." (L424–L428)
+- Proposed SQL / config: STAGED block X-2 (no SQL — recorded)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 20, no signature needed)
+
+- **Field `visible_when` on existing inputs: 10 emitted** (-04 `sampling_depth_fraction` / `wwtp_sampling_objective` / `bypass_flow_assessed` / `cooling_system_type` / `upstream_of_biocide`; -05 `grab_method`; -06 `sampler_flow_linked` / `tank_mixing_maintained`; -07 `tank_mixing_system` / `tank_sampling_device` — the last two `pending` until C-1); every other brief target is gate-read or consumed and lives in G-1 … G-9 / C-3 (asserted through `gateReaders` / `emitFieldConfigSql` throws in `field-configs-iso5667-10.test.ts`).
+- **Register column `kennung`, not `id`:** a register column keyed `id` would read the row IDENTITY (`row.id`) as its cell and the editor would overwrite the identity on write — caught while writing the render test; recorded as a trap in the playbook.
+- **The 21 amendment-K pairs** are the price of the brief's per-point / per-device registers over a prod model that asks every fact once; 0 stored values / 0 instances make every retirement data-free today.
+
 ## Plan 3 tooling rulings
 
 ### plan3-T-12c · [CODE] · `emit-field-configs-sql.ts` gate-aware guard · a `visible_when` may not silently disarm a same-worksheet gate

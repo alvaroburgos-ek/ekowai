@@ -1,0 +1,10 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'ISO-5667-10' AND edition = '2020' AND table_code = 'S4_3_2';
+DELETE FROM regulation_tables WHERE standard_code = 'ISO-5667-10' AND edition = '2020' AND table_code = 'S7_2_1';
+DELETE FROM regulation_tables WHERE standard_code = 'ISO-5667-10' AND edition = '2020' AND table_code = 'S7_2_2_1_TUBE';
+DELETE FROM regulation_tables WHERE standard_code = 'ISO-5667-10' AND edition = '2020' AND table_code = 'S7_2_2_1_PUMP';
+DELETE FROM regulation_tables WHERE standard_code = 'ISO-5667-10' AND edition = '2020' AND table_code = 'S7_2_2_4';
+DELETE FROM regulation_tables WHERE standard_code = 'ISO-5667-10' AND edition = '2020' AND table_code = 'S3_4';
+DELETE FROM regulation_tables WHERE standard_code = 'ISO-5667-10' AND edition = '2020' AND table_code = 'S9_1';
+DELETE FROM regulation_tables WHERE standard_code = 'ISO-5667-10' AND edition = '2020' AND table_code = 'S5_SITE';
+COMMIT;
