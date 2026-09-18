@@ -5253,9 +5253,9 @@ Report: `reports/plan-3-m820_2.md`. STAGED SQL: `scripts/verification/m820_2-STA
 
 ### m820_2-O-1 · DWA-M-820-2 · Anhang A / Anhang B · `anhaltswert` policy of the two outline catalogues
 - Class: override-policy
-- Chosen now (fail-safe): `anhaltswert` on ANHANGA and ANHANGB (the checklists pick rows, nothing is overwritten — the policy matters only for a future `lookup_fill`). The brief's cue "Ein erster Gliederungsvorschlag" is NOT printed (R-5); the printed heads and sentences carry the same meaning.
-- Evidence (verbatim, transcript line): "Anhang A Gliederungsvorschlag für einen Statusbericht" (L2523); "Anhang B Gliederungsvorschlag für ein Projekthandbuch" (L2559); "Im Anhang B ist ein Gliederungsvorschlag enthalten." (L663); "Es empfiehlt sich, einen Muster-Statusbericht (Gliederungsbeispiel siehe Anhang A) … aufzubauen" (L681)
-- Proposed SQL / config: none (seed as emitted).
+- Chosen now (fail-safe): `anhaltswert` on ANHANGA and ANHANGB (the checklists pick rows, nothing is overwritten — the policy matters only for a future `lookup_fill`). **Fix round 1 (RETRACTION):** the first commit recorded here that the brief's cue "Ein erster Gliederungsvorschlag" is NOT printed — that was FALSE (controller re-executed `grep -n "Ein erster Gliederungsvorschlag\|Ein Gliederungsvorschlag" DWA-M_820-2.md` → L367 and L375; my read had truncated both lines at 300 characters and no failing grep was recorded). The cue IS printed for both annexes and is now composed into both `override_quote`s.
+- Evidence (verbatim, transcript line): "Ein erster Gliederungsvorschlag ist im Anhang B beigefügt." (L367); "Ein Gliederungsvorschlag und ein Beispiel sind im Anhang A beigefügt." (L375); "Anhang A Gliederungsvorschlag für einen Statusbericht" (L2523); "Anhang B Gliederungsvorschlag für ein Projekthandbuch" (L2559); "Im Anhang B ist ein Gliederungsvorschlag enthalten." (L663); "Es empfiehlt sich, einen Muster-Statusbericht (Gliederungsbeispiel siehe Anhang A) … aufzubauen" (L681)
+- Proposed SQL / config: none (seed re-emitted in fix round 1 with the composed quotes: ANHANGB = L663 — L367, ANHANGA = L681 — L2525 — L375).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m820_2-X-1 · DWA-M-820-2 · 820-2-19 · `vergaben_los` → Teil 1 Loseausnahme (DWA-M-820-1 M820-09 `lose`)
@@ -5271,6 +5271,7 @@ Report: `reports/plan-3-m820_2.md`. STAGED SQL: `scripts/verification/m820_2-STA
 - No captured field of this standard lists its own worksheet as a consumer (Task 12b class) — pinned; 97 of 113 fields carry consumers, the 16 orphans have no section.
 - Every Plan-3 equation of this standard is register-fed and lives on its register's worksheet — all 14 outputs are materialised by the save path (no scalar-only row; amendment D has nothing to note here).
 - The Plan-1 `change_orders` config typed `datum` as text (placeholder TT.MM.JJJJ); the in-place upgrade types it `date` (0 stored rows in prod — checked read-only 2026-09-18; the Plan-1 selection migration is unapplied, so no stored text date exists to convert).
+- `820-2-21 changes_record_date` ("Datum Erfassung") and `820-2-19 vergabesumme_summary_date` ("Datum Vergabe-Zusammenfassung") are "Stand vom" summary dates of their worksheets, not per-row facts of the new `change_orders` / `vergaben_los` registers — NOT amendment-K pairs; both stay untouched (fix round 1, minor 2).
 
 ## Plan 3 tooling rulings
 

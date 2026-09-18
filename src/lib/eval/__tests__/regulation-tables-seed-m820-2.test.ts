@@ -5,12 +5,14 @@
  * SEED_BUILDERS registration.
  */
 import { describe, it, expect } from 'vitest';
-import { anhangAAsTable, anhangBAsTable, m8202SeedTables, ANHANGA_ROWS, ANHANGB_ROWS, outlineOption, M820_2_EDITION, Q_L663, Q_L681 } from '../regulation-tables-seed-m820_2';
+import { anhangAAsTable, anhangBAsTable, m8202SeedTables, ANHANGA_ROWS, ANHANGB_ROWS, outlineOption, M820_2_EDITION, Q_L663, Q_L681, Q_L367, Q_L375 } from '../regulation-tables-seed-m820_2';
 import type { RegulationTable } from '../regulation-tables';
 import { SEED_BUILDERS, liveSeedSlugs } from '../regulation-tables-seed-index';
 import { makeTableLookup, resolveRegulationTable } from '../regulation-tables-fallback';
 
 const STD = 'DWA-M-820-2';
+/** The middle span of ANHANGA's composed policy quote (L2525) — read back from the table so the pin asserts the ORDER of the three spans. */
+const Q_L2525_of = (t: RegulationTable) => (t.override_quote ?? '').split(' — ')[1];
 
 function expectWellFormed(t: RegulationTable) {
   const keys = new Set<string>();
@@ -38,12 +40,15 @@ describe('DWA-M-820-2 Plan-3 seed tables', () => {
     expect(M820_2_EDITION).toBe('2023'); // title page L9 "April 2023", imprint L48 "© DWA, 1. Auflage, Hennef 2023" = prod standards.version 'April 2023'
     // every displayed cell (number + title) is legible in the transcript ⇒ md_verified on both (amendment F)
     for (const t of tables) expect(t.verification_status, t.table_code).toBe('md_verified');
-    // both are "Gliederungsvorschlag" outlines ⇒ anhaltswert (L663 / L681 — the brief's "Ein erster Gliederungsvorschlag" is NOT printed)
+    // both are "Gliederungsvorschlag" outlines ⇒ anhaltswert — the brief's cue IS printed (L367 Anhang B, L375 Anhang A; fix round 1 retracted
+    // the first commit's false "not printed" claim) and is composed into each override_quote beside L663 / L681
     for (const t of tables) expect(t.override_policy).toBe('anhaltswert');
-    expect(anhangBAsTable().override_quote).toBe(Q_L663);
+    expect(anhangBAsTable().override_quote).toBe(`${Q_L663} — ${Q_L367}`);
     expect(Q_L663).toContain('Im Anhang B ist ein Gliederungsvorschlag enthalten.');
-    expect(anhangAAsTable().override_quote).toContain(Q_L681);
+    expect(Q_L367).toBe('Ein erster Gliederungsvorschlag ist im Anhang B beigefügt.'); // L367
+    expect(anhangAAsTable().override_quote).toBe(`${Q_L681} — ${Q_L2525_of(anhangAAsTable())} — ${Q_L375}`);
     expect(Q_L681).toContain('Gliederungsbeispiel siehe Anhang A');
+    expect(Q_L375).toBe('Ein Gliederungsvorschlag und ein Beispiel sind im Anhang A beigefügt.'); // L375
   });
 
   it('ANHANGA (L2532–L2550 + L2556–L2557): the 19 printed sections in order with their numbers and the two annexes; keys a1…a9_2, anhang1, anhang2; group + ebene', () => {

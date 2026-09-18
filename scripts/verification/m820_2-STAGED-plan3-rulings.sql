@@ -472,5 +472,6 @@
 -- (Bedarfsplanung Konzept / Projekt hide refuted by L336 / L1058), m820_2-J-2 (hoai_compliance ← contract_type: no printed rule),
 -- m820_2-J-3 ("BIM fields" hide refuted: § 8.2 / § 8.3.3 / § 8.7 / § 8.8 / § 8.9 are not BIM-conditional), m820_2-I-1
 -- (auflagen.genehmigung is free text — no cross-register reference to permit_inventory_complete rows), m820_2-O-1 (Anhang A / B policy
--- anhaltswert from the printed "Gliederungsvorschlag" / "empfiehlt sich" — the brief's cue is not printed), m820_2-X-1 (vergaben_los →
+-- anhaltswert from the printed L367 "Ein erster Gliederungsvorschlag ist im Anhang B beigefügt." / L375 — fix round 1 retracted the false "not printed"
+-- claim of the first commit), m820_2-X-1 (vergaben_los →
 -- Teil 1 Loseausnahme needs a cross-standard feed, Phase 6), observations (REQ-13 / REQ-50 empty conditions on -05 / -20).

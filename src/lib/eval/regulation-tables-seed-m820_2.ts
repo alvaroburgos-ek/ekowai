@@ -21,12 +21,13 @@
  * outline — the options are the `gedruckt` column of these rows (pinned).
  *
  * Policy `anhaltswert`: both annexes are headed "Gliederungsvorschlag" (L2523 /
- * L2559); L663 "Im Anhang B ist ein Gliederungsvorschlag enthalten." and L681
- * "Es empfiehlt sich, einen Muster-Statusbericht (Gliederungsbeispiel siehe
- * Anhang A) … aufzubauen" — a proposal to adapt, never a locked list. NOTE:
- * the brief's cue "Ein erster Gliederungsvorschlag" is NOT printed in the
- * transcript (R-5 reversal, recorded in the report) — the printed sentences
- * above are the cue.
+ * L2559); the brief's cue IS printed — L367 "Ein erster Gliederungsvorschlag ist
+ * im Anhang B beigefügt." (§ 2.1 Projekthandbuch) and L375 "Ein Gliederungsvorschlag
+ * und ein Beispiel sind im Anhang A beigefügt." (§ 2.1 Statusbericht) — plus L663
+ * "Im Anhang B ist ein Gliederungsvorschlag enthalten." and L681 "Es empfiehlt
+ * sich, einen Muster-Statusbericht (Gliederungsbeispiel siehe Anhang A) …
+ * aufzubauen": a proposal to adapt, never a locked list. (Fix round 1: the first
+ * commit falsely recorded L367 / L375 as "not printed" — retracted, see the report.)
  *
  * Verification status: `md_verified` on both — every printed row is lifted and
  * every displayed cell (number + title) is legible (amendment F).
@@ -43,6 +44,8 @@ export const Q_L681 = 'Es empfiehlt sich, einen Muster-Statusbericht (Gliederung
 export const Q_L2523 = 'Anhang A Gliederungsvorschlag für einen Statusbericht';
 export const Q_L2525 = 'Abhängig von den Anforderungen im Projekt kann der Statusbericht auf 1 bis 2 Seiten in stark zusammengefasster Form oder auch in textlicher Form in einem längeren Bericht erarbeitet werden.';
 export const Q_L2559 = 'Anhang B Gliederungsvorschlag für ein Projekthandbuch';
+export const Q_L367 = "Ein erster Gliederungsvorschlag ist im Anhang B beigefügt."; // § 2.1 "Projekthandbuch" — the brief's cue, printed
+export const Q_L375 = "Ein Gliederungsvorschlag und ein Beispiel sind im Anhang A beigefügt."; // § 2.1 "Statusbericht" — the brief's cue for Anhang A, printed
 
 // ---------------------------------------------------------------------------
 // Anhang A — Gliederungsvorschlag für einen Statusbericht (L2523; the Inhaltsverzeichnis table L2531–L2552, the two
@@ -75,7 +78,9 @@ export const ANHANGA_ROWS: readonly OutlineRow[] = [
   A('a9', '9', 'Risikoanalyse und Arbeitssicherheit', 1, 2548),
   A('a9_1', '9.1', 'Risikoanalyse', 2, 2549),
   A('a9_2', '9.2', 'Arbeitssicherheit', 2, 2550),
-  // the two printed annexes (L2556 / L2557 — plain lines under the "Anhang" head, not tabular rows)
+  // the two printed annexes (L2556 / L2557 — plain lines under the "Anhang" head, not tabular rows). L2556 ends in the
+  // printed fill-in label "Stand:" (the date the plan is dated) — deliberately EXCLUDED from `titel` and `gedruckt`
+  // (a label, not part of the title); it stays in the verbatim quote.
   { value: 'anhang1', nummer: 'Anhang 1', titel: 'Finanz- und Liquiditätsplan', ebene: 0, line: 2556, quote: 'Anhang 1: Finanz- und Liquiditätsplan Stand:' },
   { value: 'anhang2', nummer: 'Anhang 2', titel: 'Kosten-, Vertrags- und Zahlungsstand sowie Kostenprognose', ebene: 0, line: 2557, quote: 'Anhang 2: Kosten-, Vertrags- und Zahlungsstand sowie Kostenprognose' },
 ];
@@ -91,8 +96,8 @@ export function anhangAAsTable(): RegulationTable {
     key_columns: ['abschnitt'],
     value_columns: [{ name: 'nummer', type: 'string' }, { name: 'titel', type: 'string' }, { name: 'gedruckt', type: 'string' }, { name: 'ebene', type: 'number' }],
     override_policy: 'anhaltswert',
-    // L681 — L2525 (a "Gliederungsbeispiel" to build a project template from; length and form are the project's choice)
-    override_quote: `${Q_L681} — ${Q_L2525}`,
+    // L681 — L2525 — L375 (a "Gliederungsbeispiel" to build a project template from; length and form are the project's choice)
+    override_quote: `${Q_L681} — ${Q_L2525} — ${Q_L375}`,
     verification_status: 'md_verified', rows };
 }
 
@@ -122,8 +127,8 @@ export function anhangBAsTable(): RegulationTable {
     key_columns: ['kapitel'],
     value_columns: [{ name: 'nummer', type: 'string' }, { name: 'titel', type: 'string' }, { name: 'gedruckt', type: 'string' }],
     override_policy: 'anhaltswert',
-    // L663 (the Merkblatt's own words: contents and scope follow the project's complexity; Anhang B is a proposal)
-    override_quote: Q_L663,
+    // L663 — L367 (the Merkblatt's own words: contents and scope follow the project's complexity; Anhang B is "ein erster Gliederungsvorschlag")
+    override_quote: `${Q_L663} — ${Q_L367}`,
     verification_status: 'md_verified', rows };
 }
 
