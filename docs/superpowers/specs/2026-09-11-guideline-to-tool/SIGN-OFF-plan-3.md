@@ -7020,6 +7020,446 @@ Encoded 2026-09-18 from `C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability
 - **Scalar-only equation (amendment D, noted once):** `ISO-5667-6-04-D3` (I-1) — computed on the form / report, not server-materialised; the nine register-fed rows materialise on save.
 - **Brief premises refuted by the capture (O-1):** no `chain_of_custody_*` fields on -10; no `bottle_contains_preservative` on -09 (created); `extrapolation_pct` = prod `travel_time_extrapolation_limit`.
 
+## Task 24 — VSME (vsme)
+
+Encoded 2026-09-18 WITHOUT a transcript: the only quotable text is prod's own compliance_requirements paragraph wording (grade EV — captured read-only by `scripts/verification/vsme-capture-text.mjs` into `src/lib/eval/field-configs/vsme.text.prior.json`, cited `[prod compliance_requirements.description|source_quote (Para NN, <CR code>)]`); enum tokens / consumers / gates from `src/lib/eval/field-configs/vsme.prior.json` (2026-09-18, read-only). No table seeded, no value typed from memory of the standard; the XLSX template read for STRUCTURE only. STAGED SQL: `scripts/verification/vsme-STAGED-plan3-rulings.sql` (same ids). Report: `reports/plan-3-vsme.md`. This section and the STAGED file are generated from the captures (scratchpad `gen-vsme-staged.mjs`).
+
+### vsme-G-1 · VSME · VSME-B08.300 · CR-B08-03 (warn, `EmployeeTurnoverRate IS NOT NULL`) — IF-guard on the printed 50-employee threshold + the consumer edit of NumberOfEmployees + the follow-up hide of EmployeeTurnoverRate
+- Class: gate-guard
+- Chosen now (fail-safe): CR-B08-03 stays as captured (unconditional warn) and EmployeeTurnoverRate stays visible: the gate-aware guard REFUSES the hide (pinned: "read by gate VSME-CR-B08-03"), and NumberOfEmployees (B01.000) is not inherited into B08.300 (consumer_worksheets null — pinned), so the rule could not resolve there either. The threshold IS prod text ("If the undertaking employs 50 or more employees …", resolution (1)) — that is the only reason the literal 50 may be written. Once ratified, in ONE transaction: NumberOfEmployees gains VSME-B08.300 as consumer, the gate reads IF NumberOfEmployees >= 50 THEN EmployeeTurnoverRate IS NOT NULL (fewer than 50 ⇒ pass; unset ⇒ pending — the captured description itself says the trigger "ist nicht im Gate-Grammar-Scope vergleichbar"; the IF grammar makes it comparable), and the hide follows (exempt by the IF guard — pinned). Observation: NumberOfEmployees is BOTH a typed required field and the output of EQ-01 on B01.000 (#22 class) — untouched here.
+- Evidence (verbatim, prod capture — no transcript): "Para 40: „If the undertaking employs 50 or more employees, it shall disclose the employee turnover rate …“ Bedingt (Schwellenwert 50). Der Auslöser (Beschäftigtenzahl) ist nicht im Gate-Grammar-Scope vergleichbar → beratend." [prod compliance_requirements.description (Para 40, VSME-CR-B08-03)]
+- Note: Apply order: this block is self-contained (no created symbol read).
+- Proposed SQL / config: STAGED block G-1 (rollback: RESTORE('63c6798d-147b-4e39-91be-91e4b95e7a0d'); UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w. …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-G-2 · VSME · VSME-B01.000 · CR-B07-01 (BLOCK, `UndertakingAppliesCircularEconomyPrinciples IS NOT NULL`) — mis-hosted on B01.000, its symbol lives on B07.000 only: re-home
+- Class: gate-guard
+- Chosen now (fail-safe): Nothing changed: CR-B07-01 stays on B01.000 where UndertakingAppliesCircularEconomyPrinciples does not exist (captured: the symbol is a B07.000 field; B01.000 has no such field) — the gate is pending on every project today (inventory dp-vsme-01-cr-mishosting; the 2026-07-28 re-home migration moved the 16 WARN gates only, "warn->warn = zero enforcement change", and left this BLOCK). Re-homing it to B07.000 makes a currently inert block gate EFFECTIVE on B07.000 — an enforcement change, hence a ruling. The emitted B07.000 rule (DescriptionOfHowCircularEconomyPrinciplesAreApplied ← UndertakingAppliesCircularEconomyPrinciples == true) hides the DESCRIPTION only; the driver the gate reads stays visible, so the re-homed gate keeps enforcing.
+- Evidence (verbatim, prod capture — no transcript): "Para 37: „The undertaking shall disclose whether it applies circular economy principles …“ Die Ja/Nein-Angabe ist unbedingt (das „… and, if so, how …“ ist die bedingte Folgeangabe)." [prod compliance_requirements.description (Para 37, VSME-CR-B07-01)]; "VSME B7, §37 (p.10): "The undertaking shall disclose whether it applies circular economy principles and, if so, how it applies these principles."" [prod compliance_requirements.source_quote (Para 37, VSME-CR-B07-01)]
+- Note: Worksheet ids (captured): VSME-B01.000 = 9ddd8945-4cb6-47fa-88dd-71d01271f12b, VSME-B07.000 = 5596113d-ac0d-412a-96df-3f2ae63ed4bc.
+- Proposed SQL / config: STAGED block G-2 (rollback: RESTORE('8b65ebbb-4998-4dcf-b1e8-95a697b97e5b') (restores worksheet_template_id from the archive).)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-G-3 · VSME · VSME-C09.000 · CR-C09-01 (warn, `GenderDiversityRatioInGovernanceBody IS NOT NULL`) — IF-guard on the created governance_body_exists + the follow-up hide of GenderDiversityRatioInGovernanceBody
+- Class: gate-guard
+- Chosen now (fail-safe): The driver governance_body_exists (boolean attestation, C09.000) IS created by 20260917102410; CR-C09-01 stays unconditional and GenderDiversityRatioInGovernanceBody stays visible: the gate-aware guard REFUSES the hide (pinned: "read by gate VSME-CR-C09-01"). Once ratified the gate reads IF governance_body_exists == true THEN GenderDiversityRatioInGovernanceBody IS NOT NULL (no governance body ⇒ pass; unset ⇒ pending) and the hide follows in the same transaction (exempt by the IF guard — pinned). If vsme-G-4 is ratified as well, CR-C09-01 carries BOTH guards (BasisForPreparation == 'OptionBBasicModuleAndComprehensiveModuleMember' AND governance_body_exists == true) — a compound guard the emitter would not exempt, but the STAGED hides are applied by the owner, not emitted; at runtime a hidden C09 section nulls every C09 symbol and the gate reads not_applicable, which is the intended Option-A behaviour.
+- Evidence (verbatim, prod capture — no transcript): "Para 65: „If the undertaking has a governance body in place, the undertaking shall disclose the related gender diversity ratio.“ Bedingt + Comprehensive-Modul → beratend." [prod compliance_requirements.description (Para 65, VSME-CR-C09-01)]
+- Note: Apply AFTER 20260917102410 (the gate reads the created boolean).
+- Proposed SQL / config: STAGED block G-3 (rollback: RESTORE('fafa0b33-bf99-477f-af6c-54f6b062cfc7'); UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w. …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-G-4 · VSME · VSME-C01.000 / C06.000 / C08.100 / C09.000 · CR-C01-01 / CR-C06-01 / CR-C08-01 / CR-C09-01 (warn) — IF-guard on BasisForPreparation == OptionB + the four Comprehensive-module section hides that follow vsme-C-1
+- Class: gate-guard
+- Chosen now (fail-safe): The four C-worksheets that carry a gate keep their sections visible and their gates unconditional: the gate-aware guard REFUSES a section hide on each of them (pinned per gate: "hides <symbol> read by gate <code>"), and the driver is not inherited (vsme-C-1). Once C-1 is ratified (consumer edit), this block wraps the four captured conditions in BasisForPreparation == 'OptionBBasicModuleAndComprehensiveModuleMember' guards and applies the four section hides (exempt by the IF guard — pinned with the guarded prior). Semantics: an Option-A reporter's C-module gates read pass instead of warn (para 45: an omitted Comprehensive disclosure is "assumed to not be applicable" — CR-C01-01's own description), an Option-B reporter sees no change, an unset BasisForPreparation is pending (CR-B01-01 blocks until it is set).
+- Evidence (verbatim, prod capture — no transcript): "Para 24(a): „The undertaking shall disclose which of the following options it has selected: OPTION A: Basic Module (only); or OPTION B: Basic Module and Comprehensive Module.“ Unbedingte Pflichtangabe (EFRAG-Template: „MISSING VALUE“ bis befüllt)." [prod compliance_requirements.description (Para 24(a), VSME-CR-B01-01)]; "Para 47: „The undertaking shall disclose the key elements of its business model and strategy …“ Comprehensive-Modul → para 45: bei Auslassung „assumed to not be applicable“ → beratend." [prod compliance_requirements.description (Para 47, VSME-CR-C01-01)]
+- Note: Apply AFTER vsme-C-1 (the consumer edit) — otherwise the hides are pending on the form (driver missing) while the guarded gates already read pending.
+- Proposed SQL / config: STAGED block G-4 (rollback: RESTORE('54b20079-571e-4de7-b006-eea588fc8787'); RESTORE('80c7ca55-ffbc-475a-8a67-94d4a6dfa435'); RESTORE('18f70e2e-9d80-42db-ad21-e57b193b36fb'); RESTORE('fafa0b33-bf99-477f-af6c-54f6b062cfc7'); UPDATE worksheet_section …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-C-1 · VSME · VSME-B01.000 → the 12 Comprehensive-module worksheets · BasisForPreparation → consumer edit + top-level section rule `BasisForPreparation == 'OptionBBasicModuleAndComprehensiveModuleMember'` on the 8 ungated C-worksheets (the 4 gated ones follow in vsme-G-4)
+- Class: consumer-edit
+- Chosen now (fail-safe): NOT emitted: BasisForPreparation (B01.000, enum, tokens OptionABasicModuleOnlyMember / OptionBBasicModuleAndComprehensiveModuleMember) is inherited by NO worksheet (consumer_worksheets null on all 144 rows — pinned), so a section rule on the C-worksheets would evaluate pending (driver missing) on the form and on the server alike — an inert rule, withheld by the Task-24 controller instruction. The emitter ACCEPTS the 8 ungated section rules (pinned) and REFUSES the 4 gated ones (vsme-G-4). Every VSME worksheet has ONE top-level section coded <ws>-A (captured), so the whole-worksheet applicability is one section UPDATE each. Once ratified, Option-A reporters stop seeing / being warned on the 12 Comprehensive worksheets (inventory §5 win 1). Server-side computeVisibility reads templateFields only — the inherited driver hides on the form / report / PDF but never suppresses a gate server-side (vsme-X-3, fail-safe).
+- Evidence (verbatim, prod capture — no transcript): "Para 24(a): „The undertaking shall disclose which of the following options it has selected: OPTION A: Basic Module (only); or OPTION B: Basic Module and Comprehensive Module.“ Unbedingte Pflichtangabe (EFRAG-Template: „MISSING VALUE“ bis befüllt)." [prod compliance_requirements.description (Para 24(a), VSME-CR-B01-01)]; "Para 47: „The undertaking shall disclose the key elements of its business model and strategy …“ Comprehensive-Modul → para 45: bei Auslassung „assumed to not be applicable“ → beratend." [prod compliance_requirements.description (Para 47, VSME-CR-C01-01)]
+- Note: Inherited drivers are matched by symbol on the consumer worksheet (loadInheritedFields); none of the 12 C-worksheets carries a field named BasisForPreparation (captured).
+- Proposed SQL / config: STAGED block C-1 (rollback: UPDATE worksheet_sections ws SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND ws.code = 'VSME-C02.000-A' AND w.code = 'VSME-C02.000' AN …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-C-2 · VSME · VSME-B01.000 → VSME-B01.100 · BasisForReporting → consumer edit + section rule `BasisForReporting == 'ConsolidatedMember'` on B01.100 (subsidiaries register + the two one-row scalars)
+- Class: consumer-edit
+- Chosen now (fail-safe): NOT emitted (driver not inherited — pinned; the emitter accepts the rule). The created register subsidiaries lands in VSME-B01.100-A and is hidden with the section once ratified; an Individual-basis report never asks for subsidiaries (Para 24(c)). Unset ⇒ pending ⇒ visible (CR-B01-02 blocks until BasisForReporting is set).
+- Evidence (verbatim, prod capture — no transcript): "VSME B1, §24 (p.8): "The undertaking shall disclose: ... (c) whether the sustainability report has been prepared on an individual basis (i.e. the report is limited to the undertaking's information only) or on a consolidated basis (i.e. the report includes information about the undertaking and its subsidiaries);"" [prod compliance_requirements.source_quote (Para 24(c), VSME-CR-B01-02)]
+- Proposed SQL / config: STAGED block C-2 (rollback: UPDATE worksheet_sections ws SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND ws.code = 'VSME-B01.100-A' AND w.code = 'VSME-B01.100' AN …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-C-3 · VSME · VSME-B01.000 → VSME-B02.100 · UndertakingsLegalForm → consumer edit + section rule `UndertakingsLegalForm == 'CooperativeMember'` on B02.100 (cooperative-specific disclosures)
+- Class: consumer-edit
+- Chosen now (fail-safe): NOT emitted (driver not inherited — pinned; the emitter accepts the rule; B02.100 carries no gate). The same-worksheet half of the brief's legal-form rule IS emitted: OtherUndertakingsLegalForm ← UndertakingsLegalForm == 'OtherUndertakingsLegalFormMember' on B01.000 (20260917102410). Prod's OtherUndertakingsLegalFormMember carries label_de / label_en NULL (inventory data-quality gap) — the created columns never use that label.
+- Evidence (verbatim, prod capture — no transcript): "Para 24(e): „… the undertaking shall disclose … its legal form …“ Unbedingte Pflichtangabe; als Stammdatum beratend geführt (überschneidet sich mit der Registrierung)." [prod compliance_requirements.description (Para 24(e), VSME-CR-B01-03)]; prod worksheet title "General information - Cooperative specific disclosures" (VSME-B02.100)
+- Proposed SQL / config: STAGED block C-3 (rollback: UPDATE worksheet_sections ws SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND ws.code = 'VSME-B02.100-A' AND w.code = 'VSME-B02.100' AN …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-C-4 · VSME · VSME-B03.100 → VSME-B03.000 · TotalEnergyConsumption_calc → consumer edit into VSME-B03.000
+- Class: consumer-edit
+- Chosen now (fail-safe): The brief places the Σ MWh on B03.000 beside TotalEnergyConsumption (CR-B03-01, block); the register energy_carriers and its Σ twin are created on B03.100 (the breakdown worksheet). A `create` never sets consumer_worksheets and the engine sees a register of its own worksheet only (m277e trap 2), so the roll-up lives on the register's worksheet and reaches VSME-B03.000 only through this edit. Until ratified the VSME-B03.000 scalar stays typed and un-twinned on its own worksheet (fail-safe). The pair is vsme-D-17.
+- Evidence (verbatim, prod capture — no transcript): "VSME B3, §29 (p.9): "The undertaking shall disclose its total energy consumption in MWh, with a breakdown as per the table below, if it can obtain the necessary information to provide such a breakdown:"" [prod compliance_requirements.source_quote (Para 29, VSME-CR-B03-01)]
+- Note: Apply AFTER 20260917102410 / 20260917102420 (the created symbols must exist).
+- Proposed SQL / config: STAGED block C-4 (rollback: UPDATE fields f SET consumer_worksheets = nullif(array_remove(f.consumer_worksheets, 'VSME-B03.000'), '{}'::text[]) FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-C-5 · VSME · VSME-B01.200 → VSME-B05.000 · sites_in_or_near_biodiversity / area_biodiversity_ha → consumer edit into VSME-B05.000
+- Class: consumer-edit
+- Chosen now (fail-safe): The brief places the B5 count / Σ ha on B05.000; both are computed on B01.200 from the sites register. A `create` never sets consumer_worksheets and the engine sees a register of its own worksheet only (m277e trap 2), so the roll-up lives on the register's worksheet and reaches VSME-B05.000 only through this edit. Until ratified the VSME-B05.000 scalar stays typed and un-twinned on its own worksheet (fail-safe). The pairs are vsme-D-8 … D-10; CR-B05-01 keeps reading the typed boolean until a G-block re-points it (not staged — the gate is a warn on a typed field, and the register verdict has no gate yet).
+- Evidence (verbatim, prod capture — no transcript): "Para 33: „The undertaking shall disclose the number and area (in hectares) of sites that it owns, has leased, or manages in or near a biodiversity sensitive area.“ Unbedingt, aber site-bezogen (mehrere Standortzeilen) — daher beratend." [prod compliance_requirements.description (Para 33, VSME-CR-B05-01)]
+- Note: Apply AFTER 20260917102410 / 20260917102420 (the created symbols must exist).
+- Proposed SQL / config: STAGED block C-5 (rollback: UPDATE fields f SET consumer_worksheets = nullif(array_remove(f.consumer_worksheets, 'VSME-B05.000'), '{}'::text[]) FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-C-6 · VSME · VSME-B01.200 → VSME-B06.000 · AmountOfWaterWithdrawnAtSitesLocatedInAreasOfHighWaterStress_calc → consumer edit into VSME-B06.000
+- Class: consumer-edit
+- Chosen now (fail-safe): The brief places the water-stress Σ on B06.000; it is computed on B01.200 from the sites register. A `create` never sets consumer_worksheets and the engine sees a register of its own worksheet only (m277e trap 2), so the roll-up lives on the register's worksheet and reaches VSME-B06.000 only through this edit. Until ratified the VSME-B06.000 scalar stays typed and un-twinned on its own worksheet (fail-safe). The pair is vsme-D-11.
+- Evidence (verbatim, prod capture — no transcript): "VSME B6, §35 (p.10): "The undertaking shall disclose its total water withdrawal, i.e. the amount of water drawn into the boundaries of the organisation (or facility); in addition, the undertaking shall separately present the amount of water withdrawn at sites located in areas of high water-stress."" [prod compliance_requirements.source_quote (Para 35, VSME-CR-B06-01)]
+- Note: Apply AFTER 20260917102410 / 20260917102420 (the created symbols must exist).
+- Proposed SQL / config: STAGED block C-6 (rollback: UPDATE fields f SET consumer_worksheets = nullif(array_remove(f.consumer_worksheets, 'VSME-B06.000'), '{}'::text[]) FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-C-7 · VSME · VSME-B03.200 / VSME-B01.000 → VSME-B03.300 · TotalGrossLocationBasedGHGEmissions / TotalGrossMarketBasedGHGEmissions / TotalGrossLocationBasedScope1AndScope2GHGEmissions / TotalGrossMarketBasedScope1AndScope2GHGEmissions (EQ-02 … EQ-05 outputs) + Turnover → consumer edits into B03.300 (the four GHG-intensity twins)
+- Class: consumer-edit
+- Chosen now (fail-safe): The four equations VSME-B03.300-D1 … D4 (<total> / Turnover, Para 31) ARE emitted on B03.300 as the brief places them, but every input lives on another worksheet and none is inherited (pinned) — they evaluate manual_required ("Fehlende oder leere Eingaben") until this edit is ratified; never a phantom value. After the edit they compute on the form / report / PDF; the save-path materialiser resolves scalar inputs from the worksheet's own fields only, so they are not persisted on save (Task 17 trap 1, vsme-I-1). The typed intensity values stay (vsme-D-21 … D-24); CR-B03-04 keeps reading the typed TotalLocationBasedGreenhouseGasEmissionsIntensityValue.
+- Evidence (verbatim, prod capture — no transcript): "Para 31: „… shall disclose its GHG intensity calculated by dividing gross GHG emissions … by turnover …“ Unbedingt, aber abgeleitet/berechnet — daher beratend, damit eine noch nicht materialisierte Berechnung keinen harten Gate auslöst." [prod compliance_requirements.description (Para 31, VSME-CR-B03-04)]; "Para 24(e): „… the turnover …“ Unbedingte Pflichtangabe; zugleich der Nenner der THG-Intensität (B3 para 31). Als Stammdatum beratend geführt." [prod compliance_requirements.description (Para 24(e), VSME-CR-B01-06)]
+- Note: Self-contained (prod symbols only); may be applied before the data migrations.
+- Proposed SQL / config: STAGED block C-7 (rollback: UPDATE fields f SET consumer_worksheets = nullif(array_remove(f.consumer_worksheets, 'VSME-B03.300'), '{}'::text[]) FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-C-8 · VSME · VSME-B07.300 → VSME-B07.400 · TotalMassOfMaterialUsed_calc / TotalVolumeOfMaterialUsed_calc → consumer edit into VSME-B07.400
+- Class: consumer-edit
+- Chosen now (fail-safe): The brief places the material totals on B07.400; both are computed on B07.300 from the materials register. A `create` never sets consumer_worksheets and the engine sees a register of its own worksheet only (m277e trap 2), so the roll-up lives on the register's worksheet and reaches VSME-B07.400 only through this edit. Until ratified the VSME-B07.400 scalar stays typed and un-twinned on its own worksheet (fail-safe). The pairs are vsme-D-28 / D-29.
+- Evidence (verbatim, prod capture — no transcript): prod worksheet titles "Environment - Breakdown of annual mass-flow of relevant materials used by the undertaking" / "Environment - Total annual mass-flow of materials used by the undertaking" (no paragraph text in prod — vsme-U-1)
+- Note: Apply AFTER 20260917102410 / 20260917102420 (the created symbols must exist).
+- Proposed SQL / config: STAGED block C-8 (rollback: UPDATE fields f SET consumer_worksheets = nullif(array_remove(f.consumer_worksheets, 'VSME-B07.400'), '{}'::text[]) FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-C-9 · VSME · VSME-B01.000 → VSME-B08.200 · NumberOfEmployees → consumer edit into B08.200 (the employees_country_delta consistency check)
+- Class: consumer-edit
+- Chosen now (fail-safe): VSME-B08.200-D2 (employees_country_delta = NumberOfEmployees − Σ count) IS emitted on the register's worksheet; NumberOfEmployees (B01.000, typed + EQ-01 output) is not inherited (pinned) ⇒ manual_required until ratified. The Σ itself (-D1) computes today.
+- Evidence (verbatim, prod capture — no transcript): "Para 24(e): „… the number of employees in headcount or full-time equivalent (FTE) …“ Unbedingte Pflichtangabe; als Stammdatum beratend geführt." [prod compliance_requirements.description (Para 24(e), VSME-CR-B01-07)]; "Para 39: „… shall disclose the number of employees … for the following metrics: (a) type of employment contract (temporary or permanent) …“ Unbedingt, aber als aufgeteilte Zählung (leer ≠ null) — daher beratend." [prod compliance_requirements.description (Para 39, VSME-CR-B08-01)]
+- Note: Self-contained; combine with vsme-G-1 (same field, another consumer) when both are ratified — the array_append guards make the two blocks order-independent.
+- Proposed SQL / config: STAGED block C-9 (rollback: UPDATE fields f SET consumer_worksheets = nullif(array_remove(f.consumer_worksheets, 'VSME-B08.200'), '{}'::text[]) FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-1 · VSME · VSME-B01.100 · `NameOfTheSubsidiary` ↔ `subsidiaries.name`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification of vsme-C-2 (the register is the list).
+- Proposed SQL / config: STAGED block D-1 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B01.100' AND f.symbol = 'NameOfTheSubsidia …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-2 · VSME · VSME-B01.100 · `RegisteredAddressOfTheSubsidiary` ↔ `subsidiaries.registered_address`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification of vsme-C-2.
+- Proposed SQL / config: STAGED block D-2 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B01.100' AND f.symbol = 'RegisteredAddress …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-3 · VSME · VSME-B01.200 · `CountryOfSite` ↔ `sites.country`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (enum; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification (vsme-X-2: the register supersedes the first-site scalars).
+- Proposed SQL / config: STAGED block D-3 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B01.200' AND f.symbol = 'CountryOfSite' AN …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-4 · VSME · VSME-B01.200 · `GPSLocationOfSite` ↔ `sites.gps`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=true; read by gate VSME-CR-B01-09; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free. The scalar is is_required=true — retiring it also changes the approval gate (structural).
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: keep until CR-B01-09 (warn, reads the scalar) is re-pointed at a register count (count_rows(sites, gps IS NOT NULL) — not staged; no register verdict exists yet) — recommend DEFER.
+- Proposed SQL / config: STAGED block D-4 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B01.200' AND f.symbol = 'GPSLocationOfSite …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-5 · VSME · VSME-B01.200 · `AddressOfSite` ↔ `sites.address`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification (vsme-X-2).
+- Proposed SQL / config: STAGED block D-5 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B01.200' AND f.symbol = 'AddressOfSite' AN …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-6 · VSME · VSME-B01.200 · `PostalCodeOfSite` ↔ `sites.postal_code`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification (vsme-X-2).
+- Proposed SQL / config: STAGED block D-6 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B01.200' AND f.symbol = 'PostalCodeOfSite' …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-7 · VSME · VSME-B01.200 · `CityOfSite` ↔ `sites.city`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification (vsme-X-2).
+- Proposed SQL / config: STAGED block D-7 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B01.200' AND f.symbol = 'CityOfSite' AND N …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-8 · VSME · VSME-B05.000 · `SiteLocatedInABiodiversitySensitiveArea` ↔ `sites.in_biodiversity_area (→ sites_in_or_near_biodiversity, VSME-B01.200-D1)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (boolean; is_required=true; read by gate VSME-CR-B05-01; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free. The scalar is is_required=true — retiring it also changes the approval gate (structural).
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive: the scalar becomes the register count (twin emitted, reaches B05.000 via vsme-C-5); CR-B05-01 (warn) reads the scalar — re-point to sites_in_or_near_biodiversity IS NOT NULL on ratification (archive pattern, same transaction) — recommend DEFER until C-5.
+- Proposed SQL / config: STAGED block D-8 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B05.000' AND f.symbol = 'SiteLocatedInABio …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-9 · VSME · VSME-B05.000 · `SiteLocatedNearABiodiversitySensitiveArea` ↔ `sites.near_biodiversity_area (→ sites_in_or_near_biodiversity)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (boolean; is_required=true; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free. The scalar is is_required=true — retiring it also changes the approval gate (structural).
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive as D-8; retire on ratification of vsme-C-5.
+- Proposed SQL / config: STAGED block D-9 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B05.000' AND f.symbol = 'SiteLocatedNearAB …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-10 · VSME · VSME-B05.000 · `AreaOfSiteInBiodiversitySensitiveArea` ↔ `area_biodiversity_ha (VSME-B01.200-D2)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number ha; is_required=true; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free. The scalar is is_required=true — retiring it also changes the approval gate (structural).
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive: the scalar becomes the register Σ (twin emitted); retire on ratification of vsme-C-5.
+- Proposed SQL / config: STAGED block D-10 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B05.000' AND f.symbol = 'AreaOfSiteInBiodi …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-11 · VSME · VSME-B06.000 · `AmountOfWaterWithdrawnAtSitesLocatedInAreasOfHighWaterStress` ↔ `AmountOfWaterWithdrawnAtSitesLocatedInAreasOfHighWaterStress_calc (VSME-B01.200-D3)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number m³; is_required=true; read by gate VSME-CR-B06-02; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free. The scalar is is_required=true — retiring it also changes the approval gate (structural).
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive: the scalar becomes the register Σ (twin emitted, reaches B06.000 via vsme-C-6); CR-B06-02 (warn) reads the scalar — re-point on ratification — recommend DEFER until C-6.
+- Proposed SQL / config: STAGED block D-11 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B06.000' AND f.symbol = 'AmountOfWaterWith …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-12 · VSME · VSME-B02.000 · `SustainabilityIssueAddressedByPracticePolicyAndOrFutureInitiative` ↔ `policies.issue`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (enum; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification (one row per policy carries its issue).
+- Proposed SQL / config: STAGED block D-12 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B02.000' AND f.symbol = 'SustainabilityIss …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-13 · VSME · VSME-B02.000 · `PracticePolicyAndOrFutureInitiativeIsPubliclyAvailable` ↔ `policies.public (→ policies_public_count, VSME-B02.000-D1)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (boolean; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds THE ONE stored value: its retirement is NOT data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: migrate the one stored value into a first policies row, then retire — owner ruling (not data-free).
+- Proposed SQL / config: STAGED block D-13 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B02.000' AND f.symbol = 'PracticePolicyAnd …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-14 · VSME · VSME-B02.000 · `UndertakingHasSetATargetWhichIsRelatedToAPolicy` ↔ `policies.target_set`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (boolean; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification.
+- Proposed SQL / config: STAGED block D-14 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B02.000' AND f.symbol = 'UndertakingHasSet …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-15 · VSME · VSME-C02.000 · `DescriptionOfPracticesPoliciesAndOrFutureInitiatives` ↔ `policies.description (B02.000)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification — the C02 description is the per-policy text; C02.000 is a Comprehensive worksheet (vsme-C-1) while the register lives on B02.000 (Basic) — recommend DEFER (owner decides whether the description belongs to the Basic register).
+- Proposed SQL / config: STAGED block D-15 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-C02.000' AND f.symbol = 'DescriptionOfPrac …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-16 · VSME · VSME-C02.000 · `MostSeniorLevelAccountableForImplementationOfPolicies` ↔ `policies.senior_accountable (boolean, per the brief)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: keep the C02 text (the brief's boolean column records only WHETHER a senior level is designated — vsme-J-1); recommend DEFER.
+- Proposed SQL / config: STAGED block D-16 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-C02.000' AND f.symbol = 'MostSeniorLevelAc …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-17 · VSME · VSME-B03.000 · `TotalEnergyConsumption` ↔ `TotalEnergyConsumption_calc (VSME-B03.100-D1)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number MWh; is_required=true; read by gate VSME-CR-B03-01; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free. The scalar is is_required=true — retiring it also changes the approval gate (structural).
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive: the scalar becomes the register Σ (twin emitted, reaches B03.000 via vsme-C-4); CR-B03-01 (BLOCK) reads the scalar — re-point to TotalEnergyConsumption_calc IS NOT NULL on ratification (archive pattern) — recommend DEFER until C-4.
+- Proposed SQL / config: STAGED block D-17 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B03.000' AND f.symbol = 'TotalEnergyConsum …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-18 · VSME · VSME-B03.100 · `EnergyConsumptionFromElectricity` ↔ `energy_carriers row carrier = electricity`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number MWh; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification (a row per carrier).
+- Proposed SQL / config: STAGED block D-18 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B03.100' AND f.symbol = 'EnergyConsumption …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-19 · VSME · VSME-B03.100 · `EnergyConsumptionFromSelfGeneratedElectricity` ↔ `energy_carriers row carrier = self_generated`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number MWh; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification.
+- Proposed SQL / config: STAGED block D-19 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B03.100' AND f.symbol = 'EnergyConsumption …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-20 · VSME · VSME-B03.100 · `EnergyConsumptionFromFuels` ↔ `energy_carriers row carrier = fuels`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number MWh; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification.
+- Proposed SQL / config: STAGED block D-20 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B03.100' AND f.symbol = 'EnergyConsumption …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-21 · VSME · VSME-B03.300 · `TotalLocationBasedGreenhouseGasEmissionsIntensityValue` ↔ `GHGIntensity_total_location_calc (VSME-B03.300-D1)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number tCO2eq/EUR; is_required=true; read by gate VSME-CR-B03-04; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free. The scalar is is_required=true — retiring it also changes the approval gate (structural).
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive: the scalar becomes the computed intensity (twin emitted, computes after vsme-C-7); CR-B03-04 (warn) reads the scalar — re-point on ratification — recommend DEFER until C-7.
+- Proposed SQL / config: STAGED block D-21 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B03.300' AND f.symbol = 'TotalLocationBase …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-22 · VSME · VSME-B03.300 · `TotalMarketBasedGreenhouseGasEmissionsIntensityValue` ↔ `GHGIntensity_total_market_calc (VSME-B03.300-D2)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number tCO2eq/EUR; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive; retire on ratification of vsme-C-7.
+- Proposed SQL / config: STAGED block D-22 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B03.300' AND f.symbol = 'TotalMarketBasedG …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-23 · VSME · VSME-B03.300 · `Scope1AndScope2GreenhouseGasEmissionsIntensityValueLocationBased` ↔ `GHGIntensity_s12_location_calc (VSME-B03.300-D3)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number tCO2eq/EUR; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive; retire on ratification of vsme-C-7.
+- Proposed SQL / config: STAGED block D-23 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B03.300' AND f.symbol = 'Scope1AndScope2Gr …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-24 · VSME · VSME-B03.300 · `Scope1AndScope2GreenhouseGasEmissionsIntensityValueMarketBased` ↔ `GHGIntensity_s12_market_calc (VSME-B03.300-D4)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number tCO2eq/EUR; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive; retire on ratification of vsme-C-7.
+- Proposed SQL / config: STAGED block D-24 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B03.300' AND f.symbol = 'Scope1AndScope2Gr …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-25 · VSME · VSME-B07.300 · `NameOfMaterialUsed` ↔ `materials.name`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification.
+- Proposed SQL / config: STAGED block D-25 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B07.300' AND f.symbol = 'NameOfMaterialUse …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-26 · VSME · VSME-B07.300 · `WeightOfMaterialUsed` ↔ `materials.weight_t`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number t; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification.
+- Proposed SQL / config: STAGED block D-26 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B07.300' AND f.symbol = 'WeightOfMaterialU …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-27 · VSME · VSME-B07.300 · `VolumeOfMaterialUsed` ↔ `materials.volume_m3`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number m³; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification.
+- Proposed SQL / config: STAGED block D-27 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B07.300' AND f.symbol = 'VolumeOfMaterialU …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-28 · VSME · VSME-B07.400 · `TotalMassOfMaterialUsed` ↔ `TotalMassOfMaterialUsed_calc (VSME-B07.300-D1)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number t; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive: the scalar becomes the register Σ (twin emitted, reaches B07.400 via vsme-C-8); retire on ratification of C-8.
+- Proposed SQL / config: STAGED block D-28 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B07.400' AND f.symbol = 'TotalMassOfMateri …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-29 · VSME · VSME-B07.400 · `TotalVolumeOfMaterialUsed` ↔ `TotalVolumeOfMaterialUsed_calc (VSME-B07.300-D2)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number m³; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: derive; retire on ratification of vsme-C-8.
+- Proposed SQL / config: STAGED block D-29 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B07.400' AND f.symbol = 'TotalVolumeOfMate …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-30 · VSME · VSME-B08.200 · `NumberOfEmployeesForCountryOfEmploymentContract` ↔ `employees_by_country.count (→ employees_by_country_sum, VSME-B08.200-D1)`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (number; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification (the register is the "[line items]" table the label announces).
+- Proposed SQL / config: STAGED block D-30 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-B08.200' AND f.symbol = 'NumberOfEmployees …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-31 · VSME · VSME-C07.000 · `TypeOfHumanRightRelatedToTheConfirmedIncident` ↔ `human_rights_incidents.type`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (enum; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification.
+- Proposed SQL / config: STAGED block D-31 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-C07.000' AND f.symbol = 'TypeOfHumanRightR …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-32 · VSME · VSME-C07.000 · `SpecificationOfOtherHumanRightsRelatedToTheConfirmedIncident` ↔ `human_rights_incidents.specification`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification (the register row carries the specification per incident).
+- Proposed SQL / config: STAGED block D-32 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-C07.000' AND f.symbol = 'SpecificationOfOt …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-D-33 · VSME · VSME-C07.000 · `DescriptionOfActionsTakeToAddressTheConfirmedIncidents` ↔ `human_rights_incidents.actions`
+- Class: deactivation
+- Chosen now (fail-safe): Both stay: the register column / derived twin is the N-instances shape, the prod scalar (text; is_required=false; no gate; no consumer) stays typeable; no second equation for the typed value is emitted (amendment K). Prod holds 1 stored value(s) and 40 worksheet instances for VSME (read-only count 2026-09-18) — this scalar holds none: retirement is data-free.
+- Evidence (verbatim, prod capture — no transcript): prod capture (labels / data_type / is_required / gate readers as stated in the block; no paragraph text names this pair — vsme-U-1).
+- Note: Proposal: retire on ratification.
+- Proposed SQL / config: STAGED block D-33 (rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'VSME' AND w.code = 'VSME-C07.000' AND f.symbol = 'DescriptionOfActi …)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-F-1 · VSME · VSME-B08.300 / VSME-B09.000 · EmployeeTurnoverRate / RateOfRecordableWorkRelatedAccidentsInTheReportingPeriod — no formula
+- Class: text-only-formula
+- Chosen now (fail-safe): No equation invented (controller resolution (6)): prod text names the RATE ("the employee turnover rate", "the number and rate of recordable work-related accidents") but prints neither numerator / denominator nor the hours-worked basis; both stay typed inputs (EmployeeTurnoverRate %, RateOfRecordable… number). Amendment O (re-executable, 2026-09-18): grep -c -i "turnover rate" src/lib/eval/field-configs/vsme.text.prior.json → 6 (the B08.300 worksheet / section titles, the field label, the Para 40 sentence — no numerator, denominator or period); grep -c -i "hours worked\|per 200\|per 1,000\|per million" src/lib/eval/field-configs/vsme.text.prior.json → 0 (exit 1).
+- Evidence (verbatim, prod capture — no transcript): "Para 40: „If the undertaking employs 50 or more employees, it shall disclose the employee turnover rate …“ Bedingt (Schwellenwert 50). Der Auslöser (Beschäftigtenzahl) ist nicht im Gate-Grammar-Scope vergleichbar → beratend." [prod compliance_requirements.description (Para 40, VSME-CR-B08-03)]; "Para 41(a): „… the number and rate of recordable work-related accidents …“ Unbedingt, aber als abgeleitete Rate — daher beratend (Anzahl wird hart geprüft)." [prod compliance_requirements.description (Para 41(a), VSME-CR-B09-03)]
+- Note: Unlocked by a text extraction of VSME Standard.pdf (the B8 / B9 guidance paragraphs) — vsme-U-1.
+- Proposed SQL / config: none (no formula / value staged)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-F-2 · VSME · VSME-C03.300 · high_climate_impact_sector (created boolean) — the NACE-list derivation from NaceSectorClassificationCodes
+- Class: text-only-formula
+- Chosen now (fail-safe): The driver is created as an engineer ATTESTATION (boolean, C03.300; migration 20260917102410) and the two transition-plan fields hide under it (emitted, same worksheet, no gate). The derivation "sector ∈ high climate impact sectors" from NaceSectorClassificationCodes (B01.000, enum × 1047) needs the printed sector list, which is not in prod: grep -c -i "high climate impact" src/lib/eval/field-configs/vsme.text.prior.json → 3 (the C03.300 worksheet title_de / title_en and its section title only — no list, no NACE code); the NACE tokens themselves carry no sector class (prod enum_values: value / label only). Never typed from memory of the standard.
+- Evidence (verbatim, prod capture — no transcript): prod worksheet title "Environment - Transition plan for undertakings operating in high climate impact sectors" (VSME-C03.300)
+- Note: Unlocked by a text extraction of VSME Standard.pdf (C3 + the NACE list it references, itself a content-boundary pointer to the NACE regulation) — vsme-U-1.
+- Proposed SQL / config: none (no formula / value staged)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-U-1 · VSME · VSME (all) · NO TRANSCRIPT — the quotable text is prod's compliance_requirements paragraph wording only; the items whose cue is a prod title / label
+- Class: unreadable-cell
+- Chosen now (fail-safe): No table seeded, no seed migration, no value / list / threshold typed from memory (SR-1). The only quotable text is prod's own: Quote carriers in prod (capture counts): compliance_requirements 31 / 31 with a "Para NN" description, 9 / 31 with a source_quote naming the printed page; equations 10 / 10 with a source_quote (EQ-01 … EQ-10: paras 24(e)(v) / 39(a), 30, 50 / 53, 109, 38(a) / (b), 168, 170, 63(c) — none names B2, the B7 materials mass-flow, the C3 sector list, C7 or the B8 country metric) and 0 / 10 with a verification_quote; fields 0 / 144 for both columns. Grade EV, cited as [prod verification_quote (Para NN, <CR code>)]. Items whose ONLY cue is a prod worksheet title / field label (tagged "[prod worksheet_templates.title_de (…) — no paragraph text in prod; vsme-U-1]" / "prod field labels (EV)"): the registers policies (B02.000), materials (B07.300), human_rights_incidents (C07.000); the driver high_climate_impact_sector + the two C03.300 hides; the B01.000 unchanged-disclosures pair (ListOfDisclosures… / LinkToPreviousReport… ← ReportContains…Unchanged); the equations VSME-B02.000-D1, -B07.300-D1 / D2, -B08.200-D1 (verification_quote NULL). Amendment O greps on the capture (re-executable, 2026-09-18; F = src/lib/eval/field-configs/vsme.text.prior.json): grep -o "Para [0-9]*" F | sort -u → Para 24 29 30 31 33 35 37 38 39 40 41 42 43 47 61 64 65 (the complete set of paragraphs prod quotes); grep -c "Para 2[5-8]" F → 0, exit 1 (no B2 paragraph between B1's 24 and B3's 29); grep -i "material" F | grep -c "Para" → 1 (that line is Para 31 "materialisiert" — no materials paragraph); grep -i "human right" F | grep -c "Para" → 1 (Para 61(a), the C6 code-of-conduct sentence — no C7 paragraph); grep -i "country of employment" F | grep -c "Para" → 0 (exit 1). A text extraction of VSME Standard.pdf (owner-provided; C:\Users\Ekowai\Desktop\environmental-reporting service\01_Referenz\VSME Standard.pdf) unlocks: the B03 / B06 / B08 thresholds as tables (energy breakdown rows, water-stress definition, the 50-employee rule as a one-row table read by lookup()), the B2 / B7 / C7 paragraph cues, the C3 NACE list (F-2), the turnover / accident-rate bases (F-1). The XLSX template was read for STRUCTURE only (sheet names; the line-item column headers in xl/sharedStrings.xml — report §3).
+- Evidence (verbatim, prod capture — no transcript): "VSME B3, §29 (p.9): "The undertaking shall disclose its total energy consumption in MWh, with a breakdown as per the table below, if it can obtain the necessary information to provide such a breakdown:"" [prod compliance_requirements.source_quote (Para 29, VSME-CR-B03-01)] (the "table below" is the one un-extracted table this task needed)
+- Note: Owner action: provide the extraction; the registers / rules then get their printed cues in a fix round (no structure change expected).
+- Proposed SQL / config: none (observation / ruling; nothing to apply)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-I-1 · VSME · VSME-B03.300 / VSME-B08.200 / (all) · materialisation of the emitted equations (amendment D) + the server-side visibility of inherited drivers
+- Class: interface-gap
+- Chosen now (fail-safe): 9 of the 14 rows are register-fed and read only their own worksheet's register carrier — they materialise on save (source_type = derived) once 20260917102420 is applied. The 4 B03.300 intensity rows and VSME-B08.200-D2 name scalars of OTHER worksheets: computed on the form / report / snapshot / PDF after vsme-C-7 / C-9, NOT persisted on save (materialize-derived.ts resolves scalar inputs from templateFields only — Task 17 trap 1); until then manual_required. Nothing is a defect of this task; recorded once.
+- Evidence (verbatim, prod capture — no transcript): engine facts pinned in equations-vsme.test.ts (missing input ⇒ "Fehlende oder leere Eingaben: …"; empty register ⇒ counts 0 / Σ manual; Turnover 0 ⇒ "Division durch Null").
+- Note: See vsme-X-3 for the [CODE] item on server-side computeVisibility.
+- Proposed SQL / config: none (observation / ruling; nothing to apply)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-X-1 · VSME · VSME-B04.100 · pollutant_register + the three AmountOfEmissionTo* equations (Plan 2a) — untouched; VSME gate repair SP-1
+- Class: cross-standard
+- Chosen now (fail-safe): Nothing of B04.100 is touched by this task (pinned: neither migration mentions pollutant_register / AmountOfEmissionTo*): the E-PRTR register (widget migration 20260916140000, Plan 2b) and its three fallback equations (20260916110000_vsme_b04_register_equations.sql, Plan 2a) stay as written-not-applied; inventory §4's "AmountOfEmissionToAir/Water/Soil ← pollutant_register Σ by medium" is already that migration. The 31 gates this task captured are the post-SP-1 set (VSME gate repair + source verifiability, merged e1e56f0 into main; the 16 warn gates re-homed by 20260728240000_mishome_vsme.sql, the source_quote cells of 12 CRs) — this task's G-blocks build on that state (G-2 = the one BLOCK gate SP-1's warn-only re-home left on B01.000).
+- Evidence (verbatim, prod capture — no transcript): git log --oneline -1 e1e56f0 → "merge: VSME gate repair + source verifiability (SP-1) into main"; capture: 31 gates, 9 with source_quote.
+- Note: Cross-standard twins named by the inventory §4 (water volumes ↔ ISO-46001 WD / Win / Wout, ISO-59020 VTWW / VTWU / VCDW; NACE / identity ↔ ISO-59004; energy MWh ↔ ISO-59020 EITE_X) are Phase 6 (spec §8) — not encoded here.
+- Proposed SQL / config: none (observation / ruling; nothing to apply)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-X-2 · VSME · VSME-B01.200 · the sites register supersedes the one-site scalars CountryOfSite / GPSLocationOfSite / AddressOfSite / PostalCodeOfSite / CityOfSite
+- Class: cross-standard
+- Chosen now (fail-safe): The register sites (created, json, VSME-B01.200-A) is the N-instances shape of the XBRL line-items table B01.200 (template structure: one row per site); the five prod scalars stay untouched as the first site's entries (controller resolution (3)); one D-block per pair (vsme-D-3 … D-7) proposes their retirement, GPSLocationOfSite (is_required, read by CR-B01-09) recommended DEFER. The B05.000 / B06.000 per-site facts are register columns (in / near biodiversity area + ha, high water-stress + m³) whose Σ / count twins reach those worksheets via vsme-C-5 / C-6.
+- Evidence (verbatim, prod capture — no transcript): "Para 24(e): „… the geolocation of sites …“ Unbedingte Pflichtangabe; als Stammdatum beratend geführt." [prod compliance_requirements.description (Para 24(e), VSME-CR-B01-09)]; template headers (xl/sharedStrings.xml) "Country of site", "GPS Location of site", "Address of site", "Postal code of site", "City of site" — structure only
+- Proposed SQL / config: none (observation / ruling; nothing to apply)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-X-3 · VSME · VSME (C-1 / C-2 / C-3 targets) · [CODE] final-wave item: server-side computeVisibility / materializeDerivedOutputs must include inherited fields
+- Class: cross-standard
+- Chosen now (fail-safe): Once vsme-C-1 / C-2 / C-3 are ratified, the section rules key on drivers INHERITED from B01.000: the form / report / PDF hide them (loadInheritedFields supplies the driver) but the server-side computeVisibility (approval gate, save-path materialiser) reads templateFields only — the driver is missing there, the rule is pending, nothing is suppressed server-side. Fail-safe (a hidden-on-form Comprehensive worksheet is still gate-checked server-side as warn), but the Option-A relief is form-only until the final-wave [CODE] item lands. No rule of this class is EMITTED by this task (all withheld, C-blocks).
+- Evidence (verbatim, prod capture — no transcript): engine fact pinned by the controller brief (server-side computeVisibility uses templateFields only).
+- Note: Pointer: the final-wave [CODE] queue in the Plan-3 ledger ("server-side computeVisibility/materializeDerivedOutputs must include inherited fields").
+- Proposed SQL / config: none (observation / ruling; nothing to apply)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### vsme-J-1 · VSME · VSME-B02.000 / VSME-C02.000 · policies.senior_accountable is a BOOLEAN (the brief) while prod's C02 MostSeniorLevelAccountableForImplementationOfPolicies is a TEXT
+- Class: override-policy
+- Chosen now (fail-safe): The brief is followed (boolean column "senior_accountable" — whether a most senior level is designated); the prod text field on C02.000 (which level) stays typeable and is paired in vsme-D-16 (DEFER recommended). If the owner prefers the per-policy TEXT, the column type flips to text in a fix round (a ui_config change of the created register — additive, no data today).
+- Evidence (verbatim, prod capture — no transcript): prod field label "MostSeniorLevelAccountableForImplementationOfPolicies" (VSME-C02.000, text); the brief's column list "senior_accountable boolean".
+- Proposed SQL / config: none (observation / ruling; nothing to apply)
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (no signature needed)
+
+- **NumberOfEmployees is typed AND computed** (B01.000: is_required=true field and the EQ-01 output `NumberOfPermanentContractEmployees + NumberOfTemporaryContractEmployees`, imported_unverified) — the #22 class the inventory §4 names; untouched by this task (the B08.200 delta reads whichever value the form holds).
+- **Waste units kg (B07.100) vs t (B07.200)** for two decompositions of one total (inventory data-quality gap) — untouched; no equation crosses the two worksheets here.
+- **Enum tokens with NULL labels in prod**: OtherUndertakingsLegalFormMember, AverageDuringTheReportingPeriodMember, BusinessConductMember (label_de / label_en null) — the generated `vsme-enums.ts` falls back to the token as label; a label backfill is prod hygiene, not a Plan-3 write.
+- **C06 "Specification of other types of content"** hides under the code-of-conduct YES/NO (the brief); a finer rule (only when TypeOfContentCovered… = OtherContentMember) is possible on the same worksheet — not emitted, no prod text names it.
+- **B04.000 URLOrLinkToThePubliclyAvailableDisclosure ← PubliclyAvailableDisclosure == true** and **B11.000 convictions / fines ← "In case of convictions and fines"** are natural pairs the brief does not list; no rule emitted (B11 has no driver field; B04 not in scope) — residue in the report.
+
 ## Plan 3 tooling rulings
 
 ### plan3-T-12c · [CODE] · `emit-field-configs-sql.ts` gate-aware guard · a `visible_when` may not silently disarm a same-worksheet gate
