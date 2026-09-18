@@ -154,7 +154,7 @@ export const EQUATIONS: EquationEntry[] = [
     input_symbols: ['prueflaeufe'], output_symbol: 'eta_hydr_unbel_min', output_unit: null,
     clause_reference: '§6.4.5, Gl. 3, Anhang E',
     description: 'Plan 3: kleinster η_hydr über alle unbelasteten Prüfläufe (die sichere Seite der η-Kurve nach Bild E.1; din1989_2-J-2).',
-    verification_quote: 'e) des hydraulischen Wirkungsgrades (Darstellung in Diagrammform nach Bild E.1)', // L916
+    verification_quote: String.raw`e) des hydraulischen Wirkungsgrades (Darstellung in Diagrammform nach Bild E.1) — \eta_{\mathrm{hydr}}=\frac{Q_{\mathrm{Zu}}-Q_{\mathrm{Ab}}}{Q_{\mathrm{Zu}}} \tag{3}`, // L916 — L509 (Gl. 3, the η the minimum aggregates)
   },
   {
     standard: STD, worksheet: WS03, equation_number: 'DIN-1989-2-03-D9',
@@ -162,7 +162,7 @@ export const EQUATIONS: EquationEntry[] = [
     input_symbols: ['prueflaeufe'], output_symbol: 'eta_hydr_bel_min', output_unit: null,
     clause_reference: '§6.4.6, Gl. 5, Anhang E',
     description: 'Plan 3: kleinster η_hyd,bel über alle dauerbelasteten Prüfläufe (Bild E.1; din1989_2-J-2).',
-    verification_quote: '2) am dauerbelasteten System (siehe 6.4.6)', // L918
+    verification_quote: String.raw`2) am dauerbelasteten System (siehe 6.4.6) — \eta_{\text {hyd,bel }}=\frac{Q_{\mathrm{Zu}}-Q_{\mathrm{Ab}}}{Q_{\mathrm{Zu}}} \tag{5}`, // L918 — L540 (Gl. 5)
   },
   {
     standard: STD, worksheet: WS03, equation_number: 'DIN-1989-2-03-D10',

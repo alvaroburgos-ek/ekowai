@@ -123,7 +123,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     symbol: 'sedimentationsvolumen', widget: 'select_one', ui_config: null,
     enum_values: [
       // L271: the head of this column is an image in the transcript; the title follows the sibling L272 and §5.3.2 L281 (U-1)
-      { value: 'gross', label_de: 'großes Sedimentationsvolumen (Filter mit mechanischer Filtration und)', order_index: 0 },
+      { value: 'gross', label_de: 'großes Sedimentationsvolumen', order_index: 0 }, // NOT reconstructed: the printed head cell is an image — only "großen Volumen" (L281) backs the word (fix round 1)
       { value: 'klein', label_de: 'kleines Sedimentationsvolumen', order_index: 1 }, // L272
       { value: 'keines', label_de: 'Filter mit mechanischer Filtration ohne Sedimentationsvolumen', order_index: 2 }, // L271
     ],
@@ -175,7 +175,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'ohne_werkzeug', label: 'ohne Werkzeug herausnehmbar', type: 'boolean' }, // L309
       ],
       footer: ['behaeltnis_volumen_sum', 'behaeltnis_masse_max', 'behaeltnis_grifftiefe_max'],
-      note: `${L309} ${L311} ${L313}`,
+      note: `${L309} ${L311} ${L313} Ohne eingetragene Entnahmetiefe zeigt die Zeile "≤ 60 cm" vorläufig (kein Wert = keine Überschreitung); die maßgebende Tiefe behaeltnis_grifftiefe_max bleibt dann offen.`,
     },
     verification_quote: `${L309} — ${L311} — ${L313} — ${L317}`, // four spans (L315 lies between L313 and L317)
     create: { section_code: 'C', label_de: 'Herausnehmbare Behältnisse (Typ B, §5.3.3)', data_type: 'json', unit: null, clause_reference: '§5.3.3',
@@ -358,9 +358,9 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     create: { section_code: 'A', label_de: 'Vorhandene Kennzeichnungsangaben (§7 a–i)', data_type: 'json', unit: null, clause_reference: '§7',
       description: 'Plan 3: Mehrfachauswahl über die neun gedruckten Kennzeichnungspositionen a)–i); Zwilling zum manuellen Boolean kennzeichnung_vollstaendig (CR-14) — Umstellung STAGED (din1989_2-D-1); Position g) gilt nur bei Kunststoff.' },
   }),
-  // L698: the Werkstoffbezeichnung is required for plastics only. werkstoff_filterelement is a -02 field that reaches no other worksheet in
-  // the capture — the rule reads `pending` (visible, inert) on -04 until the consumer edit din1989_2-C-1 lands.
-  WS04({ symbol: 'werkstoffbezeichnung', widget: 'scalar', ui_config: null, visible_when: "werkstoff_filterelement == 'kunststoff'", verification_quote: L698 }),
+  // L698: the Werkstoffbezeichnung is required for plastics only — but werkstoff_filterelement is a -02 field that reaches no other
+  // worksheet in the capture, so the -04 rule would be inert (pending) until the consumer edit lands; NOT emitted — it lives in the
+  // STAGED block din1989_2-C-1 together with that edit (fix round 1).
 ];
 
 // Section rules: none — every candidate section holds a consumed or gate-bearing field (-02 C: V_Rueck_A / V_Rueck_B / behaeltnis_masse /

@@ -4448,7 +4448,7 @@ Report: `reports/plan-3-din1989_2.md` · STAGED SQL: `scripts/verification/din19
 
 ### din1989_2-G-3 · DIN-1989-2 · -04 · `werkstoffbezeichnung` (validation_rules `!= ''` unconditional)
 - Class: gate-guard
-- Chosen now (fail-safe): the visibility rule `werkstoff_filterelement == 'kunststoff'` IS emitted (no gate reads the symbol; the prod `validation_rules.raw` is display-dead) and reads `pending` (visible) until C-1; no requirement is added.
+- Chosen now (fail-safe): the visibility rule `werkstoff_filterelement == 'kunststoff'` is NOT emitted (fix round 1 — it would be inert on -04 until the driver reaches it; it now lives inside the C-1 STAGED block); the prod `validation_rules.raw` is display-dead; no requirement is added.
 - Evidence (verbatim, transcript line): "g) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);" (L698)
 - Proposed SQL / config: STAGED block G-3 — optional NEW gate CR-18 `IF werkstoff_filterelement == kunststoff THEN werkstoffbezeichnung IS NOT NULL` (needs C-1).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -4518,9 +4518,9 @@ Report: `reports/plan-3-din1989_2.md` · STAGED SQL: `scripts/verification/din19
 
 ### din1989_2-C-1 · DIN-1989-2 · -02 `werkstoff_filterelement` · consumer_worksheets += DIN-1989-2-04
 - Class: consumer-edit
-- Chosen now (fail-safe): the -04 rule on `werkstoffbezeichnung` is emitted and reads `pending` (visible, inert) — the capture lists no consumer for the -02 enum.
+- Chosen now (fail-safe): the -04 rule on `werkstoffbezeichnung` is NOT emitted (fix round 1) — the capture lists no consumer for the -02 enum, so the rule would be inert; the STAGED C-1 block applies the consumer edit and the field rule in one transaction.
 - Evidence (verbatim, transcript line): "g) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);" (L698)
-- Proposed SQL / config: STAGED block C-1 (array_append, guarded; rollback array_remove).
+- Proposed SQL / config: STAGED block C-1 (array_append + the `visible_when` UPDATE on `werkstoffbezeichnung`, both guarded; rollback array_remove + NULL).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din1989_2-C-2 · DIN-1989-2 · -03 / -02 · type / DN rules on the consumed outputs `eta_Rueck_AB` · `eta_C` · `eta_hyd_bel` · `eta_hydr_bel_doku` and the Gl.-7…9 inputs (REFUSED)
@@ -4583,7 +4583,7 @@ Report: `reports/plan-3-din1989_2.md` · STAGED SQL: `scripts/verification/din19
 - Class: deactivation
 - Chosen now (fail-safe): the twins are visible beside the Gl.-3 output; the -02 "(Doku)" field stays the re-typed copy CR-11 reads.
 - Evidence (verbatim, transcript line): "Der hydraulische Wirkungsgrad am unbelasteten System ist nach 6.4.5 zu ermitteln und in der Produktdokumentation anzugeben." (L372)
-- Proposed SQL / config: STAGED block D-6 … D-9 (CR-11 → `eta_hydr IS NOT NULL` + consumer edit; retire the Doku copy).
+- Proposed SQL / config: STAGED block D-6 … D-9 (CR-11 → `eta_hydr IS NOT NULL` + consumer edit; retire the Doku copy). Cue note (fix round 1): the `_min` twins D8 / D9 carry Gl. 3 (L509) / Gl. 5 (L540) beside the Bild-E.1 lines L916 / L918 — the review named "L642/L662 (Gl. 7/8)", which are the Trennwirkung equations; the minimum aggregates the hydraulic η of Gl. 3 / 5, so those are the lines added.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din1989_2-D-9 · DIN-1989-2 · -03 `eta_hyd_bel` (Gl. 5) and -02 `eta_hydr_bel_doku` ↔ `eta_hydr_bel_p100` / `eta_hydr_bel_min`
@@ -4623,7 +4623,7 @@ Report: `reports/plan-3-din1989_2.md` · STAGED SQL: `scripts/verification/din19
 
 ### din1989_2-U-1 · DIN-1989-2 · -01 · TAB1 first Funktionsprinzip column head (image)
 - Class: unreadable-cell
-- Chosen now (fail-safe): the head of the "großes Sedimentationsvolumen" column is an image in the transcript; the created select's first option and the TAB1 key `gross` take their title from the sibling head and §5.3.2; the five printed TYP cells (L273 / L274) are clean and seeded; TAB1 stays `imported_unverified`.
+- Chosen now (fail-safe): the head of the first Funktionsprinzip column is an IMAGE in the transcript (L271) — the created select's first option label is exactly `großes Sedimentationsvolumen` (the adjective from §5.3.2 L281 "in einem ausreichend großen Volumen", the noun from the sibling head L272); NOT reconstructed (fix round 1): any leading phrase of that image cell (the inventory's guess "Filter mit mechanischer Filtration und" is printed nowhere in the transcript — the first label carried it and was corrected), and whether the image holds one or two column heads; the five printed TYP cells (L273 / L274) are clean and seeded; TAB1 stays `imported_unverified`.
 - Evidence (verbatim, transcript line): "![](https://cdn.mathpix.com/cropped/9718cf16-9f01-43f4-8c3f-8e56539be251-08.jpg?height=40\&width=740\&top_left_y=746\&top_left_x=607)} & Filter mit mechanischer Filtration ohne Sedimentationsvolumen \\" (L271); "\hline & & kleines Sedimentationsvolumen & \\" (L272); "… mit anschließender Sedimentation dieser Stoffe in einem ausreichend großen Volumen …" (L281)
 - Proposed SQL / config: after the PDF read (SR-3): confirm the head text, then `UPDATE regulation_tables SET verification_status = 'md_verified' WHERE standard_code = 'DIN-1989-2' AND table_code = 'TAB1'` (and the option label if it differs).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -4635,11 +4635,11 @@ Report: `reports/plan-3-din1989_2.md` · STAGED SQL: `scripts/verification/din19
 - Proposed SQL / config: the owner confirms the printed edition on the PDF cover BEFORE `20260917101700` is applied; if it reads e.g. "2004-08", re-emit the seed with `DIN1989_2_EDITION` changed (a later change would orphan the rows: `UPDATE regulation_tables SET edition = '<x>' WHERE standard_code = 'DIN-1989-2'`).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### din1989_2-I-2 · DIN-1989-2 · -03 · the save-path materialiser cannot resolve inherited scalars (`filtertyp`, `DN`); scalar-only twins are not materialised
+### din1989_2-I-2 · DIN-1989-2 · -02 / -03 · [CODE] the save path resolves neither inherited drivers nor inherited scalar inputs server-side (visibility AND materialiser); scalar-only twins are not materialised
 - Class: interface-gap
-- Chosen now (fail-safe): `materialize-derived.ts` builds its `symbolLookup` over the worksheet's OWN template fields, so a register-fed twin naming `filtertyp` as an input would persist null on every save while the form computes it — therefore Gl. 7 / 8 / 9 are three register-only twins (D13 … D15) plus two per-type codes (D16 / D17) and the "Gl. 7 vs 8/9" switch lives in `visible_when` and the STAGED gate (G-4), never in a formula input. Scalar-only rows (D1 … D4 on -03, D1 / D2 on -02, -01 D1) evaluate on the form / report only (amendment D).
+- Chosen now (fail-safe): `src/lib/actions/worksheet.ts` (~L712–L724) calls `computeVisibility` and `materializeDerivedOutputs` with `templateFields` only (the worksheet's OWN fields), so the inherited drivers `filtertyp`, `DN` and `einbausystem` never resolve server-side: (a) the 18 `DN <= 200` / `DN > 200` rules and the `filtertyp` / `einbausystem` rules hide on the FORM only — on save every such rule is `pending` (nothing hidden) and register-fed outputs are materialised regardless of type (e.g. `m_verw_calc` = 0 and `filtertrennwirkung_code_c` for a Typ-A filter); fail-safe today because no prod gate reads a created symbol; (b) a register-fed twin naming `filtertyp` as a formula INPUT would persist null on every save while the form computes it — therefore Gl. 7 / 8 / 9 are three register-only twins (D13 … D15) plus two per-type codes (D16 / D17) and the "Gl. 7 vs 8/9" switch lives in `visible_when` and the STAGED gate (G-4), never in a formula input. Scalar-only rows (D1 … D4 on -03, D1 / D2 on -02, -01 D1) evaluate on the form / report only (amendment D). The controller has queued the engine fix (overlay the inherited values in the save path) — G-4 Step 2 and any gate on a created symbol should wait for it.
 - Evidence (verbatim, transcript line): "Die Filtertrennwirkung ist als Quotient aus zurückgehaltenen Prüfstoffen bzw. abgeleiteten Prüfstoffen zur Gesamtfeststoffmasse je nach Filtertyp zu ermitteln." (L384)
-- Proposed SQL / config: none (engine observation; a materialiser that overlays inherited values is a [CODE] candidate).
+- Proposed SQL / config: none here — [CODE] item queued by the controller (save path overlays `loadInheritedFields` values before `computeVisibility` / `materializeDerivedOutputs`); re-check the 18 DN rules and the per-type codes on the deployed build after it lands.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din1989_2-J-1 · DIN-1989-2 · -01 · `DN` as a `select_one` of nominal sizes (the brief's `dn_nennweite`)

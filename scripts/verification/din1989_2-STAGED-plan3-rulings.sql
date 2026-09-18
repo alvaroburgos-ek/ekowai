@@ -86,7 +86,7 @@
 -- Evidence: L698 "g) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);". Prod: is_required = false, validation_rules
 -- {"raw":"werkstoffbezeichnung != ''"} (the validation_rules column enforces nothing at runtime — reference_wizard_compliance_gates);
 -- no compliance_requirements row reads the symbol. The Plan-3 rule `werkstoffbezeichnung ← werkstoff_filterelement == 'kunststoff'`
--- IS emitted (20260917101710) but reads `pending` (visible, inert) on -04 until C-1 lands. Nothing to apply beyond C-1; if the owner
+-- is NOT emitted (withdrawn in fix round 1 — inert until the driver reaches -04) and lives inside the C-1 block. Nothing to apply beyond C-1; if the owner
 -- wants the requirement enforced, a NEW gate is the enforcement change:
 --   INSERT … compliance_requirements (worksheet DIN-1989-2-04, code 'DIN-1989-2-CR-18', severity 'block',
 --     condition 'IF werkstoff_filterelement == kunststoff THEN werkstoffbezeichnung IS NOT NULL', title_de 'Werkstoffbezeichnung bei Kunststoff (§7 g)').
@@ -243,7 +243,9 @@
 --  ON CONFLICT (id) DO NOTHING;
 -- DELETE FROM equations_archive_din1989_2 WHERE id IN ('46fb74c9-af5e-4705-8b7e-7c56e595240e', 'f1ac6dff-12fa-43f4-af5b-2b0796ed349b');
 -- COMMIT;
--- The archive table `equations_archive_din1989_2` is shared by R-1 / R-3 / R-2 and dropped once every archived row is rolled back, or by the owner once the deletions are final.
+-- The archive table `equations_archive_din1989_2` is shared by R-1 and R-3 (and by R-2 only if the owner takes its DELETE variant); apply / roll back in the
+-- file order R-1 → R-2 → R-3, and the LAST block that uses the archive (R-3, below) carries the explicit DROP TABLE in its rollback — never drop it here
+-- while R-3's rows are still archived.
 
 -- =====================================================================================================================
 -- din1989_2-R-2 · DIN-1989-2-03 · Gl. 7 (20c140c2-3bdb-4ed4-937f-b0bded5cd925, md5 84d012e66585f8efcc91f8fee180821b) ·
@@ -289,7 +291,16 @@
 -- DELETE FROM equations e USING equations_archive_din1989_2 a WHERE e.id = a.id AND md5(e.formula) = md5(a.formula)
 --   AND e.id IN ('41935d13-1d60-49f6-8308-25d0203c44f0', 'fd3184a2-6cdb-4498-b78a-083033d12978');
 -- COMMIT;
--- Rollback: the R-1 INSERT … SELECT (explicit column list) with the two ids above, then DELETE them from the archive.
+-- Rollback (full rows from the archive, explicit column list, never retyped; R-3 is the LAST user of the shared archive — roll R-1 back FIRST, then this block drops the table):
+-- BEGIN;
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_din1989_2 WHERE id IN ('41935d13-1d60-49f6-8308-25d0203c44f0', 'fd3184a2-6cdb-4498-b78a-083033d12978')
+--  ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM equations_archive_din1989_2 WHERE id IN ('41935d13-1d60-49f6-8308-25d0203c44f0', 'fd3184a2-6cdb-4498-b78a-083033d12978');
+-- DROP TABLE equations_archive_din1989_2;
+-- COMMIT;
+-- The archive table `equations_archive_din1989_2` is dropped by this rollback (after R-1's rows were re-inserted), or by the owner once every deletion of this file is signed off as final.
 
 -- =====================================================================================================================
 -- din1989_2-R-4 · DIN-1989-2-03 · Gl. 3 (c44be6b5-448a-43f8-9755-ff041c659246, md5 77a0b2c1a80009c06ccc4f1ee20e755d) and
@@ -316,15 +327,21 @@
 -- din1989_2-C-1 · DIN-1989-2-02 werkstoff_filterelement · consumer_worksheets += DIN-1989-2-04
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Evidence: L698 "g) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);". Capture: werkstoff_filterelement (-02, enum,
--- consumer_worksheets NULL). The emitted -04 rule `werkstoffbezeichnung ← werkstoff_filterelement == 'kunststoff'` reads pending
--- (visible, inert) until this edit lands.
+-- consumer_worksheets NULL). The -04 rule `werkstoffbezeichnung ← werkstoff_filterelement == 'kunststoff'` would be inert (pending,
+-- visible) until this edit lands — it was WITHDRAWN from 20260917101710 in fix round 1 and lives here, applied in the same transaction as
+-- the consumer edit (the importer rule "a consumed field may not carry visible_when" concerns the PRODUCER; werkstoffbezeichnung is a
+-- consumer-free -04 text field, no gate reads it).
 -- BEGIN;
 -- UPDATE fields f SET consumer_worksheets = array_append(COALESCE(f.consumer_worksheets, ARRAY[]::text[]), 'DIN-1989-2-04')
 --   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
 --  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-02' AND s.code = 'DIN-1989-2' AND f.symbol = 'werkstoff_filterelement' AND f.active
 --    AND NOT ('DIN-1989-2-04' = ANY(COALESCE(f.consumer_worksheets, ARRAY[]::text[])));
+-- UPDATE fields f SET visible_when = 'werkstoff_filterelement == ''kunststoff'''
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-04' AND s.code = 'DIN-1989-2' AND f.symbol = 'werkstoffbezeichnung' AND f.active AND f.visible_when IS NULL;
 -- COMMIT;
--- Rollback: UPDATE fields … SET consumer_worksheets = NULLIF(array_remove(consumer_worksheets, 'DIN-1989-2-04'), ARRAY[]::text[]) … symbol = 'werkstoff_filterelement'.
+-- Rollback: UPDATE fields … SET consumer_worksheets = NULLIF(array_remove(consumer_worksheets, 'DIN-1989-2-04'), ARRAY[]::text[]) … symbol = 'werkstoff_filterelement';
+--   UPDATE fields … SET visible_when = NULL … w.code = 'DIN-1989-2-04' AND symbol = 'werkstoffbezeichnung' AND visible_when = 'werkstoff_filterelement == ''kunststoff'''.
 
 -- =====================================================================================================================
 -- din1989_2-C-2 · DIN-1989-2-03 / -02 · the type / DN rules on the CONSUMED outputs eta_Rueck_AB · eta_C · eta_hyd_bel · eta_hydr_bel_doku

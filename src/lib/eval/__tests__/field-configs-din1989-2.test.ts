@@ -44,8 +44,8 @@ describe('DIN-1989-2 field configs (Plan 3 Task 17)', () => {
     expect(SECTION_VISIBILITY).toEqual([]);
   });
 
-  it('counts: 38 field entries (32 create, 6 update), widgets by kind, 29 visibility rules, no section rule', () => {
-    expect(FIELD_CONFIGS).toHaveLength(38);
+  it('counts: 37 field entries (32 create, 5 update), widgets by kind, 28 visibility rules, no section rule', () => {
+    expect(FIELD_CONFIGS).toHaveLength(37);
     expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(32);
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('register')).toEqual(['DIN-1989-2-02 behaeltnisse', 'DIN-1989-2-03 prueflaeufe', 'DIN-1989-2-03 pruefstoffe']);
@@ -55,19 +55,20 @@ describe('DIN-1989-2 field configs (Plan 3 Task 17)', () => {
     expect(byWidget('attestation')).toEqual([
       'DIN-1989-2-02 rueckhalteraum_zugaenglich', 'DIN-1989-2-02 einbau_fallrohr', 'DIN-1989-2-02 temperaturbestaendig_fallrohr', 'DIN-1989-2-03 hersteller_verfahren_dokumentiert',
     ]);
-    expect(byWidget('scalar')).toEqual(['DIN-1989-2-03 V_Pruef_leist', 'DIN-1989-2-03 V_Pruef_trenn', 'DIN-1989-2-03 V_pruefmedium_l', 'DIN-1989-2-03 eta_Verw', 'DIN-1989-2-04 werkstoffbezeichnung']);
+    expect(byWidget('scalar')).toEqual(['DIN-1989-2-03 V_Pruef_leist', 'DIN-1989-2-03 V_Pruef_trenn', 'DIN-1989-2-03 V_pruefmedium_l', 'DIN-1989-2-03 eta_Verw']);
     expect(byWidget('derived')).toHaveLength(23); // one per equation row
     expect(byWidget('reference')).toEqual([]); // the brief's `reference` for an EN 12056-3 value: the codebase widget is a carrier-row picker (X-1)
-    // UPDATE entries = the six existing prod fields that gain a rule (all consumer-free, none read by a same-worksheet gate)
+    // UPDATE entries = the five existing prod fields that gain a rule (all consumer-free, none read by a same-worksheet gate; the -04
+    // werkstoffbezeichnung rule was withdrawn in fix round 1 — its driver reaches no worksheet, so it lives in the C-1 STAGED block)
     expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol} :: ${e.visible_when}`)).toEqual([
       "DIN-1989-2-02 rueckhalteraum_zugaenglich :: filtertyp IN {'typ_a', 'typ_b'}",
       'DIN-1989-2-02 temperaturbestaendig_fallrohr :: einbau_fallrohr == true',
       'DIN-1989-2-03 V_Pruef_leist :: DN <= 200',
       'DIN-1989-2-03 V_Pruef_trenn :: DN <= 200',
       "DIN-1989-2-03 eta_Verw :: filtertyp == 'typ_c'",
-      "DIN-1989-2-04 werkstoffbezeichnung :: werkstoff_filterelement == 'kunststoff'",
     ]);
-    expect(FIELD_CONFIGS.filter((e) => e.visible_when)).toHaveLength(29);
+    expect(FIELD_CONFIGS.find((e) => e.symbol === 'werkstoffbezeichnung')).toBeUndefined();
+    expect(FIELD_CONFIGS.filter((e) => e.visible_when)).toHaveLength(28);
     expect(FIELD_CONFIGS.filter((e) => e.visible_when?.includes('DN <= 200'))).toHaveLength(18); // the DN ≤ 200 test-scope rules (L227 / L403)
     expect(FIELD_CONFIGS.filter((e) => e.visible_when === 'DN > 200').map((e) => e.symbol)).toEqual(['hersteller_verfahren_dokumentiert']);
   });
@@ -80,8 +81,11 @@ describe('DIN-1989-2 field configs (Plan 3 Task 17)', () => {
     expect(fill.lookup!.value).toBe('typ');
     expect(fill.create?.data_type).toBe('enum'); // amendment C: number | text | enum
     expect(new Set(tab1AsTable().rows.map((r) => r.keys.filterart))).toEqual(new Set(enumValues('DIN-1989-2-01 funktionsprinzip')));
-    const sed = byKey('DIN-1989-2-01', 'sedimentationsvolumen').enum_values as Array<{ value: string }>;
+    const sed = byKey('DIN-1989-2-01', 'sedimentationsvolumen').enum_values as Array<{ value: string; label_de: string }>;
     expect(sed.map((o) => o.value)).toEqual([...TAB1_SEDIMENTATIONSVOLUMEN]);
+    // U-1 (fix round 1): the first column head is an image — nothing beyond the two printed words is reconstructed into the label
+    expect(sed.map((o) => o.label_de)).toEqual(['großes Sedimentationsvolumen', 'kleines Sedimentationsvolumen', 'Filter mit mechanischer Filtration ohne Sedimentationsvolumen']);
+    expect(JSON.stringify(FIELD_CONFIGS)).not.toContain('Filter mit mechanischer Filtration und');
     for (const r of tab1AsTable().rows) expect(sed.map((o) => o.value)).toContain(r.keys.sedimentationsvolumen);
     const twinEnum = (fill.enum_values as Array<{ value: string; label_de: string }>);
     expect(twinEnum.map((o) => o.value)).toEqual(enumValues('DIN-1989-2-01 filtertyp'));
@@ -117,7 +121,7 @@ describe('DIN-1989-2 field configs (Plan 3 Task 17)', () => {
     expect(priorRow('DIN-1989-2-01 einbausystem').consumer_worksheets).toEqual(['DIN-1989-2-02']);
     expect(priorRow('DIN-1989-2-01 funktionsprinzip').consumer_worksheets).toEqual(['DIN-1989-2-02']);
     expect(priorRow('DIN-1989-2-02 werkstoff_filterelement').consumer_worksheets).toBeNull();
-    expect(byKey('DIN-1989-2-04', 'werkstoffbezeichnung').visible_when).toBe("werkstoff_filterelement == 'kunststoff'"); // emitted, reads pending until din1989_2-C-1
+    // the -04 werkstoffbezeichnung rule is NOT emitted (inert until the driver reaches -04) — STAGED inside din1989_2-C-1
     // the register row rule for the Erdeinbau depth reads the inherited einbausystem token exactly
     expect(registerCfg('DIN-1989-2-02', 'behaeltnisse').columns.find((c) => c.key === 'grifftiefe_cm')?.visible_when).toBe("einbausystem == 'separat_erdeinbau'");
     expect(enumValues('DIN-1989-2-01 einbausystem')).toContain('separat_erdeinbau');
@@ -172,7 +176,7 @@ describe('DIN-1989-2 field configs (Plan 3 Task 17)', () => {
     const files = fieldConfigFilesFor('din1989_2', '20260917101710');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(6);
+    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(5);
     expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(32);
     expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
