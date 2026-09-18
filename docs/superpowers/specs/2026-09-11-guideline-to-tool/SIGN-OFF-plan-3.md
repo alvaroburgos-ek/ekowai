@@ -2427,7 +2427,7 @@ Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din1
 
 ## Task 11 — DWA-M-205 (m205)
 
-Report: `reports/plan-3-m205.md` · STAGED SQL: `scripts/verification/m205-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-205\DWA-M_205.md` (lines cited) · prod capture `src/lib/eval/field-configs/m205.prior.json` (2026-09-18, read-only; 237 fields, 234 sections, 24 equations; 72 compliance rows read with `prod-query.mjs`). Ids follow the Task-11 brief where it names them (G-1…G-4, R-1…R-3, F-1…F-3, X-1, X-2); the rest use the skeleton letters (R-4/R-5 = range-SR-2, E = enum-token / binding, C = consumer-edit, D = deactivation, U = unreadable cell, J = judgment reading, I = interface gap, O = override policy). Nothing below is applied.
+Report: `reports/plan-3-m205.md` · STAGED SQL: `scripts/verification/m205-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-205\DWA-M_205.md` (lines cited) · prod capture `src/lib/eval/field-configs/m205.prior.json` (2026-09-18, read-only; 237 fields, 234 sections, 24 equations; 72 compliance rows read with `prod-query.mjs`). Ids follow the Task-11 brief where it names them (G-1…G-4, R-1…R-3, F-1…F-3, X-1, X-2); the rest use the skeleton letters (fix round 1 added D-2 … D-5 and E-4) (R-4/R-5 = range-SR-2, E = enum-token / binding, C = consumer-edit, D = deactivation, U = unreadable cell, J = judgment reading, I = interface gap, O = override policy). Nothing below is applied.
 
 ### m205-G-1 · DWA-M-205 · M205-10 · CR-03/04/05/14/15/16/17 (+ -2) → `leitorganismen_verletzungen == 0`
 - Class: gate-guard (equation-replacement of 14 verified block gates by one register gate)
@@ -2525,6 +2525,7 @@ Report: `reports/plan-3-m205.md` · STAGED SQL: `scripts/verification/m205-STAGE
 - Chosen now (fail-safe): no gate; `gerinne_sensor_verletzungen` (M205-11-D3) and `chlordosis_verletzungen` (M205-21-D1) shown.
 - Evidence (verbatim, transcript line): "Je Bestrahlungsbank ist mindestens ein UV-Sensor zur Messung der Bestrahlungsstärke mit unterer Alarmgrenze zur kontinuierlichen Überwachung des Betriebes" (L590) "anzuordnen. … Wenn hintereinander liegende Bestrahlungsräume durchflussabhängig zu- und abgeschaltet werden, sind mindestens zwei UV-Sensoren erforderlich, einer im ständig eingeschalteten Bereich und einer im am häufigsten abgeschalteten Bereich." (L591); "Je nach dem Gehalt an organischen Stoffen im Abwasser sind 1 mg bis 20 mg freies Chlor pro Liter, eine gründliche Durchmischung sowie eine Kontaktzeit von 15 bis 30 Minuten erforderlich." (L973).
 - Proposed SQL / config: STAGED block m205-G-14 (sensor gate block — "ist … anzuordnen", "sind … erforderlich"; dose gate warn).
+- Fix round 1: the sensor rule is per Bestrahlungsbank (register column `banks`, L590; `sensoren_min = max(banks, if(zuschaltbar == true, 2, 1))`) and the dose check honours the sand-filtered ClO₂ range (register column `sandfiltriert`, L984 "bei sandfiltriertem Abwasser mit geringer Restverschmutzung nur $1 mathrm{~g} / mathrm{m}^{3}$ bis $5 mathrm{~g} / mathrm{m}^{3}$"; 3 g/m³ passes only sand-filtered) — both gates read the unchanged verdict columns.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m205-R-1 · DWA-M-205 · M205-07 / M205-19 · EQ-05 `spez_energie_ozon = 10` → S4_3_3_2 lookup by Einsatzgas
@@ -2742,6 +2743,43 @@ Report: `reports/plan-3-m205.md` · STAGED SQL: `scripts/verification/m205-STAGE
 - Chosen now (fail-safe): `anhaltswert` (the brief's cue): the tables are the directive's immission limits used "zum Beispiel" as emission targets; the `quelle = behoerde` row is the deviation channel (no override block on the register, so no per-row override of a table value).
 - Evidence (verbatim, transcript line): L232 (quoted under G-1); "Vorgaben an die Leistung einer Abwasserdesinfektion können sich zum Beispiel nach den Werten und Parametern der EG-Badegewässerrichtlinie, die der Gewässerbewertung dienen, richten." (L289); Tab. 3 footnote "4) Richtwert, der analog § 2 Abs. 3 TrinkwV (Fassung vom 05.12.1990, BGBl. I, S. 2616) so weit unterschritten werden sollte, wie dies nach dem Stand der Technik mit vertretbarem Aufwand unter Berücksichtigung der Umstände des Einzelfalles möglich ist." (L406).
 - Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Fix round 1 (Task 11 review) — single-source pairs (controller ruling: register rows are the N-instance shape; the prod scalars are the retirement candidates; nothing retired now)
+
+### m205-D-2 · DWA-M-205 · M205-24 · `uv_sensor_anzahl_pro_bank` / `gerinne_zuschaltbar` ↔ M205-11 `bestrahlungsgerinne.banks/.sensoren/.zuschaltbar`
+- Class: deactivation (single-source pair)
+- Chosen now (fail-safe): both scalars stay (one is required); the register carries banks / sensors / switchability per Gerinne and its footer `gerinne_sensor_verletzungen` is the verdict. Resolution: RETIRE ON RATIFICATION — no footer reproduces a single "sensors per bank" figure (rows may differ); both scalars are consumer-free and no gate reads them.
+- Evidence (verbatim, transcript line): "Je Bestrahlungsbank ist mindestens ein UV-Sensor zur Messung der Bestrahlungsstärke mit unterer Alarmgrenze zur kontinuierlichen Überwachung des Betriebes" (L590) "anzuordnen. … Wenn hintereinander liegende Bestrahlungsräume durchflussabhängig zu- und abgeschaltet werden, sind mindestens zwei UV-Sensoren erforderlich, einer im ständig eingeschalteten Bereich und einer im am häufigsten abgeschalteten Bereich." (L591); capture: `uv_sensor_anzahl_pro_bank` (M205-24, required, VR ≥ 1, consumer-free), `gerinne_zuschaltbar` (M205-24, boolean, consumer-free).
+- Proposed SQL / config: STAGED block m205-D-2 (archive into `fields_archive_m205`, `active = false`, rollback by id).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-D-3 · DWA-M-205 · M205-17 · `ozongenerator_spannung` / `ozongenerator_frequenz` ↔ `ozongeneratoren.spannung_kv/.frequenz_hz`
+- Class: deactivation (single-source pair, same worksheet)
+- Chosen now (fail-safe): scalars stay; register rows carry both per generator. Resolution: RETIRE ON RATIFICATION (the only footer is Σ Ozonleistung; a mean voltage / frequency is meaningless).
+- Evidence (verbatim, transcript line): "Anlagen für Ozonleistungen über $1 \mathrm{~kg} / \mathrm{h}$ arbeiten bei einer Spannung von ca. 10 kV und einer Frequenz von ca. 600 Hz ." (L899); capture: both not required, VR `> 0`, consumer-free, no gate.
+- Proposed SQL / config: STAGED block m205-D-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-D-4 · DWA-M-205 · M205-14 · `porenweite` / `netto_permeatfluss` / `transmembrandruck` ↔ `membranmodule.porenweite_um/.netto_flux/.tmd`
+- Class: deactivation + equation (single-source pair with a consumer chain)
+- Chosen now (fail-safe): all three scalars stay (all required; all consumed by M205-24; `transmembrandruck` is an input of EQ-08 `permeabilitaet = brutto_permeatfluss / transmembrandruck` whose output M205-24 consumes — the chain the transitive guard protects). Resolution per scalar: `netto_permeatfluss` → DERIVE from the footer (area-weighted mean `permeat_design * 1000 / membranflaeche_sum`, new equation `M205-14-D3`, field → `widget = 'derived'`, consumers kept); `porenweite` → RETIRE ON RATIFICATION (no meaningful footer; M205-24 then needs the register mirror via a consumer edit); `transmembrandruck` → STAYS until EQ-08 is re-pointed (needs a brutto-flux register column — owner ruling).
+- Evidence (verbatim, transcript line): "- Netto-Permeatfluss: im Dauerbetrieb je Betriebszyklus erzielbarer Permeatfluss (Permeatfluss bezogen auf die gesamte Zykluszeit abzüglich Spülverluste) in $1 /\left(\mathrm{m}^{2} \cdot \mathrm{~h}\right)$," (L748); "- Permeabilität: Verhältnis von Brutto-Permeatfluss und Transmembrandruck in $1 /\left(\mathrm{m}^{2} \cdot \mathrm{~h} \cdot \mathrm{bar}\right)$," (L750); "Gesamtmembranfläche & $300 \mathrm{~m}^{2}$ & $6.720 \mathrm{~m}^{2}$ & $630 \mathrm{~m}^{2}$" (L822); capture: `porenweite` / `netto_permeatfluss` / `transmembrandruck` required, consumers `['M205-24']`; EQ-08 `d7668bb1-a44b-42ac-9be7-34714774d34e` (M205-14) → `permeabilitaet` consumed by M205-24.
+- Proposed SQL / config: STAGED block m205-D-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-D-5 · DWA-M-205 · M205-21 · the chlorine scalars ↔ `chlorungsmittel.mittel/.dosis/.sandfiltriert/.kontaktzeit_ist/.restchlor` (extends C-4 / G-2)
+- Class: deactivation (single-source pair with consumers on M205-25)
+- Chosen now (fail-safe): every scalar stays; the four consumer-free twins carry the emitted `chlormittel_typ` visibility. Resolution: RETIRE ON RATIFICATION the per-agent facts the register carries (`clo2_dosis`, `freies_chlor`, `kontaktzeit_chlor`, `chlor_kontaktzeit`, `restchlor_betrieb`, `chlormittel`) and re-point M205-25 to the register mirror (consumer edit of `chlorungsmittel`); KEEP `chlormittel_typ` (the worksheet driver), `ph_chlorung` / `chlor_ph` (process condition), `restchlor` / `restchlor_gewaesser` (Gewässer, the ≤ 0,005 class), `entchlorungsstufe`, `clo2_konzentration` (Lösung) — facts the register does not carry.
+- Evidence (verbatim, transcript line): L973 (dose / contact / pH — quoted under G-14); "der Größenordnung von $0,2 \mathrm{mg} / \mathrm{l}$ nachzuweisen sein, um die Desinfektionswirkung sicherzustellen." (L982); "Bei Verwendung von gereinigtem Abwasser als Betriebswasser in Kläranlagen sind etwa 5 g bis 10 g Chlordioxid pro Kubikmeter Abwasser zur Reduktion der Fäkalindikatorbakterien um drei Zehnerpotenzen notwendig, bei sandfiltriertem Abwasser mit geringer Restverschmutzung nur $1 \mathrm{~g} / \mathrm{m}^{3}$ bis $5 \mathrm{~g} / \mathrm{m}^{3}$." (L984); capture: `clo2_dosis` / `freies_chlor` / `kontaktzeit_chlor` (required) / `ph_chlorung` (required) / `restchlor` (required) / `entchlorungsstufe` (required) consumers `['M205-25']`; no gate on M205-21 (CR-11/12/22/23/24 read the -08 / -10 copies — G-2).
+- Proposed SQL / config: STAGED block m205-D-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m205-E-4 · DWA-M-205 · M205-17 · `ozon_pro_o2` ← S4_3_3_2 `o2_pro_o3_kg` (fill proposal; `M205-17-D3` now bound to the input)
+- Class: widget re-bind of an existing input (E-2 rule)
+- Chosen now (fail-safe): `M205-17-D3 o2_bedarf_kg_h = ozonbedarf_kg_h * ozon_pro_o2` reads the EXISTING input (VR `eq 10` = L899 "etwa 10 kg") — one registered source per fact; the seeded column stays for the fill; no re-bind emitted (the Luft cell is null → a fill would show "—" and take the input away).
+- Evidence (verbatim, transcript line): "Für 1 kg Ozon werden etwa 10 kg Sauerstoff benötigt (bei ca. $10 \%$ bis $13 \%$ Ozon im erzeugten Gasgemisch)." (L899); capture: `ozon_pro_o2` (M205-17, not required, VR `ozon_pro_o2 eq 10`, consumer-free, no gate).
+- Proposed SQL / config: STAGED block m205-E-4 (archive pattern on `fields`).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### Observations (no signature needed)

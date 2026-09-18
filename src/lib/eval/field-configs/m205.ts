@@ -72,6 +72,12 @@ export const TEXT_T3_EXPR = "if(parameter_t3 == 'fkstrep', lookup('TABELLE3', ei
 export const LIMIT_EXPR = "if(quelle == 't1', if(wert_typ == 'g', g_wert_t1, i_wert_t1), if(quelle == 't2', limit_t2, if(quelle == 't3', limit_t3, limit_behoerde)))";
 export const PERZENTIL_EXPR = "if(quelle == 't1', if(wert_typ == 'g', g_pct_t1, i_pct_t1), if(quelle == 't2', pct_t2, perzentil_behoerde))";
 export const OK_EXPR = 'if(messwert <= limit, 1, 0)';
+/** L590 (one sensor per Bestrahlungsbank) / L591 (two when spaces are switched with the flow) — per channel row. */
+export const SENSOREN_MIN_EXPR = 'max(banks, if(zuschaltbar == true, 2, 1))';
+/** §4.4.2 L984: ClO₂ 5–10 g/m³, "bei sandfiltriertem Abwasser mit geringer Restverschmutzung nur 1 g/m³ bis 5 g/m³" — the sand-filtered range applies to Chlordioxid only. */
+export const DOSIS_MIN_EFF_EXPR = "if(mittel == 'chlordioxid', if(sandfiltriert == 'ja', lookup('S4_4_2', mittel, 'dosis_sandfiltriert_min'), dosis_min), dosis_min)";
+export const DOSIS_MAX_EFF_EXPR = "if(mittel == 'chlordioxid', if(sandfiltriert == 'ja', lookup('S4_4_2', mittel, 'dosis_sandfiltriert_max'), dosis_max), dosis_max)";
+export const DOSIS_OK_EXPR = 'if(dosis >= dosis_min_eff AND dosis <= dosis_max_eff, 1, 0)';
 
 const T1_CAPTION = 'Tabelle 1: Mikrobiologische Qualitätsanforderungen an Badegewässer nach der Richtlinie 76/160/EWG'; // L297
 const T2_CAPTION = 'Tabelle 2: Mikrobiologische Qualitätsanforderungen an Badegewässer nach der Richtlinie 2006/7/EG'; // L317
@@ -191,25 +197,26 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
       columns: [
         { key: 'label', label: 'Gerinne / Bank', type: 'text', required: true },
         { key: 'q_m3_h', label: 'Q', type: 'number', unit: 'm³/h', required: true, min: 0, aria_label: 'Bemessungsdurchfluss des Gerinnes' },
-        { key: 'sensoren', label: 'UV-Sensoren', type: 'number', required: true, min: 1, aria_label: 'Anzahl UV-Sensoren je Bank' },
+        { key: 'banks', label: 'Banks', type: 'number', required: true, min: 1, aria_label: 'Anzahl Bestrahlungsbanks im Gerinne' },
+        { key: 'sensoren', label: 'UV-Sensoren', type: 'number', required: true, min: 1, aria_label: 'Anzahl UV-Sensoren im Gerinne' },
         { key: 'zuschaltbar', label: 'durchflussabhängig zu-/abgeschaltet', type: 'boolean' },
-        // L590–L591: "mindestens ein UV-Sensor" je Bank; "mindestens zwei UV-Sensoren" when spaces are switched with the flow
-        { key: 'sensoren_min', label: 'Sensoren mind.', type: 'derived', expr: 'if(zuschaltbar == true, 2, 1)' },
+        // L590 "Je Bestrahlungsbank ist mindestens ein UV-Sensor … anzuordnen" → banks; L591 "mindestens zwei UV-Sensoren" when spaces are switched with the flow
+        { key: 'sensoren_min', label: 'Sensoren mind.', type: 'derived', expr: SENSOREN_MIN_EXPR },
         { key: 'sensoren_ok', label: 'Sensoren ausreichend', type: 'derived', expr: 'if(sensoren >= sensoren_min, 1, 0)', display: 'badge', value_labels: { '1': 'ja', '0': 'nein' } },
       ],
       footer: ['gerinne_count', 'durchfluss_gerinne_sum', 'gerinne_sensor_verletzungen'],
-      note: `${Q.L548} ${Q.L590}`,
+      note: `${Q.L548} ${Q.L590} Je Zeile ein Gerinne mit seinen Banks (Sensoren mind. = Banks, bzw. 2 bei zu-/abgeschalteten Bestrahlungsräumen); die Einzelwerte uv_sensor_anzahl_pro_bank / gerinne_zuschaltbar (M205-24) bleiben bis m205-D-2.`,
     },
     verification_quote: `${Q.L548} — ${Q.L590}`,
-    create: { section_code: 'C', label_de: 'Bestrahlungsgerinne / Banks (je Gerinne Q, UV-Sensoren, Zuschaltbarkeit)', data_type: 'json', unit: null, clause_reference: '§4.1.3.2, §4.1.3.3',
-      description: 'Plan 3: Zeilen je Gerinne; Σ Q → durchfluss_gerinne_sum (M205-11-D1), Anzahl → gerinne_count (-D2), Sensorregel je Bank → gerinne_sensor_verletzungen (-D3). Der Abgleich Σ Q ≥ durchfluss_max und „> 1000 m³/h ⇒ mehrere Gerinne“ (CR-28) ist STAGED (m205-G-8; durchfluss_max ist auf M205-11 nicht verfügbar).' },
+    create: { section_code: 'C', label_de: 'Bestrahlungsgerinne / Banks (je Gerinne Q, Banks, UV-Sensoren, Zuschaltbarkeit)', data_type: 'json', unit: null, clause_reference: '§4.1.3.2, §4.1.3.3',
+      description: 'Plan 3: Zeilen je Gerinne; Σ Q → durchfluss_gerinne_sum (M205-11-D1), Anzahl → gerinne_count (-D2), Sensorregel (mindestens ein Sensor je Bank, mindestens zwei bei zu-/abgeschalteten Bestrahlungsräumen) → gerinne_sensor_verletzungen (-D3). Der Abgleich Σ Q ≥ durchfluss_max und „> 1000 m³/h ⇒ mehrere Gerinne“ (CR-28) ist STAGED (m205-G-8; durchfluss_max ist auf M205-11 nicht verfügbar); die Einzelskalare uv_sensor_anzahl_pro_bank / gerinne_zuschaltbar (M205-24) sind Ablösekandidaten (m205-D-2).' },
   }),
   WS11({ symbol: 'durchfluss_gerinne_sum', widget: 'derived', ui_config: null, verification_quote: Q.L548,
     create: { section_code: 'D', label_de: 'Summe der Gerinne-Durchflüsse', data_type: 'number', unit: 'm³/h', clause_reference: '§4.1.3.2', description: 'Plan 3: Ausgabe der Gleichung M205-11-D1 (sum_rows über bestrahlungsgerinne.q_m3_h).' } }),
   WS11({ symbol: 'gerinne_count', widget: 'derived', ui_config: null, verification_quote: Q.L548,
     create: { section_code: 'D', label_de: 'Anzahl der Bestrahlungsgerinne', data_type: 'number', unit: null, clause_reference: '§4.1.3.2', description: 'Plan 3: Ausgabe der Gleichung M205-11-D2 (count_rows über bestrahlungsgerinne); bei Durchflüssen über 1000 m³/h ist die Aufteilung auf parallele Gerinne zweckmäßig (Gate STAGED, m205-G-8).' } }),
   WS11({ symbol: 'gerinne_sensor_verletzungen', widget: 'derived', ui_config: null, verification_quote: Q.L590,
-    create: { section_code: 'D', label_de: 'Gerinne mit zu wenigen UV-Sensoren (Anzahl)', data_type: 'number', unit: null, clause_reference: '§4.1.3.3', description: 'Plan 3: Ausgabe der Gleichung M205-11-D3 (count_rows über bestrahlungsgerinne mit sensoren_ok == 0): mindestens ein Sensor je Bank, mindestens zwei bei durchflussabhängig zu-/abgeschalteten Bestrahlungsräumen.' } }),
+    create: { section_code: 'D', label_de: 'Gerinne mit zu wenigen UV-Sensoren (Anzahl)', data_type: 'number', unit: null, clause_reference: '§4.1.3.3', description: 'Plan 3: Ausgabe der Gleichung M205-11-D3 (count_rows über bestrahlungsgerinne mit sensoren_ok == 0): mindestens ein Sensor je Bank (Sensoren ≥ Banks), mindestens zwei bei durchflussabhängig zu-/abgeschalteten Bestrahlungsräumen.' } }),
 
   // ---- M205-14 Membran: modules (§4.2.3.1 L748 / L750, Tab. 5) ----
   WS14({
@@ -230,7 +237,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     },
     verification_quote: `${Q.L748} — ${Q.L726}`,
     create: { section_code: 'C', label_de: 'Membranmodule / Filtrationseinheiten (je Einheit Fläche, Netto-Permeatfluss, Druck)', data_type: 'json', unit: null, clause_reference: '§4.2.2, §4.2.3.1, Tab. 5',
-      description: 'Plan 3: Zeilen je Filtrationseinheit; Σ Fläche → membranflaeche_sum (M205-14-D1), Σ Fläche × Netto-Fluss → permeat_design in m³/h (-D2). Der Abgleich mit durchfluss_max (M205-08 → M205-14) ist STAGED (m205-G-10).' },
+      description: 'Plan 3: Zeilen je Filtrationseinheit; Σ Fläche → membranflaeche_sum (M205-14-D1), Σ Fläche × Netto-Fluss → permeat_design in m³/h (-D2). Der Abgleich mit durchfluss_max (M205-08 → M205-14) ist STAGED (m205-G-10); die Einzelskalare porenweite / netto_permeatfluss / transmembrandruck (an M205-24 übergeben) sind Ablösekandidaten (m205-D-4).' },
   }),
   WS14({ symbol: 'membranflaeche_sum', widget: 'derived', ui_config: null, verification_quote: Q.L748,
     create: { section_code: 'D', label_de: 'Gesamtmembranfläche', data_type: 'number', unit: 'm²', clause_reference: '§4.2.3.1, Tab. 5', description: 'Plan 3: Ausgabe der Gleichung M205-14-D1 (sum_rows über membranmodule.flaeche_m2); Tab. 5: 300 / 6.720 / 630 m².' } }),
@@ -253,7 +260,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     },
     verification_quote: Q.L899,
     create: { section_code: 'C', label_de: 'Ozongeneratoren (je Erzeuger Ozonleistung kg/h, Spannung, Frequenz)', data_type: 'json', unit: null, clause_reference: '§4.3.3.2',
-      description: 'Plan 3: Zeilen je Ozonerzeuger; Σ Ozonleistung → ozon_kapazitaet_sum (M205-17-D4); Abgleich mit ozonbedarf_kg_h ist STAGED (m205-G-11). Anlagen über 1 kg/h: ca. 10 kV, ca. 600 Hz (Orientierung).' },
+      description: 'Plan 3: Zeilen je Ozonerzeuger; Σ Ozonleistung → ozon_kapazitaet_sum (M205-17-D4); Abgleich mit ozonbedarf_kg_h ist STAGED (m205-G-11). Anlagen über 1 kg/h: ca. 10 kV, ca. 600 Hz (Orientierung); die Einzelskalare ozongenerator_spannung / _frequenz sind Ablösekandidaten (m205-D-3).' },
   }),
   WS17({ symbol: 'ozon_kapazitaet_sum', widget: 'derived', ui_config: null, verification_quote: Q.L899,
     create: { section_code: 'D', label_de: 'Installierte Ozonleistung (Σ Generatoren)', data_type: 'number', unit: 'kg/h', clause_reference: '§4.3.3.2', description: 'Plan 3: Ausgabe der Gleichung M205-17-D4 (sum_rows über ozongeneratoren.kapazitaet_kg_h).' } }),
@@ -262,14 +269,14 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS17({ symbol: 'ozonbedarf_kg_h', widget: 'derived', ui_config: null, verification_quote: `${Q.L920} — ${Q.L899}`,
     create: { section_code: 'D', label_de: 'Ozonbedarf (Ozonkonzentration × maximaler Zufluss)', data_type: 'number', unit: 'kg/h', clause_reference: '§4.3.3.2, §4.3.3.3', description: 'Plan 3: Ausgabe der Gleichung M205-17-D2 (ozon_konz [mg/l] · durchfluss_max [m³/h] / 1000; durchfluss_max aus M205-08).' } }),
   WS17({ symbol: 'o2_bedarf_kg_h', widget: 'derived', ui_config: null, verification_quote: Q.L899,
-    create: { section_code: 'D', label_de: 'Sauerstoffbedarf der Ozonerzeugung (etwa 10 kg O2 je kg O3, Reinsauerstoff)', data_type: 'number', unit: 'kg/h', clause_reference: '§4.3.3.2', description: 'Plan 3: Ausgabe der Gleichung M205-17-D3 (ozonbedarf_kg_h · S4_3_3_2.o2_pro_o3_kg für das Einsatzgas); für Luft druckt der Text keinen Sauerstofffaktor — kein Wert.' } }),
+    create: { section_code: 'D', label_de: 'Sauerstoffbedarf der Ozonerzeugung (Ozonbedarf × Sauerstoffbedarf je kg Ozon)', data_type: 'number', unit: 'kg/h', clause_reference: '§4.3.3.2', description: 'Plan 3: Ausgabe der Gleichung M205-17-D3 (ozonbedarf_kg_h · ozon_pro_o2 — das vorhandene Eingabefeld „Sauerstoffbedarf je kg Ozon“, VR = 10, „etwa 10 kg Sauerstoff“); eine Füllung von ozon_pro_o2 aus S4_3_3_2 ist STAGED (m205-E-4).' } }),
   WS17({
     symbol: 'ct_ecoli_basis', widget: 'scalar', ui_config: null, verification_quote: Q.L868,
     create: { section_code: 'B', label_de: 'ct-Wert für Escherichia coli (Basis, 99 % Reduktion; aus Vorversuchen / DVGW W 225)', data_type: 'number', unit: 'mg·min/l', clause_reference: '§4.3.2',
-      description: 'Plan 3: Eingabe des experimentell bestimmten ct-Werts für E. coli; ct_ziel (M205-17-D5) multipliziert ihn für Cryptosporidien-Oozysten mit 500 („um ca. das Fünfhundertfache“).' },
+      description: 'Plan 3: Eingabe des experimentell bestimmten ct-Werts für E. coli; ct_ziel (M205-17-D5) multipliziert ihn für Cryptosporidien-Oozysten mit ca. 500 („um ca. das Fünfhundertfache“).' },
   }),
   WS17({ symbol: 'ct_ziel', widget: 'derived', ui_config: null, verification_quote: Q.L868,
-    create: { section_code: 'D', label_de: 'ct-Zielwert für den Zielorganismus (Cryptosporidien: 500 × E. coli)', data_type: 'number', unit: 'mg·min/l', clause_reference: '§4.3.2', description: 'Plan 3: Ausgabe der Gleichung M205-17-D5 — if(ct_wert_zielorganismus == cryptosporidien, ct_ecoli_basis · 500, ct_ecoli_basis); Abgleich ct_wert ≥ ct_ziel ist STAGED (m205-G-12).' } }),
+    create: { section_code: 'D', label_de: 'ct-Zielwert für den Zielorganismus (Cryptosporidien: ca. 500 × E. coli)', data_type: 'number', unit: 'mg·min/l', clause_reference: '§4.3.2', description: 'Plan 3: Ausgabe der Gleichung M205-17-D5 — if(ct_wert_zielorganismus == cryptosporidien, ct_ecoli_basis · 500, ct_ecoli_basis); „um ca. das Fünfhundertfache“ (L868) — der Faktor 500 ist der gedruckte Näherungswert; Abgleich ct_wert ≥ ct_ziel ist STAGED (m205-G-12).' } }),
   WS17({
     symbol: 'spez_energie_ozon_tab', widget: 'lookup_fill', ui_config: { source_label: '§4.3.3.2' },
     lookup: { table_code: 'S4_3_3_2', role: 'value', keys: [{ column: 'einsatzgas', from_symbol: 'ozon_einsatzgas' }], value: 'spez_energie_kwh_kg' },
@@ -315,7 +322,11 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'dosis_unit', label: 'Einheit', type: 'derived', expr: "lookup('S4_4_2', mittel, 'dosis_unit')" },
         { key: 'dosis_min', label: 'Dosis min (§4.4.2)', type: 'derived', expr: "lookup('S4_4_2', mittel, 'dosis_min')" },
         { key: 'dosis_max', label: 'Dosis max (§4.4.2)', type: 'derived', expr: "lookup('S4_4_2', mittel, 'dosis_max')" },
-        { key: 'dosis_ok', label: 'Dosis im Bereich', type: 'derived', expr: 'if(dosis >= dosis_min AND dosis <= dosis_max, 1, 0)', display: 'badge', value_labels: { '1': 'ja', '0': 'nein' } },
+        // L984: "bei sandfiltriertem Abwasser mit geringer Restverschmutzung nur 1 g/m³ bis 5 g/m³" — Chlordioxid only
+        { key: 'sandfiltriert', label: 'sandfiltriertes Abwasser (geringe Restverschmutzung)', type: 'enum', options: ['ja', 'nein'], option_labels: { ja: 'ja (1–5 g/m³)', nein: 'nein (5–10 g/m³)' }, required: true, visible_when: "mittel == 'chlordioxid'" },
+        { key: 'dosis_min_eff', label: 'Dosis min (gültig)', type: 'derived', expr: DOSIS_MIN_EFF_EXPR },
+        { key: 'dosis_max_eff', label: 'Dosis max (gültig)', type: 'derived', expr: DOSIS_MAX_EFF_EXPR },
+        { key: 'dosis_ok', label: 'Dosis im Bereich', type: 'derived', expr: DOSIS_OK_EXPR, display: 'badge', value_labels: { '1': 'ja', '0': 'nein' } },
         { key: 'kontaktzeit_ist', label: 'Kontaktzeit', type: 'number', unit: 'min', min: 0 },
         { key: 'kontaktzeit_text', label: 'Kontaktzeit (§4.4.2)', type: 'derived', expr: "lookup('S4_4_2', mittel, 'kontaktzeit_text')" },
         { key: 'restchlor', label: 'Restchlor (freies Chlor)', type: 'number', unit: 'mg/l', min: 0, visible_when: "mittel != 'chlordioxid'" },
@@ -325,7 +336,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     },
     verification_quote: `${Q.L973} — ${Q.L984}`,
     create: { section_code: 'C', label_de: 'Chlorungsmittel (je Mittel Dosis, Kontaktzeit, Restchlor gegen §4.4.2)', data_type: 'json', unit: null, clause_reference: '§4.4.2',
-      description: 'Plan 3: Zeilen je eingesetztem Chlorungsmittel mit den gedruckten Bereichen (Chlorgas / Hypochlorit 1–20 mg/l freies Chlor, 15–30 min; Chlordioxid 5–10 g/m³, sandfiltriert 1–5 g/m³, wenige Minuten); Zähler → chlordosis_verletzungen (M205-21-D1). Die Einzelskalare bleiben; Umstellung der Gates CR-11/22/23/24 ist STAGED (m205-G-2).' },
+      description: 'Plan 3: Zeilen je eingesetztem Chlorungsmittel mit den gedruckten Bereichen (Chlorgas / Hypochlorit 1–20 mg/l freies Chlor, 15–30 min; Chlordioxid 5–10 g/m³, bei sandfiltriertem Abwasser 1–5 g/m³, wenige Minuten); Zähler → chlordosis_verletzungen (M205-21-D1). Die Einzelskalare bleiben (Ablösung m205-D-5); Umstellung der Gates CR-11/22/23/24 ist STAGED (m205-G-2).' },
   }),
   WS21({ symbol: 'chlordosis_verletzungen', widget: 'derived', ui_config: null, verification_quote: `${Q.L973} — ${Q.L984}`,
     create: { section_code: 'D', label_de: 'Chlorungsmittel mit Dosis außerhalb des §4.4.2-Bereichs (Anzahl)', data_type: 'number', unit: null, clause_reference: '§4.4.2', description: 'Plan 3: Ausgabe der Gleichung M205-21-D1 (count_rows über chlorungsmittel mit dosis_ok == 0).' } }),

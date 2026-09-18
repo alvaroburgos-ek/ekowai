@@ -11,7 +11,7 @@
  * Emitted as `20260917101100_regulation_tables_seed_m205.sql` (no earlier
  * DWA-M-205 table seed exists — nothing superseded).
  *
- * Edition: title page L5 / L11 "März 2013", imprint L36 "© DWA …, Hennef 2013" =
+ * Edition: title page L5 / L11 "März 2013", imprint L37 "© DWA …, Hennef 2013" =
  * prod `standards.version` 'März 2013' (read-only 2026-09-18) → `'2013-03'`.
  *
  * Verification status: `md_verified` only where every printed row is lifted AND
@@ -286,8 +286,8 @@ export function tabelle4AsTable(): RegulationTable {
       str('uvc_anteil_pct'), num('uvc_anteil_min', '%'), num('uvc_anteil_max', '%'), str('oberflaechentemp_c'), num('oberflaechentemp_min', '°C'), num('oberflaechentemp_max', '°C'),
       str('nutzungsdauer_h'), num('nutzungsdauer_min', 'h'), num('nutzungsdauer_max', 'h')],
     override_policy: 'anhaltswert',
-    // L533 row head "Typische Leistungsaufnahme" — L603 (the bidder states and guarantees the lamp figures)
-    override_quote: `${Q.L533} — ${Q.L603}`,
+    // L603 (the bidder states and guarantees the lamp figures — the printed cells are typical / mean values, manufacturer data govern)
+    override_quote: Q.L603,
     verification_status: 'md_verified', rows };
 }
 
@@ -515,7 +515,7 @@ export function s4332AsTable(): RegulationTable {
 // ---------------------------------------------------------------------------
 // §4.4.2 Chlorung (L973 / L981–L982 / L984): keyed on prod `chlormittel_typ`. Chlorgas: "1 mg bis 20 mg freies Chlor pro
 // Liter … Kontaktzeit von 15 bis 30 Minuten … pH-Bereich zwischen 6 und 8" (L973), Restchlor "0,2 mg/l" (L982). The
-// same free-chlorine sentence is applied to Natriumhypochlorit (L977: HOCl is the agent of both — m205-J-2). Chlordioxid:
+// same free-chlorine sentence is applied to Natriumhypochlorit (L969: HOCl is the agent of both — m205-J-2). Chlordioxid:
 // "5 g bis 10 g Chlordioxid pro Kubikmeter … um drei Zehnerpotenzen …, bei sandfiltriertem Abwasser … 1 g/m³ bis 5 g/m³.
 // Die erforderliche Einwirkzeit beträgt wenige Minuten." and "über 30 Volumenprozent explosiv" (L984).
 // ---------------------------------------------------------------------------

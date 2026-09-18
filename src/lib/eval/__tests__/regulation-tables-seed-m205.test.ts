@@ -43,7 +43,7 @@ describe('DWA-M-205 Plan-3 seed tables', () => {
     expect(SEED_BUILDERS.m205).toEqual({ build: m205SeedTables, ts: '20260917101100', slugFile: 'm205' });
     expect(liveSeedSlugs()).toContain('m205');
     for (const t of tables) expect(resolveRegulationTable(STD, t.table_code)?.rows.length).toBe(t.rows.length);
-    expect(M205_EDITION).toBe('2013-03'); // title page L5 "März 2013", imprint L36 "Hennef 2013"
+    expect(M205_EDITION).toBe('2013-03'); // title page L5 "März 2013", imprint L37 "Hennef 2013"
     expect(tables.filter((t) => t.verification_status === 'md_verified').map((t) => t.table_code)).toEqual(['TABELLE2', 'TABELLE3', 'TABELLE4', 'S4_1_2_3', 'S3_3_LOGRED', 'TABELLE5', 'TABELLE6', 'TABELLE7', 'S4_3_3_2', 'S4_4_2', 'S4_3_3_4']);
   });
 
@@ -99,7 +99,7 @@ describe('DWA-M-205 Plan-3 seed tables', () => {
     expect(t.verification_status).toBe('md_verified');
   });
 
-  it('TABELLE4 (L530–L537): two lamp types = prod strahlertyp tokens; printed strings kept, numeric bounds as printed; one span for both rows; anhaltswert (L533 — L603)', () => {
+  it('TABELLE4 (L530–L537): two lamp types = prod strahlertyp tokens; printed strings kept, numeric bounds as printed; one span for both rows; anhaltswert (L603)', () => {
     const t = tabelle4AsTable();
     expect(enumValues('M205-05 strahlertyp')).toEqual(['niederdruck', 'mitteldruck']);
     expect(t.rows.map((r) => r.keys.strahlertyp)).toEqual(['niederdruck', 'mitteldruck']);
@@ -112,6 +112,7 @@ describe('DWA-M-205 Plan-3 seed tables', () => {
     expect(new Set(t.rows.map((r) => r.verbatim_quote)).size).toBe(1);
     expect(TAB4_STRAHLER).toHaveLength(2);
     expect(t.override_policy).toBe('anhaltswert');
+    expect(t.override_quote).toBe(Q.L603); // fix round 1: the bidder-guarantee sentence alone (a row head is not a policy sentence)
     expect(t.verification_status).toBe('md_verified');
   });
 

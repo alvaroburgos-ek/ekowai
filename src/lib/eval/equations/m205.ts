@@ -102,10 +102,10 @@ export const EQUATIONS: EquationEntry[] = [
   },
   {
     standard: STD, worksheet: 'M205-17', equation_number: 'M205-17-D3',
-    formula: "o2_bedarf_kg_h = ozonbedarf_kg_h * lookup('S4_3_3_2', ozon_einsatzgas, 'o2_pro_o3_kg')",
-    input_symbols: ['ozonbedarf_kg_h', 'ozon_einsatzgas'], output_symbol: 'o2_bedarf_kg_h', output_unit: 'kg/h',
+    formula: 'o2_bedarf_kg_h = ozonbedarf_kg_h * ozon_pro_o2',
+    input_symbols: ['ozonbedarf_kg_h', 'ozon_pro_o2'], output_symbol: 'o2_bedarf_kg_h', output_unit: 'kg/h',
     clause_reference: '§4.3.3.2',
-    description: 'Plan 3: Sauerstoffbedarf = Ozonbedarf · 10 kg O2/kg O3 (Reinsauerstoff, "etwa 10 kg"); für Luft druckt der Text keinen Faktor → kein Wert.',
+    description: 'Plan 3: Sauerstoffbedarf = Ozonbedarf · ozon_pro_o2 (das vorhandene Eingabefeld „Sauerstoffbedarf je kg Ozon“ auf M205-17, VR eq 10 = "etwa 10 kg Sauerstoff", Reinsauerstoff) — ein registrierter Träger je Sachverhalt (Fix-Runde 1); die Füllung von ozon_pro_o2 aus S4_3_3_2 ist STAGED (m205-E-4).',
     verification_quote: Q.L899,
   },
   {

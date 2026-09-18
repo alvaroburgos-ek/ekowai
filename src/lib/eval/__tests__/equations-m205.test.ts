@@ -122,16 +122,20 @@ describe('DWA-M-205 Plan-3 equations', () => {
     expect(run('M205-24-D1', { registers: { proben_desinfektion: prep('M205-24', 'proben_desinfektion', []) } }).kind).toBe('manual_required');
   });
 
-  it('M205-11-D1/-D2/-D3: Σ Q = 1600 m³/h over three channels, count 3, one channel violates the §4.1.3.3 sensor rule (two sensors when switched with the flow, L590–L591)', () => {
+  it('M205-11-D1/-D2/-D3: Σ Q = 2000 m³/h over four channels, count 4; sensors ≥ banks (L590 "Je Bestrahlungsbank … mindestens ein UV-Sensor") and ≥ 2 when switched with the flow (L591) — two violations', () => {
     const reg = prep('M205-11', 'bestrahlungsgerinne', [
-      { id: '1', label: 'G1', q_m3_h: 600, sensoren: 1 },
-      { id: '2', label: 'G2', q_m3_h: 600, sensoren: 1, zuschaltbar: true },
-      { id: '3', label: 'G3', q_m3_h: 400, sensoren: 2, zuschaltbar: true },
+      { id: '1', label: 'G1', q_m3_h: 600, banks: 1, sensoren: 1 },
+      { id: '2', label: 'G2', q_m3_h: 600, banks: 3, sensoren: 2 },                    // three banks, two sensors → violation
+      { id: '3', label: 'G3', q_m3_h: 400, banks: 1, sensoren: 1, zuschaltbar: true },  // switched → two required → violation
+      { id: '4', label: 'G4', q_m3_h: 400, banks: 4, sensoren: 4, zuschaltbar: true },
     ]);
-    expect(reg.rows.map((r) => [r.values.sensoren_min, r.values.sensoren_ok])).toEqual([[1, 1], [2, 0], [2, 1]]);
-    expect(computed(run('M205-11-D1', { registers: { bestrahlungsgerinne: reg } }))).toBe(1600);
-    expect(computed(run('M205-11-D2', { registers: { bestrahlungsgerinne: reg } }))).toBe(3);
-    expect(computed(run('M205-11-D3', { registers: { bestrahlungsgerinne: reg } }))).toBe(1);
+    expect(reg.rows.map((r) => [r.complete, r.values.sensoren_min, r.values.sensoren_ok])).toEqual([[true, 1, 1], [true, 3, 0], [true, 2, 0], [true, 4, 1]]);
+    expect(computed(run('M205-11-D1', { registers: { bestrahlungsgerinne: reg } }))).toBe(2000);
+    expect(computed(run('M205-11-D2', { registers: { bestrahlungsgerinne: reg } }))).toBe(4);
+    expect(computed(run('M205-11-D3', { registers: { bestrahlungsgerinne: reg } }))).toBe(2);
+    // a row without the bank count is incomplete (required) and does not count
+    const partial = prep('M205-11', 'bestrahlungsgerinne', [{ id: '1', label: 'G1', q_m3_h: 600, sensoren: 1 }]);
+    expect(partial.rows[0].complete).toBe(false);
   });
 
   it('M205-14-D1/-D2: Tab. 5 Straubing 300 m² × 50 l/(m²·h) = 15 m³/h and Ruhleben 630 m² × 63 = 39,69 m³/h → Σ 930 m², 54,69 m³/h (L822 / L824)', () => {
@@ -144,11 +148,12 @@ describe('DWA-M-205 Plan-3 equations', () => {
     expect(computed(run('M205-14-D2', { registers: { membranmodule: reg } }))).toBeCloseTo(54.69, 6);
   });
 
-  it('M205-17-D1…-D5: 10 mg/l / 12,5 mg/l DOC = 0,8 mg/mg (L947 threshold); 10 mg/l × 900 m³/h = 9 kg/h; O2 = 90 kg/h for Reinsauerstoff (L899 "etwa 10 kg"), no value for Luft; Σ generators; ct × 500 for Cryptosporidien (L868)', () => {
+  it('M205-17-D1…-D5: 10 mg/l / 12,5 mg/l DOC = 0,8 mg/mg (L947 threshold); 10 mg/l × 900 m³/h = 9 kg/h; O2 = 90 kg/h with the existing input ozon_pro_o2 = 10 (L899 "etwa 10 kg", VR eq 10); Σ generators; ct × ca. 500 for Cryptosporidien (L868)', () => {
     expect(computed(run('M205-17-D1', { inputs: [num('ozon_konz', 10, 'mg/l'), num('doc', 12.5, 'mg/l')] }))).toBeCloseTo(0.8, 12);
     expect(computed(run('M205-17-D2', { inputs: [num('ozon_konz', 10, 'mg/l'), num('durchfluss_max', 900, 'm³/h')] }))).toBe(9); // §4.3.5 30.500 EW plant: max. 900 m³/h
-    expect(computed(run('M205-17-D3', { inputs: [num('ozonbedarf_kg_h', 9, 'kg/h'), num('ozon_einsatzgas', 'reiner_sauerstoff')] }))).toBe(90);
-    expect(run('M205-17-D3', { inputs: [num('ozonbedarf_kg_h', 9, 'kg/h'), num('ozon_einsatzgas', 'luft')] })).toMatchObject({ kind: 'manual_required', reason: 'Operand ist keine Zahl: null' });
+    expect(computed(run('M205-17-D3', { inputs: [num('ozonbedarf_kg_h', 9, 'kg/h'), num('ozon_pro_o2', 10, 'kg O2/kg O3')] }))).toBe(90);
+    expect(run('M205-17-D3', { inputs: [num('ozonbedarf_kg_h', 9, 'kg/h'), num('ozon_pro_o2', null, 'kg O2/kg O3')] })).toMatchObject({ kind: 'manual_required', missing: ['ozon_pro_o2'] });
+    expect(eq('M205-17-D3').input_symbols).toEqual(['ozonbedarf_kg_h', 'ozon_pro_o2']); // fix round 1: bound to the existing input, not the S4_3_3_2 lookup (one registered source per fact; the fill is m205-E-4)
     const gen = prep('M205-17', 'ozongeneratoren', [{ id: '1', label: 'A', kapazitaet_kg_h: 5 }, { id: '2', label: 'B', kapazitaet_kg_h: 5.5 }]);
     expect(computed(run('M205-17-D4', { registers: { ozongeneratoren: gen } }))).toBe(10.5);
     expect(computed(run('M205-17-D5', { inputs: [num('ct_wert_zielorganismus', 'cryptosporidien'), num('ct_ecoli_basis', 2, 'mg·min/l')] }))).toBe(1000);
@@ -156,17 +161,26 @@ describe('DWA-M-205 Plan-3 equations', () => {
     expect(run('M205-17-D5', { inputs: [num('ct_wert_zielorganismus', 'e_coli'), num('ct_ecoli_basis', null, 'mg·min/l')] }).kind).toBe('manual_required');
   });
 
-  it('M205-21-D1: chlorungsmittel rows read the §4.4.2 ranges per agent (Chlorgas 1–20 mg/l, Chlordioxid 5–10 g/m³); Restchlor column only for Chlorgas / Hypochlorit; two of three doses out of range', () => {
+  it('M205-21-D1: chlorungsmittel rows read the §4.4.2 ranges per agent (Chlorgas 1–20 mg/l; Chlordioxid 5–10 g/m³, sand-filtered 1–5 g/m³ — L984); Restchlor / sandfiltriert columns per agent; 3 g/m³ ClO₂ passes only sand-filtered', () => {
     const reg = prep('M205-21', 'chlorungsmittel', [
       { id: '1', mittel: 'chlorgas', dosis: 5, kontaktzeit_ist: 20, restchlor: 0.2 },
-      { id: '2', mittel: 'chlordioxid', dosis: 12 },
-      { id: '3', mittel: 'natriumhypochlorit', dosis: 25 },
+      { id: '2', mittel: 'chlordioxid', dosis: 3, sandfiltriert: 'ja' },
+      { id: '3', mittel: 'chlordioxid', dosis: 3, sandfiltriert: 'nein' },
+      { id: '4', mittel: 'chlordioxid', dosis: 12, sandfiltriert: 'nein' },
+      { id: '5', mittel: 'natriumhypochlorit', dosis: 25 },
     ]);
-    expect(reg.rows.map((r) => [r.complete, r.values.dosis_unit, r.values.dosis_min, r.values.dosis_max, r.values.dosis_ok, r.values.kontaktzeit_text, r.values.restchlor])).toEqual([
+    expect(reg.rows.map((r) => [r.complete, r.values.dosis_unit, r.values.dosis_min_eff, r.values.dosis_max_eff, r.values.dosis_ok, r.values.kontaktzeit_text, r.values.restchlor])).toEqual([
       [true, 'mg/l freies Chlor', 1, 20, 1, '15 bis 30 Minuten', 0.2],
+      [true, 'g/m³', 1, 5, 1, 'wenige Minuten', null],    // sand-filtered: 1–5 g/m³ → 3 ok
+      [true, 'g/m³', 5, 10, 0, 'wenige Minuten', null],   // not sand-filtered: 5–10 g/m³ → 3 violates
       [true, 'g/m³', 5, 10, 0, 'wenige Minuten', null],
       [true, 'mg/l freies Chlor', 1, 20, 0, '15 bis 30 Minuten', null],
     ]);
-    expect(computed(run('M205-21-D1', { registers: { chlorungsmittel: reg } }))).toBe(2);
+    expect(reg.rows.map((r) => r.values.sandfiltriert)).toEqual([null, 'ja', 'nein', 'nein', null]); // hidden (null) for Chlorgas / Hypochlorit — the nested if never reads it
+    expect(computed(run('M205-21-D1', { registers: { chlorungsmittel: reg } }))).toBe(3);
+    // a Chlordioxid row without the sand-filter answer is incomplete (required while visible) and does not count
+    const partial = prep('M205-21', 'chlorungsmittel', [{ id: '4', mittel: 'chlordioxid', dosis: 7 }]);
+    expect(partial.rows[0].complete).toBe(false);
+    expect(computed(run('M205-21-D1', { registers: { chlorungsmittel: partial } }))).toBe(0);
   });
 });

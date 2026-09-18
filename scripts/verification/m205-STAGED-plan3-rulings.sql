@@ -256,6 +256,9 @@
 -- Evidence: L590–L591 (sensors per bank); L973 / L984 (dose ranges). Option: INSERT … 'CR-11P3' 'gerinne_sensor_verletzungen == 0'
 -- (block — "ist mindestens ein UV-Sensor … anzuordnen", "sind mindestens zwei UV-Sensoren erforderlich") on M205-11;
 -- 'CR-21P3' 'chlordosis_verletzungen == 0' (warn — "sind … erforderlich" for Cl2, "etwa" for ClO2) on M205-21. Rollback: DELETE by code + description.
+-- Fix round 1: the sensor rule counts per Bestrahlungsbank (register column banks, L590 "Je Bestrahlungsbank ist mindestens ein UV-Sensor") and the dose
+-- check honours the sand-filtered ClO₂ range (register column sandfiltriert, L984 "bei sandfiltriertem Abwasser mit geringer Restverschmutzung nur
+--  mathrm{~g} / mathrm{m}^{3}$ bis  mathrm{~g} / mathrm{m}^{3}$") — both gates read the register verdict columns unchanged.
 
 -- =====================================================================================================================
 -- m205-R-1 · M205-07 / M205-19 · EQ-05 `spez_energie_ozon = 10` → the S4_3_3_2 lookup by Einsatzgas (+ m205-C-5)
@@ -392,3 +395,143 @@
 -- widget = 'lookup_fill', ui_config = '{"source_label":"§4.3.3.2"}'::jsonb, lookup = '{"table_code":"S4_3_3_2","role":"value","keys":[{"column":"einsatzgas","from_symbol":"ozon_einsatzgas"}],"value":"spez_energie_kwh_kg"}'::jsonb
 --  WHERE symbol = 'spez_energie_ozon' AND w.code = 'M205-07' AND f.active AND f.widget IS NULL; deactivate the twin.
 -- Rollback: the four Plan-1 columns back from the archive row by id (explicit columns); twin re-activated.
+
+-- =====================================================================================================================
+-- FIX ROUND 1 (controller ruling, Task 11 review): single-source pairs — the REGISTER row columns are the "N instances"
+-- shape and stay; the prod single-instance scalars are the retirement candidates (nothing retired now). One D-block per
+-- pair; "derive from the footer" where a footer is meaningful, else "retire on ratification". Archive pattern on
+-- `fields` (the table HAS `active` — retirement is `active = false`, the archive keeps the full row for the consumer
+-- columns that a re-point rewrites). Captured facts (read-only 2026-09-18): see each block.
+-- =====================================================================================================================
+
+-- =====================================================================================================================
+-- m205-D-2 · M205-24 uv_sensor_anzahl_pro_bank / gerinne_zuschaltbar ↔ M205-11 bestrahlungsgerinne.banks/.sensoren/.zuschaltbar
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: uv_sensor_anzahl_pro_bank (M205-24, number "Stück", REQUIRED, VR 'uv_sensor_anzahl_pro_bank >= 1', consumer_worksheets
+-- NULL, no gate reads it); gerinne_zuschaltbar (M205-24, boolean, not required, consumer-free, no gate). The register on
+-- M205-11 carries banks / sensoren / zuschaltbar PER GERINNE; its footer gerinne_sensor_verletzungen (M205-11-D3) is the
+-- rule's verdict — no footer reproduces a single "sensors per bank" number (the rows may differ), so the pair is
+-- RETIRE ON RATIFICATION (both scalars sit on another worksheet than the register and feed nothing).
+-- Evidence: L590 "Je Bestrahlungsbank ist mindestens ein UV-Sensor zur Messung der Bestrahlungsstärke mit unterer Alarmgrenze
+-- zur kontinuierlichen Überwachung des Betriebes" / L591 "… sind mindestens zwei UV-Sensoren erforderlich …".
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m205 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m205 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-205' AND w.code = 'M205-24' AND f.symbol IN ('uv_sensor_anzahl_pro_bank','gerinne_zuschaltbar') AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-205' AND w.code = 'M205-24' AND f.symbol IN ('uv_sensor_anzahl_pro_bank','gerinne_zuschaltbar') AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = a.active, is_required = a.is_required, consumer_worksheets = a.consumer_worksheets FROM fields_archive_m205 a WHERE f.id = a.id AND NOT f.active;
+--           DELETE FROM fields_archive_m205 a USING fields f WHERE f.id = a.id AND f.active = a.active;
+-- The archive table `fields_archive_m205` is dropped once every archived row of this file (D-2 … D-5, E-3, E-4) is rolled back, or by the owner once the changes are signed off as final.
+
+-- =====================================================================================================================
+-- m205-D-3 · M205-17 ozongenerator_spannung / ozongenerator_frequenz ↔ ozongeneratoren.spannung_kv/.frequenz_hz (same worksheet)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: ozongenerator_spannung (M205-17, number kV, not required, VR '> 0', consumer-free, no gate); ozongenerator_frequenz
+-- (Hz, same). The register carries both PER GENERATOR; the only footer is ozon_kapazitaet_sum (M205-17-D4) — no footer for
+-- voltage / frequency (a mean would be meaningless) → RETIRE ON RATIFICATION.
+-- Evidence: L899 "Anlagen für Ozonleistungen über $1 \mathrm{~kg} / \mathrm{h}$ arbeiten bei einer Spannung von ca. 10 kV und
+-- einer Frequenz von ca. 600 Hz ."
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m205 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m205 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-205' AND w.code = 'M205-17' AND f.symbol IN ('ozongenerator_spannung','ozongenerator_frequenz') AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-205' AND w.code = 'M205-17' AND f.symbol IN ('ozongenerator_spannung','ozongenerator_frequenz') AND f.active;
+-- COMMIT;
+-- Rollback: as D-2 (active back from the archive by id).
+
+-- =====================================================================================================================
+-- m205-D-4 · M205-14 porenweite / netto_permeatfluss / transmembrandruck ↔ membranmodule.porenweite_um/.netto_flux/.tmd (consumer chain → M205-24)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: porenweite (M205-14, µm, REQUIRED, VR '>= 0.01 AND <= 0.2', consumer_worksheets ['M205-24']); netto_permeatfluss
+-- (l/(m²·h), REQUIRED, VR '> 0', consumers ['M205-24']); transmembrandruck (bar, REQUIRED, VR '> 0', consumers ['M205-24'],
+-- AND input of EQ-08 'permeabilitaet = brutto_permeatfluss / transmembrandruck' (d7668bb1-a44b-42ac-9be7-34714774d34e, M205-14)
+-- whose output permeabilitaet is consumed by M205-24). The chain transmembrandruck → EQ-08 permeabilitaet (→ M205-24) is
+-- why the transitive guard would refuse any visibility on it and why retirement must re-point EQ-08.
+-- Resolution per scalar:
+--   netto_permeatfluss → DERIVE from the footer (area-weighted mean): new equation on M205-14
+--     'netto_permeatfluss = permeat_design * 1000 / membranflaeche_sum' (input_symbols {permeat_design, membranflaeche_sum});
+--     the field keeps its symbol + consumers, `widget = 'derived'` — M205-24 inherits the derived value (register-fed chain, materialised).
+--   porenweite → no meaningful footer (the modules may differ) → RETIRE ON RATIFICATION; M205-24 then reads null → the owner
+--     decides whether -24 needs a per-module view (ReadOnlyRegisterTable of membranmodule via a consumer edit of the register).
+--   transmembrandruck → no footer → RETIRE ON RATIFICATION together with re-pointing EQ-08 to a register footer
+--     'permeabilitaet = mean_rows(membranmodule, brutto_flux_row / tmd)' — requires a brutto flux column on the register
+--     (not created now: brutto_permeatfluss stays the scalar) → owner ruling; until then transmembrandruck STAYS (EQ-08 input).
+-- Evidence: L748 "- Netto-Permeatfluss: im Dauerbetrieb je Betriebszyklus erzielbarer Permeatfluss …", L750 "- Permeabilität:
+-- Verhältnis von Brutto-Permeatfluss und Transmembrandruck …", L726 "… Mikro- oder Ultrafiltrationsmembranen mit mittleren
+-- Porenweiten von $0,01 \mu \mathrm{~m}$ bis $0,2 \mu \mathrm{~m}$ …", Tab. 5 L822 / L824.
+-- Option (netto_permeatfluss derivation; porenweite retirement; transmembrandruck deferred):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m205 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m205 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-205' AND w.code = 'M205-14' AND f.symbol IN ('porenweite','netto_permeatfluss') AND f.active;
+-- INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status)
+-- SELECT w.id, 'M205-14-D3', 'netto_permeatfluss = permeat_design * 1000 / membranflaeche_sum', ARRAY['permeat_design','membranflaeche_sum'], 'netto_permeatfluss', 'l/(m²·h)', '§4.2.3.1, Tab. 5',
+--        'Plan 3 (m205-D-4): flächengewichteter Netto-Permeatfluss aus dem Register membranmodule (Σ Fläche × Fluss / Σ Fläche).', 'imported_unverified'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'M205-14' AND s.code = 'DWA-M-205'
+--    AND NOT EXISTS (SELECT 1 FROM equations e WHERE e.worksheet_template_id = w.id AND e.equation_number = 'M205-14-D3');
+-- UPDATE fields f SET widget = 'derived', is_required = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-205' AND w.code = 'M205-14' AND f.symbol = 'netto_permeatfluss' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-205' AND w.code = 'M205-14' AND f.symbol = 'porenweite' AND f.active;
+-- COMMIT;
+-- Rollback: DELETE FROM equations WHERE equation_number = 'M205-14-D3' AND description LIKE 'Plan 3 (m205-D-4)%';
+--           UPDATE fields f SET active = a.active, is_required = a.is_required, widget = a.widget FROM fields_archive_m205 a WHERE f.id = a.id;
+--           DELETE FROM fields_archive_m205 a USING fields f WHERE f.id = a.id AND f.active = a.active AND f.widget IS NOT DISTINCT FROM a.widget.
+
+-- =====================================================================================================================
+-- m205-D-5 · M205-21 chlormittel_typ / clo2_dosis / freies_chlor / kontaktzeit_chlor / ph_chlorung / restchlor (+ the four twins) ↔ chlorungsmittel.mittel/.dosis/.sandfiltriert/.kontaktzeit_ist/.restchlor
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture (M205-21): chlormittel_typ (enum, consumers ['M205-21']); clo2_dosis (g/m³, VR '>= 1 AND <= 10', consumers ['M205-25']);
+-- freies_chlor (mg/l, VR '1..20', consumers ['M205-25']); kontaktzeit_chlor (min, REQUIRED, VR '15..30', consumers ['M205-25']);
+-- ph_chlorung (REQUIRED, VR '6..8', consumers ['M205-25']); restchlor (mg/l, REQUIRED, VR '<= 0.005', consumers ['M205-25'];
+-- the Gewässer value, not the register's Restchlor am Beckenablauf); entchlorungsstufe (boolean, REQUIRED, consumers ['M205-25']);
+-- twins chlor_kontaktzeit, chlor_ph, restchlor_betrieb (REQUIRED, EQ-11 output = input), clo2_konzentration, chlormittel,
+-- restchlor_gewaesser (all consumer-free). Gates: none on M205-21; CR-11/12/22/23/24 read the -08 / -10 copies (G-2).
+-- The register carries mittel / dosis (unit per agent) / sandfiltriert / kontaktzeit_ist / restchlor (Beckenablauf) PER AGENT;
+-- footer chlordosis_verletzungen (M205-21-D1). No footer reproduces a single dose (agents differ) → RETIRE ON RATIFICATION
+-- for the per-agent facts (clo2_dosis, freies_chlor, kontaktzeit_chlor, chlor_kontaktzeit, restchlor_betrieb, chlormittel);
+-- KEEP the facts the register does not carry: chlormittel_typ (the worksheet driver of the four emitted rules), ph_chlorung /
+-- chlor_ph (pH is a process condition, not per agent), restchlor / restchlor_gewaesser (Gewässer, CR-12 class), entchlorungsstufe,
+-- clo2_konzentration (Lösung, L984 "1 g bis 3 g Chlordioxid pro Liter" / "über 30 Volumenprozent"). M205-25 loses the inherited
+-- clo2_dosis / freies_chlor / kontaktzeit_chlor → the owner re-points -25 to a ReadOnlyRegisterTable of chlorungsmittel
+-- (consumer edit of the register: consumer_worksheets = ['M205-25']).
+-- Evidence: L973 (dose / contact / pH for Chlorgas), L967 "Eine Chlorung wird in der Regel unter Verwendung von Chlorgas ( $\mathrm{Cl}_{2}$ ),
+-- Hypochloritverbindungen, z. B. Natriumhypochlorit (NaOCl, Chlorbleichlauge) oder Chlordioxid $\left(\mathrm{ClO}_{2}\right)$ durchgeführt."
+-- L982 (Restchlor 0,2), L984 (ClO₂ 5–10 / sand-filtered 1–5 g/m³, wenige Minuten).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m205 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m205 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-205' AND w.code = 'M205-21' AND f.symbol IN ('clo2_dosis','freies_chlor','kontaktzeit_chlor','chlor_kontaktzeit','restchlor_betrieb','chlormittel') AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-205' AND w.code = 'M205-21' AND f.symbol IN ('clo2_dosis','freies_chlor','kontaktzeit_chlor','chlor_kontaktzeit','restchlor_betrieb','chlormittel') AND f.active;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M205-25'] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-205' AND w.code = 'M205-21' AND f.symbol = 'chlorungsmittel' AND f.active AND f.consumer_worksheets IS NULL;
+-- (EQ-09 / EQ-10 / EQ-11 on M205-21 write the retired symbols — apply with R-3, or they report "Fehlende Eingabe" harmlessly.)
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = a.active, is_required = a.is_required, consumer_worksheets = a.consumer_worksheets FROM fields_archive_m205 a WHERE f.id = a.id;
+--           UPDATE fields SET consumer_worksheets = NULL WHERE symbol = 'chlorungsmittel' AND consumer_worksheets = ARRAY['M205-25'] …;
+--           DELETE FROM fields_archive_m205 a USING fields f WHERE f.id = a.id AND f.active = a.active.
+
+-- =====================================================================================================================
+-- m205-E-4 · M205-17 ozon_pro_o2 — fill the existing input from S4_3_3_2.o2_pro_o3_kg by Einsatzgas (fix round 1: M205-17-D3 is bound to the input)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: ozon_pro_o2 (M205-17, number "kg O2/kg O3", not required, VR 'ozon_pro_o2 eq 10', consumer-free, no gate, widget NULL);
+-- S4_3_3_2 seeds o2_pro_o3_kg = 10 for reiner_sauerstoff and null for luft (L899 prints the factor for Reinsauerstoff only).
+-- Class: widget re-bind of an existing input (E-2 rule — consumer-free and gate-free here, but a `lookup_fill` over the null
+-- Luft cell would show "—" and take the input away: the fill is therefore STAGED, not emitted).
+-- Evidence: L899 "Für 1 kg Ozon werden etwa 10 kg Sauerstoff benötigt (bei ca. $10 \%$ bis $13 \%$ Ozon im erzeugten Gasgemisch)."
+-- Option (archive pattern on fields, as din18130_1-E-2):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_m205 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_m205 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE s.code = 'DWA-M-205' AND w.code = 'M205-17' AND f.symbol = 'ozon_pro_o2' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"§4.3.3.2"}'::jsonb,
+--        lookup = '{"table_code":"S4_3_3_2","role":"value","keys":[{"column":"einsatzgas","from_symbol":"ozon_einsatzgas"}],"value":"o2_pro_o3_kg"}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-205' AND w.code = 'M205-17' AND f.symbol = 'ozon_pro_o2' AND f.active AND f.widget IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET widget = a.widget, ui_config = a.ui_config, lookup = a.lookup, visible_when = a.visible_when FROM fields_archive_m205 a WHERE f.id = a.id AND f.widget = 'lookup_fill';
+--           DELETE FROM fields_archive_m205 a USING fields f WHERE f.id = a.id AND f.widget IS NOT DISTINCT FROM a.widget.

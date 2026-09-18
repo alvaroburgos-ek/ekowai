@@ -10,7 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { FIELD_CONFIGS, SECTION_VISIBILITY, TAB4_FILL_SYMBOLS, ALT, NEU, BEWAESSERUNG, THERMISCH, KATALYTISCH, CLO2, NICHT_CLO2, LIMIT_T2_EXPR, LIMIT_T3_EXPR, LIMIT_EXPR, OK_EXPR } from '../field-configs/m205';
+import { FIELD_CONFIGS, SECTION_VISIBILITY, TAB4_FILL_SYMBOLS, ALT, NEU, BEWAESSERUNG, THERMISCH, KATALYTISCH, CLO2, NICHT_CLO2, LIMIT_T2_EXPR, LIMIT_T3_EXPR, LIMIT_EXPR, OK_EXPR, SENSOREN_MIN_EXPR, DOSIS_OK_EXPR } from '../field-configs/m205';
 import type { PriorSnapshot } from '../field-configs/types';
 import { parseFieldConfig, type RegisterUiConfig } from '../field-config';
 import { parseCondition, parseNumeric, parseExpression, extractSymbols } from '@/lib/expr';
@@ -159,6 +159,15 @@ describe('DWA-M-205 field configs (Plan 3 Task 11)', () => {
     expect(priorRow('M205-10 e_coli_ablauf').consumer_worksheets).toBeNull();
     expect(priorRow('M205-10 enterokokken_ablauf').consumer_worksheets).toBeNull();
     for (const r of FIELD_CONFIGS.filter((x) => x.widget === 'register')) expect((r.ui_config as RegisterUiConfig).override).toBeUndefined();
+    // fix round 1: the channel register carries the bank count (L590 per Bestrahlungsbank) and the chlorination register the sand-filter switch (L984, Chlordioxid only)
+    const ger = registerCfg('M205-11', 'bestrahlungsgerinne');
+    expect(ger.columns.find((c) => c.key === 'banks')).toMatchObject({ type: 'number', required: true, min: 1 });
+    expect(ger.columns.find((c) => c.key === 'sensoren_min')!.expr).toBe(SENSOREN_MIN_EXPR);
+    expect(SENSOREN_MIN_EXPR).toBe('max(banks, if(zuschaltbar == true, 2, 1))');
+    const chl = registerCfg('M205-21', 'chlorungsmittel');
+    expect(chl.columns.find((c) => c.key === 'sandfiltriert')).toMatchObject({ type: 'enum', options: ['ja', 'nein'], required: true, visible_when: "mittel == 'chlordioxid'" });
+    expect(chl.columns.find((c) => c.key === 'dosis_ok')!.expr).toBe(DOSIS_OK_EXPR);
+    expect(chl.columns.map((c) => c.key)).toEqual(['mittel', 'dosis', 'dosis_unit', 'dosis_min', 'dosis_max', 'sandfiltriert', 'dosis_min_eff', 'dosis_max_eff', 'dosis_ok', 'kontaktzeit_ist', 'kontaktzeit_text', 'restchlor']);
   });
 
   it('visibility never lands on a consumed or gate-bearing producer; the refused / withheld targets are pinned (m205-C-4, G-6, G-7); created fields sit in captured sections', () => {
