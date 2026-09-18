@@ -4428,6 +4428,242 @@ Report: `reports/plan-3-m1200_2.md` · STAGED SQL: `scripts/verification/m1200_2
 - Every `verification_quote` in the three modules and every fragment on this sheet was read at the cited line in this session; the 58 table-row quotes pass `verify-regulation-tables.ts` 58/58.
 
 
+## Task 17 — DIN-1989-2 (din1989_2)
+
+Report: `reports/plan-3-din1989_2.md` · STAGED SQL: `scripts/verification/din1989_2-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-1989-2\DIN-1989-2.md` (lines cited; the LaTeX is quoted as printed) · prod capture `src/lib/eval/field-configs/din1989_2.prior.json` (2026-09-18, read-only; 42 fields / 15 sections / 9 equations / 17 gates, none unparseable) · this task changes NO gate severity and emits NO `data_type` change, NO equation replacement and NO `select_many` on an existing field. Ids follow the Task-17 brief where it names them (G-1 … G-4, J-1 / J-2, X-1, R-1 / R-2, D-1 / D-2); E = widget re-bind (corpus convention since Task 7), the extra items use the skeleton letters.
+
+### din1989_2-G-1 · DIN-1989-2 · -02 · `V_Rueck_A` / CR-03
+- Class: gate-guard
+- Chosen now (fail-safe): the rule `V_Rueck_A ← filtertyp == 'typ_a'` is NOT emitted (the gate-aware guard refuses it: CR-03 `V_Rueck_A >= Q * 25` is unguarded — hidden ⇒ null ⇒ the block gate stops enforcing); the Typ-A minimum is the visible twin `v_rueck_a_min` (DIN-1989-2-02-D1); a Typ-B / Typ-C filter still meets CR-03 only by typing something into `V_Rueck_A` (inventory §5 win 1 — today's state).
+- Evidence (verbatim, transcript line): "Die Filtereinheiten müssen vor den Trennflächen (bei senkrechter Anordnung) oder über den Trennflächen (bei waagrechter Anordnung) ein Einstauvolumen $V_{\text {Rück }}$ nach Gleichung 1 sicherstellen." (L281); "V_{\text {Rück }}=Q \times 25 \tag{1}" (L284); "Alle Filter mit Fremdstoffableitung ohne planmäßige Sedimentations- und Rückhaltewirkung (siehe Bild 3) sind in Typ C einzustufen." (L345)
+- Proposed SQL / config: STAGED block G-1 — `IF filtertyp == typ_a THEN V_Rueck_A >= Q * 25` (md5-guarded), then the field rule (IF-guard exemption).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-G-2 · DIN-1989-2 · -02 · `V_Rueck_B` / `behaeltnis_masse` / `tiefe_gok_griff` — CR-04 / CR-05 / CR-06
+- Class: gate-guard
+- Chosen now (fail-safe): the three Typ-B rules are NOT emitted (each input is read by an unguarded block gate); the created register `behaeltnisse` and its outputs `behaeltnis_volumen_sum` / `behaeltnis_masse_max` / `behaeltnis_grifftiefe_max` carry the Typ-B (and Erdeinbau) visibility; the typed scalars stay the gate inputs.
+- Evidence (verbatim, transcript line): "Die Masse eines planmäßig herausnehmbaren Behältnisses darf im gefüllten Zustand 20 kg nicht überschreiten." (L311); "Bei Erdeinbau darf zwischen Geländeoberkante (Schachtabdeckung) und Entnahmeelement (z. B. Haltegriff) eine Tiefe von 60 cm nicht überschritten werden." (L313); "Das Volumen der herausnehmbaren Behältnisse $V_{\text {Rück }}$ muss mindestens betragen:" (L317); "V_{\text {Rück }}=Q \times 2 \tag{2}" (L320)
+- Proposed SQL / config: STAGED block G-2 — Option A (IF-guards `filtertyp == typ_b`, CR-06 additionally `AND einbausystem == separat_erdeinbau`, then the three field rules; the compound CR-06 guard is outside the emitter's plain-compare exemption — a [CODE] candidate), Option B (re-point the three gates to the register outputs after D-3 … D-5).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-G-3 · DIN-1989-2 · -04 · `werkstoffbezeichnung` (validation_rules `!= ''` unconditional)
+- Class: gate-guard
+- Chosen now (fail-safe): the visibility rule `werkstoff_filterelement == 'kunststoff'` IS emitted (no gate reads the symbol; the prod `validation_rules.raw` is display-dead) and reads `pending` (visible) until C-1; no requirement is added.
+- Evidence (verbatim, transcript line): "g) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);" (L698)
+- Proposed SQL / config: STAGED block G-3 — optional NEW gate CR-18 `IF werkstoff_filterelement == kunststoff THEN werkstoffbezeichnung IS NOT NULL` (needs C-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-G-4 · DIN-1989-2 · -03 · `filtertrennwirkung_nachgewiesen` / CR-08 — DN ≤ 200 scope, derived verdict per type, DN > 200 attestation
+- Class: gate-guard
+- Chosen now (fail-safe): the rule `filtertrennwirkung_nachgewiesen ← DN <= 200` is NOT emitted (CR-08 reads it unguarded); the created `filtertrennwirkung_code_ab` / `_c` (D16 / D17, materialised on save, ≥ 0,7 inclusive) and the attestation `hersteller_verfahren_dokumentiert` (visible for `DN > 200`) are emitted; CR-08 keeps reading the manual boolean for every DN and every type.
+- Evidence (verbatim, transcript line): "Filter mit Zulaufnennweiten $\leq$ DN 200 müssen allen Anforderungen dieser Norm entsprechen." (L227); "Der Hersteller muss diese Werte angeben und nachvollziehbar dokumentieren, wie er diese Werte ermittelt hat." (L228); "Die Filtertrennwirkung ist für Filter mit Zulaufnennweiten $\leq$ DN 200 nachzuweisen." (L382); "Hinsichtlich der Abtrennung von Fremdstoffen müssen diese Filter einen Wirkungsgrad von mindestens 0,7 erreichen (siehe 6.5.3)." (L386)
+- Proposed SQL / config: STAGED block G-4 — Step 1 `IF DN <= 200 THEN filtertrennwirkung_nachgewiesen == true` + rule + NEW CR-19 `IF DN > 200 THEN hersteller_verfahren_dokumentiert == true`; Step 2 (= D-2) the per-type codes replace the boolean.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-G-5 · DIN-1989-2 · -01 · CR-01 `filtertyp IS NOT NULL` — consistency with the Tab.-1 assignment
+- Class: gate-guard
+- Chosen now (fail-safe): `filtertyp_konsistent_code` (DIN-1989-2-01-D1, scalar-only, form/report) shows 1 / 0 beside the two fields; the gate is unchanged.
+- Evidence (verbatim, transcript line): "Aufgrund der unterschiedlichen Funktionsprinzipien sind Filter den in Tabelle 1 aufgeführten Typen zuzuordnen." (L263)
+- Proposed SQL / config: STAGED block G-5 — `filtertyp IS NOT NULL AND filtertyp == filtertyp_tab1` (interim until E-1; not together with E-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-G-6 · DIN-1989-2 · -03 · Gl. 4 / Gl. 6 print "≥" — no prod gate checks the Vorlagebehälter volumes
+- Class: gate-guard
+- Chosen now (fail-safe): the checks `v_pruef_leist_ok` / `v_pruef_trenn_ok` (D3 / D4) are visible codes; no gate is added.
+- Evidence (verbatim, transcript line): "V_{\text {Prüf }} \geq Q_{\mathrm{Zu}, \max } \times 90 \tag{4}" (L522); "V_{\text {Prüf }} \geq Q_{\text {Zu,max }} \times 180 \tag{6}" (L615); "Der Vorlagebehälter muss mindestens einem Volumen $V_{\text {Prüf }}$ entsprechen, das dem maximalen Volumenstrom $Q_{\text {Zu, max }}$ der jeweils vorgegebenen Nennweite des Querschnittes der Zulaufleitung bei $1 \%$ Gefälle, multipliziert mit 180 s entspricht (Gleichung (6))." (L612)
+- Proposed SQL / config: STAGED block G-6 — NEW CR-20 / CR-21 `IF DN <= 200 THEN V_Pruef_leist >= Q_Zu_max * 90` / `… V_Pruef_trenn >= Q_Zu_max * 180` (block); apply R-3 first.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-G-7 · DIN-1989-2 · -02 · `standsicherheit_eingehalten` / CR-10 — Erdeinbau only
+- Class: gate-guard
+- Chosen now (fail-safe): the rule `einbausystem == 'separat_erdeinbau'` is NOT emitted (CR-10 reads the boolean unguarded); every filter must tick it today.
+- Evidence (verbatim, transcript line): "Separate Filtersysteme für den Erdeinbau müssen den Anforderungen an die Standsicherheit für Behälter nach DIN 1989-3:2003-08, 4.4.4 entsprechen." (L396)
+- Proposed SQL / config: STAGED block G-7 — `IF einbausystem == separat_erdeinbau THEN standsicherheit_eingehalten == true` + the field rule.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-E-1 · DIN-1989-2 · -01 · `filtertyp` re-bind as the Tab.-1 lookup_fill (the brief's "din1989_2-D-1: manual → filled")
+- Class: interface-gap (widget re-bind of a consumed, gate-bearing input — amendment J)
+- Chosen now (fail-safe): the twin `filtertyp_tab1` (lookup_fill, enum, TAB1 by `funktionsprinzip` × `sedimentationsvolumen`, role value; TAB1 `locked` ⇒ no override) is created beside the keys; `filtertyp` stays the typeable select (consumed by -02 / -03, read by CR-01).
+- Evidence (verbatim, transcript line): "Aufgrund der unterschiedlichen Funktionsprinzipien sind Filter den in Tabelle 1 aufgeführten Typen zuzuordnen." (L263); "\hline mit Fremdstoffrückhalt & TYP A & TYP B & - \\" (L273); "\hline mit Fremdstoffableitung & TYP A & TYP B & TYP C \\" (L274)
+- Proposed SQL / config: STAGED block E-1 — `widget IS NULL`-guarded UPDATE with the row archived into `fields_archive_din1989_2`, the twin and D1 retired, rollback by id (four Plan-1 columns).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-R-1 · DIN-1989-2 · -02 · Gl. 1 / Gl. 2 write the REQUIRED minimum into the typed PROVIDED volumes
+- Class: equation-replacement
+- Chosen now (fail-safe): the twins `v_rueck_a_min` / `v_rueck_b_min` (D1 / D2 = Q × 25 / Q × 2) are emitted as new outputs; the two prod rows stay (they compute the same figure into the input symbols — display-only write-back; CR-03 / CR-04 read the typed values).
+- Evidence (verbatim, transcript line): "V_{\text {Rück }}=Q \times 25 \tag{1}" (L284); "V_{\text {Rück }}=Q \times 2 \tag{2}" (L320); "Q der Volumenstrom in der planmäßigen Zulaufleitung zum Filter bei einem Füllungsgrad von $70 \%$ und einem Gefälle von 1 \% nach DIN EN 12056-3:2001-01, Tabelle C.1, in Liter je Sekunde" (L290). Prod: `V_Rueck_A = Q * 25` (46fb74c9-…) and `V_Rueck_B = Q * 2` (f1ac6dff-…), verified_against_standard, outputs = the two number inputs.
+- Proposed SQL / config: STAGED block R-1 — archive + md5-guarded DELETE of the two rows; rollback from the archive with the explicit column list.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-R-2 · DIN-1989-2 · -03 · Gl. 7 / 8 / 9 ← the `pruefstoffe` register sums
+- Class: equation-replacement
+- Chosen now (fail-safe): the register, the Σ twins `m_ges_festst_calc` / `m_sp_verunr_calc` / `m_verw_calc` (D10 … D12) and the η twins `eta_rueck_calc` / `eta_verw_calc` / `eta_c_calc` (D13 … D15, Σ inline) are emitted; the three verified rows keep reading the typed scalars; the created outputs are visible twins only (never a second producer of `eta_Rueck_AB` / `eta_Verw` / `eta_C`).
+- Evidence (verbatim, transcript line): "\eta_{\text {Rück,A,B }}=\frac{\sum_{\text {ges.Festst }}-\sum_{\text {Sp.verunr }}}{\sum_{\text {ges.Festst }}} \tag{7}" (L642); "\eta_{\text {Verw }}=\frac{\sum_{\text {Verw }}}{\sum_{\text {ges.Festst }}} \tag{8}" (L662); "\eta_{\mathrm{C}}=0,5\left(\eta_{\text {Rück }}+\eta_{\text {Verw }}\right)=0,5 \frac{\Sigma_{\text {ges.Festst }}-\Sigma_{\text {Sp. veruur }}+\Sigma_{\text {Verw }}}{\Sigma_{\text {ges.Festst }}} \tag{9}" (L671); "Maßgebend sind jeweils die Mengen- bzw. Masseanteile der gefundenen Zusätze." (L631)
+- Proposed SQL / config: STAGED block R-2 — Option A re-points the three formulas to the `_calc` sums (md5-guarded), Option B retires the typed scalars (D-10 … D-12); or DELETE Gl. 7–9 (archive) and let D13 … D15 own the values (C-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-R-3 · DIN-1989-2 · -03 · Gl. 4 / Gl. 6 write the printed "≥" bound into the typed Vorlagebehälter volumes
+- Class: equation-replacement
+- Chosen now (fail-safe): the minima `v_pruef_leist_min` / `v_pruef_trenn_min` and the checks `v_pruef_leist_ok` / `v_pruef_trenn_ok` (D1 … D4) are emitted; the two prod rows stay.
+- Evidence (verbatim, transcript line): "Der Vorlagebehälter muss mindestens einem Volumen $V_{\text {Prüf }}$ entsprechen, das dem maximalen Volumenstrom $Q_{\mathrm{Zu}, \max }$ der jeweils vorgegebenen Nennweite des Querschnittes der Zulaufleitung bei $1 \%$ Gefälle, multipliziert mit 90 s entspricht." (L519); "V_{\text {Prüf }} \geq Q_{\mathrm{Zu}, \max } \times 90 \tag{4}" (L522); "V_{\text {Prüf }} \geq Q_{\text {Zu,max }} \times 180 \tag{6}" (L615). Prod: `V_Pruef_leist = Q_Zu_max * 90` (41935d13-…), `V_Pruef_trenn = Q_Zu_max * 180` (fd3184a2-…), outputs = the two required number inputs.
+- Proposed SQL / config: STAGED block R-3 — archive + md5-guarded DELETE; rollback from the archive.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-R-4 · DIN-1989-2 · -03 · Gl. 3 / Gl. 5 ← one η per state from the `prueflaeufe` register (depends on J-2)
+- Class: equation-replacement
+- Chosen now (fail-safe): the register (Tab. 2 steps × unbelastet / dauerbelastet) and the twins `eta_hydr_unbel_p100` / `eta_hydr_bel_p100` / `eta_hydr_unbel_min` / `eta_hydr_bel_min` (D6 … D9, materialised on save) are emitted; Gl. 3 / Gl. 5 keep reading the single typed pair `Q_Zu` / `Q_Ab`.
+- Evidence (verbatim, transcript line): "\eta_{\mathrm{hydr}}=\frac{Q_{\mathrm{Zu}}-Q_{\mathrm{Ab}}}{Q_{\mathrm{Zu}}} \tag{3}" (L509); "\eta_{\text {hyd,bel }}=\frac{Q_{\mathrm{Zu}}-Q_{\mathrm{Ab}}}{Q_{\mathrm{Zu}}} \tag{5}" (L540); "Abschließend ist der hydraulische Wirkungsgrad des verschmutzten Systems mit Klarwasser unter Einhaltung der Volumenströme und der Dauer nach 6.4.5 zu ermitteln." (L535). Prod: Gl. 3 (c44be6b5-…) and Gl. 5 (b6241c7a-…) are the SAME formula over the SAME two typed scalars.
+- Proposed SQL / config: STAGED block R-4 — `eta_hydr = eta_hydr_unbel_p100` / `eta_hyd_bel = eta_hydr_bel_p100` (md5-guarded), `_min` if J-2 rules the minimum.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-C-1 · DIN-1989-2 · -02 `werkstoff_filterelement` · consumer_worksheets += DIN-1989-2-04
+- Class: consumer-edit
+- Chosen now (fail-safe): the -04 rule on `werkstoffbezeichnung` is emitted and reads `pending` (visible, inert) — the capture lists no consumer for the -02 enum.
+- Evidence (verbatim, transcript line): "g) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);" (L698)
+- Proposed SQL / config: STAGED block C-1 (array_append, guarded; rollback array_remove).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-C-2 · DIN-1989-2 · -03 / -02 · type / DN rules on the consumed outputs `eta_Rueck_AB` · `eta_C` · `eta_hyd_bel` · `eta_hydr_bel_doku` and the Gl.-7…9 inputs (REFUSED)
+- Class: consumer-edit
+- Chosen now (fail-safe): not emitted (transitive producer guard: e.g. `m_verw → Gl.9 eta_C (consumed by DIN-1989-2-04)`); the created twins carry the visibility (`eta_verw_calc` / `eta_c_calc` / `m_verw_calc` under `typ_c`, the Trennwirkung block under `DN <= 200`); `eta_Verw` (consumer-free, feeds nothing) IS hidden for Typ A / B.
+- Evidence (verbatim, transcript line): "Für die Filter Typ A und Typ B ist die Filtertrennwirkung $\eta_{\text {Rück, } \mathrm{A}, \mathrm{B}}$ zu ermitteln aus:" (L639); "Filter vom Typ C verfügen über kein planmäßiges Rückhaltevolumen. Die Prüfung wird gegenüber Typ A und Typ B um die Wirksamkeit des Verwurfes von Fremdstoffen in die Abflussleitung (so genannte Schmutzfrachttrennung) ergänzt." (L657); "… ist für Filter mit Zulaufnennweiten $\leq$ DN 200 der hydraulische Wirkungsgrad des belasteten Filters nach 6.4.6 zu ermitteln und in der Produktdokumentation anzugeben." (L378)
+- Proposed SQL / config: STAGED block C-2 (the four `visible_when` UPDATEs after R-2 Option B, or drop -04 from the consumer lists once -04 reads the codes).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-1 · DIN-1989-2 · -04 · `kennzeichnung_vollstaendig` (CR-14) ↔ `kennzeichnung` (select_many a–i)
+- Class: deactivation
+- Chosen now (fail-safe): the checklist is a created twin; the boolean stays the CR-14 input.
+- Evidence (verbatim, transcript line): "Regenwasserfilter nach dieser Norm sind deutlich sichtbar und dauerhaft wie folgt zu kennzeichnen mit:" (L691); items a)–i) L692–L700.
+- Proposed SQL / config: STAGED block D-1 (`contains()` per item, g) only for Kunststoff — needs C-1; deactivate the boolean).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-2 · DIN-1989-2 · -03 · `filtertrennwirkung_nachgewiesen` (CR-08) ↔ `filtertrennwirkung_code_ab` / `filtertrennwirkung_code_c`
+- Class: deactivation
+- Chosen now (fail-safe): the codes are materialised twins (≥ 0,7 inclusive — Anhang A prints 0,7 as the passing example); the boolean stays.
+- Evidence (verbatim, transcript line): "Hinsichtlich der Abtrennung von Fremdstoffen müssen diese Filter einen Wirkungsgrad von mindestens 0,7 erreichen (siehe 6.5.3)." (L386); "\eta_{\mathrm{A}}=\eta_{\text {Rück }}=\frac{\Sigma_{\text {Festst Zulauf }}-\Sigma_{\text {Sp.verunr }}}{\Sigma_{\text {Festst.Zulauf }}}=\frac{10-3}{10}=0,7 \tag{A.1}" (L775)
+- Proposed SQL / config: G-4 Step 2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-3 · DIN-1989-2 · -02 · `V_Rueck_B` ↔ `behaeltnisse.volumen_l` / `behaeltnis_volumen_sum`
+- Class: deactivation
+- Chosen now (fail-safe): register column + Σ footer beside the typed scalar (amendment K); the scalar stays the CR-04 input.
+- Evidence (verbatim, transcript line): "Das Volumen der herausnehmbaren Behältnisse $V_{\text {Rück }}$ muss mindestens betragen:" (L317); "… durch die Anordnung von Behältnissen zur Sammlung der Fremdstoffe erzielt werden kann." (L309)
+- Proposed SQL / config: STAGED block D-3 … D-5 (deactivate after G-2 Option B).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-4 · DIN-1989-2 · -02 · `behaeltnis_masse` ↔ `behaeltnisse.masse_gefuellt_kg` / `behaeltnis_masse_max`
+- Class: deactivation
+- Chosen now (fail-safe): as D-3; the register badge `≤ 20 kg` per row, the maximum as footer.
+- Evidence (verbatim, transcript line): "Die Masse eines planmäßig herausnehmbaren Behältnisses darf im gefüllten Zustand 20 kg nicht überschreiten." (L311)
+- Proposed SQL / config: STAGED block D-3 … D-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-5 · DIN-1989-2 · -02 · `tiefe_gok_griff` ↔ `behaeltnisse.grifftiefe_cm` / `behaeltnis_grifftiefe_max`
+- Class: deactivation
+- Chosen now (fail-safe): as D-3; the column is shown for `einbausystem == 'separat_erdeinbau'` (row scope), the maximum only over entered rows.
+- Evidence (verbatim, transcript line): "Bei Erdeinbau darf zwischen Geländeoberkante (Schachtabdeckung) und Entnahmeelement (z. B. Haltegriff) eine Tiefe von 60 cm nicht überschritten werden." (L313)
+- Proposed SQL / config: STAGED block D-3 … D-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-6 · DIN-1989-2 · -03 · `Q_Zu` ↔ `prueflaeufe.q_zu`
+- Class: deactivation
+- Chosen now (fail-safe): register column beside the typed scalar (Gl. 3 / 5 keep reading the scalar).
+- Evidence (verbatim, transcript line): "$Q_{\mathrm{Zu}} \quad$ der dem Filtersystem zugeführte Volumenstrom in Liter je Sekunde;" (L514); Tab. 2 L495–L501 (seven steps).
+- Proposed SQL / config: STAGED block D-6 … D-9 (after R-4).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-7 · DIN-1989-2 · -03 · `Q_Ab` ↔ `prueflaeufe.q_ab`
+- Class: deactivation
+- Chosen now (fail-safe): as D-6.
+- Evidence (verbatim, transcript line): "$Q_{\mathrm{Ab}} \quad$ der vom Filtersystem in den Ablauf (z. B. Kanal, Versickerungsanlage) abgeführte Volumenstrom in Liter je Sekunde." (L515)
+- Proposed SQL / config: STAGED block D-6 … D-9.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-8 · DIN-1989-2 · -03 `eta_hydr` (Gl. 3) and -02 `eta_hydr_unbel_doku` (CR-11) ↔ `eta_hydr_unbel_p100` / `eta_hydr_unbel_min`
+- Class: deactivation
+- Chosen now (fail-safe): the twins are visible beside the Gl.-3 output; the -02 "(Doku)" field stays the re-typed copy CR-11 reads.
+- Evidence (verbatim, transcript line): "Der hydraulische Wirkungsgrad am unbelasteten System ist nach 6.4.5 zu ermitteln und in der Produktdokumentation anzugeben." (L372)
+- Proposed SQL / config: STAGED block D-6 … D-9 (CR-11 → `eta_hydr IS NOT NULL` + consumer edit; retire the Doku copy).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-9 · DIN-1989-2 · -03 `eta_hyd_bel` (Gl. 5) and -02 `eta_hydr_bel_doku` ↔ `eta_hydr_bel_p100` / `eta_hydr_bel_min`
+- Class: deactivation
+- Chosen now (fail-safe): as D-8.
+- Evidence (verbatim, transcript line): "… ist für Filter mit Zulaufnennweiten $\leq$ DN 200 der hydraulische Wirkungsgrad des belasteten Filters nach 6.4.6 zu ermitteln und in der Produktdokumentation anzugeben." (L378)
+- Proposed SQL / config: STAGED block D-6 … D-9.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-10 · DIN-1989-2 · -03 · `m_ges_festst` ↔ `pruefstoffe.masse_soll` / `m_ges_festst_calc`
+- Class: deactivation
+- Chosen now (fail-safe): the Σ soll (Konzentration × Prüfmedium per Tab.-3 row) is a footer twin; the typed scalar stays the Gl.-7…9 input.
+- Evidence (verbatim, transcript line): "Die Menge, Masse und Konzentration des einzelnen Prüfstoffes je 1000 Liter Prüfmedium muss Tabelle 3 entsprechen." (L530); "$\Sigma_{\text {ges.Festst }} \quad$ Summe der zugegebenen Prüfstoffe;" (L648)
+- Proposed SQL / config: R-2 Option B.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-11 · DIN-1989-2 · -03 · `m_sp_verunr` ↔ `pruefstoffe.masse_speicher_g` / `m_sp_verunr_calc`
+- Class: deactivation
+- Chosen now (fail-safe): as D-10.
+- Evidence (verbatim, transcript line): "$\Sigma_{\text {Sp.verunr }} \quad$ Summe der ermittelten Masseanteile, die in den Speicher eindringt." (L649)
+- Proposed SQL / config: R-2 Option B.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-D-12 · DIN-1989-2 · -03 · `m_verw` ↔ `pruefstoffe.masse_verwurf_g` / `m_verw_calc`
+- Class: deactivation
+- Chosen now (fail-safe): as D-10; the column is shown for Typ C only (row scope), empty cells count 0.
+- Evidence (verbatim, transcript line): "Bei Filtern Typ C ist der Verwurf (siehe 3.17) in gleicher Weise zu ermitteln." (L631); "$\Sigma_{\text {Verw }}$ & Summe der in die Abflussleitung eingedrungenen festen Stoffe." (L683)
+- Proposed SQL / config: R-2 Option B.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-X-1 · DIN-1989-2 · -02 / -03 · `Q` ≡ `Q_max` ≡ `Q_Zu_max` (EN 12056-3 Tab. C.1 is external) — and the brief's `reference` widget
+- Class: cross-standard
+- Chosen now (fail-safe): no fourth symbol was created; the Plan-3 minima bind to the existing inputs (`Q` on -02 for Gl. 1 / 2, `Q_Zu_max` on -03 for Gl. 4 / 6 — the input the prod rows already read). The brief's `q_max_en12056` as a `reference` widget cannot be built: the codebase `reference` is a carrier-row picker (`carrier_symbol` / `rows_path` / `id_key` / `label_key`, `parseFieldConfig` rejects a `{document, table, note}` ui_config); the EN 12056-3 pointer lives in the created fields' descriptions and the register notes. A DN → Q lookup would be an external table (content boundary).
+- Evidence (verbatim, transcript line): "Q der Volumenstrom in der planmäßigen Zulaufleitung zum Filter bei einem Füllungsgrad von $70 \%$ und einem Gefälle von 1 \% nach DIN EN 12056-3:2001-01, Tabelle C.1, in Liter je Sekunde" (L290); "Bezugsgröße ist der maximal zufließende Volumenstrom $Q_{\text {max }}$, nach DIN EN 12056-3:2001-01, Tabelle C. 1 in Abhängigkeit von der Nennweite DN der Zulaufleitung bei $1 \%$ Gefälle (70 \% Füllungsgrad)." (L374)
+- Proposed SQL / config: STAGED block X-1 — `Q_max = Q` (-02) and `Q_Zu_max = Q` (-03) as derived rows, the two typed inputs no longer required.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-U-1 · DIN-1989-2 · -01 · TAB1 first Funktionsprinzip column head (image)
+- Class: unreadable-cell
+- Chosen now (fail-safe): the head of the "großes Sedimentationsvolumen" column is an image in the transcript; the created select's first option and the TAB1 key `gross` take their title from the sibling head and §5.3.2; the five printed TYP cells (L273 / L274) are clean and seeded; TAB1 stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "![](https://cdn.mathpix.com/cropped/9718cf16-9f01-43f4-8c3f-8e56539be251-08.jpg?height=40\&width=740\&top_left_y=746\&top_left_x=607)} & Filter mit mechanischer Filtration ohne Sedimentationsvolumen \\" (L271); "\hline & & kleines Sedimentationsvolumen & \\" (L272); "… mit anschließender Sedimentation dieser Stoffe in einem ausreichend großen Volumen …" (L281)
+- Proposed SQL / config: after the PDF read (SR-3): confirm the head text, then `UPDATE regulation_tables SET verification_status = 'md_verified' WHERE standard_code = 'DIN-1989-2' AND table_code = 'TAB1'` (and the option label if it differs).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-I-1 · DIN-1989-2 · edition token `'2004'` (unprinted)
+- Class: interface-gap
+- Chosen now (fail-safe): the transcript's title page (L1–L13) prints no date; the seed edition is prod `standards.version` "2004 (DIN 1989-2)" (read-only `SELECT code, version, issued_year, valid_from FROM standards WHERE code = 'DIN-1989-2'` → `issued_year` / `valid_from` null). The token is a UNIQUE-key component of the five seeded tables.
+- Evidence (verbatim, transcript line): "\hline DIN 1989-2 & $\overline{\mathrm{DIN}}$ \\" (L2) — no date line on L1–L13.
+- Proposed SQL / config: the owner confirms the printed edition on the PDF cover BEFORE `20260917101700` is applied; if it reads e.g. "2004-08", re-emit the seed with `DIN1989_2_EDITION` changed (a later change would orphan the rows: `UPDATE regulation_tables SET edition = '<x>' WHERE standard_code = 'DIN-1989-2'`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-I-2 · DIN-1989-2 · -03 · the save-path materialiser cannot resolve inherited scalars (`filtertyp`, `DN`); scalar-only twins are not materialised
+- Class: interface-gap
+- Chosen now (fail-safe): `materialize-derived.ts` builds its `symbolLookup` over the worksheet's OWN template fields, so a register-fed twin naming `filtertyp` as an input would persist null on every save while the form computes it — therefore Gl. 7 / 8 / 9 are three register-only twins (D13 … D15) plus two per-type codes (D16 / D17) and the "Gl. 7 vs 8/9" switch lives in `visible_when` and the STAGED gate (G-4), never in a formula input. Scalar-only rows (D1 … D4 on -03, D1 / D2 on -02, -01 D1) evaluate on the form / report only (amendment D).
+- Evidence (verbatim, transcript line): "Die Filtertrennwirkung ist als Quotient aus zurückgehaltenen Prüfstoffen bzw. abgeleiteten Prüfstoffen zur Gesamtfeststoffmasse je nach Filtertyp zu ermitteln." (L384)
+- Proposed SQL / config: none (engine observation; a materialiser that overlays inherited values is a [CODE] candidate).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-J-1 · DIN-1989-2 · -01 · `DN` as a `select_one` of nominal sizes (the brief's `dn_nennweite`)
+- Class: range-SR-2 (fixed options not printed)
+- Chosen now (fail-safe): not created — the transcript prints only the threshold "DN 200" (L227 / L228 / L378 / L382 / L403), never the nominal sizes (they live in DIN EN 12056-3 Tab. C.1, external); the existing number `DN` (consumed by -02 / -03) drives every scope rule directly (`DN <= 200` / `DN > 200`), so no duplicate attestation was created either.
+- Evidence (verbatim, transcript line): "Filter mit Zulaufnennweiten $\leq$ DN 200 müssen allen Anforderungen dieser Norm entsprechen." (L227); "Für Filter mit Zulaufnennweite > DN200 sind die Prüfung des hydraulischen Wirkungsgrads des dauerbelasteten Systems nach 6.4.6 und der Filtertrennwirkung nach 6.5 nicht geeignet." (L403); "- Nennweite der Zulaufleitung: DN" (L901)
+- Proposed SQL / config: if the owner wants a select, the option list must come from EN 12056-3 Tab. C.1 (external table — a cross-standard seed, not this standard's content).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_2-J-2 · DIN-1989-2 · -03 · which Tab.-2 step is "the" documented hydraulic efficiency
+- Class: text-only-formula
+- Chosen now (fail-safe): two twins per state — the η of the 100 % step (`eta_hydr_unbel_p100` / `eta_hydr_bel_p100`; §5.4.2 names Q_max as the Bezugsgröße) and the minimum over all steps (`eta_hydr_unbel_min` / `eta_hydr_bel_min`; the safe side of the Bild-E.1 curve); neither replaces Gl. 3 / 5 (R-4 waits on this ruling). With duplicate rows of one step the smaller η is taken (`min_rows`).
+- Evidence (verbatim, transcript line): "Bezugsgröße ist der maximal zufließende Volumenstrom $Q_{\text {max }}$, nach DIN EN 12056-3:2001-01, Tabelle C. 1 …" (L374); "… mit in Tabelle 2 angegebenen Volumenströmen über eine jeweils festgelegte Dauer angeströmt." (L479); "e) des hydraulischen Wirkungsgrades (Darstellung in Diagrammform nach Bild E.1)" (L916) — no sentence names the documented step.
+- Proposed SQL / config: R-4 picks `_p100` (or `_min`) per this ruling.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (no signature needed)
+
+- **`funktionsprinzip` names Tab. 1's "Filterart" row head (O-1):** prod's enum `funktionsprinzip` (fremdstoffrueckhalt | fremdstoffableitung, label "Funktionsprinzip", refs §3.9 / §3.8) maps one-to-one onto the printed ROW heads "mit Fremdstoffrückhalt" / "mit Fremdstoffableitung" (L273 / L274), while the printed COLUMN head "Funktionsprinzip" (L269) spans the three Sedimentationsvolumen classes. TAB1's key column is named `filterart` after the printed row head and keyed by the prod tokens (G-A3); the created select `sedimentationsvolumen` is the printed column dimension. A label rename is the owner's cosmetic call.
+- **`rueckhalteraum_zugaenglich` shown for Typ A AND Typ B** (brief: typ_a only): L292 and L329 print the identical sentence "Das Einstauvolumen muss für Reinigungszwecke zugänglich sein." under §5.3.2 and §5.3.3 — source-settled, emitted as `filtertyp IN {'typ_a', 'typ_b'}`.
+- **LDPE fictitious mass:** footnote a (L588) makes the 15 foils 150 g "fiktiv mit 10 g/Stück"; the register asks for the FOUND mass per Prüfstoff and tells the engineer to enter `Stücke × 10 g` for the foil (note) — the engine does not count pieces.
+- **Quoted-literal lint:** the emitter printed no warning for this module (no quoted token equals a register column key or a worksheet symbol).
+- **Bundle growth:** the five tables' lifted spans (~3 KB) ride in the client bundle via the seed fallback (Task-0 observation; Task 30 measures).
+
 ## Plan 3 tooling rulings
 
 ### plan3-T-12c · [CODE] · `emit-field-configs-sql.ts` gate-aware guard · a `visible_when` may not silently disarm a same-worksheet gate

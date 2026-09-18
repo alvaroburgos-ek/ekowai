@@ -1,0 +1,440 @@
+-- DIN-1989-2 — Plan 3 Task 17 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, equation ids / formulas / md5, gate ids /
+-- conditions / md5, column lists) were captured read-only on 2026-09-18 (src/lib/eval/field-configs/din1989_2.prior.json;
+-- prod-query.mjs for the equation and compliance_requirements rows quoted below — md5(formula) / md5(condition) read
+-- from prod, the long cells never retyped). Transcript lines refer to
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-1989-2\DIN-1989-2.md.
+--
+-- Conventions: `s.code = 'DIN-1989-2'`, worksheets by code, never by id; every UPDATE is guarded by the prior
+-- value (or md5) it replaces so a re-run is a no-op; each block names its rollback. A staged DELETE on a table
+-- without `active` (equations, compliance_requirements) copies the full rows into an archive table created in the
+-- same transaction, guards the DELETE on md5(<content column>), re-inserts on rollback with an EXPLICIT column list,
+-- and the archive table is dropped by the rollback OR by the owner once the deletion is signed off as final.
+-- The Plan-3 DATA migrations (20260917101700 seed · 20260917101710 field configs · 20260917101720 equations) must be
+-- applied BEFORE any block that reads a created symbol (filtertyp_tab1, filtertyp_konsistent_code, v_rueck_*_min,
+-- behaeltnis_*, prueflaeufe, pruefstoffe, m_*_calc, eta_*_calc, filtertrennwirkung_code_*, v_pruef_*_ok,
+-- hersteller_verfahren_dokumentiert, kennzeichnung).
+--
+-- Column lists (information_schema, read-only 2026-09-18):
+--   equations: id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol,
+--     output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor,
+--     source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note,
+--     verification_quote
+--   compliance_requirements: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference,
+--     severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes,
+--     audited_at, audited_by, requires_attestation
+
+-- =====================================================================================================================
+-- din1989_2-G-1 · DIN-1989-2-02 · CR-03 (id db72ce05-6f8f-49e0-9c6e-28f3811fb5ef, block, md5 cb62da289477f6b154db0eeb4894c674)
+--   — IF-guard the Typ-A Einstauvolumen gate, then hide V_Rueck_A for the other types
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L281 "Bei Filtern des Typs A … ein Einstauvolumen V_Rück nach Gleichung 1 sicherstellen."; L284 "V_Rück = Q × 25 (1)";
+-- L345 "Alle Filter mit Fremdstoffableitung ohne planmäßige Sedimentations- und Rückhaltewirkung … sind in Typ C einzustufen."
+-- Prod: CR-03 condition 'V_Rueck_A >= Q * 25' (unguarded) — a Typ-B / Typ-C filter with an empty V_Rueck_A reads pending and can
+-- never pass this block gate (inventory §5 win 1). The Plan-3 rule `V_Rueck_A ← filtertyp == 'typ_a'` was REFUSED by the
+-- gate-aware guard (hidden ⇒ null ⇒ the gate stops enforcing) and is staged here behind the guard rewrite (IF-guard exemption:
+-- same driver / op / literal). filtertyp reaches -02 (consumer_worksheets ["DIN-1989-2-02","DIN-1989-2-03"]).
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'IF filtertyp == typ_a THEN V_Rueck_A >= Q * 25',
+--   description = 'Plan 3 (din1989_2-G-1): Einstauvolumen V_Rück ≥ Q × 25 s nur für Filter des Typs A (§5.3.2, Gl. 1).'
+--  WHERE c.id = 'db72ce05-6f8f-49e0-9c6e-28f3811fb5ef' AND md5(c.condition) = 'cb62da289477f6b154db0eeb4894c674';
+-- UPDATE fields f SET visible_when = 'filtertyp == ''typ_a'''
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-02' AND s.code = 'DIN-1989-2' AND f.symbol = 'V_Rueck_A' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements SET condition = 'V_Rueck_A >= Q * 25' WHERE id = 'db72ce05-…' AND condition = 'IF filtertyp == typ_a THEN V_Rueck_A >= Q * 25';
+--   UPDATE fields … SET visible_when = NULL … symbol = 'V_Rueck_A' AND visible_when = 'filtertyp == ''typ_a'''.
+-- Note: no field named typ_a exists on -02 (capture) — the bare token in the gate and the quoted token in the rule are the same literal (Task 12c round 2).
+
+-- =====================================================================================================================
+-- din1989_2-G-2 · DIN-1989-2-02 · CR-04 (f4ff831a-4a20-459a-bbb3-476eadb8b723, md5 f83361a70041a0ab55a7c7e0a57042d8) ·
+--   CR-05 (98622362-2605-45ce-b77c-76ca195c5678, md5 8deb374cd304f50bea226ed38661c383) · CR-06 (1c2f9e6a-6cbd-4108-a551-39c2e115210f,
+--   md5 07e6e72da003f5cea395eec32f2d9d34), all block — IF-guard the three Typ-B gates (CR-06 additionally Erdeinbau), then hide the inputs
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L317 "Das Volumen der herausnehmbaren Behältnisse V_Rück muss mindestens betragen:" L320 "V_Rück = Q × 2 (2)";
+-- L311 "Die Masse eines planmäßig herausnehmbaren Behältnisses darf im gefüllten Zustand 20 kg nicht überschreiten.";
+-- L313 "Bei Erdeinbau darf zwischen Geländeoberkante (Schachtabdeckung) und Entnahmeelement (z. B. Haltegriff) eine Tiefe von 60 cm
+-- nicht überschritten werden." Prod: 'V_Rueck_B >= Q * 2' / 'behaeltnis_masse <= 20' / 'tiefe_gok_griff <= 60' — all unguarded; the
+-- three rules (typ_b; tiefe additionally einbausystem == 'separat_erdeinbau') were REFUSED by the gate-aware guard. einbausystem
+-- reaches -02 (consumer_worksheets ["DIN-1989-2-02"]; tokens integriert | separat_erdeinbau | separat_oberirdisch).
+-- Option A (guards only; the typed scalars stay the gate inputs):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'IF filtertyp == typ_b THEN V_Rueck_B >= Q * 2'
+--  WHERE c.id = 'f4ff831a-4a20-459a-bbb3-476eadb8b723' AND md5(c.condition) = 'f83361a70041a0ab55a7c7e0a57042d8';
+-- UPDATE compliance_requirements c SET condition = 'IF filtertyp == typ_b THEN behaeltnis_masse <= 20'
+--  WHERE c.id = '98622362-2605-45ce-b77c-76ca195c5678' AND md5(c.condition) = '8deb374cd304f50bea226ed38661c383';
+-- UPDATE compliance_requirements c SET condition = 'IF filtertyp == typ_b AND einbausystem == separat_erdeinbau THEN tiefe_gok_griff <= 60'
+--  WHERE c.id = '1c2f9e6a-6cbd-4108-a551-39c2e115210f' AND md5(c.condition) = '07e6e72da003f5cea395eec32f2d9d34';
+-- UPDATE fields f SET visible_when = 'filtertyp == ''typ_b''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-02' AND s.code = 'DIN-1989-2' AND f.symbol IN ('V_Rueck_B', 'behaeltnis_masse') AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'filtertyp == ''typ_b'' AND einbausystem == ''separat_erdeinbau''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-02' AND s.code = 'DIN-1989-2' AND f.symbol = 'tiefe_gok_griff' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- CAUTION (emitter rule): the CR-06 guard is COMPOUND (AND) — the gate-aware IF-guard exemption accepts only a plain compare; the
+-- tiefe_gok_griff rule above therefore stays a hand-applied UPDATE in this block, never an emitted entry, until the guard learns
+-- compound IF guards (a [CODE] candidate) or the rule is reduced to `filtertyp == 'typ_b'` (then the field shows for integriert too).
+-- Option B (register-driven, after Option A and D-3 … D-5): re-point the three gates to the register outputs
+--   'IF filtertyp == typ_b THEN behaeltnis_volumen_sum >= v_rueck_b_min' / 'IF filtertyp == typ_b THEN behaeltnis_masse_max <= 20' /
+--   'IF filtertyp == typ_b AND einbausystem == separat_erdeinbau THEN behaeltnis_grifftiefe_max <= 60' (guard each UPDATE on the Option-A text).
+-- Rollback (A): restore the three condition texts quoted in the guards; SET visible_when = NULL on the three rows. Rollback (B): restore the Option-A texts.
+
+-- =====================================================================================================================
+-- din1989_2-G-3 · DIN-1989-2-04 · werkstoffbezeichnung — validation_rules.raw "werkstoffbezeichnung != ''" is unconditional (and display-dead)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L698 "g) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);". Prod: is_required = false, validation_rules
+-- {"raw":"werkstoffbezeichnung != ''"} (the validation_rules column enforces nothing at runtime — reference_wizard_compliance_gates);
+-- no compliance_requirements row reads the symbol. The Plan-3 rule `werkstoffbezeichnung ← werkstoff_filterelement == 'kunststoff'`
+-- IS emitted (20260917101710) but reads `pending` (visible, inert) on -04 until C-1 lands. Nothing to apply beyond C-1; if the owner
+-- wants the requirement enforced, a NEW gate is the enforcement change:
+--   INSERT … compliance_requirements (worksheet DIN-1989-2-04, code 'DIN-1989-2-CR-18', severity 'block',
+--     condition 'IF werkstoff_filterelement == kunststoff THEN werkstoffbezeichnung IS NOT NULL', title_de 'Werkstoffbezeichnung bei Kunststoff (§7 g)').
+-- Rollback: DELETE the CR-18 row by code.
+
+-- =====================================================================================================================
+-- din1989_2-G-4 · DIN-1989-2-03 · CR-08 (f6d42d32-9738-4d7d-b210-b57382a4b478, block, md5 46adfbddf01db1d77d465b6d39f18329)
+--   — the Filtertrennwirkung gate: DN ≤ 200 scope, the derived η ≥ 0,7 per type instead of the manual boolean, the DN > 200 attestation
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L227 "Filter mit Zulaufnennweiten ≤ DN 200 müssen allen Anforderungen dieser Norm entsprechen."; L228 "Für Filter mit
+-- Zulaufnennweite > DN 200 gibt es für die Anforderung Filtertrennwirkung und hydraulischer Wirkungsgrad des dauerbelasteten Systems
+-- zur Zeit kein genormtes Prüfverfahren. Der Hersteller muss diese Werte angeben und nachvollziehbar dokumentieren, wie er diese Werte
+-- ermittelt hat."; L382 "Die Filtertrennwirkung ist für Filter mit Zulaufnennweiten ≤ DN 200 nachzuweisen."; L386 "Hinsichtlich der
+-- Abtrennung von Fremdstoffen müssen diese Filter einen Wirkungsgrad von mindestens 0,7 erreichen (siehe 6.5.3)."; L639 / L642 (Gl. 7 für
+-- Typ A und Typ B); L657 / L671 (Gl. 9 für Typ C). Prod: 'filtertrennwirkung_nachgewiesen == true' (manual boolean, unguarded, for every DN
+-- and every type). DN and filtertyp reach -03 (capture). The Plan-3 rule `filtertrennwirkung_nachgewiesen ← DN <= 200` was REFUSED by the
+-- gate-aware guard; the created twins filtertrennwirkung_code_ab / _c (D16 / D17, materialised on save) and the attestation
+-- hersteller_verfahren_dokumentiert (visible for DN > 200) are emitted.
+-- Step 1 (scope only — IF-guard, then the emitted-shape rule; same driver / op / literal ⇒ exempt):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'IF DN <= 200 THEN filtertrennwirkung_nachgewiesen == true'
+--  WHERE c.id = 'f6d42d32-9738-4d7d-b210-b57382a4b478' AND md5(c.condition) = '46adfbddf01db1d77d465b6d39f18329';
+-- UPDATE fields f SET visible_when = 'DN <= 200' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-03' AND s.code = 'DIN-1989-2' AND f.symbol = 'filtertrennwirkung_nachgewiesen' AND f.active AND f.visible_when IS NULL;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'DIN-1989-2-CR-19', 'Filter > DN 200: Ermittlungsverfahren dokumentiert (§5.1, §6.1)',
+--        'IF DN > 200 THEN hersteller_verfahren_dokumentiert == true', '§5.1, §6.1', 'block',
+--        'Plan 3 (din1989_2-G-4): oberhalb DN 200 gibt es kein genormtes Prüfverfahren — der Hersteller gibt die Werte an und dokumentiert das Verfahren.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-1989-2-03' AND s.code = 'DIN-1989-2'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'DIN-1989-2-CR-19');
+-- COMMIT;
+-- Step 2 (derived verdict per type instead of the manual boolean — D-2; after Step 1):
+--   UPDATE compliance_requirements SET condition = 'IF DN <= 200 AND filtertyp IN {typ_a,typ_b} THEN filtertrennwirkung_code_ab == 1'
+--    WHERE id = 'f6d42d32-…' AND condition = 'IF DN <= 200 THEN filtertrennwirkung_nachgewiesen == true';
+--   INSERT … 'DIN-1989-2-CR-08b' 'IF DN <= 200 AND filtertyp == typ_c THEN filtertrennwirkung_code_c == 1' (block, same worksheet);
+--   UPDATE fields … SET active = false … symbol = 'filtertrennwirkung_nachgewiesen' (its consumer -04 then inherits the codes — see C-2).
+-- Rollback (Step 2): restore the Step-1 condition, DELETE CR-08b by code, re-activate the boolean. Rollback (Step 1): restore
+--   'filtertrennwirkung_nachgewiesen == true', SET visible_when = NULL, DELETE CR-19 by code.
+
+-- =====================================================================================================================
+-- din1989_2-G-5 · DIN-1989-2-01 · CR-01 (fc1b2c62-2864-4acf-a0be-18d648e8a327, block, md5 b513fc8b625ea0df4fdee19abf40b141)
+--   — the chosen Filtertyp must equal the Tab.-1 assignment (new consistency leg)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L263 "Aufgrund der unterschiedlichen Funktionsprinzipien sind Filter den in Tabelle 1 aufgeführten Typen zuzuordnen."
+-- Prod: 'filtertyp IS NOT NULL'. Plan 3 creates the twin fill filtertyp_tab1 (TAB1 by funktionsprinzip × sedimentationsvolumen) and
+-- filtertyp_konsistent_code (DIN-1989-2-01-D1, scalar-only — evaluated on the form / report, not persisted; the gate below therefore
+-- reads the fill directly). Why staged: a gate condition change.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'filtertyp IS NOT NULL AND filtertyp == filtertyp_tab1',
+--   description = 'Plan 3 (din1989_2-G-5): der gewählte Filtertyp muss der Zuordnung nach Tabelle 1 (Funktionsprinzip × Sedimentationsvolumen) entsprechen.'
+--  WHERE c.id = 'fc1b2c62-2864-4acf-a0be-18d648e8a327' AND md5(c.condition) = 'b513fc8b625ea0df4fdee19abf40b141';
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements SET condition = 'filtertyp IS NOT NULL' WHERE id = 'fc1b2c62-…' AND condition = 'filtertyp IS NOT NULL AND filtertyp == filtertyp_tab1'.
+-- Note: `filtertyp == filtertyp_tab1` is the bare var-vs-var form (both are valued enum symbols of -01); while filtertyp_tab1 is unset the
+-- gate reads pending — the "-" cell (Fremdstoffrückhalt ohne Sedimentationsvolumen) never fills and therefore never passes (the printed fact).
+
+-- =====================================================================================================================
+-- din1989_2-G-6 · DIN-1989-2-03 · NEW gates for the printed inequalities Gl. 4 / Gl. 6 (no prod gate checks them today)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L522 "V_Prüf ≥ Q_Zu,max × 90 (4)"; L615 "V_Prüf ≥ Q_Zu,max × 180 (6)". Prod: Gl. 4 / Gl. 6 are stored as EQUATIONS that write
+-- Q_Zu_max × 90 / × 180 into the typed inputs V_Pruef_leist / V_Pruef_trenn (R-3); no compliance row compares them. Plan 3 emits the
+-- twins v_pruef_leist_min / v_pruef_trenn_min and the checks v_pruef_leist_ok / v_pruef_trenn_ok (D1 … D4, scalar-only). Why staged: new gates.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'DIN-1989-2-CR-20', 'Vorlagebehälter Leistungsfähigkeit ≥ Q_Zu,max × 90 s (Gl. 4)',
+--        'IF DN <= 200 THEN V_Pruef_leist >= Q_Zu_max * 90', '§6.4.6, Gl. 4', 'block', 'Plan 3 (din1989_2-G-6).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-1989-2-03' AND s.code = 'DIN-1989-2'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'DIN-1989-2-CR-20');
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT gen_random_uuid(), w.id, 'DIN-1989-2-CR-21', 'Vorlagebehälter Trennwirkung ≥ Q_Zu,max × 180 s (Gl. 6)',
+--        'IF DN <= 200 THEN V_Pruef_trenn >= Q_Zu_max * 180', '§6.5.1, Gl. 6', 'block', 'Plan 3 (din1989_2-G-6).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-1989-2-03' AND s.code = 'DIN-1989-2'
+--    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'DIN-1989-2-CR-21');
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements WHERE code IN ('DIN-1989-2-CR-20', 'DIN-1989-2-CR-21') (worksheet DIN-1989-2-03).
+-- Note: the IF DN <= 200 guard matches the emitted rules on V_Pruef_leist / V_Pruef_trenn (20260917101710) — apply R-3 first or the
+-- equations keep overwriting the typed volumes on the card (display only; the stored value is what the gate reads).
+
+-- =====================================================================================================================
+-- din1989_2-G-7 · DIN-1989-2-02 · CR-10 (c185fbb4-a6f6-4cb7-b799-9a6bb2b181d1, block, md5 d200cc020b51705d81781b035878a6e9)
+--   — Standsicherheit applies to separate Filtersysteme für den Erdeinbau only
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L396 "Separate Filtersysteme für den Erdeinbau müssen den Anforderungen an die Standsicherheit für Behälter nach
+-- DIN 1989-3:2003-08, 4.4.4 entsprechen."; L254 (Werkstoffe für den Erdeinbau nach DIN 1989-3 4.2). Prod: 'standsicherheit_eingehalten == true'
+-- (unguarded — an integrated or above-ground filter must tick a requirement that does not apply to it). The rule
+-- `standsicherheit_eingehalten ← einbausystem == 'separat_erdeinbau'` was REFUSED by the gate-aware guard.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'IF einbausystem == separat_erdeinbau THEN standsicherheit_eingehalten == true'
+--  WHERE c.id = 'c185fbb4-a6f6-4cb7-b799-9a6bb2b181d1' AND md5(c.condition) = 'd200cc020b51705d81781b035878a6e9';
+-- UPDATE fields f SET visible_when = 'einbausystem == ''separat_erdeinbau''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-02' AND s.code = 'DIN-1989-2' AND f.symbol = 'standsicherheit_eingehalten' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: restore 'standsicherheit_eingehalten == true'; SET visible_when = NULL on the row.
+
+-- =====================================================================================================================
+-- din1989_2-E-1 · DIN-1989-2-01 filtertyp — re-bind the existing manual select as the Tab.-1 lookup_fill (the brief's "din1989_2-D-1: manual → filled")
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: filtertyp (DIN-1989-2-01, enum typ_a | typ_b | typ_c, required, consumed by DIN-1989-2-02 and -03, read by CR-01; widget /
+-- ui_config / lookup / visible_when all NULL). Its keys funktionsprinzip (prod enum fremdstoffrueckhalt | fremdstoffableitung) and
+-- sedimentationsvolumen (created by 20260917101710) are both -01 symbols; TAB1 (5 rows, locked) is seeded by 20260917101700. Plan 3
+-- created the twin filtertyp_tab1 (lookup_fill, role value, enum) beside the keys instead (amendment J: consumed + gate-bearing).
+-- Evidence: L263 "… sind Filter den in Tabelle 1 aufgeführten Typen zuzuordnen."; Tab. 1 L273 / L274.
+-- Why staged: with sedimentationsvolumen unset the field turns read-only (`keys_missing`) and every consumer (-02 / -03) and CR-01 would
+-- read null until the new select is filled on every existing project; the "-" combination fills nothing at all.
+-- Option (after 20260917101700 + 20260917101710; Plan-1 columns present) — archive pattern on `fields`:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_din1989_2 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_din1989_2 SELECT f.* FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+--  WHERE f.symbol = 'filtertyp' AND w.code = 'DIN-1989-2-01' AND s.code = 'DIN-1989-2' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"Tab. 1"}'::jsonb,
+--        lookup = '{"table_code":"TAB1","role":"value","keys":[{"column":"filterart","from_symbol":"funktionsprinzip"},{"column":"sedimentationsvolumen","from_symbol":"sedimentationsvolumen"}],"value":"typ"}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'filtertyp' AND w.code = 'DIN-1989-2-01' AND s.code = 'DIN-1989-2' AND f.active AND f.widget IS NULL;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol IN ('filtertyp_tab1', 'filtertyp_konsistent_code') AND w.code = 'DIN-1989-2-01' AND s.code = 'DIN-1989-2' AND f.active;
+-- DELETE FROM equations e USING worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-01' AND s.code = 'DIN-1989-2' AND e.equation_number = 'DIN-1989-2-01-D1' AND e.description LIKE 'Plan 3:%';
+-- COMMIT;
+-- Rollback (the four Plan-1 columns back from the archive row by id — explicit columns, never retyped; the twins re-activated; D1 re-emitted from 20260917101720):
+-- BEGIN;
+-- UPDATE fields f SET widget = a.widget, ui_config = a.ui_config, lookup = a.lookup, visible_when = a.visible_when
+--   FROM fields_archive_din1989_2 a WHERE f.id = a.id AND f.widget = 'lookup_fill';
+-- DELETE FROM fields_archive_din1989_2 a USING fields f WHERE f.id = a.id AND f.widget IS NOT DISTINCT FROM a.widget;
+-- UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol IN ('filtertyp_tab1', 'filtertyp_konsistent_code') AND w.code = 'DIN-1989-2-01' AND s.code = 'DIN-1989-2' AND NOT f.active;
+-- COMMIT;
+-- The archive table `fields_archive_din1989_2` is dropped once every archived row of this file is rolled back, or by the owner once the change is signed off as final.
+-- Prerequisite: G-5 must NOT be applied with this block (the consistency leg compares the field with itself once re-bound) — G-5 is the interim alternative.
+
+-- =====================================================================================================================
+-- din1989_2-R-1 · DIN-1989-2-02 · Gl. 1 (46fb74c9-af5e-4705-8b7e-7c56e595240e, md5 5cb818900ff7999cbc64fac155081d31) and
+--   Gl. 2 (f1ac6dff-12fa-43f4-af5b-2b0796ed349b, md5 2f6679922b66e6287edbb7326cc5e330), both verified_against_standard
+--   — retire the two rows that write the REQUIRED minimum into the typed PROVIDED volumes
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L284 "V_Rück = Q × 25 (1)" / L320 "V_Rück = Q × 2 (2)" — both are the minimum the filter must provide (L281 "ein Einstauvolumen
+-- V_Rück nach Gleichung 1 sicherstellen", L317 "muss mindestens betragen"). Prod: 'V_Rueck_A = Q * 25' and 'V_Rueck_B = Q * 2' output the
+-- symbols of the two NUMBER INPUTS V_Rueck_A / V_Rueck_B (labels "Einstauvolumen Rueckhaltebereich Typ A" / "Mindestvolumen herausnehmbare
+-- Behaeltnisse Typ B") that CR-03 / CR-04 compare with Q × 25 / Q × 2 — a symbol that is both typed and derived (the #22 class). Plan 3 emits
+-- the twins v_rueck_a_min / v_rueck_b_min (DIN-1989-2-02-D1 / -D2, 20260917101720); the typed fields stay the provided volumes.
+-- Why staged: deletes two verified equations (replacement class). Archive pattern:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_din1989_2 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_din1989_2 SELECT * FROM equations
+--  WHERE (id = '46fb74c9-af5e-4705-8b7e-7c56e595240e' AND md5(formula) = '5cb818900ff7999cbc64fac155081d31')
+--     OR (id = 'f1ac6dff-12fa-43f4-af5b-2b0796ed349b' AND md5(formula) = '2f6679922b66e6287edbb7326cc5e330');
+-- DELETE FROM equations e USING equations_archive_din1989_2 a WHERE e.id = a.id AND md5(e.formula) = md5(a.formula)
+--   AND e.id IN ('46fb74c9-af5e-4705-8b7e-7c56e595240e', 'f1ac6dff-12fa-43f4-af5b-2b0796ed349b');
+-- COMMIT;
+-- Rollback (full rows from the archive, explicit column list, never retyped):
+-- BEGIN;
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_din1989_2 WHERE id IN ('46fb74c9-af5e-4705-8b7e-7c56e595240e', 'f1ac6dff-12fa-43f4-af5b-2b0796ed349b')
+--  ON CONFLICT (id) DO NOTHING;
+-- DELETE FROM equations_archive_din1989_2 WHERE id IN ('46fb74c9-af5e-4705-8b7e-7c56e595240e', 'f1ac6dff-12fa-43f4-af5b-2b0796ed349b');
+-- COMMIT;
+-- The archive table `equations_archive_din1989_2` is shared by R-1 / R-3 / R-2 and dropped once every archived row is rolled back, or by the owner once the deletions are final.
+
+-- =====================================================================================================================
+-- din1989_2-R-2 · DIN-1989-2-03 · Gl. 7 (20c140c2-3bdb-4ed4-937f-b0bded5cd925, md5 84d012e66585f8efcc91f8fee180821b) ·
+--   Gl. 8 (64f61270-2f75-4f4b-8e5d-25893c023e93, md5 c6d444e6efc3ed420a51fae745db1839) · Gl. 9 (8c7c52f1-9976-452c-a3c1-cf00131697e6,
+--   md5 5a3962c7ae3eff6136f6e0d525e9e872), all verified_against_standard — read the Σ terms from the pruefstoffe register
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L631 "Maßgebend sind jeweils die Mengen- bzw. Masseanteile der gefundenen Zusätze."; L648 "Σ ges.Festst Summe der zugegebenen
+-- Prüfstoffe"; L649 "Σ Sp.verunr Summe der ermittelten Masseanteile, die in den Speicher eindringt."; L683 "Σ Verw Summe der in die
+-- Abflussleitung eingedrungenen festen Stoffe."; L530 "Die Menge, Masse und Konzentration des einzelnen Prüfstoffes je 1000 Liter
+-- Prüfmedium muss Tabelle 3 entsprechen." Prod: 'eta_Rueck_AB = (m_ges_festst - m_sp_verunr) / m_ges_festst', 'eta_Verw = m_verw /
+-- m_ges_festst', 'eta_C = 0.5 * (m_ges_festst - m_sp_verunr + m_verw) / m_ges_festst' over three typed scalars. Plan 3 emits the register and
+-- the Σ twins m_ges_festst_calc / m_sp_verunr_calc / m_verw_calc (D10 … D12, materialised on save) and the η twins (D13 … D15).
+-- Why staged: replaces three verified equations (input set → register-fed sums) and retires the three typed scalars (D-10 … D-12).
+-- Option A (re-point only; the typed scalars stay for a transition):
+-- BEGIN;
+-- UPDATE equations SET formula = 'eta_Rueck_AB = (m_ges_festst_calc - m_sp_verunr_calc) / m_ges_festst_calc', input_symbols = ARRAY['m_ges_festst_calc','m_sp_verunr_calc']::text[], verification_status = 'imported_unverified'
+--  WHERE id = '20c140c2-3bdb-4ed4-937f-b0bded5cd925' AND md5(formula) = '84d012e66585f8efcc91f8fee180821b';
+-- UPDATE equations SET formula = 'eta_Verw = m_verw_calc / m_ges_festst_calc', input_symbols = ARRAY['m_verw_calc','m_ges_festst_calc']::text[], verification_status = 'imported_unverified'
+--  WHERE id = '64f61270-2f75-4f4b-8e5d-25893c023e93' AND md5(formula) = 'c6d444e6efc3ed420a51fae745db1839';
+-- UPDATE equations SET formula = 'eta_C = 0.5 * (m_ges_festst_calc - m_sp_verunr_calc + m_verw_calc) / m_ges_festst_calc', input_symbols = ARRAY['m_ges_festst_calc','m_sp_verunr_calc','m_verw_calc']::text[], verification_status = 'imported_unverified'
+--  WHERE id = '8c7c52f1-9976-452c-a3c1-cf00131697e6' AND md5(formula) = '5a3962c7ae3eff6136f6e0d525e9e872';
+-- COMMIT;
+-- Option B (after A and D-10 … D-12): UPDATE fields … SET active = false … symbol IN ('m_ges_festst', 'm_sp_verunr', 'm_verw') (DIN-1989-2-03).
+-- Rollback (A): restore the three formula / input_symbols / verification_status texts quoted above (guard on the Option-A formulas). Rollback (B): re-activate the three fields.
+-- Note: the twins read the persisted Σ rows (source_type derived) one save late (Task 16 trap 2) — the η twins D13 … D15 inline the sums for that reason;
+-- the owner may prefer to DELETE Gl. 7–9 (archive pattern as in R-1) and let D13 … D15 own the η values, re-pointing the -04 consumers to eta_rueck_calc / eta_c_calc (C-2).
+
+-- =====================================================================================================================
+-- din1989_2-R-3 · DIN-1989-2-03 · Gl. 4 (41935d13-1d60-49f6-8308-25d0203c44f0, md5 12753422d8507163c95cd17c479b65c3) and
+--   Gl. 6 (fd3184a2-6cdb-4498-b78a-083033d12978, md5 43de7f4393e828d69d70b433d95d109a), both verified_against_standard
+--   — retire the two rows that write the printed "≥" bound into the typed Vorlagebehälter volumes
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L522 "V_Prüf ≥ Q_Zu,max × 90 (4)" and L615 "V_Prüf ≥ Q_Zu,max × 180 (6)" are INEQUALITIES (L519 / L612 "muss mindestens einem
+-- Volumen V_Prüf entsprechen, das … multipliziert mit 90 s / 180 s entspricht"). Prod: 'V_Pruef_leist = Q_Zu_max * 90' and
+-- 'V_Pruef_trenn = Q_Zu_max * 180' output the symbols of the typed NUMBER INPUTS V_Pruef_leist / V_Pruef_trenn (required, "Vorlagebehaeltervolumen").
+-- Plan 3 emits the minima v_pruef_leist_min / v_pruef_trenn_min and the checks v_pruef_leist_ok / v_pruef_trenn_ok (D1 … D4); G-6 proposes the gates.
+-- Why staged: deletes two verified equations. Same archive pattern as R-1 (table equations_archive_din1989_2):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_din1989_2 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_din1989_2 SELECT * FROM equations
+--  WHERE (id = '41935d13-1d60-49f6-8308-25d0203c44f0' AND md5(formula) = '12753422d8507163c95cd17c479b65c3')
+--     OR (id = 'fd3184a2-6cdb-4498-b78a-083033d12978' AND md5(formula) = '43de7f4393e828d69d70b433d95d109a');
+-- DELETE FROM equations e USING equations_archive_din1989_2 a WHERE e.id = a.id AND md5(e.formula) = md5(a.formula)
+--   AND e.id IN ('41935d13-1d60-49f6-8308-25d0203c44f0', 'fd3184a2-6cdb-4498-b78a-083033d12978');
+-- COMMIT;
+-- Rollback: the R-1 INSERT … SELECT (explicit column list) with the two ids above, then DELETE them from the archive.
+
+-- =====================================================================================================================
+-- din1989_2-R-4 · DIN-1989-2-03 · Gl. 3 (c44be6b5-448a-43f8-9755-ff041c659246, md5 77a0b2c1a80009c06ccc4f1ee20e755d) and
+--   Gl. 5 (b6241c7a-4a65-4052-9ea9-9b7704e5d0e1, md5 148933e2685ab5e4203ea3bd0c8db2f3), both verified_against_standard
+--   — ONE η per state from the prueflaeufe register instead of the single typed pair Q_Zu / Q_Ab (depends on J-2)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L479 "… mit in Tabelle 2 angegebenen Volumenströmen über eine jeweils festgelegte Dauer angeströmt."; L509 Gl. 3; L535 / L540 Gl. 5;
+-- L916 "e) des hydraulischen Wirkungsgrades (Darstellung in Diagrammform nach Bild E.1)". Prod: 'eta_hydr = (Q_Zu - Q_Ab) / Q_Zu' and
+-- 'eta_hyd_bel = (Q_Zu - Q_Ab) / Q_Zu' — the SAME formula over the SAME two typed scalars (one measured pair serves both states today).
+-- Plan 3 emits the register (seven Tab.-2 steps × unbelastet / dauerbelastet) and the twins eta_hydr_unbel_p100 / eta_hydr_bel_p100
+-- (η at 100 % Q_Zu,max — the §5.4.2 Bezugsgröße) and eta_hydr_unbel_min / eta_hydr_bel_min (D6 … D9, materialised on save).
+-- Why staged: replaces two verified equations; the choice of the documented step is J-2 (the text names none).
+-- Option (after J-2 picks p100 — else substitute the _min twins):
+-- BEGIN;
+-- UPDATE equations SET formula = 'eta_hydr = eta_hydr_unbel_p100', input_symbols = ARRAY['eta_hydr_unbel_p100']::text[], verification_status = 'imported_unverified'
+--  WHERE id = 'c44be6b5-448a-43f8-9755-ff041c659246' AND md5(formula) = '77a0b2c1a80009c06ccc4f1ee20e755d';
+-- UPDATE equations SET formula = 'eta_hyd_bel = eta_hydr_bel_p100', input_symbols = ARRAY['eta_hydr_bel_p100']::text[], verification_status = 'imported_unverified'
+--  WHERE id = 'b6241c7a-4a65-4052-9ea9-9b7704e5d0e1' AND md5(formula) = '148933e2685ab5e4203ea3bd0c8db2f3';
+-- COMMIT;
+-- Rollback: restore the two formula / input_symbols / verification_status texts (guard on the new formulas). Then D-6 … D-9 retire Q_Zu / Q_Ab
+-- and the -02 re-typed copies eta_hydr_unbel_doku / eta_hydr_bel_doku (CR-11 reads the latter — its rewrite is part of D-8).
+
+-- =====================================================================================================================
+-- din1989_2-C-1 · DIN-1989-2-02 werkstoff_filterelement · consumer_worksheets += DIN-1989-2-04
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L698 "g) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);". Capture: werkstoff_filterelement (-02, enum,
+-- consumer_worksheets NULL). The emitted -04 rule `werkstoffbezeichnung ← werkstoff_filterelement == 'kunststoff'` reads pending
+-- (visible, inert) until this edit lands.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(COALESCE(f.consumer_worksheets, ARRAY[]::text[]), 'DIN-1989-2-04')
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-02' AND s.code = 'DIN-1989-2' AND f.symbol = 'werkstoff_filterelement' AND f.active
+--    AND NOT ('DIN-1989-2-04' = ANY(COALESCE(f.consumer_worksheets, ARRAY[]::text[])));
+-- COMMIT;
+-- Rollback: UPDATE fields … SET consumer_worksheets = NULLIF(array_remove(consumer_worksheets, 'DIN-1989-2-04'), ARRAY[]::text[]) … symbol = 'werkstoff_filterelement'.
+
+-- =====================================================================================================================
+-- din1989_2-C-2 · DIN-1989-2-03 / -02 · the type / DN rules on the CONSUMED outputs eta_Rueck_AB · eta_C · eta_hyd_bel · eta_hydr_bel_doku
+--   and on the Gl.-7…9 inputs m_ges_festst · m_sp_verunr · m_verw (REFUSED by the transitive producer guard)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L639 (Gl. 7 für Typ A und Typ B) / L657 (Typ C: Verwurf) / L378 (dauerbelastet nur ≤ DN 200) / L382 (Trennwirkung nur ≤ DN 200).
+-- Capture: eta_Rueck_AB, eta_C, eta_hyd_bel, eta_hydr (-03) and eta_hydr_unbel_doku, eta_hydr_bel_doku (-02) carry consumer_worksheets
+-- ["DIN-1989-2-04"]; m_ges_festst / m_sp_verunr / m_verw feed Gl. 7 / 9 whose outputs are consumed (chain "m_verw → Gl.9 eta_C (consumed by
+-- DIN-1989-2-04)"). Hiding any of them nulls the value -04 inherits. Today -04 has no field that reads them (the inheritance is a display), and
+-- for a Typ-A filter eta_C / m_verw are empty anyway — the null a rule would produce is the same null the engineer leaves today.
+-- Chosen now: the rules are NOT emitted; the created twins carry the type / DN visibility (eta_verw_calc / eta_c_calc / m_verw_calc under typ_c,
+-- the whole Trennwirkung block under DN <= 200). Option (after R-2 Option B retires the three typed inputs; the consumers tolerate a null for the
+-- non-applicable type — owner's ruling):
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'filtertyp IN {''typ_a'', ''typ_b''}' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-03' AND s.code = 'DIN-1989-2' AND f.symbol = 'eta_Rueck_AB' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'filtertyp == ''typ_c''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-03' AND s.code = 'DIN-1989-2' AND f.symbol = 'eta_C' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'DN <= 200' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-03' AND s.code = 'DIN-1989-2' AND f.symbol = 'eta_hyd_bel' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'DN <= 200' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-02' AND s.code = 'DIN-1989-2' AND f.symbol = 'eta_hydr_bel_doku' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on the four rows (guard on the texts above). The importer rule "a consumed field may not carry visible_when"
+-- (scripts/_pass3c-validate.ts) would reject a re-import of this shape — the alternative is to drop -04 from the four consumer lists
+-- (array_remove) once -04 reads the Plan-3 codes instead (G-4 Step 2).
+
+-- =====================================================================================================================
+-- din1989_2-D-1 · DIN-1989-2-04 · kennzeichnung_vollstaendig (manual boolean, CR-14 34f17280-5466-4cb7-b056-cbb7b1b47b68, md5 4c69f777e04d97a1f8b22f96d3f442a3)
+--   ↔ kennzeichnung (created select_many over the nine printed items a–i)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L691 "Regenwasserfilter nach dieser Norm sind deutlich sichtbar und dauerhaft wie folgt zu kennzeichnen mit:" + L692–L700 a)–i);
+-- L698 "g) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);". Prod: 'kennzeichnung_vollstaendig == true'.
+-- Option (gate reads the checklist; g) only for plastics — needs C-1 so werkstoff_filterelement resolves on -04; contains() per item):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'contains(kennzeichnung, a_nummer_norm) AND contains(kennzeichnung, b_hersteller) AND contains(kennzeichnung, c_typ) AND contains(kennzeichnung, d_nenngroesse) AND contains(kennzeichnung, e_fliessrichtung) AND contains(kennzeichnung, f_filtertrennwirkung) AND (werkstoff_filterelement != kunststoff OR contains(kennzeichnung, g_werkstoffbezeichnung)) AND contains(kennzeichnung, h_herstelldatum) AND contains(kennzeichnung, i_ueberwachende_stelle)'
+--  WHERE c.id = '34f17280-5466-4cb7-b056-cbb7b1b47b68' AND md5(c.condition) = '4c69f777e04d97a1f8b22f96d3f442a3';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-2-04' AND s.code = 'DIN-1989-2' AND f.symbol = 'kennzeichnung_vollstaendig' AND f.active;
+-- COMMIT;
+-- Rollback: restore 'kennzeichnung_vollstaendig == true'; re-activate the boolean. Kleene note: with werkstoff_filterelement missing on -04 (before C-1)
+-- the OR leg is pending unless g) is ticked; every other leg is decidable from the checklist alone.
+
+-- =====================================================================================================================
+-- din1989_2-D-2 · DIN-1989-2-03 · filtertrennwirkung_nachgewiesen (manual boolean, CR-08) ↔ filtertrennwirkung_code_ab / filtertrennwirkung_code_c
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L386 "… müssen diese Filter einen Wirkungsgrad von mindestens 0,7 erreichen (siehe 6.5.3)."; L384 "… je nach Filtertyp zu ermitteln."
+-- Chosen now: the two codes are emitted as materialised twins (D16 / D17 over the register, ≥ 0,7 inclusive — Anhang A prints exactly 0,7 as the
+-- passing example L775); the boolean stays the CR-08 input. SQL: G-4 Step 2 (gate rewrite + deactivation) — one ruling, two ids.
+
+-- =====================================================================================================================
+-- din1989_2-D-3 · DIN-1989-2-02 · V_Rueck_B (typed, CR-04) ↔ behaeltnisse.volumen_l / behaeltnis_volumen_sum (DIN-1989-2-02-D3)
+-- din1989_2-D-4 · DIN-1989-2-02 · behaeltnis_masse (typed, CR-05) ↔ behaeltnisse.masse_gefuellt_kg / behaeltnis_masse_max (-D4)
+-- din1989_2-D-5 · DIN-1989-2-02 · tiefe_gok_griff (typed, CR-06) ↔ behaeltnisse.grifftiefe_cm / behaeltnis_grifftiefe_max (-D5)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER (one box per pair on the sheet)
+-- Evidence: L309 "… durch die Anordnung von Behältnissen zur Sammlung der Fremdstoffe …" (plural — N instances); L311 "Die Masse eines
+-- planmäßig herausnehmbaren Behältnisses …" (each one); L313; L317. Prod holds ONE scalar each (V_Rueck_B "Mindestvolumen herausnehmbare
+-- Behaeltnisse Typ B" — the label already says Σ; behaeltnis_masse "Masse herausnehmbares Behaeltnis (gefuellt)"; tiefe_gok_griff). The register
+-- column is the N-instances shape (amendment K); the register outputs are the register footers.
+-- Option (after G-2 Option B re-points CR-04 / 05 / 06 to the register outputs):
+--   UPDATE fields … SET active = false … w.code = 'DIN-1989-2-02' AND symbol IN ('V_Rueck_B', 'behaeltnis_masse', 'tiefe_gok_griff');
+-- Rollback: re-activate the three fields. Existing project values are not migrated into rows (a backfill script is the owner's call).
+
+-- =====================================================================================================================
+-- din1989_2-D-6 · DIN-1989-2-03 · Q_Zu (typed, feeds Gl. 3 / 5) ↔ prueflaeufe.q_zu
+-- din1989_2-D-7 · DIN-1989-2-03 · Q_Ab (typed, feeds Gl. 3 / 5) ↔ prueflaeufe.q_ab
+-- din1989_2-D-8 · DIN-1989-2-03 eta_hydr (Gl. 3 output, consumed by -04) and DIN-1989-2-02 eta_hydr_unbel_doku (typed, consumed by -04, CR-11
+--   fb165013-0006-4628-8d29-1b00b8039445 md5 1605e8f710a574866ff9d2753d1810db 'eta_hydr_unbel_doku IS NOT NULL') ↔ eta_hydr_unbel_p100 / _min
+-- din1989_2-D-9 · DIN-1989-2-03 eta_hyd_bel (Gl. 5 output) and DIN-1989-2-02 eta_hydr_bel_doku (typed) ↔ eta_hydr_bel_p100 / _min
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER (one box per pair on the sheet)
+-- Evidence: Tab. 2 L495–L501 (seven steps per state — N instances, not one pair); L372 "Der hydraulische Wirkungsgrad am unbelasteten System
+-- ist nach 6.4.5 zu ermitteln und in der Produktdokumentation anzugeben."; L378 (dauerbelastet). The -02 "(Doku)" fields re-type the -03 results.
+-- Option (after R-4): retire Q_Zu / Q_Ab (-03) and re-point CR-11 to the inherited -03 value:
+--   UPDATE compliance_requirements SET condition = 'eta_hydr IS NOT NULL' WHERE id = 'fb165013-0006-4628-8d29-1b00b8039445' AND md5(condition) = '1605e8f710a574866ff9d2753d1810db';
+--   (eta_hydr must then reach -02: UPDATE fields … consumer_worksheets = array_append(…, 'DIN-1989-2-02') … symbol = 'eta_hydr' (DIN-1989-2-03));
+--   UPDATE fields … SET active = false … symbol IN ('eta_hydr_unbel_doku', 'eta_hydr_bel_doku') (DIN-1989-2-02) and IN ('Q_Zu', 'Q_Ab') (DIN-1989-2-03).
+-- Rollback: restore 'eta_hydr_unbel_doku IS NOT NULL', array_remove the consumer, re-activate the four fields.
+
+-- =====================================================================================================================
+-- din1989_2-D-10 · DIN-1989-2-03 · m_ges_festst (typed, required) ↔ pruefstoffe.masse_soll / m_ges_festst_calc (D10)
+-- din1989_2-D-11 · DIN-1989-2-03 · m_sp_verunr (typed, required) ↔ pruefstoffe.masse_speicher_g / m_sp_verunr_calc (D11)
+-- din1989_2-D-12 · DIN-1989-2-03 · m_verw (typed) ↔ pruefstoffe.masse_verwurf_g / m_verw_calc (D12)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER (one box per pair on the sheet)
+-- Evidence: Tab. 3 L572–L587 (three Prüfstoffe — N instances); L631 "Maßgebend sind jeweils die Mengen- bzw. Masseanteile der gefundenen
+-- Zusätze." SQL: R-2 Option B (deactivation after the re-point). The scalars stay until then; nothing emitted writes them.
+
+-- =====================================================================================================================
+-- din1989_2-X-1 · DIN-1989-2-02 / -03 · Q ≡ Q_max ≡ Q_Zu_max — three prod inputs for ONE external value (DIN EN 12056-3:2001-01 Tab. C.1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L290 "Q der Volumenstrom in der planmäßigen Zulaufleitung zum Filter bei einem Füllungsgrad von 70 % und einem Gefälle von 1 % nach
+-- DIN EN 12056-3:2001-01, Tabelle C.1, in Liter je Sekunde"; L374 "Bezugsgröße ist der maximal zufließende Volumenstrom Q_max, nach
+-- DIN EN 12056-3:2001-01, Tabelle C. 1 in Abhängigkeit von der Nennweite DN …"; L519 / L612 "dem maximalen Volumenstrom Q_Zu,max der jeweils
+-- vorgegebenen Nennweite des Querschnittes der Zulaufleitung bei 1 % Gefälle". Content boundary: Tab. C.1 is NOT printed in this standard — the
+-- value stays engineer-entered; a DN → Q lookup would be an external table (the same need exists in the DIN 1986-100 / EN 12056-3 encodings).
+-- Capture: Q (-02, required, consumed by -03), Q_max (-02, required, consumer-free, no gate), Q_Zu_max (-03, required, feeds Gl. 4 / 6).
+-- Brief ↔ codebase: the brief's `reference` widget for this value is NOT the codebase `reference` (a carrier-row picker needing
+-- carrier_symbol / rows_path / id_key / label_key — parseFieldConfig rejects a `{document, table, note}` ui_config); no fourth symbol was created,
+-- the Plan-3 minima bind to the existing inputs (D1 / D2 → Q; -03 D1 … D4 → Q_Zu_max, the input Gl. 4 / 6 already read).
+-- Option (one source: Q typed on -02, Q_max and Q_Zu_max derived — a data_type / ownership change on two typed inputs):
+-- BEGIN;
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status)
+-- SELECT gen_random_uuid(), w.id, 'DIN-1989-2-02-D6', 'Q_max = Q', ARRAY['Q']::text[], 'Q_max', 'l/s', '§5.4.2', 'Plan 3 (din1989_2-X-1): Q_max ist der Volumenstrom der Zulaufleitung nach DIN EN 12056-3 Tab. C.1 (eine Quelle).', 'imported_unverified'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-1989-2-02' AND s.code = 'DIN-1989-2'
+--  ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status)
+-- SELECT gen_random_uuid(), w.id, 'DIN-1989-2-03-D18', 'Q_Zu_max = Q', ARRAY['Q']::text[], 'Q_Zu_max', 'l/s', '§6.4.6', 'Plan 3 (din1989_2-X-1): Q_Zu,max = Q (von DIN-1989-2-02 übernommen).', 'imported_unverified'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-1989-2-03' AND s.code = 'DIN-1989-2'
+--  ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
+-- UPDATE fields f SET is_required = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DIN-1989-2' AND ((w.code = 'DIN-1989-2-02' AND f.symbol = 'Q_max') OR (w.code = 'DIN-1989-2-03' AND f.symbol = 'Q_Zu_max')) AND f.active AND f.is_required;
+-- COMMIT;
+-- Rollback: DELETE the two rows by equation_number; SET is_required = true on the two fields. (Scalar-only rows are not materialised — the typed
+-- values stay typeable; the owner may prefer to retire the two fields outright after a backfill.)

@@ -28,5 +28,6 @@ export const FIELD_CONFIG_MODULES: Record<string, () => Promise<FieldConfigModul
   a178: () => import('./a178'),
   din16941_2: () => import('./din16941_2'),
   m1200_2: () => import('./m1200_2'),
-  // Plan-3 tasks append one line each, e.g. din1989_2: () => import('./din1989_2'),
+  din1989_2: () => import('./din1989_2'),
+  // Plan-3 tasks append one line each, e.g. m820_1: () => import('./m820_1'),
 };
