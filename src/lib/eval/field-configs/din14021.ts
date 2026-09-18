@@ -94,7 +94,7 @@ export const NET_RECOVERED_EXPR = '(r - e) / ((r - e) + p) * 100';
 export const RECYCLED_EXPR = 'a_mass / p_mass * 100';
 /** §7.10.3 L1570: U(%) = (I−N) / I × 100 (prod EQ-03). */
 export const REDUCED_EXPR = '(i_res - n_res) / i_res * 100';
-/** §7.6.3 a) L1297 "Die Aussage darf nur erfolgen, wenn R-E>0." — 0 when R or E is not entered (decidable badge, never a null cell); 1 on every other type. */
+/** §7.6.3 a) L1297 "Die Aussage darf nur erfolgen, wenn R-E>0." — 0 when R or E is not entered (decidable badge, never a null cell); 1 on every other type. The badge follows the printed a) condition literally: R and E entered with R−E>0 ⇒ 1 even while P (needed only for the b) percentage) is blank — the net percentage stays open until P is typed (label says so; fix round 1). */
 export const RECOVERED_OK_EXPR = `if(${ROW_RECOVERED}, if(r IS NULL OR e IS NULL, 0, if(r - e > 0, 1, 0)), 1)`;
 /** §7.14.2 L1719 / §7.15.2 L1763 "Eine uneingeschränkte Aussage … ist nur zulässig, wenn … 100 %" — an unqualified renewable claim needs the printed 100; a qualified one passes; 0 when the share is not entered. */
 export const RENEWABLE_OK_EXPR = `if(${ROW_RENEWABLE}, if(unqualified == true, if(renewable_pct IS NULL, 0, if(renewable_pct == 100, 1, 0)), 1), 1)`;
@@ -152,7 +152,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'carbon_footprint', label: 'CO2-Fußabdruck (ISO/TS 14067)', type: 'number', unit: 'kg CO2e', visible_when: ROW_CARBON, aria_label: 'Carbon Footprint des Produktes nach ISO/TS 14067' },
         { key: 'carbon_offset_declared', label: 'Ausgleich erklärt', type: 'boolean', visible_when: ROW_CARBON_NEUTRAL, aria_label: 'Ausgleich erklärt — Carbon Footprint angegeben und Ausgleich erläutert (§7.17.3.3)' },
         // row verdicts (declaration order matters: type_ok reads the four checks)
-        { key: 'recovered_ok', label: '§7.6.3 a)', type: 'derived', expr: RECOVERED_OK_EXPR, display: 'badge', value_labels: { '1': 'R−E>0 erfüllt (oder nicht zutreffend)', '0': 'R−E>0 nicht erfüllt oder R / E nicht eingetragen (§7.6.3 a)' } },
+        { key: 'recovered_ok', label: '§7.6.3 a)', type: 'derived', expr: RECOVERED_OK_EXPR, display: 'badge', value_labels: { '1': 'R−E>0 erfüllt (oder nicht zutreffend; Nettoenergie erst mit P)', '0': 'R−E>0 nicht erfüllt oder R / E nicht eingetragen (§7.6.3 a)' } },
         { key: 'renewable_ok', label: '§7.14.2 / §7.15.2', type: 'derived', expr: RENEWABLE_OK_EXPR, display: 'badge', value_labels: { '1': '100 % erfüllt, eingeschränkte Aussage oder nicht zutreffend', '0': 'uneingeschränkte Aussage ohne 100 % (§7.14.2 / §7.15.2)' } },
         { key: 'unqualified_ok', label: '§7.16.1 / §7.17.3.2', type: 'derived', expr: UNQUALIFIED_OK_EXPR, display: 'badge', value_labels: { '1': 'zulässig (eingeschränkt oder nicht zutreffend)', '0': 'uneingeschränkte Aussage unzulässig (§7.16.1 / §7.17.3.2)' } },
         { key: 'comparative_ok', label: '§6.3', type: 'derived', expr: COMPARATIVE_OK_EXPR, display: 'badge', value_labels: { '1': 'Vergleichspflicht erfüllt oder nicht zutreffend', '0': 'Aussagetyp ist vergleichend (6.3), Vergleich nicht angegeben' } },

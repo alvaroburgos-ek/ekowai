@@ -80,7 +80,7 @@ describe('claims through the generic RegisterEditor (Plan 3 Task 25)', () => {
     const badges = screen.getAllByTestId('derived-badge-type_ok');
     expect(badges).toHaveLength(2);
     for (const b of badges) expect(b).toHaveTextContent('Typbedingung erfüllt');
-    expect(screen.getAllByTestId('derived-badge-recovered_ok')[1]).toHaveTextContent('R−E>0 erfüllt (oder nicht zutreffend)');
+    expect(screen.getAllByTestId('derived-badge-recovered_ok')[1]).toHaveTextContent('R−E>0 erfüllt (oder nicht zutreffend; Nettoenergie erst mit P)');
     expect(screen.queryByTestId('register-diagnostics')).toBeNull();
     expect(screen.queryAllByRole('button', { name: 'abweichend wählen' })).toHaveLength(0); // locked table — no override affordance
     expect(evalOut('DIN-14021-01-D1', storedRows(CLAIMS_ID))).toMatchObject({ kind: 'computed', value: 2 });
