@@ -193,7 +193,8 @@ class Parser {
       // single literal/bare-ident on the right keeps the original string-literal RHS
       // semantics — EXCEPT for relational operators, where a bare-ident RHS is a value
       // reference, not an enum literal (`V_s >= V_S_min` must resolve V_S_min). Enum
-      // equality (`status == some_value`) stays on the legacy literal path.
+      // equality (`status == some_value`) stays on the legacy literal path; a QUOTED
+      // RHS (`status == 'some_value'`) is marked `quoted` and is a literal, always.
       const relational = next.value === '>=' || next.value === '<=' || next.value === '>' || next.value === '<';
       if (left.kind === 'aref' && isSimpleOperand(right) && !(relational && right.kind === 'aref')) {
         return { kind: 'compare', symbol: left.symbol, op: next.value as CompareOp, rhs: operandToLiteral(right) };
@@ -211,7 +212,7 @@ class Parser {
     const t = this.next();
     if (!t) return null;
     if (t.type === 'number') return { kind: 'lit', value: t.value };
-    if (t.type === 'string') return { kind: 'lit', value: t.value };
+    if (t.type === 'string') return { kind: 'lit', value: t.value, quoted: true }; // a quoted literal never resolves as a symbol (Task 13b)
     if (t.type === 'kw' && t.value === 'TRUE') return { kind: 'lit', value: true };
     if (t.type === 'kw' && t.value === 'FALSE') return { kind: 'lit', value: false };
     if (t.type === 'kw' && t.value === 'NULL') return { kind: 'lit', value: null };
@@ -376,7 +377,7 @@ function isSimpleOperand(n: ArithNode): boolean {
 function operandToLiteral(n: ArithNode): Literal {
   switch (n.kind) {
     case 'anum': return { kind: 'lit', value: n.value };
-    case 'astr': return { kind: 'lit', value: n.value };
+    case 'astr': return { kind: 'lit', value: n.value, quoted: true }; // quoted string → literal, always (Task 13b)
     case 'abool': return { kind: 'lit', value: n.value };
     case 'anull': return { kind: 'lit', value: null };
     case 'aref': return { kind: 'lit', value: n.symbol }; // bare ident → string literal (legacy)

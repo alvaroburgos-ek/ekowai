@@ -515,10 +515,14 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
       const v = readSymbol(c, n.symbol);
       if (isMissing(v)) { c.missing.add(n.symbol); return 'missing'; }
       let r = n.rhs.value;
-      // Var-vs-var equality (evaluate.ts review finding #1): a bare-ident RHS
-      // that IS a symbol WITH a value compares against that value; enum
-      // literals never resolve as symbols, so enum gates keep string semantics.
-      if (typeof r === 'string' && (n.op === '==' || n.op === '!=')) {
+      // Var-vs-var equality (evaluate.ts review finding #1): a BARE-ident RHS
+      // that IS a symbol WITH a value compares against that value; an unvalued
+      // bare ident is its own name (an enum token). A QUOTED string literal
+      // (`rhs.quoted`) is a literal, always — it never resolves as a symbol,
+      // even when a valued symbol / register column of that name is in scope
+      // (Task 13b, sign-off din276-X-1: `if(status == 'rechnung', rechnung, …)`
+      // used to read the `rechnung` amount column).
+      if (typeof r === 'string' && !n.rhs.quoted && (n.op === '==' || n.op === '!=')) {
         const resolved = readSymbol(c, r);
         if (!isMissing(resolved)) r = resolved;
       }
@@ -721,8 +725,8 @@ export function extractSymbols(e: Expr): Set<string> {
     switch (n.kind) {
       case 'truthy': out.add(n.symbol); return;
       case 'exists': out.add(n.symbol); return;
-      case 'in': out.add(n.symbol); return; // members are literals, not looked-up symbols
-      case 'compare': out.add(n.symbol); return; // rhs is a literal (incl. bare-ident enum value)
+      case 'in': out.add(n.symbol); return; // members are literals (quoted or bare), never looked-up symbols
+      case 'compare': out.add(n.symbol); return; // rhs is a literal — quoted (never a symbol) or a bare-ident enum value (resolved only when valued; see hiddenReferences)
       case 'acompare':
         walkArith(n.left);
         if (!isEnumRhs(n)) walkArith(n.right);
@@ -788,7 +792,8 @@ export function hiddenReferences(e: Expr, hiddenSymbols: ReadonlySet<string>): s
   const walk = (n: Node): void => {
     switch (n.kind) {
       case 'compare':
-        if ((n.op === '==' || n.op === '!=') && typeof n.rhs.value === 'string' && hiddenSymbols.has(n.rhs.value)) {
+        // Only a BARE-ident RHS can resolve as a symbol; a quoted literal never does (Task 13b).
+        if ((n.op === '==' || n.op === '!=') && typeof n.rhs.value === 'string' && !n.rhs.quoted && hiddenSymbols.has(n.rhs.value)) {
           out.add(n.rhs.value);
         }
         return;
@@ -838,6 +843,58 @@ export function unknownFunctionNames(e: Expr): string[] {
       case 'not': walk(n.inner); return;
       case 'guard': walk(n.guard); walk(n.body); return;
       default: return; // lit/truthy/exists/in/compare contain no calls
+    }
+  };
+  if (isConditionNode(e)) walk(e);
+  else walkArith(e);
+  return out;
+}
+
+/**
+ * Quoted string literals in COMPARISON position (`x == 'tok'`, `x IN {'tok'}`,
+ * `lookup(...) != 'tok'`), deduplicated, in order — walking into call
+ * arguments and guards. These are literals by the Task 13b rule and never
+ * resolve as symbols; the emitters use the list to WARN when such a token
+ * equals a register column key or a worksheet symbol (a bare-ident spelling
+ * of the same token WOULD resolve — the belt-and-braces lint of din276-X-1).
+ * `lookup()` table codes / column names and other string arguments are not
+ * comparison literals and are not collected.
+ */
+export function quotedComparisonLiterals(e: Expr): string[] {
+  const out: string[] = [];
+  const add = (v: string): void => { if (!out.includes(v)) out.push(v); };
+  const walkAny = (arg: Expr): void => {
+    if (isConditionNode(arg)) walk(arg);
+    else walkArith(arg);
+  };
+  const walkArith = (n: ArithNode): void => {
+    switch (n.kind) {
+      case 'aneg': walkArith(n.inner); return;
+      case 'abin': walkArith(n.left); walkArith(n.right); return;
+      case 'call': for (const arg of n.args) walkAny(arg); return;
+      default: return;
+    }
+  };
+  const walk = (n: Node): void => {
+    switch (n.kind) {
+      case 'compare':
+        if (n.rhs.quoted && typeof n.rhs.value === 'string') add(n.rhs.value);
+        return;
+      case 'in':
+        for (const m of n.members) if (m.quoted && typeof m.value === 'string') add(m.value);
+        return;
+      case 'acompare':
+        if (n.op === '==' || n.op === '!=') {
+          if (n.left.kind === 'astr') add(n.left.value);
+          if (n.right.kind === 'astr') add(n.right.value);
+        }
+        walkArith(n.left); walkArith(n.right);
+        return;
+      case 'and':
+      case 'or': walk(n.left); walk(n.right); return;
+      case 'not': walk(n.inner); return;
+      case 'guard': walk(n.guard); walk(n.body); return;
+      default: return;
     }
   };
   if (isConditionNode(e)) walk(e);

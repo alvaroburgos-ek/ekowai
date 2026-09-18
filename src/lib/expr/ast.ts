@@ -6,7 +6,15 @@
 
 export type CompareOp = '>=' | '<=' | '==' | '!=' | '<' | '>';
 
-export type Literal = { kind: 'lit'; value: number | string | boolean | null };
+/**
+ * A literal operand. `quoted` is set (to `true`) ONLY when the token was a
+ * quoted string (`'rechnung'` / `"rechnung"`): such a literal is a literal on
+ * every comparison path and never resolves as a symbol. A bare identifier in
+ * literal position (`status == rechnung`, `x IN {a, b}`) carries no `quoted`
+ * flag and keeps the legacy var-vs-var rule on `==` / `!=` (Task 13b,
+ * sign-off din276-X-1).
+ */
+export type Literal = { kind: 'lit'; value: number | string | boolean | null; quoted?: true };
 
 export type ArithNode =
   | { kind: 'anum'; value: number }

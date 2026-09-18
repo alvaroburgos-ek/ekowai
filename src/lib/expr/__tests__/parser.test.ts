@@ -50,7 +50,7 @@ describe('parseNumeric — the arithmetic grammar', () => {
     if (inner.kind !== 'call') return;
     expect(inner.name).toBe('if');
     expect(isConditionNode(inner.args[0])).toBe(true);
-    expect(inner.args[0]).toEqual({ kind: 'compare', symbol: 'kind', op: '==', rhs: { kind: 'lit', value: 'paved' } });
+    expect(inner.args[0]).toEqual({ kind: 'compare', symbol: 'kind', op: '==', rhs: { kind: 'lit', value: 'paved', quoted: true } }); // quoted → literal, always (Task 13b)
     expect(isConditionNode(inner.args[1])).toBe(false);
   });
   it("parses lookup('TAB9', tab9_value, 'kind') with string-literal args", () => {
@@ -92,7 +92,7 @@ describe('parseCondition — legacy semantics preserved', () => {
     expect(parseCondition('NOT x')).toEqual({ kind: 'not', inner: { kind: 'truthy', symbol: 'x' } });
     expect(parseCondition('x IS NOT NULL')).toEqual({ kind: 'exists', symbol: 'x', negate: true });
     expect(parseCondition("x IN {a, 'b'}")).toEqual({ kind: 'in', symbol: 'x', members: [
-      { kind: 'lit', value: 'a' }, { kind: 'lit', value: 'b' },
+      { kind: 'lit', value: 'a' }, { kind: 'lit', value: 'b', quoted: true }, // bare a vs quoted 'b' (Task 13b)
     ] });
     expect(parseCondition('(a >= 1 OR b >= 1) AND c >= 1')).toEqual({ kind: 'and',
       left: { kind: 'or',

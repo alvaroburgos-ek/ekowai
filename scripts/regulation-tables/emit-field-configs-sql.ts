@@ -67,7 +67,7 @@
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseFieldConfig, type RegisterUiConfig } from '../../src/lib/eval/field-config';
-import { parseCondition, parseNumeric } from '../../src/lib/expr';
+import { parseCondition, parseNumeric, quotedComparisonLiterals, type Expr } from '../../src/lib/expr';
 import type { FieldConfigEntry, SectionVisibilityEntry, PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorSnapshot } from '../../src/lib/eval/field-configs/types';
 import { FIELD_CONFIG_MODULES } from '../../src/lib/eval/field-configs';
 import { rewriteRules } from '../../src/lib/eval/rewrites';
@@ -248,6 +248,54 @@ function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior:
 }
 
 /**
+ * Task 13b (sign-off din276-X-1) belt-and-braces lint — a WARNING, never a refusal.
+ * A quoted string literal in comparison position is a literal by the engine rule
+ * (`quotedComparisonLiterals`), so these expressions evaluate correctly; the warning
+ * flags an enum token that ALSO names a register column key (row expressions /
+ * column visible_when of that register) or a symbol of the worksheet (the captured
+ * prior rows + the fields created in this batch), because a bare-ident spelling of
+ * the same token elsewhere WOULD resolve to that column / symbol — the executor
+ * records it on the standard's sheet. Returns one line per collision.
+ */
+export function quotedLiteralCollisionWarnings(entries: FieldConfigEntry[], sections: SectionVisibilityEntry[], prior: PriorSnapshot): string[] {
+  const out: string[] = [];
+  const worksheetSymbols = new Map<string, Set<string>>();
+  const addSymbol = (ws: string, sym: string): void => {
+    if (!worksheetSymbols.has(ws)) worksheetSymbols.set(ws, new Set());
+    worksheetSymbols.get(ws)!.add(sym);
+  };
+  for (const [key] of priorFieldRows(prior)) {
+    const i = key.indexOf(' ');
+    addSymbol(key.slice(0, i), key.slice(i + 1));
+  }
+  for (const e of entries) if (e.create) addSymbol(e.worksheet, e.symbol);
+  const check = (id: string, what: string, ast: Expr | null, columnKeys: ReadonlySet<string>, ws: string): void => {
+    if (!ast) return;
+    for (const lit of quotedComparisonLiterals(ast)) {
+      const hits: string[] = [];
+      if (columnKeys.has(lit)) hits.push('a register column key');
+      if (worksheetSymbols.get(ws)?.has(lit)) hits.push(`a symbol of ${ws}`);
+      if (hits.length) out.push(`WARNING ${id}: ${what} compares against the quoted literal '${lit}', which is also ${hits.join(' and ')} — a literal by the engine rule (Task 13b), but a bare-ident spelling of the same token would resolve to it; record on the sign-off sheet`);
+    }
+  };
+  const none: ReadonlySet<string> = new Set();
+  for (const e of entries) {
+    const id = `${e.worksheet} ${e.symbol}`;
+    if (e.visible_when != null) check(id, 'visible_when', parseCondition(e.visible_when), none, e.worksheet);
+    if (e.widget !== 'register') continue;
+    const ui = e.ui_config as { columns?: Array<{ key: string; expr?: string; visible_when?: string }> } | null | undefined;
+    const columns = Array.isArray(ui?.columns) ? ui.columns : [];
+    const keys: ReadonlySet<string> = new Set(columns.map((c) => c.key));
+    for (const c of columns) {
+      if (c.expr) { const p = parseNumeric(c.expr); check(`${id}.${c.key}`, 'expr', p.ok ? p.node : null, keys, e.worksheet); }
+      if (c.visible_when) check(`${id}.${c.key}`, 'visible_when', parseCondition(c.visible_when), keys, e.worksheet);
+    }
+  }
+  for (const s of sections) check(`section ${s.worksheet} ${s.section_code}`, 'visible_when', parseCondition(s.visible_when), none, s.worksheet);
+  return out;
+}
+
+/**
  * Is the field inside the targeted section OR any of its descendants? The runtime hides every descendant of a
  * hidden section (src/lib/compliance/visibility.ts), so the guard walks the captured ancestor chain. An orphan
  * field (`section_id IS NULL`, `section_path: []`) is never section-hidden. A legacy prior without
@@ -270,7 +318,8 @@ function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot): void 
   if (producers.length) throw new Error(`section ${key}: visible_when on a section (or a descendant of it) containing a symbol consumed by another worksheet: ${producers.join('; ')} (hiding a producer, or an input of a producer, hides the inherited value; STAGE the consumer edit instead)`);
 }
 
-export function emitFieldConfigSql(slug: string, entries: FieldConfigEntry[], sections: SectionVisibilityEntry[], prior: PriorSnapshot, header: FieldConfigHeader = {}): { up: string; down: string } {
+/** `warnings`: the Task 13b quoted-literal collision lint (never a refusal) — the CLI prints them to stderr. */
+export function emitFieldConfigSql(slug: string, entries: FieldConfigEntry[], sections: SectionVisibilityEntry[], prior: PriorSnapshot, header: FieldConfigHeader = {}): { up: string; down: string; warnings: string[] } {
   assertPriorSnapshot(prior);
   const up = [
     ...(header.provenance ? [`-- ${header.provenance}`] : []),
@@ -328,7 +377,7 @@ ${JOIN} WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id
     down.push(`UPDATE worksheet_sections ws SET visible_when = ${textOrNull(ps?.visible_when)} ${sectionWhere(s)};`);
   }
   up.push('COMMIT;'); down.push('COMMIT;');
-  return { up: up.join('\n') + '\n', down: down.join('\n') + '\n' };
+  return { up: up.join('\n') + '\n', down: down.join('\n') + '\n', warnings: quotedLiteralCollisionWarnings(entries, sections, prior) };
 }
 
 /** Migration + rollback file paths for a slug and timestamp (relative to the repo root). */
@@ -380,7 +429,9 @@ if (process.argv[1]?.endsWith('emit-field-configs-sql.ts')) {
     .map(([key]) => key);
   if (selfConsumed.length) console.error(`NOTICE: prod data oddity — self-consumer ignored: ${selfConsumed.join(', ')}`);
   load().then((m) => {
-    const { up, down } = emitFieldConfigSql(slug, m.FIELD_CONFIGS, m.SECTION_VISIBILITY, prior, header);
+    const { up, down, warnings } = emitFieldConfigSql(slug, m.FIELD_CONFIGS, m.SECTION_VISIBILITY, prior, header);
+    // Task 13b: quoted-literal ↔ column-key / worksheet-symbol collisions are a WARNING (stderr), never a refusal.
+    for (const w of warnings) console.error(w);
     writeFileSync(files.migration, up);
     writeFileSync(files.rollback, down);
     console.log(`wrote ${m.FIELD_CONFIGS.length} field entries + ${m.SECTION_VISIBILITY.length} section entries for ${slug} ->`, files.migration, files.rollback);
