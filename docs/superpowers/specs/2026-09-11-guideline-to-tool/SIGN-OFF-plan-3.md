@@ -2373,6 +2373,7 @@ Report: `reports/plan-3-din18130_1.md` · STAGED SQL: `scripts/verification/din1
 - Chosen now (fail-safe): mantissa / exponent derived columns (`k_mant · 10^k_exp`, `k10_mant · 10^k10_exp`) per row — the printed representation; raw cells and the footer render through the Plan-2b `fmt` (4 fraction digits) as "0"; the equation cards are correct (toPrecision).
 - Evidence (verbatim, transcript line): "ANMERKUNG: Der $k$-Wert solle als ein Vielfaches eines Exponentialfaktors zur Basis 10 angegeben werden." (L850)
 - Proposed SQL / config: CODE — scientific notation in `register-editor.tsx` `fmt()` for 0 < |v| < 1e-3 (one line + pin); outside this DATA task.
+- **fixed on branch (Task 10b, 4536468)** — `fmt()` threshold implemented as `0 < |v| < 0.01` (matching the equation card's `formatNumber` scientific-branch threshold, per controller ruling, not the `1e-3` figure floated above); scientific notation with a German decimal comma, up to 4 significant digits (`toExponential(3)`, e.g. `3,48e-10`); pinned by `src/components/worksheet/__tests__/register-fmt.test.ts`. `SUM_NUM` (legacy `sum_column` footer) untouched — `k_T_mean` / `k_10_calc` read through `fmt()`, not `SUM_NUM`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din18130_1-I-3 · DIN-18130-1 · DIN-18130-1-03 / -04 · scalar outputs not persisted

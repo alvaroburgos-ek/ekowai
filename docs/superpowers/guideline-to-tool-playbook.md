@@ -770,6 +770,14 @@ silent).
   Every register footer reads `n Einträge · n/m vollständig · <label>: <value> <unit> …`. The
   legacy `sum_column` (Plan-1 contract, the 36 TS selection registers) is a display-only
   client sum — retire it per register when an equation row exists (sign-off D-2b-5).
+- **`fmt()` number formatting (Task 10b, din18130_1-I-2 fix):** cells and `footer` values both
+  render through `register-editor.tsx` `fmt()` (de-DE, 4 fraction digits) — a non-zero
+  |v| < 0.01 (e.g. k = 3,48·10⁻¹⁰ m/s) used to round to "0". `fmt()` now switches such values to
+  scientific notation with a German decimal comma and up to 4 significant digits
+  (`3,48e-10`, via `toExponential(3)`), mirroring the equation card's `toPrecision` scientific
+  branch (`equation-engine-card.tsx` `formatNumber`) without porting its `|v| >= 1000` rule.
+  The legacy `sum_column` path (`SUM_NUM`) is unaffected — a different, display-only sum not
+  seen with tiny magnitudes to date.
 - **`override`**: `{ flag_key, applies_to, policy }` — `flag_key` MUST name a `boolean`
   column (zod refine, Task 5); no `override` block ⇒ locked (no toggle). The toggle sits under
   the first `lookup_key` column; while on, the table pair stays visible (`Tab. 9: 0,9 / 1`)

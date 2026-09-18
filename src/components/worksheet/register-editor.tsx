@@ -67,9 +67,27 @@ type OverridePolicy = RegulationTable['override_policy'];
 
 const NUM = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 });
 const SUM_NUM = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 });
+/**
+ * Scientific form for a non-zero |v| < 0.01 (din18130_1-I-2): `NUM`'s 4
+ * fraction digits collapse a value like k = 3,48·10⁻¹⁰ m/s to "0". Mirrors
+ * the equation card's `toPrecision` scientific branch (equation-engine-card.tsx
+ * `formatNumber`) but locale-adapts the separator: up to 4 significant digits
+ * (`toExponential(3)`), trailing mantissa zeros trimmed, decimal point → comma.
+ * The card's `|v| >= 1000` branch is intentionally not ported here.
+ */
+function fmtScientific(v: number): string {
+  const m = /^(-?\d(?:\.\d+)?)e([+-]\d+)$/.exec(v.toExponential(3));
+  if (!m) return String(v);
+  const mantissa = m[1].includes('.') ? m[1].replace(/0+$/, '').replace(/\.$/, '') : m[1];
+  return `${mantissa.replace('.', ',')}e${m[2]}`;
+}
 /** de-DE number formatting; `—` for null/empty; other scalars verbatim. */
 export function fmt(v: Value | undefined): string {
-  if (typeof v === 'number') return Number.isFinite(v) ? NUM.format(v) : '—';
+  if (typeof v === 'number') {
+    if (!Number.isFinite(v)) return '—';
+    if (v !== 0 && Math.abs(v) < 0.01) return fmtScientific(v);
+    return NUM.format(v);
+  }
   if (v == null || v === '') return '—';
   return String(v);
 }
