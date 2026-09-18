@@ -37,10 +37,10 @@ const reason = (r: EvalState): string => (r.kind === 'manual_required' ? r.reaso
 const num = (symbol: string, value: number | string | null, unit: string | null = null) => ({ symbol, value, unit });
 
 describe('DWA-M-820-1 Plan-3 equations', () => {
-  it('35 entries, every output has a created derived field on the same worksheet, every input is a symbol or register, no new output is chained, no prod symbol re-produced; emitter accepts them', () => {
+  it('36 entries, every output has a created derived field on the same worksheet, every input is a symbol or register, no new output is chained, no prod symbol re-produced; emitter accepts them', () => {
     expect(EQUATIONS.map((e) => e.equation_number)).toEqual([
       'M820-03-D1', 'M820-03-D2',
-      'M820-09-D1', 'M820-09-D2', 'M820-09-D3', 'M820-09-D4', 'M820-09-D5', 'M820-09-D6', 'M820-09-D7', 'M820-09-D8', 'M820-09-D9', 'M820-09-D10', 'M820-09-D11', 'M820-09-D12', 'M820-09-D13', 'M820-09-D14',
+      'M820-09-D1', 'M820-09-D2', 'M820-09-D3', 'M820-09-D4', 'M820-09-D5', 'M820-09-D6', 'M820-09-D7', 'M820-09-D8', 'M820-09-D9', 'M820-09-D10', 'M820-09-D11', 'M820-09-D12', 'M820-09-D13', 'M820-09-D14', 'M820-09-D15',
       'M820-13-D1',
       'M820-14-D1', 'M820-14-D2', 'M820-14-D3',
       'M820-16-D1', 'M820-16-D2', 'M820-16-D3', 'M820-16-D4',
@@ -81,7 +81,7 @@ describe('DWA-M-820-1 Plan-3 equations', () => {
     const files = equationFilesFor('m820_1', '20260917101820');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/ON CONFLICT \(worksheet_template_id, equation_number\) DO NOTHING/g) ?? []).length).toBe(35);
+    expect((up.match(/ON CONFLICT \(worksheet_template_id, equation_number\) DO NOTHING/g) ?? []).length).toBe(36);
   });
 
   it('M820-09-D1 / D2 / D3 (L864 / L555 / L1327): "erreicht oder übersteigt" is inclusive; ±25 % band; typed vs Anh. B.2.3 consistency', () => {
@@ -108,7 +108,8 @@ describe('DWA-M-820-1 Plan-3 equations', () => {
     expect(computed(run('M820-09-D7', {}))).toBe(2);
   });
 
-  it('M820-09-D8 … D14 over the lot register (L1366): row bound by kind, Σ, share, max, violations, the code; empty register ⇒ code open, counts 0', () => {
+  it('M820-09-D8 … D15 over the lot register (L1366): row bound by kind, Σ, share (on the -01 fee, L1368 — fix round 1), max, violations, the code, the Σ-vs-fee check; empty register ⇒ code open, counts 0', () => {
+    const fee = (v: number) => num('estimated_engineering_fee', v, 'EUR');
     const lose = prep('M820-09', 'lose', [
       { id: '1', los: 'Objektplanung', art: 'dienstleistung', netto_wert_eur: 150000 },
       { id: '2', los: 'Tragwerk', art: 'dienstleistung', netto_wert_eur: 30000, ausnahme: true },
@@ -120,29 +121,40 @@ describe('DWA-M-820-1 Plan-3 equations', () => {
     expect(computed(run('M820-09-D8', { registers: R }))).toBe(4);
     expect(computed(run('M820-09-D9', { registers: R }))).toBe(1100000);
     expect(computed(run('M820-09-D10', { registers: R }))).toBe(50000);
-    expect(computed(run('M820-09-D11', { registers: R }))).toBeCloseTo(4.5454545, 5);
+    // amendment K (fix round 1): the share reads the EXISTING -01 fee (L1368 "Gesamtauftragswerts"), not the register Σ
+    expect(eq('M820-09-D11').input_symbols).toEqual(['lose', 'estimated_engineering_fee']);
+    expect(eq('M820-09-D14').input_symbols).toEqual(['lose', 'estimated_engineering_fee']);
+    expect(computed(run('M820-09-D11', { registers: R, inputs: [fee(1100000)] }))).toBeCloseTo(4.5454545, 5);
+    expect(computed(run('M820-09-D11', { registers: R, inputs: [fee(1000000)] }))).toBe(5);
+    expect(run('M820-09-D11', { registers: R }).kind).toBe('manual_required'); // the fee is a required input
     expect(computed(run('M820-09-D12', { registers: R }))).toBe(30000);
     expect(computed(run('M820-09-D13', { registers: R }))).toBe(0);
-    expect(computed(run('M820-09-D14', { registers: R }))).toBe(1);
-    // an excepted Dienstleistungs-Los AT the bound (80000) violates "unter" (strict, m820_1-J-5)
+    expect(computed(run('M820-09-D14', { registers: R, inputs: [fee(1100000)] }))).toBe(1);
+    // D15: Σ Lose vs the fee (tolerance 0,005 EUR)
+    expect(computed(run('M820-09-D15', { registers: R, inputs: [fee(1100000)] }))).toBe(1);
+    expect(computed(run('M820-09-D15', { registers: R, inputs: [fee(1100000.004)] }))).toBe(1);
+    expect(computed(run('M820-09-D15', { registers: R, inputs: [fee(1000000)] }))).toBe(0);
+    expect(eq('M820-09-D15').input_symbols).not.toContain('lose_gesamt_eur'); // Σ inline — never chained on a new output
+    // an excepted Dienstleistungs-Los AT the bound (80000) violates "unter" (strict, m820_1-J-6)
     const atBound = prep('M820-09', 'lose', [{ id: '1', los: 'A', art: 'dienstleistung', netto_wert_eur: 320000 }, { id: '2', los: 'B', art: 'dienstleistung', netto_wert_eur: 80000, ausnahme: true }]);
     expect(atBound.rows[1].values.unter_grenze).toBe(0);
     expect(computed(run('M820-09-D13', { registers: { lose: atBound } }))).toBe(1);
-    expect(computed(run('M820-09-D14', { registers: { lose: atBound } }))).toBe(0);
+    expect(computed(run('M820-09-D14', { registers: { lose: atBound }, inputs: [fee(400000)] }))).toBe(0);
     // a Bau-Los under 1 Mio. € but the share above 20 %
     const share = prep('M820-09', 'lose', [{ id: '1', los: 'A', art: 'dienstleistung', netto_wert_eur: 100000 }, { id: '2', los: 'B', art: 'bau', netto_wert_eur: 900000, ausnahme: true }]);
     expect(share.rows[1].values.unter_grenze).toBe(1);
-    expect(computed(run('M820-09-D11', { registers: { lose: share } }))).toBe(90);
-    expect(computed(run('M820-09-D14', { registers: { lose: share } }))).toBe(0);
+    expect(computed(run('M820-09-D11', { registers: { lose: share }, inputs: [fee(1000000)] }))).toBe(90);
+    expect(computed(run('M820-09-D14', { registers: { lose: share }, inputs: [fee(1000000)] }))).toBe(0);
     // exactly 20 % passes ("nicht übersteigt")
     const twenty = prep('M820-09', 'lose', [{ id: '1', los: 'A', art: 'dienstleistung', netto_wert_eur: 80000 }, { id: '2', los: 'B', art: 'dienstleistung', netto_wert_eur: 20000, ausnahme: true }]);
-    expect(computed(run('M820-09-D14', { registers: { lose: twenty } }))).toBe(1);
+    expect(computed(run('M820-09-D14', { registers: { lose: twenty }, inputs: [fee(100000)] }))).toBe(1);
     // empty register: counts 0, Σ / code open (never a phantom pass)
     const empty = prep('M820-09', 'lose', []);
     expect(computed(run('M820-09-D8', { registers: { lose: empty } }))).toBe(0);
     expect(computed(run('M820-09-D13', { registers: { lose: empty } }))).toBe(0);
     expect(run('M820-09-D9', { registers: { lose: empty } }).kind).toBe('manual_required');
-    expect(run('M820-09-D14', { registers: { lose: empty } }).kind).toBe('manual_required');
+    expect(run('M820-09-D14', { registers: { lose: empty }, inputs: [fee(1000000)] }).kind).toBe('manual_required');
+    expect(run('M820-09-D15', { registers: { lose: empty }, inputs: [fee(1000000)] }).kind).toBe('manual_required');
   });
 
   it('M820-13-D1 (L1623): 1,5 ≤ 1,5 passes, 1,8 > 1,5 fails, 2 ≤ 2 passes for the regular case', () => {

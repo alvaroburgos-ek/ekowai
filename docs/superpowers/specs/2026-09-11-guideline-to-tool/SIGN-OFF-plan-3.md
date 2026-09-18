@@ -4666,7 +4666,7 @@ Report: `reports/plan-3-din1989_2.md` · STAGED SQL: `scripts/verification/din19
 
 ## Task 18 — DWA-M-820-1 (m820_1)
 
-Report: `reports/plan-3-m820_1.md`. STAGED SQL: `scripts/verification/m820_1-STAGED-plan3-rulings.sql` (same ids; every line a comment). Prod facts from `src/lib/eval/field-configs/m820_1.prior.json` (read-only capture 2026-09-18: 120 fields, 175 sections, 0 equations, 26 gates — 5 with an empty condition) and `prod-query.mjs` (gate ids / md5, labels, VR, the 9 stored parameters, `standards.version` 'März 2020'). Transcript lines refer to `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-820-1\DWA-M_820-1.md`.
+Report: `reports/plan-3-m820_1.md` (fix round 1 appended). STAGED SQL: `scripts/verification/m820_1-STAGED-plan3-rulings.sql` (same ids; every line a comment). Prod facts from `src/lib/eval/field-configs/m820_1.prior.json` (read-only capture 2026-09-18: 120 fields, 175 sections, 0 equations, 26 gates — 5 with an empty condition) and `prod-query.mjs` (gate ids / md5, labels, VR, the 9 stored parameters, `standards.version` 'März 2020'). Transcript lines refer to `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-820-1\DWA-M_820-1.md`.
 
 ### m820_1-E-1 · DWA-M-820-1 · M820-09 · `eu_threshold_value` re-bind as the Anh. B.2.3 lookup_fill (brief Step 3)
 - Class: interface-gap (widget re-bind of a consumed, gate-bearing input — amendment J)
@@ -4700,7 +4700,7 @@ Report: `reports/plan-3-m820_1.md`. STAGED SQL: `scripts/verification/m820_1-STA
 - Class: gate-guard
 - Chosen now (fail-safe): both gates untouched. Data observation: REQ-07 sits on M820-04 where NONE of its symbols (`estimated_engineering_fee`, `eu_threshold_value`, `threshold_status`) resolves (capture) — pending on every project today; REQ-08 reads the manual boolean `oberschwellig_check`.
 - Evidence (verbatim, transcript line): "Erreicht oder übersteigt der geschätzte Netto-Gesamtwert den EU-Schwellenwert ist ein VgV-F-Verfahren durchzuführen. Liegt er darunter, hat der Auftraggeber ein Suchverfahren durchzuführen oder er kann in zugelassenen Ausnahmefällen eine Direktvergabe (siehe 8.8) vornehmen." (L864)
-- Proposed SQL / config: STAGED block G-3 — Step 1 moves REQ-07 to M820-09 and reads the code (safe today); Step 2 re-points REQ-08 (needs the scalar-only output to reach M820-10 — blocked on the engine-output materialisation workstream, I-2).
+- Proposed SQL / config: STAGED block G-3 — Step 1 moves REQ-07 to M820-09 and reads the code: `(IF oberschwellig_code == 1 THEN threshold_status == 'oberschwellig') AND (IF oberschwellig_code == 0 THEN threshold_status == 'unterschwellig')` — TWO parenthesised IF guards joined by AND, prod's original REQ-07 shape (fix round 1: the unparenthesised text parsed as `IF a == 1 THEN (x == 'o' AND IF a == 0 THEN …)` and never enforced the second half; parse shape pinned in `field-configs-m820-1.test.ts`); Step 2 re-points REQ-08 (needs the scalar-only output to reach M820-10 — blocked on the engine-output materialisation workstream, I-2).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m820_1-G-4 · DWA-M-820-1 · M820-04 → M820-09 · REQ-24 (empty) onto `loseausnahme_code`
@@ -4825,11 +4825,32 @@ Report: `reports/plan-3-m820_1.md`. STAGED SQL: `scripts/verification/m820_1-STA
 - Proposed SQL / config: STAGED D-6 (deactivate once the code reaches -10; I-2 caveat).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### m820_1-D-7 … D-10 · DWA-M-820-1 · M820-09 · the four editable "fixed" constants ↔ their locked twins (M820-09-D4 … D7)
-- Class: deactivation (4 pairs: `lot_value_threshold_services` / `_construction` / `lot_share_threshold_pct` / `eu_threshold_review_interval_years`)
-- Chosen now (fail-safe): the editable inputs stay (prod VR "fixed … per § 3 Abs. 9 VgV" is display-dead); the twins are zero-input `lookup()` rows over S3_9_VGV / ANHB11 (locked).
-- Evidence (verbatim, transcript line): L1366 (as in G-4); "Die EU-Schwellenwerte werden von der EU-Kommission alle zwei Jahre geprüft und durch Verordnung festgelegt." (L1255)
-- Proposed SQL / config: STAGED D-7 … D-10 (generic switch; the two consumed ones need the -10 consumer edit — scalar-only, I-2).
+### m820_1-D-7 · DWA-M-820-1 · M820-09 · `lot_value_threshold_services` (consumed by -10, VR "fixed 80000 per § 3 Abs. 9 VgV") ↔ `lot_value_threshold_services_calc` (M820-09-D4)
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the editable input stays (its "fixed" VR is display-dead); the twin is a zero-input `lookup()` row over the locked table.
+- Evidence (verbatim, transcript line): L1366 (as in G-4)
+- Proposed SQL / config: STAGED D-7 (generic switch; the -10 consumer needs the twin's consumer edit — scalar-only, I-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_1-D-8 · DWA-M-820-1 · M820-09 · `lot_value_threshold_construction` (orphan, VR "fixed 1000000 per § 3 Abs. 9 VgV") ↔ `lot_value_threshold_construction_calc` (M820-09-D5)
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the editable input stays (its "fixed" VR is display-dead); the twin is a zero-input `lookup()` row over the locked table.
+- Evidence (verbatim, transcript line): L1366 (as in G-4)
+- Proposed SQL / config: STAGED D-8 (generic switch).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_1-D-9 · DWA-M-820-1 · M820-09 · `lot_share_threshold_pct` (consumed by -10, VR "fixed 20 per § 3 Abs. 9 VgV") ↔ `lot_share_threshold_pct_calc` (M820-09-D6)
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the editable input stays (its "fixed" VR is display-dead); the twin is a zero-input `lookup()` row over the locked table.
+- Evidence (verbatim, transcript line): L1366 (as in G-4); "Soweit also die Teilaufträge insgesamt $20 \%$ des Gesamtauftragswerts und je Teileauftrag 80.000 € nicht überschreiten, können diese nach nationalem Recht vergeben werden." (L1368)
+- Proposed SQL / config: STAGED D-9 (generic switch; the -10 consumer needs the twin's consumer edit — scalar-only, I-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_1-D-10 · DWA-M-820-1 · M820-09 · `eu_threshold_review_interval_years` (orphan, VR "fixed 2 per Anh. B.1.1") ↔ `eu_threshold_review_interval_years_calc` (M820-09-D7)
+- Class: deactivation (amendment K pair)
+- Chosen now (fail-safe): the editable input stays (its "fixed" VR is display-dead); the twin is a zero-input `lookup()` row over the locked table.
+- Evidence (verbatim, transcript line): "Die EU-Schwellenwerte werden von der EU-Kommission alle zwei Jahre geprüft und durch Verordnung festgelegt." (L1255)
+- Proposed SQL / config: STAGED D-10 (generic switch).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m820_1-D-11 · DWA-M-820-1 · M820-09 · `loseausnahme_applicable` (boolean, consumed by -10) ↔ `loseausnahme_code` (M820-09-D14)
@@ -4888,11 +4909,39 @@ Report: `reports/plan-3-m820_1.md`. STAGED SQL: `scripts/verification/m820_1-STA
 - Class: deactivation — generic switch with G-10 (twin consumer_worksheets += M820-23). Evidence L1025. STAGED D-20.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### m820_1-D-21 … D-24 · DWA-M-820-1 · M820-20 · `verhandlung_datum` / `verhandlung_thema` / `verhandlung_ergebnis` / `protokoll_signiert` ↔ the `verhandlungsrunden` columns
-- Class: deactivation (4 pairs; one scalar set cannot hold N talks)
-- Chosen now (fail-safe): the four required scalars stay; the register carries the per-bidder summary; `protokolle_unsigniert_count` (M820-20-D3) twins the boolean.
-- Evidence (verbatim, transcript line): L1780 (as in G-10); "Eine Tagesordnung, aus der sich der Ablauf der Verhandlungsrunde ergibt, ist vom Auftraggeber zu erstellen." (L1027)
-- Proposed SQL / config: STAGED D-21 … D-24 (deactivate the scalars; optional gate `protokolle_unsigniert_count == 0`).
+### m820_1-D-21 · DWA-M-820-1 · M820-20 · `verhandlung_datum` (date, required) ↔ `verhandlungsrunden.datum`
+- Class: deactivation (amendment K pair — one scalar set cannot hold N talks)
+- Chosen now (fail-safe): the required scalar stays; the register carries the per-bidder summary.
+- Evidence (verbatim, transcript line): L1780 (as in G-10)
+- Proposed SQL / config: STAGED D-21 (deactivate the scalar).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_1-D-22 · DWA-M-820-1 · M820-20 · `verhandlung_thema` (text, required) ↔ `verhandlungsrunden.thema`
+- Class: deactivation (amendment K pair — one scalar set cannot hold N talks)
+- Chosen now (fail-safe): the required scalar stays; the register carries the per-bidder summary.
+- Evidence (verbatim, transcript line): "Eine Tagesordnung, aus der sich der Ablauf der Verhandlungsrunde ergibt, ist vom Auftraggeber zu erstellen." (L1027)
+- Proposed SQL / config: STAGED D-22 (deactivate the scalar).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_1-D-23 · DWA-M-820-1 · M820-20 · `verhandlung_ergebnis` (text, required) ↔ `verhandlungsrunden.ergebnis`
+- Class: deactivation (amendment K pair — one scalar set cannot hold N talks)
+- Chosen now (fail-safe): the required scalar stays; the register carries the per-bidder summary.
+- Evidence (verbatim, transcript line): L1780 (as in G-10)
+- Proposed SQL / config: STAGED D-23 (deactivate the scalar).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_1-D-24 · DWA-M-820-1 · M820-20 · `protokoll_signiert` (boolean, required) ↔ `verhandlungsrunden.protokoll_signiert` / `protokolle_unsigniert_count` (M820-20-D3)
+- Class: deactivation (amendment K pair — one scalar set cannot hold N talks)
+- Chosen now (fail-safe): the required scalar stays; the register carries the per-bidder summary.
+- Evidence (verbatim, transcript line): L1780 (as in G-10)
+- Proposed SQL / config: STAGED D-24 (deactivate the scalar; optional gate `protokolle_unsigniert_count == 0`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m820_1-D-25 · DWA-M-820-1 · M820-01 / M820-09 · `estimated_engineering_fee` ↔ `lose_gesamt_eur` (M820-09-D9, Σ of the entered lots)
+- Class: deactivation (amendment K pair — fix round 1)
+- Chosen now (fail-safe): the lot share and code (M820-09-D11 / D14) READ the existing -01 fee (inherited on -09); the register Σ is a display-only twin checked by `lose_gesamt_ok` (M820-09-D15, tolerance 0,005 EUR). Proposed = no switch (the fee is the input the whole threshold chain reads).
+- Evidence (verbatim, transcript line): "Soweit also die Teilaufträge insgesamt $20 \%$ des Gesamtauftragswerts und je Teileauftrag 80.000 € nicht überschreiten, können diese nach nationalem Recht vergeben werden." (L1368); "… die Summe der Nettowerte dieser Lose 20 Prozent des Gesamtwertes aller Lose nicht übersteigt." (L1366)
+- Proposed SQL / config: STAGED D-25 (no switch; optional warn gate `lose_gesamt_ok == 1`).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m820_1-J-1 · DWA-M-820-1 · ANHB23 / S8_10_3_6 / S3_9_VGV / ANHB11 · legal figures are time-bound printed values
@@ -4934,16 +4983,16 @@ Report: `reports/plan-3-m820_1.md`. STAGED SQL: `scripts/verification/m820_1-STA
 - Evidence (verbatim, transcript line): L1366 ("unter 80000 Euro", "unter 1 Million Euro", "nicht übersteigt"); "Soweit also die Teilaufträge insgesamt $20 \%$ des Gesamtauftragswerts und je Teileauftrag 80.000 € nicht überschreiten, können diese nach nationalem Recht vergeben werden." (L1368)
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### m820_1-J-7 · DWA-M-820-1 · M820-09 · denominator of the 20 % share: "Gesamtwertes aller Lose" (register Σ) vs the brief's `estimated_engineering_fee`
+### m820_1-J-7 · DWA-M-820-1 · M820-09 · denominator of the 20 % share: the existing `estimated_engineering_fee` (emitted, amendment K) vs "Gesamtwertes aller Lose" (register Σ)
 - Class: judgment (formula reading)
-- Chosen now (fail-safe): Σ of the entered lot values (the statute's own reference, self-contained on the register — computes without the inherited fee); the brief's alternative reads the -01 fee ("Gesamtauftragswerts", L1368).
-- Evidence (verbatim, transcript line): L1366 / L1368.
-- Proposed SQL / config: if the owner prefers the fee: `lose_ausnahme_anteil_pct = … * 100 / estimated_engineering_fee` (module change + re-emit).
+- Chosen now (controller ruling, fix round 1 — amendment K): M820-09-D11 / D14 read the EXISTING -01 input `estimated_engineering_fee` (L1368 "Gesamtauftragswerts"; prod carries it and it reaches -09); the register Σ `lose_gesamt_eur` (D9) stays a display-only twin and `lose_gesamt_ok` (D15, Σ inline) flags a difference to the fee.
+- Evidence (verbatim, transcript line): "Soweit also die Teilaufträge insgesamt $20 \%$ des Gesamtauftragswerts und je Teileauftrag 80.000 € nicht überschreiten, können diese nach nationalem Recht vergeben werden." (L1368); "… die Summe der Nettowerte dieser Lose 20 Prozent des Gesamtwertes aller Lose nicht übersteigt." (L1366)
+- Proposed SQL / config: ALTERNATIVE for the owner — the statute's own reference (Σ of all lots, self-contained on the register, materialised on save): `lose_ausnahme_anteil_pct = … * 100 / sum_rows(lose, netto_wert_eur)` and the same in D14 (module change + re-emit). Note: reading the inherited fee makes D11 / D14 register-fed rows that name an INHERITED scalar — they compute on the form / report / snapshot but persist null on save (Task 17 trap 1; I-2).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m820_1-O-1 · DWA-M-820-1 · E1_4_1_UMSATZ · override policy `anhaltswert` (the 1,5 row is "sollte", the 2,0 row "darf … nicht mehr")
 - Class: override-policy
-- Chosen now (fail-safe): one table, policy from the WEAKER printed modal (`anhaltswert`, override_quote = the 1,5 sentence), the `modal` column carries the verb per row; the statutory 2,0 stays enforced by REQ-12 regardless of an override of the fill.
+- Chosen now (fail-safe): one table, policy from the WEAKER printed modal (`anhaltswert`, override_quote = the 1,5 sentence), the `modal` column carries the verb per row; the statutory 2,0 stays enforced by REQ-12 regardless of an override of the fill. The 2,0 row prints a STATUTORY modal — "darf der Auftraggeber nicht mehr als das Zweifache des geschätzten Auftragswerts verlangen" (L1623, § 45 Abs. 2 VgV) — so an `anhaltswert` override of that row can never loosen the requirement: REQ-12 (`min_annual_revenue_multiplier <= 2.0`, block) still enforces ≤ 2,0 on the typed input; only the 1,5 recommendation is genuinely overridable.
 - Evidence (verbatim, transcript line): L1623 (both sentences, as in G-7).
 - Proposed SQL / config: alternative = two tables (locked `S45_2_VGV` for the 2,0; anhaltswert for the 1,5) — the a178 trap-3 split; not staged.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -4964,7 +5013,7 @@ Report: `reports/plan-3-m820_1.md`. STAGED SQL: `scripts/verification/m820_1-STA
 
 ### m820_1-I-2 · DWA-M-820-1 · engine · scalar-only outputs not server-materialised; inherited drivers resolve on the form only
 - Class: interface-gap (standing amendment D / Task 17 I-2 observation)
-- Chosen now: the 20 scalar-only rows (-09 D1 … D7, -13 D1, -22 D1 … D4, and the register-fed rows are materialised) compute on the hook / report / snapshot / PDF; the Tab. D.1 codes and `oberschwellig_code` read INHERITED inputs (`estimated_construction_cost`, `liability_insurance_*`, `estimated_engineering_fee`) that the save-path materialiser and server-side visibility resolve for own fields only — every G-block that would make a consumer or a gate on another worksheet read such a code waits for the engine-output materialisation workstream (noted in G-3 / G-11 / D-4 / D-6 / D-7 / D-9).
+- Chosen now: the 12 scalar-only rows (-09 D1 … D7, -13 D1, -22 D1 … D4) compute on the hook / report / snapshot / PDF and are not persisted; the 24 register-fed rows are materialised on save — except -09 D11 / D14 / D15, which name the INHERITED fee (fix round 1, amendment K) and therefore persist null (Task 17 trap 1); the Tab. D.1 codes and `oberschwellig_code` read INHERITED inputs (`estimated_construction_cost`, `liability_insurance_*`, `estimated_engineering_fee`) that the save-path materialiser and server-side visibility resolve for own fields only — every G-block that would make a consumer or a gate on another worksheet read such a code waits for the engine-output materialisation workstream (noted in G-3 / G-11 / D-4 / D-6 / D-7 / D-9).
 - Evidence: `src/lib/eval/materialize-derived.ts` (register-fed only), `src/lib/actions/worksheet.ts` (`templateFields` symbol lookup).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 

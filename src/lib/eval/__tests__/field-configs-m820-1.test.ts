@@ -46,15 +46,15 @@ describe('DWA-M-820-1 field configs (Plan 3 Task 18)', () => {
     expect(SECTION_VISIBILITY).toEqual([]);
   });
 
-  it('counts: 45 field entries (42 create, 3 update = the Plan-1 registers upgraded in place), widgets by kind, exactly one visibility rule (on a created field)', () => {
-    expect(FIELD_CONFIGS).toHaveLength(45);
-    expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(42);
+  it('counts: 46 field entries (43 create, 3 update = the Plan-1 registers upgraded in place), widgets by kind, exactly one visibility rule (on a created field)', () => {
+    expect(FIELD_CONFIGS).toHaveLength(46);
+    expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(43);
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('register')).toEqual(['M820-03 stakeholder_list', 'M820-09 lose', 'M820-14 award_criteria_list', 'M820-16 bewertungskommission_members', 'M820-18 bewerber', 'M820-20 verhandlungsrunden']);
     expect(byWidget('lookup_fill')).toEqual(['M820-09 eu_threshold_value_anhb23', 'M820-09 eu_threshold_verordnung_anhb23', 'M820-13 min_annual_revenue_multiplier_max', 'M820-23 required_standstill_days_gwb']);
     expect(byWidget('select_one')).toEqual([]);
     expect(byWidget('select_many')).toEqual([]); // no S-block: no select_many on an existing field (amendment N)
-    expect(byWidget('derived')).toHaveLength(35); // one per equation row
+    expect(byWidget('derived')).toHaveLength(36); // one per equation row
     expect(byWidget('scalar')).toEqual([]);
     // UPDATE entries = the three Plan-1 registers (no visible_when — a widget / ui_config upgrade is not a hide rule)
     expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol} :: ${e.visible_when ?? 'null'}`)).toEqual([
@@ -129,7 +129,8 @@ describe('DWA-M-820-1 field configs (Plan 3 Task 18)', () => {
     expect(lose.columns.find((c) => c.key === 'art')?.options).toEqual(LOS_ARTEN.map((a) => a.value));
     expect(lose.columns.find((c) => c.key === 'grenze_eur')?.expr).toContain("lookup('S3_9_VGV', 'los_dienstleistung', 'wert')");
     expect(s39VgvAsTable().rows.map((r) => r.keys.konstante)).toEqual(['los_dienstleistung', 'los_bau', 'anteil_pct']);
-    expect(lose.footer).toHaveLength(7);
+    expect(lose.footer).toHaveLength(8);
+    expect(lose.footer).toContain('lose_gesamt_ok');
     // no register carries an override block (the locked tables are read in row scope; TABD1 / E1_4_1_UMSATZ are lookup_fill / equation targets)
     for (const r of FIELD_CONFIGS.filter((x) => x.widget === 'register')) expect((r.ui_config as RegisterUiConfig).override).toBeUndefined();
     // bewerber / verhandlungsrunden: the Anh. F columns
@@ -166,6 +167,14 @@ describe('DWA-M-820-1 field configs (Plan 3 Task 18)', () => {
     expect(Object.entries(prior.gates!).filter(([, g]) => g.parse_error).map(([k]) => k)).toEqual(['M820-01 REQ-04', 'M820-04 REQ-24', 'M820-10 REQ-11', 'M820-10 REQ-13', 'M820-10 REQ-14']);
     // REQ-07 sits on M820-04 where none of its three symbols resolves (pending on every project) — the G-3 observation
     for (const s of prior.gates!['M820-04 REQ-07'].symbols) expect(priorRow(`M820-04 ${s}`)).toBeUndefined();
+    // G-3 Step 1 parse-shape pin (fix round 1): the staged text is an AND of two parenthesised IF guards — prod's REQ-07 shape;
+    // without the parentheses the parser folds the second IF into the first guard's body and never enforces it
+    const staged = parseCondition("(IF oberschwellig_code == 1 THEN threshold_status == 'oberschwellig') AND (IF oberschwellig_code == 0 THEN threshold_status == 'unterschwellig')")!;
+    expect(staged.kind).toBe('and');
+    expect(staged.kind === 'and' && [staged.left.kind, staged.right.kind]).toEqual(['guard', 'guard']);
+    const unparenthesised = parseCondition("IF oberschwellig_code == 1 THEN threshold_status == 'oberschwellig' AND IF oberschwellig_code == 0 THEN threshold_status == 'unterschwellig'")!;
+    expect(unparenthesised.kind).toBe('guard'); // the defect the ruling caught
+    expect(prior.gates!['M820-04 REQ-07'].condition.startsWith('(IF ')).toBe(true);
   });
 
   it('drivers resolve where the twins sit (capture): estimated_construction_cost reaches -22 and NOT -13 (the Tab. D.1 pair lives on -22); the fee and the uncertainty reach -09', () => {
@@ -186,7 +195,7 @@ describe('DWA-M-820-1 field configs (Plan 3 Task 18)', () => {
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
     expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(3);
-    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(42);
+    expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(43);
     expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
   });

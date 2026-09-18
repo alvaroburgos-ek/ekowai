@@ -94,6 +94,9 @@ export const LOSE_AUSNAHME_SUM = 'sum_rows(lose, if(ausnahme == true, netto_wert
 export const LOSE_GESAMT = 'sum_rows(lose, netto_wert_eur)';
 export const LOSE_VERLETZT = 'count_rows(lose, ausnahme == true AND unter_grenze == 0)';
 export const LOSE_ANTEIL_MAX = "lookup('S3_9_VGV', 'anteil_pct', 'wert')";
+/** Fix round 1 (amendment K): the share's denominator is the EXISTING -01 input the whole threshold chain reads (L1368 "Gesamtauftragswerts"),
+ * inherited on -09; the register Σ (D9) stays a display twin checked by D15. */
+export const LOSE_DENOMINATOR = 'estimated_engineering_fee';
 
 /** §5 categories (the created `kategorie` enum tokens of stakeholder_list). */
 const KAT = ['auftraggeber', 'auftragnehmer', 'ausfuehrende_firmen', 'behoerden', 'oeffentlichkeit'] as const;
@@ -128,17 +131,19 @@ export const EQUATIONS: EquationEntry[] = [
   row(WS09, 'M820-09-D8', 'lose_count = count_rows(lose)', ['lose'], null, 'Anhang B.2.4',
     'Plan 3: Anzahl der erfassten Lose.', Q_L1366),
   row(WS09, 'M820-09-D9', `lose_gesamt_eur = ${LOSE_GESAMT}`, ['lose'], 'EUR', 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
-    'Plan 3: Gesamtwert aller Lose = Σ der eingetragenen Nettowerte (Bezugsgröße des § 3 Abs. 9 VgV; nicht der Netto-Gesamtwert der Ingenieurleistungen — m820_1-J-7).', Q_L1366),
+    'Plan 3: Σ der eingetragenen Nettowerte aller Lose — Anzeige-Zwilling zum geschätzten Netto-Gesamtwert estimated_engineering_fee (m820_1-D-25 / J-7); Abgleich in M820-09-D15.', Q_L1366),
   row(WS09, 'M820-09-D10', `lose_ausnahme_sum_eur = ${LOSE_AUSNAHME_SUM}`, ['lose'], 'EUR', 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
     'Plan 3: Summe der Nettowerte der Lose mit Loseausnahme (nicht gesetzte Kästchen zählen 0).', Q_L1366),
-  row(WS09, 'M820-09-D11', `lose_ausnahme_anteil_pct = ${LOSE_AUSNAHME_SUM} * 100 / ${LOSE_GESAMT}`, ['lose'], '%', 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
-    'Plan 3: Anteil der ausgenommenen Lose am Gesamtwert aller Lose in Prozent (Grenze 20 Prozent, "nicht übersteigt").', `${Q_L1366} — ${Q_L1368}`),
+  row(WS09, 'M820-09-D11', `lose_ausnahme_anteil_pct = ${LOSE_AUSNAHME_SUM} * 100 / ${LOSE_DENOMINATOR}`, ['lose', LOSE_DENOMINATOR], '%', 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
+    'Plan 3: Anteil der ausgenommenen Lose am geschätzten Netto-Gesamtwert (estimated_engineering_fee, L1368 "Gesamtauftragswerts") in Prozent (Grenze 20 Prozent, "nicht übersteigt"); die Register-Σ als Bezugsgröße ist die Alternative (m820_1-J-7).', `${Q_L1366} — ${Q_L1368}`),
   row(WS09, 'M820-09-D12', 'lose_ausnahme_max_eur = max_rows(lose, if(ausnahme == true, netto_wert_eur, 0))', ['lose'], 'EUR', 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
     'Plan 3: größter Nettowert eines ausgenommenen Loses (0 ohne Ausnahme); die Grenze je Los steht in der Zeile (grenze_eur, nach Art).', Q_L1366),
   row(WS09, 'M820-09-D13', `lose_ausnahme_verletzt = ${LOSE_VERLETZT}`, ['lose'], null, 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
     'Plan 3: Anzahl der ausgenommenen Lose, deren Nettowert die Grenze je Los ("unter 80000 Euro" / "unter 1 Million Euro") erreicht oder überschreitet — strenge Grenze nach dem Gesetzestext (m820_1-J-6).', Q_L1366),
-  row(WS09, 'M820-09-D14', `loseausnahme_code = if(${LOSE_VERLETZT} == 0 AND ${LOSE_AUSNAHME_SUM} * 100 / ${LOSE_GESAMT} <= ${LOSE_ANTEIL_MAX}, 1, 0)`, ['lose'], null, 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
-    'Plan 3: 1 wenn jedes ausgenommene Los unter seiner Grenze liegt UND die Summe der ausgenommenen Lose höchstens 20 Prozent des Gesamtwertes aller Lose beträgt, sonst 0; ohne Lose offen; Zwilling zu loseausnahme_applicable — REQ-24 STAGED (m820_1-G-4, D-11).', `${Q_L1366} — ${Q_L1368}`),
+  row(WS09, 'M820-09-D14', `loseausnahme_code = if(${LOSE_VERLETZT} == 0 AND ${LOSE_AUSNAHME_SUM} * 100 / ${LOSE_DENOMINATOR} <= ${LOSE_ANTEIL_MAX}, 1, 0)`, ['lose', LOSE_DENOMINATOR], null, 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
+    'Plan 3: 1 wenn jedes ausgenommene Los unter seiner Grenze liegt UND die Summe der ausgenommenen Lose höchstens 20 Prozent des geschätzten Netto-Gesamtwerts (estimated_engineering_fee) beträgt, sonst 0; ohne Lose offen; Zwilling zu loseausnahme_applicable — REQ-24 STAGED (m820_1-G-4, D-11).', `${Q_L1366} — ${Q_L1368}`),
+  row(WS09, 'M820-09-D15', `lose_gesamt_ok = if(abs(${LOSE_GESAMT} - ${LOSE_DENOMINATOR}) < 0.005, 1, 0)`, ['lose', LOSE_DENOMINATOR], null, 'Anhang B.2.4 (§ 3 Abs. 9 VgV); § 8.5',
+    'Plan 3: 1 wenn die Σ der eingetragenen Lose dem geschätzten Netto-Gesamtwert entspricht (|Σ − fee| < 0,005; Σ inline, nie auf die neue Ausgabe lose_gesamt_eur verkettet), sonst 0 — Abgleich "Gesamtwertes aller Lose" (L1366) gegen "Gesamtauftragswerts" (L1368), m820_1-J-7 / D-25.', `${Q_L1366} — ${Q_L1368}`),
 
   // ---- M820-13 (Eignungskriterien) ----
   row(WS13, 'M820-13-D1', 'min_annual_revenue_multiplier_ok = if(min_annual_revenue_multiplier <= min_annual_revenue_multiplier_max, 1, 0)', ['min_annual_revenue_multiplier', 'min_annual_revenue_multiplier_max'], null, 'Anhang E.1.4.1 (§ 45 Abs. 2 VgV)',

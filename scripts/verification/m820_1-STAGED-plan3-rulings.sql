@@ -130,7 +130,7 @@
 -- Step 1 (move REQ-07 to the worksheet where its symbols live and read the code):
 -- BEGIN;
 -- UPDATE compliance_requirements c SET worksheet_template_id = WS(M820-09),
---   condition = 'IF oberschwellig_code == 1 THEN threshold_status == ''oberschwellig'' AND IF oberschwellig_code == 0 THEN threshold_status == ''unterschwellig''',
+--   condition = '(IF oberschwellig_code == 1 THEN threshold_status == ''oberschwellig'') AND (IF oberschwellig_code == 0 THEN threshold_status == ''unterschwellig'')',
 --   description = 'Plan 3 (m820_1-G-3): Schwellenwert-Status folgt dem berechneten Vergleich Netto-Gesamtwert ≥ EU-Schwellenwert (§ 8.6).'
 --  WHERE c.id = 'fc792f58-0530-4e0b-80cc-e70b9431c5de' AND md5(c.condition) = '2a0ff00c0efd0d54f3c34ff21b24c16d';
 -- COMMIT;
@@ -145,7 +145,9 @@
 --   worksheet_template_id = WS(M820-04) and the archived condition (guard on the new text; the 191-char original is in the prior capture).
 -- CAUTION: oberschwellig_code is scalar-only and NOT server-materialised (amendment D / I-2): a consumer on M820-10 would inherit nothing
 --   until the engine-output materialisation workstream lands — Step 2 waits for that; Step 1 is safe today (same-worksheet read).
---   The compound guard in Step 1 is a hand-applied text (the emitter's IF-exemption accepts plain compares only).
+--   Step 1's condition is TWO parenthesised IF guards joined by AND — exactly prod's original REQ-07 shape; without the parentheses the
+--   parser reads `IF a == 1 THEN (x == 'o' AND IF a == 0 THEN …)` and the second half is never enforced (fix round 1; parse shape pinned in
+--   field-configs-m820-1.test.ts). A compound guard is a hand-applied text (the emitter's IF-exemption accepts plain compares only).
 
 -- =====================================================================================================================
 -- m820_1-G-4 · M820-04 → M820-09 · REQ-24 (662aa41f-cce5-41c6-9d8c-31657c5433fa, warn, EMPTY condition) — Loseausnahme onto loseausnahme_code
@@ -329,7 +331,7 @@
 --   Plan-3 entry (not staged here — one Anhaltswert pair suffices).
 
 -- =====================================================================================================================
--- m820_1-D-1 … D-24 · deactivation pairs (register / table twin ↔ existing typed scalar) — amendment K, one block per pair
+-- m820_1-D-1 … D-25 · deactivation pairs (register / table twin ↔ existing typed scalar) — amendment K, one block per pair
 -- Generic switch (per pair; every UPDATE guarded on the prior value; apply only after the matching G-block where one exists):
 --   (a) manual field → derived:  FLD(ws, <manual>) SET widget = 'derived', ui_config = NULL WHERE f.widget IS NULL;
 --   (b) equation output → manual: UPDATE equations e SET output_symbol = '<manual>', formula = replace(e.formula, '<twin> = ', '<manual> = ')
@@ -389,6 +391,10 @@
 -- m820_1-D-23 · M820-20 verhandlung_ergebnis (text, required) ↔ verhandlungsrunden.ergebnis — as D-21. ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- m820_1-D-24 · M820-20 protokoll_signiert (boolean, required) ↔ verhandlungsrunden.protokoll_signiert / protokolle_unsigniert_count (M820-20-D3)
 --   — proposed = deactivate the scalar; optional gate 'protokolle_unsigniert_count == 0'. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- m820_1-D-25 · M820-01 estimated_engineering_fee (consumed by -09 / -13) ↔ M820-09 lose_gesamt_eur (M820-09-D9, Σ of the entered lots)
+--   ☐ RATIFIED ☐ REJECTED ☐ DEFER — amendment K (fix round 1): the lot share / code (D11 / D14) READ the existing fee (L1368 "Gesamtauftragswerts");
+--   the register Σ stays a display-only twin with the consistency code lose_gesamt_ok (M820-09-D15, L1366 "Gesamtwertes aller Lose"); proposed = no
+--   switch (the fee is the -01 input the whole threshold chain reads); an optional warn gate 'lose_gesamt_ok == 1' on the owner's word.
 
 -- =====================================================================================================================
 -- m820_1-X-1 · M820-06 / M820-07 · risk_register / risk_mitigation_plan — bespoke editors (Plan 2b), untouched by this task (the brief's ruling).

@@ -237,12 +237,12 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'grenze_eur', label: 'Grenze je Los (§ 3 Abs. 9 VgV)', type: 'derived', expr: LOS_GRENZE_EXPR, unit: 'EUR' },
         { key: 'unter_grenze', label: 'unter der Grenze', type: 'derived', expr: LOS_UNTER_GRENZE_EXPR, display: 'badge', value_labels: { '1': 'unter der Losgrenze', '0': 'Losgrenze erreicht oder überschritten' } },
       ],
-      footer: ['lose_count', 'lose_gesamt_eur', 'lose_ausnahme_sum_eur', 'lose_ausnahme_anteil_pct', 'lose_ausnahme_max_eur', 'lose_ausnahme_verletzt', 'loseausnahme_code'],
-      note: `${L1366} Gesamtwert aller Lose = Σ der eingetragenen Nettowerte (Bezugsgröße des Gesetzestextes, nicht der Netto-Gesamtwert der Ingenieurleistungen — m820_1-J-7); "unter" = strenge Grenze je Los (m820_1-J-6).`,
+      footer: ['lose_count', 'lose_gesamt_eur', 'lose_gesamt_ok', 'lose_ausnahme_sum_eur', 'lose_ausnahme_anteil_pct', 'lose_ausnahme_max_eur', 'lose_ausnahme_verletzt', 'loseausnahme_code'],
+      note: `${L1366} ${L1368} Bezugsgröße des Anteils = der geschätzte Netto-Gesamtwert (estimated_engineering_fee, M820-01); die Σ der eingetragenen Lose wird daneben angezeigt und mit lose_gesamt_ok abgeglichen (m820_1-J-7); "unter" = strenge Grenze je Los (m820_1-J-6).`,
     },
     verification_quote: `${L1365} — ${L1366} — ${L1368}`,
     create: { section_code: 'B', label_de: 'Lose (Teilaufträge) nach § 3 Abs. 9 VgV', data_type: 'json', unit: null, clause_reference: 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
-      description: 'Plan 3: Zeilen je Los (Art, Nettowert, Loseausnahme); Grenze je Los aus S3_9_VGV; Σ / Anteil / Maximum / Verletzungen → lose_* (M820-09-D8 … D13), loseausnahme_code (M820-09-D14) als abgeleiteter Zwilling zum manuellen Boolean loseausnahme_applicable — Umstellung und REQ-24 (heute leere Bedingung auf M820-04) STAGED (m820_1-D-11, G-4).' },
+      description: 'Plan 3: Zeilen je Los (Art, Nettowert, Loseausnahme); Grenze je Los aus S3_9_VGV; Σ / Abgleich / Anteil / Maximum / Verletzungen → lose_* (M820-09-D8 … D13, D15), loseausnahme_code (M820-09-D14; Anteil auf estimated_engineering_fee bezogen) als abgeleiteter Zwilling zum manuellen Boolean loseausnahme_applicable — Umstellung und REQ-24 (heute leere Bedingung auf M820-04) STAGED (m820_1-D-11, G-4).' },
   }),
   WS09({
     symbol: 'lose_count', widget: 'derived', ui_config: null, verification_quote: L1365,
@@ -252,7 +252,12 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS09({
     symbol: 'lose_gesamt_eur', widget: 'derived', ui_config: null, verification_quote: L1366,
     create: { section_code: 'F', label_de: 'Gesamtwert aller Lose (Σ Nettowerte)', data_type: 'number', unit: 'EUR', clause_reference: 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
-      description: 'Plan 3: Ausgabe der Gleichung M820-09-D9 (sum_rows über lose.netto_wert_eur) — die Bezugsgröße "Gesamtwertes aller Lose" des § 3 Abs. 9 VgV.' },
+      description: 'Plan 3: Ausgabe der Gleichung M820-09-D9 (sum_rows über lose.netto_wert_eur) — Anzeige-Zwilling zum geschätzten Netto-Gesamtwert estimated_engineering_fee (m820_1-D-25 / J-7); Abgleich → lose_gesamt_ok.' },
+  }),
+  WS09({
+    symbol: 'lose_gesamt_ok', widget: 'derived', ui_config: null, verification_quote: `${L1366} — ${L1368}`,
+    create: { section_code: 'F', label_de: 'Σ Lose = geschätzter Netto-Gesamtwert (1 = ja, 0 = Abweichung)', data_type: 'number', unit: null, clause_reference: 'Anhang B.2.4 (§ 3 Abs. 9 VgV); § 8.5',
+      description: 'Plan 3: Ausgabe der Gleichung M820-09-D15 (|Σ Lose − estimated_engineering_fee| < 0,005); zeigt, ob der "Gesamtwert aller Lose" (L1366) und der "Gesamtauftragswert" (L1368) übereinstimmen (m820_1-J-7).' },
   }),
   WS09({
     symbol: 'lose_ausnahme_sum_eur', widget: 'derived', ui_config: null, verification_quote: L1366,
@@ -261,8 +266,8 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   }),
   WS09({
     symbol: 'lose_ausnahme_anteil_pct', widget: 'derived', ui_config: null, verification_quote: `${L1366} — ${L1368}`,
-    create: { section_code: 'F', label_de: 'Anteil der ausgenommenen Lose am Gesamtwert aller Lose (Grenze 20 Prozent)', data_type: 'number', unit: '%', clause_reference: 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
-      description: 'Plan 3: Ausgabe der Gleichung M820-09-D11 (Σ ausgenommen · 100 / Σ alle Lose).' },
+    create: { section_code: 'F', label_de: 'Anteil der ausgenommenen Lose am geschätzten Netto-Gesamtwert (Grenze 20 Prozent)', data_type: 'number', unit: '%', clause_reference: 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
+      description: 'Plan 3: Ausgabe der Gleichung M820-09-D11 (Σ ausgenommen · 100 / estimated_engineering_fee — L1368 "Gesamtauftragswerts"; die Register-Σ ist die Alternative, m820_1-J-7).' },
   }),
   WS09({
     symbol: 'lose_ausnahme_max_eur', widget: 'derived', ui_config: null, verification_quote: L1366,
@@ -277,7 +282,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS09({
     symbol: 'loseausnahme_code', widget: 'derived', ui_config: null, verification_quote: `${L1366} — ${L1368}`,
     create: { section_code: 'F', label_de: 'Loseausnahme nach § 3 Abs. 9 VgV eingehalten (1 = jedes ausgenommene Los unter der Grenze UND Anteil ≤ 20 Prozent, 0 = nein)', data_type: 'number', unit: null, clause_reference: 'Anhang B.2.4 (§ 3 Abs. 9 VgV)',
-      description: 'Plan 3: Ausgabe der Gleichung M820-09-D14; Zwilling zum manuellen Boolean loseausnahme_applicable (konsumiert von M820-10) — Umstellung und REQ-24 STAGED (m820_1-D-11, G-4). Ohne eingetragene Lose bleibt der Wert offen (kein Phantom-Bestehen).' },
+      description: 'Plan 3: Ausgabe der Gleichung M820-09-D14; Zwilling zum manuellen Boolean loseausnahme_applicable (konsumiert von M820-10) — Umstellung und REQ-24 STAGED (m820_1-D-11, G-4). Anteil bezogen auf estimated_engineering_fee (L1368); ohne eingetragene Lose bleibt der Wert offen (kein Phantom-Bestehen).' },
   }),
 
   // ---- M820-13: the Anh. E.1.4.1 revenue-factor limit beside the typed multiplier ----
