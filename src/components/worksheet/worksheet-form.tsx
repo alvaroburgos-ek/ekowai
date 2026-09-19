@@ -16,7 +16,9 @@ import {
 } from './manual-override-pill';
 import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { RainfallTableSelector } from './rainfall-table-selector';
-import { normalizeRainfallCarrier, facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
+import { normalizeRainfallCarrier, facilityReturnPeriod, resolveSelectedTable, resolveColumn } from '@/lib/eval/rainfall-tables';
+import { DesignWindowPanel } from './design-window-panel';
+import { DESIGN_WINDOWS, WINDOW_BY_WORKSHEET } from '@/lib/eval/design-window';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
 import { SitePortalLinks } from './site-portal-links';
 import { PollutantRegisterEditor } from './pollutant-register-editor';
@@ -496,6 +498,52 @@ export function WorksheetForm({
     return facilityReturnPeriod(worksheet.template.code, pick);
   }, [fieldBySymbol, values, worksheet.template.code]);
 
+  // Design window (A138-16…22): the facility's design variable scanned against
+  // every guideline limit, from the SAME rain rows / scalars the engine uses.
+  // Shown only on the worksheet of the chosen facility, while it is editable.
+  const designWindow = useMemo(() => {
+    const facility = WINDOW_BY_WORKSHEET[worksheet.template.code];
+    if (!facility || !DESIGN_WINDOWS[facility]) return null;
+    const pick = (sym: string): number | null => {
+      const f = fieldBySymbol.get(sym);
+      if (!f) return null;
+      const v = values[f.id];
+      return v?.type === 'number' && v.value != null && Number.isFinite(v.value) ? v.value : null;
+    };
+    const chosen = (() => {
+      const f = fieldBySymbol.get('facility_type_selected');
+      const v = f ? values[f.id] : undefined;
+      return v?.type === 'enum' || v?.type === 'text' ? v.value : null;
+    })();
+    if (chosen && chosen !== facility) return null;
+    const selected = resolveSelectedTable(normalizeRainfallCarrier(kostraValue?.type === 'json' ? kostraValue.value : undefined), rainfallTableRef);
+    if (!selected) return null;
+    const T = rainfallDesignReturnPeriod;
+    const col = resolveColumn(selected, T);
+    if (col.status === 'missing') return null;
+    const rows = col.rows.map((r) => ({ D_min: r.D_min, r_D_n: r.r_D_n }));
+    // Comparison column: the next lower canonical return period that is populated.
+    let compareRows: { T: number; rows: typeof rows } | null = null;
+    if (T != null) {
+      for (const Tc of [10, 5, 3, 2, 1].filter((t) => t < T)) {
+        const c = resolveColumn(selected, Tc as 1 | 2 | 3 | 5 | 10);
+        if (c.status === 'ok') { compareRows = { T: Tc, rows: c.rows.map((r) => ({ D_min: r.D_min, r_D_n: r.r_D_n })) }; break; }
+      }
+    }
+    const def = DESIGN_WINDOWS[facility]!;
+    // Variable = the facility's own design quantity (A_S,m inherited from A138-12 for the swale; the
+    // overrained area A_VA_Mulde is passed separately — the two are NOT identified silently, F-3c).
+    const current = pick(def.variable.symbol);
+    const scalars: Record<string, number | null> = {
+      A_C: pick('A_C'), k_i: pick('k_i'), f_Z: pick('f_Z'), f_A: pick('f_A') ?? 1, Q_Dr: pick('Q_Dr') ?? 0,
+      A_VA: facility === 'mulde' ? pick('A_VA_Mulde') : pick('A_VA_MRE') ?? pick('A_VA'),
+      V_M: pick('V_M_MRE') ?? pick('V_M'),
+      b_R: pick('b_R'), h_R: pick('h_R'), s_R: pick('s_R') ?? pick('s_F'),
+      D_flaeche: pick('D_min_used'),
+    };
+    return { facility, rows, compareRows, scalars, current, T };
+  }, [worksheet.template.code, fieldBySymbol, values, kostraValue, rainfallTableRef, rainfallDesignReturnPeriod]);
+
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
 
@@ -882,6 +930,19 @@ export function WorksheetForm({
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">
           <SitePortalLinks latFieldId={siteLatField.id} lonFieldId={siteLonField.id} label={title} />
         </section>
+      )}
+
+      {designWindow && !locked && (
+        <div className="border-t border-hairline pt-6 mt-8">
+          <DesignWindowPanel
+            facility={designWindow.facility}
+            rows={designWindow.rows}
+            designReturnPeriod={designWindow.T}
+            compareRows={designWindow.compareRows}
+            scalars={designWindow.scalars}
+            current={designWindow.current}
+          />
+        </div>
       )}
 
       {surfaceInventoryField && (
