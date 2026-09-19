@@ -18,6 +18,8 @@ import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { RainfallTableSelector } from './rainfall-table-selector';
 import { normalizeRainfallCarrier, facilityReturnPeriod, resolveSelectedTable, resolveColumn } from '@/lib/eval/rainfall-tables';
 import { DesignWindowPanel } from './design-window-panel';
+import { FeasibilityTablePanel } from './feasibility-table-panel';
+import { TAB3_CRITERIA } from '@/lib/eval/feasibility-table';
 import { DESIGN_WINDOWS, WINDOW_BY_WORKSHEET } from '@/lib/eval/design-window';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
 import { SitePortalLinks } from './site-portal-links';
@@ -544,6 +546,17 @@ export function WorksheetForm({
     return { facility, rows, compareRows, scalars, current, T };
   }, [worksheet.template.code, fieldBySymbol, values, kostraValue, rainfallTableRef, rainfallDesignReturnPeriod]);
 
+  // A138-02: Tab. 3 shown as printed, with the column each answer falls into.
+  const tab3 = useMemo(() => {
+    if (worksheet.template.code !== 'A138-02') return null;
+    const ids: Record<string, string | undefined> = {};
+    for (const c of TAB3_CRITERIA) for (const sym of c.symbols) ids[sym] = fieldBySymbol.get(sym)?.id;
+    const detField = fieldBySymbol.get('feasibility_determination');
+    const detVal = detField ? values[detField.id] : undefined;
+    const determination = detVal?.type === 'enum' ? detVal.value : null;
+    return { ids, determination };
+  }, [worksheet.template.code, fieldBySymbol, values]);
+
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
 
@@ -930,6 +943,12 @@ export function WorksheetForm({
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">
           <SitePortalLinks latFieldId={siteLatField.id} lonFieldId={siteLonField.id} label={title} />
         </section>
+      )}
+
+      {tab3 && (
+        <div className="border-t border-hairline pt-6 mt-8">
+          <FeasibilityTablePanel fieldIdBySymbol={tab3.ids} determination={tab3.determination} />
+        </div>
       )}
 
       {designWindow && !locked && (
