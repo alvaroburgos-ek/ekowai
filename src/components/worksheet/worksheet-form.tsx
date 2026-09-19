@@ -17,6 +17,7 @@ import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { RainfallTableSelector } from './rainfall-table-selector';
 import { normalizeRainfallCarrier, facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
+import { SitePortalLinks } from './site-portal-links';
 import { PollutantRegisterEditor } from './pollutant-register-editor';
 import { POLLUTANT_REGISTER_SYMBOL, POLLUTANT_OUTPUT_SYMBOLS } from '@/lib/eval/pollutant-register';
 import { SurfaceSourceBanner } from './surface-source-banner';
@@ -492,6 +493,10 @@ export function WorksheetForm({
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
 
+  // A138-01 site coordinates: portal links (TIM-online, ELWAS-WEB) preset with the site.
+  const siteLatField = fields.find((f) => f.symbol === 'site_lat');
+  const siteLonField = fields.find((f) => f.symbol === 'site_lon');
+
   // VSME-B04.100 pollutant register: per-pollutant E-PRTR rows; the three
   // AmountOfEmissionTo{Air,Water,Soil} scalars are derived per-medium sums.
   const pollutantRegisterField = fields.find((f) => f.symbol === POLLUTANT_REGISTER_SYMBOL);
@@ -828,6 +833,12 @@ export function WorksheetForm({
             onSelect={(id) => setField(rainfallRefField.id, { type: 'text', value: id })}
             readOnly={locked}
           />
+        </section>
+      )}
+
+      {siteLatField && siteLonField && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+          <SitePortalLinks latFieldId={siteLatField.id} lonFieldId={siteLonField.id} label={title} />
         </section>
       )}
 
