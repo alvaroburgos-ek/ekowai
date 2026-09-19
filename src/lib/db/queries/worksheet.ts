@@ -143,8 +143,15 @@ export async function loadInheritedFields(
   currentTemplateId: string,
   currentStandardId: string,
   currentWorksheetCode: string,
+  /**
+   * Client to run the SELECT on. Defaults to the global pool. A caller that
+   * is inside `db.transaction` MUST pass its `tx` handle: running this query
+   * on the global pool while the transaction holds a second connection made
+   * the prod submit hang idle-in-transaction (2026-09-17, captureSnapshot).
+   */
+  client: Pick<typeof db, 'select'> = db,
 ): Promise<InheritedField[]> {
-  const rows = await db
+  const rows = await client
     .select({
       field: fields,
       originCode: worksheetTemplates.code,
