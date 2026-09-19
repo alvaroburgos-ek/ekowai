@@ -366,3 +366,82 @@ export function facilityReturnPeriod(
 
   return null;
 }
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KOSTRA-DWD-2020 CSV import (pure; the editor pastes the file text)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Result of parsing a KOSTRA-DWD-2020 grid-cell CSV (DWD CDC download
+ * "KOSTRA-DWD-2020_…_INDEX_<cell>.csv" and the identical openko export).
+ *
+ * The file is semicolon-separated with decimal commas and the header
+ *   D_min;hN_T1;…;hN_T100;rN_T1;…;rN_T100;UC_T5;UC_T10
+ * Only `D_min` and the `rN_T<n>` columns (Regenspende r_D(n) in l/(s·ha))
+ * are read — exactly the values Gl. 8 / Gl. 14 consume. hN (Niederschlags-
+ * höhe, mm) and UC (Unsicherheitsklasse) are ignored. Nothing is derived or
+ * rounded: every cell lands as printed (§5.3.3.5 "exakte Werte des DWD").
+ */
+export type KostraCsvImport = {
+  rows: RainfallGridRow[];
+  /** Return-period columns present in the file, in canonical order. */
+  columns: ReturnPeriod[];
+  warnings: string[];
+};
+
+function parseDecimal(raw: string): number | null {
+  const s = raw.trim().replace(/\s/g, '').replace(',', '.');
+  if (s === '' || s === '-' || /^n\/?a$/i.test(s)) return null;
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Parse KOSTRA CSV text. Returns `{ error }` when the header carries no
+ * `rN_T<n>` column (wrong file, e.g. the hN-only export or a tab of the PDF). */
+export function parseKostraCsv(text: string): KostraCsvImport | { error: string } {
+  const lines = text
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !l.startsWith('#'));
+  if (lines.length === 0) return { error: 'Leerer Text — bitte den Inhalt der KOSTRA-CSV einfügen.' };
+
+  const header = lines[0];
+  const delim = header.includes(';') ? ';' : header.includes('\t') ? '\t' : ',';
+  const cols = header.split(delim).map((c) => c.trim());
+  const dIdx = cols.findIndex((c) => /^(D(_min)?|Dauerstufe(\s*\(min\))?)$/i.test(c));
+  if (dIdx < 0) return { error: 'Keine Dauerstufen-Spalte gefunden (erwartet "D_min" wie in der DWD-CSV).' };
+
+  const rnCols: Array<{ rp: ReturnPeriod; idx: number }> = [];
+  cols.forEach((c, idx) => {
+    const m = /^rN_T(\d+)$/i.exec(c);
+    if (!m) return;
+    const t = Number(m[1]);
+    if ((RETURN_PERIODS as readonly number[]).includes(t)) rnCols.push({ rp: t as ReturnPeriod, idx });
+  });
+  if (rnCols.length === 0) {
+    return { error: 'Keine rN_T-Spalten gefunden. Erwartet wird die KOSTRA-DWD-2020 CSV mit der Kopfzeile "D_min;hN_T1;…;rN_T1;…;rN_T100" (Regenspende r_D(n)).' };
+  }
+  rnCols.sort((a, b) => a.rp - b.rp);
+
+  const warnings: string[] = [];
+  const rows: RainfallGridRow[] = [];
+  const seenD = new Set<number>();
+  for (let i = 1; i < lines.length; i++) {
+    const cells = lines[i].split(delim);
+    const D = parseDecimal(cells[dIdx] ?? '');
+    if (D == null) { warnings.push(`Zeile ${i + 1}: Dauerstufe nicht lesbar — übersprungen.`); continue; }
+    if (seenD.has(D)) warnings.push(`Zeile ${i + 1}: Dauerstufe D = ${D} min kommt mehrfach vor.`);
+    seenD.add(D);
+    const r: Partial<Record<TnKey, number | null>> = {};
+    for (const { rp, idx } of rnCols) {
+      const v = parseDecimal(cells[idx] ?? '');
+      if (v == null) warnings.push(`Zeile ${i + 1}: r_D(${rp} a) bei D = ${D} min fehlt.`);
+      r[String(rp) as TnKey] = v;
+    }
+    rows.push({ D_min: D, r });
+  }
+  if (rows.length === 0) return { error: 'Keine Datenzeilen unter der Kopfzeile gefunden.' };
+  return { rows, columns: rnCols.map((c) => c.rp), warnings };
+}
