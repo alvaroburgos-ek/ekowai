@@ -549,13 +549,13 @@ export function WorksheetForm({
   // A138-02: Tab. 3 shown as printed, with the column each answer falls into.
   const tab3 = useMemo(() => {
     if (worksheet.template.code !== 'A138-02') return null;
-    const ids: Record<string, string | undefined> = {};
-    for (const c of TAB3_CRITERIA) for (const sym of c.symbols) ids[sym] = fieldBySymbol.get(sym)?.id;
-    const detField = fieldBySymbol.get('feasibility_determination');
-    const detVal = detField ? values[detField.id] : undefined;
-    const determination = detVal?.type === 'enum' ? detVal.value : null;
-    return { ids, determination };
-  }, [worksheet.template.code, fieldBySymbol, values]);
+    const metas: Record<string, { id: string; dataType: string; inheritedFrom?: string } | undefined> = {};
+    for (const c of TAB3_CRITERIA) for (const sym of c.symbols) {
+      const f = fieldBySymbol.get(sym);
+      metas[sym] = f ? { id: f.id, dataType: f.dataType, inheritedFrom: f.inheritedFromWorksheet } : undefined;
+    }
+    return { metas, determinationFieldId: fieldBySymbol.get('feasibility_determination')?.id };
+  }, [worksheet.template.code, fieldBySymbol]);
 
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
@@ -947,7 +947,7 @@ export function WorksheetForm({
 
       {tab3 && (
         <div className="border-t border-hairline pt-6 mt-8">
-          <FeasibilityTablePanel fieldIdBySymbol={tab3.ids} determination={tab3.determination} />
+          <FeasibilityTablePanel fieldsBySymbol={tab3.metas} determinationFieldId={tab3.determinationFieldId} readOnly={locked} locale={locale} projectId={projectId} standardCode={standardCode} />
         </div>
       )}
 
