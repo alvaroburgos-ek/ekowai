@@ -19,6 +19,7 @@ import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-side
 import { BackLink } from '@/components/ui/back-link';
 import { NormTextProvider } from '@/components/norm-text/norm-text-context';
 import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profile/symbol-map';
+import { twinSourcesFor, twinSourceSymbols } from '@/lib/eval/twin-symbols';
 
 export default async function WorksheetPage({
   params,
@@ -52,7 +53,9 @@ export default async function WorksheetPage({
   const ambiguousSymbols = mergeResult.ambiguousSymbols;
 
   const fieldIds = mergedFields.map((f) => f.id);
-  const fieldSymbols = mergedFields.map((f) => f.symbol);
+  // Own + inherited symbols, plus every twin SOURCE symbol of the standard so the
+  // same-symbol query also brings back the values a twin rule may prefill from.
+  const fieldSymbols = Array.from(new Set([...mergedFields.map((f) => f.symbol), ...twinSourceSymbols(standardCode)]));
 
   // Parallelise all queries that depend on ws.template.id but not on each other
   const [instance, parameters, sameSymbol, sidebarWorksheets, docs, fieldCounts] = await Promise.all([
@@ -163,8 +166,12 @@ export default async function WorksheetPage({
   //   4. Standard-recommended default_value on the field row.
   const initialValues: Record<string, unknown> = {};
   const inheritedFromBySymbol: Record<string, string> = {};
-  const prefillSourceByFieldId: Record<string, 'standard_default' | 'site_profile'> = {};
+  const prefillSourceByFieldId: Record<string, 'standard_default' | 'site_profile' | 'twin'> = {};
   const siteProfileKeyByFieldId: Record<string, string> = {};
+  const twinSourceByFieldId: Record<string, { worksheetCode: string; symbol: string }> = {};
+  // Twin hints (same quantity, other symbol) merged into the same-symbol hint list
+  // of the TARGET symbol so the field shows "Bereits in A138-07 (als A_C)" + Übernehmen.
+  const twinHintsBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol: string }>> = {};
   for (const f of mergedFields) {
     const p = parameters.get(f.id);
     if (p) {
@@ -205,6 +212,29 @@ export default async function WorksheetPage({
         }
       }
     }
+
+    // 2b. Twin symbol — the same quantity produced upstream under another symbol
+    //     (TWIN_SYMBOLS). First source with an unambiguous value wins; render-only
+    //     prefill with a "Vorbefüllt ← <ws> · <symbol>" badge, persisted only on
+    //     Übernehmen / "Alle Vorbefüllungen übernehmen". Not routed through
+    //     inheritedFromBySymbol on purpose: that map moves a symbol's engine home
+    //     and the twin's symbol differs from the source's.
+    let twinDone = false;
+    for (const src of twinSourcesFor(standardCode, f.symbol)) {
+      const ups = sameSymbol.get(src);
+      if (!ups || ups.length === 0) continue;
+      const ambiguousTwin = ups.length > 1 && !ups.every((u) => sameSymbolValueEqual(u.value, ups[0].value));
+      if (ambiguousTwin) continue;
+      const coerced = coerceSameSymbolValue(f.dataType, ups[0].value);
+      if (!coerced) continue;
+      initialValues[f.id] = coerced;
+      prefillSourceByFieldId[f.id] = 'twin';
+      twinSourceByFieldId[f.id] = { worksheetCode: ups[0].worksheetCode, symbol: src };
+      twinHintsBySymbol[f.symbol] = ups.map((u) => ({ worksheetCode: u.worksheetCode, value: u.value, viaSymbol: src }));
+      twinDone = true;
+      break;
+    }
+    if (twinDone) continue;
 
     // 3. Site profile — resolved via the symbol map; coerced inside the helper.
     const site = resolveFromSiteProfile(project.siteProfile, f.symbol);
@@ -248,9 +278,21 @@ export default async function WorksheetPage({
     });
   }
 
-  const sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>> = {};
+  const sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol?: string }>> = {};
   for (const [symbol, arr] of sameSymbol) {
     sameSymbolValuesBySymbol[symbol] = arr.map(({ worksheetCode, value }) => ({ worksheetCode, value }));
+  }
+  // Twin hints for fields that already hold a local value (no prefill happened
+  // above, but the engineer should still see the upstream twin + Übernehmen).
+  for (const f of mergedFields) {
+    if (sameSymbolValuesBySymbol[f.symbol]?.length) continue;
+    if (twinHintsBySymbol[f.symbol]) { sameSymbolValuesBySymbol[f.symbol] = twinHintsBySymbol[f.symbol]; continue; }
+    for (const src of twinSourcesFor(standardCode, f.symbol)) {
+      const ups = sameSymbol.get(src);
+      if (!ups || ups.length === 0) continue;
+      sameSymbolValuesBySymbol[f.symbol] = ups.map((u) => ({ worksheetCode: u.worksheetCode, value: u.value, viaSymbol: src }));
+      break;
+    }
   }
 
   // Build citations map: field_id → Citation[] (from project_parameters.citation_sources)
@@ -387,6 +429,7 @@ export default async function WorksheetPage({
           ambiguousSymbols={Object.fromEntries(ambiguousSymbols)}
           prefillSourceByFieldId={prefillSourceByFieldId}
           siteProfileKeyByFieldId={siteProfileKeyByFieldId}
+          twinSourceByFieldId={twinSourceByFieldId}
           clientSuppliedByFieldId={clientSuppliedByFieldId}
           standardCode={standardCode}
           docs={docs}

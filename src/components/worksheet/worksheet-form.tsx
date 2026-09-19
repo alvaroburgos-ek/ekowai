@@ -133,7 +133,7 @@ type Props = {
   initialValues: Record<string, FieldValue>;
   initialSources: Record<string, { docId: string; page?: number; note?: string } | null>;
   initialCitations: Record<string, Array<{ id: string; docId: string; page: number | null; note: string | null }>>;
-  sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>>;
+  sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol?: string }>>;
   /** symbol → worksheet code from which the initial value was inherited (no
    * local saved value existed). Used to render the "← [code]" hint. */
   inheritedFromBySymbol: Record<string, string>;
@@ -145,7 +145,11 @@ type Props = {
    * pre-fill (norm default or project site profile). Lets the field display
    * a small "Norm-Default" / "Projekt-Standort" badge until the engineer
    * touches the value. */
-  prefillSourceByFieldId?: Record<string, 'standard_default' | 'site_profile'>;
+  prefillSourceByFieldId?: Record<string, 'standard_default' | 'site_profile' | 'twin'>;
+  /** field_id → upstream worksheet + symbol that supplied a TWIN pre-fill (same
+   * quantity under another symbol, TWIN_SYMBOLS). Drives the badge and the
+   * "Alle Vorbefüllungen übernehmen" bar. */
+  twinSourceByFieldId?: Record<string, { worksheetCode: string; symbol: string }>;
   /** field_id → site-profile JSON key that supplied the pre-fill. Only set
    * for fields where prefillSourceByFieldId is 'site_profile'. Shown in the
    * field's tooltip so the engineer can find the source entry. */
@@ -208,6 +212,7 @@ export function WorksheetForm({
   ambiguousSymbols,
   prefillSourceByFieldId,
   siteProfileKeyByFieldId,
+  twinSourceByFieldId,
   clientSuppliedByFieldId,
   standardCode,
   docs,
@@ -572,6 +577,21 @@ export function WorksheetForm({
     return result;
   }, [fieldsBySectionId, sections]);
 
+  // Twin pre-fills not yet persisted: the value is in the store (render-only)
+  // but not in pendingFieldIds and there is no saved row — "Alle übernehmen"
+  // marks them pending so the next autosave persists them in one go.
+  const twinPrefillIds = useMemo(() => {
+    if (!twinSourceByFieldId) return [] as string[];
+    return Object.keys(twinSourceByFieldId).filter((id) => values[id] != null && !pendingFieldIds.has(id));
+  }, [twinSourceByFieldId, values, pendingFieldIds]);
+  const acceptAllTwinPrefills = () => {
+    if (locked) return;
+    for (const id of twinPrefillIds) {
+      const v = values[id];
+      if (v) setField(id, v);
+    }
+  };
+
   const topSections = sections.filter((s) => s.parentSectionId === null);
   const orphanFields = fieldsBySectionId.get(null) ?? [];
   const title = locale === 'de' ? worksheet.template.titleDe : worksheet.template.titleEn ?? worksheet.template.titleDe;
@@ -649,6 +669,7 @@ export function WorksheetForm({
           computedHint={computedHint}
           prefillSource={prefillSourceByFieldId?.[f.id]}
           siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
+          twinSource={twinSourceByFieldId?.[f.id]}
           clientSupplied={clientSuppliedByFieldId?.[f.id] ?? false}
           inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
           overridePill={
@@ -711,6 +732,26 @@ export function WorksheetForm({
       )}
 
       <SourceFormReferencePanel standardCode={standardCode} locale={locale} />
+
+      {twinPrefillIds.length > 0 && !locked && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 rounded border border-accent/40 bg-accent/5 px-3 py-2 text-sm"
+          data-testid="twin-prefill-bar"
+        >
+          <span>
+            {twinPrefillIds.length === 1
+              ? '1 Feld aus vorgelagerten Arbeitsblättern vorbefüllt (noch nicht gespeichert).'
+              : `${twinPrefillIds.length} Felder aus vorgelagerten Arbeitsblättern vorbefüllt (noch nicht gespeichert).`}
+          </span>
+          <button
+            type="button"
+            onClick={acceptAllTwinPrefills}
+            className="text-xs px-3 py-1 rounded border border-hairline-strong hover:bg-paper-2 text-ink"
+          >
+            Alle Vorbefüllungen übernehmen
+          </button>
+        </div>
+      )}
 
       {srcState && <SurfaceSourceBanner state={srcState} />}
 
