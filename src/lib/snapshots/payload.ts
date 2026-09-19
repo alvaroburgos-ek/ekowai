@@ -12,6 +12,7 @@ import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
+import { withAbsentDefault } from '@/lib/eval/optional-inputs';
 import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
 import {
   normalizeRainfallCarrier,
@@ -346,7 +347,7 @@ export function buildSnapshotPayload(args: {
   const gl10Scalars: Gl10Scalars = {
     A_VA: numberBySymbol('A_VA'),
     Q_S: numberBySymbol('Q_S'),
-    Q_Dr: numberBySymbol('Q_Dr'),
+    Q_Dr: withAbsentDefault('Q_Dr', numberBySymbol('Q_Dr')), // no throttle ⇒ 0
     D: numberBySymbol('D_min') ?? numberBySymbol('D'),
     V_VA: numberBySymbol('V_VA'),
     r_D_T_n_Ue: numberBySymbol('r_D_30'),
@@ -364,7 +365,7 @@ export function buildSnapshotPayload(args: {
     A_C: gl8Pick('A_C'),
     A_VA: gl8Pick('A_VA'),
     Q_S: gl8Pick('Q_S'),
-    Q_Dr: gl8Pick('Q_Dr'),
+    Q_Dr: withAbsentDefault('Q_Dr', gl8Pick('Q_Dr')), // no throttle ⇒ 0
     f_Z: gl8Pick('f_Z'),
     f_A: gl8Pick('f_A'),
   };
@@ -418,7 +419,7 @@ export function buildSnapshotPayload(args: {
       const f = fieldBySymbol.get(aliasFor(sym));
       const p = f ? paramByFieldId.get(f.id) : undefined;
       const num = p ? readNumber(p) : null;
-      return { symbol: sym, value: num, unit: f?.unit ?? null };
+      return { symbol: sym, value: withAbsentDefault(sym, num), unit: f?.unit ?? null };
     });
 
     const expectedUnits: Record<string, string | null> = {};

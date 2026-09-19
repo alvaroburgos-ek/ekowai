@@ -21,6 +21,7 @@ import { useEffect, useMemo } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateFormula, type EvalState } from './formula';
 import { rewriteRules } from './rewrites';
+import { withAbsentDefault } from './optional-inputs';
 import type {
   KostraCarrier,
   Gl8Scalars,
@@ -261,7 +262,7 @@ export function useEquationEngine({
       A_C: pick('A_C'),
       A_VA: pick('A_VA'),
       Q_S: pick('Q_S'),
-      Q_Dr: pick('Q_Dr'),
+      Q_Dr: withAbsentDefault('Q_Dr', pick('Q_Dr')), // no throttle ⇒ 0 (optional-inputs.ts)
       f_Z: pick('f_Z'),
       f_A: pick('f_A'),
       V_Zisterne: pick('V_Zisterne'),
@@ -301,7 +302,7 @@ export function useEquationEngine({
     return {
       A_VA: pick('A_VA'),
       Q_S: pick('Q_S'),
-      Q_Dr: pick('Q_Dr'),
+      Q_Dr: withAbsentDefault('Q_Dr', pick('Q_Dr')), // no throttle ⇒ 0 (optional-inputs.ts)
       D: pick('D_min') ?? pick('D'),
       V_VA: pick('V_VA'),
       r_D_T_n_Ue: pick('r_D_30'),
@@ -432,7 +433,7 @@ export function useEquationEngine({
         const f = fieldBySymbol.get(aliasFor(sym));
         const v = f ? values[f.id] : undefined;
         const num = v?.type === 'number' ? v.value : null;
-        return { symbol: sym, value: num, unit: f?.unit ?? null };
+        return { symbol: sym, value: withAbsentDefault(sym, num), unit: f?.unit ?? null };
       });
 
       const expectedUnits: Record<string, string | null> = {};

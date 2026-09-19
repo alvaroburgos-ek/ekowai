@@ -14,6 +14,7 @@
 import { evaluateFormula, type EvalState } from './formula';
 import { evaluateCondition, type EvalResult } from '../compliance/evaluate';
 import { equationProfiles } from './equation-profiles';
+import { withAbsentDefault } from './optional-inputs';
 import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
 import { shouldEngineEvaluate } from './equation-manual-denylist';
@@ -268,7 +269,7 @@ export function evaluateWorksheetEquations(
     A_C: pickNum('A_C'),
     A_VA: pickNum('A_VA'),
     Q_S: pickNum('Q_S'),
-    Q_Dr: pickNum('Q_Dr'),
+    Q_Dr: withAbsentDefault('Q_Dr', pickNum('Q_Dr')), // no throttle ⇒ 0
     f_Z: pickNum('f_Z'),
     f_A: pickNum('f_A'),
     V_Zisterne: pickNum('V_Zisterne'),
@@ -277,7 +278,7 @@ export function evaluateWorksheetEquations(
   const gl10Scalars: Gl10Scalars = {
     A_VA: pickNum('A_VA'),
     Q_S: pickNum('Q_S'),
-    Q_Dr: pickNum('Q_Dr'),
+    Q_Dr: withAbsentDefault('Q_Dr', pickNum('Q_Dr')), // no throttle ⇒ 0
     D: pickNum('D_min') ?? pickNum('D'),
     V_VA: pickNum('V_VA'),
     r_D_T_n_Ue: pickNum('r_D_30'),
@@ -301,7 +302,7 @@ export function evaluateWorksheetEquations(
     const evalInputs = neededSymbols.map((sym) => {
       const f = fieldBySymbol.get(aliasFor(sym));
       const num = f ? (numByField.get(f.id) ?? null) : null;
-      return { symbol: sym, value: num, unit: f?.unit ?? null };
+      return { symbol: sym, value: withAbsentDefault(sym, num), unit: f?.unit ?? null };
     });
 
     const expectedUnits: Record<string, string | null> = {};
