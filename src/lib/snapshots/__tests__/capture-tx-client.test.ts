@@ -93,7 +93,7 @@ describe('captureSnapshot({ txDb })', () => {
     const id = await captureSnapshot({
       worksheetInstanceId: 'inst-1',
       takenByUserId: 'user-1',
-      trigger: 'submit',
+      trigger: 'submit_for_review',
       txDb: tx as never,
     });
 
