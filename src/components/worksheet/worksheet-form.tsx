@@ -19,6 +19,8 @@ import { RainfallTableSelector } from './rainfall-table-selector';
 import { normalizeRainfallCarrier, facilityReturnPeriod, resolveSelectedTable, resolveColumn } from '@/lib/eval/rainfall-tables';
 import { DesignWindowPanel } from './design-window-panel';
 import { FeasibilityTablePanel } from './feasibility-table-panel';
+import { GuidelineTablePanel } from './guideline-table-panel';
+import { GUIDELINE_TABLES, TABLES_BY_WORKSHEET } from '@/lib/eval/guideline-tables';
 import { TAB3_CRITERIA } from '@/lib/eval/feasibility-table';
 import { DESIGN_WINDOWS, WINDOW_BY_WORKSHEET } from '@/lib/eval/design-window';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
@@ -557,6 +559,26 @@ export function WorksheetForm({
     return { metas, determinationFieldId: fieldBySymbol.get('feasibility_determination')?.id };
   }, [worksheet.template.code, fieldBySymbol]);
 
+  // Guideline decision tables (Tab. 8 / 11 / 14) shown as printed on the worksheet that consumes them.
+  const guidelineTables = useMemo(() => {
+    const codes = TABLES_BY_WORKSHEET[worksheet.template.code] ?? [];
+    return codes.map((code) => {
+      const t = GUIDELINE_TABLES[code];
+      const metas: Record<string, { id: string; dataType: string; inheritedFrom?: string } | undefined> = {};
+      const syms = new Set<string>([...t.targets, 'n', 'T_n', 'f_methode', 'permeability_test_method', 'facility_type_selected', 'A_C']);
+      for (const sym of syms) {
+        const f = fieldBySymbol.get(sym);
+        if (f) metas[sym] = { id: f.id, dataType: f.dataType, inheritedFrom: f.inheritedFromWorksheet };
+      }
+      // Tab. 8: the A_C band is derived from the inherited A_C when it is visible
+      const acField = fieldBySymbol.get('A_C');
+      const acVal = acField ? values[acField.id] : undefined;
+      const ac = acVal?.type === 'number' && acVal.value != null ? acVal.value : null;
+      const extra = ac == null ? {} : { ac_band: ac <= 800 ? 'le800' : 'gt800' };
+      return { code, metas, extra };
+    });
+  }, [worksheet.template.code, fieldBySymbol, values]);
+
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
 
@@ -944,6 +966,12 @@ export function WorksheetForm({
           <SitePortalLinks latFieldId={siteLatField.id} lonFieldId={siteLonField.id} label={title} />
         </section>
       )}
+
+      {guidelineTables.map((g) => (
+        <div key={g.code} className="border-t border-hairline pt-6 mt-8">
+          <GuidelineTablePanel tableCode={g.code} fieldsBySymbol={g.metas} readOnly={locked} extraValues={g.extra} />
+        </div>
+      ))}
 
       {tab3 && (
         <div className="border-t border-hairline pt-6 mt-8">
