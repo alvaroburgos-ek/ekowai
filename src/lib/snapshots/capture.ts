@@ -111,7 +111,9 @@ export async function loadCaptureInputs(args: {
       .select()
       .from(complianceRequirements)
       .where(eq(complianceRequirements.worksheetTemplateId, inst.worksheetTemplateId)),
-    loadInheritedFields(inst.worksheetTemplateId, tplRow.standardId, tplRow.code),
+    // Same client as the three selects above: inside db.transaction this is
+    // the tx handle — never the global pool (prod submit hang, 2026-09-17).
+    loadInheritedFields(inst.worksheetTemplateId, tplRow.standardId, tplRow.code, dbi),
   ]);
 
   const merged = mergeInheritedFields(ownFields, inherited);
