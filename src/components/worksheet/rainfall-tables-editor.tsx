@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import {
   normalizeRainfallCarrier,
+  parseKostraCsv,
   RETURN_PERIODS,
   type RainfallCarrier,
   type RainfallTable,
@@ -99,6 +100,25 @@ export function RainfallTablesEditor({ fieldId, readOnly = false, designReturnPe
     if (!t) return;
     patchTable(tableId, { rows: t.rows.filter((_, i) => i !== idx) });
   }
+  /** Replace a table's grid by the rows of a pasted KOSTRA-DWD-2020 CSV
+   *  (`parseKostraCsv`). The table becomes a native 2D KOSTRA table; the
+   *  legacy 1D flag is dropped because the file carries every column. */
+  function importCsv(tableId: string, text: string): { ok: true; rows: number; columns: number[]; warnings: string[] } | { ok: false; error: string } {
+    const t = carrier.tables.find((x) => x.id === tableId);
+    if (!t) return { ok: false, error: 'Tabelle nicht gefunden.' };
+    const parsed = parseKostraCsv(text);
+    if ('error' in parsed) return { ok: false, error: parsed.error };
+    const { legacyDesignColumn: _ldc, ...rest } = t;
+    void _ldc;
+    write({
+      tables: carrier.tables.map((tbl) =>
+        tbl.id === tableId
+          ? { ...rest, legacyDesignColumn: undefined, source: 'KOSTRA-DWD-2020', columns: parsed.columns, rows: parsed.rows }
+          : tbl,
+      ),
+    });
+    return { ok: true, rows: parsed.rows.length, columns: parsed.columns, warnings: parsed.warnings };
+  }
   function startNativeGrid(tableId: string) {
     const t = carrier.tables.find((x) => x.id === tableId);
     if (!t) return;
@@ -167,6 +187,8 @@ export function RainfallTablesEditor({ fieldId, readOnly = false, designReturnPe
             </button>
           </div>
 
+          <KostraCsvImport readOnly={readOnly} inputCls={inputCls} onImport={(text) => importCsv(t.id, text)} />
+
           {t.legacyDesignColumn ? (
             <LegacyTableView
               table={t}
@@ -187,6 +209,84 @@ export function RainfallTablesEditor({ fieldId, readOnly = false, designReturnPe
           )}
         </section>
       ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KOSTRA CSV paste box (one per table)
+// ─────────────────────────────────────────────────────────────────────────────
+
+type KostraCsvImportProps = {
+  readOnly: boolean;
+  inputCls: (ro: boolean) => string;
+  onImport: (text: string) => { ok: true; rows: number; columns: number[]; warnings: string[] } | { ok: false; error: string };
+};
+
+/** Paste the DWD CSV of the grid cell instead of typing 22 × 9 cells by hand.
+ *  Nothing is computed here — the parser copies the printed r_D(n) values. */
+function KostraCsvImport({ readOnly, inputCls, onImport }: KostraCsvImportProps) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
+  const [status, setStatus] = useState<{ kind: 'ok' | 'error'; message: string; warnings?: string[] } | null>(null);
+
+  if (!open) {
+    return (
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => { setOpen(true); setStatus(null); }}
+          disabled={readOnly}
+          className="text-xs px-3 py-1 rounded border border-hairline-strong hover:bg-paper-2 text-ink disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          KOSTRA-CSV einfügen
+        </button>
+        {status?.kind === 'ok' && <span className="text-xs text-subtext" data-testid="kostra-import-status">{status.message}</span>}
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-2 rounded border border-hairline bg-paper-2/40 p-2" data-testid="kostra-csv-import">
+      <p className="text-xs text-subtext">
+        Inhalt der DWD-Datei „KOSTRA-DWD-2020_…_INDEX_&lt;Zelle&gt;.csv“ (oder des openko-Exports) hier einfügen.
+        Gelesen werden D_min und die Spalten rN_T1 … rN_T100 (Regenspende r_D(n) in l/(s·ha)) — unverändert, keine Rundung.
+      </p>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        aria-label="KOSTRA-CSV Inhalt"
+        rows={6}
+        spellCheck={false}
+        className={`${inputCls(false)} font-mono text-xs`}
+        placeholder="D_min;hN_T1;…;rN_T1;…;rN_T100;UC_T5;UC_T10"
+      />
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => {
+            const res = onImport(text);
+            if (res.ok) {
+              setStatus({ kind: 'ok', message: `${res.rows} Dauerstufen, Spalten ${res.columns.map((c) => `${c} a`).join(' · ')} übernommen.`, warnings: res.warnings });
+              setText('');
+              setOpen(false);
+            } else {
+              setStatus({ kind: 'error', message: res.error });
+            }
+          }}
+          disabled={readOnly || text.trim() === ''}
+          className="text-xs px-3 py-1 rounded border border-hairline-strong hover:bg-paper-2 text-ink disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Übernehmen
+        </button>
+        <button
+          type="button"
+          onClick={() => { setOpen(false); setText(''); setStatus(null); }}
+          className="text-xs px-3 py-1 rounded text-subtext hover:text-ink"
+        >
+          Abbrechen
+        </button>
+        {status?.kind === 'error' && <span className="text-xs text-error" role="alert">{status.message}</span>}
+      </div>
     </div>
   );
 }
