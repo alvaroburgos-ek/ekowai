@@ -243,14 +243,147 @@ const TAB6: GuidelineTable = {
   targets: [],
 };
 
-export const GUIDELINE_TABLES: Record<string, GuidelineTable> = { TAB5, TAB6, TAB11, TAB8, TAB14 };
+
+// ---------------------------------------------------------------- Tab. 7 (A138-06), L980–L1018 — display only, keyed by the Tab.-5 group
+const T7_STAR_NOTE = '(*) Verwendungshinweis: Die Behandlungsanforderungen für die Kategorien D, SD1, SD2, SV, SVW, SF, SL, SG und SA richten sich nach den rechtlichen Anforderungen und sind ggf. mit der zuständigen Behörde abzustimmen. → Für unterirdische Anlagen (Rigole, Schacht) gibt Tab. 7 hier keinen Wirkungsgrad vor.';
+const T7_T1_HINT = 'Bei Versickerung über Versickerungsschacht Typ B mit ausreichender Filtersandschicht und vorgeschaltetem Absetzschacht (Oberflächenbeschickung 10 m/h, Horizontalgeschwindigkeit 0,05 m/s) gilt die Reinigungsleistung als nachgewiesen';
+const T7_T2_HINT = 'z. B. dezentrale Behandlungsanlage mit allgemeiner bauaufsichtlicher Zulassung DIBt; mögliche zusätzliche Sicherheitsaspekte (Tauchwand, Absperrschieber, Beprobung auf Schadstoffakkumulation etc.) im Einzelfall mit der zuständigen Behörde abstimmen';
+function tab7Row(group: string, bk: string, afs: string, gel: string, hint: string, line: string, note: string): GuidelineRow {
+  return { key: group, cells: [group, bk, afs, gel, hint], writes: {}, matches: (v) => v.flaechengruppe === group, line, note };
+}
+const T7_REQ = (afs: string, gel: string) => `Vor einer unterirdischen Versickerung ist eine dezentrale Behandlung mit η_AFS63 ≥ ${afs} und η_gelöste Stoffe ≥ ${gel} (Kupfer und Zink) nachzuweisen (Prüfung der eingetragenen Wirkungsgrade eta_AFS63 / eta_geloest).`;
+const TAB7: GuidelineTable = {
+  code: 'TAB7', worksheet: 'A138-06',
+  titleDe: 'Tabelle 7: Anforderungen an die dezentrale Niederschlagswasserbehandlung vor Versickerung über unterirdische Versickerungsanlagen (Rigolen, Versickerungsschächte) (*)',
+  clause: '§5.2.3.3, Tab. 7 (L980–L1018)',
+  heads: ['Flächengruppe (Tab. 5)', 'Belastungskategorie', 'η_AFS63', 'η_gelöste Stoffe', 'Zusätzliche Hinweise'],
+  rows: [
+    tab7Row('D', 'I', '(*)', '(*)', '(*)', 'L985', T7_STAR_NOTE),
+    tab7Row('VW1', 'I', '40 %', '50 % (**)', T7_T1_HINT, 'L986', T7_REQ('40 %', '50 %')),
+    tab7Row('V1', 'I', '40 %', '50 % (**)', T7_T1_HINT, 'L987', T7_REQ('40 %', '50 %')),
+    tab7Row('BG1', 'I', '40 %', '50 % (**)', T7_T1_HINT, 'L988', T7_REQ('40 %', '50 %')),
+    tab7Row('VW2', 'II', '70 %', '65 % (**)', T7_T2_HINT, 'L1005', T7_REQ('70 %', '65 %')),
+    tab7Row('V2', 'II', '70 %', '65 % (**)', T7_T2_HINT, 'L1006', T7_REQ('70 %', '65 %')),
+    tab7Row('BF', 'II', '70 %', '65 % (**)', T7_T2_HINT, 'L1007', T7_REQ('70 %', '65 %')),
+    tab7Row('BG2', 'II', '70 %', '65 % (**)', T7_T2_HINT, 'L1008', T7_REQ('70 %', '65 %')),
+    tab7Row('BL', 'II', '80 %', '75 % (**)', T7_T2_HINT, 'L1009', T7_REQ('80 %', '75 %')),
+    tab7Row('V3', 'III', '80 %', '75 % (**)', T7_T2_HINT, 'L1010', T7_REQ('80 %', '75 %')),
+    tab7Row('BG3', 'III', '80 %', '75 % (**)', T7_T2_HINT, 'L1011', T7_REQ('80 %', '75 %')),
+    ...['SD1', 'SD2', 'SV', 'SVW', 'SF', 'SL', 'SG', 'SA'].map((g) => tab7Row(g, g === 'SD1' ? 'II' : 'III', '(*)', '(*)', '(*)', 'L1012–L1018', T7_STAR_NOTE)),
+  ],
+  notesDe: [
+    '(**) Der Wirkungsgrad η_gelöste Stoffe bezieht sich ausschließlich auf die Referenzparameter Kupfer und Zink. (L1017)',
+    '§5.2.3.3 (L967): Bei Einsatz unterirdischer Versickerungsanlagen sind dezentrale Behandlungsanlagen vorzuschalten.',
+    'Nur relevant, wenn der gewählte Anlagentyp unterirdisch ist (Rigole, Schacht, Mulden-Rigolen mit Rigolenanteil); bei Versickerung über eine bewachsene Bodenzone gilt Tab. 6.',
+  ],
+  targets: [],
+};
+
+// ---------------------------------------------------------------- Tab. 13 (A138-12), L1706–L1713 — clickable, writes soil_bodenart_tab13
+const TAB13: GuidelineTable = {
+  code: 'TAB13', worksheet: 'A138-12',
+  titleDe: 'Tabelle 13: Größenordnungen A_S,m nach Bodenart',
+  clause: '§6.3.2, Tab. 13 (L1706–L1713)',
+  heads: ['Bodenart', 'Erforderliche, mittlere Versickerungsfläche A_S,m'],
+  rows: [
+    { key: 'mittel_feinsand', cells: ['Mittel-/Feinsand', '0,10 · A_C'], writes: { soil_bodenart_tab13: 'mittel_feinsand' }, matches: (v) => v.soil_bodenart_tab13 === 'mittel_feinsand', line: 'L1709', note: 'Orientierung: A_S,m ≈ 0,10 · A_C — Abschätzung unabhängig von der Geometrie (L1702), kein Nachweis.' },
+    { key: 'schluffig', cells: ['schluffiger Sand, sandiger Schluff, Schluff', '0,20 · A_C'], writes: { soil_bodenart_tab13: 'schluffig' }, matches: (v) => v.soil_bodenart_tab13 === 'schluffig', line: 'L1710', note: 'Orientierung: A_S,m ≈ 0,20 · A_C — Abschätzung unabhängig von der Geometrie (L1702), kein Nachweis.' },
+  ],
+  notesDe: [
+    '§6.3.2 (L1702): In Tabelle 13 werden in Abhängigkeit der Bodenart Größenordnungen zur Abschätzung von A_S,m unabhängig von der Geometrie der Anlage gegeben.',
+    '§6.3.2 (L1715): Das aus qualitativer Sicht erforderliche Verhältnis A_C/A_S,m (Tabelle 6) ist nachzuweisen.',
+  ],
+  targets: ['soil_bodenart_tab13'],
+};
+
+// ---------------------------------------------------------------- §6.4.2 q_VS list (A138-18), L1866–L1870 — display (q_VS is Gl.-24 engine output)
+const QVS: GuidelineTable = {
+  code: 'QVS', worksheet: 'A138-18',
+  titleDe: '§6.4.2 — Näherungswerte für den spezifischen Wasseraustritt q_VS aus dem Versickerrohr (ohne Herstellerangaben)',
+  clause: '§6.4.2 (L1866–L1870)',
+  heads: ['Schüttmaterial', 'q_VS'],
+  rows: [
+    { key: 'kiessand', cells: ['bei Kiessand als Schüttmaterial', 'q_VS = 0,2 l/(s·m)'], writes: {}, matches: () => false, line: 'L1869' },
+    { key: 'kies', cells: ['bei Kies (z. B. 16/32) als Schüttmaterial', 'q_VS = 5 l/(s·m)'], writes: {}, matches: () => false, line: 'L1870' },
+  ],
+  notesDe: [
+    '§6.4.2 (L1866): Liegen keine Herstellerangaben zu den Sickeröffnungen vor, können folgende Werte näherungsweise für den spezifischen Wasseraustritt q_D aus dem Versickerrohr verwendet werden.',
+    'Mit Herstellerangaben gilt Gl. 24: q_VS = 0,1 · az_SÖ · A_SÖ · 10⁻¹ (Engine-Ausgabe); das Schüttmaterial als Feld ist Ruling a138-E-4.',
+  ],
+  targets: [],
+};
+
+// ---------------------------------------------------------------- Tab. 12 (A138-01), L1471–L1490 — display keyed by design_method
+const TAB12: GuidelineTable = {
+  code: 'TAB12', worksheet: 'A138-01',
+  titleDe: 'Tabelle 12: Empfehlung hydrologischer Grundlagen für Versickerungsanlagen',
+  clause: '§5.3.3.5, Tab. 12 (L1471–L1490)',
+  heads: ['Verfahren', 'Anwendung', 'Regen', 'Bemessungshäufigkeit n (1/a) 2)', 'Maßgebliche Dauerstufe D (min)', 'Abflussbildung', 'Abflusskonzentration'],
+  rows: [
+    { key: 'einfaches_verfahren', cells: ['Einfaches Verfahren (Lastfallkonzept)', 'Dezentrale und einfache zentrale Versickerungsanlagen 1)', 'statistische Starkregen (z. B. KOSTRA)', '0,02–0,5', 'Flächenversickerung 10–15; sonst iterativ', 'Bestimmung der Rechenwerte AC unter Berücksichtigung eines konstanten Abflussbeiwerts', 'in der Regel ohne Berücksichtigung; ggf. Abminderungsfaktor f_A'], writes: {}, matches: (v) => v.design_method === 'einfaches_verfahren', line: 'L1473–L1484', note: 'Einfaches Verfahren: KOSTRA-Regenspenden, A_C mit konstantem Abflussbeiwert (Tab. 9), n nach Tab. 8 innerhalb 0,02–0,5/a, Anwendungsgrenzen nach §5.3.3.2 (A_E ≤ 200 ha oder t_f ≤ 15 min; n ≥ 0,1/a; q_S,AC ≥ 2).' },
+    { key: 'nachweisverfahren', cells: ['Nachweisverfahren (Langzeitkontinuumsimulation)', 'Zentrale Versickerung und vernetzte Mulden-Rigolen-Systeme 3)', 'geeignete, kontinuierliche Regenreihen für min. 10 Jahre', '0,02–0,5', 'entfällt', 'flächenspezifische Prozessmodellierung', 'entfällt oder Übertragungsfunktion'], writes: {}, matches: (v) => v.design_method === 'nachweisverfahren', line: 'L1473–L1484', note: 'Nachweisverfahren: Langzeitsimulation mit ≥ 10 Jahren Regenreihe (Gl. 1: M ≥ 3 · T_n), außerhalb des Einfachen Verfahrens dieser Kette.' },
+  ],
+  notesDe: [
+    '1) Einzelanlagen (Mulden, Rigolen, Mulden-Rigolen-Elemente, Schachtversickerung, Becken) oder parallel geschaltete Mulden-Rigolen-Systeme; 2) nach Tabelle 8 und unter Berücksichtigung der Anwendungsgrenzen des Einfachen Verfahrens; 3) Mulden-Rigolen-Systeme in Reihenschaltung. (L1486–L1489)',
+  ],
+  targets: [],
+};
+
+// ---------------------------------------------------------------- Tab. 4 (A138-03), L759–L767 — reference checklist (what data from where)
+const TAB4: GuidelineTable = {
+  code: 'TAB4', worksheet: 'A138-03',
+  titleDe: 'Tabelle 4: Verwendung, Art und Herkunft von Grundlagendaten für die Ersteinschätzung',
+  clause: '§5.1.1, Tab. 4 (L759–L767)',
+  heads: ['Verwendung', 'Informationsgrundlage', 'Quelle'],
+  rows: [
+    { key: 'boden', cells: ['Beurteilung der Boden-/Untergrundverhältnisse (z. B. k_f-Werte)', 'Bodenkarte, Geologische Karte, Baugrundgutachten, Sondierbohrungen etc.', 'Fachbehörden (Geologisches Landesamt, Landesamt für Bodenforschung, Umweltamt etc.), Fachplanende'], writes: {}, matches: () => false, line: 'L762' },
+    { key: 'grundwasser', cells: ['Beurteilung der Grundwasserverhältnisse (z. B. Grundwasserflurabstand, Fließrichtung)', 'Hydrogeologische Karte, Grundwasserstandsmessungen, Grundwassergleichenplan, Flurabstandsplan, hydrogeologische Gutachten etc.', 'Fachbehörden, Wasserversorgungsunternehmen'], writes: {}, matches: () => false, line: 'L763' },
+    { key: 'topografie', cells: ['Beurteilung der topografischen Verhältnisse (z. B. Hangneigung)', 'topografische Karte, Deutsche Grundkarte, digitales Geländemodell', 'Landesvermessungsamt, Katasteramt'], writes: {}, matches: () => false, line: 'L764' },
+    { key: 'restriktionen', cells: ['Beurteilung möglicher Restriktionen', 'Flächennutzungsplan, Bebauungsplan, Gebietsentwicklungsplan, Altlastenkataster, Altlastengutachten, Schutzgebiete (Landschafts-, Natur- und Wasserschutzgebiete)', 'Verwaltungsbehörden (Stadt, Kommune, Kreis, Bezirksregierung), Fachbehörden'], writes: {}, matches: () => false, line: 'L765' },
+    { key: 'machbarkeit', cells: ['Beurteilung der technischen Machbarkeit', 'Katasterplan, Leitungsplan, örtliche Begehung', 'Katasteramt, Versorgungsunternehmen, Verwaltungsbehörden'], writes: {}, matches: () => false, line: 'L766' },
+  ],
+  notesDe: [
+    'In NRW: Boden/Grundwasser → Baugrundgutachten + LANUK (OpenHygrisC), Topografie → TIM-online (DGM1, Hangneigung), Restriktionen → ELWAS-WEB (Wasserschutzgebiete, Überschwemmungsgebiete) + Kataster, Machbarkeit → Lageplan, Leitungspläne, Begehung. Die Portal-Links auf A138-01 sind mit dem Standort voreingestellt.',
+  ],
+  targets: [],
+};
+
+// ---------------------------------------------------------------- Tab. A.1 (A138-03), L2444–L2463 — display keyed by permeability_test_method
+const A1_ROW = (key: string, method: string, norm: string, result: string, quality: string, boden: string, anlage: string, line: string, match: (v: Record<string, unknown>) => boolean, note: string): GuidelineRow =>
+  ({ key, cells: [method, norm, result, quality, boden, anlage], writes: {}, matches: match, line, note });
+const TABA1: GuidelineTable = {
+  code: 'TABA1', worksheet: 'A138-03',
+  titleDe: 'Tabelle A.1: Einordnung von Methoden für die Durchlässigkeitsbestimmung in anstehendem Boden',
+  clause: 'Anhang A (normativ), Tab. A.1 (L2444–L2463)',
+  heads: ['Methode', 'Normung / Quelle', 'Ergebnis', 'Ergebnisqualität für Projektplanung', 'Eignung für Bodenart', 'Eignung für Versickerungsanlage'],
+  rows: [
+    A1_ROW('karten', 'Abschätzung mit Boden- oder Geodaten-Karten', 'DIN 4220, DIN 18196 (Eckelmann 2005)', 'k_f-Wert', 'Ersteinschätzung; nicht für Bemessung', 'alle', 'alle', 'L2448', (v) => v.permeability_test_method === 'literaturwert', 'Nur Ersteinschätzung — nicht für die Bemessung zulässig; ein Literaturwert kann den Nachweis nicht tragen.'),
+    A1_ROW('ansprache', 'Abschätzung mit Bodenansprache', 'DIN 19682-2, DIN EN ISO 14688-1, DIN EN ISO 14688-2 (Eckelmann 2005)', 'k_f-Wert', 'Ersteinschätzung; nicht für Bemessung', 'alle', 'alle', 'L2453', () => false, ''),
+    A1_ROW('sieblinie', 'Sieblinienauswertung', 'DIN ISO 11277, DIN EN ISO 17892-4, DIN 18196', 'k_f-Wert', 'Planungsgrundlage und für Bemessung', 'Sandböden (Feinsand/ breitstufige Sande)', 'tief liegende Rigolen, Schächte, unter Umständen bei Becken', 'L2454', (v) => v.permeability_test_method === 'korngroessenanalyse', 'Sieblinienauswertung: für Bemessung zulässig (f_Methode 0,1, Tab. 11), Eignung laut A.1 für Sandböden und tief liegende Rigolen/Schächte — für Versickerungsfläche und Mulden nennt A.1 den Doppelzylinder-Infiltrometer als geeignete Methode; als Bestätigung vor Ort empfohlen.'),
+    A1_ROW('labor_ungestoert', 'Laborversuche ungestörte Proben (z. B. Permeameter-Versuch, Stechzylinderbodenprobe)', 'DIN 19683-9, DIN EN ISO 17892-11, DIN 19672-1', 'k_f-Wert', 'Planungsgrundlage und für Bemessung', 'alle', 'alle', 'L2456', (v) => v.permeability_test_method === 'laborversuch', 'Laborversuch an ungestörten Proben: für alle Bodenarten und Anlagen geeignet (f_Methode 0,7, Tab. 11).'),
+    A1_ROW('bohrloch', 'Bohrlochmethode (z. B. Open-End-Test)', 'DIN EN ISO 22282-2 (Stecker 1995) (Mahabadi 2012)', 'k_f-Wert', 'Planungsgrundlage und für Bemessung', 'alle', 'Rigolen, Schächte, unter Umständen bei Becken', 'L2457', () => false, ''),
+    A1_ROW('doppelzylinder', 'Doppelzylinder-Infiltrometer', 'DIN EN ISO 22282-5, DIN 19682-7', 'Infiltrationsrate k_i oder k_f-Wert', 'Planungsgrundlage und für Bemessung', 'schlämmungsunempfindliche und steinarme Böden', 'Versickerungsfläche, Mulden, unter Umständen bei Becken', 'L2458', () => false, ''),
+    A1_ROW('schurf_klein', 'Kleinflächiger Probeschurf (≤ 1 m²)', '(Mahabadi 2012) (Woods-Ballard et al. 2015)', 'Infiltrationsrate k_i oder k_f-Wert', 'Planungsgrundlage und für Bemessung', 'alle', 'alle', 'L2459', () => false, ''),
+    A1_ROW('schurf_gross', 'Großflächige Testgrube/Probeschurf (> 1 m²)', '(Mahabadi 2012) (Woods-Ballard et al. 2015)', 'Infiltrationsrate k_i', 'Planungsgrundlage und für Bemessung', 'alle', 'alle', 'L2460', (v) => v.permeability_test_method === 'feldversuch', 'Feldversuch: die vom Regelwerk bevorzugte Methode (§5.3.3.6, L1377: „Vorzugsweise sollte der Durchlässigkeitsbeiwert für Planungen durch Feldversuche bestimmt werden.“); welche Feldmethode (Tab. 11: 1 · 0,9 · 0,9 · 0,8) ist in der Zeile zu wählen.'),
+  ],
+  notesDe: [
+    '§5.3.3.6 (L1377): Informationen zur Eignung von Bestimmungsmethoden sind ergänzend mit Anhang A, Tabelle A.1 in Abhängigkeit des Versickerungsverfahrens und der Bodenart gegeben. Vorzugsweise sollte der Durchlässigkeitsbeiwert für Planungen durch Feldversuche bestimmt werden.',
+    'Die vier vorhandenen Optionen (Feldversuch / Laborversuch / Korngrößenanalyse / Literaturwert) werden auf die acht gedruckten Methoden abgebildet; die feineren Zeilen sind Ruling a138-E-1.',
+  ],
+  targets: [],
+};
+
+export const GUIDELINE_TABLES: Record<string, GuidelineTable> = { TAB4, TAB5, TAB6, TAB7, TAB8, TAB11, TAB12, TAB13, TAB14, TABA1, QVS };
 
 /** Tables shown on a worksheet (DWA-A 138-1). */
 export const TABLES_BY_WORKSHEET: Readonly<Record<string, string[]>> = {
-  'A138-03': ['TAB11'],
-  'A138-06': ['TAB5', 'TAB6'],
+  'A138-01': ['TAB12'],
+  'A138-03': ['TAB11', 'TABA1', 'TAB4'],
+  'A138-06': ['TAB5', 'TAB6', 'TAB7'],
   'A138-08': ['TAB8'],
+  'A138-12': ['TAB13'],
   'A138-15': ['TAB14'],
+  'A138-18': ['QVS'],
 };
 
 /** Row keys of `table` that match the stored values (0, 1 or, for tables with a hidden key, several). */

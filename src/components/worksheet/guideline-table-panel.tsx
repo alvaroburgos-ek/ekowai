@@ -64,7 +64,7 @@ export function GuidelineTablePanel({ tableCode, fieldsBySymbol, readOnly, extra
         <span className="text-[10px] text-subtext">{table.clause}</span>
       </div>
       <p className="text-[11px] text-subtext">
-        {displayOnly ? 'Nur Anzeige — die Zeile folgt aus der gewählten Flächengruppe.' : canClick ? `Zeile anklicken = Wert übernehmen (schreibt ${table.targets.join(', ')}, wird gespeichert).` : writable ? 'Schreibgeschützt.' : `Zielfeld ${table.targets.join(', ')} liegt auf einem anderen Arbeitsblatt — nur Anzeige.`}
+        {displayOnly ? (matched.size > 0 ? 'Nur Anzeige — markiert ist die Zeile, die zur gespeicherten Auswahl gehört.' : 'Nur Anzeige (Referenz des Regelwerks).') : canClick ? `Zeile anklicken = Wert übernehmen (schreibt ${table.targets.join(', ')}, wird gespeichert).` : writable ? 'Schreibgeschützt.' : `Zielfeld ${table.targets.join(', ')} liegt auf einem anderen Arbeitsblatt — nur Anzeige.`}
         {' '}Markiert ist die Zeile, die zum gespeicherten Wert passt.
       </p>
 

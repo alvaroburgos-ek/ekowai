@@ -90,9 +90,40 @@ describe('Tab. 6 (A138-06, display only)', () => {
     useWorksheetStore.getState().init('inst-1', { 'f-fg': { type: 'enum', value: 'D' } } as never, {}, {});
     render(<GuidelineTablePanel tableCode="TAB6" readOnly={false} fieldsBySymbol={{ flaechengruppe: { id: 'f-fg', dataType: 'enum' } }} />);
     expect(screen.getByTestId('gt-row-TAB6-D').getAttribute('aria-selected')).toBe('true');
-    expect(screen.getByText(/Nur Anzeige — die Zeile folgt aus der gewählten Flächengruppe/)).toBeInTheDocument();
+    expect(screen.getByText(/Nur Anzeige — markiert ist die Zeile/)).toBeInTheDocument();
     expect(screen.getByTestId('gt-reading-TAB6').textContent).toMatch(/richten sich nach den rechtlichen Anforderungen und sind ggf\. mit der zuständigen Behörde abzustimmen/);
     expect(GUIDELINE_TABLES.TAB6.rows.find((r) => r.key === 'V2')!.cells[2]).toMatch(/A_C\/A_S,m ≤ 30/);
     expect(GUIDELINE_TABLES.TAB6.rows.find((r) => r.key === 'VW1')!.note).toMatch(/= Nein/);
+  });
+});
+
+describe('remaining tables (7, 12, 13, A.1, 4, q_VS)', () => {
+  it('registers every table on its worksheet', () => {
+    expect(Object.keys(GUIDELINE_TABLES).sort()).toEqual(['QVS', 'TAB11', 'TAB12', 'TAB13', 'TAB14', 'TAB4', 'TAB5', 'TAB6', 'TAB7', 'TAB8', 'TABA1']);
+    expect(TABLES_BY_WORKSHEET['A138-03']).toEqual(['TAB11', 'TABA1', 'TAB4']);
+    expect(TABLES_BY_WORKSHEET['A138-06']).toEqual(['TAB5', 'TAB6', 'TAB7']);
+  });
+
+  it('Tab. 7 reads the case (roofs) as (*) and the traffic groups with their efficiencies', () => {
+    expect(matchingRows(GUIDELINE_TABLES.TAB7, { flaechengruppe: 'D' })).toEqual(['D']);
+    expect(GUIDELINE_TABLES.TAB7.rows.find((r) => r.key === 'V2')!.cells.slice(2, 4)).toEqual(['70 %', '65 % (**)']);
+    expect(GUIDELINE_TABLES.TAB7.rows.find((r) => r.key === 'V3')!.note).toMatch(/η_AFS63 ≥ 80 %/);
+  });
+
+  it('Tab. 13 click writes the soil band; Tab. A.1 reads the sieve curve as suited to deep facilities and names the infiltrometer for swales', () => {
+    useWorksheetStore.getState().init('inst-1', { 'f-sb': { type: 'enum', value: 'schluffig' }, 'f-ptm': { type: 'enum', value: 'korngroessenanalyse' } } as never, {}, {});
+    render(<GuidelineTablePanel tableCode="TAB13" readOnly={false} fieldsBySymbol={{ soil_bodenart_tab13: { id: 'f-sb', dataType: 'enum' } }} />);
+    expect(screen.getByTestId('gt-row-TAB13-schluffig').getAttribute('aria-selected')).toBe('true');
+    fireEvent.click(screen.getByTestId('gt-row-TAB13-mittel_feinsand'));
+    expect(val('f-sb')).toBe('mittel_feinsand');
+    render(<GuidelineTablePanel tableCode="TABA1" readOnly={false} fieldsBySymbol={{ permeability_test_method: { id: 'f-ptm', dataType: 'enum' } }} />);
+    expect(screen.getByTestId('gt-row-TABA1-sieblinie').getAttribute('aria-pressed')).toBe('true'); // six columns ⇒ card layout
+    expect(screen.getByTestId('gt-reading-TABA1').textContent).toMatch(/Doppelzylinder-Infiltrometer als geeignete Methode/);
+  });
+
+  it('Tab. 12 highlights the chosen method; Tab. 4 and q_VS are pure references', () => {
+    expect(matchingRows(GUIDELINE_TABLES.TAB12, { design_method: 'einfaches_verfahren' })).toEqual(['einfaches_verfahren']);
+    expect(GUIDELINE_TABLES.TAB4.rows).toHaveLength(5);
+    expect(GUIDELINE_TABLES.QVS.rows.map((r) => r.cells[1])).toEqual(['q_VS = 0,2 l/(s·m)', 'q_VS = 5 l/(s·m)']);
   });
 });

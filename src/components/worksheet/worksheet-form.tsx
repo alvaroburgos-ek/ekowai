@@ -565,7 +565,7 @@ export function WorksheetForm({
     return codes.map((code) => {
       const t = GUIDELINE_TABLES[code];
       const metas: Record<string, { id: string; dataType: string; inheritedFrom?: string } | undefined> = {};
-      const syms = new Set<string>([...t.targets, 'n', 'T_n', 'f_methode', 'permeability_test_method', 'facility_type_selected', 'A_C', 'flaechengruppe', 'belastungskategorie']);
+      const syms = new Set<string>([...t.targets, 'n', 'T_n', 'f_methode', 'permeability_test_method', 'facility_type_selected', 'A_C', 'flaechengruppe', 'belastungskategorie', 'soil_bodenart_tab13', 'design_method']);
       for (const sym of syms) {
         const f = fieldBySymbol.get(sym);
         if (f) metas[sym] = { id: f.id, dataType: f.dataType, inheritedFrom: f.inheritedFromWorksheet };
