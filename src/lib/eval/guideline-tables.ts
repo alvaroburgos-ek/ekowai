@@ -149,11 +149,106 @@ const TAB14: GuidelineTable = {
   targets: ['facility_type_selected'],
 };
 
-export const GUIDELINE_TABLES: Record<string, GuidelineTable> = { TAB11, TAB8, TAB14 };
+
+// ---------------------------------------------------------------- Tab. 5 (A138-06), L800–L860 (three printed parts)
+/** One row per printed Flächengruppe; tokens = prod enum of flaechengruppe (D … SA) and belastungskategorie (BK_I/II/III). */
+function tab5Row(group: string, art: string, spec: string, bk: 'BK_I' | 'BK_II' | 'BK_III', line: string, note?: string): GuidelineRow {
+  const bkText = bk === 'BK_I' ? 'I' : bk === 'BK_II' ? 'II' : 'III';
+  return {
+    key: group, cells: [art, spec, group, bkText], line, note,
+    writes: { flaechengruppe: group, belastungskategorie: bk },
+    matches: (v) => v.flaechengruppe === group,
+  };
+}
+const ART_VW = 'Hof- und Wegeflächen (VW), Verkehrsflächen (V)';
+const ART_BS = 'Betriebsflächen (B) und sonstige Flächen mit besonderer Belastung (S)';
+const TAB5: GuidelineTable = {
+  code: 'TAB5', worksheet: 'A138-06',
+  titleDe: 'Tabelle 5: Kategorisierung von Niederschlagswasser bebauter oder befestigter Flächen (Quelle: analog Arbeitsblatt DWA-A 102-2/BWK-A 3-2:2020)',
+  clause: '§5.2.2, Tab. 5 (L800–L860)',
+  heads: ['Flächenart', 'Flächenspezifizierung', 'Flächengruppe (Kurzzeichen)', 'Belastungskategorie (BK)'],
+  rows: [
+    tab5Row('D', 'Dächer (D)', 'Alle Dachflächen ≤ 50 m² und Dachflächen > 50 m² mit Ausnahme der unter Flächengruppe SD1 oder SD2 fallenden', 'BK_I', 'L804'),
+    tab5Row('VW1', ART_VW, 'Fuß-, Rad- und Wohnwege; Hof- und Wegeflächen ohne Kfz-Verkehr in Sport- und Freizeitanlagen; Hofflächen ohne Kfz-Verkehr in Wohngebieten, wenn Fahrzeugwaschen dort unzulässig; Garagenzufahrten bei Einzelhausbebauung; Fußgängerzonen ohne Marktstände und seltenen Freiluftveranstaltungen', 'BK_I', 'L805–L809'),
+    tab5Row('V1', ART_VW, 'Hof- und Verkehrsflächen in Wohngebieten mit geringem Kfz-Verkehr (DTV ≤ 300 Kfz/d oder ≤ 50 Wohneinheiten), z. B. Wohnstraßen mit Park- und Stellplätzen, Zufahrten zu Sammelgaragen; Park- und Stellplätze mit geringer Frequentierung (z. B. private Stellplätze)', 'BK_I', 'L810–L813'),
+    tab5Row('VW2', ART_VW, 'Marktplätze; Flächen, auf denen häufig Freiluftveranstaltungen stattfinden; Einkaufsstraßen in Wohngebieten', 'BK_II', 'L814–L816'),
+    tab5Row('V2', ART_VW, 'Hof- und Verkehrsflächen außerhalb von Misch-, Gewerbe- und Industriegebieten mit mäßigem Kfz-Verkehr (DTV 300 Kfz/d bis 15.000 Kfz/d), z. B. Wohn- und Erschließungsstraßen mit Park- und Stellplätzen, zwischengemeindliche Straßen- und Wegeverbindungen, Zufahrten zu Sammelgaragen', 'BK_II', 'L817'),
+    tab5Row('V3', ART_VW, 'Verkehrsflächen außerhalb von Misch- und Gewerbe- und Industriegebieten mit hohem Kfz-Verkehr (DTV > 15.000 Kfz/d); Park- und Stellplätze mit hoher Frequentierung (z. B. bei Einkaufsmärkten); Hof- und Verkehrsflächen in Misch-, Gewerbe- und Industriegebieten mit mittlerem oder hohem Kfz-Verkehr (DTV > 2.000 Kfz/d), mit Ausnahme der unter SV und SVW fallenden', 'BK_III', 'L819–L825'),
+    tab5Row('BG1', ART_BS, 'Gleisanlagen (G) mit Schotteroberbau auf freier Strecke sowie im Bahnhofsbereich bis 100.000 Lt/d (Leistungstonnen pro Tag) pro Gleis mit Ausnahme der unter SG fallenden', 'BK_I', 'L835'),
+    tab5Row('BF', ART_BS, 'Start- und Landebahnen und weitere Betriebsflächen von Flughäfen (F) mit Ausnahme der unter SF fallenden', 'BK_II', 'L836'),
+    tab5Row('BL', ART_BS, 'Landwirtschaftliche Hofflächen (L) mit Ausnahme der unter SL fallenden', 'BK_II', 'L837'),
+    tab5Row('BG2', ART_BS, 'Gleisanlagen (G) mit Schotteroberbau im Bahnhofsbereich > 100.000 Lt/d pro Gleis sowie Gleisanlagen (G) mit fester Fahrbahn bis 100.000 Lt/d pro Gleis mit Ausnahme der unter SG fallenden', 'BK_II', 'L838–L841'),
+    tab5Row('SD1', ART_BS, 'Dachflächen (D) mit hohen Anteilen (20 % bis 70 % der Gesamtdachfläche) an Materialien, die im Niederschlagswasser zu signifikanten Belastungen mit gewässerschädlichen Substanzen führen', 'BK_II', 'L842'),
+    tab5Row('SD2', ART_BS, 'Dachflächen (D) mit sehr hohen Anteilen (> 70 % der Gesamtdachfläche) an Materialien, die im Niederschlagswasser zu signifikanten Belastungen mit gewässerschädlichen Substanzen führen', 'BK_III', 'L843'),
+    tab5Row('SV', ART_BS, 'Hof- und Verkehrsflächen sowie Park- und Stellplätze (V) innerhalb von Misch-, Gewerbe- und Industriegebieten, auf denen sonstige besondere Beeinträchtigungen der Niederschlagswasserqualität zu erwarten sind, z. B. Lagerflächen, Zufahrten Steinbruch', 'BK_III', 'L844', 'gedruckt „SV bzw. SVW“ — eine Zeile, zwei Kurzzeichen'),
+    tab5Row('SVW', ART_BS, 'wie SV (gedruckt „SV bzw. SVW“)', 'BK_III', 'L844'),
+    tab5Row('SF', ART_BS, 'Flächen von Flughäfen, auf denen eine Wäsche von Flugzeugen erfolgt; Flächen im unmittelbaren Umfeld von Flächen mit Betankung oder Enteisung von Flugzeugen', 'BK_III', 'L845–L848'),
+    tab5Row('SL', ART_BS, 'Landwirtschaftliche Hofflächen und sonstige Flächen (L) mit großen Tieransammlungen, z. B. Viehhaltungsbetriebe, Reiterhöfe oder landwirtschaftliche Hofflächen (L) mit sonstigen starken Beeinträchtigungen der Niederschlagswasserqualität, z. B. Flächen zur Fahrzeugreinigung', 'BK_III', 'L849'),
+    tab5Row('BG3', ART_BS, 'Gleisanlagen (G) mit fester Fahrbahn > 100.000 Lt/d pro Gleis mit Ausnahme der unter SG fallenden', 'BK_III', 'L850'),
+    tab5Row('SG', ART_BS, 'Gleisanlagen mit betriebsbedingt stark erhöhter Beeinträchtigung der Niederschlagswasserqualität, z. B. durch starken Rangierbetrieb oder stark frequentierte Bremsstrecken, bei Vegetationskontrolle durch Herbizideinsatz', 'BK_III', 'L858–L862'),
+    tab5Row('SA', ART_BS, 'Hof- und Verkehrsflächen auf Abwasser- und Abfallanlagen (A) mit stark erhöhter Beeinträchtigung der Niederschlagswasserqualität, z. B. Flächen im unmittelbaren Umfeld von Flächen, auf denen Abfälle abgefüllt, verladen oder gelagert werden', 'BK_III', 'L863'),
+  ],
+  notesDe: [
+    'Die Belastungskategorie folgt aus der Flächengruppe (Tab. 5); für D, SD1, SD2, SV, SVW, SF, SL, SG und SA richten sich die Behandlungsanforderungen nach den rechtlichen Anforderungen und sind ggf. mit der zuständigen Behörde abzustimmen (Tab. 6, Verwendungshinweis (*), L1016).',
+    'Bei Anschluss mehrerer Flächengruppen an eine Anlage gilt die jeweils strengste Behandlungsanforderung (§5.2.3.2, L944).',
+    '„Von der Kategorisierung nach Tabelle 5 kann in begründeten Fällen abgewichen werden.“ (L791)',
+  ],
+  targets: ['flaechengruppe', 'belastungskategorie'],
+};
+
+
+// ---------------------------------------------------------------- Tab. 6 (A138-06), L912–L935 — display only (keyed by the Tab.-5 group)
+const T6_STAR = '(*)';
+const T6_STAR_NOTE = '(*) Verwendungshinweis: Die Behandlungsanforderungen für die Kategorien D, SD1, SD2, SV, SVW, SF, SL, SG und SA richten sich nach den rechtlichen Anforderungen und sind ggf. mit der zuständigen Behörde abzustimmen. → „Behandlung erforderlich“ ist hier eine Behörden-/Rechtsfrage, nicht aus der Tabelle ableitbar.';
+const T6_TIER2_20 = 'A_C/A_S,m ≤ 30; bei Mulden-Rigolen: Überlauf in Rigole mit n_M max. 1/a';
+const T6_TIER2_30 = 'A_C/A_S,m ≤ 50; bei Mulden-Rigolen: Überlauf in Rigole mit n_M max. 1/a';
+const T6_TIER3_20 = 'A_C/A_S,m ≤ 15; bei Mulden-Rigolen: Überlauf in Rigole mit n_M max. 1/a';
+const T6_TIER3_30 = 'A_C/A_S,m ≤ 30; bei Mulden-Rigole: Überlauf in Rigole mit n_M max. 1/a';
+const T6_NONE_NOTE = 'Zelle leer gedruckt: keine Behandlungsanforderung über die bewachsene Bodenzone hinaus → „Behandlung erforderlich“ = Nein.';
+const T6_TIER_NOTE = 'Die Behandlung erfolgt durch die bewachsene Bodenzone; einzuhalten ist die Flächenbelastung A_C/A_S,m je Mächtigkeit (Prüfung auf A138-12).';
+function tab6Row(group: string, bk: string, c20: string, c30: string, line: string, note: string): GuidelineRow {
+  return { key: group, cells: [group, bk, c20, c30], writes: {}, matches: (v) => v.flaechengruppe === group, line, note };
+}
+const TAB6: GuidelineTable = {
+  code: 'TAB6', worksheet: 'A138-06',
+  titleDe: 'Tabelle 6: Anforderungen an die Niederschlagswasserbehandlung bei Versickerung durch eine bewachsene Bodenzone',
+  clause: '§5.2.3.2, Tab. 6 (L912–L935)',
+  heads: ['Flächengruppe (Tab. 5)', 'Belastungskategorie', 'Mindestmächtigkeit bewachsene Bodenzone ≥ 20 cm', '≥ 30 cm'],
+  rows: [
+    tab6Row('D', 'I', T6_STAR, T6_STAR, 'L916', T6_STAR_NOTE),
+    tab6Row('VW1', 'I', '', '', 'L917', T6_NONE_NOTE),
+    tab6Row('V1', 'I', '', '', 'L918', T6_NONE_NOTE),
+    tab6Row('BG1', 'I', 'bei Mulden-Rigolen: Überlauf in Rigole mit n_M max. 2/a', 'bei Mulden-Rigolen: Überlauf in Rigole mit n_M max. 2/a', 'L919', 'Keine Flächenbelastungs-Grenze; nur die Überlaufhäufigkeit bei Mulden-Rigolen.'),
+    tab6Row('VW2', 'II', T6_TIER2_20, T6_TIER2_30, 'L920', T6_TIER_NOTE),
+    tab6Row('V2', 'II', T6_TIER2_20, T6_TIER2_30, 'L921', T6_TIER_NOTE),
+    tab6Row('BF', 'II', T6_TIER2_20, T6_TIER2_30, 'L922', T6_TIER_NOTE),
+    tab6Row('BG2', 'II', T6_TIER2_20, T6_TIER2_30, 'L923', T6_TIER_NOTE),
+    tab6Row('BL', 'II', T6_TIER3_20, T6_TIER3_30, 'L924', T6_TIER_NOTE),
+    tab6Row('V3', 'III', T6_TIER3_20, T6_TIER3_30, 'L925', T6_TIER_NOTE),
+    tab6Row('BG3', 'III', T6_TIER3_20, T6_TIER3_30, 'L926', T6_TIER_NOTE),
+    tab6Row('SD1', 'II', T6_STAR, T6_STAR, 'L927', T6_STAR_NOTE),
+    tab6Row('SD2', 'III', T6_STAR, T6_STAR, 'L928', T6_STAR_NOTE),
+    tab6Row('SV', 'III', T6_STAR, T6_STAR, 'L929', T6_STAR_NOTE + ' (gedruckt „SV bzw. SVW“)'),
+    tab6Row('SVW', 'III', T6_STAR, T6_STAR, 'L929', T6_STAR_NOTE + ' (gedruckt „SV bzw. SVW“)'),
+    tab6Row('SF', 'III', T6_STAR, T6_STAR, 'L930', T6_STAR_NOTE),
+    tab6Row('SL', 'III', T6_STAR, T6_STAR, 'L931', T6_STAR_NOTE),
+    tab6Row('SG', 'III', T6_STAR, T6_STAR, 'L932', T6_STAR_NOTE),
+    tab6Row('SA', 'III', T6_STAR, T6_STAR, 'L933', T6_STAR_NOTE),
+  ],
+  notesDe: [
+    '§5.2.3.2 (L940): Die Anforderungen für die Versickerung des Niederschlagswassers aus dem Anliefer-/Verladebereich sowie von Flächen der Flächengruppen D und sonstigen Flächen mit besonderer Belastung (S) bedürfen grundsätzlich der vorherigen Abstimmung mit der zuständigen Behörde.',
+    '§5.2.3.2 (L944): Flächen mit unterschiedlichen Anforderungen […] an eine gemeinsame Mulde […]: es gilt die jeweils strengste Behandlungsanforderung.',
+    '§5.2.3.2 (L946): Die jeweilige Mindestmächtigkeit der bewachsenen Bodenzone nach Tabelle 6 ist nach Setzung der Schicht einzuhalten.',
+  ],
+  targets: [],
+};
+
+export const GUIDELINE_TABLES: Record<string, GuidelineTable> = { TAB5, TAB6, TAB11, TAB8, TAB14 };
 
 /** Tables shown on a worksheet (DWA-A 138-1). */
 export const TABLES_BY_WORKSHEET: Readonly<Record<string, string[]>> = {
   'A138-03': ['TAB11'],
+  'A138-06': ['TAB5', 'TAB6'],
   'A138-08': ['TAB8'],
   'A138-15': ['TAB14'],
 };

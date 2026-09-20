@@ -64,3 +64,35 @@ describe('GuidelineTablePanel', () => {
     expect(screen.getByText(/liegt auf einem anderen Arbeitsblatt — nur Anzeige/)).toBeInTheDocument();
   });
 });
+
+describe('Tab. 5 (A138-06)', () => {
+  it('has the 19 printed groups with prod tokens and their categories; roofs are category I', () => {
+    const t = GUIDELINE_TABLES.TAB5;
+    expect(t.rows.map((r) => r.key)).toEqual(['D', 'VW1', 'V1', 'VW2', 'V2', 'V3', 'BG1', 'BF', 'BL', 'BG2', 'SD1', 'SD2', 'SV', 'SVW', 'SF', 'SL', 'BG3', 'SG', 'SA']);
+    expect(t.rows.find((r) => r.key === 'D')!.writes).toEqual({ flaechengruppe: 'D', belastungskategorie: 'BK_I' });
+    expect(t.rows.filter((r) => r.writes.belastungskategorie === 'BK_III').map((r) => r.key)).toEqual(['V3', 'SD2', 'SV', 'SVW', 'SF', 'SL', 'BG3', 'SG', 'SA']);
+    expect(matchingRows(t, { flaechengruppe: 'D' })).toEqual(['D']);
+  });
+
+  it('a click on SD1 writes group and category II', () => {
+    useWorksheetStore.getState().init('inst-1', { 'f-fg': { type: 'enum', value: 'D' }, 'f-bk': { type: 'enum', value: 'BK_I' } } as never, {}, {});
+    render(<GuidelineTablePanel tableCode="TAB5" readOnly={false} fieldsBySymbol={{ flaechengruppe: { id: 'f-fg', dataType: 'enum' }, belastungskategorie: { id: 'f-bk', dataType: 'enum' } }} />);
+    expect(screen.getByTestId('gt-row-TAB5-D').getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByTestId('gt-row-TAB5-D').textContent).toMatch(/Alle Dachflächen ≤ 50 m²/);
+    fireEvent.click(screen.getByTestId('gt-row-TAB5-SD1'));
+    expect(val('f-fg')).toBe('SD1');
+    expect(val('f-bk')).toBe('BK_II');
+  });
+});
+
+describe('Tab. 6 (A138-06, display only)', () => {
+  it('highlights the row of the chosen group and reads the (*) case for roofs as an authority question', () => {
+    useWorksheetStore.getState().init('inst-1', { 'f-fg': { type: 'enum', value: 'D' } } as never, {}, {});
+    render(<GuidelineTablePanel tableCode="TAB6" readOnly={false} fieldsBySymbol={{ flaechengruppe: { id: 'f-fg', dataType: 'enum' } }} />);
+    expect(screen.getByTestId('gt-row-TAB6-D').getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByText(/Nur Anzeige — die Zeile folgt aus der gewählten Flächengruppe/)).toBeInTheDocument();
+    expect(screen.getByTestId('gt-reading-TAB6').textContent).toMatch(/richten sich nach den rechtlichen Anforderungen und sind ggf\. mit der zuständigen Behörde abzustimmen/);
+    expect(GUIDELINE_TABLES.TAB6.rows.find((r) => r.key === 'V2')!.cells[2]).toMatch(/A_C\/A_S,m ≤ 30/);
+    expect(GUIDELINE_TABLES.TAB6.rows.find((r) => r.key === 'VW1')!.note).toMatch(/= Nein/);
+  });
+});

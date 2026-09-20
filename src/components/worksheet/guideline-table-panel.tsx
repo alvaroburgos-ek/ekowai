@@ -38,8 +38,10 @@ export function GuidelineTablePanel({ tableCode, fieldsBySymbol, readOnly, extra
 
   if (!table) return null;
   const matched = new Set(matchingRows(table, bySymbol));
-  const writable = table.targets.every((t) => fieldsBySymbol[t] && !fieldsBySymbol[t]!.inheritedFrom);
+  const displayOnly = table.targets.length === 0;
+  const writable = !displayOnly && table.targets.every((t) => fieldsBySymbol[t] && !fieldsBySymbol[t]!.inheritedFrom);
   const canClick = !readOnly && writable;
+  const matchedNotes = table.rows.filter((r) => matched.has(r.key) && r.note).map((r) => r.note!);
 
   const pick = (rowKey: string) => {
     if (!canClick) return;
@@ -62,7 +64,7 @@ export function GuidelineTablePanel({ tableCode, fieldsBySymbol, readOnly, extra
         <span className="text-[10px] text-subtext">{table.clause}</span>
       </div>
       <p className="text-[11px] text-subtext">
-        {canClick ? `Zeile anklicken = Wert übernehmen (schreibt ${table.targets.join(', ')}, wird gespeichert).` : writable ? 'Schreibgeschützt.' : `Zielfeld ${table.targets.join(', ')} liegt auf einem anderen Arbeitsblatt — nur Anzeige.`}
+        {displayOnly ? 'Nur Anzeige — die Zeile folgt aus der gewählten Flächengruppe.' : canClick ? `Zeile anklicken = Wert übernehmen (schreibt ${table.targets.join(', ')}, wird gespeichert).` : writable ? 'Schreibgeschützt.' : `Zielfeld ${table.targets.join(', ')} liegt auf einem anderen Arbeitsblatt — nur Anzeige.`}
         {' '}Markiert ist die Zeile, die zum gespeicherten Wert passt.
       </p>
 
@@ -98,7 +100,7 @@ export function GuidelineTablePanel({ tableCode, fieldsBySymbol, readOnly, extra
                   <tr key={r.key} className={`border-t border-hairline/60 align-top ${on ? 'bg-accent/10 font-medium' : ''} ${canClick ? 'cursor-pointer hover:bg-paper-2' : ''}`}
                       onClick={() => pick(r.key)} data-testid={`gt-row-${table.code}-${r.key}`} aria-selected={on}>
                     {r.cells.map((c, i) => (
-                      <td key={i} className="py-1 pr-2">{i === 0 ? (on ? '☑ ' : '☐ ') : ''}{c}{i === 0 && r.note ? <div className="text-[10px] text-subtext font-normal">{r.note}</div> : null}</td>
+                      <td key={i} className="py-1 pr-2">{i === 0 ? (on ? '☑ ' : '☐ ') : ''}{c}{i === 0 && r.note && !displayOnly ? <div className="text-[10px] text-subtext font-normal">{r.note}</div> : null}</td>
                     ))}
                   </tr>
                 );
@@ -108,6 +110,12 @@ export function GuidelineTablePanel({ tableCode, fieldsBySymbol, readOnly, extra
         </div>
       )}
 
+      {matchedNotes.length > 0 && (
+        <div className="rounded border border-hairline bg-paper-2/40 p-2 text-xs text-ink" data-testid={`gt-reading-${table.code}`}>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-subtext">Bedeutung für die gewählte Zeile</div>
+          {matchedNotes.map((n, i) => <p key={i} className="leading-snug">{n}</p>)}
+        </div>
+      )}
       <ul className="text-[11px] text-subtext list-disc pl-4 space-y-0.5">
         {table.notesDe.map((n) => <li key={n}>{n}</li>)}
       </ul>
