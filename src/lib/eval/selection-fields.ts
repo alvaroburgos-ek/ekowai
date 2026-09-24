@@ -759,13 +759,16 @@ export function fromDbField(row: DbFieldShape): SelectionConfig | null {
     // wave B defect 2: carry `label_de` beside the value. Emitted only when at least one
     // label differs from its value, so the `toDbShape`/`fromDbField` parity pin (which
     // round-trips TS configs whose labels ARE their values) keeps its exact shape.
-    const optionLabels = Object.fromEntries(ev.map((e) => [e.value, e.label_de ?? e.value]));
+    // fix round 1 (item 4): `??` does not catch the EMPTY STRING — a prod `label_de` of ''
+    // (or whitespace) would render a blank checkbox label. Fall back to the value.
+    const labelOfValue = (e: EnumValue): string => (e.label_de?.trim() ? e.label_de : e.value);
+    const optionLabels = Object.fromEntries(ev.map((e) => [e.value, labelOfValue(e)]));
     return strip({
       kind: 'checklist',
       title: ui.title,
       subtitle: ui.subtitle ?? '',
       options: ev.map((e) => e.value),
-      optionLabels: ev.some((e) => (e.label_de ?? e.value) !== e.value) ? optionLabels : undefined,
+      optionLabels: ev.some((e) => labelOfValue(e) !== e.value) ? optionLabels : undefined,
       groups,
       note: ui.note,
       allowCustom: ui.allow_custom,

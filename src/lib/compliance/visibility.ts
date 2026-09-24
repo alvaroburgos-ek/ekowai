@@ -82,7 +82,13 @@ export type InheritableField = {
   worksheetTemplateId: string;
   standardCode: string;
   consumerWorksheets?: readonly string[] | null;
-  active?: boolean;
+  /**
+   * REQUIRED (wave B fix round 1, item 3): `loadInheritedFields` filters `active = true`, and
+   * prod carries four INACTIVE fields with a non-empty `consumer_worksheets` (DWA-M-816,
+   * DWA-A-272E). An optional flag let a caller omit the column and silently inherit them; a
+   * required one makes the omission a compile error at the call site instead.
+   */
+  active: boolean;
 };
 
 /**
@@ -111,7 +117,7 @@ export function inheritedFieldsFor<T extends InheritableField>(
     (f) =>
       f.standardCode === own.standardCode &&
       f.worksheetTemplateId !== own.worksheetTemplateId &&
-      (f.active ?? true) &&
+      f.active &&
       (f.consumerWorksheets ?? []).includes(own.worksheetCode),
   );
 }

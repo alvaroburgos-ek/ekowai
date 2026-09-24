@@ -68,3 +68,36 @@ describe('checklist labels (wave B defect 2)', () => {
     expect(screen.getByText('nur_wert')).toBeTruthy();
   });
 });
+
+/**
+ * Wave B fix round 1, item 4 — `??` does not catch the EMPTY STRING, so a prod
+ * `enum_values[i].label_de = ''` would render a blank checkbox label with no way to tell
+ * the options apart. Prod has 0 empty labels today; this is prophylactic and pinned.
+ */
+describe('checklist labels — an empty label_de falls back to the value (fix round 1, item 4)', () => {
+  const ROW_WITH_EMPTY = {
+    ...DB_ROW,
+    uiConfig: { title: 'QS-Bereiche', subtitle: 'DWA-M 820-2' },
+    enumValues: [
+      { value: 'qs_rohrleitung', label_de: 'Rohrleitungsbau', order_index: 0 },
+      { value: 'qs_leer', label_de: '', order_index: 1 },
+      { value: 'qs_blank', label_de: '   ', order_index: 2 },
+    ],
+  };
+  it('fromDbField maps an empty / whitespace label to the value', () => {
+    const cfg = fromDbField(ROW_WITH_EMPTY) as ChecklistConfig;
+    expect(cfg.optionLabels).toEqual({
+      qs_rohrleitung: 'Rohrleitungsbau',
+      qs_leer: 'qs_leer',
+      qs_blank: 'qs_blank',
+    });
+  });
+  it('the editor never renders a blank label, even if one reached optionLabels', () => {
+    const cfg: ChecklistConfig = {
+      kind: 'checklist', title: 'T', subtitle: '', options: ['qs_leer'],
+      optionLabels: { qs_leer: '' },
+    };
+    render(<ChecklistEditor fieldId="f4" config={cfg} />);
+    expect(screen.getByLabelText('qs_leer')).toBeTruthy();
+  });
+});

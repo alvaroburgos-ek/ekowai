@@ -161,3 +161,39 @@ describe('defect 5 — register row uniqueness declared in ui_config', () => {
     expect(screen.queryByTestId('register-duplicates')).toBeNull();
   });
 });
+
+/**
+ * Wave B fix round 1, item 5 — the duplicate list keyed its <li> on the RENDERED label, and
+ * `fmt` can collapse two distinct key tuples to the same text (e.g. a number below the fmt
+ * epsilon and an exact 0 both render "0"). React would then see one key for two entries.
+ * The key is the key TUPLE, not its presentation.
+ */
+describe('defect 5 — duplicate groups are keyed on the tuple, not on the rendered text', () => {
+  const NUM_CFG: RegisterUiConfig = {
+    title: 'Syn', columns: [
+      { key: 'k', type: 'lookup_key', label: 'K', required: true, lookup: { table_code: 'TAB1' } },
+      { key: 'n', type: 'number', label: 'N' },
+      { key: 'ov', type: 'boolean', label: 'abweichend' },
+    ],
+    unique_by: ['n'],
+  };
+  it('two distinct tuples that RENDER identically produce two separate warnings', () => {
+    registerTables([KANN_TABLE]);
+    initStore({ rows: [
+      { id: 'r1', k: 'a', n: 0, ov: false },
+      { id: 'r2', k: 'a', n: 0, ov: false },
+      { id: 'r3', k: 'b', n: 1e-15, ov: false },
+      { id: 'r4', k: 'b', n: 1e-15, ov: false },
+    ] });
+    render(<RegisterEditor fieldId={FIELD_ID} symbol="syn" config={NUM_CFG} standardCode="SYN-2" projectId={PROJECT_ID} />);
+    // both render as N „0“ — two <li> whose IDENTITY is the tuple, not the text
+    const items = [...screen.getByTestId('register-duplicates').querySelectorAll('li')];
+    expect(items).toHaveLength(2);
+    // the rendered TEXT is identical — that is the whole point of the case
+    expect(new Set(items.map((li) => li.textContent)).size).toBe(1);
+    const keys = items.map((li) => li.getAttribute('data-dup-key'));
+    expect(keys.every((k) => k != null)).toBe(true);
+    expect(new Set(keys).size).toBe(2);
+    expect(screen.getAllByTestId('register-row')).toHaveLength(4);
+  });
+});

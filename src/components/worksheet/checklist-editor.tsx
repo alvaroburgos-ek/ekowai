@@ -34,7 +34,12 @@ export function ChecklistEditor({ fieldId, config, readOnly = false }: Props) {
   const customEntries = carrier.selected.filter((x) => !config.options.includes(x));
   /** Plan 3 final wave B (defect 2, `m820_2-E-1`): render the printed label, store the value.
    *  Same rule as the register editor's enum column (`option_labels?.[o] ?? o`). */
-  const labelOf = (value: string): string => config.optionLabels?.[value] ?? value;
+  //  Fix round 1 (item 4): `??` does not catch '' — a blank label would render a nameless
+  //  checkbox. Only a non-empty label wins.
+  const labelOf = (value: string): string => {
+    const l = config.optionLabels?.[value];
+    return l?.trim() ? l : value;
+  };
 
   return (
     <div className="space-y-2" data-testid="checklist-editor">

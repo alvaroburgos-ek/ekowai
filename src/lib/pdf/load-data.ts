@@ -151,9 +151,13 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       // Plan 2a (Task 10): visible_when inputs for reportVisibility.
       sectionId: fields.sectionId,
       visibleWhen: fields.visibleWhen,
-      // Plan 3 final wave B (defect 1): the inheritance rule's own column — a rule whose
-      // driver lives on another worksheet of the same standard must resolve here too.
+      // Plan 3 final wave B (defect 1): the inheritance rule's own columns — a rule whose
+      // driver lives on another worksheet of the same standard must resolve here too, and
+      // `active` is part of that rule (fix round 1, item 3): `loadInheritedFields` filters
+      // `active = true`, and prod has four INACTIVE fields carrying `consumer_worksheets`
+      // (DWA-M-816, DWA-A-272E) that must not reach the lookup.
       consumerWorksheets: fields.consumerWorksheets,
+      active: fields.active,
     })
     .from(fields)
     .where(inArray(fields.worksheetTemplateId, templateIds));
@@ -328,7 +332,10 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       })),
       tmplFields,
       tmplParameters,
-      { standardCode: inst.standardCode, hiddenSymbols },
+      // wave B fix round 1 (item 1): the same inherited pair the visibility pass gets —
+      // without it the PDF re-computes as `manual_required` the very values the save path
+      // persists (M820-09-D11 & co.), so the screen and the PDF would disagree.
+      { standardCode: inst.standardCode, hiddenSymbols, inherited: { fields: inheritedFields, parameters: inheritedParameters } },
     );
 
     const complianceResults = evaluateWorksheetCompliance(

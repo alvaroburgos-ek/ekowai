@@ -73,3 +73,24 @@ describe('computeVisibility over own + inherited (the save-path / report contrac
     expect([...hiddenSymbols]).not.toContain('DN');
   });
 });
+
+/**
+ * Wave B fix round 1, item 3 — the PDF loader's `allFields` select omitted `fields.active`,
+ * so `f.active ?? true` never excluded anything and the docstring's "active only" was a lie.
+ * Prod carries FOUR inactive fields with a non-empty `consumer_worksheets` (DWA-M-816,
+ * DWA-A-272E). `active` is now REQUIRED on `InheritableField` — a caller that forgets the
+ * column is a compile error, not a silent inheritance — and the runtime rule is pinned over
+ * rows shaped exactly like that select.
+ */
+describe('inheritedFieldsFor — `active` is part of the inheritance rule (fix round 1, item 3)', () => {
+  const loaderRow = (over: Partial<(typeof ALL)[number]>) => ({
+    id: 'f-x', symbol: 'sym_x', worksheetTemplateId: 't01', standardCode: 'DIN-1989-2',
+    consumerWorksheets: ['DIN-1989-2-03'], active: true, ...over,
+  });
+  it('an INACTIVE producer that lists this worksheet is never inherited', () => {
+    expect(inheritedFieldsFor(OWN, [loaderRow({ active: false })])).toEqual([]);
+  });
+  it('the same row with active = true IS inherited (the rule is `active`, not the row shape)', () => {
+    expect(inheritedFieldsFor(OWN, [loaderRow({ active: true })]).map((f) => f.symbol)).toEqual(['sym_x']);
+  });
+});

@@ -222,12 +222,30 @@ export function materializeDerivedOutputs(args: {
   // scalar inputs below all read through `valueOf` — nothing re-implements the "hidden ⇒ null" rule.
   const valueOf = withHidden((fieldId: string) => valuesByFieldId[fieldId], hiddenFieldIdsOf(readableFields, args.hiddenSymbols));
   const symbol = symbolLookup(readableFields, valueOf);
+  /**
+   * WAVE B FIX ROUND 1 (item 2) — an ABSENT inherited json source is NOT a source.
+   *
+   * An OWN carrier that is absent still becomes an empty register/carrier on purpose: its
+   * equations then resolve to `manual_required` and the output is written as null, which
+   * CLEARS a stale value (the Plan-2a ruling). An INHERITED carrier is not this save's to
+   * clear — the producing worksheet's own save owns it — so an absent one yields no
+   * register, no carrier and no candidate symbol, and the equation is skipped entirely
+   * rather than writing null over what the producer materialised.
+   */
+  const inheritedIds = new Set((args.inheritedFields ?? []).map((f) => f.id));
+  const carrierSourceFields = inheritedIds.size === 0
+    ? readableFields
+    : readableFields.filter((f) => {
+      if (!inheritedIds.has(f.id)) return true;
+      const v = valueOf(f.id);
+      return v?.type === 'json' && v.value != null;
+    });
 
   // Registers: every field that resolves to a register config AND holds a json value.
   // A carrier with an absent value is still a register (empty rows) so its equations
   // evaluate to manual_required → null, clearing stale downstream values.
   const registers = buildRegisters(
-    readableFields,
+    carrierSourceFields,
     // `{}` (not undefined) for an absent/null carrier: buildRegisters skips fields whose json is
     // absent, but an absent register must still yield rows=[] so its equations resolve to
     // manual_required → null (clears stale outputs). Non-register fields are filtered by
@@ -239,7 +257,7 @@ export function materializeDerivedOutputs(args: {
   // `cell()`. Same hidden-aware accessor; a hidden or absent checklist yields
   // NO carrier, so its equation is manual_required and its output is written
   // as null (clears stale values) — never a phantom "nothing ticked" verdict.
-  const carriers = buildCarriers(readableFields, (fieldId) => {
+  const carriers = buildCarriers(carrierSourceFields, (fieldId) => {
     const v = valueOf(fieldId);
     return v?.type === 'json' ? v.value : undefined;
   });
@@ -247,7 +265,7 @@ export function materializeDerivedOutputs(args: {
   // Candidate (not present) carrier symbols: an equation over an UNFILLED
   // checklist is still this materialiser's business, so its stale output is
   // cleared to null instead of surviving as a value nothing backs.
-  const carrierSymbols = carrierFieldSymbols(readableFields);
+  const carrierSymbols = carrierFieldSymbols(carrierSourceFields);
   const diagnostics = new Set<string>();
   for (const r of Object.values(registers)) for (const d of r.diagnostics ?? []) diagnostics.add(d);
 

@@ -295,7 +295,7 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
   const duplicates = useMemo(() => {
     const keys = config.unique_by;
     if (!keys?.length) return [];
-    const seen = new Map<string, { n: number; label: string }>();
+    const seen = new Map<string, { id: string; n: number; label: string }>();
     for (const r of prepared.rows) {
       const id = keys.map((k) => JSON.stringify(r.values[k] ?? null)).join(' ');
       const hit = seen.get(id);
@@ -308,7 +308,7 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
           : fmt(v);
         return `${c?.label ?? k} „${shown}“`;
       }).join(' · ');
-      seen.set(id, { n: 1, label });
+      seen.set(id, { id, n: 1, label });
     }
     return [...seen.values()].filter((e) => e.n > 1);
   }, [prepared.rows, config.unique_by, colByKey, tableRows]);
@@ -454,7 +454,9 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
       {duplicates.length > 0 && (
         <ul data-testid="register-duplicates" className="text-[11px] text-warning list-disc pl-4 space-y-0.5">
           {duplicates.map((d) => (
-            <li key={d.label}>Doppelte Zeile: {d.label} — {d.n}× erfasst; zählende Prüfungen zählen sie mehrfach.</li>
+            // fix round 1 (item 5): the identity is the key TUPLE — two distinct tuples can
+            // render to the same text (fmt collapses 0 and 1e-15 to "0") and must stay two rows.
+            <li key={d.id} data-dup-key={d.id}>Doppelte Zeile: {d.label} — {d.n}× erfasst; zählende Prüfungen zählen sie mehrfach.</li>
           ))}
         </ul>
       )}

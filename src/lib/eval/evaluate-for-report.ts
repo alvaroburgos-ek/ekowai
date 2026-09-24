@@ -163,6 +163,28 @@ function buildValueMap(
 }
 
 /**
+ * Plan 3 final wave B — own + INHERITED, with an inherited row dropped when an OWN field
+ * already carries its symbol (the single-owner rule `materializeDerivedOutputs` applies on
+ * the save path). Inherited rows are a READ source: they never become hideable fields and
+ * never become an equation's output target.
+ */
+function withInherited(
+  fields: ReportField[],
+  parameters: ReportParameter[],
+  inherited?: { fields: ReportField[]; parameters: ReportParameter[] },
+): { fields: ReportField[]; parameters: ReportParameter[] } {
+  if (!inherited?.fields.length) return { fields, parameters };
+  const ownSymbols = new Set(fields.map((f) => f.symbol));
+  const extra = inherited.fields.filter((f) => !ownSymbols.has(f.symbol));
+  if (extra.length === 0) return { fields, parameters };
+  const keep = new Set(extra.map((f) => f.id));
+  return {
+    fields: [...fields, ...extra],
+    parameters: [...parameters, ...inherited.parameters.filter((p) => keep.has(p.fieldId))],
+  };
+}
+
+/**
  * Plan 2a (Task 10): fields/sections hidden by `visible_when` under the saved
  * parameters — the SAME pure helper the form and the approval gate use, over
  * the same symbol map `evaluateWorksheetCompliance` evaluates against. Feed
@@ -182,10 +204,8 @@ export function reportVisibility(
    */
   inherited?: { fields: ReportField[]; parameters: ReportParameter[] },
 ): Visibility {
-  const { bySymbol } = buildValueMap(
-    inherited?.fields.length ? [...inherited.fields, ...fields] : fields, // own last ⇒ own wins
-    inherited?.parameters.length ? [...inherited.parameters, ...parameters] : parameters,
-  );
+  const readable = withInherited(fields, parameters, inherited);
+  const { bySymbol } = buildValueMap(readable.fields, readable.parameters);
   return computeVisibility(
     fields.map((f) => ({ id: f.id, symbol: f.symbol, sectionId: f.sectionId ?? null, visibleWhen: f.visibleWhen ?? null })),
     sections,
@@ -213,35 +233,45 @@ export function evaluateWorksheetEquations(
      * source + scope, aggregator carriers, rainfall ref, Gl.8/10 scalars —
      * so an equation over it is `manual_required`, never `computed`. */
     hiddenSymbols?: ReadonlySet<string>;
+    /**
+     * Plan 3 final wave B fix round 1 (item 1): the fields this worksheet INHERITS
+     * (`inheritedFieldsFor` / `loadInheritedFields`) and their parameters. Without them the
+     * report/PDF resolved equation inputs from own rows only and re-computed as
+     * `manual_required` the very values the save path persists — the screen would say 5 and
+     * the PDF "manuell zu ermitteln" for the 20 carrier-fed Plan-3 equations. A READ source
+     * only: an inherited row is never hideable and never an output target.
+     */
+    inherited?: { fields: ReportField[]; parameters: ReportParameter[] };
   },
 ): EquationReportResult[] {
-  const { numByField, strByField, fieldBySymbol, bySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
+  const readable = withInherited(fields, parameters, opts?.inherited);
+  const { numByField, strByField, fieldBySymbol, bySymbol, jsonBySymbol } = buildValueMap(readable.fields, readable.parameters);
 
   // ONE hidden-aware accessor family (withHidden) — every read below goes
   // through these; nothing re-implements the "hidden ⇒ null" rule.
   const hiddenSymbols = opts?.hiddenSymbols;
-  const hiddenFieldIds = hiddenFieldIdsOf(fields, hiddenSymbols);
+  const hiddenFieldIds = hiddenFieldIdsOf(readable.fields, hiddenSymbols);
   const valueOf = withHidden((sym: string) => bySymbol.get(sym), hiddenSymbols);
   const jsonOf = withHidden((sym: string) => jsonBySymbol.get(sym), hiddenSymbols);
   const numOf = withHidden((fieldId: string) => numByField.get(fieldId), hiddenFieldIds);
   const strOf = withHidden((fieldId: string) => strByField.get(fieldId), hiddenFieldIds);
-  const paramOf = withHidden((fieldId: string) => parameters.find((x) => x.fieldId === fieldId), hiddenFieldIds);
+  const paramOf = withHidden((fieldId: string) => readable.parameters.find((x) => x.fieldId === fieldId), hiddenFieldIds);
 
   // Plan 2a — generic registers (mirror of the client hook). Every json field
   // that resolves to a register config is prepared into typed rows; the
   // worksheet's scalar values back a derived column's symbol references
   // (G-13). Unknown names resolve to `undefined`, never null/''.
   const tableLookup = makeTableLookup(opts?.standardCode);
-  const symbolByFieldId = new Map(fields.map((f) => [f.id, f.symbol]));
+  const symbolByFieldId = new Map(readable.fields.map((f) => [f.id, f.symbol]));
   const registers = buildRegisters(
-    fields,
+    readable.fields,
     (fieldId) => jsonOf(symbolByFieldId.get(fieldId) ?? ''),
     { standardCode: opts?.standardCode, symbol: valueOf },
   );
   // Plan 3 final wave A (defect 2): raw json carriers for `contains()` / `cell()`
   // — every json field that is NOT a register, through the same hidden-aware
   // accessor (a hidden checklist yields no carrier ⇒ manual_required).
-  const carriers = buildCarriers(fields, (fieldId) => jsonOf(symbolByFieldId.get(fieldId) ?? ''));
+  const carriers = buildCarriers(readable.fields, (fieldId) => jsonOf(symbolByFieldId.get(fieldId) ?? ''));
 
   // Aggregator context — built once per worksheet, reused per equation.
   const subAreasJson = jsonOf('sub_areas_A138_10') as { rows?: unknown } | undefined;

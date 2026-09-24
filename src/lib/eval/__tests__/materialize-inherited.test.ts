@@ -131,3 +131,64 @@ describe('materializeDerivedOutputs — inherited fields (Plan 3 wave B, defect 
     expect(out.writes[0].value).toBeCloseTo(10, 9);
   });
 });
+
+/**
+ * Wave B fix round 1, item 2 (IMPORTANT) — the guard against a future regression.
+ *
+ * An OWN register that is absent still yields `rows: []`, so its equations resolve to
+ * `manual_required` and the output is WRITTEN as null — that is the deliberate "clear the
+ * stale value" rule of Plan 2a. An INHERITED carrier is different: this save is not the one
+ * that owns it, so an ABSENT inherited carrier must produce NO write at all — writing null
+ * would clobber a value the producing worksheet's own save legitimately materialised.
+ *
+ * The shape is unreachable today only because `saveWorksheet` (`src/lib/actions/worksheet.ts`,
+ * the `batchRegisterIds.length > 0` gate) runs the block only when the batch carries an OWN
+ * register. This pin is what fails if someone widens that gate.
+ */
+describe('materializeDerivedOutputs — an ABSENT inherited carrier writes nothing (wave B fix round 1, item 2)', () => {
+  const own = [{ id: 'f-flood', symbol: 'A_C_s_flood', dataType: 'number', unit: 'm²' }];
+  const inheritedRegister = [{ id: 'f-si', symbol: 'surface_inventory', dataType: 'json', unit: null }];
+  const eq = {
+    id: 'A138-26-D1', equationNumber: 'A138-26-D1',
+    formula: 'A_C_s_flood = sum_rows(surface_inventory, area_m2 * c_s)',
+    inputSymbols: ['surface_inventory'], outputSymbol: 'A_C_s_flood',
+  };
+
+  it('no value at all for the inherited register ⇒ no write (not even a null)', () => {
+    const out = materializeDerivedOutputs({
+      standardCode: 'DWA-A-138-1', worksheetCode: 'A138-26', equations: [eq], fields: own,
+      inheritedFields: inheritedRegister, valuesByFieldId: {},
+    });
+    expect(out.writes).toEqual([]);
+  });
+
+  it('an explicit null json for the inherited register ⇒ still no write', () => {
+    const out = materializeDerivedOutputs({
+      standardCode: 'DWA-A-138-1', worksheetCode: 'A138-26', equations: [eq], fields: own,
+      inheritedFields: inheritedRegister,
+      valuesByFieldId: { 'f-si': { type: 'json', value: null } },
+    });
+    expect(out.writes).toEqual([]);
+  });
+
+  it('the same for an inherited CHECKLIST carrier read through contains()', () => {
+    const out = materializeDerivedOutputs({
+      standardCode: 'DWA-M-820-1', worksheetCode: 'M820-09',
+      equations: [{ id: 'X-2', equationNumber: 'X-2', formula: "flag_code = if(contains(pruefliste, 'a'), 1, 0)", inputSymbols: ['pruefliste'], outputSymbol: 'flag_code' }],
+      fields: [{ id: 'f-code', symbol: 'flag_code', dataType: 'number', unit: null }],
+      inheritedFields: [{ id: 'f-chk', symbol: 'pruefliste', dataType: 'json', unit: null }],
+      valuesByFieldId: {},
+    });
+    expect(out.writes).toEqual([]);
+  });
+
+  it('an OWN absent register still writes null — the clear-stale rule is untouched', () => {
+    const out = materializeDerivedOutputs({
+      standardCode: 'DWA-A-138-1', worksheetCode: 'A138-26', equations: [eq],
+      fields: [...own, { id: 'f-si-own', symbol: 'surface_inventory', dataType: 'json', unit: null }],
+      valuesByFieldId: {},
+    });
+    expect(out.writes).toHaveLength(1);
+    expect(out.writes[0].value).toBeNull();
+  });
+});
