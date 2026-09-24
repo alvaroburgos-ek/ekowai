@@ -153,7 +153,10 @@ export function EngineVerdict({ equation }: { equation: ReportEquation }) {
 
 /** Plan 3 Task 1b: a string input (enum token / text) prints QUOTED and verbatim —
  * never through the numeric formatter. */
-function formatInput(v: number | string): string {
+function formatInput(v: number | string | boolean): string {
+  // Plan 3 final wave A (defect 1): a boolean input renders as the bare keyword
+  // the expression language compares against (`flag = true`).
+  if (typeof v === 'boolean') return String(v);
   return typeof v === 'string' ? quoteStringInput(v) : formatNumber(v);
 }
 

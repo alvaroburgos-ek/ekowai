@@ -232,6 +232,19 @@ export async function checkApprovalGate(
 
   const lookup = makeGateLookup(localSymbols, bySymbol, fallback);
 
+  // Plan 3 final wave A (defect 4): the RAW json of this worksheet's carriers,
+  // so a gate `contains(checklist, 'token')` has a value to read. `bySymbol`
+  // above deliberately keeps mapping a carrier to the 'present' marker for the
+  // existence checks — this is the carrier path beside it, local fields only
+  // (the project-wide fallback resolves scalars; a structured carrier is never
+  // merged across worksheets).
+  const carrierByFieldId = new Map(tmplFields.map((f) => [f.symbol, f]));
+  const gateCarrier = (sym: string): unknown => {
+    const f = carrierByFieldId.get(sym);
+    if (!f || f.dataType !== 'json') return undefined;
+    return paramByFieldId.get(f.id)?.valueJson ?? undefined;
+  };
+
   // Plan 2a (Task 10): fields/sections hidden by `visible_when` under the
   // SAVED values — same pure helper and same lookup the form uses, so the
   // gate cannot disagree with what the engineer saw. A block condition that
@@ -284,7 +297,7 @@ export async function checkApprovalGate(
 
   const failingBlockConditions: ApprovalGateResult['failingBlockConditions'] = [];
   for (const r of rows) {
-    const result = evaluateCondition(r.condition, lookup, { hiddenSymbols });
+    const result = evaluateCondition(r.condition, lookup, { hiddenSymbols, carrier: gateCarrier });
     if (result.kind === 'fail') {
       failingBlockConditions.push({
         code: r.code,

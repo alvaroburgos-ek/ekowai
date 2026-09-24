@@ -15,7 +15,7 @@ import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
-import { buildRegisters } from '@/lib/eval/register-rows';
+import { buildCarriers, buildRegisters } from '@/lib/eval/register-rows';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
 import type { Value } from '@/lib/expr';
 import {
@@ -60,8 +60,9 @@ export type SnapshotEquationOutput =
       kind: 'computed';
       value: number;
       formula: string;
-      /** Plan 3 Task 1b: enum/text inputs are recorded as their verbatim strings. */
-      substituted: Record<string, number | string>;
+      /** Plan 3 Task 1b: enum/text inputs are recorded as their verbatim strings.
+       * Plan 3 final wave A (defect 1): boolean inputs as `true`/`false`. */
+      substituted: Record<string, number | string | boolean>;
     }
   | {
       kind: 'manual_required';
@@ -283,6 +284,9 @@ export function buildSnapshotPayload(args: {
     (fieldId) => paramForEngine(fieldId)?.valueJson ?? undefined,
     { standardCode: args.standardCode, symbol: scalarBySymbol },
   );
+  // Plan 3 final wave A (defect 2): raw json carriers for `contains()` / `cell()`
+  // — every json field that is NOT a register, same hidden-aware accessor.
+  const carriers = buildCarriers(fieldList, (fieldId) => paramForEngine(fieldId)?.valueJson ?? undefined);
 
   // Carriers for aggregator-driven equations. The JSON value's shape is
   // checked at the aggregator boundary — if the carrier is malformed, the
@@ -524,6 +528,7 @@ export function buildSnapshotPayload(args: {
       aggregator,
       registers,
       tableLookup,
+      carriers,
     });
 
     // Task 2 (A138-10 auto-Q_zu): basin Gl.8 materialises governing D + r_D
@@ -586,9 +591,18 @@ export function buildSnapshotPayload(args: {
 
   // (visibility — `hiddenSymbols` — is computed once above the equation loop.)
 
+  // Plan 3 final wave A (defect 4): the raw json of a checklist/grid carrier
+  // for a gate `contains(...)`. `lookupForCompliance` deliberately maps json
+  // to "missing" for the scalar path; this is the carrier path beside it.
+  const carrierForCompliance = (sym: string): unknown => {
+    const f = fieldBySymbol.get(sym);
+    if (!f || f.dataType !== 'json') return undefined;
+    return paramForEngine(f.id)?.valueJson ?? undefined;
+  };
+
   const complianceResults: Record<string, SnapshotComplianceVerdict> = {};
   for (const req of crList) {
-    const res = evaluateCondition(req.condition, lookupForCompliance, { hiddenSymbols });
+    const res = evaluateCondition(req.condition, lookupForCompliance, { hiddenSymbols, carrier: carrierForCompliance });
     switch (res.kind) {
       case 'pass':
         complianceResults[req.id] = 'pass';

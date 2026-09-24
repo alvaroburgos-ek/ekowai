@@ -1,6 +1,6 @@
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
 import { engineInputValue } from '@/lib/eval/engine-input';
-import { buildRegisters } from '@/lib/eval/register-rows';
+import { buildCarriers, buildRegisters } from '@/lib/eval/register-rows';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
@@ -660,6 +660,10 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           },
         },
       );
+      // Plan 3 final wave A (defect 2): raw json carriers for `contains()` /
+      // `cell()` — every json field that is NOT a register, same hidden-aware
+      // accessor as the registers above.
+      const carriers = buildCarriers(tplFields, (fieldId) => paramForEngine(fieldId)?.valueJson ?? undefined);
 
       // Equations — evaluate each whitelisted one server-side. Same
       // evaluator the browser uses. NEVER returns a number when the
@@ -710,6 +714,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           inputs,
           registers,
           tableLookup,
+          carriers,
         });
         return {
           id: eq.id,
@@ -724,8 +729,15 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
       });
 
 
+      // Plan 3 final wave A (defect 4): the raw json of a checklist/grid
+      // carrier, so a gate `contains(...)` has a value to read. `gateLookup`
+      // above deliberately hands the gate only scalars.
+      const gateCarrier = (sym: string): unknown => {
+        const f = tplFields.find((x) => x.symbol === sym);
+        return f && f.dataType === 'json' ? paramForEngine(f.id)?.valueJson ?? undefined : undefined;
+      };
       const evaluatedCompliance: ReportCompliance[] = tplCReqs.map((c) => {
-        const result = evaluateCondition(c.condition, gateLookup, { hiddenSymbols });
+        const result = evaluateCondition(c.condition, gateLookup, { hiddenSymbols, carrier: gateCarrier });
         // Stage-3: failed gates carry the per-leaf explanation (same AST as
         // the evaluator) so the dossier shows actual · required · wouldPass.
         let explanation: ExplainLeaf[] | undefined;

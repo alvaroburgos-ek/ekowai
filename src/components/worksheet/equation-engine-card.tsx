@@ -278,7 +278,11 @@ export function EquationEngineCard({
 
 /** Plan 3 Task 1b: a string input (enum token / text) renders QUOTED and verbatim —
  * never through the numeric formatter. */
-function formatInput(v: number | string): string {
+function formatInput(v: number | string | boolean): string {
+  // Plan 3 final wave A (defect 1): a boolean input renders as the bare keyword
+  // the expression language compares against (`flag = true`) — never quoted
+  // like a text token, never formatted like a number.
+  if (typeof v === 'boolean') return String(v);
   return typeof v === 'string' ? quoteStringInput(v) : formatNumber(v);
 }
 
@@ -312,7 +316,7 @@ function formatNumberWide(v: number): string {
  */
 function substituteFormula(
   formula: string,
-  substituted: Record<string, number | string>,
+  substituted: Record<string, number | string | boolean>,
 ): string {
   const symbols = Object.keys(substituted).sort((a, b) => b.length - a.length);
   let out = formula;
@@ -323,7 +327,10 @@ function substituteFormula(
     // negative lookbehind/lookahead for [A-Za-z0-9_].
     const re = new RegExp(`(?<![A-Za-z0-9_])${escaped}(?![A-Za-z0-9_])`, 'g');
     const v = substituted[sym];
-    const literal = typeof v === 'string' ? quoteStringInput(v) : formatNumberWide(v);
+    // Plan 3 final wave A: a boolean substitutes as the bare `true`/`false`
+    // keyword, so the substituted form stays a valid expression.
+    const literal =
+      typeof v === 'boolean' ? String(v) : typeof v === 'string' ? quoteStringInput(v) : formatNumberWide(v);
     // function replacer: a text value containing `$` must not be read as a replacement pattern
     out = out.replace(re, () => literal);
   }

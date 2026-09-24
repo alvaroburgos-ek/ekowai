@@ -47,3 +47,22 @@ export function makeSymbolLookup(
   // aligned with every server lookup (gate / report / snapshot / assembler).
   return (sym: string) => symbolToValue.get(sym) ?? undefined;
 }
+
+/**
+ * Plan 3 final wave A (defect 4) — the RAW json carrier accessor beside
+ * `makeSymbolLookup`, for a gate `contains(checklist, 'token')`. The symbol
+ * lookup above deliberately keeps mapping a carrier to the 'present'/absent
+ * marker (the existence-check contract); this reads the value itself.
+ * Pass it as `evaluateCondition(…, { carrier })`.
+ */
+export function makeCarrierLookup(
+  fields: ReadonlyArray<{ id: string; symbol: string }>,
+  values: Readonly<Record<string, LookupValue | undefined>>,
+): (sym: string) => unknown {
+  const bySymbol = new Map<string, unknown>();
+  for (const f of fields) {
+    const v = values[f.id];
+    if (v?.type === 'json' && v.value != null) bySymbol.set(f.symbol, v.value);
+  }
+  return (sym: string) => bySymbol.get(sym);
+}

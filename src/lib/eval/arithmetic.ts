@@ -53,7 +53,9 @@ export function evalExpression(
   expression: string,
   // Plan 3 Task 1b: enum/text inputs are string entries — `symbol()` hands the
   // string to the evaluator verbatim (lookup keys, if/== operands).
-  scope: Record<string, number | string>,
+  // Plan 3 final wave A (defect 1): boolean inputs are boolean entries — the
+  // expr `Value` union carries them natively (`compare()` / `truthy()`).
+  scope: Record<string, number | string | boolean>,
   extra?: EvalExtras,
 ): number {
   const values = new Map(Object.entries(scope));

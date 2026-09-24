@@ -12,8 +12,11 @@
  *     computes 61,4656 and prod equation 2 inverts it back to L = 10.
  *   - edge cases: an EMPTY register is never a phantom pass; a single row makes s `manual_required`
  *     (s is undefined for n = 1); an incomplete row (no x_i) never counts.
- *   - iso5667_1-F-1: a (aspect, method) pair with no S21 row leaves `method_ok` BLANK (no diagnostic),
- *     and any aggregate over that column goes `manual_required` — the raw behaviour, pinned.
+ *   - iso5667_1-F-1: a (aspect, method) pair with no S21 row leaves `method_ok` BLANK and any
+ *     aggregate over that column goes `manual_required`. Plan 3 final wave A (defect 5) fixed the
+ *     SILENCE, not the verdict: the register now reports the missed S21 row on `lookupMisses`
+ *     (NOT on the amber `diagnostics` channel — a row the standard does not print is not an
+ *     authoring defect) and the aggregate's message cites it. Both are pinned below.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -143,7 +146,7 @@ describe('ISO-5667-1 Plan-3 equations', () => {
     expect(['99', '98', '95', '90', '80', '68', '50'].map((c) => table('S16_4_K', [c])!.k)).toEqual([2.58, 2.33, 1.96, 1.64, 1.28, 1.0, 0.67]);
   });
 
-  it('-02 / -05 / -08 register counts; the §12.1.2 badge reads the seeded 50 mm; iso5667_1-F-1: a pair with no S21 row leaves method_ok BLANK with no diagnostic and any aggregate over it goes manual', () => {
+  it('-02 / -05 / -08 register counts; the §12.1.2 badge reads the seeded 50 mm; iso5667_1-F-1 (wave A): a pair with no S21 row leaves method_ok BLANK, the register NAMES the missed S21 row on lookupMisses, and the aggregate stays manual_required — now citing why', () => {
     const det = prep('ISO-5667-1-02', 'determinands', [
       { id: 'd1', kennung: 'D-1', parameter: 'Nitrat', variability: 'wide_rapid', target_statistic: 'arithmetic_mean', n_required: 61 },
       { id: 'd2', kennung: 'D-2', parameter: 'CSB', variability: 'stable', target_statistic: 'median', n_required: 12 },
@@ -170,14 +173,29 @@ describe('ISO-5667-1 Plan-3 equations', () => {
       { id: 'f3', kennung: 'D-1', aspect: 'direction', method: 'venturi' }, // NOT printed under §21.2 → no S21 row
     ]);
     expect(computed(run('ISO-5667-1-08-D1', { registers: { flow_measurements: flow } }))).toBe(3);
-    // F-1: the unprinted pair yields null, NOT 0, and the register reports no diagnostic
+    // F-1: the unprinted pair yields null, NOT 0 — unchanged, and still fail-safe.
     expect(flow.rows.map((r) => r.values.method_ok)).toEqual([1, 1, null]);
+    // Plan 3 final wave A (defect 5) UPDATED THIS PIN. It used to assert that the
+    // register says NOTHING about the blank (`flow.diagnostics ?? []` → `[]` and a bare
+    // `Fehlende Eingabe für count_rows(): method_ok`) — the silence iso5667_1-F-1 was
+    // filed against. The register now NAMES the missed S21 row, on its own channel:
+    //   - `diagnostics` (the amber authoring-defect warning) stays empty — a table row
+    //     the standard does not print is not a misconfiguration;
+    //   - `lookupMisses` carries the reason, deduplicated;
+    //   - the aggregate's message cites it, so the engineer reads WHY a column they
+    //     never fill by hand is undecidable.
+    // The VERDICT is deliberately unchanged: still manual_required, never a phantom 0.
     expect(flow.diagnostics ?? []).toEqual([]);
-    // …so a count over method_ok is NOT expressible today — it goes manual_required, never a phantom 0
+    expect(flow.lookupMisses).toEqual([
+      'method_ok: lookup(): keine Zeile in S21 für Schlüssel [direction, venturi] (Spalte valid)',
+    ]);
     const counted = evaluateFormula({
       equationId: 'probe-F-1', formula: 'bad = count_rows(flow_measurements, method_ok == 0)',
       inputSymbols: ['flow_measurements'], outputSymbol: 'bad', inputs: [], registers: { flow_measurements: flow }, tableLookup: table,
     });
-    expect(manual(counted)).toBe('Fehlende Eingabe für count_rows(): method_ok');
+    expect(counted.kind).toBe('manual_required');
+    expect(manual(counted)).toBe(
+      'Fehlende Eingabe für count_rows(): method_ok — method_ok: lookup(): keine Zeile in S21 für Schlüssel [direction, venturi] (Spalte valid)',
+    );
   });
 });

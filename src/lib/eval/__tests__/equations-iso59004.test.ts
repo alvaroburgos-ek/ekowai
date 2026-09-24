@@ -132,15 +132,33 @@ describe('ISO-59004 Plan-3 equations', () => {
     for (const n of EQUATIONS.map((e) => e.equation_number)) expect(computed(run(n, registers)), n).toBe(0);
   });
 
-  it('iso59004-F-1: the withheld -04-D1 is proven withheld — the AND-chain does not parse, and the nested-if rewrite that parses returns manual_required for want of `carriers`', () => {
+  it('iso59004-F-1 UNBLOCKED by wave A: the AND-chain parses AND evaluates — the equation stays UNEMITTED until the owner ratifies it', () => {
+    // This pin used to assert the two blocks of iso59004-F-1:
+    //   (1) parseNumeric(<the AND-chain>) ⇒ { ok: false, message: 'Ausdruck erwartet.' }
+    //   (2) the nested-if rewrite ⇒ manual_required 'Unbekanntes Symbol "principles" im Ausdruck.'
+    // Plan 3 final wave A fixed BOTH root causes — defect 3 (a boolean-valued call is a condition
+    // atom, so AND/OR chain them) and defect 2 (every production caller now passes `carriers`).
+    // It is therefore the FIX, not the pin, that was right; the pin is re-aimed at the new
+    // behaviour and at the fact that nothing was emitted on the strength of it.
     const strip = (f: string) => f.replace(/^[a-z_]+ = /, '');
-    expect(parseNumeric(strip(WITHHELD_04_D1_FORMULA))).toEqual({ ok: false, message: 'Ausdruck erwartet.' });
+    expect(parseNumeric(strip(WITHHELD_04_D1_FORMULA)).ok).toBe(true);
     expect(parseNumeric(strip(WITHHELD_04_D1_NESTED_FORM)).ok).toBe(true);
-    const probe = evaluateFormula({
-      equationId: 'probe-F-1', formula: WITHHELD_04_D1_NESTED_FORM,
+    const probe = (selected: string[]) => evaluateFormula({
+      equationId: 'probe-F-1', formula: WITHHELD_04_D1_FORMULA,
       inputSymbols: ['principles'], outputSymbol: 'all_principles_considered_code',
-      inputs: [{ symbol: 'principles', value: 'systems_thinking', unit: null }], tableLookup: table,
+      inputs: [], tableLookup: table, carriers: { principles: selected },
     });
-    expect(manual(probe)).toBe('Unbekanntes Symbol "principles" im Ausdruck.');
+    const SIX = ['systems_thinking', 'value_creation', 'value_sharing', 'resource_stewardship', 'resource_traceability', 'ecosystem_resilience'];
+    expect(computed(probe(SIX))).toBe(1);
+    expect(computed(probe(SIX.slice(0, 5)))).toBe(0);
+    // WITHOUT a carrier it is still the fail-safe manual_required — never a phantom 0.
+    const noCarrier = evaluateFormula({
+      equationId: 'probe-F-1', formula: WITHHELD_04_D1_FORMULA,
+      inputSymbols: ['principles'], outputSymbol: 'all_principles_considered_code',
+      inputs: [{ symbol: 'principles', value: null, unit: null }], tableLookup: table,
+    });
+    expect(manual(noCarrier)).toBe('Fehlende oder leere Eingaben: principles');
+    // …and the encoding is UNCHANGED by this wave: no equation row was added.
+    expect(EQUATIONS.find((e) => e.output_symbol === 'all_principles_considered_code')).toBeUndefined();
   });
 });

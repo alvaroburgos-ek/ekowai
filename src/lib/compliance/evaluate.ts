@@ -12,7 +12,11 @@
  * `status == ersatz`), existence (`x IS [NOT] NULL/EMPTY`), membership
  * (`x IN {a, b}`), truthy flags, `AND`/`OR`/`NOT`/parentheses, `IF cond THEN
  * cond` guards, and calls from the shared registry (`lookup(...)`,
- * `count_rows(...)`, `if(...)`). Anything that does not parse (prose such as
+ * `count_rows(...)`, `if(...)`). Plan 3 final wave A (defect 4, `iso59004-I-3`):
+ * a BOOLEAN-valued call — `contains(checklist, 'token')`, `flag(reg, 'key')` —
+ * is a condition ATOM on its own and inside `AND`/`OR`/`NOT`; feed the raw json
+ * through `opts.carrier` or `contains()` is `pending` (never a verdict).
+ * Anything that does not parse (prose such as
  * "Engineer attestation") is `manual`; a referenced symbol without a value is
  * `pending`; a symbol listed in `opts.hiddenSymbols` is `not_applicable`.
  * Semantics pinned in `src/lib/expr/__tests__/legacy-semantics.test.ts`: a

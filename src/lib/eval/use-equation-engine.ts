@@ -28,7 +28,7 @@ import type {
   FloodSubAreasCarrier,
   Gl10Scalars,
 } from './aggregators';
-import { buildRegisters } from './register-rows';
+import { buildCarriers, buildRegisters } from './register-rows';
 import { makeTableLookup } from './regulation-tables-fallback';
 import type { Value } from '@/lib/expr';
 import { hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
@@ -211,6 +211,21 @@ export function useEquationEngine({
         { standardCode, symbol: scalarBySymbol },
       ),
     [fields, storeValue, standardCode, scalarBySymbol],
+  );
+
+  // Plan 3 final wave A (defect 2): raw json carriers for `contains()` /
+  // `cell()` — every json field that is NOT a register, read through the same
+  // hidden-aware `storeValue` (a hidden checklist yields no carrier).
+  const carriers = useMemo(
+    () =>
+      buildCarriers(
+        fields.map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType ?? 'json', widget: f.widget, uiConfig: f.uiConfig })),
+        (fieldId) => {
+          const v = storeValue(fieldId);
+          return v?.type === 'json' ? v.value : undefined;
+        },
+      ),
+    [fields, storeValue],
   );
 
   // KOSTRA carrier (Gl. 8): the `r_D_n_table` field carries the rainfall
@@ -555,6 +570,7 @@ export function useEquationEngine({
         aggregator,
         registers,
         tableLookup,
+        carriers,
       });
     }
     return next;
@@ -564,6 +580,7 @@ export function useEquationEngine({
     fieldBySymbol,
     engineEquationIds,
     registers,
+    carriers,
     tableLookup,
     kostraCarrier,
     kostraResolution,

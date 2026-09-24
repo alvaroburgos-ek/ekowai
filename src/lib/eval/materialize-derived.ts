@@ -34,7 +34,7 @@ import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
 import { rewriteRules } from './rewrites';
 import { resolveRegisterConfig, withFallbackRegisterEquations } from './register-configs';
-import { buildRegisters } from './register-rows';
+import { buildCarriers, buildRegisters, carrierFieldSymbols } from './register-rows';
 import { makeTableLookup } from './regulation-tables-fallback';
 import type { Value } from '@/lib/expr';
 
@@ -150,7 +150,19 @@ export function materializeDerivedOutputs(args: {
     (fieldId) => { const v = valueOf(fieldId); return v?.type === 'json' ? (v.value ?? {}) : {}; },
     { standardCode, symbol },
   );
+  // Plan 3 final wave A (defect 2): raw json carriers for `contains()` /
+  // `cell()`. Same hidden-aware accessor; a hidden or absent checklist yields
+  // NO carrier, so its equation is manual_required and its output is written
+  // as null (clears stale values) — never a phantom "nothing ticked" verdict.
+  const carriers = buildCarriers(fields, (fieldId) => {
+    const v = valueOf(fieldId);
+    return v?.type === 'json' ? v.value : undefined;
+  });
   const registerSymbols = new Set(Object.keys(registers));
+  // Candidate (not present) carrier symbols: an equation over an UNFILLED
+  // checklist is still this materialiser's business, so its stale output is
+  // cleared to null instead of surviving as a value nothing backs.
+  const carrierSymbols = carrierFieldSymbols(fields);
   const diagnostics = new Set<string>();
   for (const r of Object.values(registers)) for (const d of r.diagnostics ?? []) diagnostics.add(d);
 
@@ -159,7 +171,9 @@ export function materializeDerivedOutputs(args: {
   for (const eq of withFallbackRegisterEquations(worksheetCode, [...args.equations])) {
     if (!eq.outputSymbol || equationProfiles[eq.id]?.displayOnly) continue;
     const consumed = new Set([...normalizeSymbols(eq.inputSymbols ?? []), ...Object.values(rewriteRules[eq.id]?.remap ?? {})]);
-    if (![...consumed].some((s) => registerSymbols.has(s))) continue;
+    // Register-fed OR carrier-fed: both are json values the client cannot
+    // persist as a scalar, so the save path is the one that materialises them.
+    if (![...consumed].some((s) => registerSymbols.has(s) || carrierSymbols.has(s))) continue;
     const outField = fieldBySymbol.get(eq.outputSymbol);
     if (!outField || writtenFieldIds.has(outField.id)) continue;
     writtenFieldIds.add(outField.id);
@@ -177,6 +191,7 @@ export function materializeDerivedOutputs(args: {
       inputs,
       registers,
       tableLookup: table,
+      carriers,
     });
     writes.push({ equationId: eq.id, symbol: eq.outputSymbol, fieldId: outField.id, value: state.kind === 'computed' ? state.value : null, state });
   }

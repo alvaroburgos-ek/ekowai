@@ -59,8 +59,10 @@ export type EvalInputValue = {
   symbol: string;
   /** Plan 3 Task 1b: a `number` field value, or the VERBATIM string of an
    * `enum`/`text` field (never coerced to a number); `null` = missing.
+   * Plan 3 final wave A (defect 1): a `boolean` field value verbatim — `false`
+   * is a VALUE, not a missing input.
    * Build it with `engineInputValue()` (engine-input.ts). */
-  value: number | string | null;
+  value: number | string | boolean | null;
   /** unit as stored on the wizard field; null/undefined when the symbol is dimensionless */
   unit: string | null;
 };
@@ -96,8 +98,10 @@ export type EvalState =
       value: number;
       /** the values used as inputs, by symbol-after-rewrite. Plan 3 Task 1b:
        * an enum/text input is recorded as its VERBATIM string — renderers
-       * quote it (`schutzkategorie = 'gering'`) and never format it as a number. */
-      substituted: Record<string, number | string>;
+       * quote it (`schutzkategorie = 'gering'`) and never format it as a number.
+       * Plan 3 final wave A: a boolean input is recorded as `true`/`false` and
+       * renders as the bare keyword (never quoted, never formatted as a number). */
+      substituted: Record<string, number | string | boolean>;
       /** the formula RHS actually fed to mathjs (after rewrite + LHS stripping) */
       formulaEvaluated: string;
       /** present when a rewrite was applied */
@@ -200,7 +204,7 @@ export function evaluateFormula(req: EvalRequest): EvalState {
   const profile = equationProfiles[req.equationId];
 
   // 2. Resolve each needed symbol from the supplied inputs.
-  const substituted: Record<string, number | string> = {};
+  const substituted: Record<string, number | string | boolean> = {};
   const missing: string[] = [];
   const unitConflicts: UnitConflict[] = [];
   const valueBySymbol = new Map(req.inputs.map((i) => [i.symbol, i]));
@@ -214,6 +218,9 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     // string. A non-empty string (enum token / text) is PRESENT and is passed
     // verbatim — `lookup()` / `if()` / `==` consume it; an arithmetic operator
     // rejects it in the evaluator (`Operand ist keine Zahl`, manual_required).
+    // Plan 3 final wave A (defect 1): a BOOLEAN is present for BOTH `true` and
+    // `false` — `false === ''` is false, so the rule below already admits it;
+    // only `null` (never answered) is missing.
     if (
       !found ||
       found.value === null ||
@@ -299,7 +306,7 @@ export function evaluateFormula(req: EvalRequest): EvalState {
   // input values. They are NOT recorded as substituted inputs in the
   // returned state — the engineer-facing UI surfaces variable substitutions,
   // not language-level constants.
-  const scope: Record<string, number | string> = profile?.constants
+  const scope: Record<string, number | string | boolean> = profile?.constants
     ? { ...substituted, ...profile.constants }
     : substituted;
 

@@ -31,7 +31,17 @@ import {
   type Value,
 } from './scope';
 
-type Ctx = { scope: Scope; strict: boolean; missing: Set<string>; row?: RowValues };
+/**
+ * `diagnostics` (Plan 3 final wave A, defect 5): an optional sink the caller
+ * supplies to learn WHY a `lookup()` produced nothing. It is needed because a
+ * lookup miss inside an `if()` TEST never reaches the caller as an error —
+ * conditions are always evaluated leniently (`evalNodeCore` forces
+ * `strict: false`), so `if(lookup(...) == 1, 1, 0)` surfaces only as
+ * `Fehlende Eingabe für if():` with an empty symbol list. The sink is
+ * write-only and additive: nothing about the RESULT changes when it is
+ * present, and every caller that omits it behaves exactly as before.
+ */
+type Ctx = { scope: Scope; strict: boolean; missing: Set<string>; row?: RowValues; diagnostics?: string[] };
 
 type Ternary = 'true' | 'false' | 'missing';
 
@@ -194,7 +204,15 @@ function resolveRegister(e: Expr, ctx: Ctx): { reg: PreparedRegister; name: stri
     if (count === null) return null;
     const take = Math.max(0, Math.floor(count));
     const complete = inner.reg.rows.filter((r) => r.complete);
-    return { reg: { rows: take === 0 ? [] : complete.slice(-take), flags: inner.reg.flags }, name: inner.name };
+    return {
+      reg: {
+        rows: take === 0 ? [] : complete.slice(-take),
+        flags: inner.reg.flags,
+        // keep the lookup-miss reasons on the narrowed register (defect 5)
+        ...(inner.reg.lookupMisses ? { lookupMisses: inner.reg.lookupMisses } : {}),
+      },
+      name: inner.name,
+    };
   }
   return fail(ctx, 'Registerausdruck erwartet.', false);
 }
@@ -242,7 +260,15 @@ function filterRows(
   const rows: PreparedRow[] = [];
   for (const row of complete) {
     const matched = rowMatches(condExpr, row, ctx);
-    if (matched === null) return fail(ctx, `Fehlende Eingabe für ${fnName}(): ${[...ctx.missing].join(', ')}`);
+    if (matched === null) {
+      // Plan 3 final wave A (defect 5, iso5667_1-F-1): when the undecidable
+      // column is blank because its `lookup()` found NO ROW, say so. Without
+      // this the engineer reads "Fehlende Eingabe für count_rows(): method_ok"
+      // over a column they never fill by hand and cannot act on it.
+      const why = r.reg.lookupMisses ?? [];
+      const base = `Fehlende Eingabe für ${fnName}(): ${[...ctx.missing].join(', ')}`;
+      return fail(ctx, why.length > 0 ? `${base} — ${why.join('; ')}` : base);
+    }
     if (matched) rows.push(row);
   }
   return { name: r.name, rows };
@@ -353,9 +379,18 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
       if (!ctx.scope.table) return fail(ctx, 'lookup(): kein Tabellenzugriff im Scope.', false);
       const row = ctx.scope.table(code, keys);
       if (row === undefined) {
+        // defect 5: name the missed row (table + keys + the column that was
+        // wanted) in the diagnostics sink as well as in the failure — the
+        // failure alone is invisible when the call sits in an `if()` test.
+        const why = `lookup(): keine Zeile in ${code} für Schlüssel [${keys.map(String).join(', ')}] (Spalte ${col})`;
+        ctx.diagnostics?.push(why);
         return fail(ctx, `lookup(): keine Zeile in ${code} für Schlüssel [${keys.map(String).join(', ')}]`);
       }
-      if (!(col in row)) return fail(ctx, `lookup(): Spalte ${col} nicht in ${code}`, false);
+      if (!(col in row)) {
+        const why = `lookup(): Spalte ${col} nicht in ${code}`;
+        ctx.diagnostics?.push(why);
+        return fail(ctx, why, false);
+      }
       return row[col];
     }
 
@@ -634,11 +669,20 @@ export function evalNumber(src: string, scope: Scope): number {
  * (derived register cells). A numeric result is finiteness-checked here
  * (final result only, arithmetic.ts parity).
  */
-export function evalValue(node: Expr, scope: Scope, row?: RowValues): Value {
-  const v = evalExpr(node, { scope, strict: true, missing: new Set(), row });
+export function evalValue(node: Expr, scope: Scope, row?: RowValues, opts?: EvalValueOptions): Value {
+  const v = evalExpr(node, { scope, strict: true, missing: new Set(), row, diagnostics: opts?.diagnostics });
   if (typeof v === 'number' && !Number.isFinite(v)) return nonFinite(v);
   return v;
 }
+
+/**
+ * `diagnostics` (Plan 3 final wave A, defect 5): an array the evaluator APPENDS
+ * `lookup()` failure reasons to. Purely additive — the returned value and the
+ * thrown errors are identical with and without it. Used by
+ * `prepareRegisterRows` so a derived cell that is blank because its regulation
+ * table has no matching row can say so instead of failing silently.
+ */
+export type EvalValueOptions = { diagnostics?: string[] };
 
 /**
  * Lenient gate evaluation. Unparseable input or an unknown function name →
@@ -654,7 +698,13 @@ export function evalCondition(src: string, scope: Scope, opts?: ConditionOptions
     const hidden = hiddenReferences(ast, hiddenSet);
     if (hidden.length > 0) return { kind: 'not_applicable', hiddenSymbols: hidden };
   }
-  const ctx: Ctx = { scope, strict: false, missing: new Set() };
+  // Plan 3 final wave A (defect 4): a carrier accessor supplied through the
+  // options folds into the scope, so a gate `contains(checklist, 'token')`
+  // reads the raw json. An explicit `scope.carrier` always wins.
+  const withCarrier: Scope = scope.carrier === undefined && opts?.carrier !== undefined
+    ? { ...scope, carrier: opts.carrier }
+    : scope;
+  const ctx: Ctx = { scope: withCarrier, strict: false, missing: new Set() };
   const r = evalNodeCore(ast, ctx);
   if (r === 'missing') return { kind: 'pending', missingSymbols: [...ctx.missing] };
   return r === 'true' ? { kind: 'pass' } : { kind: 'fail' };

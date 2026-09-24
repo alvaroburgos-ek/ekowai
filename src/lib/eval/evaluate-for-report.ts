@@ -20,7 +20,7 @@ import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
 import { shouldEngineEvaluate } from './equation-manual-denylist';
 import { withFallbackRegisterEquations } from './register-configs';
-import { buildRegisters } from './register-rows';
+import { buildCarriers, buildRegisters } from './register-rows';
 import { makeTableLookup } from './regulation-tables-fallback';
 import {
   normalizeRainfallCarrier,
@@ -226,6 +226,10 @@ export function evaluateWorksheetEquations(
     (fieldId) => jsonOf(symbolByFieldId.get(fieldId) ?? ''),
     { standardCode: opts?.standardCode, symbol: valueOf },
   );
+  // Plan 3 final wave A (defect 2): raw json carriers for `contains()` / `cell()`
+  // — every json field that is NOT a register, through the same hidden-aware
+  // accessor (a hidden checklist yields no carrier ⇒ manual_required).
+  const carriers = buildCarriers(fields, (fieldId) => jsonOf(symbolByFieldId.get(fieldId) ?? ''));
 
   // Aggregator context — built once per worksheet, reused per equation.
   const subAreasJson = jsonOf('sub_areas_A138_10') as { rows?: unknown } | undefined;
@@ -426,6 +430,7 @@ export function evaluateWorksheetEquations(
       aggregator,
       registers,
       tableLookup,
+      carriers,
     });
 
     // Task 2 (A138-10 auto-Q_zu): basin Gl.8 materialises governing D + r_D
@@ -481,7 +486,7 @@ export function evaluateWorksheetCompliance(
    * referencing one reports `not_applicable`. */
   opts?: { hiddenSymbols?: ReadonlySet<string> },
 ): ComplianceReportResult[] {
-  const { bySymbol } = buildValueMap(fields, parameters);
+  const { bySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
 
   // Overlay computed engine outputs onto the symbol lookup so conditions
   // can read e.g. `V_VA` even when the engineer hasn't manually entered it.
@@ -492,7 +497,11 @@ export function evaluateWorksheetCompliance(
   }
 
   const lookup = (sym: string) => bySymbol.get(sym) ?? undefined;
-  const evalOpts = opts?.hiddenSymbols ? { hiddenSymbols: opts.hiddenSymbols } : undefined;
+  // Plan 3 final wave A (defect 4): the raw json of a checklist/grid carrier,
+  // so a gate `contains(checklist, 'token')` has a value to read. Hidden
+  // symbols are still filtered by `hiddenSymbols` before any evaluation.
+  const carrier = (sym: string) => jsonBySymbol.get(sym);
+  const evalOpts = { ...(opts?.hiddenSymbols ? { hiddenSymbols: opts.hiddenSymbols } : {}), carrier };
 
   return rows.map((row) => {
     const result = evaluateCondition(row.condition, lookup, evalOpts);

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateCondition, type EvalResult } from '@/lib/compliance/evaluate';
-import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
+import { makeCarrierLookup, makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { explainCondition } from '@/lib/compliance/explain';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';
@@ -55,8 +55,11 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
   // Plan 2a (Task 10): the same lookup WorksheetForm feeds computeVisibility,
   // so the visibility decision and the gate verdict read one symbol map.
   const lookup = useMemo(() => makeSymbolLookup(fields, values), [fields, values]);
+  // Plan 3 final wave A (defect 4): the raw json of a checklist carrier, so a
+  // gate `contains(checklist, 'token')` has a value to read on the form too.
+  const carrier = useMemo(() => makeCarrierLookup(fields, values), [fields, values]);
 
-  const evalOpts = useMemo(() => ({ hiddenSymbols }), [hiddenSymbols]);
+  const evalOpts = useMemo(() => ({ hiddenSymbols, carrier }), [hiddenSymbols, carrier]);
   const results = useMemo(
     () => requirements.map((cr) => ({ cr, result: evaluateCondition(cr.condition, lookup, evalOpts) })),
     [requirements, lookup, evalOpts],

@@ -152,6 +152,9 @@ export function prepareRegisterRows(carrierRaw: unknown, columns: readonly Regis
   if (!Array.isArray(v.rows)) return { rows: [], flags };
   const scope: Scope = { symbol: ctx.symbol ?? (() => undefined), table: ctx.table };
   let diagnostics: string[] | undefined;
+  /** Plan 3 final wave A (defect 5): blanks caused by a MISSING TABLE ROW — a separate,
+   * non-warning channel (see PreparedRegister). */
+  let lookupMisses: string[] | undefined;
   // A derived expression that does not parse (syntax error, or nesting beyond the
   // parser budget — parseExpression already turns a RangeError into null) yields
   // a null cell in every row and ONE diagnostic per column, never an escape.
@@ -161,6 +164,14 @@ export function prepareRegisterRows(carrierRaw: unknown, columns: readonly Regis
     return { c, node };
   });
   const rows: PreparedRow[] = [];
+  // Plan 3 final wave A (defect 5, iso5667_1-F-1): a `lookup()` MISS is a
+  // recoverable condition — the cell stays null and the aggregate over it
+  // stays manual_required — but it is a CATALOGUE gap, not an unfilled input,
+  // and staying silent left the engineer with a blank cell and a refusing
+  // aggregate that never said why. Report it once per (column, key set); a
+  // register with 200 rows over the same unprinted pair must not emit 200
+  // identical lines.
+  const seenLookupMisses = new Set<string>();
   for (const raw of v.rows) {
     if (!raw || typeof raw !== 'object') continue;
     const r = raw as Record<string, unknown>;
@@ -173,20 +184,104 @@ export function prepareRegisterRows(carrierRaw: unknown, columns: readonly Regis
       // null, never an exception for the caller. A RECOVERABLE ExprError is a normal data condition (missing
       // input) and stays silent; a non-recoverable one (malformed expression for its context, e.g. a column
       // typo in lookup()) or any other error is still null but is reported in `diagnostics`.
+      // Plan 3 final wave A (defect 5): the per-cell `lookup()` reason sink.
+      // It has to be read even when NOTHING throws — a lookup miss inside an
+      // `if()` TEST is swallowed by the lenient condition path, so the cell
+      // comes back null with no error at all (iso5667_1-F-1).
+      const lookupWhy: string[] = [];
       try {
-        values[c.key] = node ? evalValue(node, scope, values) : null;
+        values[c.key] = node ? evalValue(node, scope, values, { diagnostics: lookupWhy }) : null;
       } catch (e) {
         values[c.key] = null;
-        if (e instanceof ExprError && e.recoverable) continue;
-        (diagnostics ??= []).push(`${c.key}: ${e instanceof Error ? e.message : String(e)}`);
+        // A recoverable ExprError is a normal data condition (an unfilled
+        // input) and stays silent. A NON-recoverable one (malformed expression
+        // for its context) is a WARNING, exactly as before.
+        if (!(e instanceof ExprError && e.recoverable)) {
+          (diagnostics ??= []).push(`${c.key}: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }
+      // Split the two lookup faults by channel (see PreparedRegister):
+      //   - "Spalte X nicht in T"  → an authoring defect ⇒ `diagnostics`
+      //     (now caught even when the call sits inside an `if()` test, where
+      //     the lenient condition path used to swallow it entirely);
+      //   - "keine Zeile in T …"   → a table row the standard does not print
+      //     ⇒ `lookupMisses`, the channel the row functions cite when an
+      //     aggregate over the blanked column refuses.
+      // Each distinct line is recorded ONCE per register — 200 rows over the
+      // same unprinted pair must not produce 200 identical entries. The cell
+      // stays null either way: this explains the blank, it never fills it.
+      for (const why of lookupWhy) {
+        const line = `${c.key}: ${why}`;
+        if (seenLookupMisses.has(line)) continue;
+        seenLookupMisses.add(line);
+        if (why.startsWith('lookup(): keine Zeile')) (lookupMisses ??= []).push(line);
+        else if (!(diagnostics ?? []).includes(line)) (diagnostics ??= []).push(line);
       }
     }
     rows.push({ id: str(r.id) ?? genId(), values, complete: isComplete(values, columns, ctx) });
   }
-  return diagnostics ? { rows, flags, diagnostics } : { rows, flags };
+  return {
+    rows,
+    flags,
+    ...(diagnostics ? { diagnostics } : {}),
+    ...(lookupMisses ? { lookupMisses } : {}),
+  };
 }
 
 export type RegisterFieldMeta = { id: string; symbol: string; dataType: string; widget?: string | null; uiConfig?: unknown };
+
+/**
+ * Plan 3 final wave A (defect 2) — the ONE carrier builder, sibling of
+ * `buildRegisters` and shared by the same five callers (save-path
+ * materialiser, client hook, report evaluator, snapshot builder, PDF
+ * assembler).
+ *
+ * A json field that does NOT resolve to a register config is a RAW CARRIER:
+ * a `select_many` checklist, a grid, any structured json the expression
+ * language reads with `contains()` / `cell()`. Before this wave no production
+ * caller built one, so `contains(checklist, 'token')` resolved as
+ * `Unbekanntes Symbol` on every path and three standards had to withhold
+ * their completeness codes (din14021-F-1, iso14046-F-2, iso59004-F-1, with
+ * iso46001-F-2 as the precedent).
+ *
+ * Rules, deliberately narrow:
+ *   - REGISTERS are excluded — they already travel as `registers` (prepared,
+ *     typed rows); a register symbol must never resolve twice.
+ *   - only `dataType === 'json'` fields are considered, and `jsonOf` must
+ *     return `undefined`/`null` for an absent value: an UNANSWERED checklist
+ *     stays MISSING (manual_required), it is not an empty one (a verdict).
+ *   - the value is passed through RAW: shape interpretation belongs to
+ *     `contains()` / `cell()` in the evaluator, not here.
+ */
+export function buildCarriers(
+  fields: ReadonlyArray<RegisterFieldMeta>,
+  jsonOf: (fieldId: string) => unknown,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const f of fields) {
+    if (!isCarrierField(f)) continue;
+    const raw = jsonOf(f.id);
+    if (raw === undefined || raw === null) continue;
+    out[f.symbol] = raw;
+  }
+  return out;
+}
+
+/** A json field that is NOT a register ⇒ it travels as a raw carrier. */
+export function isCarrierField(f: RegisterFieldMeta): boolean {
+  return f.dataType === 'json' && resolveRegisterConfig(f) === null;
+}
+
+/**
+ * Every symbol on this template that WOULD be a carrier, regardless of whether
+ * it currently holds a value. The save-path materialiser uses it to decide
+ * that an equation is its business: an equation over an UNFILLED checklist
+ * must still be evaluated (to manual_required) so its stale output is cleared
+ * — the same rule `buildRegisters` gets from the materialiser's `{}` default.
+ */
+export function carrierFieldSymbols(fields: ReadonlyArray<RegisterFieldMeta>): Set<string> {
+  return new Set(fields.filter(isCarrierField).map((f) => f.symbol));
+}
 
 /**
  * Plan 2a (fix round 1): the ONE register builder shared by the client hook,

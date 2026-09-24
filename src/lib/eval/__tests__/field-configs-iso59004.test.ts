@@ -221,18 +221,20 @@ describe('ISO-59004 field configs (Plan 3 Task 29)', () => {
     for (const w of WITHHELD_STAGE_RULES) expect(STAGE_TOKENS).toContain(/'([^']+)'/.exec(w.visible_when)![1]);
   });
 
-  it('iso59004-F-1: the withheld ISO-59004-04-D1 is blocked TWICE — the AND-chain of contains() does NOT parse at all, and the nested-if rewrite that DOES parse has no carrier path', () => {
+  it('iso59004-F-1 UNBLOCKED by wave A: the brief\'s AND-chain of contains() now parses — and the equation is STILL not emitted (that needs the owner\'s ratification, not an engine fix)', () => {
+    // The formula string itself is unchanged and stays the regression fixture.
     expect(WITHHELD_04_D1_FORMULA).toBe(
       "all_principles_considered_code = if(contains(principles, 'systems_thinking') AND contains(principles, 'value_creation') AND contains(principles, 'value_sharing') AND contains(principles, 'resource_stewardship') AND contains(principles, 'resource_traceability') AND contains(principles, 'ecosystem_resilience'), 1, 0)",
     );
-    // (1) AND combines COMPARISONS, not calls — the brief's form does not parse
+    // This assertion used to read `{ ok: false, message: 'Ausdruck erwartet.' }` — the parser
+    // refused an AND-chain of calls (iso59004-I-2). Plan 3 final wave A defect 3 fixed that, so
+    // the pin now records the capability rather than the gap; the FIX was right, not the pin.
     const rhs = (f: string) => f.replace(/^[a-z_]+ = /, '');
-    expect(parseNumeric(rhs(WITHHELD_04_D1_FORMULA))).toEqual({ ok: false, message: 'Ausdruck erwartet.' });
-    // …while a SINGLE contains() inside if() parses fine, so it really is the AND chain
+    expect(parseNumeric(rhs(WITHHELD_04_D1_FORMULA)).ok).toBe(true);
     expect(parseNumeric("if(contains(principles, 'systems_thinking'), 1, 0)").ok).toBe(true);
-    // (2) the nested-if rewrite parses — and is still withheld, for want of `carriers` (probe in the report)
     expect(parseNumeric(rhs(WITHHELD_04_D1_NESTED_FORM)).ok).toBe(true);
     expect(WITHHELD_04_D1_NESTED_FORM).toContain("if(contains(principles, 'ecosystem_resilience'), 1, 0)");
+    // The ENCODING is untouched by the engine wave: no field config was added for the output.
     expect(FIELD_CONFIGS.find((e) => e.symbol === 'all_principles_considered_code')).toBeUndefined();
   });
 

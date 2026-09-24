@@ -29,6 +29,7 @@
  */
 
 import { tokenize, type Token, type KeywordToken } from './tokens';
+import { canonicalFunctionName } from './functions';
 import type { CompareOp, Literal, ArithNode, Node, Expr } from './ast';
 
 export type ParseNumericResult =
@@ -205,6 +206,22 @@ class Parser {
     // No operator follows.
     if (left.kind === 'aref') return { kind: 'truthy', symbol: left.symbol };
     if (left.kind === 'abool') return { kind: 'lit', value: left.value };
+    // Plan 3 final wave A (defects 3 + 4): a bare call to a BOOLEAN-valued
+    // registry function IS a condition — `contains(principles, 'x')` on its
+    // own, and as an atom of an AND/OR chain. Desugared to the existing
+    // `acompare` node (`call == TRUE`) so no new AST kind reaches the
+    // evaluator, the explainer or the four static walks.
+    // Found by ISO-59004: `iso59004-I-2` (the numeric grammar refused an
+    // AND-chain of contains(), blocking every "all N checklist items ticked"
+    // code in the corpus) and `iso59004-I-3` (the gate grammar had no
+    // contains() at all, leaving 23 of 24 compliance rows unconditionable).
+    // Restricted to the boolean-valued functions ON PURPOSE: `count_rows()`,
+    // `lookup()` and `if()` return numbers/strings, and `compare(3, '==', true)`
+    // is `false` — truthy-testing them bare would silently invert a non-zero
+    // count. They keep needing an explicit comparison (`count_rows(r) > 0`).
+    if (left.kind === 'call' && isBooleanCall(left.name)) {
+      return { kind: 'acompare', left, op: '==', right: { kind: 'abool', value: true } };
+    }
     return null; // a bare arithmetic expression is not a meaningful condition
   }
 
@@ -367,6 +384,18 @@ class Parser {
     }
     return node;
   }
+}
+
+/**
+ * Registry functions whose result IS a boolean (`evaluate.ts`: `contains`
+ * returns `list.some(…)`, `flag` returns `flags[key] === true`). Only these
+ * may stand alone as a condition atom — see the ruling in `parseComparison`.
+ */
+const BOOLEAN_CALLS: ReadonlySet<string> = new Set(['contains', 'flag']);
+
+function isBooleanCall(name: string): boolean {
+  const canonical = canonicalFunctionName(name);
+  return canonical !== null && BOOLEAN_CALLS.has(canonical);
 }
 
 /** A simple (non-arithmetic, non-call) terminal operand suitable for the legacy compare path. */

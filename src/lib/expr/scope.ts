@@ -17,9 +17,27 @@ export type PreparedRow = { id: string; values: RowValues; complete: boolean };
  * `diagnostics` (optional, additive): non-recoverable derived-column failures
  * collected while preparing the rows (`"<column key>: <message>"`), e.g. a
  * column-name typo in `lookup()`. Absent when there were none; recoverable
- * conditions (missing inputs) are never reported here.
+ * conditions (missing inputs) are never reported here. This is the WARNING
+ * channel — the save path surfaces it and the register editor renders it in
+ * amber, so only an authoring defect belongs in it.
+ *
+ * `lookupMisses` (Plan 3 final wave A, defect 5): derived cells that are blank
+ * because the regulation table has NO ROW for the row's keys
+ * (`"<column key>: lookup(): keine Zeile in <table> für Schlüssel […] (Spalte <col>)"`),
+ * deduplicated. Deliberately NOT `diagnostics`: across the corpus a missing
+ * table row is the DESIGNED blank badge for a combination the standard does
+ * not print (DIN-EN-16941-2 Tab. A.2, DWA-M-1200-2 Tab. 4/6, DWA-M-1200-3
+ * Tab. 14, ISO-5667-10 §7.2.2.1, DIN-276 Tab. 4), so warning about it on
+ * every healthy project would be noise. It IS the answer to "why is this
+ * aggregate manual_required?" (iso5667_1-F-1), and the row functions append it
+ * to their failure message.
  */
-export type PreparedRegister = { rows: PreparedRow[]; flags: Record<string, boolean>; diagnostics?: string[] };
+export type PreparedRegister = {
+  rows: PreparedRow[];
+  flags: Record<string, boolean>;
+  diagnostics?: string[];
+  lookupMisses?: string[];
+};
 
 export type TableRowValues = Record<string, Value>;
 
@@ -41,7 +59,16 @@ export type EvalResult =
   | { kind: 'manual' }
   | { kind: 'not_applicable'; hiddenSymbols: string[] };
 
-export type ConditionOptions = { hiddenSymbols?: ReadonlySet<string> };
+/**
+ * `carrier` (Plan 3 final wave A, defect 4): the raw json carrier accessor for
+ * `contains()` / `cell()` inside a GATE condition. It lives in the options
+ * rather than in a `Scope` because the compliance adapter's value accessor is
+ * a bare `(sym) => Value | undefined` function that every call site already
+ * passes positionally; `evalCondition` folds it into the scope it builds.
+ * Omitted ⇒ `contains()` over a carrier is `pending` (fail-safe), never a
+ * verdict.
+ */
+export type ConditionOptions = { hiddenSymbols?: ReadonlySet<string>; carrier?: (sym: string) => unknown };
 
 /**
  * Thrown by the strict evaluation mode. `recoverable` = true when the
