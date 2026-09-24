@@ -9476,3 +9476,252 @@ Report: `reports/plan-3-atv_a704e.md` · STAGED SQL: `scripts/verification/atv_a
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 <!-- ===== end Plan 3 Task 28 · ISO-5667-1 ===== -->
+
+<!-- ===== Plan 3 Task 29 · ISO-59004 (slug iso59004) — appended 2026-09-24 ===== -->
+
+> **ISO-59004 source note (applies to every block below).** There is no markdown/text transcript. Every quote marked `[PDF p.N]` comes from an IN-SESSION `pdftotext -layout` extraction of the standard's own PDF (`…\ISO 59004\ISO_FDIS_59004_N.pdf` = **NM ISO/FDIS 59004:2024**, the IMANOR adoption whose cover reads "La présente norme est identique à l'ISO/FDIS 59004:2024"; 241 700 bytes, 62 pages, 150 010 non-whitespace characters, 4 588 lines). Such a quote is **VA grade** under SR-3, with the page taken from the form-feed mapping (a form feed ends a page; the document prints page N on PDF page N+7 throughout the body — cross-checked against nine independent prod `verification_quote` cells that already record both numbers). The extraction is not committed; the command, its counts, the page-mapping method and the row-by-row `verify-regulation-tables.ts` proof (6/6 PASS) are in `docs/superpowers/specs/2026-09-11-guideline-to-tool/reports/plan-3-iso59004.md`. **Every quote is from a FINAL DRAFT** — see `iso59004-J-1`, which gates every other block. A second source-quality caveat applies throughout: the PDF carries a diagonal "Projet de Norme Marocaine" watermark that `pdftotext` interleaves into the text — see `iso59004-U-2`.
+
+### iso59004-J-1 · ISO-59004 · standard · the source is a FINAL DRAFT (FDIS), not the published ISO 59004:2024
+- Class: interface-gap (source edition) — **this block gates every other block of Task 29**
+- Chosen now (fail-safe): the encoding proceeds because this PDF is the only copy in the library and the acquisition policy is "no external acquisitions"; every artefact is labelled FDIS, the seed builder's edition token is `'FDIS 2024'`, and no table ships a status above `imported_unverified`. Nothing is applied to prod.
+- Evidence: [PDF p.8 (printed p.1), the running header of the first body page, VA] "FINAL DRAFT International Standard                                                     ISO/FDIS 59004:2024(en)" — that string, verbatim, is the status.
+- Evidence: [PDF p.1 (IMANOR cover, French), VA] "La présente norme est identique à l'ISO/FDIS 59004:2024."
+- Evidence: [prod `standards.version`, EV] "FDIS 2024 (ISO/FDIS 59004:2024)" — prod already records the draft status, so nothing in this task contradicts prod.
+- Stated plainly: **every** quote produced by Task 29 — the six §5.2 rows of the seeded table `S5_2`, the `verification_quote` of all 14 created fields and the 6 re-widgeted ones, all 6 equation quotes, and every `Evidence [PDF …]` line in the STAGED file — comes from a **draft**. Clause numbers, the six principle texts, Table 1 and the Clause-7 stage structure can all have moved in the published ISO 59004:2024.
+- Proposed SQL / config: no SQL — a ruling. **REJECT ⇒ do not apply `20260917102900` / `…10` / `…20`, and every other Task-29 block falls with it.** RATIFY ⇒ the published edition is re-verified when acquired; because the edition token is `'FDIS 2024'`, a published-edition seed lands as a NEW edition row and supersedes nothing by accident. Block `iso59004-J-1` in `scripts/verification/iso59004-STAGED-plan3-rulings.sql`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-J-2 · ISO-59004 · S5_2 · `regulation_tables.verification_status` — propose the third token `pdf_verified`
+- Class: interface-gap (verification vocabulary) — **the SAME ruling as `iso5667_1-J-2` (Task 28); one decision settles both standards**
+- Chosen now (fail-safe): `S5_2` ships `imported_unverified`. The corpus has exactly two tokens — `md_verified` (rows lifted from a MARKDOWN transcript, grade VC) and `imported_unverified` — and this standard has no markdown transcript, so `md_verified` would be factually false. A third token is never introduced unilaterally. The cost is that the evidence is UNDER-stated: all six rows were lifted from the standard's own PDF with a page reference, which SR-3 grades VA — strictly stronger than the `md_verified` rows elsewhere in this wave.
+- Evidence: [global constraints, rule 2] "`regulation_tables.verification_status` is free text (no CHECK) — use exactly these two tokens." The vocabulary is a convention, not a database constraint, so adding a token is a documentation + consumer decision, not a migration risk.
+- Proposed SQL / config: block `iso59004-J-2` in `scripts/verification/iso59004-STAGED-plan3-rulings.sql` — `UPDATE regulation_tables SET verification_status = 'pdf_verified' WHERE standard_code = 'ISO-59004' AND edition = 'FDIS 2024' AND table_code = 'S5_2' AND verification_status = 'imported_unverified';` with the inverse as rollback. If adopted, run the ISO-5667-1 side in the same wave, and move the two-token pins in every per-standard seed test [CODE].
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-U-1 · ISO-59004 · Table 1 "Guidance for resource management actions" · NOT seeded
+- Class: unreadable-cell / seed content
+- Chosen now (fail-safe): **no `TABLE1` row exists.** `actions.category` is an engineer-entered enum over the five prod `action_category` tokens, and this standard emits **no** `lookup_fill` and **no** `lookup_key`/`lookup_value` register column at all.
+- Reason 1 — the printed table has TWO columns and no category column. The extraction prints the header as `Action` (L2575) and `Description` (L2577); the word "category" does not occur anywhere in the table span, and none of the five prod `action_category` tokens does either. **Both absences are asserted** in `src/lib/eval/__tests__/regulation-tables-seed-iso59004.test.ts` against the committed span `Q.L2570_2631`, so the claim is re-executable rather than asserted. Under controller resolution (2) a row whose category cell is not physically unambiguous is not seeded — that is every row.
+- Reason 2 — the `description` column cannot be lifted without RECONSTRUCTION. `pdftotext -layout` interleaves the two column streams and the watermark lands inside them. Evidence: [PDF p.35 (printed p.28), Table 1, VA, verbatim as extracted] `Re-mine          deGenerate useful energy from recovered resources.` — the "Recover energy" DESCRIPTION printed on the "Re-mine" LABEL line, with a watermark "de" glued to its first word. Likewise the "Cascade" description (L2618–L2621 + L2625) has the "Recycle" LABEL (L2623) sitting inside it, and the "Rethink" description (L2584 + L2590) is split across the "Source" and "Reduce" label lines. All three interleavings are asserted in the same test.
+- What IS settled, and is reported as a positive finding: the thirteen Action **labels** each stand alone on their own line, in the printed order Refuse · Rethink · Source · Reduce · Repair · Re-use · Refurbish · Remanufacture · Repurpose · Cascade · Recycle · Recover energy · Re-mine, and they match the thirteen prod `selected_action` tokens one-for-one **in order** (asserted in the test). So the ENUM is PDF-verified even though the TABLE is not seedable.
+- Proposed SQL / config: no SQL. Unblock path: a text-layer copy of the **published** ISO 59004:2024, or a two-column-aware extraction (`pdftotext -raw` cross-checked against `-layout`), would settle the Description column. The category column needs the standard to actually print one, which this edition does not — §6.2 – §6.6 group CLAUSES, not the Table-1 R-strategies, so an engineer-entered category is also the conservative reading. Block `iso59004-U-1`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-U-2 · ISO-59004 · whole document · the "Projet de Norme Marocaine" watermark
+- Class: unreadable-cell (source quality)
+- Chosen now (fail-safe): every `verbatim_quote` stored on a seeded row is the **RAW span, watermark and all** — nothing is cleaned. A build-time guard (`inSpan` in `regulation-tables-seed-iso59004.ts`) drops whole watermark-**only** lines before checking that a seeded cell really is printed inside its span, by the explicit token list `WATERMARK_TOKENS = ['Pr','oj','et','de','N','or','m','M','e','ar','oc','ai','n']` (the letters of "Projet de Norme Marocaine"). The same helper cleans a span that is used as rendered prose, and the raw span stays committed beside it.
+- Evidence: [PDF p.23 (printed p.16), §5.2.3, VA, verbatim as extracted] the span `Q.L1610_1617` reads "… by sharing the value created with the provision of a" / blank / blank / "                                                                           ai" / "solution." — the `ai` is the overlay, between two halves of one printed sentence.
+- Evidence: [PDF p.23 (printed p.16), §5.2.5, VA] `Q.L1626_1629` carries an "e" line between the two body lines, and the heading line itself ends "Resource traceability                               M".
+- Limit, stated: where a watermark token is glued **inside** a body word, no helper can clean it — `deGenerate` (L2629) and `ojnongovernmental` (L2711). Both are asserted in the seed test, and every entry that would have quoted such a line uses a different, clean span instead and says so in its comment.
+- Proposed SQL / config: no SQL — a source-quality record. Block `iso59004-U-2`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-U-3 · ISO-59004 · ISO-59004-02 · the five circularity aspects are printed as an EXAMPLE, not a closed list
+- Class: option-list (fixed options ⇒ selection, constraint 3(b))
+- Chosen now (fail-safe): the created `circularity_aspects` checklist carries the five printed aspects **and** `allow_custom: true`, and prod's free-text `circularity_aspect` (id `032bb918-83c1-49f2-8350-d08eb2d42e19`, consumer_worksheets ["ISO-59004-05","ISO-59004-06"]) is untouched — see `iso59004-D-10`.
+- Evidence: [PDF p.20 (printed p.13), §3.6.1, VA] "circularity aspect | element of an organization's (3.4.1) activities or solutions (3.2.1) that interacts with the circular economy (3.1.1) | EXAMPLE  Durability, recyclability, reusability, repairability, recoverability."
+- Reading: constraint 3(b) turns a CLOSED printed list into a selection. This list is opened by the word EXAMPLE, so the selection is offered but never made exclusive and the free-text field must stay. The same five are a real enum in ISO-59020 — reconciling the two is Phase 6 (`iso59004-X-1`).
+- Proposed SQL / config: no SQL beyond the emitted `20260917102910` INSERT. Block `iso59004-U-3`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-U-4 · ISO-59004 · §7.4.5 · pdftotext reorders the six feasibility bullets
+- Class: unreadable-cell
+- Chosen now (fail-safe): the `feasibility_dimension` entry quotes only the lead-in sentence (`Q.L3044_3045`), not the bullet block L3046–L3068, whose lines the extractor emits out of reading order (the `network;` continuation of the FIRST bullet is emitted before the rest of its own sentence) and with watermark tokens between them.
+- Evidence: [PDF p.41 (printed p.34), §7.4.5, VA] "To assess the feasibility of the adoption of a circular economy and its associated circular economy value creation models, actions should be assessed against the following dimensions:"
+- The six DIMENSION NAMES are nonetheless unambiguous — each opens its own bullet line — and they match the six prod `feasibility_dimension` tokens one-for-one (technical / organizational / financial and economic / context / social / environmental). That correspondence is asserted in `field-configs-iso59004.test.ts`.
+- Proposed SQL / config: no SQL. Block `iso59004-U-4`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-F-1 · ISO-59004 · ISO-59004-04 · `all_principles_considered_code` (the brief's -04-D1) is WITHHELD
+- Class: interface-gap (engine)
+- Chosen now (fail-safe): **no equation is emitted.** The prod hand boolean `all_principles_considered` (id `86c49ff8-ff8d-4971-b571-5e361b00e84b`, is_required = true, gate CR-013) keeps enforcing exactly as today; the `principles` checklist is additive beside it.
+- Intended formula, recorded verbatim (exported as `WITHHELD_04_D1_FORMULA`): `all_principles_considered_code = if(contains(principles, 'systems_thinking') AND contains(principles, 'value_creation') AND contains(principles, 'value_sharing') AND contains(principles, 'resource_stewardship') AND contains(principles, 'resource_traceability') AND contains(principles, 'ecosystem_resilience'), 1, 0)`
+- Block 1 [CODE] — **it does not even parse.** Evidence: [probe, re-executable via `equations-iso59004.test.ts`] `parseNumeric(<rhs>)` ⇒ `{"ok":false,"message":"Ausdruck erwartet."}`, while `parseNumeric("if(contains(principles, 'systems_thinking'), 1, 0)")` ⇒ `{"ok":true,…}`. So it is the `AND` chain, not `contains`. This is NEW: `din14021-F-1` and `iso14046-F-2` recorded only the carrier gap. See `iso59004-I-2`.
+- Block 2 [CODE] — even the nested-`if` rewrite that DOES parse cannot evaluate. Evidence: [probe] `evaluateFormula(WITHHELD_04_D1_NESTED_FORM, inputs: [{symbol:"principles", …}])` ⇒ `{"kind":"manual_required","reason":"Unbekanntes Symbol \"principles\" im Ausdruck."}` — `contains()` over a json `select_many` carrier has no engine path because no production `evaluateFormula` caller passes `carriers`. Confirmed a fourth time here (after din14021, iso14046 and Task 27's reviewer).
+- Evidence: [PDF p.23 (printed p.16), §5.3.2, VA — the sentence the code would have enforced] "Considering the integration of all the circular economy principles is important, as focusing on only one or two principles can undermine the achievements that would otherwise occur if all the principles were considered."
+- Proposed SQL / config: no prod SQL. Both blockers are [CODE] items for the final wave; the nested rewrite is exported as `WITHHELD_04_D1_NESTED_FORM` and its parse is pinned, so the day `carriers` lands the emission is one line. Block `iso59004-F-1`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-I-1 · ISO-59004 · [CODE] · `src/lib/eval/field-config.ts` · a register column cannot be a MULTI-select
+- Class: interface-gap (contract)
+- Chosen now (fail-safe): `actions.feasibility_dimensions` is a `text` column with the six printed dimensions as its `datalist` (the brief's own shape), and the CR-038 condition proposed in `iso59004-G-4` is only a presence check.
+- Evidence: `registerColumn.type` is `text | number | boolean | enum | date | lookup_key | lookup_value | derived | grid`. There is no multi-select. Evidence: [PDF p.41 (printed p.34), §7.4.5, VA] "actions should be assessed against the following dimensions:" followed by SIX bullets — an action is assessed against **all six**, not one of six.
+- Proposed SQL / config: no prod SQL. Proposal for the final [CODE] wave: add `type: 'multi_enum'` with `options` + `option_labels`, stored as a string array in the row cell, and give `count_rows` a membership test — the same primitive that unblocks `iso59004-F-1` and `iso59004-I-3`. Block `iso59004-I-1`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-I-2 · ISO-59004 · [CODE] · `src/lib/expr` · `AND`/`OR` combine COMPARISONS, not CALLS
+- Class: interface-gap (engine) — **new this task**
+- Chosen now (fail-safe): nothing emitted; `iso59004-F-1` is withheld partly because of this.
+- Evidence: [probe, re-executable] `parseNumeric("if(contains(p,'a') AND contains(p,'b'), 1, 0)")` ⇒ `{"ok":false,"message":"Ausdruck erwartet."}`; `parseNumeric("if(contains(p,'a'), 1, 0)")` ⇒ ok; `parseNumeric("if(x == 1 AND y == 2, 1, 0)")` ⇒ ok. Any boolean combination of function results must be written as nested `if()`s today.
+- Consequence beyond this standard: every "all of these N checklist items are ticked" code in the corpus is blocked by BOTH this and the carrier gap, not only by the carrier gap. The completeness codes withheld by `din14021-F-1` and `iso14046-F-2` have the same shape and would hit this first.
+- Proposed SQL / config: no prod SQL. Proposal: allow a CALL wherever a COMPARISON is accepted inside `and`/`or` (the evaluator already coerces a numeric result to truth inside `if()`), pinned with this standard's `WITHHELD_04_D1_FORMULA` as the regression fixture. Block `iso59004-I-2`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-I-3 · ISO-59004 · [CODE] · the GATE condition grammar has no `contains` at all
+- Class: interface-gap (engine)
+- Chosen now (fail-safe): the six §5.2 principle requirements CR-006 … CR-011 stay empty-conditioned (see `iso59004-G-4`) rather than take an invented enforcement.
+- Evidence: [probe, re-executable] `parseCondition("contains(principles, 'systems_thinking')")` ⇒ `null`; `parseCondition("principles IS NOT NULL")` ⇒ parses and evaluates `pass` over a two-token checklist value. So the only checklist predicate a gate can express today is "at least one ticked", which cannot distinguish six requirements that each name ONE principle.
+- Proposed SQL / config: no prod SQL. Proposal: add a membership test to the condition grammar (`<carrier> CONTAINS '<token>'`, or `contains(<carrier>, '<token>')` for symmetry with the formula set), with the six ISO-59004 principle CRs as the fixture. Block `iso59004-I-3`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-J-3 · ISO-59004 · ISO-59004-05 · the brief's per-row rule for `actions.life_cycle_note` is REFUTED
+- Class: visibility (premise refuted, R-5)
+- Chosen now (fail-safe): `actions.life_cycle_note` has **no** `visible_when` — the engineer can write a life-cycle note on any action row.
+- Refutation 1 — the token does not exist. The brief writes `action IN {recycle, recover, re_mine}`. The prod `ISO-59004-05 selected_action` enum (read-only 2026-09-24) has thirteen tokens and none is `recover`: refuse / rethink / source / reduce / repair / re_use / refurbish / remanufacture / repurpose / cascade / recycle / **recover_energy** / re_mine. Failing grep, run in this session against the committed prior: `grep -nE '"value": ?"recover"' src/lib/eval/field-configs/iso59004.prior.json` → no output, **exit 1**; the same grep for `recover_energy` → `647:        "value": "recover_energy",`, exit 0. The absence is also pinned as an assertion in `field-configs-iso59004.test.ts`.
+- Refutation 2 — the printed rule says the opposite. Evidence: [PDF p.34 (printed p.27), §6.7, VA] "This resource management guidance is intended to help organizations prioritize actions to increase circularity performance. A life cycle perspective should guide the organization in the identification of the best action for their value creation model and to avoid unwanted trade-offs." — the life-cycle perspective guides the identification of **the best action**, full stop; it is not restricted to three of the thirteen. Evidence: [PDF p.35 (printed p.28), §6.7, VA] "In general, products should be repaired before they are remanufactured, and remanufactured before they are recycled." — the only ORDERING the standard prints names repair / remanufacture / recycle, not recycle / recover / re-mine.
+- Proposed SQL / config: no SQL. If the owner wants a narrowing anyway, the source-grounded one is the printed ordering trio, recorded verbatim in the module as `WITHHELD_LIFE_CYCLE_NOTE_ALTERNATIVE = "action IN {'repair', 'remanufacture', 'recycle'}"` (it parses; asserted). It is a `ui_config` change on the register carrier → re-emit `20260917102910`, never hand-written SQL. Block `iso59004-J-3`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-J-4 / iso59004-G-5 · ISO-59004 · ISO-59004-06 · the brief's five `implementation_stage` visibility rules are WITHHELD
+- Class: visibility + gate (premise refuted by the source; eight independent guard refusals)
+- Chosen now (fail-safe): **no field of ISO-59004-06 is hidden by `implementation_stage`.** Every §7.2 – §7.6 field stays visible on every project, exactly as today, and no gate is rewritten.
+- Reason 1 — the printed text refutes stage-gating. Evidence: [PDF p.37 (printed p.30), §7.1.4, VA] "The guidance is structured to allow for an iterative process. The stages of implementation can be altered and adapted to reflect changing circumstances of the organization. Figure 4 illustrates the stages, which are underpinned by the circular economy principles. The proposed stages that an organization can undertake in order to implement a circular economy are discussed in 7.2 to 7.6." Evidence: [PDF p.37 (printed p.30), §7.1.4 NOTE, VA] "NOTE      The sequence of stages can differ and can also occur at the same time or in parallel." — `implementation_stage` is a SINGLE-select of one current stage; hiding the other four stages' fields would contradict the NOTE outright and would make CR-034 / CR-035 / CR-036 / CR-037 / CR-039 / CR-042 unsatisfiable for an organization working two stages in parallel — the F-4 class of harm (a gate that silently stops enforcing).
+- Reason 2 — independently, the gate-aware guard REFUSES eight of the eleven candidate hides. The exact messages are pinned in `field-configs-iso59004.test.ts` (asserted through the emitter, not claimed): `reference_situation_assessed` ← CR-032, `baseline_circularity_assessment` ← CR-032, `ce_purpose_mission_vision` ← CR-034, `ce_goals` ← CR-035, `ce_strategy` ← CR-036, `ce_action_plan` ← CR-039, `value_creation_model` ← CR-037, `monitoring_review_process` ← CR-042 — each "visible_when hides X read by gate CR-0NN (warn: \"…\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block".
+- The remaining three (`feasibility_dimension`, `pilot_project`, `selected_circularity_indicator`) are ACCEPTED by the guard — no gate reads them — and are withheld on **Reason 1 alone**. That asymmetry is stated deliberately: the guard is not the argument, the printed NOTE is.
+- Proposed SQL / config: **no gate rewrite is proposed**, because the rule it would guard is itself withheld. Should the owner override this block, block `iso59004-J-4 / G-5` in the STAGED file gives the exact IF-guarded `UPDATE` (with its captured md5) that each of the eight gates needs FIRST — e.g. CR-035 → `IF implementation_stage == 'purpose_mission_vision_goals' THEN ce_goals IS NOT NULL` — and only then may the matching `visible_when` be emitted. Never one without the other.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-J-5 · ISO-59004 · ISO-59004-06-D2 · the brief's `intermediate_target != ''` does not evaluate
+- Class: interface-gap (engine) / formula choice
+- Chosen now: `ISO-59004-06-D2` is emitted as `goals_with_targets = count_rows(goals, intermediate_target IS NOT NULL)`.
+- Evidence: [probe, re-executable via `equations-iso59004.test.ts`] `parseNumeric("count_rows(goals, intermediate_target != '')")` ⇒ `{"ok":true,…}` — it PARSES; `evaluateFormula` on the same formula over a 3-row register ⇒ `{"kind":"manual_required","reason":"Fehlende Eingabe für count_rows(): intermediate_target"}`; the emitted `IS NOT NULL` form over the SAME rows ⇒ `{"kind":"computed","value":1}`, where row 1 carries "2030: 50 % Rezyklatanteil", row 2 the EMPTY STRING and row 3 no key at all. The emitted form therefore already treats an empty text as not set, which is the behaviour §7.3.2 needs.
+- Evidence: [PDF p.40 (printed p.33), §7.3.2, VA] "Intermediate targets should be established to allow for circularity assessments of progress from the reference situation towards the longer-term goals."
+- Proposed SQL / config: no SQL — `20260917102920` already carries the decidable form. Both behaviours are pinned side by side so a silent engine change fails the test rather than changing a count. Block `iso59004-J-5`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-J-6 · ISO-59004 · ISO-59004-06 · there is no "more than one level" token — a boolean driver is created instead
+- Class: option-list (premise refuted, D-1)
+- Chosen now: a created boolean `operates_across_multiple_levels` (§7.1.3, section B) drives the created `level_relationships`. The prod enum `implementation_level` is NOT touched beyond its widget (D-1: its four options stay byte-identical).
+- Evidence: [prod `ISO-59004-06 implementation_level`, EV] four tokens — `global_regional_country_local` / `interorganizational` / `organizational` / `product`. Failing grep, run this session: `grep -oE '"value":"[a-z_]*(multi|across|more_than)[a-z_]*"' src/lib/eval/field-configs/iso59004.prior.json` → no output, **exit 1**.
+- Evidence: [PDF p.36 (printed p.29), §7.1.3, VA] "Organizations that interact or operate across more than one system level should consider the relationships and interactions within and between the other system levels to achieve a circular economy." — the standard asks a YES/NO question about the organization, which is a boolean, not a fifth level.
+- Proposed SQL / config: the boolean and its dependent are in the emitted `20260917102910`. The alternative the owner may prefer — a fifth enum option — is an `enum_values` write on a NON-NULL prod list, i.e. a D-1 violation, and is therefore NOT proposed. Block `iso59004-J-6`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-G-1 · ISO-59004 · ISO-59004-05 · CR-028 — ask for the §6.7 life-cycle justification instead of demanding the order
+- Class: gate condition
+- Chosen now (fail-safe): CR-028 (id `4830f731-57bb-4361-9448-6a793f1ef7d6`, warn, md5 `a8fa5e847d4120187a40a2c2d7238097`) stays exactly as captured — `repair_before_remanufacture_before_recycle == true`. The created field `life_cycle_justification` IS emitted with `visible_when "repair_before_remanufacture_before_recycle == false"` (the emitter accepts it: the hidden symbol is new and no gate reads it), so the question is already on the sheet; only the GATE is unchanged, because a gate condition change is always a sign-off.
+- Evidence: [PDF p.35 (printed p.28), §6.7, VA] "In general, products should be repaired before they are remanufactured, and remanufactured before they are recycled. However, in cases where applying this guidance does not lead to the best outcome, organizations should consider applying a life cycle perspective to determine the best action."
+- Reading: the printed sentence makes the order a DEFAULT ("In general") with an explicit escape. Today's gate warns whenever the escape is taken, which mis-states the standard; the proposal warns only when the escape is taken WITHOUT the justification the standard asks for.
+- Proposed SQL / config: block `iso59004-G-1` — archive + md5-guarded `UPDATE … SET condition = 'IF repair_before_remanufacture_before_recycle == false THEN life_cycle_justification IS NOT NULL'`, `RESTORE_CR` rollback. Apply AFTER `20260917102910` (it references the created field). The condition parses and evaluates `fail` on the escape-without-justification state (probe pinned).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-G-2 · ISO-59004 · ISO-59004-05 · CR-018 — read the §6.1 preliminary-action rule off the actions register
+- Class: gate condition
+- Chosen now (fail-safe): CR-018 (id `95588ee7-f302-473b-be61-acaaa93921b4`, warn, md5 `c5d1538f2d5e731611a852cfa42b9d4b`) stays `preliminary_action_refuse_rethink == true`, and the hand boolean stays a required input (`iso59004-D-11`). The register now produces `refuse_rethink_first` (ISO-59004-05-D2), the same fact counted from the rows.
+- Evidence: [PDF p.25 (printed p.18), §6.1, VA] "Organizations should consider refuse and rethink as preliminary actions."
+- Reading: "should consider … as preliminary actions" is about the ACTIONS the organization records, which is what the register holds. The IF-guard keeps an EMPTY register from firing the gate — a project that has recorded no action yet is not in breach.
+- Proposed SQL / config: block `iso59004-G-2` — archive + md5-guarded `UPDATE … SET condition = 'IF actions_count >= 1 THEN refuse_rethink_first >= 1'`, `RESTORE_CR` rollback. Apply AFTER `20260917102920`, else the symbol is absent and the gate reads `manual`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-G-3 · ISO-59004 · ISO-59004-06 · CR-031 — add the §7.1.3 multi-level relationships to the level gate
+- Class: gate condition
+- Chosen now (fail-safe): CR-031 (id `06b1b297-a849-4793-b6ed-ca791550defe`, warn, md5 `1fbc6e32b65d8b8e9035c349966b3915`) stays `implementation_level IS NOT NULL`. The two created fields are already emitted, so the question is on the sheet; only the gate is unchanged.
+- Evidence: [PDF p.36 (printed p.29), §7.1.3, VA] "Organizations that interact or operate across more than one system level should consider the relationships and interactions within and between the other system levels to achieve a circular economy."
+- Amendment M note: the proposed IF-THEN **body** is simple (`level_relationships IS NOT NULL`) and is therefore NOT parenthesised; the parentheses in the proposal wrap the whole IF-THEN clause because it is the right operand of an `AND`.
+- Proposed SQL / config: block `iso59004-G-3` — archive + md5-guarded `UPDATE … SET condition = 'implementation_level IS NOT NULL AND (IF operates_across_multiple_levels == true THEN level_relationships IS NOT NULL)'`, `RESTORE_CR` rollback. Apply AFTER `20260917102910`. Parses and evaluates `fail` on the multi-level-without-relationships state (probe pinned).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-G-4 · ISO-59004 · the 24 EMPTY-condition compliance requirements — one proposal, 23 reasoned refusals
+- Class: gate condition
+- Count correction, recorded: the inventory says "22 of 44"; the read-only capture of 2026-09-24 counts **24** rows whose `condition` is the empty string (md5 `d41d8cd98f00b204e9800998ecf8427e`). The capture is the authority (R-4). An empty condition never blocks (`evaluate.ts` returns `manual`), so all 24 are advisory text today — the fail-safe state.
+- Chosen now (fail-safe): 23 of the 24 stay empty. ONE proposal is made, and only because a real prod symbol already carries the fact.
+- PROPOSED — ISO-59004-06 CR-038 (id `6e59b7ba-06e3-4f66-8368-01db94614c73`, warn) "Assess feasibility across all dimensions" → `feasibility_dimension IS NOT NULL`. Evidence: [PDF p.41 (printed p.34), §7.4.5, VA] "To assess the feasibility of the adoption of a circular economy and its associated circular economy value creation models, actions should be assessed against the following dimensions:" followed by the six printed bullets, which are exactly the six prod `feasibility_dimension` tokens. **Honest limit:** the printed rule asks for an assessment against ALL SIX; `feasibility_dimension` is a single-select and the register column is free text (`iso59004-I-1`). The proposal is therefore a PRESENCE check — strictly weaker than the printed sentence, and the same shape CR-034 / CR-035 / CR-036 / CR-039 already use on this worksheet. It becomes complete only after I-1 closes.
+- NOT PROPOSED — the other 23, each with its reason, are listed one by one in block `iso59004-G-4` of the STAGED file. In summary: CR-006 … CR-011 (the six §5.2 principles) are blocked by `iso59004-I-3` — the gate grammar has no `contains`, and a shared `principles IS NOT NULL` would make six DISTINCT requirements fire identically, which is an invented enforcement; CR-012 would duplicate CR-013 on the same symbol; CR-041 would duplicate CR-039; CR-014, CR-016, CR-020, CR-021, CR-024, CR-030, CR-033, CR-040 are prose guidance with no symbol anywhere in prod or in this task; CR-019, CR-022, CR-023, CR-025, CR-026 would enforce the ENGINEER's own `category` classification rather than the standard (the category is engineer-entered because Table 1 is unseeded, `iso59004-U-1`); CR-043 and CR-044 are CROSS-STANDARD (ISO 59020 / ISO 59010) and belong to `iso59004-X-1`.
+- Proposed SQL / config: block `iso59004-G-4` — archive + md5-guarded `UPDATE` for CR-038 only, `RESTORE_CR` rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-S-1 · ISO-59004 · ISO-59004-02 · deactivate `defined_term` (inventory §5 win 5)
+- Class: deactivation (structural)
+- Chosen now (fail-safe): the field is UNTOUCHED — still active, still an enum, still inherited by every worksheet. This module does not even change its widget.
+- Evidence: [prod, EV] `ISO-59004-02 defined_term` (id `e49c7202-6a79-4558-b0b3-f52b7b643385`, enum, is_required = false, active = true, consumer_worksheets ["ALL"], 23 options §3.1.1 – §3.1.23). Evidence: [prod `description`, EV] "Selector over the 23 circular-economy terms (3.1); supportive vocabulary lookup."
+- Reading: the description says it out loud — "supportive vocabulary lookup". Nothing computes from it, **no gate reads it** (verified against all 44 captured conditions: 0 name `defined_term`), and a project does not HAVE a "defined term". The glossary belongs in rendered reference text.
+- Consumer warning: `consumer_worksheets` is `["ALL"]`, so deactivation removes an inherited symbol from every worksheet of the standard. Nothing reads it today, but the ALL entry means the blast radius must be re-checked at ratification time, not assumed from this capture.
+- Proposed SQL / config: block `iso59004-S-1` — `fields_archive_iso59004` + `UPDATE fields SET active = false WHERE id = … AND active = true`, rollback via the FULL explicit 31-column `RESTORE_F`. Never a DELETE (instances may hold values).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-1 · ISO-59004 · ISO-59004-05 · `actions.action` ↔ `selected_action`
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape (§6.7 Table 1 lists thirteen strategies an organization combines); the prod scalar (id `f301f926-4f37-4df9-9b3b-ee3801cb4753`, enum, is_required = true, consumer_worksheets ["ISO-59004-06"]) keeps every gate and every inheritance it has today. No second equation is emitted for this quantity.
+- Evidence: [PDF p.34 (printed p.27), §6.7, VA] "The guidance (see Table 1) suggests organizations can begin by determining if there is a need to be satisfied and if the need can be met without additional resource use (refuse). … Organizations should seek to extend the life of solutions by design and by maintaining the solution in use for as long as possible (repair, reuse, refurbish, remanufacture, repurpose) while continuing to provide value. Finally, organizations should look to use resources in multiple cycles (cascade, recycle), recover the energy if the resource cannot be used again (energy recovery) or source resources from landfills (re-mine)."
+- Proposed SQL / config: block `iso59004-D-1` — on ratification of RETIREMENT (not proposed here), archive + `active = false` + `RESTORE_F` rollback. The scalar is is_required and inherited by -06; retiring it needs the -06 consumer edit and a replacement for whatever reads it there.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-2 · ISO-59004 · ISO-59004-05 · `actions.category` ↔ `action_category`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the per-action classification; the scalar (id `06d21589-3812-404c-bc62-0baf0432ff7c`, enum, is_required = false, consumer_worksheets ["ISO-59004-06"]) is the project-level one. **Both are engineer-entered**, because Table 1 prints no category column (`iso59004-U-1`).
+- Evidence: [prod `verification_quote`, EV] "6.2 Actions that create added value | 6.3 Actions that contribute to value retention | 6.4 Actions that contribute to value recovery | 6.5 Actions to regenerate ecosystems | 6.6 Actions to support a circular economy transition" — the five tokens are the five printed CLAUSE headings, which is exactly why they cannot be looked up from Table 1.
+- Proposed SQL / config: block `iso59004-D-2`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-3 · ISO-59004 · ISO-59004-05 · `actions.feasibility_dimensions` ↔ ISO-59004-06 `feasibility_dimension`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay. The standard assesses EACH action against the six dimensions; the prod scalar (id `3476e0a8-29a1-40a9-8384-7742177ae134`, enum, is_required = false, consumer_worksheets null) is a single-select on another worksheet.
+- Evidence: [PDF p.41 (printed p.34), §7.4.5, VA] "To assess the feasibility of the adoption of a circular economy and its associated circular economy value creation models, actions should be assessed against the following dimensions:"
+- Proposed SQL / config: block `iso59004-D-3`. Neither shape is complete until a multi-select register column exists (`iso59004-I-1`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-4 · ISO-59004 · ISO-59004-05 · `actions.pilot` ↔ ISO-59004-06 `pilot_project`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay. Piloting is per action; the prod boolean (id `eeca86b2-0dcb-4407-add3-9cb1da1b246c`, boolean, is_required = false, consumer_worksheets null) is per project. `ISO-59004-05-D3` counts the rows.
+- Evidence: [PDF p.42 (printed p.35), §7.4.7, VA] "Prior to formal implementation some organizations can consider a preliminary pilot application of a specific circular economy practice or for a specific segment of the organization to ensure the application works as planned and any specific risk or barriers are addressed before wider implementation."
+- Proposed SQL / config: block `iso59004-D-4`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-5 · ISO-59004 · ISO-59004-05 · `actions.value_creation_model` ↔ ISO-59004-06 `value_creation_model`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay. The scalar (id `82b7680e-b5c0-4ee1-a9d6-bb1746a25f17`, text, is_required = true, consumer_worksheets null) is gate-bearing (CR-037) — it stays until CR-037 is rewritten.
+- Evidence: [PDF p.40 (printed p.33), §7.4.4, VA] "The organization should align its actions with the strategy and address identified opportunities to create value and have a value creation model in place that is aligned with the circular economy."
+- Proposed SQL / config: block `iso59004-D-5`. Do NOT retire a field while a compliance_requirements condition still names it.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-6 · ISO-59004 · ISO-59004-05 · `actions.life_cycle_note` ↔ `life_cycle_perspective_applied`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay, and they are complementary rather than duplicate: the boolean (id `f2078636-0072-4f7b-ac72-cd518bd16fc1`, is_required = true, consumer_worksheets ["ISO-59004-06"], gate CR-027) attests that a life-cycle perspective was applied at all; the column records WHAT it said, per action.
+- Evidence: [PDF p.34 (printed p.27), §6.7, VA] "A life cycle perspective should guide the organization in the identification of the best action for their value creation model and to avoid unwanted trade-offs."
+- Proposed SQL / config: block `iso59004-D-6` — recommended outcome is KEEP BOTH permanently.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-7 · ISO-59004 · ISO-59004-06 · `goals.goal` / `.intermediate_target` / `.year` ↔ `ce_goals`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay. The scalar (id `8ffe261f-1527-4051-a397-5a53fdd0b068`, text, is_required = true, consumer_worksheets null) is a free-text blob and is gate-bearing (CR-035); the register is the structured form the printed sentence asks for.
+- Evidence: [PDF p.40 (printed p.33), §7.3.2, VA] "The organization should develop goals with an aim to create structured and lasting change and identify pathways and key actions to achieve their vision for a circular economy. Intermediate targets should be established to allow for circularity assessments of progress from the reference situation towards the longer-term goals."
+- Proposed SQL / config: block `iso59004-D-7`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-8 · ISO-59004 · ISO-59004-06 · `indicators_59004.indicator` / `goals.indicator` ↔ `selected_circularity_indicator`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay. The scalar (id `1a37d6cb-2e64-4062-b556-52b808543b34`, text, is_required = true, consumer_worksheets null) holds one indicator; the register holds one row per chosen indicator with its baseline and target.
+- Evidence: [PDF p.43 (printed p.36), §7.6, VA] "As part of its action plan for a circular economy (see 7.1.4), the organization should choose circularity indicators to assess the effectiveness and efficiency of the interventions adopted and monitor the progress." Evidence: [PDF p.44 (printed p.37), §7.6, VA] "Review of the circularity indicators and circularity performance should set the basis for continual improvement and, therefore, can include milestones and targets for the next period."
+- Proposed SQL / config: block `iso59004-D-8`. Binding either to ISO-59020 Table 3 is Phase 6 (`iso59004-X-1`) — which is also why the column is free text and not a `lookup_key` into another standard's table (constraint 3(d)).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-9 · ISO-59004 · ISO-59004-04 · the `principles` checklist ↔ `selected_principle`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay, and the checklist uses **prod's own labels** for the six tokens (the created field writes its enum list once; it is not a D-1 overwrite). The scalar (id `140e3977-fce7-409e-ba5a-d135103c831b`, enum, is_required = true, consumer_worksheets ["ISO-59004-05","ISO-59004-06"]) keeps every inheritance.
+- Evidence: [PDF p.22 (printed p.15), §5.1, VA] "The set of principles given in 5.2, which are interlinked and complementary, should be considered by an organization to transition towards a circular economy." — a single-select over six interlinked principles cannot express "all six considered", which is what §5.3.2 asks for.
+- Proposed SQL / config: block `iso59004-D-9`. The completeness CODE over the checklist is blocked twice (`iso59004-F-1`), so the hand boolean `all_principles_considered` is doing real work today and must not be retired.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-10 · ISO-59004 · ISO-59004-02 · the `circularity_aspects` checklist ↔ `circularity_aspect`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay, and here the free-text field **must** stay: the printed five are an EXAMPLE, not a closed list (`iso59004-U-3`), and the scalar (id `032bb918-83c1-49f2-8350-d08eb2d42e19`, text, consumer_worksheets ["ISO-59004-05","ISO-59004-06"]) is inherited by two worksheets.
+- Evidence: [PDF p.20 (printed p.13), §3.6.1, VA] "EXAMPLE  Durability, recyclability, reusability, repairability, recoverability."
+- Proposed SQL / config: block `iso59004-D-10` — recommended outcome is KEEP BOTH permanently.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-D-11 · ISO-59004 · ISO-59004-05 · `refuse_rethink_first` (engine output) ↔ `preliminary_action_refuse_rethink`
+- Class: deactivation (amendment K)
+- Chosen now (fail-safe): BOTH stay. The hand boolean (id `152afe33-75b1-4e24-889a-46e524630cf6`, boolean, is_required = true, consumer_worksheets null) is gate-bearing (CR-018); the engine output counts the same fact off the register.
+- Evidence: [PDF p.25 (printed p.18), §6.1, VA] "Organizations should consider refuse and rethink as preliminary actions."
+- Proposed SQL / config: block `iso59004-D-11`. Retirement depends on `iso59004-G-2` landing first.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso59004-X-1 · ISO-59004 · Phase 6 · cross-standard inheritance from ISO-59020 (and the ISO-59010 pointer)
+- Class: inheritance (Phase 6 — recorded, not encoded)
+- Chosen now: nothing cross-standard is encoded (spec §8).
+- Evidence: [PDF p.43 (printed p.36), §7.6, VA] "Guidance on how to measure and assess circularity performance is provided by ISO 59020." Evidence: [prod CR-043, EV] "…this document hands measurement to ISO 59020." (empty condition, warn). Evidence: [prod CR-044, EV] "Guidance on circular economy value creation models and value networks … is provided by ISO 59010" — **ISO 59010 is NOT in the corpus**: a bare pointer stays a pointer (content-boundary rule), NR grade, acquisition list.
+- The three concrete inheritances for the Phase-6 wave: `system_in_focus` (ISO-59004-02 ↔ ISO-59020-01); `circularity_aspect` / the created `circularity_aspects` checklist (ISO-59004-02 ↔ the ISO-59020 enum of the same five aspects); `selected_circularity_indicator` / the created `indicators_59004` register (ISO-59004-06 ↔ ISO-59020 **Table 3**, which IS seeded under ISO-59020 as `TABLE3`, 13 rows). Because of that last one, `indicators_59004.indicator` is deliberately free text here and not a `lookup_key` into another standard's table — the governing table belongs to ISO-59020 and is seeded under ITS task.
+- Proposed SQL / config: no SQL. Block `iso59004-X-1`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+<!-- ===== end Plan 3 Task 29 · ISO-59004 ===== -->

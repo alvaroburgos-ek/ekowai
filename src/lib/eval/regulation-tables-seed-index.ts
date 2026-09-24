@@ -44,6 +44,7 @@ import { iso56676SeedTables } from './regulation-tables-seed-iso5667_6';
 import { din14021SeedTables } from './regulation-tables-seed-din14021';
 import { iso14046SeedTables } from './regulation-tables-seed-iso14046';
 import { iso56671SeedTables } from './regulation-tables-seed-iso5667_1';
+import { iso59004SeedTables } from './regulation-tables-seed-iso59004';
 
 export type SeedBuilder = { build: () => RegulationTable[]; ts: string; slugFile: string; supersedes?: string };
 
@@ -75,6 +76,7 @@ export const SEED_BUILDERS: Record<string, SeedBuilder> = {
   din14021: { build: din14021SeedTables, ts: '20260917102500', slugFile: 'din14021' }, // Plan 3 Task 25: DIN-14021 (three text tables — CLAIMMAP claim type → §7 clause / condition / numeric block, S6_5_3 documentation items a) – g), S5_3_5_10 general requirements 5.3 – 5.10)
   iso14046: { build: iso14046SeedTables, ts: '20260917102600', slugFile: 'iso14046' }, // Plan 3 Task 26: ISO-14046 (two text catalogues — S5_2_4_2_DQ data-quality items a) – j), S6_2_TP third-party-report aspects a) – g))
   iso5667_1: { build: iso56671SeedTables, ts: '20260917102800', slugFile: 'iso5667_1' }, // Plan 3 Task 28: ISO-5667-1 (four printed tables — §16.4 K per confidence level, §21 flow-method catalogue keyed (aspect, method), §8.6 25 mm bore, §12.1.2 50 mm sludge pipe)
+  iso59004: { build: iso59004SeedTables, ts: '20260917102900', slugFile: 'iso59004' }, // Plan 3 Task 29: ISO-59004 (one table — S5_2 the six §5.2 principles keyed on the prod selected_principle tokens; Table 1 NOT seeded, iso59004-U-1)
   // Plan-3 tasks append one line each, e.g. atv_a704e: { build: atvA704eSeedTables, ts: '20260917102700', slugFile: 'atv_a704e' }
 };
 

@@ -1,0 +1,1461 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs ISO-59004 iso59004",
+    "captured_at": "2026-09-24T13:39:29.943Z",
+    "standard": "ISO-59004",
+    "slug": "iso59004",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 33,
+    "section_rows": 51,
+    "sections_total": 51,
+    "equation_rows": 0,
+    "gate_rows": 44
+  },
+  "ISO-59004-01 ce_commitment": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "ISO-59004-01 jurisdiction": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59004-01 organization_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "text",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "ISO-59004-01 organization_type": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59004-01 value_chain_position": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-05",
+      "ISO-59004-06"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59004-02 circularity_aspect": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-05",
+      "ISO-59004-06"
+    ],
+    "data_type": "text",
+    "section_code": "H",
+    "section_id_is_null": false,
+    "section_path": [
+      "H"
+    ]
+  },
+  "ISO-59004-02 defined_term": {
+    "enum_values": [
+      {
+        "value": "circular economy",
+        "label_de": "Kreislaufwirtschaft",
+        "label_en": "circular economy",
+        "order_index": 1,
+        "regulation_reference": "§3.1.1"
+      },
+      {
+        "value": "economic system",
+        "label_de": "Wirtschaftssystem",
+        "label_en": "economic system",
+        "order_index": 2,
+        "regulation_reference": "§3.1.2"
+      },
+      {
+        "value": "social system",
+        "label_de": "Sozialsystem",
+        "label_en": "social system",
+        "order_index": 3,
+        "regulation_reference": "§3.1.3"
+      },
+      {
+        "value": "environmental system",
+        "label_de": "Umweltsystem",
+        "label_en": "environmental system",
+        "order_index": 4,
+        "regulation_reference": "§3.1.4"
+      },
+      {
+        "value": "resource",
+        "label_de": "Ressource",
+        "label_en": "resource",
+        "order_index": 5,
+        "regulation_reference": "§3.1.5"
+      },
+      {
+        "value": "circular flow of resources",
+        "label_de": "Ressourcenkreislauf",
+        "label_en": "circular flow of resources",
+        "order_index": 6,
+        "regulation_reference": "§3.1.6"
+      },
+      {
+        "value": "value",
+        "label_de": "Wert",
+        "label_en": "value",
+        "order_index": 7,
+        "regulation_reference": "§3.1.7"
+      },
+      {
+        "value": "recover value",
+        "label_de": "Wert zurueckgewinnen",
+        "label_en": "recover value",
+        "order_index": 8,
+        "regulation_reference": "§3.1.8"
+      },
+      {
+        "value": "retain value",
+        "label_de": "Wert erhalten",
+        "label_en": "retain value",
+        "order_index": 9,
+        "regulation_reference": "§3.1.9"
+      },
+      {
+        "value": "add value",
+        "label_de": "Wert hinzufuegen",
+        "label_en": "add value",
+        "order_index": 10,
+        "regulation_reference": "§3.1.10"
+      },
+      {
+        "value": "sustainable development",
+        "label_de": "nachhaltige Entwicklung",
+        "label_en": "sustainable development",
+        "order_index": 11,
+        "regulation_reference": "§3.1.11"
+      },
+      {
+        "value": "resilience",
+        "label_de": "Resilienz",
+        "label_en": "resilience",
+        "order_index": 12,
+        "regulation_reference": "§3.1.12"
+      },
+      {
+        "value": "principle",
+        "label_de": "Grundsatz",
+        "label_en": "principle",
+        "order_index": 13,
+        "regulation_reference": "§3.1.13"
+      },
+      {
+        "value": "circular",
+        "label_de": "zirkulaer",
+        "label_en": "circular",
+        "order_index": 14,
+        "regulation_reference": "§3.1.14"
+      },
+      {
+        "value": "circularity",
+        "label_de": "Zirkularitaet",
+        "label_en": "circularity",
+        "order_index": 15,
+        "regulation_reference": "§3.1.15"
+      },
+      {
+        "value": "environment",
+        "label_de": "Umwelt",
+        "label_en": "environment",
+        "order_index": 16,
+        "regulation_reference": "§3.1.16"
+      },
+      {
+        "value": "ecosystem",
+        "label_de": "Oekosystem",
+        "label_en": "ecosystem",
+        "order_index": 17,
+        "regulation_reference": "§3.1.17"
+      },
+      {
+        "value": "technosphere",
+        "label_de": "Technosphaere",
+        "label_en": "technosphere",
+        "order_index": 18,
+        "regulation_reference": "§3.1.18"
+      },
+      {
+        "value": "biosphere",
+        "label_de": "Biosphaere",
+        "label_en": "biosphere",
+        "order_index": 19,
+        "regulation_reference": "§3.1.19"
+      },
+      {
+        "value": "technical cycle",
+        "label_de": "technischer Kreislauf",
+        "label_en": "technical cycle",
+        "order_index": 20,
+        "regulation_reference": "§3.1.20"
+      },
+      {
+        "value": "biological cycle",
+        "label_de": "biologischer Kreislauf",
+        "label_en": "biological cycle",
+        "order_index": 21,
+        "regulation_reference": "§3.1.21"
+      },
+      {
+        "value": "system",
+        "label_de": "System",
+        "label_en": "system",
+        "order_index": 22,
+        "regulation_reference": "§3.1.22"
+      },
+      {
+        "value": "system in focus",
+        "label_de": "betrachtetes System",
+        "label_en": "system in focus",
+        "order_index": 23,
+        "regulation_reference": "§3.1.23"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59004-02 system_in_focus": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59004-03 ce_vision_statement": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59004-03 principles_integrated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59004-03 systems_thinking_applied": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59004-04 all_principles_considered": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59004-04 hazardous_substance_risk_approach": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "K",
+    "section_id_is_null": false,
+    "section_path": [
+      "K"
+    ]
+  },
+  "ISO-59004-04 selected_principle": {
+    "enum_values": [
+      {
+        "value": "systems_thinking",
+        "label_de": "Systemdenken",
+        "label_en": "Systems thinking",
+        "order_index": 1,
+        "regulation_reference": "§5.2.1"
+      },
+      {
+        "value": "value_creation",
+        "label_de": "Wertschoepfung",
+        "label_en": "Value creation",
+        "order_index": 2,
+        "regulation_reference": "§5.2.2"
+      },
+      {
+        "value": "value_sharing",
+        "label_de": "Wertteilung",
+        "label_en": "Value sharing",
+        "order_index": 3,
+        "regulation_reference": "§5.2.3"
+      },
+      {
+        "value": "resource_stewardship",
+        "label_de": "Ressourcenverantwortung",
+        "label_en": "Resource stewardship",
+        "order_index": 4,
+        "regulation_reference": "§5.2.4"
+      },
+      {
+        "value": "resource_traceability",
+        "label_de": "Ressourcenrueckverfolgbarkeit",
+        "label_en": "Resource traceability",
+        "order_index": 5,
+        "regulation_reference": "§5.2.5"
+      },
+      {
+        "value": "ecosystem_resilience",
+        "label_de": "Oekosystem-Resilienz",
+        "label_en": "Ecosystem resilience",
+        "order_index": 6,
+        "regulation_reference": "§5.2.6"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-05",
+      "ISO-59004-06"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59004-04 stocks_flows_monitored": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59004-05 action_category": {
+    "enum_values": [
+      {
+        "value": "create_added_value",
+        "label_de": "Wertschaffung",
+        "label_en": "Actions that create added value",
+        "order_index": 1,
+        "regulation_reference": "§6.2"
+      },
+      {
+        "value": "value_retention",
+        "label_de": "Werterhaltung",
+        "label_en": "Actions that contribute to value retention",
+        "order_index": 2,
+        "regulation_reference": "§6.3"
+      },
+      {
+        "value": "value_recovery",
+        "label_de": "Wertrueckgewinnung",
+        "label_en": "Actions that contribute to value recovery",
+        "order_index": 3,
+        "regulation_reference": "§6.4"
+      },
+      {
+        "value": "regenerate_ecosystems",
+        "label_de": "Oekosystem-Regeneration",
+        "label_en": "Actions to regenerate ecosystems",
+        "order_index": 4,
+        "regulation_reference": "§6.5"
+      },
+      {
+        "value": "support_transition",
+        "label_de": "Transformationsunterstuetzung",
+        "label_en": "Actions to support a circular economy transition",
+        "order_index": 5,
+        "regulation_reference": "§6.6"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "enum",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "ISO-59004-05 life_cycle_perspective_applied": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59004-05 preliminary_action_refuse_rethink": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59004-05 repair_before_remanufacture_before_recycle": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59004-05 selected_action": {
+    "enum_values": [
+      {
+        "value": "refuse",
+        "label_de": "Verweigern",
+        "label_en": "Refuse",
+        "order_index": 1,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "rethink",
+        "label_de": "Ueberdenken",
+        "label_en": "Rethink",
+        "order_index": 2,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "source",
+        "label_de": "Beziehen",
+        "label_en": "Source",
+        "order_index": 3,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "reduce",
+        "label_de": "Reduzieren",
+        "label_en": "Reduce",
+        "order_index": 4,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "repair",
+        "label_de": "Reparieren",
+        "label_en": "Repair",
+        "order_index": 5,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "re_use",
+        "label_de": "Wiederverwenden",
+        "label_en": "Re-use",
+        "order_index": 6,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "refurbish",
+        "label_de": "Aufarbeiten",
+        "label_en": "Refurbish",
+        "order_index": 7,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "remanufacture",
+        "label_de": "Wiederaufbereiten",
+        "label_en": "Remanufacture",
+        "order_index": 8,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "repurpose",
+        "label_de": "Umnutzen",
+        "label_en": "Repurpose",
+        "order_index": 9,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "cascade",
+        "label_de": "Kaskadieren",
+        "label_en": "Cascade",
+        "order_index": 10,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "recycle",
+        "label_de": "Recyceln",
+        "label_en": "Recycle",
+        "order_index": 11,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "recover_energy",
+        "label_de": "Energie zurueckgewinnen",
+        "label_en": "Recover energy",
+        "order_index": 12,
+        "regulation_reference": "§6.7, Tab. 1"
+      },
+      {
+        "value": "re_mine",
+        "label_de": "Rueckgewinnen aus Deponien",
+        "label_en": "Re-mine",
+        "order_index": 13,
+        "regulation_reference": "§6.7, Tab. 1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-59004-06"
+    ],
+    "data_type": "enum",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59004-06 baseline_circularity_assessment": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59004-06 ce_action_plan": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59004-06 ce_goals": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59004-06 ce_purpose_mission_vision": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-59004-06 ce_strategy": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59004-06 feasibility_dimension": {
+    "enum_values": [
+      {
+        "value": "technical",
+        "label_de": "Technisch",
+        "label_en": "Technical aspects",
+        "order_index": 1,
+        "regulation_reference": "§7.4.5"
+      },
+      {
+        "value": "organizational",
+        "label_de": "Organisatorisch",
+        "label_en": "Organizational aspects",
+        "order_index": 2,
+        "regulation_reference": "§7.4.5"
+      },
+      {
+        "value": "financial_economic",
+        "label_de": "Finanziell & wirtschaftlich",
+        "label_en": "Financial and economic aspects",
+        "order_index": 3,
+        "regulation_reference": "§7.4.5"
+      },
+      {
+        "value": "context",
+        "label_de": "Kontext",
+        "label_en": "Context aspects",
+        "order_index": 4,
+        "regulation_reference": "§7.4.5"
+      },
+      {
+        "value": "social",
+        "label_de": "Sozial",
+        "label_en": "Social aspects",
+        "order_index": 5,
+        "regulation_reference": "§7.4.5"
+      },
+      {
+        "value": "environmental",
+        "label_de": "Umweltbezogen",
+        "label_en": "Environmental aspects",
+        "order_index": 6,
+        "regulation_reference": "§7.4.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59004-06 implementation_level": {
+    "enum_values": [
+      {
+        "value": "global_regional_country_local",
+        "label_de": "Global/regional/national/lokal",
+        "label_en": "Global, regional, country, local level",
+        "order_index": 1,
+        "regulation_reference": "§7.1.3"
+      },
+      {
+        "value": "interorganizational",
+        "label_de": "Zwischenbetrieblich",
+        "label_en": "Interorganizational level",
+        "order_index": 2,
+        "regulation_reference": "§7.1.3"
+      },
+      {
+        "value": "organizational",
+        "label_de": "Organisatorisch",
+        "label_en": "Organizational level",
+        "order_index": 3,
+        "regulation_reference": "§7.1.3"
+      },
+      {
+        "value": "product",
+        "label_de": "Produkt",
+        "label_en": "Product level",
+        "order_index": 4,
+        "regulation_reference": "§7.1.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59004-06 implementation_stage": {
+    "enum_values": [
+      {
+        "value": "context_reference_assessment",
+        "label_de": "Kontext- & Referenzsituationsbewertung",
+        "label_en": "Context and reference situation assessment",
+        "order_index": 1,
+        "regulation_reference": "§7.2"
+      },
+      {
+        "value": "purpose_mission_vision_goals",
+        "label_de": "Zweck, Mission, Vision & Ziele",
+        "label_en": "Purpose, mission, vision and goals definition",
+        "order_index": 2,
+        "regulation_reference": "§7.3"
+      },
+      {
+        "value": "strategic_priorities_action_plan",
+        "label_de": "Strategische Prioritaeten & Aktionsplan",
+        "label_en": "Strategic priorities and action plan development",
+        "order_index": 3,
+        "regulation_reference": "§7.4"
+      },
+      {
+        "value": "implementation",
+        "label_de": "Umsetzung",
+        "label_en": "Circular economy implementation",
+        "order_index": 4,
+        "regulation_reference": "§7.5"
+      },
+      {
+        "value": "monitoring_reviewing_reporting",
+        "label_de": "Ueberwachung, Ueberpruefung & Berichterstattung",
+        "label_en": "Monitoring, reviewing and reporting",
+        "order_index": 5,
+        "regulation_reference": "§7.6"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-59004-06 monitoring_review_process": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59004-06 pilot_project": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-59004-06 reference_situation_assessed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-59004-06 selected_circularity_indicator": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "G",
+    "section_id_is_null": false,
+    "section_path": [
+      "G"
+    ]
+  },
+  "ISO-59004-06 value_creation_model": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "sections": {
+    "ISO-59004-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 G": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 H": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 G": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 G": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-59004-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {},
+  "gates": {
+    "ISO-59004-01 CR-001": {
+      "condition": "organization_name IS NOT NULL AND organization_type IS NOT NULL AND value_chain_position IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "organization_name",
+        "organization_type",
+        "value_chain_position"
+      ]
+    },
+    "ISO-59004-01 CR-002": {
+      "condition": "ce_commitment == true",
+      "severity": "warn",
+      "symbols": [
+        "ce_commitment"
+      ]
+    },
+    "ISO-59004-03 CR-003": {
+      "condition": "ce_vision_statement IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "ce_vision_statement"
+      ]
+    },
+    "ISO-59004-03 CR-004": {
+      "condition": "systems_thinking_applied == true",
+      "severity": "warn",
+      "symbols": [
+        "systems_thinking_applied"
+      ]
+    },
+    "ISO-59004-03 CR-005": {
+      "condition": "principles_integrated == true",
+      "severity": "warn",
+      "symbols": [
+        "principles_integrated"
+      ]
+    },
+    "ISO-59004-04 CR-006": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-04 CR-007": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-04 CR-008": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-04 CR-009": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-04 CR-010": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-04 CR-011": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-04 CR-012": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-04 CR-013": {
+      "condition": "all_principles_considered == true",
+      "severity": "warn",
+      "symbols": [
+        "all_principles_considered"
+      ]
+    },
+    "ISO-59004-04 CR-014": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-04 CR-015": {
+      "condition": "hazardous_substance_risk_approach == true",
+      "severity": "block",
+      "symbols": [
+        "hazardous_substance_risk_approach"
+      ]
+    },
+    "ISO-59004-04 CR-016": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-04 CR-017": {
+      "condition": "stocks_flows_monitored == true",
+      "severity": "warn",
+      "symbols": [
+        "stocks_flows_monitored"
+      ]
+    },
+    "ISO-59004-05 CR-018": {
+      "condition": "preliminary_action_refuse_rethink == true",
+      "severity": "warn",
+      "symbols": [
+        "preliminary_action_refuse_rethink"
+      ]
+    },
+    "ISO-59004-05 CR-019": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-05 CR-020": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-05 CR-021": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-05 CR-022": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-05 CR-023": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-05 CR-024": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-05 CR-025": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-05 CR-026": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-05 CR-027": {
+      "condition": "life_cycle_perspective_applied == true",
+      "severity": "warn",
+      "symbols": [
+        "life_cycle_perspective_applied"
+      ]
+    },
+    "ISO-59004-05 CR-028": {
+      "condition": "repair_before_remanufacture_before_recycle == true",
+      "severity": "warn",
+      "symbols": [
+        "repair_before_remanufacture_before_recycle"
+      ]
+    },
+    "ISO-59004-06 CR-029": {
+      "condition": "implementation_stage IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "implementation_stage"
+      ]
+    },
+    "ISO-59004-06 CR-030": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-06 CR-031": {
+      "condition": "implementation_level IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "implementation_level"
+      ]
+    },
+    "ISO-59004-06 CR-032": {
+      "condition": "reference_situation_assessed == true AND baseline_circularity_assessment == true",
+      "severity": "warn",
+      "symbols": [
+        "baseline_circularity_assessment",
+        "reference_situation_assessed"
+      ]
+    },
+    "ISO-59004-06 CR-033": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-06 CR-034": {
+      "condition": "ce_purpose_mission_vision IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "ce_purpose_mission_vision"
+      ]
+    },
+    "ISO-59004-06 CR-035": {
+      "condition": "ce_goals IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "ce_goals"
+      ]
+    },
+    "ISO-59004-06 CR-036": {
+      "condition": "ce_strategy IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "ce_strategy"
+      ]
+    },
+    "ISO-59004-06 CR-037": {
+      "condition": "value_creation_model IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "value_creation_model"
+      ]
+    },
+    "ISO-59004-06 CR-038": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-06 CR-039": {
+      "condition": "ce_action_plan IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "ce_action_plan"
+      ]
+    },
+    "ISO-59004-06 CR-040": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-06 CR-041": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-06 CR-042": {
+      "condition": "monitoring_review_process == true",
+      "severity": "warn",
+      "symbols": [
+        "monitoring_review_process"
+      ]
+    },
+    "ISO-59004-06 CR-043": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-59004-06 CR-044": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    }
+  }
+}

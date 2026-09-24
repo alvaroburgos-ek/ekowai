@@ -1,0 +1,528 @@
+-- ISO-59004 — Plan 3 Task 29 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters). LAST of the 29 standards.
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md (same ids).
+-- Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the order it appears — with these dependencies:
+--   every block AFTER the three DATA migrations 20260917102900 (seed: S5_2, six §5.2 principle rows) · 20260917102910 (field configs: 14 created fields incl. three registers and two checklists, 6 widget UPDATEs) · 20260917102920 (equations ISO-59004-05-D1 … -06-D3);
+--   J-1 FIRST — it decides whether ANY of this may be encoded against a FINAL DRAFT at all; a REJECT on J-1 rejects every other block and the three DATA migrations with it;
+--   J-2 is independent and is the SAME ruling as iso5667_1-J-2 (Task 28) — one decision settles both standards;
+--   G-1 AFTER 20260917102910 (it references the CREATED field life_cycle_justification); G-3 AFTER 20260917102910 (operates_across_multiple_levels / level_relationships); G-2 AFTER 20260917102920 (it reads the engine output refuse_rethink_first);
+--   S-1 is independent of everything else; the D-blocks are decisions to KEEP as-is and carry no SQL to run unless the owner chooses retirement.
+--
+-- SOURCE. There is no markdown/text transcript for this standard. The evidence below is an IN-SESSION `pdftotext -layout` extraction of the standard’s own PDF
+-- ("C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 59004\ISO_FDIS_59004_N.pdf" = NM ISO/FDIS 59004:2024, the IMANOR adoption whose cover reads
+-- "La présente norme est identique à l’ISO/FDIS 59004:2024"; 241 700 bytes, 62 pages, 150 010 non-whitespace characters — the command and the page-mapping method are in the task report).
+-- Every "Evidence [PDF …]" line is therefore a VERBATIM quote of the standard WITH its PDF page (grade VA under SR-3). Lines marked "Evidence [prod …]" are cells of the read-only
+-- prod capture (grade EV). Lines marked "Evidence [probe …]" are raw outputs of the engine, re-executable from the pinned tests. The extraction itself is NOT committed.
+--
+-- ⚠ DRAFT CAVEAT (iso59004-J-1): every quote in this file is from a FINAL DRAFT International Standard. See the J-1 block FIRST.
+--
+-- Prod facts (field ids, enum tokens, consumer_worksheets, gate ids / conditions / md5) were captured READ-ONLY on 2026-09-24
+--   (node scripts/regulation-tables/build-prior-snapshot.mjs ISO-59004 iso59004 ; node scripts/verification/capture-text.mjs ISO-59004 iso59004).
+-- This file is GENERATED (scratchpad gen-iso59004-staged.mjs); every id and every md5 below is read from those captures, never typed.
+--
+-- Conventions: s.code = 'ISO-59004', worksheets by code, never by id; every UPDATE is guarded by the prior value (or md5) it replaces so a re-run is a no-op; each block names its rollback.
+-- A staged gate rewrite archives the full compliance_requirements row into compliance_requirements_archive_iso59004 in the SAME transaction (CREATE TABLE … AS SELECT * … WHERE false;
+-- INSERT … SELECT c.* WHERE c.id = … AND md5(c.condition) = …), guards the UPDATE on md5(condition), and rolls back by restoring the FULL explicit column list from the archive by id.
+-- A staged field change archives into fields_archive_iso59004 the same way and restores the EXPLICIT 31-column list. Each archive table is dropped by the owner once every change of its
+-- class in this file is signed off as final.
+--
+-- Column lists (information_schema, re-read READ-ONLY in this session, 2026-09-24 — 18 / 22 / 31 / 7):
+--   compliance_requirements (18): id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   equations (22): id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   fields (31): id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote
+--   worksheet_sections (7): id, worksheet_template_id, parent_section_id, code, title_de, title_en, order_index   (+ visible_when after 20260911100000)
+--
+-- Shorthand:  WS(code) = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-59004' AND w.code = '<code>')
+--             RESTORE_CR(id, md5) = UPDATE compliance_requirements c SET worksheet_template_id = a.worksheet_template_id, code = a.code, title_de = a.title_de, title_en = a.title_en, condition = a.condition, clause_reference = a.clause_reference, severity = a.severity, description = a.description, suggestion = a.suggestion, audit_status = a.audit_status, source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote, audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_iso59004 a WHERE a.id = c.id AND c.id = '<id>' AND md5(a.condition) = '<md5>';
+--             RESTORE_F(id)       = UPDATE fields f SET section_id = a.section_id, symbol = a.symbol, label_de = a.label_de, label_en = a.label_en, data_type = a.data_type, unit = a.unit, is_required = a.is_required, enum_values = a.enum_values, validation_rules = a.validation_rules, clause_reference = a.clause_reference, description = a.description, consumer_worksheets = a.consumer_worksheets, order_index = a.order_index, verification_status = a.verification_status, audit_status = a.audit_status, source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote, audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by, active = a.active, default_value = a.default_value, verified_by_user_id = a.verified_by_user_id, verified_at = a.verified_at, verification_note = a.verification_note, owner = a.owner, xbrl_element_id = a.xbrl_element_id, verification_quote = a.verification_quote FROM fields_archive_iso59004 a WHERE a.id = f.id AND f.id = '<id>';
+--             (id and worksheet_template_id are join keys and are never restored.)
+--
+-- Gates touched or named (read-only 2026-09-24):
+--   ISO-59004-04 CR-013 (id c59875f0-bb9c-48a3-ae3e-ab465a845c2e, warn, md5 db82f3920aa5c32bb8d8f68898cf4e25, condition "all_principles_considered == true")
+--   ISO-59004-05 CR-018 (id 95588ee7-f302-473b-be61-acaaa93921b4, warn, md5 c5d1538f2d5e731611a852cfa42b9d4b, condition "preliminary_action_refuse_rethink == true")
+--   ISO-59004-05 CR-028 (id 4830f731-57bb-4361-9448-6a793f1ef7d6, warn, md5 a8fa5e847d4120187a40a2c2d7238097, condition "repair_before_remanufacture_before_recycle == true")
+--   ISO-59004-06 CR-031 (id 06b1b297-a849-4793-b6ed-ca791550defe, warn, md5 1fbc6e32b65d8b8e9035c349966b3915, condition "implementation_level IS NOT NULL")
+--   ISO-59004-06 CR-032 (id aaa9d35e-70cd-4f54-ba3e-6b20e6bed0f9, warn, md5 04ad8030e08329790072940547144268, condition "reference_situation_assessed == true AND baseline_circularity_assessment == true")
+--   ISO-59004-06 CR-034 (id 7ce80b98-f6e6-43d8-9bd4-3cac6d4ecbdb, warn, md5 4d140adf4f9a311ae2c1bb2ce970650f, condition "ce_purpose_mission_vision IS NOT NULL")
+--   ISO-59004-06 CR-035 (id 98653a62-1983-44cd-a18c-b267ea12a63b, warn, md5 169073274a937c5d1b352785bc919ef4, condition "ce_goals IS NOT NULL")
+--   ISO-59004-06 CR-036 (id 53c8e788-fceb-4fba-bf8d-4fc1ec15d359, warn, md5 e50c3825889ab4811658df1a08d33a33, condition "ce_strategy IS NOT NULL")
+--   ISO-59004-06 CR-037 (id 50a17d1d-b313-4697-ba65-0d367ac5402b, warn, md5 274d1f080b29294dc378692fe8e571e0, condition "value_creation_model IS NOT NULL")
+--   ISO-59004-06 CR-038 (id 6e59b7ba-06e3-4f66-8368-01db94614c73, warn, md5 d41d8cd98f00b204e9800998ecf8427e, condition "")
+--   ISO-59004-06 CR-039 (id f16b869a-954a-456f-ac72-b6ddcae84b2d, warn, md5 3162760c0f6e2f5dcbb737ab0d769132, condition "ce_action_plan IS NOT NULL")
+--   ISO-59004-06 CR-042 (id 2e04f912-93fe-4640-acdf-ee4bf9e46ef6, warn, md5 030e6ff9c4355ead5d6d68bf16c0ca09, condition "monitoring_review_process == true")
+-- Fields named:
+--   ISO-59004-02 defined_term (id e49c7202-6a79-4558-b0b3-f52b7b643385, enum, is_required false, active true, consumer_worksheets ["ALL"])
+--   ISO-59004-02 circularity_aspect (id 032bb918-83c1-49f2-8350-d08eb2d42e19, text, is_required false, active true, consumer_worksheets ["ISO-59004-05","ISO-59004-06"])
+--   ISO-59004-04 all_principles_considered (id 86c49ff8-ff8d-4971-b571-5e361b00e84b, boolean, is_required true, active true, consumer_worksheets ["ISO-59004-06"])
+--   ISO-59004-04 selected_principle (id 140e3977-fce7-409e-ba5a-d135103c831b, enum, is_required true, active true, consumer_worksheets ["ISO-59004-05","ISO-59004-06"])
+--   ISO-59004-05 selected_action (id f301f926-4f37-4df9-9b3b-ee3801cb4753, enum, is_required true, active true, consumer_worksheets ["ISO-59004-06"])
+--   ISO-59004-05 action_category (id 06d21589-3812-404c-bc62-0baf0432ff7c, enum, is_required false, active true, consumer_worksheets ["ISO-59004-06"])
+--   ISO-59004-05 life_cycle_perspective_applied (id f2078636-0072-4f7b-ac72-cd518bd16fc1, boolean, is_required true, active true, consumer_worksheets ["ISO-59004-06"])
+--   ISO-59004-05 preliminary_action_refuse_rethink (id 152afe33-75b1-4e24-889a-46e524630cf6, boolean, is_required true, active true, consumer_worksheets null)
+--   ISO-59004-06 ce_goals (id 8ffe261f-1527-4051-a397-5a53fdd0b068, text, is_required true, active true, consumer_worksheets null)
+--   ISO-59004-06 selected_circularity_indicator (id 1a37d6cb-2e64-4062-b556-52b808543b34, text, is_required true, active true, consumer_worksheets null)
+--   ISO-59004-06 feasibility_dimension (id 3476e0a8-29a1-40a9-8384-7742177ae134, enum, is_required false, active true, consumer_worksheets null)
+--   ISO-59004-06 pilot_project (id eeca86b2-0dcb-4407-add3-9cb1da1b246c, boolean, is_required false, active true, consumer_worksheets null)
+--   ISO-59004-06 value_creation_model (id 82b7680e-b5c0-4ee1-a9d6-bb1746a25f17, text, is_required true, active true, consumer_worksheets null)
+-- Equations: prod carries ZERO equations for ISO-59004 (capture 2026-09-24) — no replacement is proposed anywhere in this file.
+
+-- ======================================================================================================================
+-- iso59004-J-1 · ISO-59004 · ALL worksheets · the source is a FINAL DRAFT (FDIS), not the published ISO 59004:2024 — may the corpus be encoded against a draft at all?
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): the encoding proceeds, every artefact is labelled FDIS, and no table ships a status above `imported_unverified`. Nothing is applied.
+-- The exact status string read from the PDF this session, verbatim (PDF p.8 = printed p.1, the running header of the first body page):
+-- Evidence [PDF p.8 (printed p.1), VA]: "FINAL DRAFT International Standard                                                     ISO/FDIS 59004:2024(en)"
+-- Evidence [PDF p.1 (IMANOR cover, French), VA]: "La présente norme est identique à l’ISO/FDIS 59004:2024."
+-- Evidence [prod standards.version]: "FDIS 2024 (ISO/FDIS 59004:2024)" — prod already records the draft status, so nothing here contradicts prod.
+-- What this means, stated plainly: EVERY quote in Task 29 — the six §5.2 principle rows of the seeded table S5_2, every `verification_quote` on the 14 created fields and the
+-- 6 re-widgeted ones, every equation quote, and every "Evidence [PDF …]" line in this file — comes from a DRAFT. Clause numbers, the six principle texts, Table 1 and the
+-- Clause-7 stage structure can all have moved in the published ISO 59004:2024. The corpus has no other copy: the doctrine’s source inventory records this PDF as the only one.
+-- If REJECTED: do not apply 20260917102900 / …10 / …20, and treat every other block in this file as rejected with it.
+-- If RATIFIED: the published edition must be re-verified when acquired; the seed builder’s edition token is 'FDIS 2024', so a published-edition seed lands as a NEW edition row and
+-- supersedes nothing by accident.
+-- No SQL — this is a ruling, not a change.
+
+-- ======================================================================================================================
+-- iso59004-J-2 · ISO-59004 · regulation_tables.verification_status · propose a third token `pdf_verified` (the SAME ruling as iso5667_1-J-2, Task 28)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): S5_2 ships `imported_unverified`. `md_verified` would be FACTUALLY WRONG (there is no markdown transcript for this standard), and a new token is never
+-- introduced unilaterally. The six rows are nonetheless PDF-derived with a page reference, i.e. grade VA under SR-3 — strictly better evidence than `md_verified` denotes.
+-- Cross-reference: Task 28 (ISO-5667-1) raised the identical proposal for its four tables. ONE ruling settles both standards; if the token is adopted, run BOTH updates.
+-- Evidence [global constraints, rule 2]: "regulation_tables.verification_status is free text (no CHECK) — use exactly these two tokens." — the vocabulary is a convention, not a
+-- database constraint, so adding a token is a documentation + consumer decision, not a migration risk.
+-- Proposed SQL (ISO-59004 side; the ISO-5667-1 side is in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql):
+-- BEGIN;
+-- UPDATE regulation_tables SET verification_status = 'pdf_verified'
+--   WHERE standard_code = 'ISO-59004' AND edition = 'FDIS 2024' AND table_code = 'S5_2' AND verification_status = 'imported_unverified';
+-- COMMIT;
+-- Rollback:
+-- BEGIN;
+-- UPDATE regulation_tables SET verification_status = 'imported_unverified'
+--   WHERE standard_code = 'ISO-59004' AND edition = 'FDIS 2024' AND table_code = 'S5_2' AND verification_status = 'pdf_verified';
+-- COMMIT;
+-- Also required if adopted [CODE]: the two tokens are asserted in every per-standard seed test and in the plan’s verification vocabulary — those pins move in the same wave.
+
+-- ======================================================================================================================
+-- iso59004-G-1 · ISO-59004 · ISO-59004-05 · CR-028 — the §6.7 ordering rule is not absolute: ask for the life-cycle justification INSTEAD of demanding the order
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): CR-028 stays exactly as captured — `repair_before_remanufacture_before_recycle == true`, warn. The created field `life_cycle_justification` is emitted with
+-- `visible_when "repair_before_remanufacture_before_recycle == false"` (the emitter ACCEPTS it: the hidden symbol is new and no gate reads it), so the question is already on the sheet;
+-- only the GATE is unchanged, because a gate condition change is always a sign-off.
+-- Evidence [PDF p.35 (printed p.28), §6.7, VA]: "In general, products should be repaired before they are remanufactured, and remanufactured before they are recycled. However, in cases
+--     where applying this guidance does not lead to the best outcome, organizations should consider applying a life cycle perspective to determine the best action."
+-- Reading: the printed sentence makes the order a DEFAULT ("In general") with an explicit escape ("However, in cases where … does not lead to the best outcome"). Today’s gate warns
+--     whenever the escape is taken, which mis-states the standard; the proposed condition warns only when the escape is taken WITHOUT the life-cycle justification the standard asks for.
+-- Evidence [probe, re-executable via src/lib/eval/__tests__/field-configs-iso59004.test.ts]: parseCondition("IF repair_before_remanufacture_before_recycle == false THEN life_cycle_justification IS NOT NULL") PARSES; with the escape taken and no justification it evaluates {"kind":"fail"}.
+-- Proposed SQL:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59004 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59004 (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation) SELECT c.id, c.worksheet_template_id, c.code, c.title_de, c.title_en, c.condition, c.clause_reference, c.severity, c.description, c.suggestion, c.audit_status, c.source_file, c.source_anchor, c.source_quote, c.audit_notes, c.audited_at, c.audited_by, c.requires_attestation FROM compliance_requirements c WHERE c.id = '4830f731-57bb-4361-9448-6a793f1ef7d6' AND md5(c.condition) = 'a8fa5e847d4120187a40a2c2d7238097';
+-- UPDATE compliance_requirements SET condition = 'IF repair_before_remanufacture_before_recycle == false THEN life_cycle_justification IS NOT NULL' WHERE id = '4830f731-57bb-4361-9448-6a793f1ef7d6' AND md5(condition) = 'a8fa5e847d4120187a40a2c2d7238097';
+-- COMMIT;
+-- Rollback (RESTORE_CR):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = a.worksheet_template_id, code = a.code, title_de = a.title_de, title_en = a.title_en, condition = a.condition, clause_reference = a.clause_reference, severity = a.severity, description = a.description, suggestion = a.suggestion, audit_status = a.audit_status, source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote, audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_iso59004 a WHERE a.id = c.id AND c.id = '4830f731-57bb-4361-9448-6a793f1ef7d6' AND md5(a.condition) = 'a8fa5e847d4120187a40a2c2d7238097';
+-- COMMIT;
+-- DROP TABLE compliance_requirements_archive_iso59004;   -- only once every gate block in this file is final
+
+-- ======================================================================================================================
+-- iso59004-G-2 · ISO-59004 · ISO-59004-05 · CR-018 — read the §6.1 preliminary-action rule off the actions REGISTER instead of a hand boolean
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): CR-018 stays exactly as captured — `preliminary_action_refuse_rethink == true`, warn — and the hand boolean stays a required input (iso59004-D-11).
+-- The register now produces `refuse_rethink_first` (ISO-59004-05-D2), the same fact counted from the rows, but a gate condition change is always a sign-off.
+-- Evidence [PDF p.25 (printed p.18), §6.1, VA]: "Organizations should consider refuse and rethink as preliminary actions."
+-- Reading: "should consider … as preliminary actions" is about the ACTIONS the organization records, which is exactly what the register holds. The IF-guard keeps an EMPTY register
+--     from firing the gate (a project that has recorded no action yet is not yet in breach) — without it, `refuse_rethink_first >= 1` would fail on every fresh worksheet.
+-- Evidence [probe]: parseCondition("IF actions_count >= 1 THEN refuse_rethink_first >= 1") PARSES; with actions_count = 2 and refuse_rethink_first = 0 it evaluates {"kind":"fail"}.
+-- Proposed SQL:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59004 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59004 (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation) SELECT c.id, c.worksheet_template_id, c.code, c.title_de, c.title_en, c.condition, c.clause_reference, c.severity, c.description, c.suggestion, c.audit_status, c.source_file, c.source_anchor, c.source_quote, c.audit_notes, c.audited_at, c.audited_by, c.requires_attestation FROM compliance_requirements c WHERE c.id = '95588ee7-f302-473b-be61-acaaa93921b4' AND md5(c.condition) = 'c5d1538f2d5e731611a852cfa42b9d4b';
+-- UPDATE compliance_requirements SET condition = 'IF actions_count >= 1 THEN refuse_rethink_first >= 1' WHERE id = '95588ee7-f302-473b-be61-acaaa93921b4' AND md5(condition) = 'c5d1538f2d5e731611a852cfa42b9d4b';
+-- COMMIT;
+-- Rollback (RESTORE_CR):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = a.worksheet_template_id, code = a.code, title_de = a.title_de, title_en = a.title_en, condition = a.condition, clause_reference = a.clause_reference, severity = a.severity, description = a.description, suggestion = a.suggestion, audit_status = a.audit_status, source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote, audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_iso59004 a WHERE a.id = c.id AND c.id = '95588ee7-f302-473b-be61-acaaa93921b4' AND md5(a.condition) = 'c5d1538f2d5e731611a852cfa42b9d4b';
+-- COMMIT;
+-- Depends on 20260917102920 (the equation that produces refuse_rethink_first) being applied FIRST — otherwise the symbol is absent and the gate reads `manual`.
+
+-- ======================================================================================================================
+-- iso59004-G-3 · ISO-59004 · ISO-59004-06 · CR-031 — add the §7.1.3 multi-level relationships to the level gate
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): CR-031 stays exactly as captured — `implementation_level IS NOT NULL`, warn. The two created fields (`operates_across_multiple_levels`,
+-- `level_relationships` with its `visible_when`) are already emitted, so the question is on the sheet; only the gate is unchanged.
+-- Evidence [PDF p.36 (printed p.29), §7.1.3, VA]: "Organizations that interact or operate across more than one system level should consider the relationships and interactions within
+--     and between the other system levels to achieve a circular economy."
+-- Evidence [prod ISO-59004-06 implementation_level enum, EV]: four tokens — global_regional_country_local / interorganizational / organizational / product. There is NO
+--     "across more than one level" token, so the brief’s `implementation_level == '<multi token>'` premise is REFUTED (iso59004-J-6) and a separate boolean is the only honest driver.
+-- Amendment M note: the IF-THEN body is SIMPLE (`level_relationships IS NOT NULL`), so it is NOT parenthesised; the parentheses in the proposal wrap the whole IF-THEN clause because it
+--     is the right operand of an AND.
+-- Evidence [probe]: parseCondition("implementation_level IS NOT NULL AND (IF operates_across_multiple_levels == true THEN level_relationships IS NOT NULL)") PARSES; multi-level true with an empty relationships text evaluates {"kind":"fail"}.
+-- Proposed SQL:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59004 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59004 (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation) SELECT c.id, c.worksheet_template_id, c.code, c.title_de, c.title_en, c.condition, c.clause_reference, c.severity, c.description, c.suggestion, c.audit_status, c.source_file, c.source_anchor, c.source_quote, c.audit_notes, c.audited_at, c.audited_by, c.requires_attestation FROM compliance_requirements c WHERE c.id = '06b1b297-a849-4793-b6ed-ca791550defe' AND md5(c.condition) = '1fbc6e32b65d8b8e9035c349966b3915';
+-- UPDATE compliance_requirements SET condition = 'implementation_level IS NOT NULL AND (IF operates_across_multiple_levels == true THEN level_relationships IS NOT NULL)' WHERE id = '06b1b297-a849-4793-b6ed-ca791550defe' AND md5(condition) = '1fbc6e32b65d8b8e9035c349966b3915';
+-- COMMIT;
+-- Rollback (RESTORE_CR):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = a.worksheet_template_id, code = a.code, title_de = a.title_de, title_en = a.title_en, condition = a.condition, clause_reference = a.clause_reference, severity = a.severity, description = a.description, suggestion = a.suggestion, audit_status = a.audit_status, source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote, audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_iso59004 a WHERE a.id = c.id AND c.id = '06b1b297-a849-4793-b6ed-ca791550defe' AND md5(a.condition) = '1fbc6e32b65d8b8e9035c349966b3915';
+-- COMMIT;
+
+-- ======================================================================================================================
+-- iso59004-G-4 · ISO-59004 · the 24 EMPTY-condition compliance requirements — ONE is proposable, 23 are not, each with its reason
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Count correction, recorded: the inventory says "22 of 44"; the read-only capture of 2026-09-24 counts 24 rows whose `condition` is the empty string (md5 d41d8cd98f00b204e9800998ecf8427e).
+--     The capture is the authority (R-4). An empty condition never blocks — `evaluate.ts` returns `manual` — so all 24 are advisory text today, which is the fail-safe state and is left alone.
+-- Chosen now (fail-safe): 23 of the 24 stay empty. ONE proposal is made, and only because a real prod symbol already carries the fact.
+--
+-- PROPOSED — ISO-59004-06 CR-038 (id 6e59b7ba-06e3-4f66-8368-01db94614c73, warn, md5 d41d8cd98f00b204e9800998ecf8427e) "Assess feasibility across all dimensions"
+-- Evidence [PDF p.41 (printed p.34), §7.4.5, VA]: "To assess the feasibility of the adoption of a circular economy and its associated circular economy value creation models, actions
+--     should be assessed against the following dimensions:" — followed by the six printed bullets technical / organizational / financial and economic / context / social / environmental,
+--     which are exactly the six prod `feasibility_dimension` tokens.
+-- Honest limit of the proposal: the printed rule asks for an assessment against ALL SIX dimensions; `feasibility_dimension` is a SINGLE-select and the register column
+--     `actions.feasibility_dimensions` is free text, because no register column type is a multi-select (iso59004-I-1). The proposed condition is therefore a PRESENCE check — strictly
+--     weaker than the printed sentence, and the corpus shape used by CR-034 / CR-035 / CR-036 / CR-039 on this same worksheet. It becomes complete only after I-1 is closed.
+-- Proposed SQL:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso59004 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso59004 (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation) SELECT c.id, c.worksheet_template_id, c.code, c.title_de, c.title_en, c.condition, c.clause_reference, c.severity, c.description, c.suggestion, c.audit_status, c.source_file, c.source_anchor, c.source_quote, c.audit_notes, c.audited_at, c.audited_by, c.requires_attestation FROM compliance_requirements c WHERE c.id = '6e59b7ba-06e3-4f66-8368-01db94614c73' AND md5(c.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- UPDATE compliance_requirements SET condition = 'feasibility_dimension IS NOT NULL' WHERE id = '6e59b7ba-06e3-4f66-8368-01db94614c73' AND md5(condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+-- Rollback (RESTORE_CR):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = a.worksheet_template_id, code = a.code, title_de = a.title_de, title_en = a.title_en, condition = a.condition, clause_reference = a.clause_reference, severity = a.severity, description = a.description, suggestion = a.suggestion, audit_status = a.audit_status, source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote, audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_iso59004 a WHERE a.id = c.id AND c.id = '6e59b7ba-06e3-4f66-8368-01db94614c73' AND md5(a.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- COMMIT;
+--
+-- NOT PROPOSED — the other 23, with the reason each one is left empty (never an invented enforcement):
+--   ISO-59004-04 CR-006 (id 6440b428-dded-4f72-be32-65d91c86376f, warn) "Principle - Systems thinking" — the six §5.2 principle CRs (CR-006 … CR-011) each restate ONE principle. The created `principles` checklist holds exactly the six tokens, but the GATE condition grammar has NO `contains` — probed this session: parseCondition("contains(principles, 'systems_thinking')") returns null, and only `principles IS NOT NULL` parses. A shared `principles IS NOT NULL` would make six DISTINCT requirements fire identically, which is an invented enforcement. Unblocked by I-3.
+--   ISO-59004-04 CR-007 (id 677f0076-8bb4-483e-bc7e-9763a3275629, warn) "Principle - Value creation" — see CR-006 (same reason).
+--   ISO-59004-04 CR-008 (id b0f8d508-6722-47f5-858b-52ee03075f9b, warn) "Principle - Value sharing" — see CR-006 (same reason).
+--   ISO-59004-04 CR-009 (id 222c8d71-aae0-472c-9421-fee6932b0d3c, warn) "Principle - Resource stewardship" — see CR-006 (same reason).
+--   ISO-59004-04 CR-010 (id bbd286fa-f7d3-4d42-a399-49983f7f3624, warn) "Principle - Resource traceability" — see CR-006 (same reason).
+--   ISO-59004-04 CR-011 (id 1617c244-11ec-487e-8672-10a60fcf1181, warn) "Principle - Ecosystem resilience" — see CR-006 (same reason).
+--   ISO-59004-04 CR-012 (id 17c18f64-b562-4734-a6d2-f7da020bef0e, warn) "Principles considered at design stage" — §5.3.2 "principles considered at design stage" — the only symbol prod has for it is `all_principles_considered`, which CR-013 already reads. A second gate on the same symbol is a duplicate, not a new check.
+--   ISO-59004-04 CR-014 (id 0e849844-e2a3-45ef-88d1-f1f4f1332164, warn) "Collaborate for management of information and resources" — §5.3.3 collaboration for management of information and resources — prose guidance; no prod field and nothing this task creates asks the question.
+--   ISO-59004-04 CR-016 (id 7983ae16-7909-4ad2-ba83-e574cc824c4a, warn) "Optimize value creation relative to resource use" — §5.3.5 optimize value creation relative to resource use — prose guidance; no symbol.
+--   ISO-59004-05 CR-019 (id 3482d344-2dc8-41a4-b242-95a0448043fe, warn) "Prioritize resource stewardship in added-value actions" — §6.2.1 prioritize resource stewardship in added-value actions — the actions register records WHICH action, not which principle drove it; mapping an action to a principle is not printed.
+--   ISO-59004-05 CR-020 (id 60ce08d1-4490-4f62-9693-0df315fff35e, warn) "Apply design for circularity" — §6.2.2 design for circularity — prose guidance; no symbol.
+--   ISO-59004-05 CR-021 (id 6ef806c5-f052-48ed-9c42-728e34812336, warn) "Apply circular sourcing" — §6.2.3 circular sourcing — prose guidance; the `source` R-strategy is one register row value, not a statement that sourcing was made circular.
+--   ISO-59004-05 CR-022 (id 5baf6b0d-243f-4e34-b1d6-daa4761f70f8, warn) "Invest in value-retention activities" — §6.3.1 invest in value-retention activities — prose guidance; the `category` column is engineer-entered (Table 1 unseeded, iso59004-U-1), so counting value_retention rows would enforce the engineer’s own classification, not the standard.
+--   ISO-59004-05 CR-023 (id c6aa0894-a2b0-4d9e-b5ea-a5623be74f33, warn) "Implement value-recovery actions" — §6.4.1 implement value-recovery actions — see CR-022.
+--   ISO-59004-05 CR-024 (id 66195366-6c31-4480-8c1a-37aa10987cd2, warn) "Energy recovery only as circular when life-cycle optimal" — §6.4.7 energy recovery only as circular when life-cycle optimal — a judgment about a material’s place in the circular flow; no symbol expresses it.
+--   ISO-59004-05 CR-025 (id 481462f7-52ec-412a-878a-bed3566f6e29, warn) "Actions to regenerate ecosystems" — §6.5 actions to regenerate ecosystems — see CR-022.
+--   ISO-59004-05 CR-026 (id 0642889b-b3df-4a85-bfd4-100098e8384a, warn) "Actions to support a circular economy transition" — §6.6.1 actions to support a circular economy transition — see CR-022.
+--   ISO-59004-06 CR-030 (id 6d7112d4-250c-4ef4-8de4-4574aea1d824, warn) "Incorporate principles in each implementation stage" — §7.1.2 incorporate principles in each implementation stage — prose guidance; the `principles` checklist is per-project, not per-stage.
+--   ISO-59004-06 CR-033 (id 68478888-6361-4244-a493-3ee2ce9da1d5, warn) "Identify risks and opportunities" — §7.2.5 identify risks and opportunities — no prod field and nothing this task creates records them.
+--   ISO-59004-06 CR-040 (id 7dbbe7fa-b493-489e-968c-78d8af1924dc, warn) "Raise awareness and build capacity" — §7.5.2 raise awareness and build capacity — prose guidance; no symbol.
+--   ISO-59004-06 CR-041 (id 666e27b2-7d03-479d-81bc-af7003e94eec, warn) "Execute the action plan" — §7.5.4 execute the action plan — prose guidance; `ce_action_plan IS NOT NULL` is already CR-039.
+--   ISO-59004-06 CR-043 (id 782225e5-fa85-48ab-b5fa-8449c184dae9, warn) "Measurement & assessment per ISO 59020" — §7.2.2 / §7.6 measurement per ISO 59020 — CROSS-STANDARD. The condition belongs to the ISO-59020 inheritance work (iso59004-X-1, Phase 6); `indicators_59004_count >= 1` would enforce a count this document never prints.
+--   ISO-59004-06 CR-044 (id 4c2331e6-c3f4-4010-8fb0-0d3e8c4b7063, warn) "Value creation models & networks per ISO 59010" — §7.4.4 value creation models per ISO 59010 — CROSS-STANDARD and ISO 59010 is not in the corpus; `value_creation_model IS NOT NULL` is already CR-037.
+
+-- ======================================================================================================================
+-- iso59004-J-4 / G-5 · ISO-59004 · ISO-59004-06 · the brief’s five `implementation_stage` visibility rules are WITHHELD — the standard itself refutes stage-gating
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): NO field of ISO-59004-06 is hidden by `implementation_stage`. Every §7.2 – §7.6 field stays visible on every project, exactly as today.
+-- Reason 1 — the printed text refutes the premise.
+-- Evidence [PDF p.37 (printed p.30), §7.1.4, VA]: "The guidance is structured to allow for an iterative process. The stages of implementation can be altered and adapted to reflect
+--     changing circumstances of the organization. Figure 4 illustrates the stages, which are underpinned by the circular economy principles. The proposed stages that an organization can
+--     undertake in order to implement a circular economy are discussed in 7.2 to 7.6."
+-- Evidence [PDF p.37 (printed p.30), §7.1.4 NOTE, VA]: "NOTE      The sequence of stages can differ and can also occur at the same time or in parallel."
+-- Reading: `implementation_stage` is a SINGLE-select of one current stage. Hiding the other four stages’ fields would contradict the NOTE outright and would make CR-034 / CR-035 /
+--     CR-036 / CR-037 / CR-039 / CR-042 unsatisfiable on a worksheet whose organization works two stages in parallel — the F-4 class of harm (a gate that silently stops enforcing).
+-- Reason 2 — independently, the gate-aware guard (amendment M) REFUSES eight of the eleven candidate hides. The exact messages, pinned in
+--     src/lib/eval/__tests__/field-configs-iso59004.test.ts so they cannot drift:
+--   "ISO-59004-06 reference_situation_assessed: visible_when hides reference_situation_assessed read by gate CR-032 (warn: \"reference_situation_assessed == true AND baseline_circularity_assessment == true\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block"
+--   "ISO-59004-06 baseline_circularity_assessment: visible_when hides baseline_circularity_assessment read by gate CR-032 (warn: \"reference_situation_assessed == true AND baseline_circularity_assessment == true\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block"
+--   "ISO-59004-06 ce_purpose_mission_vision: visible_when hides ce_purpose_mission_vision read by gate CR-034 (warn: \"ce_purpose_mission_vision IS NOT NULL\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block"
+--   "ISO-59004-06 ce_goals: visible_when hides ce_goals read by gate CR-035 (warn: \"ce_goals IS NOT NULL\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block"
+--   "ISO-59004-06 ce_strategy: visible_when hides ce_strategy read by gate CR-036 (warn: \"ce_strategy IS NOT NULL\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block"
+--   "ISO-59004-06 ce_action_plan: visible_when hides ce_action_plan read by gate CR-039 (warn: \"ce_action_plan IS NOT NULL\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block"
+--   "ISO-59004-06 value_creation_model: visible_when hides value_creation_model read by gate CR-037 (warn: \"value_creation_model IS NOT NULL\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block"
+--   "ISO-59004-06 monitoring_review_process: visible_when hides monitoring_review_process read by gate CR-042 (warn: \"monitoring_review_process == true\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block"
+--     The remaining three (`feasibility_dimension`, `pilot_project`, `selected_circularity_indicator`) are ACCEPTED by the guard — no gate reads them — and are withheld on Reason 1 alone.
+--     That asymmetry is stated deliberately: the guard is not the argument, the printed NOTE is.
+-- NO gate rewrite is proposed, because the RULE it would guard is itself withheld. Should the owner override this block and want the hides after all, each of the eight gates needs the
+--     matching IF-guard first, in the archive pattern of G-1, e.g. for CR-035:
+--       UPDATE compliance_requirements SET condition = 'IF implementation_stage == ''purpose_mission_vision_goals'' THEN ce_goals IS NOT NULL' WHERE id = '98653a62-1983-44cd-a18c-b267ea12a63b' AND md5(condition) = '169073274a937c5d1b352785bc919ef4';
+--     …and only then may the corresponding `visible_when` be emitted. Do not do one without the other.
+
+-- ======================================================================================================================
+-- iso59004-J-3 · ISO-59004 · ISO-59004-05 · the brief’s per-row rule for `actions.life_cycle_note` is REFUTED — the column is always visible
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): `actions.life_cycle_note` has NO `visible_when`; the engineer can write a life-cycle note on any action row.
+-- Refutation 1 — the token does not exist. The brief writes `action IN {recycle, recover, re_mine}`. The prod `ISO-59004-05 selected_action` enum, captured read-only 2026-09-24, has
+--     thirteen tokens and NONE of them is `recover`: refuse / rethink / source / reduce / repair / re_use / refurbish / remanufacture / repurpose / cascade / recycle / recover_energy / re_mine.
+--     The failing grep and its exit code are in the task report; the absence is also pinned as an assertion in field-configs-iso59004.test.ts.
+-- Refutation 2 — the printed rule says the opposite.
+-- Evidence [PDF p.34 (printed p.27), §6.7, VA]: "This resource management guidance is intended to help organizations prioritize actions to increase circularity performance. A life cycle
+--     perspective should guide the organization in the identification of the best action for their value creation model and to avoid unwanted trade-offs."
+--     — the life-cycle perspective guides the identification of the best action, FULL STOP; it is not restricted to three of the thirteen.
+-- Evidence [PDF p.35 (printed p.28), §6.7, VA]: "In general, products should be repaired before they are remanufactured, and remanufactured before they are recycled."
+--     — the only ORDERING the standard prints names repair / remanufacture / recycle, not recycle / recover / re-mine.
+-- If the owner wants a narrowing anyway, the source-grounded one is the printed ordering trio, and it is recorded verbatim in the module as
+--     WITHHELD_LIFE_CYCLE_NOTE_ALTERNATIVE = "action IN {'repair', 'remanufacture', 'recycle'}" (it parses; asserted in the test). It is a ui_config change on the register carrier:
+--     add `visible_when` to the `life_cycle_note` column of ISO-59004-05 `actions` and re-emit 20260917102910 — no hand-written SQL, the emitter owns that file.
+
+-- ======================================================================================================================
+-- iso59004-J-5 · ISO-59004 · ISO-59004-06-D2 · the brief’s `intermediate_target != ''` does not evaluate; `IS NOT NULL` is emitted instead
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: ISO-59004-06-D2 is `goals_with_targets = count_rows(goals, intermediate_target IS NOT NULL)`.
+-- Evidence [probe, re-executable via src/lib/eval/__tests__/equations-iso59004.test.ts]:
+--     parseNumeric("count_rows(goals, intermediate_target != '')")  ⇒  {"ok":true,…}      (it PARSES)
+--     evaluateFormula(… same formula …) over a 3-row register  ⇒  {"kind":"manual_required","reason":"Fehlende Eingabe für count_rows(): intermediate_target"}
+--     evaluateFormula("goals_with_targets = count_rows(goals, intermediate_target IS NOT NULL)") over the SAME rows  ⇒  {"kind":"computed","value":1}
+--     …where row 1 has "2030: 50 % Rezyklatanteil", row 2 has the EMPTY STRING and row 3 has no key at all: the emitted form already treats an empty text as not set, which is the
+--     behaviour §7.3.2 needs ("Intermediate targets should be established"). Both behaviours are pinned side by side, so a silent engine change fails the test rather than changing a count.
+-- No SQL — the emitted migration 20260917102920 already carries the decidable form. This block records the decision and its evidence.
+
+-- ======================================================================================================================
+-- iso59004-J-6 · ISO-59004 · ISO-59004-06 · there is no "more than one level" token — a boolean driver is created instead of inventing an enum option
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: a new boolean `operates_across_multiple_levels` (§7.1.3) drives `level_relationships`. The prod enum `implementation_level` is NOT touched (D-1: its four options stay).
+-- Evidence [prod ISO-59004-06 implementation_level, EV]: global_regional_country_local / interorganizational / organizational / product — four tokens, no multi-level option.
+-- Evidence [PDF p.36 (printed p.29), §7.1.3, VA]: "Organizations that interact or operate across more than one system level should consider the relationships and interactions within and
+--     between the other system levels to achieve a circular economy." — the standard asks a YES/NO question about the organization, which is a boolean, not a fifth level.
+-- Alternative the owner may prefer: add a fifth enum option. That is an `enum_values` write on a NON-NULL prod list, i.e. a D-1 violation, and is therefore NOT proposed here.
+
+-- ======================================================================================================================
+-- iso59004-S-1 · ISO-59004 · ISO-59004-02 · deactivate `defined_term` — a 23-term glossary single-select is not a worksheet fact (inventory §5 win 5)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): the field is UNTOUCHED — still active, still an enum, still inherited by every worksheet. Field deactivation is structural ⇒ STAGED only.
+-- Evidence [prod, EV]: ISO-59004-02 defined_term (id e49c7202-6a79-4558-b0b3-f52b7b643385, enum, is_required false, active true, consumer_worksheets ["ALL"], 23 enum options §3.1.1 – §3.1.23).
+-- Evidence [prod description, EV]: "Selector over the 23 circular-economy terms (3.1); supportive vocabulary lookup."
+-- Reading: the description says it out loud — "supportive vocabulary lookup". Nothing computes from it, no gate reads it (no compliance_requirements condition of this standard names
+--     `defined_term`; verified against the 44 captured conditions), and a project does not HAVE a "defined term". The glossary belongs in rendered reference text.
+-- Consumer warning: `consumer_worksheets` is ["ALL"], so deactivating it removes an inherited symbol from every worksheet of the standard. Nothing reads it today, but the ALL entry
+--     means the blast radius must be re-checked at ratification time, not assumed from this capture.
+-- Proposed SQL:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso59004 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso59004 (id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote) SELECT f.id, f.worksheet_template_id, f.section_id, f.symbol, f.label_de, f.label_en, f.data_type, f.unit, f.is_required, f.enum_values, f.validation_rules, f.clause_reference, f.description, f.consumer_worksheets, f.order_index, f.verification_status, f.audit_status, f.source_file, f.source_anchor, f.source_quote, f.audit_notes, f.audited_at, f.audited_by, f.active, f.default_value, f.verified_by_user_id, f.verified_at, f.verification_note, f.owner, f.xbrl_element_id, f.verification_quote FROM fields f WHERE f.id = 'e49c7202-6a79-4558-b0b3-f52b7b643385' AND f.active = true;
+-- UPDATE fields SET active = false WHERE id = 'e49c7202-6a79-4558-b0b3-f52b7b643385' AND active = true;
+-- COMMIT;
+-- Rollback (RESTORE_F — the FULL explicit 31-column list minus the two join keys):
+-- BEGIN;
+-- UPDATE fields f SET section_id = a.section_id, symbol = a.symbol, label_de = a.label_de, label_en = a.label_en, data_type = a.data_type, unit = a.unit, is_required = a.is_required, enum_values = a.enum_values, validation_rules = a.validation_rules, clause_reference = a.clause_reference, description = a.description, consumer_worksheets = a.consumer_worksheets, order_index = a.order_index, verification_status = a.verification_status, audit_status = a.audit_status, source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote, audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by, active = a.active, default_value = a.default_value, verified_by_user_id = a.verified_by_user_id, verified_at = a.verified_at, verification_note = a.verification_note, owner = a.owner, xbrl_element_id = a.xbrl_element_id, verification_quote = a.verification_quote FROM fields_archive_iso59004 a WHERE a.id = f.id AND f.id = 'e49c7202-6a79-4558-b0b3-f52b7b643385';
+-- COMMIT;
+-- DROP TABLE fields_archive_iso59004;   -- only once every field block in this file is final
+
+-- ======================================================================================================================
+-- iso59004-D-1 · amendment K — register column ↔ existing prod scalar: ISO-59004-05 actions.action  ↔  ISO-59004-05 selected_action (§6.7, Table 1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: one action per project vs one row per action. The scalar is is_required and is inherited by -06; retiring it needs the -06 consumer edit and a replacement for whatever reads it there.
+-- Evidence [prod, EV]: ISO-59004-05 selected_action (id f301f926-4f37-4df9-9b3b-ee3801cb4753, enum, is_required true, consumer_worksheets ["ISO-59004-06"]).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-2 · amendment K — register column ↔ existing prod scalar: ISO-59004-05 actions.category  ↔  ISO-59004-05 action_category (§6.2 – §6.6)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: the register column is the per-action classification; the scalar is the project-level one. Both are engineer-entered because Table 1 prints no category column (iso59004-U-1).
+-- Evidence [prod, EV]: ISO-59004-05 action_category (id 06d21589-3812-404c-bc62-0baf0432ff7c, enum, is_required false, consumer_worksheets ["ISO-59004-06"]).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-3 · amendment K — register column ↔ existing prod scalar: ISO-59004-05 actions.feasibility_dimensions  ↔  ISO-59004-06 feasibility_dimension (§7.4.5)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: the standard assesses EACH action against the six dimensions; the prod scalar is a single-select on another worksheet. Neither is complete until a multi-select register column exists (iso59004-I-1).
+-- Evidence [prod, EV]: ISO-59004-06 feasibility_dimension (id 3476e0a8-29a1-40a9-8384-7742177ae134, enum, is_required false, consumer_worksheets null).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-4 · amendment K — register column ↔ existing prod scalar: ISO-59004-05 actions.pilot  ↔  ISO-59004-06 pilot_project (§7.4.7)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: piloting is per action ("a specific circular economy practice or … a specific segment"); the prod boolean is per project. ISO-59004-05-D3 counts the rows.
+-- Evidence [prod, EV]: ISO-59004-06 pilot_project (id eeca86b2-0dcb-4407-add3-9cb1da1b246c, boolean, is_required false, consumer_worksheets null).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-5 · amendment K — register column ↔ existing prod scalar: ISO-59004-05 actions.value_creation_model  ↔  ISO-59004-06 value_creation_model (§7.4.4)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: the scalar is is_required and gate-bearing (CR-037) — it stays until CR-037 is rewritten.
+-- Evidence [prod, EV]: ISO-59004-06 value_creation_model (id 82b7680e-b5c0-4ee1-a9d6-bb1746a25f17, text, is_required true, consumer_worksheets null).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-6 · amendment K — register column ↔ existing prod scalar: ISO-59004-05 actions.life_cycle_note  ↔  ISO-59004-05 life_cycle_perspective_applied (§6.7)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: the boolean attests that a life-cycle perspective was applied at all (CR-027); the column records WHAT it said, per action. Complementary, not duplicate — keep both.
+-- Evidence [prod, EV]: ISO-59004-05 life_cycle_perspective_applied (id f2078636-0072-4f7b-ac72-cd518bd16fc1, boolean, is_required true, consumer_worksheets ["ISO-59004-06"]).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-7 · amendment K — register column ↔ existing prod scalar: ISO-59004-06 goals.goal / .intermediate_target / .year  ↔  ISO-59004-06 ce_goals (§7.3.2)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: the scalar is a free-text blob that is is_required and gate-bearing (CR-035); the register is the structured form the printed "Intermediate targets should be established" asks for.
+-- Evidence [prod, EV]: ISO-59004-06 ce_goals (id 8ffe261f-1527-4051-a397-5a53fdd0b068, text, is_required true, consumer_worksheets null).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-8 · amendment K — register column ↔ existing prod scalar: ISO-59004-06 indicators_59004.indicator / goals.indicator  ↔  ISO-59004-06 selected_circularity_indicator (§7.6)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: the scalar is is_required; the register holds one row per chosen indicator with its baseline and target. Binding either to ISO-59020 Table 3 is Phase 6 (iso59004-X-1).
+-- Evidence [prod, EV]: ISO-59004-06 selected_circularity_indicator (id 1a37d6cb-2e64-4062-b556-52b808543b34, text, is_required true, consumer_worksheets null).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-9 · amendment K — register column ↔ existing prod scalar: ISO-59004-04 principles (select_many)  ↔  ISO-59004-04 selected_principle (§5.2)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: a single-select over six interlinked principles cannot express "all six considered", which is what §5.3.2 asks for. The scalar is is_required and inherited by -05 and -06 — it stays.
+-- Evidence [prod, EV]: ISO-59004-04 selected_principle (id 140e3977-fce7-409e-ba5a-d135103c831b, enum, is_required true, consumer_worksheets ["ISO-59004-05","ISO-59004-06"]).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-10 · amendment K — register column ↔ existing prod scalar: ISO-59004-02 circularity_aspects (select_many)  ↔  ISO-59004-02 circularity_aspect (§3.6.1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: the printed five are an EXAMPLE, not a closed list (iso59004-U-3), so the free-text field MUST stay for anything else; it is also inherited by -05 and -06.
+-- Evidence [prod, EV]: ISO-59004-02 circularity_aspect (id 032bb918-83c1-49f2-8350-d08eb2d42e19, text, is_required false, consumer_worksheets ["ISO-59004-05","ISO-59004-06"]).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-D-11 · amendment K — register column ↔ existing prod scalar: ISO-59004-05 refuse_rethink_first (engine output)  ↔  ISO-59004-05 preliminary_action_refuse_rethink (§6.1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
+-- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
+-- Why the pair exists: the hand boolean is is_required and gate-bearing (CR-018). Retirement depends on G-2.
+-- Evidence [prod, EV]: ISO-59004-05 preliminary_action_refuse_rethink (id 152afe33-75b1-4e24-889a-46e524630cf6, boolean, is_required true, consumer_worksheets null).
+-- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
+--     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.
+
+-- ======================================================================================================================
+-- iso59004-U-1 · ISO-59004 · Table 1 "Guidance for resource management actions" is NOT seeded — no printed category column, and the two printed columns interleave
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): no TABLE1 row exists; `actions.category` is an engineer-entered enum over the five prod `action_category` tokens, and there is no lookup_fill in this standard.
+-- Reason 1 — the printed table has TWO columns. The extraction prints the header as "Action" (L2575) and "Description" (L2577); the word "category" does not occur anywhere in the table
+--     span, and none of the five prod `action_category` tokens does either. Both absences are ASSERTED in src/lib/eval/__tests__/regulation-tables-seed-iso59004.test.ts, against the
+--     committed span Q.L2570_2631, so the claim is re-executable. Under controller resolution (2) a row whose category cell is not physically unambiguous is not seeded — that is every row.
+-- Reason 2 — the `description` column cannot be lifted without RECONSTRUCTION. `pdftotext -layout` interleaves the two column streams and the diagonal watermark lands inside them:
+--       L2629 prints  "Re-mine          deGenerate useful energy from recovered resources."   — the "Recover energy" DESCRIPTION on the "Re-mine" LABEL line, with a watermark "de" glued to it;
+--       L2618–L2621 + L2625 carry the "Cascade" description with the "Recycle" LABEL (L2623) sitting inside it;
+--       L2584 + L2590 carry the "Rethink" description split across the "Source" and "Reduce" label lines.
+--     Both interleavings are ASSERTED in the same test. Re-associating them is exactly the "reading harder" that SR-3 / R-3 forbid.
+-- What IS settled and is reported as a positive finding: the thirteen Action LABELS each stand alone on their own line, in the printed order Refuse · Rethink · Source · Reduce · Repair ·
+--     Re-use · Refurbish · Remanufacture · Repurpose · Cascade · Recycle · Recover energy · Re-mine, and they match the thirteen prod `selected_action` tokens one-for-one, in order. The
+--     printed order is asserted in the test. So the ENUM is verified against the PDF even though the TABLE is not seedable.
+-- Unblock path: a text-layer copy of the published ISO 59004:2024 (or a two-column-aware extraction, e.g. `pdftotext -raw` cross-checked against `-layout`) would settle the Description
+--     column; the category column needs the standard to actually print one, which this edition does not. Until then `actions.category` stays engineer-entered — which is also the
+--     conservative reading, since §6.2 – §6.6 group CLAUSES, not the Table-1 R-strategies.
+
+-- ======================================================================================================================
+-- iso59004-U-2 · ISO-59004 · the PDF carries a diagonal "Projet de Norme Marocaine" watermark that pdftotext interleaves into the text
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: every `verbatim_quote` stored on a seeded row is the RAW span, watermark and all — nothing is cleaned. A build-time guard (`inSpan` in regulation-tables-seed-iso59004.ts)
+--     drops whole watermark-ONLY lines before checking that a seeded cell really is printed inside its span, by the explicit token list
+--     WATERMARK_TOKENS = ['Pr','oj','et','de','N','or','m','M','e','ar','oc','ai','n'] (the letters of "Projet de Norme Marocaine"). The same helper cleans quotes used as PROSE.
+-- Evidence [PDF p.23 (printed p.16), §5.2.3, VA]: the raw span Q.L1610_1617 reads "… with the provision of a" / blank / blank / "                    ai" / "solution." — the "ai" is the overlay.
+-- Evidence [PDF p.23 (printed p.16), §5.2.5, VA]: the raw span Q.L1626_1629 carries an "e" line between the two body lines.
+-- Limit, stated: where a watermark token is glued INSIDE a body word no helper can clean it — L2629 "deGenerate", L2711 "ojnongovernmental". Both are asserted in the seed test, and
+--     every entry that would have quoted such a line uses a different, clean span instead and says so in its comment.
+-- No SQL — this is a source-quality record.
+
+-- ======================================================================================================================
+-- iso59004-U-3 · ISO-59004 · ISO-59004-02 · the five circularity aspects are printed as an EXAMPLE, not as a closed list
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: the created `circularity_aspects` checklist carries the five printed aspects AND `allow_custom: true`, and prod’s free-text `circularity_aspect` is untouched (D-10).
+-- Evidence [PDF p.20 (printed p.13), §3.6.1, VA]: "circularity aspect | element of an organization’s (3.4.1) activities or solutions (3.2.1) that interacts with the circular economy
+--     (3.1.1) | EXAMPLE  Durability, recyclability, reusability, repairability, recoverability."
+-- Reading: constraint 3(b) turns a CLOSED printed list into a selection. This list is opened by the word EXAMPLE, so the selection is offered but never made exclusive. The same five
+--     are a real enum in ISO-59020 — reconciling the two is Phase 6 (iso59004-X-1), not this task.
+
+-- ======================================================================================================================
+-- iso59004-U-4 · ISO-59004 · §7.4.5 · pdftotext reorders the six feasibility bullets, so only the lead-in sentence is quoted
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: the `feasibility_dimension` entry quotes the lead-in (Q.L3044_3045) and not the bullet block (L3046–L3068), whose lines pdftotext emits out of reading order
+--     (the "network;" continuation of the FIRST bullet is emitted before the rest of its own sentence) and with watermark tokens between them.
+-- Evidence [PDF p.41 (printed p.34), §7.4.5, VA]: "To assess the feasibility of the adoption of a circular economy and its associated circular economy value creation models, actions
+--     should be assessed against the following dimensions:"
+-- The six DIMENSION NAMES are nonetheless unambiguous — each opens its own bullet line — and they match the six prod `feasibility_dimension` tokens one-for-one
+--     (technical / organizational / financial and economic / context / social / environmental). That correspondence is asserted in field-configs-iso59004.test.ts.
+
+-- ======================================================================================================================
+-- iso59004-F-1 · ISO-59004 · ISO-59004-04 · `all_principles_considered_code` (the brief’s -04-D1) is WITHHELD — blocked twice over
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): no equation is emitted. The prod hand boolean `all_principles_considered` (is_required, gate CR-013) keeps enforcing exactly as today; the `principles`
+--     checklist is additive beside it.
+-- Intended formula, recorded verbatim so a ratified engine change emits it mechanically (exported as WITHHELD_04_D1_FORMULA):
+--     all_principles_considered_code = if(contains(principles, 'systems_thinking') AND contains(principles, 'value_creation') AND contains(principles, 'value_sharing') AND
+--       contains(principles, 'resource_stewardship') AND contains(principles, 'resource_traceability') AND contains(principles, 'ecosystem_resilience'), 1, 0)
+-- Block 1 [CODE] — it does not even PARSE. `AND` combines COMPARISONS, not calls.
+-- Evidence [probe, re-executable via equations-iso59004.test.ts]: parseNumeric(<rhs above>) ⇒ {"ok":false,"message":"Ausdruck erwartet."}
+--     …while parseNumeric("if(contains(principles, 'systems_thinking'), 1, 0)") ⇒ {"ok":true,…}, so it really is the AND chain. This is a NEW corpus finding: din14021-F-1 and
+--     iso14046-F-2 recorded only the missing carrier path. See iso59004-I-2.
+-- Block 2 [CODE] — even the nested-`if` rewrite that DOES parse cannot evaluate, because `contains()` over a json `select_many` carrier has no engine path: no production
+--     `evaluateFormula` caller passes `carriers`.
+-- Evidence [probe]: evaluateFormula(WITHHELD_04_D1_NESTED_FORM, inputs: [{symbol:"principles", …}]) ⇒ {"kind":"manual_required","reason":"Unbekanntes Symbol \"principles\" im Ausdruck."}
+--     (the nested form is exported as WITHHELD_04_D1_NESTED_FORM and its parse is pinned, so the day carriers land the rewrite is one line.)
+-- Confirmed three times before this task (din14021-F-1, iso14046-F-2, Task 27 reviewer) and a fourth time here — the carrier gap is the corpus-wide blocker for every checklist code.
+
+-- ======================================================================================================================
+-- iso59004-I-1 · ISO-59004 · [CODE] · a register column cannot be a MULTI-select
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- `registerColumn.type` (src/lib/eval/field-config.ts) is text | number | boolean | enum | date | lookup_key | lookup_value | derived | grid. There is no multi-select.
+-- Hit here by §7.4.5: "actions should be assessed against the following dimensions:" followed by SIX bullets — an action is assessed against all six, not one of six. The column
+--     `actions.feasibility_dimensions` is therefore a `text` column with the six printed dimensions as its datalist, and CR-038’s proposed condition (G-4) is only a presence check.
+-- Proposal for the final [CODE] wave: add `type: 'multi_enum'` with `options` + `option_labels`, stored as a string array in the row cell, and give `count_rows` a membership test
+--     (the same primitive that would unblock F-1). Until then the brief’s "per-row multi-select → text" shape is the honest one.
+
+-- ======================================================================================================================
+-- iso59004-I-2 · ISO-59004 · [CODE] · `AND` / `OR` combine COMPARISONS, not CALLS, in the formula grammar
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- New this task. `parseNumeric("if(contains(p,'a') AND contains(p,'b'), 1, 0)")` ⇒ {"ok":false,"message":"Ausdruck erwartet."}, while a single `contains(...)` inside `if()` parses
+--     and `if(x == 1 AND y == 2, 1, 0)` parses. So any boolean combination of function results has to be written as nested `if()`s today.
+-- Consequence beyond this standard: every "all of these N checklist items are ticked" code in the corpus is blocked by BOTH this and the carrier gap, not only by the carrier gap.
+--     The completeness codes withheld by din14021-F-1 and iso14046-F-2 have the same shape and would hit this first.
+-- Proposal: allow a CALL wherever a COMPARISON is accepted inside `and`/`or` (the evaluator already coerces a numeric result to truth in `if()`), and pin it with the
+--     WITHHELD_04_D1_FORMULA string of this standard as the regression fixture.
+
+-- ======================================================================================================================
+-- iso59004-I-3 · ISO-59004 · [CODE] · the GATE condition grammar has no `contains` at all
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- `parseCondition("contains(principles, 'systems_thinking')")` ⇒ null (probed this session); only `principles IS NOT NULL` parses over a checklist carrier.
+-- Consequence here: the six §5.2 principle requirements CR-006 … CR-011 cannot each be conditioned on their own principle, and a shared presence check would make six distinct
+--     requirements fire identically. They stay empty-conditioned (G-4) rather than take an invented enforcement.
+-- Proposal: add a membership test to the condition grammar (`<carrier> CONTAINS '<token>'` or `contains(<carrier>, '<token>')`), with the six ISO-59004 principle CRs as the fixture.
+
+-- ======================================================================================================================
+-- iso59004-X-1 · ISO-59004 · Phase 6 · cross-standard inheritance from ISO-59020 (and the ISO-59010 pointer) — NOT encoded here
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Recorded, not encoded (spec §8: cross-standard inheritance is Phase 6).
+-- Evidence [PDF p.43 (printed p.36), §7.6, VA]: "Guidance on how to measure and assess circularity performance is provided by ISO 59020."
+-- Evidence [prod ISO-59004-06 CR-043, EV]: "Methods to measure and assess circularity performance (indicator selection, calculation, system boundaries, baseline) are provided by
+--     ISO 59020; this document hands measurement to ISO 59020." (empty condition, warn)
+-- Evidence [prod ISO-59004-06 CR-044, EV]: "Guidance on circular economy value creation models and value networks … is provided by ISO 59010" — ISO 59010 is NOT in the corpus
+--     (content-boundary rule: a bare pointer stays a pointer; NR grade, acquisition list).
+-- The three concrete inheritances the inventory names, for the Phase-6 wave: `system_in_focus` (ISO-59004-02 ↔ ISO-59020-01), `circularity_aspect` / the created
+--     `circularity_aspects` checklist (ISO-59004-02 ↔ the ISO-59020 enum of the same five aspects), and `selected_circularity_indicator` / the created `indicators_59004` register
+--     (ISO-59004-06 ↔ ISO-59020 Table 3, which IS seeded under ISO-59020 as TABLE3 with 13 rows). Because of that last one, `indicators_59004.indicator` is deliberately a free-text
+--     column here and NOT a lookup_key into another standard’s table — the governing table belongs to ISO-59020 and is seeded under ITS task (constraint 3(d)).
+
+-- END — 31 blocks. Nothing in this file has been applied.
