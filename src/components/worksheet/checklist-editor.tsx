@@ -32,6 +32,9 @@ export function ChecklistEditor({ fieldId, config, readOnly = false }: Props) {
   }
 
   const customEntries = carrier.selected.filter((x) => !config.options.includes(x));
+  /** Plan 3 final wave B (defect 2, `m820_2-E-1`): render the printed label, store the value.
+   *  Same rule as the register editor's enum column (`option_labels?.[o] ?? o`). */
+  const labelOf = (value: string): string => config.optionLabels?.[value] ?? value;
 
   return (
     <div className="space-y-2" data-testid="checklist-editor">
@@ -48,7 +51,7 @@ export function ChecklistEditor({ fieldId, config, readOnly = false }: Props) {
               {g.options.map((opt) => (
                 <label key={opt} className="flex items-start gap-2 text-sm text-ink cursor-pointer">
                   <input type="checkbox" checked={selected.has(opt)} disabled={readOnly} onChange={() => toggle(opt)} className="mt-1 shrink-0" />
-                  <span>{opt}</span>
+                  <span>{labelOf(opt)}</span>
                 </label>
               ))}
             </fieldset>
@@ -59,7 +62,7 @@ export function ChecklistEditor({ fieldId, config, readOnly = false }: Props) {
           {config.options.map((opt) => (
             <label key={opt} className="flex items-start gap-2 text-sm text-ink cursor-pointer">
               <input type="checkbox" checked={selected.has(opt)} disabled={readOnly} onChange={() => toggle(opt)} className="mt-1 shrink-0" />
-              <span>{opt}</span>
+              <span>{labelOf(opt)}</span>
             </label>
           ))}
         </div>

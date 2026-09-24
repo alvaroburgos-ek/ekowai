@@ -12,7 +12,7 @@
  * numbers keep today's `de-DE` grouping unchanged).
  */
 import { describe, it, expect } from 'vitest';
-import { fmt } from '../register-editor';
+import { fmt, FMT_EPSILON } from '../register-editor';
 
 describe('fmt() — de-DE number formatting (register cells + footers)', () => {
   it('a tiny non-zero magnitude (|v| < 0.01) renders in scientific form with a German decimal comma (din18130_1-I-2 fix)', () => {
@@ -35,5 +35,30 @@ describe('fmt() — de-DE number formatting (register cells + footers)', () => {
   });
   it('a non-numeric scalar renders verbatim', () => {
     expect(fmt('text')).toBe('text');
+  });
+});
+
+/**
+ * Plan 3 final wave B (defect 4) — the epsilon guard the Task-10b fix left open
+ * (Plan-2c backlog item 13): float noise around 1e-13 rendered in SCIENTIFIC form
+ * ("1e-13") instead of "0". A difference that is exactly zero in the guideline's
+ * arithmetic and only non-zero because of IEEE-754 cancellation must read as zero;
+ * a magnitude a standard actually prints (k_f down to ~1e-10 m/s, DIN 18130-1)
+ * must keep the scientific form. `FMT_EPSILON` is the documented boundary.
+ */
+describe('fmt() — epsilon guard for float noise (wave B defect 4)', () => {
+  it('cancellation noise below the epsilon reads as "0", not as a tiny value', () => {
+    expect(fmt(0.3 - 0.1 - 0.2)).toBe('0');            // ≈ -2.78e-17
+    expect(fmt(1e-13)).toBe('0');
+    expect(fmt(-1e-13)).toBe('0');
+  });
+  it('the epsilon boundary itself is noise; the first decade above it is a value', () => {
+    expect(fmt(FMT_EPSILON)).toBe('0');
+    expect(fmt(FMT_EPSILON * 10)).toBe('1e-11');
+  });
+  it('every printed magnitude of the corpus is far above the epsilon and keeps scientific form', () => {
+    expect(FMT_EPSILON).toBeLessThan(3.48e-10 / 100);  // DIN-18130-1 k_f, the smallest printed value
+    expect(fmt(3.48e-10)).toBe('3,48e-10');
+    expect(fmt(2e-6)).toBe('2e-6');                    // A138 k_f site values
   });
 });

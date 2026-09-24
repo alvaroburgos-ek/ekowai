@@ -13,6 +13,7 @@ import {
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
+import { loadInheritedFields } from '@/lib/db/queries/worksheet';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
 import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { computeVisibility } from '@/lib/compliance/visibility';
@@ -685,6 +686,21 @@ export async function saveWorksheet(
       const batchValues = Object.fromEntries(Object.entries(input.values).filter(([id]) => !rejectedFieldIds.has(id)));
       const batchRegisterIds = registerFieldIds(templateFields, batchValues).filter((id) => fieldIds.includes(id));
       if (batchRegisterIds.length > 0 && savedTemplateRow?.standardCode && savedTemplateCode) {
+        // Plan 3 final wave B (defect 1, din1989_2-I-2 / m820_1-I-2): the fields this
+        // worksheet INHERITS from other worksheets of the same standard. Without them a
+        // `visible_when` whose driver is inherited resolved to `pending` (⇒ nothing hid
+        // server-side, while the form hid it) and a register-fed equation naming an
+        // inherited scalar persisted `null` (while the form/report/snapshot computed it).
+        // The tx client is passed on purpose: `loadInheritedFields` on the GLOBAL pool from
+        // inside an open transaction deadlocks once the pool is exhausted (Task 10b).
+        const inheritedRows = savedStandardId
+          ? await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode, tx)
+          : [];
+        const ownSymbols = new Set(templateFields.map((f) => f.symbol));
+        const inheritedFields = inheritedRows
+          .filter((f) => !ownSymbols.has(f.symbol)) // an own field always wins (single-owner rule)
+          .map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType, unit: f.unit, widget: f.widget, uiConfig: f.uiConfig }));
+        const readableFields = [...templateFields, ...inheritedFields];
         const persisted = await tx
           .select({
             fieldId: projectParameters.fieldId,
@@ -696,8 +712,8 @@ export async function saveWorksheet(
             valueJson: projectParameters.valueJson,
           })
           .from(projectParameters)
-          .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, templateFields.map((f) => f.id))));
-        const valuesByFieldId = { ...parametersToFieldValues(persisted, templateFields), ...batchValues };
+          .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, readableFields.map((f) => f.id))));
+        const valuesByFieldId = { ...parametersToFieldValues(persisted, readableFields), ...batchValues };
         // Plan 2a (Task 10, fix round 1): fields/sections hidden by `visible_when` under the
         // overlaid values (persisted + batch) — same pure helper + lookup as the form, so the
         // materialiser sees exactly what the engineer saw: a hidden input ⇒ no value ⇒
@@ -709,16 +725,20 @@ export async function saveWorksheet(
           .select({ id: worksheetSections.id, parentSectionId: worksheetSections.parentSectionId, visibleWhen: worksheetSections.visibleWhen })
           .from(worksheetSections)
           .where(eq(worksheetSections.worksheetTemplateId, instance.worksheetTemplateId));
+        // The HIDEABLE set stays this worksheet's own fields (an inherited field is governed
+        // by its origin worksheet); the LOOKUP covers own + inherited — the same pair the
+        // form makes (`worksheet-form.tsx`: computeVisibility(ownFields, …, makeSymbolLookup(fields, …))).
         const { hiddenSymbols } = computeVisibility(
           templateFields,
           templateSections,
-          makeSymbolLookup(templateFields, valuesByFieldId),
+          makeSymbolLookup(readableFields, valuesByFieldId),
         );
         const { writes, diagnostics } = materializeDerivedOutputs({
           standardCode: savedTemplateRow.standardCode,
           worksheetCode: savedTemplateCode,
           equations: templateEquations,
           fields: templateFields,
+          inheritedFields,
           valuesByFieldId,
           hiddenSymbols,
         });

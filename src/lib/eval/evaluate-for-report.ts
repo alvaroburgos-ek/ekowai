@@ -172,8 +172,20 @@ export function reportVisibility(
   fields: ReportField[],
   sections: readonly VisibilitySection[],
   parameters: ReportParameter[],
+  /**
+   * Plan 3 final wave B (defect 1): the fields this worksheet INHERITS from other
+   * worksheets of the same standard (`inheritedFieldsFor` / `loadInheritedFields`) and
+   * their parameters. They enter the LOOKUP only — the hideable set stays `fields`, so an
+   * inherited row is still governed by its origin worksheet. Without them a rule whose
+   * driver is inherited resolves to `pending` and never hides anything in the report or
+   * the PDF, while the form hides it (din1989_2-I-2).
+   */
+  inherited?: { fields: ReportField[]; parameters: ReportParameter[] },
 ): Visibility {
-  const { bySymbol } = buildValueMap(fields, parameters);
+  const { bySymbol } = buildValueMap(
+    inherited?.fields.length ? [...inherited.fields, ...fields] : fields, // own last ⇒ own wins
+    inherited?.parameters.length ? [...inherited.parameters, ...parameters] : parameters,
+  );
   return computeVisibility(
     fields.map((f) => ({ id: f.id, symbol: f.symbol, sectionId: f.sectionId ?? null, visibleWhen: f.visibleWhen ?? null })),
     sections,

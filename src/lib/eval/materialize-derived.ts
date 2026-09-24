@@ -188,7 +188,20 @@ export function materializeDerivedOutputs(args: {
   worksheetCode: string;
   equations: ReadonlyArray<EqLike>;
   fields: ReadonlyArray<FieldLike>;
-  /** persisted rows overlaid by the save batch */
+  /**
+   * Plan 3 final wave B (defect 1) — fields this worksheet INHERITS from other worksheets of
+   * the same standard (`loadInheritedFields`: `code = ANY(consumer_worksheets)`, the owner
+   * worksheet itself excluded per the Task-12b ruling). They are an INPUT source only:
+   *   - their values reach scalar equation inputs, the register `symbol` scope (G-13) and the
+   *     register / carrier json sources, exactly as on the form (`worksheet-form.tsx` builds
+   *     its symbol lookup over own + inherited and hides only its OWN fields);
+   *   - they are NEVER output targets — a derived value is only ever written onto a field of
+   *     THIS template, so one save can never write across a worksheet boundary.
+   * An own field always wins over an inherited field carrying the same symbol.
+   * Found by DIN-1989-2 (`din1989_2-I-2`), recorded again on DWA-M-820-1 (`m820_1-I-2`).
+   */
+  inheritedFields?: ReadonlyArray<FieldLike>;
+  /** persisted rows overlaid by the save batch (own AND inherited field ids) */
   valuesByFieldId: Record<string, FieldValue>;
   /** Plan 2a (Task 10, fix round 1): symbols hidden by `visible_when` (caller computes them from
    * the template fields + sections over the same overlaid values). A hidden scalar input resolves
@@ -198,17 +211,23 @@ export function materializeDerivedOutputs(args: {
 }): MaterializeDerivedResult {
   const { standardCode, worksheetCode, fields, valuesByFieldId } = args;
   const table = makeTableLookup(standardCode);
-  const fieldBySymbol = new Map(fields.map((f) => [f.symbol, f]));
+  // OUTPUT resolution is own-fields-only — see `inheritedFields`. INPUT resolution reads
+  // `readableFields`, own first so an own field shadows an inherited one with the same symbol.
+  const ownFieldBySymbol = new Map(fields.map((f) => [f.symbol, f]));
+  const readableFields: ReadonlyArray<FieldLike> = args.inheritedFields?.length
+    ? [...fields, ...args.inheritedFields.filter((f) => !ownFieldBySymbol.has(f.symbol))]
+    : fields;
+  const fieldBySymbol = new Map(readableFields.map((f) => [f.symbol, f]));
   // ONE hidden-aware accessor (withHidden): the register scope, the register json source and the
   // scalar inputs below all read through `valueOf` — nothing re-implements the "hidden ⇒ null" rule.
-  const valueOf = withHidden((fieldId: string) => valuesByFieldId[fieldId], hiddenFieldIdsOf(fields, args.hiddenSymbols));
-  const symbol = symbolLookup(fields, valueOf);
+  const valueOf = withHidden((fieldId: string) => valuesByFieldId[fieldId], hiddenFieldIdsOf(readableFields, args.hiddenSymbols));
+  const symbol = symbolLookup(readableFields, valueOf);
 
   // Registers: every field that resolves to a register config AND holds a json value.
   // A carrier with an absent value is still a register (empty rows) so its equations
   // evaluate to manual_required → null, clearing stale downstream values.
   const registers = buildRegisters(
-    fields,
+    readableFields,
     // `{}` (not undefined) for an absent/null carrier: buildRegisters skips fields whose json is
     // absent, but an absent register must still yield rows=[] so its equations resolve to
     // manual_required → null (clears stale outputs). Non-register fields are filtered by
@@ -220,7 +239,7 @@ export function materializeDerivedOutputs(args: {
   // `cell()`. Same hidden-aware accessor; a hidden or absent checklist yields
   // NO carrier, so its equation is manual_required and its output is written
   // as null (clears stale values) — never a phantom "nothing ticked" verdict.
-  const carriers = buildCarriers(fields, (fieldId) => {
+  const carriers = buildCarriers(readableFields, (fieldId) => {
     const v = valueOf(fieldId);
     return v?.type === 'json' ? v.value : undefined;
   });
@@ -228,7 +247,7 @@ export function materializeDerivedOutputs(args: {
   // Candidate (not present) carrier symbols: an equation over an UNFILLED
   // checklist is still this materialiser's business, so its stale output is
   // cleared to null instead of surviving as a value nothing backs.
-  const carrierSymbols = carrierFieldSymbols(fields);
+  const carrierSymbols = carrierFieldSymbols(readableFields);
   const diagnostics = new Set<string>();
   for (const r of Object.values(registers)) for (const d of r.diagnostics ?? []) diagnostics.add(d);
 
@@ -248,7 +267,7 @@ export function materializeDerivedOutputs(args: {
       || readsCarrier(eq.formula, carrierSymbols)
       || (rewriteRules[eq.id] ? readsCarrier(rewriteRules[eq.id].to, carrierSymbols) : false);
     if (!carrierFed) continue;
-    const outField = fieldBySymbol.get(eq.outputSymbol);
+    const outField = ownFieldBySymbol.get(eq.outputSymbol);
     if (!outField || writtenFieldIds.has(outField.id)) continue;
     writtenFieldIds.add(outField.id);
     const inputs = [...consumed].filter((s) => !registerSymbols.has(s)).map((sym) => {

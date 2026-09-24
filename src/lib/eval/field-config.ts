@@ -65,6 +65,14 @@ const registerUi = z.object({
   sum_column: z.object({ key: z.string(), label: z.string(), unit: z.string().optional() }).optional(),
   override: z.object({ flag_key: z.string(), applies_to: z.array(z.string()).min(1), policy: z.enum(['anhaltswert','kann','messwert']) }).optional(),
   legacy_map: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+  /**
+   * Plan 3 final wave B (defect 5, `iso59020-F-2`; Plan-2c backlog 7) — the column keys that
+   * together identify a row. Two rows agreeing on ALL of them are duplicates: the editor says
+   * so, visibly and non-blockingly, and changes nothing (never drops, merges or renumbers an
+   * engineer's row). Without it a duplicate row silently inflates every `count_rows` gate —
+   * ISO-59020 had to rewrite its G-4 as six per-token clauses to close the hole.
+   */
+  unique_by: z.array(z.string().min(1)).min(1).optional(),
   /** Symbols whose engine values are shown as a footer line under the table (Σ previews). */
   footer: z.array(z.string()).optional(), editor: z.string().optional(),
   /** Register-level boolean flags stored on the carrier (e.g. `not_applicable`), read by `flag()`. */

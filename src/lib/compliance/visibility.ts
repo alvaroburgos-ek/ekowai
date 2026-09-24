@@ -75,6 +75,54 @@ export function effectiveVisibleWhen(f: { symbol: string; visibleWhen?: string |
   return own ?? LEGACY_VISIBLE_WHEN[f.symbol] ?? null;
 }
 
+/**
+ * A field as the inheritance rule sees it (the columns `loadInheritedFields` selects on).
+ */
+export type InheritableField = {
+  worksheetTemplateId: string;
+  standardCode: string;
+  consumerWorksheets?: readonly string[] | null;
+  active?: boolean;
+};
+
+/**
+ * Plan 3 final wave B (defect 1) — the PURE form of the cross-worksheet inheritance
+ * `src/lib/db/queries/worksheet.ts` `loadInheritedFields` implements in SQL: fields of
+ * ANOTHER template of the SAME standard whose `consumer_worksheets` array names this
+ * worksheet's code, active only. The owner worksheet itself is excluded even when its
+ * own field lists its own code (`worksheet_template_id <> currentTemplateId`, the
+ * Task-12b ruling).
+ *
+ * For server callers that already hold the project's fields in memory (the PDF/report
+ * loader); callers inside a transaction use `loadInheritedFields(..., tx)` instead — a
+ * global-pool query from inside an open tx deadlocks (Task 10b).
+ *
+ * WHY it lives beside `computeVisibility`: a `visible_when` whose driver is inherited
+ * must resolve in the LOOKUP handed to `computeVisibility` — the form already builds its
+ * lookup over own + inherited fields while hiding only its own (`worksheet-form.tsx`),
+ * and every server consumer has to make the same pair or it silently disagrees with what
+ * the engineer saw.
+ */
+export function inheritedFieldsFor<T extends InheritableField>(
+  own: { worksheetTemplateId: string; worksheetCode: string; standardCode: string },
+  all: readonly T[],
+): T[] {
+  return all.filter(
+    (f) =>
+      f.standardCode === own.standardCode &&
+      f.worksheetTemplateId !== own.worksheetTemplateId &&
+      (f.active ?? true) &&
+      (f.consumerWorksheets ?? []).includes(own.worksheetCode),
+  );
+}
+
+/**
+ * `fields` is the HIDEABLE set — this worksheet's own fields. `lookup` must resolve the
+ * worksheet's own symbols AND every symbol it inherits (`inheritedFieldsFor` /
+ * `loadInheritedFields`): a driver that does not resolve reports `pending`, which keeps
+ * everything visible, so an own-fields-only lookup silently disables every rule whose
+ * driver lives on another worksheet (wave B defect 1).
+ */
 export function computeVisibility(
   fields: readonly VisibilityField[],
   sections: readonly VisibilitySection[],

@@ -47,6 +47,14 @@ export type ChecklistConfig = {
   /** Flat option list, OR use `groups` for a sectioned checklist. When groups
    * are given, `options` is the flattened union (kept for validation/tests). */
   options: readonly string[];
+  /**
+   * Plan 3 final wave B (defect 2, `m820_2-E-1`): display label per option VALUE, from the
+   * field's prod `enum_values.label_de`. The values stay the stored tokens (`contains()`,
+   * gates and the carrier all read them); only the rendering changes. Absent ⇒ the editor
+   * falls back to the value, which is also what a prod row whose `label_de` equals its
+   * `value` produces. Mirrors the register editor's `option_labels` rule for enum columns.
+   */
+  optionLabels?: Readonly<Record<string, string>>;
   groups?: readonly OptionGroup[];
   note?: string;
   allowCustom?: boolean;
@@ -748,11 +756,16 @@ export function fromDbField(row: DbFieldShape): SelectionConfig | null {
     const ui = (cfg.ui ?? {}) as SelectManyUiConfig;
     const ev = Array.isArray(row.enumValues) ? (row.enumValues as EnumValue[]) : [];
     const groups = ui.groups?.map((g) => ({ label: g.label, options: g.options }));
+    // wave B defect 2: carry `label_de` beside the value. Emitted only when at least one
+    // label differs from its value, so the `toDbShape`/`fromDbField` parity pin (which
+    // round-trips TS configs whose labels ARE their values) keeps its exact shape.
+    const optionLabels = Object.fromEntries(ev.map((e) => [e.value, e.label_de ?? e.value]));
     return strip({
       kind: 'checklist',
       title: ui.title,
       subtitle: ui.subtitle ?? '',
       options: ev.map((e) => e.value),
+      optionLabels: ev.some((e) => (e.label_de ?? e.value) !== e.value) ? optionLabels : undefined,
       groups,
       note: ui.note,
       allowCustom: ui.allow_custom,

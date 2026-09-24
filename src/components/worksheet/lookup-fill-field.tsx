@@ -44,6 +44,7 @@ import { useWorksheetStore, type FieldValue } from '@/lib/state/worksheet-store'
 import { OverrideReasonForm, ReasonMissing, overrideReasonKey, resetSavedOverrideReasons, useOverrideReason } from './override-reason';
 import { resolveLookupFill, resolveLookupFillConfig, type LookupFillState } from '@/lib/eval/lookup-fill';
 import type { LookupBinding } from '@/lib/eval/field-config';
+import { printedAlternatives } from '@/lib/eval/regulation-tables';
 import { fmt } from './register-editor';
 import type { WidgetContext, WorksheetFormField } from './widgets';
 
@@ -180,8 +181,12 @@ function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: Works
   const canOverride = mode === 'fill' && !readOnly && state.kind === 'resolved' && policy !== 'locked' && tableScalar != null;
   const showInput = canOverride && (editing || overridden);
   const inputLabel = `${field.labelDe}${policy === 'messwert' ? ' (Messwert)' : ' (abweichend)'}`;
-  // `kann`: the printed alternatives of the value column (number / text). An enum field always selects over its own values.
-  const alternatives = policy === 'kann' && scalarType !== 'enum' && state.kind === 'resolved' && state.valueColumn?.values?.length ? state.valueColumn.values : null;
+  // `kann`: the printed alternatives — the RESOLVED ROW's own list first (wave B defect 6,
+  // `a178-O-4`: DWA-A 178 Tab. 1 prints η_VS per Vorstufe type), else the value column's
+  // table-wide list. An enum field always selects over its own values.
+  const alternatives = policy === 'kann' && scalarType !== 'enum' && state.kind === 'resolved'
+    ? printedAlternatives(state.row, state.valueColumn)
+    : null;
 
   /** Engineer-typed value; `null` clears the input (kept empty — no re-fill while editing). */
   const write = (v: Scalar | null) => {

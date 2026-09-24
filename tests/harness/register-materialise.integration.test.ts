@@ -55,3 +55,47 @@ describe('Plan 2a — register-fed equations materialise through the REAL saveWo
     }
   });
 });
+
+describe('Plan 3 final wave B (defect 1) — the save path resolves INHERITED fields (embedded Postgres)', () => {
+  const read = async (fieldId: string) => (await sql<{ value_number: string | null; source_type: string }[]>`
+    SELECT value_number, source_type FROM project_parameters WHERE project_id = ${fixture.projectId} AND field_id = ${fieldId}`)[0];
+
+  it('a register-fed equation naming an INHERITED scalar computes on save (was persisted as null)', async () => {
+    const { saveWorksheet } = await import('@/lib/actions/worksheet');
+    const r = await saveWorksheet({
+      instanceId: fixture.ws91InstanceId,
+      values: { [fixture.inhRegisterFieldId]: { type: 'json', value: { rows: [
+        { id: '1', betrag: 4 },
+        { id: '2', betrag: 6 },
+      ] } } },
+    });
+    expect(r.ok).toBe(true);
+    // own-register sum — computed before AND after the fix (the control)
+    expect(Number((await read(fixture.inhSumFieldId)).value_number)).toBeCloseTo(10, 9);
+    // the inherited factor (3, produced on A138-90) — null before the fix
+    const scaled = await read(fixture.inhScaledFieldId);
+    expect(scaled.source_type).toBe('derived');
+    expect(Number(scaled.value_number)).toBeCloseTo(30, 9);
+  });
+
+  it('a `visible_when` whose driver is INHERITED now hides server-side: the hidden register clears its outputs to null', async () => {
+    const { saveWorksheet } = await import('@/lib/actions/worksheet');
+    // flip the inherited driver on A138-90 (300 > 200) ⇒ the -91 register hides
+    await sql`UPDATE project_parameters SET value_number = 300
+               WHERE project_id = ${fixture.projectId} AND field_id = ${fixture.inhGateFieldId}`;
+    const r = await saveWorksheet({
+      instanceId: fixture.ws91InstanceId,
+      values: { [fixture.inhRegisterFieldId]: { type: 'json', value: { rows: [
+        { id: '1', betrag: 4 },
+        { id: '2', betrag: 6 },
+      ] } } },
+    });
+    expect(r.ok).toBe(true);
+    // both outputs cleared — the hidden carrier yields no rows ⇒ manual_required ⇒ null
+    expect((await read(fixture.inhSumFieldId)).value_number).toBeNull();
+    expect((await read(fixture.inhScaledFieldId)).value_number).toBeNull();
+    // restore for any later case in this file
+    await sql`UPDATE project_parameters SET value_number = 100
+               WHERE project_id = ${fixture.projectId} AND field_id = ${fixture.inhGateFieldId}`;
+  });
+});

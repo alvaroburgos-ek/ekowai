@@ -518,3 +518,38 @@ describe('LookupFillField — I-1: fill honours field.dataType (text / enum), ne
     expect(screen.queryByTestId('lookup-reason-missing')).toBeNull();
   });
 });
+
+/**
+ * Plan 3 final wave B (defect 6, `a178-O-4`) — a `kann` table may print the permitted values
+ * PER ROW. `printedAlternatives` is the one rule (shared with the register editor): the row's
+ * own list wins, the value column's table-wide list is the fallback.
+ */
+describe('LookupFillField — per-row `kann` alternatives (wave B defect 6)', () => {
+  const perRowTable = (): RegulationTable => ({
+    standard_code: 'SYN-3', edition: '2026-01', table_code: 'TAB1', title_de: 'Synthetisch kann', clause_reference: null, page_ref: null,
+    key_columns: ['k'], value_columns: [{ name: 'v', type: 'number', values: ['0', '0.2', '0.3', '0.5'] }],
+    override_policy: 'kann', override_quote: null, verification_status: 'imported_unverified',
+    rows: [
+      { row_key: 'a', keys: { k: 'a' }, group_label: null, label_de: 'A', order_index: 0, values: { v: 0.2 }, verbatim_quote: 'q', alternatives: { v: ['0.2', '0.3'] } },
+      { row_key: 'b', keys: { k: 'b' }, group_label: null, label_de: 'B', order_index: 1, values: { v: 0.5 }, verbatim_quote: 'q' },
+    ],
+  });
+  const kF = makeField({ id: 'f-k9', symbol: 'k', dataType: 'enum' });
+  const vF = makeField({ id: 'f-v9', symbol: 'v_test', labelDe: 'v_test', widget: 'lookup_fill', lookup: { table_code: 'TAB1', role: 'value', keys: [{ column: 'k', from_symbol: 'k' }], value: 'v' } });
+
+  it('offers the ROW\'s alternatives when the resolved row prints its own', () => {
+    registerTables([perRowTable()]);
+    render(<Harness field={vF} fields={[vF, kF]} initial={{ 'f-k9': { type: 'enum', value: 'a' }, 'f-v9': { type: 'number', value: 0.2 } }} over={{ standardCode: 'SYN-3' }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'abweichend wählen' }));
+    const select = screen.getByLabelText('v_test (abweichend)') as HTMLSelectElement;
+    expect([...select.options].map((o) => o.value)).toEqual(['0.2', '0.3']);
+  });
+
+  it('falls back to the value column\'s list for a row that prints none', () => {
+    registerTables([perRowTable()]);
+    render(<Harness field={vF} fields={[vF, kF]} initial={{ 'f-k9': { type: 'enum', value: 'b' }, 'f-v9': { type: 'number', value: 0.5 } }} over={{ standardCode: 'SYN-3' }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'abweichend wählen' }));
+    const select = screen.getByLabelText('v_test (abweichend)') as HTMLSelectElement;
+    expect([...select.options].map((o) => o.value)).toEqual(['0', '0.2', '0.3', '0.5']);
+  });
+});

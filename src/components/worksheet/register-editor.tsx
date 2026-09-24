@@ -43,6 +43,7 @@ import { OverrideReasonForm, ReasonMissing, clearSavedOverrideReason, overrideRe
 import { evalCondition, type PreparedRegister, type PreparedRow, type Scope, type Value } from '@/lib/expr';
 import type { RegisterColumn, RegisterUiConfig } from '@/lib/eval/field-config';
 import type { EvalState } from '@/lib/eval/formula';
+import { printedAlternatives } from '@/lib/eval/regulation-tables';
 import type { RegulationRow, RegulationTable, ValueColumn } from '@/lib/eval/regulation-tables';
 
 export type FooterState = { label: string; unit: string | null; state: EvalState | undefined };
@@ -81,11 +82,27 @@ function fmtScientific(v: number): string {
   const mantissa = m[1].includes('.') ? m[1].replace(/0+$/, '').replace(/\.$/, '') : m[1];
   return `${mantissa.replace('.', ',')}e${m[2]}`;
 }
+/**
+ * Plan 3 final wave B (defect 4; Plan-2c backlog item 13) — the epsilon the Task-10b
+ * scientific branch left open. Below it a magnitude is IEEE-754 cancellation noise, not a
+ * value: `0.3 - 0.1 - 0.2` is −2,78e-17 and must read "0", because the guideline's own
+ * arithmetic says zero. Above it the scientific branch stands.
+ *
+ * WHY 1e-12: the smallest magnitude the corpus PRINTS is the DIN 18130-1 permeability
+ * k_f ≈ 3,48·10⁻¹⁰ m/s (the value Task 10b was opened for), so the guard sits two decades
+ * below anything a standard states, while the cancellation residue of sums over the
+ * corpus's ordinary magnitudes (10⁰…10⁶) lands at 1e-16…1e-10 only for the very largest —
+ * and those are areas/volumes in m², where 1e-12 m² is not a quantity anyone reports.
+ * Exported so the boundary is auditable and pinned, never re-guessed.
+ */
+export const FMT_EPSILON = 1e-12;
 /** de-DE number formatting; `—` for null/empty; other scalars verbatim. */
 export function fmt(v: Value | undefined): string {
   if (typeof v === 'number') {
     if (!Number.isFinite(v)) return '—';
-    if (v !== 0 && Math.abs(v) < 0.01) return fmtScientific(v);
+    // epsilon guard BEFORE the scientific branch: noise formats as the plain zero it means.
+    if (v !== 0 && Math.abs(v) > FMT_EPSILON && Math.abs(v) < 0.01) return fmtScientific(v);
+    if (Math.abs(v) <= FMT_EPSILON) return NUM.format(0);
     return NUM.format(v);
   }
   if (v == null || v === '') return '—';
@@ -269,6 +286,32 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
     () => [...new Set([...(prepared.diagnostics ?? []), ...(policyDiagnostic ? [policyDiagnostic] : [])])],
     [prepared.diagnostics, policyDiagnostic],
   );
+  /**
+   * wave B defect 5 (`iso59020-F-2`): rows agreeing on every `ui_config.unique_by` column are
+   * duplicates. Reported, never repaired — dropping or merging a row would destroy an
+   * engineer's entry on a guess; the register is theirs, the warning is ours. The count is
+   * what a `count_rows` gate sees, which is the whole point of saying it out loud.
+   */
+  const duplicates = useMemo(() => {
+    const keys = config.unique_by;
+    if (!keys?.length) return [];
+    const seen = new Map<string, { n: number; label: string }>();
+    for (const r of prepared.rows) {
+      const id = keys.map((k) => JSON.stringify(r.values[k] ?? null)).join(' ');
+      const hit = seen.get(id);
+      if (hit) { hit.n += 1; continue; }
+      const label = keys.map((k) => {
+        const c = colByKey.get(k);
+        const v = r.values[k];
+        const shown = c?.type === 'lookup_key' && c.lookup
+          ? (tableRows(c.lookup.table_code) ?? []).find((t) => t.row_key === v)?.label_de ?? fmt(v)
+          : fmt(v);
+        return `${c?.label ?? k} „${shown}“`;
+      }).join(' · ');
+      seen.set(id, { n: 1, label });
+    }
+    return [...seen.values()].filter((e) => e.n > 1);
+  }, [prepared.rows, config.unique_by, colByKey, tableRows]);
   // Legacy structured-register footer (display-only, never written; the engine's Σ is `footer` below).
   const legacySum = useMemo(() => {
     if (!config.sum_column) return null;
@@ -408,6 +451,14 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
         </ul>
       )}
 
+      {duplicates.length > 0 && (
+        <ul data-testid="register-duplicates" className="text-[11px] text-warning list-disc pl-4 space-y-0.5">
+          {duplicates.map((d) => (
+            <li key={d.label}>Doppelte Zeile: {d.label} — {d.n}× erfasst; zählende Prüfungen zählen sie mehrfach.</li>
+          ))}
+        </ul>
+      )}
+
       {config.note ? <p className="text-[11px] text-subtext">{config.note}</p> : null}
 
       <div className="text-[11px] text-subtext border-t border-hairline-strong pt-2">
@@ -528,7 +579,16 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn,
       // The override control follows the value column: `kann` ⇒ select over the printed alternatives; a string/enum
       // column ⇒ text input (never a number input over a non-numeric cell); else number input.
       const numeric = valueColumn ? valueColumn.type === 'number' : typeof tableValue !== 'string';
-      const alternatives = policy === 'kann' && valueColumn?.values?.length ? valueColumn.values : null;
+      // wave B defect 6 (`a178-O-4`): the ROW's printed alternatives win over the value
+      // column's table-wide list; `printedAlternatives` is the single rule (shared with LookupFillField).
+      const tableRow = col.lookup?.key_column ? tableRows.find((t) => t.row_key === row.values[col.lookup!.key_column!]) : undefined;
+      const alternatives = policy === 'kann' ? printedAlternatives(tableRow, valueColumn) : null;
+      // wave B defect 3 (`m1200_2-I-2`): the override flag suppresses `refillLookupValues`
+      // for the WHOLE row, so a lookup_value column the override does not claim keeps a stale
+      // value (or stays blank) with no signal. Keep the engineer's value — say what the table
+      // holds now. Non-blocking, and never rendered for the editable override cells (their
+      // "Tab. N: …" line under the key column already prints the current table values).
+      const staleTable = overridden && !isApplies && tableValue !== undefined && v !== tableValue;
       return (
         <>
           {overridden && isApplies ? (
@@ -551,6 +611,11 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn,
             <span data-testid={`lookup-value-${col.key}`} className="font-mono text-ink">{fmt(v)}</span>
           )}
           {mismatch && <div data-testid={`mismatch-${col.key}`} className="text-[10px] text-warning">{col.label} weicht von {tl} ab</div>}
+          {staleTable && (
+            <div data-testid={`table-stale-${col.key}`} className="text-[10px] text-warning">
+              {tl}: {fmt(tableValue)} — nicht übernommen (Zeile abweichend)
+            </div>
+          )}
         </>
       );
     }

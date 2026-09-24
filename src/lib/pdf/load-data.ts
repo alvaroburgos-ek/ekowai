@@ -23,6 +23,7 @@ import {
   type EquationReportResult,
   type ComplianceReportResult,
 } from '@/lib/eval/evaluate-for-report';
+import { inheritedFieldsFor } from '@/lib/compliance/visibility';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 
@@ -150,6 +151,9 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       // Plan 2a (Task 10): visible_when inputs for reportVisibility.
       sectionId: fields.sectionId,
       visibleWhen: fields.visibleWhen,
+      // Plan 3 final wave B (defect 1): the inheritance rule's own column — a rule whose
+      // driver lives on another worksheet of the same standard must resolve here too.
+      consumerWorksheets: fields.consumerWorksheets,
     })
     .from(fields)
     .where(inArray(fields.worksheetTemplateId, templateIds));
@@ -226,6 +230,11 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
     );
   const paramsByFieldId = new Map(params.map((p) => [p.fieldId, p]));
 
+  // Plan 3 final wave B (defect 1): templateId → standard code, so `inheritedFieldsFor`
+  // can scope the inheritance to the SAME standard (a foreign standard reusing a worksheet
+  // code must never leak a driver in).
+  const standardCodeByTemplateId = new Map(instances.map((i) => [i.templateId, i.standardCode]));
+
   // Pre-group fields by templateId for O(1) lookup per instance
   const fieldsByTemplateId = new Map<string, typeof allFields>();
   for (const f of allFields) {
@@ -279,7 +288,33 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
     // values — computed ONCE per instance and fed to BOTH the equation path
     // (hidden ⇒ no value ⇒ manual_required; fix round 1) and the compliance
     // path (hidden ⇒ not_applicable). Same pure helper as the form/gate.
-    const { hiddenSymbols } = reportVisibility(tmplFields, sectionsByTemplateId.get(inst.templateId) ?? [], tmplParameters);
+    // Plan 3 final wave B (defect 1): a `visible_when` whose driver is INHERITED
+    // (`code = ANY(consumer_worksheets)` on another worksheet of the same standard) must
+    // resolve here too — it did not, so the PDF/report never hid what the form hid.
+    // `inheritedFieldsFor` is the pure form of `loadInheritedFields`; the project's fields
+    // are already in memory (`allFields`), so no extra query is needed.
+    const inheritedFields = inheritedFieldsFor(
+      { worksheetTemplateId: inst.templateId, worksheetCode: inst.code, standardCode: inst.standardCode },
+      allFields.map((f) => ({ ...f, standardCode: standardCodeByTemplateId.get(f.worksheetTemplateId) ?? '' })),
+    );
+    const inheritedParameters = inheritedFields
+      .map((f) => paramsByFieldId.get(f.id))
+      .filter((p): p is NonNullable<typeof p> => p != null)
+      .map((p) => ({
+        fieldId: p.fieldId,
+        valueNumber: p.valueNumber == null ? null : Number(p.valueNumber),
+        valueText: p.valueText,
+        valueEnum: p.valueEnum,
+        valueBoolean: p.valueBoolean,
+        valueDate: p.valueDate,
+        valueJson: p.valueJson,
+      }));
+    const { hiddenSymbols } = reportVisibility(
+      tmplFields,
+      sectionsByTemplateId.get(inst.templateId) ?? [],
+      tmplParameters,
+      { fields: inheritedFields, parameters: inheritedParameters },
+    );
 
     const equationResults = evaluateWorksheetEquations(
       inst.code,

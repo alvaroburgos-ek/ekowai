@@ -79,6 +79,13 @@ export type SeededFixture = {
   acAsCheckFieldId: string;
   // A138-15 facility selector
   facilityTypeFieldId: string;
+  // A138-90/-91 cross-worksheet inheritance (wave B defect 1)
+  ws91InstanceId: string;
+  inhFactorFieldId: string;
+  inhGateFieldId: string;
+  inhRegisterFieldId: string;
+  inhSumFieldId: string;
+  inhScaledFieldId: string;
   // A138-23 output field ids
   f_dimensioned: string;
   f_volume: string;
@@ -185,6 +192,35 @@ export async function seedPltHs01(
   await mkField(t12.templateId, t12.sectionId, 'ac_as_ratio_check_reason', 'text', 10);
   await mkEquation(t12.templateId, GL7_A138_12, 'Gl.7', '(A_S_min + A_S_max) / 2', 'A_S_m');
 
+  // ── A138-90 / A138-91 — cross-worksheet INHERITANCE through the real save path
+  //    (Plan 3 final wave B, defect 1; din1989_2-I-2 / m820_1-I-2).
+  //    A138-90 produces two scalars and declares A138-91 as their consumer:
+  //      · `harness_inh_factor` — a scalar INPUT of a register-fed equation on -91
+  //        (the M820-09-D11 shape: `sum_rows(lose, …) … estimated_engineering_fee`);
+  //      · `harness_inh_gate`   — the DRIVER of the `visible_when` on -91's register
+  //        (the DIN-1989-2-03 shape: `DN <= 200`, DN owned by -01).
+  //    Both were invisible to `saveWorksheet` before the fix.
+  const t90 = await mkTemplate('A138-90', 'Inheritance producer');
+  const inhFactorFieldId = await mkField(t90.templateId, t90.sectionId, 'harness_inh_factor', 'number', 1);
+  const inhGateFieldId = await mkField(t90.templateId, t90.sectionId, 'harness_inh_gate', 'number', 2);
+  await sql`UPDATE fields SET consumer_worksheets = ${sql.array(['A138-91'])}
+             WHERE id IN (${inhFactorFieldId}, ${inhGateFieldId})`;
+
+  const t91 = await mkTemplate('A138-91', 'Inheritance consumer');
+  const inhRegisterFieldId = await mkField(t91.templateId, t91.sectionId, 'harness_reg', 'json', 1);
+  await sql`UPDATE fields
+               SET widget = 'register',
+                   ui_config = ${sql.json({ title: 'Harness-Register', columns: [{ key: 'betrag', label: 'Betrag', type: 'number' }] })},
+                   visible_when = ${'harness_inh_gate <= 200'}
+             WHERE id = ${inhRegisterFieldId}`;
+  const inhSumFieldId = await mkField(t91.templateId, t91.sectionId, 'harness_sum', 'number', 2);
+  const inhScaledFieldId = await mkField(t91.templateId, t91.sectionId, 'harness_scaled', 'number', 3);
+  await mkEquation(t91.templateId, '00000000-0000-4000-9000-000000000091', 'harness_sum',
+    'harness_sum = sum_rows(harness_reg, betrag)', 'harness_sum', ['harness_reg']);
+  await mkEquation(t91.templateId, '00000000-0000-4000-9000-000000000092', 'harness_scaled',
+    'harness_scaled = sum_rows(harness_reg, betrag) * harness_inh_factor', 'harness_scaled',
+    ['harness_reg', 'harness_inh_factor']);
+
   // ── A138-15 facility_type_selected ──
   const t15 = await mkTemplate('A138-15', 'Facility select');
   const ftFieldId = await mkField(t15.templateId, t15.sectionId, 'facility_type_selected', 'enum', 1);
@@ -242,6 +278,9 @@ export async function seedPltHs01(
   await insParam(qSacFieldId, t17.instanceId, { value_number: String(PLT_HS_01.q_S_AC) });
   // engineer-entered verdict — must never be overwritten by the materialize
   await insParam(gateResultFieldId, t23.instanceId, { value_enum: 'FAIL' });
+  // wave B defect 1: the two inherited producers (gate visible, factor 3).
+  await insParam(inhFactorFieldId, t90.instanceId, { value_number: '3' });
+  await insParam(inhGateFieldId, t90.instanceId, { value_number: '100' });
 
   return {
     projectId: proj.id,
@@ -266,6 +305,12 @@ export async function seedPltHs01(
     aSmaxFieldId,
     acAsCheckFieldId,
     facilityTypeFieldId: ftFieldId,
+    ws91InstanceId: t91.instanceId,
+    inhFactorFieldId,
+    inhGateFieldId,
+    inhRegisterFieldId,
+    inhSumFieldId,
+    inhScaledFieldId,
     f_dimensioned,
     f_volume,
     f_footprint,
