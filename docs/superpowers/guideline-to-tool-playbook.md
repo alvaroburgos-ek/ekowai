@@ -86,6 +86,148 @@ changes nothing on screen; they are independent of each other and of steps 4–6
 step 1. Applying any of them to `vadsmshzebefjreqcicl` is the owner's stamp, never this
 branch's.
 
+### Plan 3 — the 29 standards (85 migrations; WRITTEN, NOT APPLIED)
+
+Plan 3 (`docs/superpowers/plans/2026-09-16-guideline-to-tool-plan-3-encode-29-standards.md`)
+wrote **85 migrations + 85 rollbacks**, none of them applied. Counted in this session:
+
+```
+$ ls scripts/migrations/2026091710*_regulation_tables_seed_*.sql | wc -l   →  27
+$ ls scripts/migrations/2026091710*_field_configs_*.sql        | wc -l   →  29
+$ ls scripts/migrations/2026091710*_equations_*.sql            | wc -l   →  29
+$ ls scripts/migrations/20260917*.sql                          | wc -l   →  85
+$ ls scripts/rollback-20260917*.sql                            | wc -l   →  85     (pairing check: 0 unpaired both ways)
+```
+
+Two standards have no seed migration because they have no transcript at all (VSME, ATV-A-704E)
+— `SEED_BUILDERS` therefore carries 27 of the 29 slugs (plus the frozen Plan-1 `a138` entry).
+
+**Everything below runs AFTER steps 1–3 above**, and step 1 is load-bearing in a way it was not
+before Plan 3: since Task 4 fix round 1 the Plan-1 schema migration `20260911100000` first
+**renames the legacy prod `regulation_tables`** (5,382 per-cell rows / 35 standards, no
+`standard_code` column) to `regulation_tables_legacy_v1`. Without that rename `CREATE TABLE IF
+NOT EXISTS regulation_tables` is a no-op against the legacy table and **every one of the 27 seed
+migrations below fails on "column standard_code does not exist"** — while the TS fallback keeps
+serving the same rows, so the app looks healthy and the data never lands. Sign-off
+**`plan1-D-3-1`** is the owner's rename-vs-adopt-legacy ruling and **gates the whole list**.
+
+Order (the dependencies that make it load-bearing):
+
+1. **`20260911100000` schema — including the legacy rename.** Tables and columns before anything
+   that writes into them.
+2. **Plan-1 seed `20260911110000` + the nine `20260911120000_selection_configs_*.sql`.** A138's
+   Plan-1 rows are what the Plan-3 A138 seed *supersedes*: `SEED_BUILDERS.a138_p3` declares
+   `supersedes: 'a138'`, and its rollback re-emits the Plan-1 rows byte-for-byte. Apply Plan-1's
+   seed first so that rollback has something to restore to.
+3. **Plan 2a — `20260916100000`, `20260916110000`, `20260916120000`** (any order among the three).
+4. **Plan 2b — `20260916130000`, `20260916140000`, `20260916150000`**; `20260916160000` stays
+   EXCLUDED until sign-off `D-2b-3` is ratified.
+5. **Then, per standard, in Plan-3 task order 1 → 29, the trio in this order:**
+   `…00 regulation_tables seed` → `…10 field configs` → `…20 equations`.
+
+   Within a standard the order is not cosmetic:
+   - the **seed** must precede the **field configs**, because a `lookup_fill` binding and a
+     register's `lookup_key` / `lookup_value` column name a `table_code`; with the table absent
+     the widget resolves to the TS fallback (harmless) but any `override` policy read and every
+     `LookupFillField` "keine Zeile" badge would be decided against the wrong source;
+   - the **field configs** must precede the **equations**, because a large share of the Plan-3
+     equations read a **register created by the field-config migration** (`sum_rows(reg, …)`,
+     `count_rows(reg, …)`) or a symbol the field-config migration `create`s. An equation whose
+     `input_symbols` name a field that does not exist yet is not an error — it is silently
+     `manual_required` forever, which is the failure mode this order exists to prevent.
+
+   **Standards are independent of each other.** The one apparent exception — Task 6 (M-1200-3)
+   reading Task 5's (M-1200-1) water class — is *data* inheritance through
+   `consumer_worksheets`, not schema, so the two trios may be applied in either order.
+
+| # | standard | migrations, in order | owner-stamped follow-up (STAGED, never emitted) |
+|---|---|---|---|
+| 1 | DWA-A-138-1 (`a138`) | `20260917100100_regulation_tables_seed_a138_p3.sql` → `20260917100110_field_configs_a138.sql` → `20260917100120_equations_a138.sql` | `scripts/verification/a138-STAGED-plan3-rulings.sql` |
+| 2 | DIN-1989-1 (`din1989_1`) | `20260917100200_regulation_tables_seed_din1989_1.sql` → `20260917100210_field_configs_din1989_1.sql` → `20260917100220_equations_din1989_1.sql` | `scripts/verification/din1989_1-STAGED-plan3-rulings.sql` |
+| 3 | DWA-A-262E (`a262e`) | `20260917100300_regulation_tables_seed_a262e.sql` → `20260917100310_field_configs_a262e.sql` → `20260917100320_equations_a262e.sql` | `scripts/verification/a262e-STAGED-plan3-rulings.sql` |
+| 4 | DWA-M-277E (`m277e`) | `20260917100400_regulation_tables_seed_m277e.sql` → `20260917100410_field_configs_m277e.sql` → `20260917100420_equations_m277e.sql` | `scripts/verification/m277e-STAGED-plan3-rulings.sql` |
+| 5 | DWA-M-1200-1 (`m1200_1`) | `20260917100500_regulation_tables_seed_m1200_1.sql` → `20260917100510_field_configs_m1200_1.sql` → `20260917100520_equations_m1200_1.sql` | `scripts/verification/m1200_1-STAGED-plan3-rulings.sql` |
+| 6 | DWA-M-1200-3 (`m1200_3`) | `20260917100600_regulation_tables_seed_m1200_3.sql` → `20260917100610_field_configs_m1200_3.sql` → `20260917100620_equations_m1200_3.sql` | `scripts/verification/m1200_3-STAGED-plan3-rulings.sql` |
+| 7 | FLL-GAR-2023 (`fll_gar`) | `20260917100700_regulation_tables_seed_fll_gar.sql` → `20260917100710_field_configs_fll_gar.sql` → `20260917100720_equations_fll_gar.sql` | `scripts/verification/fll_gar-STAGED-plan3-rulings.sql` |
+| 8 | FLL-Naturteich (`fll_naturteich`) | `20260917100800_regulation_tables_seed_fll_naturteich.sql` → `20260917100810_field_configs_fll_naturteich.sql` → `20260917100820_equations_fll_naturteich.sql` | `scripts/verification/fll_naturteich-STAGED-plan3-rulings.sql` |
+| 9 | DWA-M-820-3 (`m820_3`) | `20260917100900_regulation_tables_seed_m820_3.sql` → `20260917100910_field_configs_m820_3.sql` → `20260917100920_equations_m820_3.sql` | `scripts/verification/m820_3-STAGED-plan3-rulings.sql` |
+| 10 | DIN-18130-1 (`din18130_1`) | `20260917101000_regulation_tables_seed_din18130_1.sql` → `20260917101010_field_configs_din18130_1.sql` → `20260917101020_equations_din18130_1.sql` | `scripts/verification/din18130_1-STAGED-plan3-rulings.sql` |
+| 11 | DWA-M-205 (`m205`) | `20260917101100_regulation_tables_seed_m205.sql` → `20260917101110_field_configs_m205.sql` → `20260917101120_equations_m205.sql` | `scripts/verification/m205-STAGED-plan3-rulings.sql` |
+| 12 | DWA-M-187 (`m187`) | `20260917101200_regulation_tables_seed_m187.sql` → `20260917101210_field_configs_m187.sql` → `20260917101220_equations_m187.sql` | `scripts/verification/m187-STAGED-plan3-rulings.sql` |
+| 13 | DIN-276 (`din276`) | `20260917101300_regulation_tables_seed_din276.sql` → `20260917101310_field_configs_din276.sql` → `20260917101320_equations_din276.sql` | `scripts/verification/din276-STAGED-plan3-rulings.sql` |
+| 14 | DWA-A-178 (`a178`) | `20260917101400_regulation_tables_seed_a178.sql` → `20260917101410_field_configs_a178.sql` → `20260917101420_equations_a178.sql` | `scripts/verification/a178-STAGED-plan3-rulings.sql` |
+| 15 | DIN-EN-16941-2 (`din16941_2`) | `20260917101500_regulation_tables_seed_din16941_2.sql` → `20260917101510_field_configs_din16941_2.sql` → `20260917101520_equations_din16941_2.sql` | `scripts/verification/din16941_2-STAGED-plan3-rulings.sql` |
+| 16 | DWA-M-1200-2 (`m1200_2`) | `20260917101600_regulation_tables_seed_m1200_2.sql` → `20260917101610_field_configs_m1200_2.sql` → `20260917101620_equations_m1200_2.sql` | `scripts/verification/m1200_2-STAGED-plan3-rulings.sql` |
+| 17 | DIN-1989-2 (`din1989_2`) | `20260917101700_regulation_tables_seed_din1989_2.sql` → `20260917101710_field_configs_din1989_2.sql` → `20260917101720_equations_din1989_2.sql` | `scripts/verification/din1989_2-STAGED-plan3-rulings.sql` |
+| 18 | DWA-M-820-1 (`m820_1`) | `20260917101800_regulation_tables_seed_m820_1.sql` → `20260917101810_field_configs_m820_1.sql` → `20260917101820_equations_m820_1.sql` | `scripts/verification/m820_1-STAGED-plan3-rulings.sql` |
+| 19 | DWA-M-820-2 (`m820_2`) | `20260917101900_regulation_tables_seed_m820_2.sql` → `20260917101910_field_configs_m820_2.sql` → `20260917101920_equations_m820_2.sql` | `scripts/verification/m820_2-STAGED-plan3-rulings.sql` |
+| 20 | ISO-5667-10 (`iso5667_10`) | `20260917102000_regulation_tables_seed_iso5667_10.sql` → `20260917102010_field_configs_iso5667_10.sql` → `20260917102020_equations_iso5667_10.sql` | `scripts/verification/iso5667_10-STAGED-plan3-rulings.sql` |
+| 21 | ISO-59020 (`iso59020`) | `20260917102100_regulation_tables_seed_iso59020.sql` → `20260917102110_field_configs_iso59020.sql` → `20260917102120_equations_iso59020.sql` | `scripts/verification/iso59020-STAGED-plan3-rulings.sql` |
+| 22 | ISO-46001 (`iso46001`) | `20260917102200_regulation_tables_seed_iso46001.sql` → `20260917102210_field_configs_iso46001.sql` → `20260917102220_equations_iso46001.sql` | `scripts/verification/iso46001-STAGED-plan3-rulings.sql` |
+| 23 | ISO-5667-6 (`iso5667_6`) | `20260917102300_regulation_tables_seed_iso5667_6.sql` → `20260917102310_field_configs_iso5667_6.sql` → `20260917102320_equations_iso5667_6.sql` | `scripts/verification/iso5667_6-STAGED-plan3-rulings.sql` |
+| 24 | VSME (`vsme`) | `20260917102410_field_configs_vsme.sql` → `20260917102420_equations_vsme.sql` *(no seed — no transcript)* | `scripts/verification/vsme-STAGED-plan3-rulings.sql` |
+| 25 | DIN-14021 (`din14021`) | `20260917102500_regulation_tables_seed_din14021.sql` → `20260917102510_field_configs_din14021.sql` → `20260917102520_equations_din14021.sql` | `scripts/verification/din14021-STAGED-plan3-rulings.sql` |
+| 26 | ISO-14046 (`iso14046`) | `20260917102600_regulation_tables_seed_iso14046.sql` → `20260917102610_field_configs_iso14046.sql` → `20260917102620_equations_iso14046.sql` | `scripts/verification/iso14046-STAGED-plan3-rulings.sql` |
+| 27 | ATV-A-704E (`atv_a704e`) | `20260917102710_field_configs_atv_a704e.sql` → `20260917102720_equations_atv_a704e.sql` *(no seed — no transcript)* | `scripts/verification/atv_a704e-STAGED-plan3-rulings.sql` |
+| 28 | ISO-5667-1 (`iso5667_1`) | `20260917102800_regulation_tables_seed_iso5667_1.sql` → `20260917102810_field_configs_iso5667_1.sql` → `20260917102820_equations_iso5667_1.sql` | `scripts/verification/iso5667_1-STAGED-plan3-rulings.sql` |
+| 29 | ISO-59004 (`iso59004`) | `20260917102900_regulation_tables_seed_iso59004.sql` → `20260917102910_field_configs_iso59004.sql` → `20260917102920_equations_iso59004.sql` | `scripts/verification/iso59004-STAGED-plan3-rulings.sql` |
+
+6. **Deploy the build** (unchanged: the build is safe once step 1 is in; every Plan-3 migration
+   below step 1 is pure data and the code is correct with none of them applied — `widget IS NULL`
+   ⇒ today's rendering, missing seed rows ⇒ the TS builder fallback, missing equation rows ⇒ the
+   derived symbol simply stays absent).
+
+**The STAGED files are NOT part of this order.** Each
+`scripts/verification/<slug>-STAGED-plan3-rulings.sql` is 100 % SQL comments carrying the
+judgment items (gate rewrites, `data_type` changes, equation replacements, deactivations,
+consumer edits) with `☐ RATIFIED` markers. They are applied **one block at a time, each in its
+own transaction, only after its box is ticked**, and every block states its own prerequisite —
+most of them require their standard's trio to be applied first, because they reference symbols
+the trio creates. Blocks that rewrite a gate use the archive pattern (see "Rollback fidelity"
+below): a `CREATE TABLE IF NOT EXISTS <table>_archive_<slug>` in the same transaction, every
+`UPDATE`/`DELETE` guarded on `md5(condition)` / `md5(formula)` captured read-only from prod, and
+a rollback that restores from the archive with an explicit column list and then drops it.
+
+**Two standards' field-config migrations were emitted in `--gate-guard=warn` mode** and therefore
+carry a rule the gate-aware guard refuses in default mode. Re-running the emitter without the flag
+in this session reproduces both refusals (exit 1):
+
+```
+$ pnpm -s tsx scripts/regulation-tables/emit-field-configs-sql.ts din1989_1 20260917100210
+Error: DIN-1989-1-05 versickerung_bemessung_a138: visible_when hides versickerung_bemessung_a138
+read by gate DIN-1989-1-CR-11 (block: "ueberlauf_versickerung != true OR versickerung_bemessung_a138 == true")
+— hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block
+$ pnpm -s tsx scripts/regulation-tables/emit-field-configs-sql.ts a262e 20260917100310
+Error: A262-05 m_multiplier: visible_when hides m_multiplier read by gate REQ-05 (block: "m_multiplier >= 1")
+— hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block
+```
+
+Do **not** apply `20260917100210` or `20260917100310` before ruling on `din1989_1-G-4` and
+`a262e-G-11` / `a262e-G-12` (Task 30 close-out): applying them as they stand makes
+`DIN-1989-1-CR-11` and ten `DWA-A-262E` block gates stop enforcing, silently.
+
+**Rollback of a Plan-3 standard** is the reverse of its own trio (`…20` → `…10` → `…00`), and the
+standards can be rolled back independently. No Plan-3 migration changes a runtime code path, so a
+rollback needs **no** redeploy — `widget = NULL` and missing rows are the code's own fallback. The
+"redeploy the old build first" twist below applies only to the Plan-1 *schema* migration.
+
+**Per-standard post-apply verification** (expected counts are in each task report's counts table,
+`docs/superpowers/specs/2026-09-11-guideline-to-tool/reports/plan-3-<slug>.md`):
+
+```sql
+select t.table_code, count(*) from regulation_table_rows r
+  join regulation_tables t on t.id = r.table_id
+ where t.standard_code = '<CODE>' group by 1 order by 1;
+select f.widget, count(*) from fields f
+  join worksheet_templates w on w.id = f.worksheet_template_id
+  join standards s on s.id = w.standard_id
+ where s.code = '<CODE>' and f.widget is not null group by 1 order by 1;
+select e.equation_number, e.output_symbol from equations e
+  join worksheet_templates w on w.id = e.worksheet_template_id
+  join standards s on s.id = w.standard_id
+ where s.code = '<CODE>' and e.description like 'Plan 3:%' order by 1;
+```
+
 **Rollback is the reverse order, with one twist:** redeploy the previous (pre-this-branch)
 build BEFORE running `rollback-20260911100000_guideline_to_tool_schema.sql` — dropping the
 schema columns while the new build is still live re-creates the exact "column does not exist"
@@ -749,10 +891,66 @@ Pattern: `scripts/verification/m1200_3-STAGED-plan3-rulings.sql` blocks R-2 / G-
 
 ## Token budget note
 
-Plan 1 was the expensive corpus-wide pass. Per-standard cost through this playbook is still
-dominated by inventory-writing and manual `ui_config`/table authoring for the first several
-standards — no fixed multiplier exists yet. **Measure on the first Plan-3 standard** (tokens
-in, sections/tables/registers out) and record the number here before quoting a ratio.
+Plan 1 was the expensive corpus-wide pass. Plan 3 measured the per-standard cost across all 29
+standards, so the ratio below replaces the earlier "no fixed multiplier exists yet".
+
+**Measured on DWA-A-138-1 (Plan 3 Task 1): ≈ 0.55 M tokens → 9 tables / 81 rows / 2 registers /
+51 conditionals (2 field + 49 section) / 5 equations = 148 artefacts ⇒ ≈ 3 700 tokens per
+artefact. Per-standard median across the 27 standards that recorded a token figure: ≈ 7 060
+tokens per artefact (min 845 — DIN-276; max 17 590 — ATV-A-704E). Pooled: 15.76 M tokens →
+3 687 artefacts ⇒ ≈ 4 270 tokens per artefact.**
+
+How the two numbers are produced (both re-executable; `_t30-counts.ts` is the throwaway Task-30
+helper that reads the committed modules, not a report):
+
+```
+$ pnpm -s tsx scripts/verification/_t30-counts.ts          # tables, rows, registers, field_vw, section_vw, equations per slug
+$ grep -oE "≈ ?[0-9]+[.,][0-9]+ ?M" docs/superpowers/specs/2026-09-11-guideline-to-tool/reports/plan-3-<slug>.md | head -1
+```
+
+`artefacts` = tables + seeded rows + registers + field `visible_when` + section `visible_when` +
+emitted equations. Two of the 29 reports (ISO-5667-1, ISO-59004) record no token figure at all —
+they are excluded from the median and the pooled figure, and that omission is itself a finding
+for the next plan's report template.
+
+**What the spread actually says — read it before quoting the median.** The ratio is *not* a
+productivity metric; it is dominated by how much printed matter the standard has:
+
+- **Cheap per artefact = a big printed catalogue.** DIN-276 (845) and DWA-M-820-3 (1 206) each
+  lift hundreds of catalogue rows from one well-formed table; the marginal row is nearly free.
+- **Expensive per artefact = no transcript.** ATV-A-704E (17 590) and VSME (16 207) have no
+  source document at all: the whole budget goes into prod-text quote provenance, register design
+  and sign-off blocks, and the artefact count stays small by construction.
+- **The middle band (≈ 5 000–9 000) is the honest planning number for a normal standard with a
+  markdown transcript.**
+
+**Cost did NOT fall wave over wave**, and that is expected rather than a failure of the brief:
+the token budget per standard sat in a narrow 0.45–0.80 M band for all 27 measured standards
+(the playbook's patterns hardened, but the work shifted from table authoring to sign-off /
+STAGED authoring, which costs about the same). What DID fall is the share spent on mechanism
+discovery — the six engine/emitter fixes (Tasks 1b, 10b, 12b, 12c, 13b) are all in the first half.
+
+**Where the budget goes when the source is unreadable (U-entries).** 91 of the 1 276 sign-off
+blocks are `U` (unreadable / unsourced cell) — counted with
+`node scripts/verification/_t30-signoff-index.mjs`. The standards that stopped at a cell rather
+than guessing it, with the printed rows that cost:
+
+| standard | U-blocks | rows not seeded, as the report states it |
+|---|---|---|
+| ISO-46001 | 23 | Table D.1: **23 of 24** printed sector ↔ indicator pairs — the raw two-column extraction does not settle the pairing (only 1 row seeded) |
+| DWA-A-138-1 | 5 | Tab. 10 (an `\includegraphics` figure) + **21** printed "(*)"/empty Tab. 6 / Tab. 7 rows |
+| ISO-59004 | 4 | Table 1 in full — **13** Action rows; the FDIS prints only "Action \| Description" and the two columns interleave |
+| DIN-18130-1 | 2 | **3** Tab. 5 sub-rows (multirow Bauteil spans) |
+| DWA-A-262E | 3 | Table 19 in full (images) |
+| DWA-M-1200-3 | 3 | Tab. 15 in full (row heads are images) |
+| VSME | 1 | **every** table — no transcript exists (no seed builder, no seed migration) |
+| ATV-A-704E | 6 | **every** table — the PDF is a scan with no text layer (`pdftotext` → 37 bytes, 0 non-whitespace) |
+| DIN-1989-1 · DWA-M-1200-1 · DWA-M-1200-2 · FLL-GAR · DWA-M-205 · DWA-M-187 · DIN-276 · DWA-A-178 · others | 1–6 each | individual CELLS seeded `null` and the owning table kept `imported_unverified`; no whole row lost |
+
+Read that table as the real cost of SR-1: roughly **60+ printed rows and two whole standards'
+table content** were deliberately not encoded rather than reconstructed. Every one of them has a
+`U` block naming the table, the row and the transcript line, and an unblock path (a PDF page, a
+better extraction, or the published edition).
 
 ## What Plan 2a added (2026-09-16/17, commits `7ee7d22..9b0e1bd` on `feat/guideline-to-tool`)
 
@@ -1141,3 +1339,85 @@ present at `3a1d8fa`; 2b's only touch there was removing a `vi.mock` line) · `p
 (embedded PG — 2b did not touch the save path) · `scripts/reasoning-map/` scorecards
 regenerated by the full run are byte-identical in content to HEAD (EOL-only diff; 2b changed
 no corpus result) · `git status --short` empty after the close-out commit.
+
+## What Plan 3 added (2026-09-17 … 2026-09-24, commits `b349d21..2b2bca2` on `feat/guideline-to-tool`)
+
+Plan 3 encoded **29 standards** onto the Plan-1/2a/2b mechanism. **Nothing is applied to any
+database.** All of it is TypeScript modules + generated SQL + sign-off text on the branch.
+
+**What is on the branch** (measured in this session with
+`pnpm -s tsx scripts/verification/_t30-counts.ts`, which reads the committed modules — not a
+report; the frozen Plan-1 `a138` builder is excluded and its superseding `a138_p3` counted):
+
+| out | count |
+|---|---|
+| `regulation_tables` seeded | **196** |
+| `regulation_table_rows` seeded (every one with a lifted `verbatim_quote`) | **1 945** |
+| register carriers | **169** |
+| `select_one` / `select_many` / `lookup_fill` field configs | **55** / **15** / **172** |
+| field `visible_when` rules | **484** |
+| section `visible_when` rules | **290** |
+| equations emitted (`ON CONFLICT DO NOTHING`, `description LIKE 'Plan 3:%'`) | **679** |
+| fields created additively (`create`) | **1 096** |
+| migrations written / rollbacks written / **applied** | **85** / **85** / **0** |
+| sign-off blocks on `SIGN-OFF-plan-3.md` | **1 276** |
+| STAGED blocks across the 29 `scripts/verification/<slug>-STAGED-plan3-rulings.sql` files | **1 042** |
+
+**New shared machinery** (Task 0 + the six mid-plan `[CODE]` rounds; all of it lives in
+`scripts/regulation-tables/` and `src/lib/eval/`):
+
+- `emit-field-configs-sql.ts` (extends Plan-2b's `emit-widget-configs-sql.ts` with
+  `visible_when`, section rules, the D-1 prod-enum guard and the prior snapshot),
+  `emit-equations-sql.ts`, `verify-regulation-tables.ts` (every `verbatim_quote` must occur,
+  whitespace-normalised, in the transcript — the per-standard PASS list is pasted in each report),
+  `build-prior-snapshot.mjs` + `prior-snapshot-fold.mjs` (read-only prod capture: fields, section
+  hierarchy, equations, compliance conditions), `capture-text.mjs <CODE> <slug>` (read-only prod
+  text for the four no-transcript standards).
+- `SEED_BUILDERS` (`src/lib/eval/regulation-tables-seed-index.ts`) — slug → builder + migration
+  timestamp + `supersedes`; the runtime fallback iterates it, so a standard's tables resolve while
+  its seed migration is unapplied.
+- **The producer guard**, grown in four steps and now the most valuable part of the emitter: it
+  refuses to emit a `visible_when` that would hide (a) a field another worksheet consumes,
+  (b) a *transitive* producer — an input of a same-worksheet equation whose output has consumers
+  (Task 3), (c) a symbol a same-worksheet **gate condition** reads, unless that condition carries
+  an IF-guard on the same driver (Task 12c rounds 1–4, including the runtime's own
+  `hiddenReferences` superset and reach through same-worksheet equation chains). A self-entry in a
+  field's own `consumer_worksheets` is ignored (Task 12b — the runtime never inherits from the
+  owning worksheet). Every refusal becomes a STAGED G/C block instead of a silent enforcement loss.
+- **Engine fixes Plan 3 forced:** enum/text values reach formulas as strings (Task 1b — without it
+  every lookup keyed on a select reported "Fehlende Eingaben"); a QUOTED string literal never
+  resolves as a symbol while bare identifiers keep the legacy var-vs-var rule (Task 13b, DIN-276
+  `status == 'rechnung'` was reading the `rechnung` column); `fmt()` renders `0 < |v| < 0.01` in
+  scientific form (Task 10b).
+
+**The conventions that made 29 standards affordable** — apply them to standard 30 unchanged:
+
+1. **One row = one printed line, quoted.** `verbatim_quote` is `NOT NULL` and the verifier
+   re-checks every one against the transcript. A cell you cannot read is a `U` sign-off block, not
+   a guess. Table status is `md_verified` only when every row AND every displayed text cell is
+   legible; one garbled displayed cell ⇒ `imported_unverified`.
+2. **Additive only.** New carriers, drivers and limit targets come in through `create`
+   (`is_required = false`, `imported_unverified`, `description` starting `Plan 3:`). Anything that
+   changes an existing gate, equation, `data_type`, `is_required`, `consumer_worksheets`, or
+   deactivates a field goes to the STAGED file as commented SQL with `☐ RATIFIED`.
+3. **The twin, not the re-bind.** When an existing prod field is required or gate-bearing, create a
+   `*_tab` / `*_calc` twin beside it and STAGE the re-bind; a widget change on a required field can
+   leave the engineer with no input at all (`LookupFillField` renders none for a `locked` table with
+   missing keys — `iso5667_1-E-1`).
+4. **Archive-pattern rollbacks** for every STAGED `UPDATE`/`DELETE` on long text (see "Rollback
+   fidelity" above): `CREATE TABLE IF NOT EXISTS <table>_archive_<slug>` in the same transaction,
+   `md5()` content guard on each statement, explicit column list on the restore, `DROP TABLE` in the
+   rollback. Column lists must match the LIVE schema — `equations` has 22 columns,
+   `compliance_requirements` 18 (Task 26 shipped a 13-of-22 list and it was caught in review).
+5. **Amendment O — an absence claim carries its failing command.** "The standard prints no X" is a
+   finding only with the grep, its empty output and its exit code. Task 19 shipped a false absence
+   claim (`cut -c1-300` had truncated the paragraph) and the rule exists because of it.
+6. **Report the reversal.** Five briefs' premises were refuted against the source in-session
+   (A-262E Table 21 complete; M-820-3 193 items not 174; ISO-5667-1 `n_required_calc` already
+   produced by prod Gl. 3; A-178 `b_R,a` locked not `kann`; ATV-A-704E CR-020/021 are attestation
+   gates). Each refutation is recorded with the command that produced it.
+
+**What Plan 3 deliberately did NOT do** — see "Honest residue" in
+`docs/superpowers/specs/2026-09-11-guideline-to-tool/reports/plan-3-LEDGER.md`: nothing applied,
+no browser pass, no cross-standard inheritance (Phase 6), no verified equation replaced, and the
+Plan-2c interface/engine backlog (17 items) still open.

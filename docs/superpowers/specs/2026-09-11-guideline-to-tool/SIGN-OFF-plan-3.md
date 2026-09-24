@@ -7,6 +7,81 @@ status: awaiting-signature
 
 # Sign-off sheet — Plan 3 (encode the 29 standards)
 
+## Index — 1 279 blocks, by standard and class (Task 30 close-out, 2026-09-24)
+
+Built and verified in-session:
+
+```
+$ node scripts/verification/_t30-signoff-index.mjs        # parses this sheet's `### <slug>-<CLASS>-<n>` headings
+#SHEET_TOTAL                          1279                #   and every `-- <slug>-<CLASS>-<n>` block heading
+#STAGED_TOTAL                         1045                #   in the 29 scripts/verification/<slug>-STAGED-plan3-rulings.sql
+#UNKNOWN_CLASS_LETTERS                []
+#STAGED_NOT_ON_SHEET                  (none)
+```
+
+**Sheet ↔ STAGED reconciliation: clean.** Every one of the 1 045 STAGED blocks has a block on this
+sheet with the same id. The reverse is not expected to match — 234 sheet blocks are rulings with no
+SQL to stage (judgments, unreadable cells, observations, cross-standard notes). Two sheet blocks
+whose prose mentions "STAGED file" have no block of their own id, and both are correct as written:
+`a262e-E-3` (its SQL lives under the combined heading `-- a262e-C-3 / a262e-E-3` in the a262e STAGED
+file) and `m187-I-3` (a capture-vs-brief record whose "Proposed SQL / config" is *none*).
+
+**Class letters** (the sheet's own legend, §"IDs" above): **G** gate-guard · **R** range-SR-2 ·
+**D** deactivation · **S** structural / widget-switch · **C** consumer-edit · **M**
+multi-select-driver · **J** judgment · **U** unreadable / unsourced cell · **P** override-policy
+choice · **E** equation-replacement / re-bind · **F** text-only formula (described, not printed) ·
+**X** cross-standard (Phase 6) · **I** interface-gap · **O** override-policy · **T** data_type.
+(Later tasks used **J** for judgments and **P**/**O** interchangeably for policy choices; the
+counts below are literal, by the letter actually used in the id.)
+
+| # | standard (slug) | G | R | D | S | C | M | J | U | P | E | F | X | I | O | T | **total** | STAGED blocks | STAGED file |
+|---|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|---|
+| 1 | DWA-A-138-1 (`a138`) | 4 | 2 | 2 | 1 | 7 | 0 | 1 | 5 | 2 | 4 | 1 | 4 | 1 | 1 | 0 | **35** | 20 | `scripts/verification/a138-STAGED-plan3-rulings.sql` |
+| 2 | DIN-1989-1 (`din1989_1`) | 4 | 2 | 0 | 0 | 3 | 0 | 4 | 6 | 0 | 0 | 0 | 1 | 2 | 0 | 0 | **22** | 11 | `scripts/verification/din1989_1-STAGED-plan3-rulings.sql` |
+| 3 | DWA-A-262E (`a262e`) | 12 | 3 | 0 | 0 | 7 | 0 | 4 | 3 | 2 | 3 | 8 | 1 | 1 | 0 | 0 | **44** | 27 | `scripts/verification/a262e-STAGED-plan3-rulings.sql` |
+| 4 | DWA-M-277E (`m277e`) | 6 | 5 | 3 | 1 | 4 | 0 | 4 | 1 | 1 | 0 | 2 | 2 | 1 | 0 | 0 | **30** | 30 | `scripts/verification/m277e-STAGED-plan3-rulings.sql` |
+| 5 | DWA-M-1200-1 (`m1200_1`) | 9 | 1 | 2 | 0 | 3 | 0 | 3 | 4 | 1 | 3 | 1 | 1 | 0 | 0 | 0 | **28** | 16 | `scripts/verification/m1200_1-STAGED-plan3-rulings.sql` |
+| 6 | DWA-M-1200-3 (`m1200_3`) | 6 | 2 | 0 | 0 | 7 | 0 | 5 | 3 | 0 | 1 | 2 | 1 | 0 | 0 | 0 | **27** | 27 | `scripts/verification/m1200_3-STAGED-plan3-rulings.sql` |
+| 7 | FLL-GAR-2023 (`fll_gar`) | 13 | 2 | 6 | 0 | 4 | 0 | 7 | 4 | 0 | 2 | 2 | 5 | 1 | 0 | 0 | **46** | 25 | `scripts/verification/fll_gar-STAGED-plan3-rulings.sql` |
+| 8 | FLL-Naturteich (`fll_naturteich`) | 7 | 5 | 2 | 1 | 3 | 0 | 6 | 0 | 0 | 1 | 2 | 3 | 0 | 2 | 0 | **32** | 19 | `scripts/verification/fll_naturteich-STAGED-plan3-rulings.sql` |
+| 9 | DWA-M-820-3 (`m820_3`) | 5 | 0 | 2 | 0 | 5 | 1 | 3 | 2 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | **22** | 22 | `scripts/verification/m820_3-STAGED-plan3-rulings.sql` |
+| 10 | DIN-18130-1 (`din18130_1`) | 11 | 3 | 3 | 0 | 2 | 0 | 3 | 2 | 0 | 3 | 3 | 1 | 3 | 2 | 0 | **36** | 36 | `scripts/verification/din18130_1-STAGED-plan3-rulings.sql` |
+| 11 | DWA-M-205 (`m205`) | 14 | 5 | 5 | 0 | 5 | 0 | 5 | 3 | 0 | 4 | 3 | 2 | 2 | 2 | 0 | **50** | 31 | `scripts/verification/m205-STAGED-plan3-rulings.sql` |
+| 12 | DWA-M-187 (`m187`) | 12 | 1 | 8 | 0 | 5 | 0 | 6 | 2 | 0 | 0 | 5 | 3 | 3 | 3 | 0 | **48** | 30 | `scripts/verification/m187-STAGED-plan3-rulings.sql` |
+| 13 | DIN-276 (`din276`) | 3 | 0 | 10 | 1 | 5 | 2 | 7 | 2 | 0 | 2 | 3 | 3 | 4 | 1 | 2 | **45** | 27 | `scripts/verification/din276-STAGED-plan3-rulings.sql` |
+| 14 | DWA-A-178 (`a178`) | 7 | 4 | 11 | 0 | 5 | 0 | 6 | 5 | 0 | 2 | 4 | 5 | 3 | 5 | 0 | **57** | 23 | `scripts/verification/a178-STAGED-plan3-rulings.sql` |
+| 15 | DIN-EN-16941-2 (`din16941_2`) | 9 | 2 | 8 | 1 | 0 | 0 | 7 | 0 | 0 | 0 | 0 | 2 | 1 | 2 | 0 | **32** | 20 | `scripts/verification/din16941_2-STAGED-plan3-rulings.sql` |
+| 16 | DWA-M-1200-2 (`m1200_2`) | 7 | 1 | 9 | 0 | 4 | 0 | 7 | 6 | 0 | 0 | 2 | 4 | 2 | 2 | 0 | **44** | 21 | `scripts/verification/m1200_2-STAGED-plan3-rulings.sql` |
+| 17 | DIN-1989-2 (`din1989_2`) | 7 | 4 | 12 | 0 | 2 | 0 | 2 | 1 | 0 | 1 | 0 | 1 | 2 | 0 | 0 | **32** | 27 | `scripts/verification/din1989_2-STAGED-plan3-rulings.sql` |
+| 18 | DWA-M-820-1 (`m820_1`) | 11 | 0 | 25 | 0 | 4 | 0 | 7 | 0 | 0 | 2 | 1 | 1 | 2 | 1 | 0 | **54** | 44 | `scripts/verification/m820_1-STAGED-plan3-rulings.sql` |
+| 19 | DWA-M-820-2 (`m820_2`) | 15 | 0 | 5 | 0 | 4 | 1 | 3 | 0 | 0 | 1 | 1 | 1 | 1 | 1 | 0 | **33** | 27 | `scripts/verification/m820_2-STAGED-plan3-rulings.sql` |
+| 20 | ISO-5667-10 (`iso5667_10`) | 9 | 0 | 21 | 0 | 3 | 0 | 5 | 1 | 0 | 1 | 3 | 2 | 1 | 5 | 0 | **51** | 51 | `scripts/verification/iso5667_10-STAGED-plan3-rulings.sql` |
+| 21 | ISO-59020 (`iso59020`) | 6 | 1 | 25 | 0 | 1 | 1 | 9 | 1 | 0 | 0 | 2 | 3 | 1 | 1 | 0 | **51** | 51 | `scripts/verification/iso59020-STAGED-plan3-rulings.sql` |
+| 22 | ISO-46001 (`iso46001`) | 6 | 1 | 40 | 1 | 2 | 0 | 4 | 23 | 0 | 0 | 2 | 2 | 1 | 1 | 0 | **83** | 83 | `scripts/verification/iso46001-STAGED-plan3-rulings.sql` |
+| 23 | ISO-5667-6 (`iso5667_6`) | 10 | 0 | 25 | 0 | 1 | 0 | 4 | 2 | 0 | 0 | 2 | 1 | 1 | 1 | 0 | **47** | 47 | `scripts/verification/iso5667_6-STAGED-plan3-rulings.sql` |
+| 24 | VSME (`vsme`) | 4 | 0 | 33 | 0 | 9 | 0 | 1 | 1 | 0 | 0 | 2 | 3 | 1 | 0 | 0 | **54** | 54 | `scripts/verification/vsme-STAGED-plan3-rulings.sql` |
+| 25 | DIN-14021 (`din14021`) | 28 | 0 | 36 | 0 | 4 | 0 | 4 | 1 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | **77** | 77 | `scripts/verification/din14021-STAGED-plan3-rulings.sql` |
+| 26 | ISO-14046 (`iso14046`) | 12 | 1 | 26 | 0 | 3 | 0 | 5 | 1 | 0 | 1 | 2 | 2 | 2 | 1 | 0 | **56** | 56 | `scripts/verification/iso14046-STAGED-plan3-rulings.sql` |
+| 27 | ATV-A-704E (`atv_a704e`) | 8 | 1 | 42 | 0 | 4 | 0 | 3 | 6 | 0 | 0 | 1 | 3 | 2 | 2 | 0 | **72** | 72 | `scripts/verification/atv_a704e-STAGED-plan3-rulings.sql` |
+| 28 | ISO-5667-1 (`iso5667_1`) | 3 | 2 | 23 | 0 | 2 | 0 | 4 | 2 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | **39** | 39 | `scripts/verification/iso5667_1-STAGED-plan3-rulings.sql` |
+| 29 | ISO-59004 (`iso59004`) | 4 | 0 | 11 | 1 | 0 | 0 | 6 | 4 | 1 | 0 | 1 | 1 | 3 | 0 | 0 | **32** | 32 | `scripts/verification/iso59004-STAGED-plan3-rulings.sql` |
+| | **TOTAL (29)** | **252** | **48** | **395** | **7** | **108** | **5** | **135** | **91** | **7** | **32** | **58** | **61** | **43** | **35** | **2** | **1279** | **1045** | 29 files |
+
+**How to read the shape of this table.** **D** (395) is the largest class by far and is almost
+entirely the *amendment-K pairs*: a register column and the prod scalar it duplicates, both kept,
+with a guarded deactivation proposed for the scalar — nothing is retired without a signature. **G**
+(252) is the second largest and is where the enforcement decisions live; **U** (91) is the honest
+count of printed matter this wave refused to guess. The four no-transcript / txt-only standards
+(VSME 54, ATV-A-704E 72, ISO-46001 83, DIN-14021 77) carry the heaviest sheets precisely *because*
+they could seed the least.
+
+**Nothing in this index is applied.** See "Apply order" in
+`docs/superpowers/guideline-to-tool-playbook.md` and the honest residue in
+`docs/superpowers/specs/2026-09-11-guideline-to-tool/reports/plan-3-LEDGER.md`.
+
+---
+
+
 - **Plan:** `docs/superpowers/plans/2026-09-16-guideline-to-tool-plan-3-encode-29-standards.md` · **Ledger:** `.superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/progress.md` · **Per-standard reports:** `docs/superpowers/specs/2026-09-11-guideline-to-tool/reports/plan-3-<slug>.md`.
 - **Nothing on this sheet is applied to prod.** Every Plan-3 migration is WRITTEN, NOT APPLIED (generated by `scripts/regulation-tables/emit-seed-sql.ts`, `emit-field-configs-sql.ts`, `emit-equations-sql.ts`; rollbacks alongside). Structural rulings (gate guards, `data_type`, equation replacements, deactivations, consumer edits) live as commented SQL in `scripts/verification/<slug>-STAGED-plan3-rulings.sql` with the same ☐ RATIFIED markers and are referenced from their block below.
 - **Judgment items never block a task** (Global Constraint 8): the executor makes the fail-safe choice (visible, warn, `imported_unverified`, no gate change), records it here with verbatim evidence, and continues. The owner signs asynchronously.
@@ -9735,3 +9810,165 @@ Report: `reports/plan-3-atv_a704e.md` · STAGED SQL: `scripts/verification/atv_a
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 <!-- ===== end Plan 3 Task 29 · ISO-59004 ===== -->
+
+<!-- ===== Plan 3 Task 30 · close-out — appended 2026-09-24 ===== -->
+
+## Task 30 — close-out (gate-guard debt, Plan-2c backlog, owner browser pass)
+
+Task 30 encodes nothing. It writes three blocks that the earlier tasks owed (the **gate-guard
+debt** the controller ledger records), lists the interface/engine backlog for **Plan 2c**, and
+queues the owner's browser pass. Everything below is WRITTEN, NOT APPLIED.
+
+The three blocks belong to Task 2's and Task 3's standards, but the sheet's rule is that a task
+never edits another task's section — so they live here and their SQL lives in the owning
+standard's STAGED file, as usual.
+
+### din1989_1-G-4 · DIN-1989-1 · DIN-1989-1-05 · `versickerung_bemessung_a138` / CR-11
+- Class: gate-guard (gate-guard debt; Task 2 predates the Task-12c gate-aware guard)
+- Chosen now (fail-safe): **nothing changed**. `20260917100210_field_configs_din1989_1.sql` was
+  emitted in `--gate-guard=warn` mode and carries the rule; CR-11 is untouched. Re-running the
+  emitter WITHOUT the flag in this session refuses it (exit 1):
+  `pnpm -s tsx scripts/regulation-tables/emit-field-configs-sql.ts din1989_1 20260917100210` →
+  `Error: DIN-1989-1-05 versickerung_bemessung_a138: visible_when hides versickerung_bemessung_a138 read by gate DIN-1989-1-CR-11 (block: "ueberlauf_versickerung != true OR versickerung_bemessung_a138 == true") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`
+- Evidence (verbatim, transcript line): "Gestatten die vorhandenen Bodenverhältnisse eine Regenwasserversickerung, sollte das aus dem Speicher überlaufende Wasser versickert werden (Schacht, Rigole, Mulde oder Mulden-Rigole). Bei Metalldächern sind die landesspezifischen Regelungen zur Versickerung zu beachten." (L653); "Baugrundsätze und Bemessung von Regenwasserversickerungsanlagen sind im ATV-Arbeitsblatt A 138 festgelegt. …" (L659). Prod capture READ-ONLY 2026-09-24 via `node scripts/verification/prod-query.mjs --sql "select … from compliance_requirements …"`: id `91691756-5397-438d-acd0-002b809f1e3c`, severity `block`, condition `ueberlauf_versickerung != true OR versickerung_bemessung_a138 == true`, `md5 = b0e62783483a98bb7e07d8f5052c519e`.
+- Why it is a ruling: the disjunction already encodes the same conditionality. Hiding its
+  right-hand operand nulls it, `null == true` is `pending`, and the gate degrades from "block
+  unless attested" to "never blocks" — an ENFORCEMENT change.
+- Proposed SQL / config: block `din1989_1-G-4` in
+  `scripts/verification/din1989_1-STAGED-plan3-rulings.sql` — rewrite CR-11 as
+  `IF ueberlauf_versickerung == true THEN versickerung_bemessung_a138 == true` (archive pattern,
+  md5-guarded, complete 18-column restore). Alternatives (b) drop the rule, (c) ship as is, are
+  stated in the block.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-11 · DWA-A-262E · A262-05 · `m_multiplier` / REQ-05
+- Class: gate-guard (gate-guard debt; Task 3 predates the Task-12c gate-aware guard)
+- Chosen now (fail-safe): nothing changed; `20260917100310` was emitted in `--gate-guard=warn`
+  mode. Re-running without the flag in this session refuses it (exit 1):
+  `Error: A262-05 m_multiplier: visible_when hides m_multiplier read by gate REQ-05 (block: "m_multiplier >= 1") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`
+- Evidence (verbatim, transcript line): "Maximum wastewater flow from separate sewer networks:" (L579). Prod capture READ-ONLY 2026-09-24: id `4d3f2c87-ca57-412a-bdad-eba11f16ae72`, `block`, `m_multiplier >= 1`, `md5 = 44b9a62e2288a9128ea1bb7964bb1f36`.
+- Proposed SQL / config: block `a262e-G-11` — `IF sewer_system_type == separate_sewer THEN m_multiplier >= 1`. Prerequisite `a262e-C-2` (the driver reaches A262-05 by inheritance).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-12 · DWA-A-262E · A262-11 / -13 / -16 / -20 / -22 / -26 · the eight section-minimum gates
+- Class: gate-guard (gate-guard debt — eight refused SECTION rules, **ten** gates)
+- Chosen now (fail-safe): nothing changed. The nine warn-mode refusals reproduced in this session
+  are pasted verbatim into the STAGED block; the gates are REQ-40 / REQ-41 (A262-11), REQ-60 /
+  REQ-61 (A262-13), REQ-90 (A262-16), REQ-110 / REQ-111 (A262-20), REQ-130 / REQ-131 (A262-22),
+  REQ-02c (A262-26) — all `block`.
+- Evidence (verbatim, transcript line): "I small wastewater treatment systems treating domestic wastewater with an inflow of up to 50 P ;" (L296); "Table 17 summarizes the main design parameters for planted and unplanted filters used in small wastewater treatment systems." (L1187); "Table 18 summarizes the main design parameters for planted and unplanted filters used in municipal wastewater treatment plants." (L1189); "The specific area of a filter for greywater treatment can be dimensioned with $50 \%$ of the specific surface required for a conventional filter treating domestic wastewater. …" (L1119). Prod capture READ-ONLY 2026-09-24: all ten ids + conditions + md5 are listed in the STAGED block.
+- Why it is a ruling: each gate is the Tab. 17 / Tab. 18 minimum for its OWN filter type and today
+  fires on every project regardless of type — which is the defect the section rules fix. But once
+  the section is hidden the symbol nulls and the gate degrades to `pending`, so the minimum stops
+  being enforced for the type it belongs to as well. Guarding each gate on the SAME driver as the
+  section rule restores both properties; whether the right verdict for the other types is
+  `not_applicable` or `pass` is the owner's enforcement call.
+- Proposed SQL / config: block `a262e-G-12` in `scripts/verification/a262e-STAGED-plan3-rulings.sql`
+  — ten md5-guarded rewrites in one transaction, one shared archive table with `a262e-G-11`,
+  complete 18-column restore, `DROP TABLE` in the rollback. Prerequisite `a262e-C-2`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+---
+
+## Plan 2c backlog — the interface and engine gaps Plan 3 hit (no signature needed; a work list)
+
+Seventeen items. Each is a real limitation demonstrated by a named standard, not a wish. They are
+**not** blockers for applying the 85 migrations — every one of them has a fail-safe workaround in
+the encoding as shipped — but each one costs an engineer something today. Ordered roughly by how
+much: server-side correctness first, then engine expressiveness, then emitter hygiene.
+
+**Server-side / correctness**
+
+1. **`computeVisibility` + `materializeDerivedOutputs` ignore inherited fields.**
+   `saveWorksheet` (`src/lib/actions/worksheet.ts` ~L712–724) runs both with `templateFields`
+   only — it never calls `loadInheritedFields`. So a rule whose driver lives on another worksheet
+   never resolves server-side: the field hides on the FORM but not on save, and register-fed
+   outputs are materialised for rows that should be hidden. Found by DIN-1989-2 (`din1989_2-I-2`,
+   broadened from the Task-17 review); its consequence is recorded again on DWA-M-820-1
+   (`m820_1-I-2`: D11 / D14 / D15 are `manual_required` on save until this is fixed). Fail-safe
+   today only because no gate reads the affected outputs.
+2. **Booleans do not reach scalar equations.** `engine-input.ts` maps a boolean field to
+   *missing* for a scalar formula input, so `if(flag, a, b)` at worksheet level is unusable.
+   Found by DWA-M-820-1 (`m820_1-I-1`); worked around everywhere by creating an `enum`
+   yes/no driver instead of using the boolean (FLL-GAR `fll_gar-I-1`).
+3. **Inputs inside an untaken `if()` branch are still required.** The engine demands every symbol
+   named in a formula, so a conditional whose other branch names a field the project will never
+   fill reports `manual_required` in the nominal case. Found by DWA-M-187 (Task 12 fix round:
+   `M187-22-D7 carbonatschicht_nachweis` exists only because the folded conditional could not be
+   used); confirmed in `formula.ts` by the Task-12 re-review.
+4. **An overridden register row is never refilled.** Once a `lookup_value` cell carries an
+   override, a later key change does not re-fetch the table value. Found by DWA-M-1200-2
+   (`m1200_2-I-2`).
+5. **A `lookup()` miss inside a register `derived` column blanks the cell silently and poisons
+   every aggregate over it** (`register-rows.ts` — a recoverable `ExprError` leaves the cell
+   `null` with no diagnostic, so `sum_rows`/`mean_rows` over it goes `manual_required`). Found by
+   ISO-5667-1 (`iso5667_1-F-1`), confirmed by its reviewer.
+6. **`LookupFillField` renders NO input when the table policy is `locked` and the keys are
+   missing** (`lookup-fill-field.tsx`: `canOverride` requires `policy !== 'locked'`, and the fill
+   effect returns early unless the row resolves). A required field can then be neither filled nor
+   typed. Found by ISO-5667-1 (`iso5667_1-E-1`) — the reason the whole corpus uses twins instead
+   of re-binds on required fields.
+7. **Register rows have no uniqueness constraint.** A duplicate row passes every count-based
+   gate. Found by ISO-59020 (`iso59020-F-2`); its G-4 had to be rewritten as six per-token
+   clauses to close the hole. Wanted: unique-key columns declared in `ui_config`.
+8. **Checklists render enum VALUES, not labels.** Found by DWA-M-820-2 (`m820_2-E-1`); every
+   Spanish/English option list is affected (ISO-5667-10 names it too).
+
+**Engine expressiveness**
+
+9. **`contains()` over a `json` `select_many` carrier has no engine path in scalar equations** —
+   no production `evaluateFormula` caller passes `carriers`. Found by DIN-14021 (`din14021-F-1`),
+   independently re-confirmed by ISO-46001 (`iso46001-F-2`) and ISO-14046; three standards had to
+   withhold equations because of it.
+10. **The expression parser rejects an AND-chain of `contains()` outright** ("Ausdruck erwartet").
+    Found by ISO-59004 (`iso59004-F-1` / `I-2`), re-probed by its reviewer.
+11. **The GATE condition grammar has no `contains` operator at all** — `parseCondition` has no
+    call node. Found by ISO-59004 (`iso59004-I-3`): **23 of 24** empty-condition compliance rows
+    on that standard cannot be given a condition without it.
+12. **The equations emitter's legacy CALL regex reads `AND (` as a function call**, so a
+    parenthesised compound condition is refused inside a formula. Found by ISO-59020 (fix round
+    1 — `-04-D5` had to ship unparenthesised).
+13. **`fmt()` has no epsilon guard** — float noise around 1e-13 now renders in scientific form
+    instead of "0" (a side effect of the Task-10b fix; no pinned register is affected today).
+14. **No PDF-side quoted-string test.** Parked from the Task-1b review; the PDF path is the one
+    place the Task-13b quoted-literal rule is not pinned.
+
+**Emitter hygiene**
+
+15. **The shared emitter does not guard emitted `visible_when` UPDATEs with
+    `AND f.visible_when IS NULL`** — the STAGED blocks all do, the generated migrations do not, so
+    re-applying one would overwrite a value someone set in between. Found by ISO-14046
+    (`iso14046-I-2`). Fixing it rewrites **every** standard's field-config migration, so it belongs
+    in a corpus-wide re-emit, never in one standard's fix round.
+16. **The emitter accepts reserved register column keys** (`id`, …), which collide with
+    `register-rows.ts`'s own row identity (`:168` / `:184`). Found by ISO-5667-10 (the `id` column
+    trap; the column was renamed `kennung` and the same rename was applied pre-emptively in Tasks
+    23 and 28). Wanted: a refusal, not a convention.
+17. **No per-row `alternatives` on a `RegulationRow`** — a `kann` table that prints two permitted
+    values per row cannot offer the choice per row. Found by DWA-A-178 (`a178-O-4`).
+
+**Also carried, from the STAGED-file audit (Task 30):** every archive-rollback re-INSERT column
+list must match the LIVE schema — `equations` 22 columns, `compliance_requirements` 18,
+`fields` 31. Task 26 shipped a 13-of-22 list, caught in review and fixed in its fix round; Tasks
+27–29 were checked at their reviews and are complete. A corpus-wide re-check of every R/G/C block
+against the live schema is the remaining item.
+
+---
+
+## Owner browser pass — the "5-minute look" queue
+
+**Nothing on this branch is deployed and nothing is applied, so there is no browser pass to run
+yet.** This list exists so the pass has a script the moment the owner stamps a standard's trio.
+Per standard, after `…00` / `…10` / `…20` are applied and the build is deployed:
+
+| standard | what to look at (5 minutes) |
+|---|---|
+| DWA-A-138-1 | A138-06: the tier `lookup_fill` badge fills from TAB5/6/7; A138-12 sections collapse by `versickerungsart` |
+| DWA-A-262E | A262-10 Filterstufen register; A262-11/-13 collapse for the non-selected filter type (and note whether the minima still block — `a262e-G-12`) |
+| DWA-M-820-3 | any QE worksheet: the 193-item catalogue renders as a checklist register with its count/share footer |
+| DIN-276 | DIN-276-09…-16: the KG registers and the stage × KG matrix; the 326-row KG catalogue in the picker |
+| DWA-M-1200-2 | -05 validation register: the per-organism SD / median / percentile row statistics |
+| ISO-5667-1 | -07: the `K_table` twin fills from `S16_4_K` by `confidence_level` (prod's `K` untouched) |
+| every standard | one worksheet where a `visible_when` hides a section: confirm the hidden fields do NOT block approval and the gate reads `not_applicable`, not `pending` |
+
+<!-- ===== end Plan 3 Task 30 ===== -->

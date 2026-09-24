@@ -173,3 +173,85 @@
 -- UPDATE worksheet_sections ws SET visible_when = 'bemessungsverfahren != ''verkuerzt''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
 --  WHERE ws.worksheet_template_id = w.id AND w.code = 'DIN-1989-1-04' AND ws.code = 'B' AND s.code = 'DIN-1989-1' AND ws.visible_when IS NULL;
 -- Rollback: SET visible_when = NULL.
+
+-- =====================================================================================================================
+-- din1989_1-G-4 · DIN-1989-1-05 · CR-11 — the gate reads `versickerung_bemessung_a138`, which the emitted rule hides
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- (Plan 3 Task 30 close-out: the gate-guard debt the ledger carries. Written here for the first time — Task 2 predates
+--  the gate-aware guard of Task 12c, which is why the rule shipped in `--gate-guard=warn` mode and no G-block existed.)
+--
+-- What the guard refuses, re-executed IN THIS SESSION:
+--   $ pnpm -s tsx scripts/regulation-tables/emit-field-configs-sql.ts din1989_1 20260917100210
+--   Error: DIN-1989-1-05 versickerung_bemessung_a138: visible_when hides versickerung_bemessung_a138 read by gate
+--   DIN-1989-1-CR-11 (block: "ueberlauf_versickerung != true OR versickerung_bemessung_a138 == true")
+--   — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block
+--   (exit 1. With `--gate-guard=warn` the same run prints the line as GATE-REFUSAL and writes the committed migration —
+--    which is exactly how `20260917100210_field_configs_din1989_1.sql` was produced; the pin holds the count at 1.)
+--
+-- The emitted rule (committed, `src/lib/eval/field-configs/din1989_1.ts:251`):
+--   fields.visible_when = 'ueberlauf_versickerung == true'  ON  DIN-1989-1-05 `versickerung_bemessung_a138`
+-- Evidence for the rule itself (lifted by Task 2 from the transcript, unchanged here):
+--   L653 "Gestatten die vorhandenen Bodenverhältnisse eine Regenwasserversickerung, sollte das aus dem Speicher
+--   überlaufende Wasser versickert werden (Schacht, Rigole, Mulde oder Mulden-Rigole). Bei Metalldächern sind die
+--   landesspezifischen Regelungen zur Versickerung zu beachten."
+--   L659 "Baugrundsätze und Bemessung von Regenwasserversickerungsanlagen sind im ATV-Arbeitsblatt A 138 festgelegt.
+--   Bei der Bemessung von Versickerungsanlagen kann ggf. die Rückhaltewirkung von Regenwasserspeichern berücksichtigt
+--   werden."
+--
+-- Prod capture, READ-ONLY IN THIS SESSION (2026-09-24):
+--   $ node scripts/verification/prod-query.mjs --sql "select w.code as ws, c.code as cr, c.id::text as id, c.severity,
+--       c.condition, md5(c.condition) as cond_md5 from compliance_requirements c
+--       join worksheet_templates w on w.id=c.worksheet_template_id join standards s on s.id=w.standard_id
+--       where s.code='DIN-1989-1' and c.code='DIN-1989-1-CR-11'"
+--   → 1 row: DIN-1989-1-05 · DIN-1989-1-CR-11 · id 91691756-5397-438d-acd0-002b809f1e3c · block
+--            condition 'ueberlauf_versickerung != true OR versickerung_bemessung_a138 == true'
+--            md5 b0e62783483a98bb7e07d8f5052c519e
+--
+-- Why this is a ruling, not a fix: the disjunction ALREADY encodes the same conditionality the rule encodes
+-- ("no infiltration overflow ⇒ pass"). Hiding the right-hand operand nulls it, and `null == true` is `pending`, so the
+-- whole OR degrades from "block unless attested" to "never blocks" — an ENFORCEMENT change, which is an owner stop.
+-- The IF-guard form below is behaviour-identical today for every state the engine can reach, and is what the guard's
+-- `guardExempts()` recognises, so after ratification the rule emits in DEFAULT (refuse) mode and the warn-mode pin
+-- in `src/lib/eval/__tests__/field-configs-din1989-1.test.ts` can be moved back to the strict assertion [CODE].
+--
+-- Options (the owner picks ONE):
+--   (a) rewrite CR-11 as an IF-guard on the same driver (recommended — keeps the block, survives the hide);
+--   (b) leave CR-11 as captured and DROP the `versickerung_bemessung_a138` rule from the field-config module
+--       (the attestation then stays visible on every project — today's fail-safe rendering, no migration);
+--   (c) leave both as they are (the state this branch ships): the rule is emitted, CR-11 stops enforcing once the
+--       migration is applied. NOT recommended — it is the silent case the guard exists to catch.
+--
+-- (a) — full block, archive pattern, md5-guarded, complete 18-column list (live schema read in-session:
+--       id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description,
+--       suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by,
+--       requires_attestation).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din1989_1 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_din1989_1
+-- SELECT * FROM compliance_requirements
+--  WHERE id = '91691756-5397-438d-acd0-002b809f1e3c'
+--    AND md5(condition) = 'b0e62783483a98bb7e07d8f5052c519e';
+-- UPDATE compliance_requirements
+--    SET condition = 'IF ueberlauf_versickerung == true THEN versickerung_bemessung_a138 == true'
+--  WHERE id = '91691756-5397-438d-acd0-002b809f1e3c'
+--    AND md5(condition) = 'b0e62783483a98bb7e07d8f5052c519e';
+-- COMMIT;
+-- Rollback (restores the captured row byte-exactly from the archive, explicit column list, then drops the archive):
+-- BEGIN;
+-- UPDATE compliance_requirements c
+--    SET worksheet_template_id = a.worksheet_template_id, code = a.code, title_de = a.title_de, title_en = a.title_en,
+--        condition = a.condition, clause_reference = a.clause_reference, severity = a.severity,
+--        description = a.description, suggestion = a.suggestion, audit_status = a.audit_status,
+--        source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote,
+--        audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by,
+--        requires_attestation = a.requires_attestation
+--   FROM compliance_requirements_archive_din1989_1 a
+--  WHERE c.id = a.id AND a.id = '91691756-5397-438d-acd0-002b809f1e3c';
+-- DROP TABLE compliance_requirements_archive_din1989_1;
+-- COMMIT;
+-- (The archive table is dropped by the rollback above, or on the owner's sign-off that the rewrite is final.)
+--
+-- Parse proof (re-executable): every proposed condition above parses through the real gate grammar.
+--   $ pnpm -s tsx scripts/verification/_t30-probe.ts
+--   PARSE-OK  IF ueberlauf_versickerung == true THEN versickerung_bemessung_a138 == true
+--   … 12 of 12 PARSE-OK, #NOT_OK 0 (the same probe covers the ten a262e rewrites).

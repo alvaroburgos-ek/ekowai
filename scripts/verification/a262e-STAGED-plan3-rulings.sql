@@ -431,3 +431,182 @@
 -- COMMIT;
 -- Rollback: UPDATE fields … SET unit = 'l/s; m3/h' … WHERE f.symbol = 'Q_Tr_h_max' AND f.unit = 'l/s'.
 -- Then the equation block above (A262-07-D1, factor 1000/3600) applies unchanged.
+
+-- =====================================================================================================================
+-- a262e-G-11 · A262-05 · REQ-05 — the gate reads `m_multiplier`, which the emitted field rule hides
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- (Plan 3 Task 30 close-out: the gate-guard debt the ledger carries. Written here for the first time — Task 3 predates
+--  the gate-aware guard of Task 12c, which is why this standard's field configs are emitted in `--gate-guard=warn`
+--  mode; the freshness pin holds the refusal count at 9.)
+--
+-- What the guard refuses, re-executed IN THIS SESSION:
+--   $ pnpm -s tsx scripts/regulation-tables/emit-field-configs-sql.ts a262e 20260917100310
+--   Error: A262-05 m_multiplier: visible_when hides m_multiplier read by gate REQ-05 (block: "m_multiplier >= 1")
+--   — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block            (exit 1)
+--
+-- The emitted rule (committed, `src/lib/eval/field-configs/a262e.ts:108`):
+--   fields.visible_when = sewer_system_type == 'separate_sewer'   ON  A262-05 `m_multiplier`
+-- Evidence for the rule itself (lifted by Task 3, unchanged here): L579 "Maximum wastewater flow from separate sewer
+-- networks:" — the §4.1.2 heading under which Gl. 5's lump-sum multiplier is printed.
+--
+-- Prod capture, READ-ONLY IN THIS SESSION (2026-09-24):
+--   $ node scripts/verification/prod-query.mjs --sql "select w.code as ws, c.code as cr, c.id::text as id, c.severity,
+--       c.condition, md5(c.condition) as cond_md5 from compliance_requirements c
+--       join worksheet_templates w on w.id=c.worksheet_template_id join standards s on s.id=w.standard_id
+--       where s.code='DWA-A-262E' and c.code = 'REQ-05'"
+--   → A262-05 · REQ-05 · id 4d3f2c87-ca57-412a-bdad-eba11f16ae72 · block · 'm_multiplier >= 1'
+--     md5 44b9a62e2288a9128ea1bb7964bb1f36
+--
+-- Why this is a ruling: on a COMBINED-sewer project the rule hides `m_multiplier`, the value nulls, and
+-- `null >= 1` is `pending` — REQ-05 stops blocking. That is an enforcement change and an owner stop. The IF-guard
+-- below is what the guard's `guardExempts()` recognises, and it is behaviour-identical for separate-sewer projects.
+--
+-- Options: (a) guard REQ-05 on the same driver (recommended); (b) drop the `m_multiplier` rule from the module
+-- (the field stays visible on combined-sewer projects — today's fail-safe rendering); (c) ship as is (REQ-05 silently
+-- stops enforcing once 20260917100310 is applied — NOT recommended).
+--
+-- (a) archive pattern, md5-guarded, complete 18-column list (live schema read in-session).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_a262e AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_a262e
+-- SELECT * FROM compliance_requirements
+--  WHERE id = '4d3f2c87-ca57-412a-bdad-eba11f16ae72' AND md5(condition) = '44b9a62e2288a9128ea1bb7964bb1f36';
+-- UPDATE compliance_requirements
+--    SET condition = 'IF sewer_system_type == separate_sewer THEN m_multiplier >= 1'
+--  WHERE id = '4d3f2c87-ca57-412a-bdad-eba11f16ae72' AND md5(condition) = '44b9a62e2288a9128ea1bb7964bb1f36';
+-- COMMIT;
+-- (The bare identifier `separate_sewer` is the corpus form for an enum token in a GATE condition — Task 13b: a bare
+--  identifier resolves as a symbol only when a field of that name exists on the worksheet, and none does. Note the
+--  driver `sewer_system_type` lives on A262-02 and reaches A262-05 by inheritance — a262e-C-2 is the consumer edit;
+--  until it is ratified the guard evaluates `pending` and the gate does not block, which is fail-safe but inert.)
+-- Rollback: see the shared rollback block under a262e-G-12 (one archive table serves both blocks).
+
+-- =====================================================================================================================
+-- a262e-G-12 · A262-11 / -13 / -16 / -20 / -22 / -26 · the EIGHT section-minimum gates the section rules hide
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- (Plan 3 Task 30 close-out: the second half of the gate-guard debt. Eight refused SECTION rules, ten gates.)
+--
+-- What the guard refuses, re-executed IN THIS SESSION (`--gate-guard=warn`, the eight section lines verbatim):
+--   section A262-11 C: visible_when on a section (or a descendant of it) hides A_Fo_spez_VFS_KA read by gate REQ-40 (block: "A_Fo_spez_VFS_KA >= 4")
+--   section A262-11 D: … hides A_Fo_min_VFS_KA read by gate REQ-41 (block: "A_Fo_min_VFS_KA >= 16")
+--   section A262-13 C: … hides A_Fo_spez_VFG_KA read by gate REQ-60 (block: "A_Fo_spez_VFG_KA >= 1")
+--   section A262-13 D: … hides A_Fo_min_VFG_KA read by gate REQ-61 (block: "A_Fo_min_VFG_KA >= 4")
+--   section A262-16 C: … hides A_F_spez_HFK_KA read by gate REQ-90 (block: "A_F_spez_HFK_KA >= 1")
+--   section A262-20 C: … hides A_Fo1_spez_KomKA read by gate REQ-110 (block: "A_Fo1_spez_KomKA >= 1");
+--                      … hides A_Fo2_spez_KomKA read by gate REQ-111 (block: "A_Fo2_spez_KomKA >= 1")
+--   section A262-22 C: … hides A_Fu_spez_VFK_KomKA read by gate REQ-130 (block: "A_Fu_spez_VFK_KomKA >= 1");
+--                      … hides f_V_CSB_VFK_KomKA read by gate REQ-131 (block: "f_V_CSB_VFK_KomKA <= 100")
+--   section A262-26 D: … hides Q_GW_taeglich read by gate REQ-02c (block: "Q_GW_taeglich >= 75")
+--
+-- The emitted section rules (committed, `src/lib/eval/field-configs/a262e.ts:326-343`, `sections()` / `filterWs()`):
+--   A262-11  system_size_category == 'small_wwts'      AND filter_type == 'vf_sand_0_2'
+--   A262-13  system_size_category == 'small_wwts'      AND filter_type == 'vf_coarse_sand_0_4'
+--   A262-16  system_size_category == 'small_wwts'      AND filter_type == 'aerated_hf_gravel_8_16'
+--   A262-20  system_size_category == 'municipal_wwtp'  AND filter_type == 'two_stage_vf_gravel_sand'
+--   A262-22  system_size_category == 'municipal_wwtp'  AND filter_type == 'aerated_vf_gravel_8_16'
+--   A262-26  wastewater_type == 'greywater_only'
+-- Evidence for the rules themselves (lifted by Task 3, unchanged here):
+--   L296  "I small wastewater treatment systems treating domestic wastewater with an inflow of up to 50 P ;"
+--   L396  "Small wastewater treatment systems are defined as facilities that treat flows up to 50 P lunit for
+--          population) in accordance with DIN EN 12566, and which treat only domestic or similar wastewater flows."
+--   L1187 "Table 17 summarizes the main design parameters for planted and unplanted filters used in small wastewater
+--          treatment systems."
+--   L1189 "Table 18 summarizes the main design parameters for planted and unplanted filters used in municipal
+--          wastewater treatment plants."
+--   L1119 "The specific area of a filter for greywater treatment can be dimensioned with $50 \%$ of the specific
+--          surface required for a conventional filter treating domestic wastewater. …"
+--
+-- Prod capture, READ-ONLY IN THIS SESSION (2026-09-24) — ids, conditions and md5 of the ten gates:
+--   $ node scripts/verification/prod-query.mjs --sql "select w.code as ws, c.code as cr, c.id::text as id, c.severity,
+--       c.condition, md5(c.condition) as cond_md5 from compliance_requirements c
+--       join worksheet_templates w on w.id=c.worksheet_template_id join standards s on s.id=w.standard_id
+--       where s.code='DWA-A-262E' and c.code in ('REQ-40','REQ-41','REQ-60','REQ-61','REQ-90','REQ-110','REQ-111',
+--       'REQ-130','REQ-131','REQ-02c') order by w.code, c.code"
+--   A262-11 REQ-40  38145be2-a111-4b5a-b63f-cc895141415d  block  'A_Fo_spez_VFS_KA >= 4'      a9051f0f29414d3fbaf73c0f1a9b88cf
+--   A262-11 REQ-41  d0d6acdc-8411-4c49-876c-5b12f25ba9c8  block  'A_Fo_min_VFS_KA >= 16'      4b80564b0ad2d72042150fe9361623e2
+--   A262-13 REQ-60  77d1a8d7-33b9-4884-a0cb-c5c9aeaff61d  block  'A_Fo_spez_VFG_KA >= 1'      cd8a3764420d32eb4e39670a4ccb8fbc
+--   A262-13 REQ-61  b5526f2e-3d94-4fbb-a57a-bae3f179a643  block  'A_Fo_min_VFG_KA >= 4'       5ed5179234ca0938acc2e422641ed844
+--   A262-16 REQ-90  cd44e737-9fc0-4907-a6b6-79134b515cf9  block  'A_F_spez_HFK_KA >= 1'       87a3b9540f2296fadba9e6d2a879dfd2
+--   A262-20 REQ-110 ca5e12f4-823c-4421-bc03-2f41c04475e3  block  'A_Fo1_spez_KomKA >= 1'      df9ca25cecd42398d3aa1dccc8b4d776
+--   A262-20 REQ-111 73c598cf-25e2-41b8-a770-b8fd23b912fa  block  'A_Fo2_spez_KomKA >= 1'      f8c06acf39050396101d1ce6b77ca895
+--   A262-22 REQ-130 eb2e3043-f8c6-47d5-a99e-b76cb1d25e14  block  'A_Fu_spez_VFK_KomKA >= 1'   92e7e2d7705ee51a0eea67aed9452ac6
+--   A262-22 REQ-131 cabd0aa5-3be4-45f8-8a43-5da843ff93ea  block  'f_V_CSB_VFK_KomKA <= 100'   cfc68ad1d1a6a43ce5f5c7425ef50a1e
+--   A262-26 REQ-02c 8a8539fe-7b53-4920-ad9b-7757d002f896  block  'Q_GW_taeglich >= 75'        1e64d05b4416d7f72a76da96602cdd10
+--
+-- Why this is a ruling: each gate is the Tab. 17 / Tab. 18 minimum for its OWN filter type. Today it fires on every
+-- project, including projects of another filter type where the worksheet is irrelevant — that is the defect the
+-- section rules exist to fix. But once the section is hidden, the symbol nulls and the gate degrades to `pending`:
+-- the minimum is no longer enforced even for the type it belongs to. A guard on the SAME driver as the section rule
+-- restores both properties at once (irrelevant type ⇒ the guard is false ⇒ not_applicable; relevant type ⇒ blocks as
+-- before). Whether the minima should be per-type at all, and whether `not_applicable` or `pass` is the right verdict
+-- for the other types, is the owner's enforcement call.
+--
+-- Prerequisite: `filter_type` (A262-10) and `system_size_category` / `wastewater_type` (A262-02) must reach these
+-- worksheets — that is a262e-C-2 (consumer edit). Until it is ratified every guard evaluates `pending`: the gates do
+-- not block, which is fail-safe but inert, and the same is true of the section rules themselves.
+--
+-- (a) archive pattern, md5-guarded, ten rewrites in one transaction, complete 18-column list (live schema read
+--     in-session: id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity,
+--     description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at,
+--     audited_by, requires_attestation).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_a262e AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_a262e
+-- SELECT * FROM compliance_requirements WHERE
+--      (id = '38145be2-a111-4b5a-b63f-cc895141415d' AND md5(condition) = 'a9051f0f29414d3fbaf73c0f1a9b88cf')
+--   OR (id = 'd0d6acdc-8411-4c49-876c-5b12f25ba9c8' AND md5(condition) = '4b80564b0ad2d72042150fe9361623e2')
+--   OR (id = '77d1a8d7-33b9-4884-a0cb-c5c9aeaff61d' AND md5(condition) = 'cd8a3764420d32eb4e39670a4ccb8fbc')
+--   OR (id = 'b5526f2e-3d94-4fbb-a57a-bae3f179a643' AND md5(condition) = '5ed5179234ca0938acc2e422641ed844')
+--   OR (id = 'cd44e737-9fc0-4907-a6b6-79134b515cf9' AND md5(condition) = '87a3b9540f2296fadba9e6d2a879dfd2')
+--   OR (id = 'ca5e12f4-823c-4421-bc03-2f41c04475e3' AND md5(condition) = 'df9ca25cecd42398d3aa1dccc8b4d776')
+--   OR (id = '73c598cf-25e2-41b8-a770-b8fd23b912fa' AND md5(condition) = 'f8c06acf39050396101d1ce6b77ca895')
+--   OR (id = 'eb2e3043-f8c6-47d5-a99e-b76cb1d25e14' AND md5(condition) = '92e7e2d7705ee51a0eea67aed9452ac6')
+--   OR (id = 'cabd0aa5-3be4-45f8-8a43-5da843ff93ea' AND md5(condition) = 'cfc68ad1d1a6a43ce5f5c7425ef50a1e')
+--   OR (id = '8a8539fe-7b53-4920-ad9b-7757d002f896' AND md5(condition) = '1e64d05b4416d7f72a76da96602cdd10');
+-- UPDATE compliance_requirements SET condition = 'IF (system_size_category == small_wwts AND filter_type == vf_sand_0_2) THEN A_Fo_spez_VFS_KA >= 4'
+--  WHERE id = '38145be2-a111-4b5a-b63f-cc895141415d' AND md5(condition) = 'a9051f0f29414d3fbaf73c0f1a9b88cf';
+-- UPDATE compliance_requirements SET condition = 'IF (system_size_category == small_wwts AND filter_type == vf_sand_0_2) THEN A_Fo_min_VFS_KA >= 16'
+--  WHERE id = 'd0d6acdc-8411-4c49-876c-5b12f25ba9c8' AND md5(condition) = '4b80564b0ad2d72042150fe9361623e2';
+-- UPDATE compliance_requirements SET condition = 'IF (system_size_category == small_wwts AND filter_type == vf_coarse_sand_0_4) THEN A_Fo_spez_VFG_KA >= 1'
+--  WHERE id = '77d1a8d7-33b9-4884-a0cb-c5c9aeaff61d' AND md5(condition) = 'cd8a3764420d32eb4e39670a4ccb8fbc';
+-- UPDATE compliance_requirements SET condition = 'IF (system_size_category == small_wwts AND filter_type == vf_coarse_sand_0_4) THEN A_Fo_min_VFG_KA >= 4'
+--  WHERE id = 'b5526f2e-3d94-4fbb-a57a-bae3f179a643' AND md5(condition) = '5ed5179234ca0938acc2e422641ed844';
+-- UPDATE compliance_requirements SET condition = 'IF (system_size_category == small_wwts AND filter_type == aerated_hf_gravel_8_16) THEN A_F_spez_HFK_KA >= 1'
+--  WHERE id = 'cd44e737-9fc0-4907-a6b6-79134b515cf9' AND md5(condition) = '87a3b9540f2296fadba9e6d2a879dfd2';
+-- UPDATE compliance_requirements SET condition = 'IF (system_size_category == municipal_wwtp AND filter_type == two_stage_vf_gravel_sand) THEN A_Fo1_spez_KomKA >= 1'
+--  WHERE id = 'ca5e12f4-823c-4421-bc03-2f41c04475e3' AND md5(condition) = 'df9ca25cecd42398d3aa1dccc8b4d776';
+-- UPDATE compliance_requirements SET condition = 'IF (system_size_category == municipal_wwtp AND filter_type == two_stage_vf_gravel_sand) THEN A_Fo2_spez_KomKA >= 1'
+--  WHERE id = '73c598cf-25e2-41b8-a770-b8fd23b912fa' AND md5(condition) = 'f8c06acf39050396101d1ce6b77ca895';
+-- UPDATE compliance_requirements SET condition = 'IF (system_size_category == municipal_wwtp AND filter_type == aerated_vf_gravel_8_16) THEN A_Fu_spez_VFK_KomKA >= 1'
+--  WHERE id = 'eb2e3043-f8c6-47d5-a99e-b76cb1d25e14' AND md5(condition) = '92e7e2d7705ee51a0eea67aed9452ac6';
+-- UPDATE compliance_requirements SET condition = 'IF (system_size_category == municipal_wwtp AND filter_type == aerated_vf_gravel_8_16) THEN f_V_CSB_VFK_KomKA <= 100'
+--  WHERE id = 'cabd0aa5-3be4-45f8-8a43-5da843ff93ea' AND md5(condition) = 'cfc68ad1d1a6a43ce5f5c7425ef50a1e';
+-- UPDATE compliance_requirements SET condition = 'IF wastewater_type == greywater_only THEN Q_GW_taeglich >= 75'
+--  WHERE id = '8a8539fe-7b53-4920-ad9b-7757d002f896' AND md5(condition) = '1e64d05b4416d7f72a76da96602cdd10';
+-- COMMIT;
+-- (Compound IF bodies are parenthesised — amendment M; the single-clause A262-26 guard needs none. Bare identifiers
+--  are the corpus form for enum tokens in GATE conditions (Task 13b): none of `small_wwts`, `municipal_wwtp`,
+--  `vf_sand_0_2`, `vf_coarse_sand_0_4`, `aerated_hf_gravel_8_16`, `two_stage_vf_gravel_sand`,
+--  `aerated_vf_gravel_8_16`, `greywater_only` is a field symbol on the worksheet it appears on.)
+--
+-- Rollback for a262e-G-11 AND a262e-G-12 (one archive table serves both; restores every captured row byte-exactly
+-- with an explicit column list, then drops the archive):
+-- BEGIN;
+-- UPDATE compliance_requirements c
+--    SET worksheet_template_id = a.worksheet_template_id, code = a.code, title_de = a.title_de, title_en = a.title_en,
+--        condition = a.condition, clause_reference = a.clause_reference, severity = a.severity,
+--        description = a.description, suggestion = a.suggestion, audit_status = a.audit_status,
+--        source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote,
+--        audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by,
+--        requires_attestation = a.requires_attestation
+--   FROM compliance_requirements_archive_a262e a
+--  WHERE c.id = a.id;
+-- DROP TABLE compliance_requirements_archive_a262e;
+-- COMMIT;
+-- (The archive table is dropped by the rollback above, or on the owner's sign-off that the rewrites are final.)
+--
+-- Parse proof (re-executable): all ten rewrites above plus a262e-G-11 parse through the real gate
+-- grammar (`parseCondition`, src/lib/expr/parser.ts:390) — the parenthesised compound IF guards included.
+--   $ pnpm -s tsx scripts/verification/_t30-probe.ts
+--   PARSE-OK  IF (system_size_category == small_wwts AND filter_type == vf_sand_0_2) THEN A_Fo_spez_VFS_KA >= 4
+--   … #TOTAL 12  #NOT_OK 0
