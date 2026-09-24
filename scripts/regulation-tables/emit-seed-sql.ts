@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { writeSql } from './emit-widget-configs-sql';
 import { SEED_BUILDERS } from '../../src/lib/eval/regulation-tables-seed-index';
 import type { RegulationTable } from '../../src/lib/eval/regulation-tables';
 
@@ -91,7 +91,7 @@ if (process.argv[1]?.endsWith('emit-seed-sql.ts')) {
   const slug = process.argv[2] ?? '';
   const files = seedFilesFor(slug);
   const { up, down } = emitSeedSqlFor(slug);
-  writeFileSync(files.migration, up);
-  writeFileSync(files.rollback, down);
+  writeSql(files.migration, up);
+  writeSql(files.rollback, down);
   console.log('wrote seed + rollback for', slug, '->', files.migration, files.rollback);
 }

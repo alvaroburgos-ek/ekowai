@@ -9951,6 +9951,46 @@ much: server-side correctness first, then engine expressiveness, then emitter hy
 17. **No per-row `alternatives` on a `RegulationRow`** — a `kann` table that prints two permitted
     values per row cannot offer the choice per row. Found by DWA-A-178 (`a178-O-4`).
 
+
+### Plan 3 final wave C — items 15 and 16 are CLOSED; two consequences the owner must know
+
+Wave C (branch `feat/guideline-to-tool`, commit `95d0ea3` + its fix round) fixed backlog items 15
+and 16 and re-emitted the corpus: 24 of the 29 field-config migrations gained the guard (140 field
+UPDATEs + 290 section UPDATEs), and **no other byte moved** — reversing the guard strings and the
+four corrected descriptions reproduces the previous commit byte-for-byte on all 24 files. The
+`iso14046-I-2` and `atv_a704e-I-2` entries above are answered by that sweep and need no separate
+signature.
+
+**C-1 · Re-applying a corrected migration is now a SILENT NO-OP on `visible_when`, so the recovery
+path is ROLLBACK-THEN-REAPPLY, never reapply-on-top.** The guard writes a rule only into a cell
+that is still NULL: once a migration has been applied (or a human has set a rule by hand), running
+a corrected version of the same migration changes that field's `visible_when` not at all, and
+reports success. To land a corrected rule, apply the migration's ROLLBACK first (restoring the
+captured prior), then apply the corrected migration. Every rollback statement whose UP carries the
+guard now says this in a comment directly above it — and warns that the unguarded restore
+overwrites a rule a human set after the migration was applied, so prod must be re-captured before
+a rollback is run.
+
+**C-2 · Six `ui_config.note` strings still assert an engine limit that final wave A removed.**
+They are ENCODED VALUES (emitted into `ui_config`, shown to the engineer under the widget), not
+descriptions, so wave C deliberately did NOT touch them; the four `fields.description` strings
+carrying the same claim WERE corrected and re-emitted. Complete list, for the ratification batch of
+the F-blocks they reference:
+
+| file:line | now-false clause | block |
+|---|---|---|
+| `src/lib/eval/field-configs/din14021.ts:188` | „ein Vollständigkeits-Code (alle acht angekreuzt) ist nicht materialisierbar — der Materialisierer liest keine Checklisten" | `din14021-F-1` |
+| `src/lib/eval/field-configs/din14021.ts:201` | „ein Vollständigkeits-Code ist nicht materialisierbar" | `din14021-F-1` |
+| `src/lib/eval/field-configs/iso14046.ts:107` | „ein Vollständigkeits-Code über die Checkliste ist nicht materialisierbar" | `iso14046-F-2` |
+| `src/lib/eval/field-configs/iso14046.ts:252` | „ein Vollständigkeits-Code über die Checkliste ist nicht materialisierbar" | `iso14046-F-2` |
+| `src/lib/eval/field-configs/iso59004.ts:184` | „ein Vollständigkeits-Code über diese Liste ist NICHT materialisierbar — contains() erreicht den Motor nicht" | `iso59004-F-1` |
+| `src/lib/eval/field-configs/iso5667_6.ts:275` | „ein Vollständigkeits-Gate neben CR-027 ist STAGED … der Materialisierer liest keine Checklisten" | `iso5667_6-F-2` |
+
+(English: each says a completeness code over a checklist cannot be materialised / that `contains()`
+does not reach the engine. Since final wave A it does — `buildCarriers` feeds json `select_many`
+carriers to all five production callers — so each clause is false while the block it names is still
+correctly STAGED.)
+
 **Also carried, from the STAGED-file audit (Task 30):** every archive-rollback re-INSERT column
 list must match the LIVE schema — `equations` 22 columns, `compliance_requirements` 18,
 `fields` 31. Task 26 shipped a 13-of-22 list, caught in review and fixed in its fix round; Tasks

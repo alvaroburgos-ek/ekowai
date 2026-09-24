@@ -20,7 +20,7 @@
  *
  * Pure / DB-free. The caller supplies the standard's active field-symbol set.
  */
-import { canonicalFunctionName, KEYWORD_NAMES } from '@/lib/expr';
+import { canonicalFunctionName, parseExpression, KEYWORD_NAMES } from '@/lib/expr';
 import { normalizeFormula, normalizeSymbol } from './normalize-formula';
 
 /** Math constants the arithmetic evaluator resolves without a backing field. */
@@ -76,6 +76,18 @@ export function validateEngineEligibility(
       reason: `nicht engine-verifiziert: nicht unterstützte Funktion/Aggregat im Formeltext (${unsupported.join(', ')})`,
       unresolved: [],
     };
+  }
+
+  // (1b) Fix round 1 (reviewer, IMPORTANT 1): stage (1) is a REGEX PROXY for
+  //      "does this parse" — it only asks whether an identifier before `(`
+  //      names a supported function. Since keywords are skipped there (the
+  //      `AND (` fix), a keyword-NAMED call — `if(and(a,b),x,y)`, `empty(a)`,
+  //      `true(a)` — slipped through a gate whose docstring promises parse
+  //      validation. Ask the real parser. Every corpus formula (679/679,
+  //      incl. the `out = expr` assignment shape) parses, so nothing that
+  //      passed before is refused now.
+  if (parseExpression(normalizedFormula) === null) {
+    return { verified: false, reason: 'nicht engine-verifiziert: Formel nicht parsebar', unresolved: [] };
   }
 
   // (2) Symbol resolution — every declared input symbol must resolve to an

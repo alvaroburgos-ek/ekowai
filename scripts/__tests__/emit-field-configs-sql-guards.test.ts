@@ -17,6 +17,8 @@ const row = (over: Partial<PriorFieldRow> = {}): PriorFieldRow => ({ enum_values
 const ev = [{ value: 'a', label_de: 'A', order_index: 0 }];
 const base = { standard: 'S', worksheet: 'S-01', verification_quote: 'q' };
 const bad = (v: unknown) => v as unknown as PriorSnapshot;
+/** `toThrow(string)` is a SUBSTRING match; this makes an "exact message" pin actually exact (fix round 1, reviewer minor 5). */
+const exactly = (msg: string) => new RegExp(`^${msg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
 
 describe('emitFieldConfigSql — guards beyond the brief (fix round 1)', () => {
   it('lookup and visible_when are ALWAYS written, as NULL when absent, on every UPDATE; the UPDATE is scoped to active rows', () => {
@@ -53,8 +55,10 @@ describe('emitFieldConfigSql — guards beyond the brief (fix round 1)', () => {
     const lines = down.split('\n');
     const fi = lines.findIndex((l) => l.startsWith('UPDATE fields f SET widget = NULL'));
     expect(lines[fi - 1]).toBe('-- S-01 n: no prior snapshot row captured — restore assumes prod had NULL in these columns; re-capture before applying the rollback.');
+    // fix round 1: a section restore now also carries the guarded-UP re-capture note, between the no-prior note and the statement
     const si = lines.findIndex((l) => l.startsWith('UPDATE worksheet_sections ws SET visible_when = NULL'));
-    expect(lines[si - 1]).toMatch(/^-- section S-01 S-01\.1: no prior snapshot row captured/);
+    expect(lines[si - 2]).toMatch(/^-- section S-01 S-01\.1: no prior snapshot row captured/);
+    expect(lines[si - 1]).toMatch(/^-- section S-01 S-01\.1: the UP writes visible_when under an IS NULL guard/);
     const captured = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar' }], [], { 'S-01 n': row({ widget: 'scalar', visible_when: 'b == 2' }) }).down;
     expect(captured).not.toContain('no prior snapshot row captured');
     expect(captured).toContain("UPDATE fields f SET widget = 'scalar', ui_config = NULL, lookup = NULL, visible_when = 'b == 2'");
@@ -194,7 +198,7 @@ describe('emitFieldConfigSql — reserved register column keys (final wave C, it
 
   it("refuses a register column keyed `id` with the exact message", () => {
     expect(() => emitFieldConfigSql('x', withColumns([{ key: 'id', label: 'Nr.', type: 'text' }]), [], {}))
-      .toThrow("S-01 reg.id: reserved register column key — `register-rows.ts` owns `id` as the ROW IDENTITY (the raw row's `id`), so the column would read the row id as its cell and be overwritten on save; rename it (Task 20 used `kennung`)");
+      .toThrow(exactly("S-01 reg.id: reserved register column key — `register-rows.ts` owns `id` as the ROW IDENTITY (the raw row's `id`), so the column would read the row id as its cell and be overwritten on save; rename it (Task 20 used `kennung`)"));
   });
 
   it('refuses it in a nested position too (any column of the register, not just the first)', () => {
@@ -242,5 +246,50 @@ describe('emitFieldConfigSql — visible_when UPDATEs are IS NULL guarded (final
     const { up, down } = emitFieldConfigSql('x', [], [{ standard: 'S', worksheet: 'S-03', section_code: 'S-03.2', visible_when: "typ == 'b'", verification_quote: 'q' }], { sections: { 'S-03 S-03.2': { visible_when: null } } });
     expect(up).toContain("ws.code = 'S-03.2' AND w.code = 'S-03' AND s.code = 'S' AND ws.visible_when IS NULL;");
     expect(down).toContain("ws.code = 'S-03.2' AND w.code = 'S-03' AND s.code = 'S';");
+  });
+});
+
+/**
+ * Plan 3 final wave C · fix round 1 (reviewer, IMPORTANT 2) — the DOWN is not
+ * guarded, and it cannot be: a rollback must restore the captured prior. But
+ * after wave C the UP is guarded, so the pair is asymmetric — if a human sets a
+ * rule AFTER the migration was applied, re-applying is a silent no-op while the
+ * ROLLBACK still overwrites the rule with the captured prior. Every restore
+ * whose UP carries the guard now says so in a comment above it. `NO_PRIOR_NOTE`
+ * only ever fired when NO prior row was captured, so 0 of the corpus's
+ * rollback statements carried any warning.
+ */
+describe('emitFieldConfigSql — a guarded UP gets a re-capture note on its restore (final wave C fix round 1)', () => {
+  const RECAPTURE = /^-- (?:section )?\S.*: the UP writes visible_when under an IS NULL guard; this restore is unguarded — re-capture before applying the rollback \(a rule set after the migration is overwritten here\)\.$/;
+
+  it('a field entry that writes a rule gets the note immediately above its restore', () => {
+    const prior = { 'S-01 n': row({ widget: 'scalar', visible_when: null }) };
+    const { down } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar', visible_when: "mode == 'a'" }], [], prior);
+    const lines = down.split('\n');
+    const i = lines.findIndex((l) => l.startsWith('UPDATE fields f SET'));
+    expect(lines[i - 1]).toBe("-- S-01 n: the UP writes visible_when under an IS NULL guard; this restore is unguarded — re-capture before applying the rollback (a rule set after the migration is overwritten here).");
+    expect(lines[i - 1]).toMatch(RECAPTURE);
+  });
+
+  it('an entry that writes visible_when = NULL (unguarded UP) gets NO note', () => {
+    const prior = { 'S-01 n': row({ widget: 'scalar' }) };
+    const { down } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar' }], [], prior);
+    expect(down).not.toContain('IS NULL guard');
+  });
+
+  it('a section rule (always a guarded UP) gets the note too', () => {
+    const { down } = emitFieldConfigSql('x', [], [{ standard: 'S', worksheet: 'S-03', section_code: 'S-03.2', visible_when: "typ == 'b'", verification_quote: 'q' }], { sections: { 'S-03 S-03.2': { visible_when: null } } });
+    const lines = down.split('\n');
+    const i = lines.findIndex((l) => l.startsWith('UPDATE worksheet_sections ws SET'));
+    expect(lines[i - 1]).toMatch(RECAPTURE);
+    expect(lines[i - 1]).toContain('-- section S-03 S-03.2:');
+  });
+
+  it('the note rides ALONGSIDE the no-prior note when both apply (no prior row captured AND a guarded UP)', () => {
+    const { down } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar', visible_when: "mode == 'a'" }], [], {});
+    const lines = down.split('\n');
+    const i = lines.findIndex((l) => l.startsWith('UPDATE fields f SET'));
+    expect(lines[i - 2]).toMatch(/^-- S-01 n: no prior snapshot row captured/);
+    expect(lines[i - 1]).toMatch(RECAPTURE);
   });
 });

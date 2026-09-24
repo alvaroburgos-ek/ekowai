@@ -26,5 +26,6 @@ DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_
 DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-04' AND f.symbol = 'versuche_count' AND f.description LIKE 'Plan 3:%';
 DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-04' AND f.symbol = 'bereich_code' AND f.description LIKE 'Plan 3:%';
 DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-18130-1' AND w.code = 'DIN-18130-1-05' AND f.symbol = 'pflichtangaben' AND f.description LIKE 'Plan 3:%';
+-- DIN-18130-1-05 i_bereich: the UP writes visible_when under an IS NULL guard; this restore is unguarded — re-capture before applying the rollback (a rule set after the migration is overwritten here).
 UPDATE fields f SET widget = NULL, ui_config = NULL, lookup = NULL, visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND f.symbol = 'i_bereich' AND w.code = 'DIN-18130-1-05' AND s.code = 'DIN-18130-1' AND f.active;
 COMMIT;

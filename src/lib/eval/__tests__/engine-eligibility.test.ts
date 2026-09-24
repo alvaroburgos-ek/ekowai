@@ -185,3 +185,46 @@ describe('Plan 3 final wave C — a boolean connective before a parenthesised gr
     expect(validateEngineEligibility('if(a > 1, x, y)', syms, f).verified).toBe(true);
   });
 });
+
+/**
+ * Plan 3 final wave C · fix round 1 (reviewer, IMPORTANT 1) — the hole the
+ * keyword widening opened.
+ *
+ * Stage (1) is a REGEX proxy for "does this parse": it only asks whether an
+ * identifier before `(` names a supported function. Skipping keywords there
+ * (the `AND (` fix) also skips `and(a,b)` / `empty(a)` / `true(a)` — keyword-
+ * NAMED calls the evaluator cannot parse at all — so the gate answered
+ * `verified: true` for a formula `parseExpression` rejects, while its own
+ * docstring promises parse validation. Stage (1b) now actually parses.
+ * No corpus formula is affected (679/679 still parse — probed this session),
+ * so this is a forward guard.
+ */
+describe('Plan 3 final wave C fix round 1 — a keyword-NAMED call does not parse and is refused', () => {
+  const f = new Set(['a', 'b', 'x', 'y']);
+  const syms = ['a', 'b', 'x', 'y'];
+  const REASON = 'nicht engine-verifiziert: Formel nicht parsebar';
+
+  it('if(and(a,b),x,y) — a connective used as a call', () => {
+    const r = validateEngineEligibility('if(and(a,b),x,y)', syms, f);
+    expect(r.verified).toBe(false);
+    if (!r.verified) { expect(r.reason).toBe(REASON); expect(r.unresolved).toEqual([]); }
+  });
+
+  it('empty(a) — a keyword literal used as a call', () => {
+    const r = validateEngineEligibility('empty(a)', syms, f);
+    expect(r.verified).toBe(false);
+    if (!r.verified) expect(r.reason).toBe(REASON);
+  });
+
+  it('true(a) — a boolean literal used as a call', () => {
+    const r = validateEngineEligibility('true(a)', syms, f);
+    expect(r.verified).toBe(false);
+    if (!r.verified) expect(r.reason).toBe(REASON);
+  });
+
+  it('the legitimate connective forms and the assignment shape still pass (the guard does not re-close the fix)', () => {
+    expect(validateEngineEligibility('if(a > 1 AND (b < 2), x, y)', syms, f).verified).toBe(true);
+    expect(validateEngineEligibility('z = a + b', ['a', 'b'], new Set([...f, 'z'])).verified).toBe(true);
+    expect(validateEngineEligibility('Q_zu = r_D(n) * (A_C + A_VA) * 10^-4', ['r_D(n)', 'A_C', 'A_VA'], new Set(['r_D_n', 'A_C', 'A_VA'])).verified).toBe(true);
+  });
+});

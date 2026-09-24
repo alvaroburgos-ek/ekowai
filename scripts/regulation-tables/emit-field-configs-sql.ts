@@ -95,14 +95,14 @@
  * migration header says so and the owner re-captures before applying.
  * WRITTEN, NOT APPLIED.
  */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { parseFieldConfig, type RegisterUiConfig } from '../../src/lib/eval/field-config';
 import { parseCondition, parseNumeric, quotedComparisonLiterals, hiddenReferences, type Expr } from '../../src/lib/expr';
 import type { FieldConfigEntry, SectionVisibilityEntry, PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorGateRow, PriorSnapshot } from '../../src/lib/eval/field-configs/types';
 import { FIELD_CONFIG_MODULES } from '../../src/lib/eval/field-configs';
 import { rewriteRules } from '../../src/lib/eval/rewrites';
 import { normalizeSymbol } from '../../src/lib/eval/normalize-formula';
-import { q, j, JOIN, SCHEMA_MIGRATION, gatedHeaderLines } from './emit-widget-configs-sql';
+import { q, j, JOIN, SCHEMA_MIGRATION, gatedHeaderLines, writeSql } from './emit-widget-configs-sql';
 
 /** The prior-snapshot types live in src/lib/eval/field-configs/types.ts (re-exported for the tests and the CLI). */
 export type { PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorGateRow, PriorSnapshot };
@@ -410,6 +410,17 @@ const sectionWhere = (s: { standard: string; worksheet: string; section_code: st
 const jsonOrNull = (v: unknown) => (v == null ? 'NULL' : j(v));
 const textOrNull = (v: string | null | undefined) => (v == null ? 'NULL' : q(v));
 const NO_PRIOR_NOTE = (key: string) => `-- ${key}: no prior snapshot row captured — restore assumes prod had NULL in these columns; re-capture before applying the rollback.`;
+/**
+ * Plan 3 final wave C, fix round 1 (reviewer, IMPORTANT 2) — the asymmetry the guard created.
+ *
+ * The UP writes `visible_when` only into a NULL cell; the DOWN cannot be guarded the same way
+ * (a rollback must restore the captured prior unconditionally). So once a human sets a rule
+ * AFTER the migration was applied, re-applying the migration is a silent no-op while the
+ * ROLLBACK still overwrites that rule with the captured prior. `NO_PRIOR_NOTE` never covered
+ * this — it fires only when no prior row was captured at all — so 0 rollback statements in the
+ * corpus carried any warning. Every restore whose UP is guarded now says it out loud.
+ */
+const GUARDED_RESTORE_NOTE = (key: string) => `-- ${key}: the UP writes visible_when under an IS NULL guard; this restore is unguarded — re-capture before applying the rollback (a rule set after the migration is overwritten here).`;
 
 /**
  * Plan 3 final wave C (item 2) — register column keys the ROW SHAPE already owns.
@@ -627,6 +638,7 @@ ${JOIN} WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id
     if (writesEnum) restore.push(`enum_values = ${jsonOrNull(p?.enum_values)}`);
     // A missing prior row cannot be refused (an enum list is — see validateEntry), but the rollback must say what it assumes.
     if (!p) down.push(NO_PRIOR_NOTE(key));
+    if (e.visible_when != null) down.push(GUARDED_RESTORE_NOTE(key));
     down.push(`UPDATE fields f SET ${restore.join(', ')} ${where(e)};`);
   }
   const seenSections = new Set<string>();
@@ -638,6 +650,7 @@ ${JOIN} WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id
     up.push(`UPDATE worksheet_sections ws SET visible_when = ${q(s.visible_when)} ${sectionWhere(s, true)};`);
     const ps = prior.sections?.[key];
     if (!ps) down.push(NO_PRIOR_NOTE(`section ${key}`));
+    down.push(GUARDED_RESTORE_NOTE(`section ${key}`)); // a section entry always writes a rule ⇒ its UP is always guarded
     down.push(`UPDATE worksheet_sections ws SET visible_when = ${textOrNull(ps?.visible_when)} ${sectionWhere(s)};`);
   }
   up.push('COMMIT;'); down.push('COMMIT;');
@@ -704,8 +717,8 @@ if (process.argv[1]?.endsWith('emit-field-configs-sql.ts')) {
     // Task 13b: quoted-literal ↔ column-key / worksheet-symbol collisions are a WARNING (stderr), never a refusal;
     // Task 12c warn-mode gate refusals print the same way (GATE-REFUSAL prefix).
     for (const w of warnings) console.error(w);
-    writeFileSync(files.migration, up);
-    writeFileSync(files.rollback, down);
+    writeSql(files.migration, up);
+    writeSql(files.rollback, down);
     console.log(`wrote ${m.FIELD_CONFIGS.length} field entries + ${m.SECTION_VISIBILITY.length} section entries for ${slug} ->`, files.migration, files.rollback);
   }).catch((err) => { console.error(err); process.exit(1); });
 }

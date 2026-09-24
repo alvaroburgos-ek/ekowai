@@ -1,2 +1,3 @@
 data/norm-text/*.md text eol=lf
 scripts/migrations/*.sql text eol=lf
+scripts/rollback-*.sql text eol=lf

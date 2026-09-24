@@ -20,12 +20,11 @@
  * rule); `validateEngineEligibility` runs as well so the emitter and the
  * runtime gate agree. WRITTEN, NOT APPLIED.
  */
-import { writeFileSync } from 'node:fs';
 import { parseNumeric, extractSymbols, unknownFunctionNames, quotedComparisonLiterals } from '../../src/lib/expr';
 import { validateEngineEligibility } from '../../src/lib/eval/engine-eligibility';
 import type { EquationEntry } from '../../src/lib/eval/field-configs/types';
 import { EQUATION_MODULES } from '../../src/lib/eval/equations';
-import { q, JOIN } from './emit-widget-configs-sql';
+import { q, JOIN, writeSql } from './emit-widget-configs-sql';
 
 /** Math constants the evaluator resolves without a backing field (mirrors engine-eligibility.ts). */
 const RESERVED_CONSTANTS: ReadonlySet<string> = new Set(['pi', 'e']);
@@ -127,8 +126,8 @@ if (process.argv[1]?.endsWith('emit-equations-sql.ts')) {
     const { up, down, warnings } = emitEquationsSql(slug, m.EQUATIONS);
     // Task 13b: quoted-literal ↔ input/output-symbol collisions are a WARNING (stderr), never a refusal.
     for (const w of warnings) console.error(w);
-    writeFileSync(files.migration, up);
-    writeFileSync(files.rollback, down);
+    writeSql(files.migration, up);
+    writeSql(files.rollback, down);
     console.log(`wrote ${m.EQUATIONS.length} equations for ${slug} ->`, files.migration, files.rollback);
   }).catch((err) => { console.error(err); process.exit(1); });
 }

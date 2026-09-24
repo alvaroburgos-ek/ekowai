@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
+import { writeSql } from './emit-widget-configs-sql';
 import { SELECTION_CONFIGS, toDbShape } from '../../src/lib/eval/selection-fields';
 
 type EnumValue = { value: string; label_de: string; label_en?: string | null; order_index?: number };
@@ -103,8 +104,8 @@ export function emitSelectionRollbackSql(entries: Entry[]): string {
 if (process.argv[1]?.endsWith('emit-selection-configs-sql.ts')) {
   const entries = JSON.parse(readFileSync(process.argv[2], 'utf8')) as Entry[];
   for (const [std, sql] of emitSelectionConfigSql(entries)) {
-    writeFileSync(`scripts/migrations/20260911120000_selection_configs_${std.replace(/[^A-Za-z0-9]/g, '_')}.sql`, sql);
+    writeSql(`scripts/migrations/20260911120000_selection_configs_${std.replace(/[^A-Za-z0-9]/g, '_')}.sql`, sql);
   }
-  writeFileSync('scripts/rollback-20260911120000-selection-configs.sql', emitSelectionRollbackSql(entries));
+  writeSql('scripts/rollback-20260911120000-selection-configs.sql', emitSelectionRollbackSql(entries));
   console.log('wrote', entries.length, 'entries');
 }
