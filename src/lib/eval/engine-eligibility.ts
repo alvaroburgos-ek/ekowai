@@ -20,7 +20,7 @@
  *
  * Pure / DB-free. The caller supplies the standard's active field-symbol set.
  */
-import { canonicalFunctionName } from '@/lib/expr';
+import { canonicalFunctionName, KEYWORD_NAMES } from '@/lib/expr';
 import { normalizeFormula, normalizeSymbol } from './normalize-formula';
 
 /** Math constants the arithmetic evaluator resolves without a backing field. */
@@ -35,8 +35,19 @@ const RESERVED_CONSTANTS: ReadonlySet<string> = new Set(['pi', 'e']);
  * SUM(...), Σ-style aggregates, bare `log`, unknown helpers — is a construct
  * the evaluator cannot faithfully compute, so the equation is not
  * engine-eligible via route-all.
+ *
+ * Plan 3 final wave C (item 1): a LANGUAGE KEYWORD followed by `(` is a boolean
+ * connective (or a literal) in front of a PARENTHESISED GROUP, never a call —
+ * `if(a > 1 AND (b < 2 OR c > 3), x, y)` is a legal Plan-2a formula, but `AND (`
+ * matched this regex and `canonicalFunctionName('AND')` is null, so the equation
+ * was refused as "nicht unterstützte Funktion/Aggregat … (AND)" (found by
+ * ISO-59020; the corpus worked around it by leaving formula-level compound
+ * conditions unparenthesised). `KEYWORD_NAMES` (the tokenizer's own table) is
+ * the discriminator; `if` is both a keyword and a real function, so its call
+ * form is unaffected either way.
  */
 const CALL = /([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
+const isConnective = (name: string): boolean => KEYWORD_NAMES.has(name.toLowerCase());
 
 export type EligibilityResult =
   | { verified: true }
@@ -58,7 +69,7 @@ export function validateEngineEligibility(
   const normalizedFormula = normalizeFormula(formula);
   const unsupported = [...normalizedFormula.matchAll(CALL)]
     .map((m) => m[1])
-    .filter((name) => canonicalFunctionName(name) === null);
+    .filter((name) => !isConnective(name) && canonicalFunctionName(name) === null);
   if (unsupported.length > 0) {
     return {
       verified: false,

@@ -394,13 +394,46 @@ export function equationReach(prior: PriorSnapshot, worksheet: string, symbol: s
   return hops;
 }
 
-const where = (e: { standard: string; worksheet: string; symbol: string }) =>
-  `${JOIN} WHERE f.worksheet_template_id = w.id AND f.symbol = ${q(e.symbol)} AND w.code = ${q(e.worksheet)} AND s.code = ${q(e.standard)} AND f.active`;
-const sectionWhere = (s: { standard: string; worksheet: string; section_code: string }) =>
-  `${JOIN} WHERE ws.worksheet_template_id = w.id AND ws.code = ${q(s.section_code)} AND w.code = ${q(s.worksheet)} AND s.code = ${q(s.standard)}`;
+/**
+ * Plan 3 final wave C (item 3): `guardVisibleWhen` appends `AND f.visible_when IS NULL`
+ * — the guard every STAGED block's hide carries and the generated migrations did not
+ * (`iso14046-I-2`, `atv_a704e-I-2`). It rides ONLY on statements that WRITE a rule: an
+ * entry with no `visible_when` writes `visible_when = NULL` under the emitter's
+ * always-written invariant, and guarding that would silently skip its widget/ui_config
+ * write on any field that already carries a rule in prod. The ROLLBACK is never
+ * guarded — it restores the captured prior unconditionally.
+ */
+const where = (e: { standard: string; worksheet: string; symbol: string }, guardVisibleWhen = false) =>
+  `${JOIN} WHERE f.worksheet_template_id = w.id AND f.symbol = ${q(e.symbol)} AND w.code = ${q(e.worksheet)} AND s.code = ${q(e.standard)} AND f.active${guardVisibleWhen ? ' AND f.visible_when IS NULL' : ''}`;
+const sectionWhere = (s: { standard: string; worksheet: string; section_code: string }, guardVisibleWhen = false) =>
+  `${JOIN} WHERE ws.worksheet_template_id = w.id AND ws.code = ${q(s.section_code)} AND w.code = ${q(s.worksheet)} AND s.code = ${q(s.standard)}${guardVisibleWhen ? ' AND ws.visible_when IS NULL' : ''}`;
 const jsonOrNull = (v: unknown) => (v == null ? 'NULL' : j(v));
 const textOrNull = (v: string | null | undefined) => (v == null ? 'NULL' : q(v));
 const NO_PRIOR_NOTE = (key: string) => `-- ${key}: no prior snapshot row captured — restore assumes prod had NULL in these columns; re-capture before applying the rollback.`;
+
+/**
+ * Plan 3 final wave C (item 2) — register column keys the ROW SHAPE already owns.
+ *
+ * A register row travels as `{ id, <columnKey>: value, … }`: `register-rows.ts`
+ * reads `rows.push({ id: str(r.id) ?? genId(), values, … })` and the register editor
+ * writes `{ id: genId() }` on every added row. A column keyed `id` therefore reads the
+ * row identity as its cell and is overwritten on the next save — found by Task 20,
+ * which had to rename the column to `kennung` after the fact (Task 28 hit it too).
+ * The convention is now a refusal.
+ *
+ * Audit of the rest of the row/carrier shape (`register-rows.ts`, this session):
+ *   - `values` / `complete` are fields of `PreparedRow`, NOT keys of the raw row —
+ *     every column key lands INSIDE `values`, so they cannot collide;
+ *   - `rows` and the register's `flags[].key` live on the CARRIER object
+ *     (`{ rows: [...], <flagKey>: bool }`), one level above a row;
+ *   - `override.flag_key` IS written into a row's values (`values[overrideFlagKey] = differs`),
+ *     but it is a DECLARED boolean column of the same register (surface_inventory's
+ *     `coeff_override`), so it is a binding, not a collision.
+ * `id` is therefore the only reserved word today; the map keeps the next one cheap.
+ */
+const RESERVED_REGISTER_COLUMN_KEYS: ReadonlyMap<string, string> = new Map([
+  ['id', "`register-rows.ts` owns `id` as the ROW IDENTITY (the raw row's `id`), so the column would read the row id as its cell and be overwritten on save; rename it (Task 20 used `kennung`)"],
+]);
 
 /** `gate`: receives each Task 12c gate refusal (the caller throws or collects it per `gate_guard`). */
 function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior: PriorSnapshot, gate: (msg: string) => void, createdKeys: ReadonlySet<string>): void {
@@ -409,6 +442,8 @@ function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior:
   if (e.visible_when != null && parseCondition(e.visible_when) === null) throw new Error(`${id}: visible_when does not parse: ${e.visible_when}`);
   if (e.widget === 'register') {
     for (const c of (cfg.ui as RegisterUiConfig).columns) {
+      const reserved = RESERVED_REGISTER_COLUMN_KEYS.get(c.key);
+      if (reserved) throw new Error(`${id}.${c.key}: reserved register column key — ${reserved}`);
       if (c.expr && !parseNumeric(c.expr).ok) throw new Error(`${id}.${c.key}: expr does not parse: ${c.expr}`);
       if (c.visible_when && parseCondition(c.visible_when) === null) throw new Error(`${id}.${c.key}: visible_when does not parse: ${c.visible_when}`);
     }
@@ -582,7 +617,7 @@ ${JOIN} WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id
     const sets = [`widget = ${q(e.widget)}`, `ui_config = ${jsonOrNull(e.ui_config)}`, `lookup = ${jsonOrNull(e.lookup)}`, `visible_when = ${textOrNull(e.visible_when)}`];
     const writesEnum = Array.isArray(e.enum_values);
     if (writesEnum) sets.push(`enum_values = ${j(e.enum_values)}`);
-    up.push(`UPDATE fields f SET ${sets.join(', ')} ${where(e)};`);
+    up.push(`UPDATE fields f SET ${sets.join(', ')} ${where(e, e.visible_when != null)};`);
     const restore = [
       `widget = ${textOrNull(p?.widget)}`,
       `ui_config = ${jsonOrNull(p?.ui_config)}`,
@@ -600,7 +635,7 @@ ${JOIN} WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id
     if (seenSections.has(key)) throw new Error(`section ${key}: duplicate entry`);
     seenSections.add(key);
     validateSection(s, prior, gate, createdKeys, creates);
-    up.push(`UPDATE worksheet_sections ws SET visible_when = ${q(s.visible_when)} ${sectionWhere(s)};`);
+    up.push(`UPDATE worksheet_sections ws SET visible_when = ${q(s.visible_when)} ${sectionWhere(s, true)};`);
     const ps = prior.sections?.[key];
     if (!ps) down.push(NO_PRIOR_NOTE(`section ${key}`));
     down.push(`UPDATE worksheet_sections ws SET visible_when = ${textOrNull(ps?.visible_when)} ${sectionWhere(s)};`);

@@ -93,3 +93,22 @@ describe('Task 4 review items (folded into Task 4b)', () => {
     expect(normalizeFormula('IF(x)')).toBe('IF(x)');
   });
 });
+
+/**
+ * Plan 3 final wave C · item 1 (sibling of the CALL-regex defect) — the
+ * `ident(singleToken)` rewrite must not fire on a LANGUAGE KEYWORD. Without
+ * the exclusion, `a > 1 AND (b)` normalised to `a > 1 AND_b`: the connective
+ * and its grouped atom were welded into one phantom symbol, so the formula
+ * silently changed meaning on the way to the engine instead of being refused.
+ */
+describe('Plan 3 final wave C — a keyword before a parenthesised group is never rewritten', () => {
+  it('AND / OR / NOT (single-token group) keep their shape', () => {
+    expect(normalizeFormula('if(a > 1 AND (b), x, y)')).toBe('if(a > 1 AND (b), x, y)');
+    expect(normalizeFormula('if(a > 1 or (b), x, y)')).toBe('if(a > 1 or (b), x, y)');
+    expect(normalizeFormula('if(NOT (b), x, y)')).toBe('if(NOT (b), x, y)');
+  });
+
+  it('the r_D(n) accessor class is still rewritten (the fix does not disable the normaliser)', () => {
+    expect(normalizeFormula('r_D(n) * A_C')).toBe('r_D_n * A_C');
+  });
+});

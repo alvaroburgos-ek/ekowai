@@ -143,3 +143,45 @@ describe('Task 4 review items (folded into Task 4b)', () => {
     expect(validateEngineEligibility('x = IF(A_C > 1, 1, 0)', ['A_C'], new Set(['A_C', 'x'])).verified).toBe(true);
   });
 });
+
+/**
+ * Plan 3 final wave C · item 1 — the CALL regex misread a BOOLEAN CONNECTIVE
+ * followed by a parenthesised group as a function call.
+ *
+ * `if(a > 1 AND (b < 2 OR c > 3), x, y)` is a legal Plan-2a formula (the parser
+ * groups with parentheses), but `AND (` matched `([A-Za-z_][A-Za-z0-9_]*)\s*\(`
+ * and `canonicalFunctionName('AND')` is null, so the emitter REFUSED the
+ * equation as "nicht unterstützte Funktion/Aggregat im Formeltext (AND)".
+ * Found by ISO-59020; the corpus worked around it by leaving formula-level
+ * compound conditions unparenthesised and parenthesising them only in STAGED
+ * gate text. A language KEYWORD (`and` / `or` / `not` / `is` / `in` / `then` /
+ * `null` / `empty` / `true` / `false`) followed by `(` is a connective, never a
+ * call; `if(` stays a genuine call and keeps passing through
+ * `canonicalFunctionName`.
+ */
+describe('Plan 3 final wave C — a boolean connective before a parenthesised group is not a CALL', () => {
+  const f = new Set(['a', 'b', 'c', 'x', 'y']);
+  const syms = ['a', 'b', 'c', 'x', 'y'];
+
+  it('AND before a parenthesised group is accepted (ISO-59020 refusal)', () => {
+    expect(validateEngineEligibility('if(a > 1 AND (b < 2 OR c > 3), x, y)', syms, f).verified).toBe(true);
+  });
+
+  it('OR / NOT / lower-case spellings before a parenthesised group are accepted too', () => {
+    expect(validateEngineEligibility('if(a > 1 OR (b < 2), x, y)', syms, f).verified).toBe(true);
+    expect(validateEngineEligibility('if(NOT (b < 2), x, y)', syms, f).verified).toBe(true);
+    expect(validateEngineEligibility('if(a > 1 and (b < 2 or c > 3), x, y)', syms, f).verified).toBe(true);
+  });
+
+  it('a genuine unsupported call is still refused (the fix does not widen the gate)', () => {
+    // a multi-token argument is NOT rewritten by normalizeFormula, so the CALL test is the one that decides
+    const r = validateEngineEligibility('SUM(a + b)', ['a', 'b'], f);
+    expect(r.verified).toBe(false);
+    if (!r.verified) expect(r.reason).toContain('SUM');
+    expect(validateEngineEligibility('log(a)', ['a'], f).verified).toBe(false);
+  });
+
+  it('`if(` remains a supported call (it is a keyword AND a function)', () => {
+    expect(validateEngineEligibility('if(a > 1, x, y)', syms, f).verified).toBe(true);
+  });
+});

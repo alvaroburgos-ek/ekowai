@@ -49,8 +49,9 @@ export const MANDATORY_TOKENS = ['A.2.2_reused_content_inflow', 'A.2.3_recycled_
 /**
  * Per-token form (fix round 1): every Mandatory indicator present EXACTLY ONCE as selected or justified N/A — a duplicate or a
  * missing row fails (closes F-2 for the mandatory rows). UNPARENTHESISED inside the formula: the equations emitter's legacy
- * eligibility check (`engine-eligibility.ts` CALL regex) reads `AND (` as a call named AND and refuses; `==` binds tighter than
- * AND, so the meaning is the same. The STAGED G-4 gate text carries the parenthesised clauses (conditions are not subject to that check).
+ * eligibility check (`engine-eligibility.ts` CALL regex) read `AND (` as a call named AND and refused; `==` binds tighter than
+ * AND, so the meaning is the same. (Plan 3 final wave C item 1 retired that refusal — a keyword before a parenthesised group is
+ * no longer a CALL; this form is kept byte-stable, and new work may parenthesise.) The STAGED G-4 gate text carries the parenthesised clauses (conditions are not subject to that check).
  */
 export const MANDATORY_ALL_ONCE = MANDATORY_TOKENS.map((t) => `count_rows(indicators, indicator == '${t}' AND ok == 1) == 1`).join(' AND ');
 /** §A.4.2 precondition of every energy Σ (fix round 1, controller ruling). */

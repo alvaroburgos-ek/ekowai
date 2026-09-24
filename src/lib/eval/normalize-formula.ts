@@ -24,7 +24,7 @@
  * complex (nested calls, multiple args, expressions inside the parens) is
  * NOT rewritten — those formulas need a rewrite rule or aggregator.
  */
-import { EXPR_FUNCTION_NAMES, canonicalFunctionName } from '@/lib/expr';
+import { EXPR_FUNCTION_NAMES, KEYWORD_NAMES, canonicalFunctionName } from '@/lib/expr';
 
 // Rewrite `ident(singletoken)` → `ident_singletoken` (the r_D(n) accessor class),
 // but NOT when `ident` is a real expr function. Plan 2a: the exclusion set is the
@@ -40,7 +40,11 @@ import { EXPR_FUNCTION_NAMES, canonicalFunctionName } from '@/lib/expr';
 // manual_required — DWA-A-102-2 Bild-4 regression class. The `(?<![A-Za-z0-9_])`
 // lookbehind anchors the match to the START of an identifier so the excluded
 // `ln(` cannot be re-matched via its `n(` substring.
-const EXCLUDED = [...EXPR_FUNCTION_NAMES, 'log', 'lg'].join('|');
+// Plan 3 final wave C (item 1): the language's KEYWORDS join the exclusion set.
+// `a > 1 AND (b)` is a connective in front of a single-token parenthesised group,
+// not a stringified symbol — without this it normalised to the phantom `a > 1 AND_b`,
+// the silent sibling of the CALL-regex refusal fixed in engine-eligibility.ts.
+const EXCLUDED = [...EXPR_FUNCTION_NAMES, 'log', 'lg', ...KEYWORD_NAMES].join('|');
 const FN_LIKE = new RegExp(
   `(?<![A-Za-z0-9_])(?!(?:${EXCLUDED})\\s*\\()([A-Za-z_][A-Za-z0-9_]*)\\s*\\(\\s*([A-Za-z0-9_]+)\\s*\\)`,
   'gi',

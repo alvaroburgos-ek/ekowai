@@ -41,6 +41,22 @@ const KEYWORDS: Record<string, KeywordToken> = {
   true: 'TRUE', false: 'FALSE',
 };
 
+/**
+ * The language's reserved words, lower-cased — the ONE source of truth for
+ * "this identifier is a connective/literal, not a symbol or a function name".
+ *
+ * Plan 3 final wave C (item 1): two regexes outside the parser scan raw formula
+ * text for `<ident> (` — the eligibility gate's CALL test
+ * (`src/lib/eval/engine-eligibility.ts`) and the `r_D(n)` accessor normaliser
+ * (`src/lib/eval/normalize-formula.ts`). Both read `AND (b < 2 OR c > 3)` as a
+ * call to a function named `AND`, so a parenthesised compound condition inside
+ * a formula was either REFUSED as an unsupported aggregate (ISO-59020) or
+ * silently welded into the phantom symbol `AND_b`. They consult this set to
+ * tell a connective from a call. `if` is in here AND is a real function
+ * (`canonicalFunctionName('if')`), so its call form keeps working either way.
+ */
+export const KEYWORD_NAMES: ReadonlySet<string> = new Set(Object.keys(KEYWORDS));
+
 // arithmetic.ts:98 superset — accepts a leading dot (.5) alongside plain
 // digits, decimals, and scientific-notation suffixes.
 const NUMBER = /^(?:\d+\.\d+|\d+|\.\d+)(?:[eE][+-]?\d+)?/;

@@ -110,7 +110,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     enum_values: DATA_QUALITY_ITEMS.map((m) => ({ value: m.value, label_de: m.label_de, order_index: m.order_index })),
     verification_quote: `${Q.L595} — ${Q.L596}`,
     create: { section_code: 'F', label_de: 'Datenqualitätsanforderungen §5.2.4.2 a) – j) (Prüfliste, Mehrfachauswahl)', data_type: 'json', unit: null, clause_reference: '§5.2.4.2',
-      description: 'Plan 3: Mehrfachauswahl über die zehn gedruckten Datenqualitätspunkte a) – j) (S5_2_4_2_DQ); das Einzelfeld data_quality_requirements bleibt (iso14046-D-24); data_quality_complete_code ist STAGED (iso14046-F-2 — contains() erreicht den Materialisierer nicht).' },
+      description: 'Plan 3: Mehrfachauswahl über die zehn gedruckten Datenqualitätspunkte a) – j) (S5_2_4_2_DQ); das Einzelfeld data_quality_requirements bleibt (iso14046-D-24); data_quality_complete_code ist STAGED (iso14046-F-2 — seit Plan 3 Welle A erreicht contains() den Materialisierer; der Block bleibt bis zur Ratifizierung STAGED).' },
   }),
   WS02({
     symbol: 'baseline_conditions_present', widget: 'attestation', ui_config: null,

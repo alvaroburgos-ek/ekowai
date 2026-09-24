@@ -362,7 +362,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     enum_values: MONITORING_ITEMS.map((m, i) => ({ value: m.value, label_de: m.label_de, order_index: i })),
     verification_quote: `${Q.L660_671} — ${Q.L681}`,
     create: { section_code: 'C', label_de: 'Mindestumfang von Monitoring und Messung (§9.1 1), sieben Punkte)', data_type: 'json', unit: null, clause_reference: '§9.1 1)',
-      description: 'Plan 3: Mehrfachauswahl über die sieben gedruckten Mindestpunkte; das Textfeld monitoring_breakdown bleibt (iso46001-D-38); ein Vollständigkeits-Gate (alle sieben) neben CR-030 ist STAGED (iso46001-G-3 — der Materialisierer liest keine Checklisten, iso46001-F-2).' },
+      description: 'Plan 3: Mehrfachauswahl über die sieben gedruckten Mindestpunkte; das Textfeld monitoring_breakdown bleibt (iso46001-D-38); ein Vollständigkeits-Gate (alle sieben) neben CR-030 ist STAGED (iso46001-G-3 — seit Plan 3 Welle A liest der Materialisierer Checklisten (iso46001-F-2); der Block bleibt bis zur Ratifizierung STAGED).' },
   }),
 
   // ---- ISO-46001-10: nonconformities and corrective actions (§10.1) ----

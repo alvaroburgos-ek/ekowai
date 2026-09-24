@@ -187,7 +187,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     enum_values: PRINCIPLE_TOKENS.map((t, i) => ({ value: t, label_de: PRINCIPLE_LABELS[t], order_index: i + 1 })),
     verification_quote: `${norm(Q.L1588_1589)} — ${norm(SENTENCE_5_3_2)} — PDF pp.22–23 (gedruckte S. 15–16), §5.1 / §5.3.2`,
     create: { section_code: 'C', label_de: 'Berücksichtigte Grundsätze (§5.2.1 – §5.2.6, Mehrfachauswahl)', data_type: 'json', unit: null, clause_reference: '§5.1, §5.2, §5.3.2',
-      description: 'Plan 3: Mehrfachauswahl über die sechs gedruckten Grundsätze (Token = prod selected_principle = Zeilenschlüssel der Tabelle S5_2); das Einzelfeld selected_principle und das Pflicht-Boolean all_principles_considered bleiben (iso59004-D-9). all_principles_considered_code ist ZURÜCKGEHALTEN (iso59004-F-1 — contains() über einen json-Träger hat keinen Motorpfad).' },
+      description: 'Plan 3: Mehrfachauswahl über die sechs gedruckten Grundsätze (Token = prod selected_principle = Zeilenschlüssel der Tabelle S5_2); das Einzelfeld selected_principle und das Pflicht-Boolean all_principles_considered bleiben (iso59004-D-9). all_principles_considered_code ist ZURÜCKGEHALTEN (iso59004-F-1 — contains() über einen json-Träger hat seit Plan 3 Welle A einen Motorpfad; der Block bleibt bis zur Ratifizierung zurückgehalten).' },
   }),
 
   // ---- ISO-59004-05: the actions register (§6.1 / §6.7) ----

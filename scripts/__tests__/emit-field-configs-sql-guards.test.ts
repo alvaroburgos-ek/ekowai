@@ -178,3 +178,69 @@ describe('parseHeaderArgs (CLI)', () => {
     expect(() => parseHeaderArgs(['--nope', 'v'])).toThrow(/unknown argument --nope/);
   });
 });
+
+/**
+ * Plan 3 final wave C · item 2 — RESERVED register column keys.
+ *
+ * `src/lib/eval/register-rows.ts` owns the raw row's `id` as the ROW IDENTITY
+ * (`rows.push({ id: str(r.id) ?? genId(), … })`, and the register editor writes
+ * `{ id: genId() }` on every add). A register column keyed `id` therefore reads
+ * the row identity as its cell and is overwritten on save. Task 20 discovered it
+ * after the fact and renamed the column to `kennung`; Task 28 hit the same trap.
+ * The emitter must REFUSE it, not rely on the convention.
+ */
+describe('emitFieldConfigSql — reserved register column keys (final wave C, item 2)', () => {
+  const withColumns = (columns: unknown[]) => [{ ...base, symbol: 'reg', widget: 'register' as const, ui_config: { title: 'T', columns } }];
+
+  it("refuses a register column keyed `id` with the exact message", () => {
+    expect(() => emitFieldConfigSql('x', withColumns([{ key: 'id', label: 'Nr.', type: 'text' }]), [], {}))
+      .toThrow("S-01 reg.id: reserved register column key — `register-rows.ts` owns `id` as the ROW IDENTITY (the raw row's `id`), so the column would read the row id as its cell and be overwritten on save; rename it (Task 20 used `kennung`)");
+  });
+
+  it('refuses it in a nested position too (any column of the register, not just the first)', () => {
+    expect(() => emitFieldConfigSql('x', withColumns([{ key: 'a', label: 'A', type: 'text' }, { key: 'id', label: 'B', type: 'number' }]), [], {}))
+      .toThrow(/reserved register column key/);
+  });
+
+  it('a non-reserved key that merely CONTAINS id is fine (kennung, id_nr, row_id)', () => {
+    for (const key of ['kennung', 'id_nr', 'row_id']) {
+      expect(() => emitFieldConfigSql('x', withColumns([{ key, label: 'A', type: 'text' }]), [], {})).not.toThrow();
+    }
+  });
+});
+
+/**
+ * Plan 3 final wave C · item 3 — every emitted `visible_when` UPDATE is guarded
+ * by `AND f.visible_when IS NULL` (sections: `AND ws.visible_when IS NULL`),
+ * exactly like every STAGED block's hide. Without it, re-applying a migration
+ * overwrites a rule someone set in between (`iso14046-I-2`, `atv_a704e-I-2`).
+ * The guard rides on the statements that WRITE a rule; an entry that writes
+ * `visible_when = NULL` (the emitter's always-written invariant) is unguarded,
+ * and the ROLLBACK is never guarded — it must restore the captured prior.
+ */
+describe('emitFieldConfigSql — visible_when UPDATEs are IS NULL guarded (final wave C, item 3)', () => {
+  it('a field UPDATE that writes a rule carries the guard, at the END of the WHERE', () => {
+    const { up } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar', visible_when: "mode == 'a'" }], [], {});
+    expect(up).toContain("UPDATE fields f SET widget = 'scalar', ui_config = NULL, lookup = NULL, visible_when = 'mode == ''a''' FROM worksheet_templates w");
+    expect(up).toContain("AND s.code = 'S' AND f.active AND f.visible_when IS NULL;");
+  });
+
+  it('an UPDATE that writes visible_when = NULL is NOT guarded (the always-written invariant stays a plain write)', () => {
+    const { up } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar' }], [], {});
+    expect(up).toContain("AND s.code = 'S' AND f.active;");
+    expect(up).not.toContain('f.visible_when IS NULL');
+  });
+
+  it('the rollback is never guarded — it restores the captured prior unconditionally', () => {
+    const prior = { 'S-01 n': row({ visible_when: null }) };
+    const { down } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar', visible_when: "mode == 'a'" }], [], prior);
+    expect(down).not.toContain('IS NULL;');
+    expect(down).toContain("UPDATE fields f SET widget = NULL, ui_config = NULL, lookup = NULL, visible_when = NULL FROM worksheet_templates w");
+  });
+
+  it('a section rule carries the same guard on worksheet_sections; its rollback does not', () => {
+    const { up, down } = emitFieldConfigSql('x', [], [{ standard: 'S', worksheet: 'S-03', section_code: 'S-03.2', visible_when: "typ == 'b'", verification_quote: 'q' }], { sections: { 'S-03 S-03.2': { visible_when: null } } });
+    expect(up).toContain("ws.code = 'S-03.2' AND w.code = 'S-03' AND s.code = 'S' AND ws.visible_when IS NULL;");
+    expect(down).toContain("ws.code = 'S-03.2' AND w.code = 'S-03' AND s.code = 'S';");
+  });
+});

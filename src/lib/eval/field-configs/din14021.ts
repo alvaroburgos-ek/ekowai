@@ -191,7 +191,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     enum_values: GENERAL_REQUIREMENT_ITEMS.map((m) => ({ value: m.value, label_de: m.label_de, order_index: m.order_index })),
     verification_quote: `${Q.L757} — ${Q.L823}`,
     create: { section_code: 'C', label_de: 'Allgemeine Anforderungen §5.3 – §5.10 (Prüfliste, Mehrfachauswahl)', data_type: 'json', unit: null, clause_reference: '§5.3–§5.10',
-      description: 'Plan 3: Mehrfachauswahl über die acht gedruckten Abschnitte 5.3 … 5.10 (S5_3_5_10); die zwölf Einzel-Booleans bleiben (din14021-D-26 … D-35); general_requirements_met_code ist STAGED (din14021-F-1 — contains() erreicht den Materialisierer nicht).' },
+      description: 'Plan 3: Mehrfachauswahl über die acht gedruckten Abschnitte 5.3 … 5.10 (S5_3_5_10); die zwölf Einzel-Booleans bleiben (din14021-D-26 … D-35); general_requirements_met_code ist STAGED (din14021-F-1 — seit Plan 3 Welle A erreicht contains() den Materialisierer; der Block bleibt bis zur Ratifizierung STAGED).' },
   }),
 
   // ---- DIN-14021-04: the §6.5.3 a) – g) minimum documentation as a checklist (info_documented_min stays — D-block) ----
