@@ -3,6 +3,7 @@ import { ClauseChip } from '@/components/norm-text/clause-chip';
 
 import { KatexFormula } from '@/components/math/katex-formula';
 import { VerifyButton } from './verify-button';
+import { verificationStatusLabel, verificationStatusTitle } from '@/lib/verification-status';
 
 type Equation = {
   id: string;
@@ -48,7 +49,12 @@ export function EquationsBlock({
                 <ClauseChip clauseReference={eq.clauseReference} />
               )}
               {eq.verificationStatus !== 'engineer_verified' && (
-                <span className="text-accent-2">imported_unverified</span>
+                <span
+                  className="text-accent-2 normal-case tracking-normal"
+                  title={verificationStatusTitle(eq.verificationStatus)}
+                >
+                  {verificationStatusLabel(eq.verificationStatus)}
+                </span>
               )}
               {isPlatformEngineer && (
                 <VerifyButton
