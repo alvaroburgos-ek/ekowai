@@ -1,0 +1,2561 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs ATV-A-704E atv_a704e",
+    "captured_at": "2026-09-24T11:01:54.868Z",
+    "standard": "ATV-A-704E",
+    "slug": "atv_a704e",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 91,
+    "section_rows": 101,
+    "sections_total": 101,
+    "equation_rows": 6,
+    "gate_rows": 30
+  },
+  "ATV-A-704E-01 aqa_applied": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-01 attest_atv_a_704e_01_cr_001": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-01 attest_atv_a_704e_01_cr_002": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-01 attest_atv_a_704e_01_cr_003": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-01 attest_atv_a_704e_01_cr_004": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-01 attest_atv_a_704e_01_cr_005": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-01 attest_atv_a_704e_01_cr_006": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-01 attest_atv_a_704e_01_cr_007": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-01 attest_atv_a_704e_01_cr_008": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-01 iqc_card_module": {
+    "enum_values": [
+      {
+        "value": "card_1",
+        "label_de": "Übersichtskarte",
+        "label_en": "Survey Card",
+        "order_index": 0,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_2",
+        "label_de": "Interne Vorgaben",
+        "label_en": "Internal Specifications",
+        "order_index": 1,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_3",
+        "label_de": "Mehrfachbestimmungen",
+        "label_en": "Multiple Determinations",
+        "order_index": 2,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_4",
+        "label_de": "Messung von Standards",
+        "label_en": "Measurement of Standards",
+        "order_index": 3,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_5",
+        "label_de": "Plausibilitätsprüfung (Verdünnung und Standardaddition)",
+        "label_en": "Plausibility Check by Dilution and Standard Addition",
+        "order_index": 4,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_6",
+        "label_de": "Gleichwertigkeitsmessungen",
+        "label_en": "Equivalency Measurements",
+        "order_index": 5,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_7",
+        "label_de": "Parallelanalysen zur Referenzmethode",
+        "label_en": "Parallel Analyses to the Reference Method",
+        "order_index": 6,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_8",
+        "label_de": "Probenahme und Probenvorbehandlung",
+        "label_en": "Sampling and Pre-treatment of Samples",
+        "order_index": 7,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_9",
+        "label_de": "Prüfmittelüberwachung",
+        "label_en": "Test Equipment Monitoring",
+        "order_index": 8,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_10",
+        "label_de": "Personalnachweisblatt Betriebsanalytik",
+        "label_en": "Personnel Record Sheet, Operating Analysis",
+        "order_index": 9,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      },
+      {
+        "value": "card_11",
+        "label_de": "Abweichungen und Maßnahmen",
+        "label_en": "Deviations and Measures",
+        "order_index": 10,
+        "regulation_reference": "pdf §2.1 + Annex A.2 / card list (Contents pp.5-6, A.2 survey table p.17)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-08",
+      "ATV-A-704E-09",
+      "ATV-A-704E-10",
+      "ATV-A-704E-11",
+      "ATV-A-704E-12"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-01 parameter_name": {
+    "enum_values": [
+      {
+        "value": "settable_substances",
+        "label_de": "Absetzbare Stoffe",
+        "label_en": "Settable substances (Sett.)",
+        "order_index": 0,
+        "regulation_reference": "pdf §2.2 Abbreviated Terms table (p.9) — analytical-parameter rows only"
+      },
+      {
+        "value": "bod5",
+        "label_de": "BSB5",
+        "label_en": "BOD5 — Biochemical oxygen demand in five days",
+        "order_index": 1,
+        "regulation_reference": "pdf §2.2 Abbreviated Terms table (p.9) — analytical-parameter rows only"
+      },
+      {
+        "value": "cod",
+        "label_de": "CSB",
+        "label_en": "COD — Chemical oxygen demand",
+        "order_index": 2,
+        "regulation_reference": "pdf §2.2 Abbreviated Terms table (p.9) — analytical-parameter rows only"
+      },
+      {
+        "value": "nh4_n",
+        "label_de": "NH4-N (Ammoniumstickstoff)",
+        "label_en": "NH4-N — Ammonium nitrogen",
+        "order_index": 3,
+        "regulation_reference": "pdf §2.2 Abbreviated Terms table (p.9) — analytical-parameter rows only"
+      },
+      {
+        "value": "no3_n",
+        "label_de": "NO3-N (Nitratstickstoff)",
+        "label_en": "NO3-N — Nitrate nitrogen",
+        "order_index": 4,
+        "regulation_reference": "pdf §2.2 Abbreviated Terms table (p.9) — analytical-parameter rows only"
+      },
+      {
+        "value": "no2_n",
+        "label_de": "NO2-N (Nitritstickstoff)",
+        "label_en": "NO2-N — Nitrite nitrogen",
+        "order_index": 5,
+        "regulation_reference": "pdf §2.2 Abbreviated Terms table (p.9) — analytical-parameter rows only"
+      },
+      {
+        "value": "p_total",
+        "label_de": "Pges (Gesamtphosphor)",
+        "label_en": "P total — Total phosphorus",
+        "order_index": 6,
+        "regulation_reference": "pdf §2.2 Abbreviated Terms table (p.9) — analytical-parameter rows only"
+      },
+      {
+        "value": "tn",
+        "label_de": "TNb / Nges (Gesamtstickstoff, gebunden)",
+        "label_en": "TN — Total nitrogen bound",
+        "order_index": 7,
+        "regulation_reference": "pdf §2.2 Abbreviated Terms table (p.9) — analytical-parameter rows only"
+      },
+      {
+        "value": "toc",
+        "label_de": "TOC (gesamter organischer Kohlenstoff)",
+        "label_en": "TOC — Total organic carbon",
+        "order_index": 8,
+        "regulation_reference": "pdf §2.2 Abbreviated Terms table (p.9) — analytical-parameter rows only"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-01 standard_scope_confirmed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "ATV-A-704E-02 manufacturer_change_notification": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-02 manufacturer_documentation": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-03"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-02 manufacturer_function_control": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-02 method_evaluated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-03"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-02 method_validated_vs_reference": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-03"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-02 user_applies_per_leaflet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-02 user_iqc_performed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-08"
+    ],
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-03 application_mode": {
+    "enum_values": [
+      {
+        "value": "parallel_to_reference",
+        "label_de": "Parallel zur Referenzmethode",
+        "label_en": "Parallel to reference method",
+        "order_index": 1,
+        "regulation_reference": "§4.1"
+      },
+      {
+        "value": "single_substitute",
+        "label_de": "Einzel-Ersatzmethode",
+        "label_en": "Single substitute method",
+        "order_index": 2,
+        "regulation_reference": "§4.1"
+      },
+      {
+        "value": "self_monitoring",
+        "label_de": "Eigenkontrolle",
+        "label_en": "Self-monitoring use",
+        "order_index": 3,
+        "regulation_reference": "§4.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-05"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-03 attest_atv_a_704e_03_cr_009": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-03 attest_atv_a_704e_03_cr_010": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-03 attest_atv_a_704e_03_cr_011": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-03 attest_atv_a_704e_03_cr_012": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-03 expected_concentration_range": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-10"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ATV-A-704E-03 method_selected_suitable": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-03 validation_range_coverage_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-04 basic_instruction_done": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-04 successive_supervision_interval": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-04 training_courses_attended": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-05 attest_atv_a_704e_05_cr_014": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-05 attest_atv_a_704e_05_cr_015": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-05 blank_and_standard_controlled": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-05 equivalency_check_performed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-10"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-05 multiple_determination_performed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-09"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-05 parallel_analysis_performed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-10"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-05 reagent_storage_life_controlled": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-05 sample_suitability_checked": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-07"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-06 container_material": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-06 max_storage_time": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-06 precipitation_influence": {
+    "enum_values": [
+      {
+        "value": "none",
+        "label_de": "Keiner",
+        "label_en": "None",
+        "order_index": 1,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "partial",
+        "label_de": "Teilweise",
+        "label_en": "Partial",
+        "order_index": 2,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "full",
+        "label_de": "Voll",
+        "label_en": "Full",
+        "order_index": 3,
+        "regulation_reference": "§A.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ATV-A-704E-06 sample_pretreatment": {
+    "enum_values": [
+      {
+        "value": "homogenisation",
+        "label_de": "Homogenisierung",
+        "label_en": "Homogenisation (per DIN 38402-30)",
+        "order_index": 0,
+        "regulation_reference": "pdf IQC-Card 8 'Sampling and Pre-treatment of Samples' (Annex A.4, pp.49-50)"
+      },
+      {
+        "value": "filtration",
+        "label_de": "Filtration",
+        "label_en": "Filtration",
+        "order_index": 1,
+        "regulation_reference": "pdf IQC-Card 8 'Sampling and Pre-treatment of Samples' (Annex A.4, pp.49-50)"
+      },
+      {
+        "value": "digestion",
+        "label_de": "Aufschluss (thermisch-chemisch)",
+        "label_en": "Thermal-chemical digestion / decomposition",
+        "order_index": 2,
+        "regulation_reference": "pdf IQC-Card 8 'Sampling and Pre-treatment of Samples' (Annex A.4, pp.49-50)"
+      },
+      {
+        "value": "dilution",
+        "label_de": "Verdünnung",
+        "label_en": "Dilution",
+        "order_index": 3,
+        "regulation_reference": "pdf IQC-Card 8 'Sampling and Pre-treatment of Samples' (Annex A.4, pp.49-50)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-09"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-06 sample_type": {
+    "enum_values": [
+      {
+        "value": "single_sample",
+        "label_de": "Stichprobe",
+        "label_en": "Single sample",
+        "order_index": 1,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "random_sample",
+        "label_de": "Zufallsprobe",
+        "label_en": "Random sample",
+        "order_index": 2,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "mixed_sample",
+        "label_de": "Mischprobe",
+        "label_en": "Mixed sample",
+        "order_index": 3,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "qualified_sample",
+        "label_de": "Qualifizierte Stichprobe",
+        "label_en": "Qualified sample",
+        "order_index": 4,
+        "regulation_reference": "§A.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-09"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-06 sampling_method": {
+    "enum_values": [
+      {
+        "value": "manual",
+        "label_de": "Manuelle Probenahme",
+        "label_en": "Manual sampling",
+        "order_index": 1,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "automatic",
+        "label_de": "Automatische Probenahme",
+        "label_en": "Automatic sampling",
+        "order_index": 2,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "time_proportional",
+        "label_de": "Zeitproportional",
+        "label_en": "Time proportional",
+        "order_index": 3,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "volume_proportional",
+        "label_de": "Volumenproportional",
+        "label_en": "Volume proportional",
+        "order_index": 4,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "flow_proportional",
+        "label_de": "Mengenproportional",
+        "label_en": "Flow proportional",
+        "order_index": 5,
+        "regulation_reference": "§A.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-06 storage_temperature": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-07 attest_atv_a_704e_07_cr_016": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-07 attest_atv_a_704e_07_cr_017": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-07 attest_atv_a_704e_07_cr_018": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-07 qualification_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-07 quality_control_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-07 results_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-08 attest_atv_a_704e_08_cr_020": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-08 attest_atv_a_704e_08_cr_021": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-08 attest_atv_a_704e_08_cr_024": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-08 attest_atv_a_704e_08_cr_027": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "ATV-A-704E-08 qa_measure": {
+    "enum_values": [
+      {
+        "value": "multiple_determinations",
+        "label_de": "Mehrfachbestimmungen",
+        "label_en": "Multiple determinations",
+        "order_index": 1,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "measurement_of_standards",
+        "label_de": "Messung von Standards",
+        "label_en": "Measurement of standards",
+        "order_index": 2,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "plausibility_checks",
+        "label_de": "Plausibilitaetspruefungen (Aufstockung, Verduennung)",
+        "label_en": "Plausibility checks (spiking, dilution)",
+        "order_index": 3,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "equivalency_measurements",
+        "label_de": "Aequivalenzmessungen / Ringversuch",
+        "label_en": "Equivalency / interlaboratory test",
+        "order_index": 4,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "parallel_measurements",
+        "label_de": "Parallelmessungen zur Referenzmethode",
+        "label_en": "Parallel measurements to reference method",
+        "order_index": 5,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "pipettes",
+        "label_de": "Pipetten",
+        "label_en": "Pipettes",
+        "order_index": 6,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "ph_meter_check",
+        "label_de": "pH-Meter-Kontrolle",
+        "label_en": "pH-meter check",
+        "order_index": 7,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "heating_thermoblock_check",
+        "label_de": "Heizgeraet-/Thermoblock-Kontrolle",
+        "label_en": "Heating device/thermoblock check",
+        "order_index": 8,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "measuring_device_check",
+        "label_de": "Pruefung Messgeraet (z.B. Photometer)",
+        "label_en": "Measuring device check (e.g. photometer)",
+        "order_index": 9,
+        "regulation_reference": "§A.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-09",
+      "ATV-A-704E-10",
+      "ATV-A-704E-11"
+    ],
+    "data_type": "enum",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-08 qa_minimum_frequency": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-09",
+      "ATV-A-704E-10",
+      "ATV-A-704E-11"
+    ],
+    "data_type": "text",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-08 qa_quality_target_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-09",
+      "ATV-A-704E-10"
+    ],
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-08 survey_measure_count": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-09 calculated_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-09 concentration_standard": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-09 control_measure_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-09 deviation_single_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-09 mean_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-09 measured_value_diluted_sample": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-09 measured_value_original_sample": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-09 measured_value_spiked_sample": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-09 n_determinations": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-09 NSS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-09 sample_volume": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-09 single_result_i": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-09 total_volume": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-09 volume_sample": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-09 volume_standard": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-10 deviation_equivalency_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-10 deviation_parallel_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-10 measured_value_operating": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-10 measured_value_reference": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-10 nominal_value_reference": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-11 heating_device_deviation": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-11 monitoring_interval": {
+    "enum_values": [
+      {
+        "value": "annually",
+        "label_de": "Jaehrlich",
+        "label_en": "Annually",
+        "order_index": 1,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "biannually",
+        "label_de": "Halbjaehrlich",
+        "label_en": "Biannually",
+        "order_index": 2,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "quarterly",
+        "label_de": "Vierteljaehrlich",
+        "label_en": "Quarterly",
+        "order_index": 3,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "monthly",
+        "label_de": "Monatlich",
+        "label_en": "Monthly",
+        "order_index": 4,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "every_two_weeks",
+        "label_de": "Alle zwei Wochen",
+        "label_en": "Every two weeks",
+        "order_index": 5,
+        "regulation_reference": "§A.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-11 photometer_check_done": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ATV-A-704E-11 pipette_deviation_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-11 pipette_tested_volume": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-11 testing_equipment": {
+    "enum_values": [
+      {
+        "value": "bod_respirometer",
+        "label_de": "BSB-Respirometer",
+        "label_en": "BOD-respirometer",
+        "order_index": 1,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "photometer",
+        "label_de": "Photometer",
+        "label_en": "Photometer",
+        "order_index": 2,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "annealing_furnace",
+        "label_de": "Gluehofen",
+        "label_en": "Annealing furnace",
+        "order_index": 3,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "heating_device_thermoblock",
+        "label_de": "Heizgeraet/Thermoblock",
+        "label_en": "Heating device/thermoblock",
+        "order_index": 4,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "ion_exchange",
+        "label_de": "Ionenaustauscher",
+        "label_en": "Ion exchange",
+        "order_index": 5,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "piston_stroke_pipettes",
+        "label_de": "Kolbenhubpipetten",
+        "label_en": "Piston stroke pipettes",
+        "order_index": 6,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "refrigerator",
+        "label_de": "Kuehlschrank",
+        "label_en": "Refrigerator",
+        "order_index": 7,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "conductivity_device",
+        "label_de": "Leitfaehigkeitsmessgeraet",
+        "label_en": "Conductivity measuring device",
+        "order_index": 8,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "ph_meter",
+        "label_de": "pH-Meter",
+        "label_en": "pH-meter",
+        "order_index": 9,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "sampling_equipment",
+        "label_de": "Probenahmeausruestung",
+        "label_en": "Sampling equipment",
+        "order_index": 10,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "reagents",
+        "label_de": "Reagenzien",
+        "label_en": "Reagents",
+        "order_index": 11,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "oxygen_device",
+        "label_de": "Sauerstoffmessgeraet",
+        "label_en": "Oxygen measuring device",
+        "order_index": 12,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "thermometer",
+        "label_de": "Thermometer",
+        "label_en": "Thermometer",
+        "order_index": 13,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "thermo_cabinet",
+        "label_de": "Thermoschrank",
+        "label_en": "Thermo cabinet",
+        "order_index": 14,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "drying_cabinet",
+        "label_de": "Trockenschrank",
+        "label_en": "Drying cabinet",
+        "order_index": 15,
+        "regulation_reference": "§A.4"
+      },
+      {
+        "value": "scales",
+        "label_de": "Waage",
+        "label_en": "Scales",
+        "order_index": 16,
+        "regulation_reference": "§A.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-12 deviation_cause": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-12 deviation_feature": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-12 deviation_iqc_card_ref": {
+    "enum_values": [
+      {
+        "value": "card_1",
+        "label_de": "Übersichtskarte",
+        "label_en": "Survey Card",
+        "order_index": 0,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_2",
+        "label_de": "Interne Vorgaben",
+        "label_en": "Internal Specifications",
+        "order_index": 1,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_3",
+        "label_de": "Mehrfachbestimmungen",
+        "label_en": "Multiple Determinations",
+        "order_index": 2,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_4",
+        "label_de": "Messung von Standards",
+        "label_en": "Measurement of Standards",
+        "order_index": 3,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_5",
+        "label_de": "Plausibilitätsprüfung (Verdünnung und Standardaddition)",
+        "label_en": "Plausibility Check by Dilution and Standard Addition",
+        "order_index": 4,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_6",
+        "label_de": "Gleichwertigkeitsmessungen",
+        "label_en": "Equivalency Measurements",
+        "order_index": 5,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_7",
+        "label_de": "Parallelanalysen zur Referenzmethode",
+        "label_en": "Parallel Analyses to the Reference Method",
+        "order_index": 6,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_8",
+        "label_de": "Probenahme und Probenvorbehandlung",
+        "label_en": "Sampling and Pre-treatment of Samples",
+        "order_index": 7,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_9",
+        "label_de": "Prüfmittelüberwachung",
+        "label_en": "Test Equipment Monitoring",
+        "order_index": 8,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_10",
+        "label_de": "Personalnachweisblatt Betriebsanalytik",
+        "label_en": "Personnel Record Sheet, Operating Analysis",
+        "order_index": 9,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      },
+      {
+        "value": "card_11",
+        "label_de": "Abweichungen und Maßnahmen",
+        "label_en": "Deviations and Measures",
+        "order_index": 10,
+        "regulation_reference": "pdf IQC-Card 11 'Deviations and Measures' references the IQC-Card set (same enumeration as field 1)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-12 deviation_measure": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-07"
+    ],
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ATV-A-704E-12 employee_qualification": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-07"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ATV-A-704E-12 instruction_training_record": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ATV-A-704E-07"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "sections": {
+    "ATV-A-704E-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-01 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-02 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-02 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-03 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-04 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-05 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-07 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-07 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-07 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-08 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-08 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-08 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-08 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-08 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-08 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-08 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-08 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-08 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-09 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-09 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-09 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-09 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-09 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-09 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-09 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-09 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-09 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-10 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-10 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-10 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-10 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-10 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-10 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-10 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-10 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-11 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-11 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-11 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-11 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-11 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-11 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-11 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-11 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-11 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-12 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-12 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-12 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-12 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-12 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-12 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-12 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ATV-A-704E-12 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "ATV-A-704E-09 EQ-01": {
+      "id": "c4f4944e-9329-4a62-9724-3e9637a0891c",
+      "output_symbol": "mean_value",
+      "input_symbols": [
+        "single_result_i",
+        "n_determinations"
+      ]
+    },
+    "ATV-A-704E-09 EQ-02": {
+      "id": "a4287f3a-2d8f-4d0e-8f51-8ce6843496cf",
+      "output_symbol": "deviation_single_pct",
+      "input_symbols": [
+        "single_result_i",
+        "mean_value"
+      ]
+    },
+    "ATV-A-704E-09 EQ-03": {
+      "id": "f203bcc2-f1d4-4a40-85a6-de11bd2e7894",
+      "output_symbol": "calculated_value",
+      "input_symbols": [
+        "total_volume",
+        "sample_volume",
+        "measured_value_diluted_sample"
+      ]
+    },
+    "ATV-A-704E-09 EQ-04": {
+      "id": "56f648dc-a38d-4f4a-81da-401d3ba36eb5",
+      "output_symbol": "NSS",
+      "input_symbols": [
+        "volume_sample",
+        "measured_value_original_sample",
+        "volume_standard",
+        "concentration_standard"
+      ]
+    },
+    "ATV-A-704E-10 EQ-05": {
+      "id": "3da75786-3ecf-4f6b-996a-bdd86e486605",
+      "output_symbol": "deviation_equivalency_pct",
+      "input_symbols": [
+        "measured_value_operating",
+        "nominal_value_reference"
+      ]
+    },
+    "ATV-A-704E-10 EQ-06": {
+      "id": "5bb589a2-3706-4651-8e8c-13ac5cdd6c60",
+      "output_symbol": "deviation_parallel_pct",
+      "input_symbols": [
+        "measured_value_operating",
+        "measured_value_reference"
+      ]
+    }
+  },
+  "gates": {
+    "ATV-A-704E-01 CR-001": {
+      "condition": "attest_atv_a_704e_01_cr_001 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_01_cr_001"
+      ]
+    },
+    "ATV-A-704E-01 CR-002": {
+      "condition": "attest_atv_a_704e_01_cr_002 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_01_cr_002"
+      ]
+    },
+    "ATV-A-704E-01 CR-003": {
+      "condition": "attest_atv_a_704e_01_cr_003 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_01_cr_003"
+      ]
+    },
+    "ATV-A-704E-01 CR-004": {
+      "condition": "attest_atv_a_704e_01_cr_004 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_01_cr_004"
+      ]
+    },
+    "ATV-A-704E-01 CR-005": {
+      "condition": "attest_atv_a_704e_01_cr_005 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_01_cr_005"
+      ]
+    },
+    "ATV-A-704E-01 CR-006": {
+      "condition": "attest_atv_a_704e_01_cr_006 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_01_cr_006"
+      ]
+    },
+    "ATV-A-704E-01 CR-007": {
+      "condition": "attest_atv_a_704e_01_cr_007 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_01_cr_007"
+      ]
+    },
+    "ATV-A-704E-01 CR-008": {
+      "condition": "attest_atv_a_704e_01_cr_008 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_01_cr_008"
+      ]
+    },
+    "ATV-A-704E-03 CR-009": {
+      "condition": "attest_atv_a_704e_03_cr_009 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_03_cr_009"
+      ]
+    },
+    "ATV-A-704E-03 CR-010": {
+      "condition": "attest_atv_a_704e_03_cr_010 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_03_cr_010"
+      ]
+    },
+    "ATV-A-704E-03 CR-011": {
+      "condition": "attest_atv_a_704e_03_cr_011 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_03_cr_011"
+      ]
+    },
+    "ATV-A-704E-03 CR-012": {
+      "condition": "attest_atv_a_704e_03_cr_012 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_03_cr_012"
+      ]
+    },
+    "ATV-A-704E-04 CR-013": {
+      "condition": "training_courses_attended == true",
+      "severity": "warn",
+      "symbols": [
+        "training_courses_attended"
+      ]
+    },
+    "ATV-A-704E-05 CR-014": {
+      "condition": "attest_atv_a_704e_05_cr_014 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_05_cr_014"
+      ]
+    },
+    "ATV-A-704E-05 CR-015": {
+      "condition": "attest_atv_a_704e_05_cr_015 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_05_cr_015"
+      ]
+    },
+    "ATV-A-704E-05 CR-029": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ATV-A-704E-07 CR-016": {
+      "condition": "attest_atv_a_704e_07_cr_016 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_07_cr_016"
+      ]
+    },
+    "ATV-A-704E-07 CR-017": {
+      "condition": "attest_atv_a_704e_07_cr_017 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_07_cr_017"
+      ]
+    },
+    "ATV-A-704E-07 CR-018": {
+      "condition": "attest_atv_a_704e_07_cr_018 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_07_cr_018"
+      ]
+    },
+    "ATV-A-704E-07 CR-028": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ATV-A-704E-08 CR-020": {
+      "condition": "attest_atv_a_704e_08_cr_020 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_08_cr_020"
+      ]
+    },
+    "ATV-A-704E-08 CR-021": {
+      "condition": "attest_atv_a_704e_08_cr_021 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_08_cr_021"
+      ]
+    },
+    "ATV-A-704E-08 CR-024": {
+      "condition": "attest_atv_a_704e_08_cr_024 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_08_cr_024"
+      ]
+    },
+    "ATV-A-704E-08 CR-027": {
+      "condition": "attest_atv_a_704e_08_cr_027 == True",
+      "severity": "block",
+      "symbols": [
+        "attest_atv_a_704e_08_cr_027"
+      ]
+    },
+    "ATV-A-704E-08 CR-030": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ATV-A-704E-09 CR-019": {
+      "condition": "deviation_single_pct <= qa_quality_target_pct",
+      "severity": "warn",
+      "symbols": [
+        "deviation_single_pct",
+        "qa_quality_target_pct"
+      ]
+    },
+    "ATV-A-704E-10 CR-022": {
+      "condition": "deviation_equivalency_pct <= qa_quality_target_pct",
+      "severity": "warn",
+      "symbols": [
+        "deviation_equivalency_pct",
+        "qa_quality_target_pct"
+      ]
+    },
+    "ATV-A-704E-10 CR-023": {
+      "condition": "deviation_parallel_pct <= qa_quality_target_pct",
+      "severity": "warn",
+      "symbols": [
+        "deviation_parallel_pct",
+        "qa_quality_target_pct"
+      ]
+    },
+    "ATV-A-704E-11 CR-025": {
+      "condition": "(pipette_tested_volume <= 0.5 AND pipette_deviation_pct <= 2) OR (pipette_tested_volume >= 1.0 AND pipette_deviation_pct <= 1)",
+      "severity": "block",
+      "symbols": [
+        "pipette_deviation_pct",
+        "pipette_tested_volume"
+      ]
+    },
+    "ATV-A-704E-11 CR-026": {
+      "condition": "heating_device_deviation <= 3",
+      "severity": "block",
+      "symbols": [
+        "heating_device_deviation"
+      ]
+    }
+  }
+}

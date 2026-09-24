@@ -1,0 +1,1490 @@
+-- ATV-A-704E — Plan 3 Task 27 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md (same ids).
+-- Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the order it appears — except the stated dependencies:
+--   G-2 BEFORE G-5 (G-5 guards on G-2's POST-state md5); C-3 BEFORE G-4 / G-6 / G-7 (the counts must be inherited first); C-1 AFTER G-2;
+--   R-1 AFTER D-2 / D-3 / D-4 / D-9 / D-16 / D-20 / D-21; every D-block and every C-block AFTER the DATA migrations
+--   20260917102710 (field configs: the nine registers + twelve derived outputs, the three visibility rules) · 20260917102720 (equations ATV-A-704E-08-D1 … -12-D2).
+--   There is NO seed migration for this standard: ATV-A-704E has no transcript, so NO regulation table is seeded (atv_a704e-U-1 … U-6).
+--
+-- **NO TRANSCRIPT.** The only source on disk is a 37-page SCAN without a text layer ("C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ATV A 704E\ATV-A-704E-Operating-Methods-for-Wastewater-Analysis.pdf").
+-- `pdftotext -layout` on it returns 37 bytes = one form feed per page, 0 non-whitespace characters (command + raw output in the task report, amendment O).
+-- Every "Evidence" line below is therefore a cell of the READ-ONLY prod capture (`node scripts/verification/capture-text.mjs ATV-A-704E atv_a704e`
+-- → src/lib/eval/field-configs/atv_a704e.text.prior.json), grade **EV** — encoded, unverified against the standard. No line here is a verbatim quote OF THE STANDARD.
+--
+-- Prod facts (enum tokens, consumer_worksheets, gate ids / conditions / md5, the six equation ids / formulas / md5, worksheet ids, the 0 stored project_parameters
+-- and 12 worksheet instances of the standard, max code CR-030) were captured read-only on 2026-09-24 (atv_a704e.prior.json + atv_a704e.text.prior.json).
+-- This file and the sheet section are GENERATED (scratchpad gen-a704e-staged.mjs); every md5 below is read from the capture or recomputed with node:crypto, never typed.
+--
+-- Conventions: s.code = 'ATV-A-704E', worksheets by code, never by id; every UPDATE is guarded by the prior value (or md5) it replaces so a re-run is a no-op; each block names its rollback.
+-- A staged gate rewrite archives the full compliance_requirements row into compliance_requirements_archive_atv_a704e in the SAME transaction (CREATE TABLE … AS SELECT * … WHERE false; INSERT … SELECT c.* WHERE c.id = … AND md5(c.condition) = …),
+-- guards the UPDATE on md5(condition), and rolls back by restoring condition / description / worksheet_template_id / severity / requires_attestation from the archive by id;
+-- the archive table is dropped by the owner once every gate change of this file is signed off as final. The six prod EQUATIONS are touched only by R-1 (archive + delete),
+-- whose rollback re-INSERTs ALL 22 live `equations` columns with an EXPLICIT list.
+--
+-- Column lists (information_schema, re-read READ-ONLY in this session, 2026-09-24):
+--   equations (22, live order): id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--     (EQ-01 … EQ-06 carry non-null verified_at and verification_note — checked read-only; the R-1 rollback lists all 22.)
+--   compliance_requirements (18): id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation   (no `active` column; max code today CR-030)
+--   fields (31): id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote
+--     (+ widget, ui_config, lookup, visible_when after 20260911100000 — still ABSENT today, the Plan-1 schema migration is unapplied)
+--   worksheet_sections (7): id, worksheet_template_id, parent_section_id, code, title_de, title_en, order_index   (+ visible_when after 20260911100000)
+--
+-- Shorthand:  WS(code) = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = '<code>')
+--             RESTORE(code) = UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '<id>';
+--
+-- Gates (read-only 2026-09-24; conditions from the capture):
+--   ATV-A-704E-01 CR-001 (id 3595d9ff-f666-4a73-a3d4-45469955b1d3, block, md5 203d23782d6fe95a64dcd86a788a4944, attest true, condition 'attest_atv_a_704e_01_cr_001 == True')
+--   ATV-A-704E-01 CR-002 (id 07e68d4a-bc11-480b-94af-eb680999d496, block, md5 5e6222eeb3460f83c29dc8b2bff24914, attest true, condition 'attest_atv_a_704e_01_cr_002 == True')
+--   ATV-A-704E-01 CR-003 (id 69ce76e3-7bb6-487c-8f3e-f39d2d754f69, block, md5 e905ed1b1d04087f275784707711ad4b, attest true, condition 'attest_atv_a_704e_01_cr_003 == True')
+--   ATV-A-704E-01 CR-004 (id f8ecc7f9-4b7f-4985-82b1-367e9408e95d, block, md5 1571ad754d940e1d9d3c9aba52f3ff62, attest true, condition 'attest_atv_a_704e_01_cr_004 == True')
+--   ATV-A-704E-01 CR-005 (id ae6e92a6-f766-45d5-8444-6e43ffb7dc06, block, md5 abb310ccd15b0f97835091dba442f402, attest true, condition 'attest_atv_a_704e_01_cr_005 == True')
+--   ATV-A-704E-01 CR-006 (id 87f8bd72-c9f5-4aa2-92ef-fa3b141d399f, block, md5 b4990999016ff212a787ab361039c8cf, attest true, condition 'attest_atv_a_704e_01_cr_006 == True')
+--   ATV-A-704E-01 CR-007 (id d0378888-db5d-4391-8466-738f241894a1, block, md5 be33ac824c062de87fcec4b9c58db4f6, attest true, condition 'attest_atv_a_704e_01_cr_007 == True')
+--   ATV-A-704E-01 CR-008 (id 303204f9-b91c-4828-bf9d-03e8e6ad1d4b, block, md5 a891059bd07e01e74fc2d443c37fbade, attest true, condition 'attest_atv_a_704e_01_cr_008 == True')
+--   ATV-A-704E-03 CR-009 (id 1de0e4a0-d098-4da4-9af7-377aa679bd24, block, md5 1631f89af59b15563da78e02073c4155, attest true, condition 'attest_atv_a_704e_03_cr_009 == True')
+--   ATV-A-704E-03 CR-010 (id 76eba033-bc51-4646-a1f9-ec52abbc42fb, block, md5 459466ddccf5fade17047df846ff5428, attest true, condition 'attest_atv_a_704e_03_cr_010 == True')
+--   ATV-A-704E-03 CR-011 (id a45d66d5-18f2-41d8-81bf-846cf2cf7b78, block, md5 cedc5878149066b385e2d5328a2e7178, attest true, condition 'attest_atv_a_704e_03_cr_011 == True')
+--   ATV-A-704E-03 CR-012 (id 0fa537be-3f70-4c67-8580-24f0da6c3e26, block, md5 bed2ff4da11622c18898f696f94c5f15, attest true, condition 'attest_atv_a_704e_03_cr_012 == True')
+--   ATV-A-704E-04 CR-013 (id 35cc7d55-8215-40b1-ab11-b5e430d4ebee, warn, md5 02fef82d49ffec7b48b05a91d13d1bb2, attest false, condition 'training_courses_attended == true')
+--   ATV-A-704E-05 CR-014 (id a72564cd-2ffd-442e-954e-d22ee9574098, block, md5 822fd5480c9c1d98ed19ff5147d69932, attest true, condition 'attest_atv_a_704e_05_cr_014 == True')
+--   ATV-A-704E-05 CR-015 (id f2fa9ae3-439b-4a36-9366-7df5ad776183, block, md5 02c7bec8608444bd496e6e1108c67e3c, attest true, condition 'attest_atv_a_704e_05_cr_015 == True')
+--   ATV-A-704E-05 CR-029 (id 08aa1b11-63af-4c7a-ade0-d369b2d69c3f, warn, md5 d41d8cd98f00b204e9800998ecf8427e, attest false, condition '')
+--   ATV-A-704E-07 CR-016 (id 65b335ec-5f70-4b36-8b8a-cb3cd220a4bf, block, md5 68eb967b45fb66e330689b3bb94c4e4c, attest true, condition 'attest_atv_a_704e_07_cr_016 == True')
+--   ATV-A-704E-07 CR-017 (id 6f161079-9b59-4804-a37f-3e0805111e5a, block, md5 21da3e3531ba10a629ef9e59bd57cb35, attest true, condition 'attest_atv_a_704e_07_cr_017 == True')
+--   ATV-A-704E-07 CR-018 (id 4e769f71-8c62-43d7-bc42-e017fa200431, block, md5 749c7629603ed96c8526931dc3f07a13, attest true, condition 'attest_atv_a_704e_07_cr_018 == True')
+--   ATV-A-704E-07 CR-028 (id 126fbadd-257e-4ea6-85f2-9c036089ddba, warn, md5 d41d8cd98f00b204e9800998ecf8427e, attest false, condition '')
+--   ATV-A-704E-08 CR-020 (id 5284c13d-79fe-4f9f-ae0b-5ec3f0adb495, block, md5 1b53c546684931b39ee46f7f2736e5a5, attest true, condition 'attest_atv_a_704e_08_cr_020 == True')
+--   ATV-A-704E-08 CR-021 (id 0db28ced-aeb9-4bcd-af9d-22f30dd3fc07, block, md5 102962df3b7ade10f39df117fe75f709, attest true, condition 'attest_atv_a_704e_08_cr_021 == True')
+--   ATV-A-704E-08 CR-024 (id dbf31510-c6ac-4076-94d7-4763adb0d169, block, md5 270b021616778884dff876a10566059a, attest true, condition 'attest_atv_a_704e_08_cr_024 == True')
+--   ATV-A-704E-08 CR-027 (id 55e20532-c41b-4a54-8f45-7546844e8a72, block, md5 277a7a84d768829ef3d4d020b0c0b365, attest true, condition 'attest_atv_a_704e_08_cr_027 == True')
+--   ATV-A-704E-08 CR-030 (id 55a9b4b3-8828-41c3-830d-282c8fbd6532, warn, md5 d41d8cd98f00b204e9800998ecf8427e, attest false, condition '')
+--   ATV-A-704E-09 CR-019 (id 22f9df00-7368-4855-94a1-e68dff901654, warn, md5 6ee9ad80eaa22abf5fd23f8733d0f4a1, attest false, condition 'deviation_single_pct <= qa_quality_target_pct')
+--   ATV-A-704E-10 CR-022 (id 49b280e6-801c-4a93-98df-02e2d6c0e6cc, warn, md5 47803239cbdd3a98a288d5bbcd1a645b, attest false, condition 'deviation_equivalency_pct <= qa_quality_target_pct')
+--   ATV-A-704E-10 CR-023 (id beabf464-e506-4e73-8176-8f29164136e4, warn, md5 3c0912deb7605b5b9dbf912d7983a8fe, attest false, condition 'deviation_parallel_pct <= qa_quality_target_pct')
+--   ATV-A-704E-11 CR-025 (id c548fbde-1dfb-49a9-8ac1-d436dee7d623, block, md5 b87cac8599fd4132db67e4f067232da0, attest false, condition '(pipette_tested_volume <= 0.5 AND pipette_deviation_pct <= 2) OR (pipette_tested_volume >= 1.0 AND pipette_deviation_pct <= 1)')
+--   ATV-A-704E-11 CR-026 (id 907c09f6-a679-484e-aacb-c5c2a69a5046, block, md5 19d23565c7d23b2a61436ca38d522b88, attest false, condition 'heating_device_deviation <= 3')
+-- Equations (read-only 2026-09-24):
+--   ATV-A-704E-09 EQ-01 (id c4f4944e-9329-4a62-9724-3e9637a0891c, verified_against_standard, md5 75efaf7051f17c0f86066aab6c87759d, formula 'mean_value = SUM(single_result_i) / n_determinations')
+--   ATV-A-704E-09 EQ-02 (id a4287f3a-2d8f-4d0e-8f51-8ce6843496cf, verified_against_standard, md5 4ff22a93dde07b5700008971dd51a384, formula 'deviation_single_pct = 100 * (single_result_i - mean_value) / mean_value')
+--   ATV-A-704E-09 EQ-03 (id f203bcc2-f1d4-4a40-85a6-de11bd2e7894, verified_against_standard, md5 8c9d771f4dff6b0af58672a550048c52, formula 'calculated_value = (total_volume / sample_volume) * measured_value_diluted_sample')
+--   ATV-A-704E-09 EQ-04 (id 56f648dc-a38d-4f4a-81da-401d3ba36eb5, verified_against_standard, md5 2a152d77d487c87163d8774388eddcaf, formula 'NSS = (volume_sample * measured_value_original_sample + volume_standard * concentration_standard) / (volume_sample + volume_standard)')
+--   ATV-A-704E-10 EQ-05 (id 3da75786-3ecf-4f6b-996a-bdd86e486605, verified_against_standard, md5 1f2f389f1896fa4104b9c9624c8ac568, formula 'deviation_equivalency_pct = 100 * (measured_value_operating - nominal_value_reference) / nominal_value_reference')
+--   ATV-A-704E-10 EQ-06 (id 5bb589a2-3706-4651-8e8c-13ac5cdd6c60, verified_against_standard, md5 dbe27722b8e847e271c47b59c1ca2b88, formula 'deviation_parallel_pct = 100 * (measured_value_operating - measured_value_reference) / measured_value_reference')
+-- Worksheet ids (read-only 2026-09-24): ATV-A-704E-01 374f68fb-af7e-4552-afab-f969a390018a; ATV-A-704E-02 f0f2e3b2-fdc8-4c2f-8a08-ea92cbec259a; ATV-A-704E-03 ad55e50e-0295-41e7-808d-e5ab4e06eed2; ATV-A-704E-04 344e3c9d-ff0c-49e0-9beb-e8a9a5740b46; ATV-A-704E-05 09590739-3a09-4da6-a455-153932d5844c; ATV-A-704E-06 173fb4e3-fba9-45dd-89a0-61a2c5c1b98d; ATV-A-704E-07 9f601e2f-f03d-45d6-9ac7-42b7b92bd081; ATV-A-704E-08 f6bbe420-201a-47a3-8c43-a666fc33aebf; ATV-A-704E-09 c6b24603-07c3-4c5b-8f7a-da3d64e88e3f; ATV-A-704E-10 638fb0fa-9e92-4dec-b388-e31f68a853ef; ATV-A-704E-11 422b2b90-0d71-46db-a0a8-d5e35addf0cb; ATV-A-704E-12 2b31b936-e3f6-4af0-9a15-05514d3dc945
+--
+-- =====================================================================================================================
+-- atv_a704e-G-1 · ATV-A-704E · ATV-A-704E-11 · CR-026 / heating_device_deviation — IF-guard on `testing_equipment == 'heating_device_thermoblock'` + the follow-up hide of `heating_device_deviation` (the tolerance only exists for a thermoblock)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): CR-026 stays as captured (`heating_device_deviation <= 3`, block) and `heating_device_deviation` stays visible for every item of testing equipment. The emitter REFUSED the
+--     hide the brief asks for: hiding a symbol a same-worksheet gate reads nulls it, and the gate silently stops enforcing (`hiddenReferences` ⇒ not_applicable) — an enforcement change, never an
+--     emitted default. Today a plant that monitors a pH-meter must still answer a thermoblock temperature deviation or the block gate fails. Once ratified, in ONE transaction: the gate reads the
+--     IF-guard and the field hides for every other item (the guard exemption then applies — pinned in field-configs-atv_a704e.test.ts).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 heating_device_deviation), EV — no transcript]: "Monitoring of heating device/thermoblock: Within the scope of testing equipment monitoring,
+--     the function of thermoblocks must be checked annually. Check of the required temperatures of 100 °C and/or 148 °C (± 3 °C). Alternatively, also other/further frequently used temperatures can be
+--     tested. — printed p.55"
+-- Evidence [prod compliance_requirements.description (CR-026), EV — no transcript]: "The heating device/thermoblock temperature deviation shall be < 3 degC at 100 degC and 148 degC."
+-- Note: Self-contained. The IQC-Card 2 Sheet 1 / IQC-Card 9 figures behind the 3 °C are NOT seeded (no transcript — atv_a704e-U-1 / U-2); this block changes only WHEN the gate applies, never the
+--     printed 3.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_atv_a704e AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = '907c09f6-a679-484e-aacb-c5c2a69a5046' AND md5(c.condition) = '19d23565c7d23b2a61436ca38d522b88';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF testing_equipment == ''heating_device_thermoblock'' THEN heating_device_deviation <= 3',
+--   description = 'Plan 3 (atv_a704e-G-1): Temperaturtoleranz des Heizgeraets/Thermoblocks nur pruefen, wenn das ueberwachte Pruefmittel ein Heizgeraet/Thermoblock ist (IF-Guard auf testing_equipment).'
+--  WHERE c.id = '907c09f6-a679-484e-aacb-c5c2a69a5046' AND md5(c.condition) = '19d23565c7d23b2a61436ca38d522b88';
+-- UPDATE fields f SET visible_when = 'testing_equipment == ''heating_device_thermoblock''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'heating_device_deviation' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '907c09f6-a679-484e-aacb-c5c2a69a5046'; UPDATE fields f SET visible_when = NULL FROM
+--     worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol =
+--     'heating_device_deviation' AND f.active AND f.visible_when = 'testing_equipment == ''heating_device_thermoblock'''; -- drop compliance_requirements_archive_atv_a704e once every gate change of
+--     this file is signed off as final.
+--
+-- =====================================================================================================================
+-- atv_a704e-G-2 · ATV-A-704E · ATV-A-704E-09 / -10 · CR-019 / CR-022 / CR-023 + the -09 C / -10 C / -10 D section hides — §4.4 applicability: IF-guards on the three §4.4 booleans + the follow-up section hides (a plant that runs no equivalency measurement should not be asked for one)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The three warn gates stay as captured and every section of -09 / -10 stays visible. The emitter REFUSED all three section rules: CR-019 reads `deviation_single_pct` (and
+--     EQ-02 carries `single_result_i` / `mean_value` into it), CR-022 reads `deviation_equivalency_pct` (EQ-05 hop), CR-023 reads `deviation_parallel_pct` (EQ-06 hop) — hiding the sections would
+--     disarm the gates. Once ratified, in ONE transaction: each gate reads `IF <the §4.4 boolean> THEN <its captured check>` and the matching section hides. The §4.4 booleans are inherited where the
+--     rules live (multiple_determination_performed → -09, equivalency_check_performed / parallel_analysis_performed → -10; captured consumer_worksheets).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-05 multiple_determination_performed), EV — no transcript]: "measuring of standard solutions to check the procedure, the measurement equipment
+--     and reagents, — printed p.12"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-05 equivalency_check_performed), EV — no transcript]: "equivalency measurements by means of operating methods from other wastewater systems
+--     (e.g. within the scope of wastewater treatment plant neighbourhoods) and/or participation in interlaboratory tests, — printed p.12"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-05 parallel_analysis_performed), EV — no transcript]: "parallel analyses as a comparison to reference methods, — printed p.12"
+-- Evidence [prod compliance_requirements.source_quote (CR-019), EV — no transcript]: "The greatest difference is decisive for the interpretation of the multiple determination. If the difference lies
+--     within the quality target, the spread is ok. If the difference is greater, the entire multiple determination should be repeated. [VC]"
+-- Note: Apply BEFORE atv_a704e-G-5 (which re-points the same three conditions onto the register maxima); G-5 then guards on this block's post-state md5. The -09 D / -09 E sections are NOT part of
+--     this block — their driver is not inherited (atv_a704e-C-2). Observation recorded separately: prod's -05 verification_quote cells appear shifted by one bullet of the §4.4 list
+--     (multiple_determination_performed carries the "measuring of standard solutions" sentence, sample_suitability_checked the "reproducibility … by multiple determination" one) — prod hygiene,
+--     nothing changed here.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_atv_a704e AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = '22f9df00-7368-4855-94a1-e68dff901654' AND md5(c.condition) = '6ee9ad80eaa22abf5fd23f8733d0f4a1';
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc' AND md5(c.condition) = '47803239cbdd3a98a288d5bbcd1a645b';
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = 'beabf464-e506-4e73-8176-8f29164136e4' AND md5(c.condition) = '3c0912deb7605b5b9dbf912d7983a8fe';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF multiple_determination_performed == true THEN deviation_single_pct <= qa_quality_target_pct',
+--   description = 'Plan 3 (atv_a704e-G-2): Abweichung der Mehrfachbestimmung nur pruefen, wenn eine Mehrfachbestimmung durchgefuehrt wird (IF-Guard auf multiple_determination_performed, Paragraph 4.4).'
+--  WHERE c.id = '22f9df00-7368-4855-94a1-e68dff901654' AND md5(c.condition) = '6ee9ad80eaa22abf5fd23f8733d0f4a1';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF equivalency_check_performed == true THEN deviation_equivalency_pct <= qa_quality_target_pct',
+--   description = 'Plan 3 (atv_a704e-G-2): Abweichung der Gleichwertigkeitsmessung nur pruefen, wenn eine Gleichwertigkeitsmessung durchgefuehrt wird (IF-Guard auf equivalency_check_performed, Paragraph 4.4).'
+--  WHERE c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc' AND md5(c.condition) = '47803239cbdd3a98a288d5bbcd1a645b';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF parallel_analysis_performed == true THEN deviation_parallel_pct <= qa_quality_target_pct',
+--   description = 'Plan 3 (atv_a704e-G-2): Abweichung der Parallelanalyse nur pruefen, wenn eine Parallelanalyse durchgefuehrt wird (IF-Guard auf parallel_analysis_performed, Paragraph 4.4).'
+--  WHERE c.id = 'beabf464-e506-4e73-8176-8f29164136e4' AND md5(c.condition) = '3c0912deb7605b5b9dbf912d7983a8fe';
+-- UPDATE worksheet_sections ws SET visible_when = 'multiple_determination_performed == true' WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND ws.parent_section_id IS NULL AND ws.code = 'C' AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'equivalency_check_performed == true' WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10') AND ws.parent_section_id IS NULL AND ws.code = 'C' AND ws.visible_when IS NULL;
+-- UPDATE worksheet_sections ws SET visible_when = 'parallel_analysis_performed == true' WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10') AND ws.parent_section_id IS NULL AND ws.code = 'D' AND ws.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '22f9df00-7368-4855-94a1-e68dff901654'; UPDATE compliance_requirements c SET condition =
+--     a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM
+--     compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc'; UPDATE compliance_requirements c SET condition = a.condition, description =
+--     a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id
+--     = c.id AND c.id = 'beabf464-e506-4e73-8176-8f29164136e4'; UPDATE worksheet_sections ws SET visible_when = NULL WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN
+--     standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND ws.code = 'C' AND ws.visible_when = 'multiple_determination_performed == true'; UPDATE
+--     worksheet_sections ws SET visible_when = NULL WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND
+--     w.code = 'ATV-A-704E-10') AND ws.code = 'C' AND ws.visible_when = 'equivalency_check_performed == true'; UPDATE worksheet_sections ws SET visible_when = NULL WHERE ws.worksheet_template_id =
+--     (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10') AND ws.code = 'D' AND ws.visible_when =
+--     'parallel_analysis_performed == true';
+--
+-- =====================================================================================================================
+-- atv_a704e-G-3 · ATV-A-704E · ATV-A-704E-11 · CR-025 / pipette_tested_volume + pipette_deviation_pct — IF-guard on `testing_equipment == 'piston_stroke_pipettes'` + the follow-up hides of the two pipette fields
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): CR-025 stays as captured (`(pipette_tested_volume <= 0.5 AND pipette_deviation_pct <= 2) OR (pipette_tested_volume >= 1.0 AND pipette_deviation_pct <= 1)`, block) and both
+--     pipette fields stay visible for every item of testing equipment. The emitter REFUSED both hides (CR-025 reads both symbols). Today a plant that monitors only a photometer must still enter a
+--     tested pipette volume and a pipette deviation or the block gate fails. Once ratified, in ONE transaction: the gate reads the IF-guard and both fields hide for every other item.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 pipette_deviation_pct), EV — no transcript]: "The mean must be calculated from the 5 results of the weightings. [...] The mean value must lie
+--     within a defined tolerance range (see table). | Tested volume [ml] / Deviation [%] / Tolerance range [g]: 0.100 / ≤ 2 / 0.098 - 0.102 | 0.200 / ≤ 2 / 0.196 - 0.204 | 0.500 / ≤ 2 / 0.490 - 0.510
+--     | 1.000 / ≤ 1 / 0.990 - 1.010 | 2.000 / ≤ 1 / 1.980 - 2.020 | 5.000 / ≤ 1 / 4.950 - 5.050 | If the results lie outside the tolerance range, the pipette must no longer be used as testing
+--     equipment (remove designation) and should be sent to the manufacturer for testing, if necessary. — printed p.55"
+-- Evidence [prod compliance_requirements.description (CR-025), EV — no transcript]: "A piston-stroke pipette shall be within its permissible deviation (<=2 % for 0.100-0.500 ml; <=1 % for 1.000-5.000
+--     ml); outside -> remove from testing equipment and send to manufacturer."
+-- Note: The volume bands and the 2 % / 1 % split inside the captured condition are NOT re-derived here — the printed IQC-Card 9 Sheet 3 table is a sign-off item (atv_a704e-U-3). This block changes
+--     only WHEN the gate applies.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_atv_a704e AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = 'c548fbde-1dfb-49a9-8ac1-d436dee7d623' AND md5(c.condition) = 'b87cac8599fd4132db67e4f067232da0';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF testing_equipment == ''piston_stroke_pipettes'' THEN (pipette_tested_volume <= 0.5 AND pipette_deviation_pct <= 2) OR (pipette_tested_volume >= 1.0 AND pipette_deviation_pct <= 1)',
+--   description = 'Plan 3 (atv_a704e-G-3): Pipettentoleranz nur pruefen, wenn das ueberwachte Pruefmittel eine Kolbenhubpipette ist (IF-Guard auf testing_equipment).'
+--  WHERE c.id = 'c548fbde-1dfb-49a9-8ac1-d436dee7d623' AND md5(c.condition) = 'b87cac8599fd4132db67e4f067232da0';
+-- UPDATE fields f SET visible_when = 'testing_equipment == ''piston_stroke_pipettes''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_tested_volume' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'testing_equipment == ''piston_stroke_pipettes''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_deviation_pct' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = 'c548fbde-1dfb-49a9-8ac1-d436dee7d623'; UPDATE fields f SET visible_when = NULL FROM
+--     worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_tested_volume'
+--     AND f.active AND f.visible_when = 'testing_equipment == ''piston_stroke_pipettes'''; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--     WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_deviation_pct' AND f.active AND f.visible_when = 'testing_equipment ==
+--     ''piston_stroke_pipettes''';
+--
+-- =====================================================================================================================
+-- atv_a704e-G-4 · ATV-A-704E · ATV-A-704E-08 · CR-020 / CR-021 / CR-024 (attestation gates) + CR-027 — Replace the IQC-Card 2 / IQC-Card 9 ATTESTATION gates by register-fed checks (`qa_measures_count >= 1`, `pruefmittel_count >= 1`) once the registers are the record
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed: CR-020 / CR-021 / CR-024 / CR-027 stay attestation gates (`attest_… == True`, block, requires_attestation true) and the 21 `attest_*` booleans stay
+--     (atv_a704e-X-1). The new registers make a computable form possible for the first time, but swapping an attestation for a computed check is an enforcement change and needs a signature. Proposal
+--     (after atv_a704e-C-3 carries `pruefmittel_count` to -08): CR-020 / CR-021 / CR-024 read `qa_measures_count >= 1`, CR-027 reads `pruefmittel_count >= 1`. An EMPTY register reads 0 — never a
+--     phantom pass.
+-- Evidence [prod compliance_requirements.description (CR-020), EV — no transcript]: "Calculated value (dilution factor * measured value diluted sample) shall agree with the measured value of the
+--     original sample within the quality target; else check pipettes/process/measurement and repeat."
+-- Evidence [prod compliance_requirements.description (CR-024), EV — no transcript]: "Each item of testing equipment shall be monitored at least at the frequency given in IGC-Card 9
+--     (manufacturer/legislator frequency takes precedence if defined)."
+-- Evidence [prod fields.verification_quote (ATV-A-704E-08 qa_measure), EV — no transcript]: "IQC-Card 2 Sheet 1 - Recommendations by the DWA-Working Group IG-4.3, col.1 Quality assurance measure:
+--     Multiple determinations | Measurement of standards | Plausibility checks (spiking, dilution) | Equivalency measurements and/or interlaboratory test (operating methods) | Parallel measurements
+--     to the reference method | Pipettes 100-1000 µl volume check | Pipettes > 1000 µl volume check | pH-meter check | Heating device/thermoblock check | Measuring device check (e.g. photometer) —
+--     printed p.23"
+-- Note: Recommend DEFER until an engineer has filled the registers on a real project. The attestations are the only thing enforcing IQC-Card 2 today — never delete them before the computed form is
+--     ratified AND the data exists.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_atv_a704e AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = '5284c13d-79fe-4f9f-ae0b-5ec3f0adb495' AND md5(c.condition) = '1b53c546684931b39ee46f7f2736e5a5';
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = '0db28ced-aeb9-4bcd-af9d-22f30dd3fc07' AND md5(c.condition) = '102962df3b7ade10f39df117fe75f709';
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = 'dbf31510-c6ac-4076-94d7-4763adb0d169' AND md5(c.condition) = '270b021616778884dff876a10566059a';
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = '55e20532-c41b-4a54-8f45-7546844e8a72' AND md5(c.condition) = '277a7a84d768829ef3d4d020b0c0b365';
+-- UPDATE compliance_requirements c SET
+--   condition = 'qa_measures_count >= 1',
+--   description = 'Plan 3 (atv_a704e-G-4): interne Qualitaetsspezifikationen werden durch mindestens eine Zeile im Register qs_massnahmen nachgewiesen (statt einer Attestierung).'
+--  WHERE c.id = '5284c13d-79fe-4f9f-ae0b-5ec3f0adb495' AND md5(c.condition) = '1b53c546684931b39ee46f7f2736e5a5';
+-- UPDATE compliance_requirements c SET
+--   condition = 'qa_measures_count >= 1',
+--   description = 'Plan 3 (atv_a704e-G-4): Mindesthaeufigkeit je QS-Massnahme wird im Register qs_massnahmen gefuehrt (statt einer Attestierung).'
+--  WHERE c.id = '0db28ced-aeb9-4bcd-af9d-22f30dd3fc07' AND md5(c.condition) = '102962df3b7ade10f39df117fe75f709';
+-- UPDATE compliance_requirements c SET
+--   condition = 'qa_measures_count >= 1',
+--   description = 'Plan 3 (atv_a704e-G-4): Qualitaetsziele je QS-Massnahme werden im Register qs_massnahmen gefuehrt (statt einer Attestierung).'
+--  WHERE c.id = 'dbf31510-c6ac-4076-94d7-4763adb0d169' AND md5(c.condition) = '270b021616778884dff876a10566059a';
+-- UPDATE compliance_requirements c SET
+--   condition = 'pruefmittel_count >= 1',
+--   description = 'Plan 3 (atv_a704e-G-4): Pruefmitteluberwachung wird durch mindestens eine Zeile im Register pruefmittel nachgewiesen (statt einer Attestierung).'
+--  WHERE c.id = '55e20532-c41b-4a54-8f45-7546844e8a72' AND md5(c.condition) = '277a7a84d768829ef3d4d020b0c0b365';
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '5284c13d-79fe-4f9f-ae0b-5ec3f0adb495'; UPDATE compliance_requirements c SET condition =
+--     a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM
+--     compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '0db28ced-aeb9-4bcd-af9d-22f30dd3fc07'; UPDATE compliance_requirements c SET condition = a.condition, description =
+--     a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id
+--     = c.id AND c.id = 'dbf31510-c6ac-4076-94d7-4763adb0d169'; UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id =
+--     a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id =
+--     '55e20532-c41b-4a54-8f45-7546844e8a72';
+--
+-- =====================================================================================================================
+-- atv_a704e-G-5 · ATV-A-704E · ATV-A-704E-09 / -10 · CR-019 / CR-022 / CR-023 re-pointed onto the register maxima — Enforce the quality target over ALL rows (`max_dev_pct_calc` / `equivalency_max_dev` / `parallel_max_dev`) instead of one typed deviation, and propose two NEW warn gates for the dilution / spiking trials
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed: the three warn gates still read the single typed deviation fields (`deviation_single_pct`, `deviation_equivalency_pct`, `deviation_parallel_pct`). With one
+--     row per determination the register maxima are the honest check — the worst row decides, exactly as the IQC-Card interpretation column asks. Proposal (AFTER atv_a704e-G-2, guarded on ITS
+--     post-state md5): the three conditions read the `_max` outputs; and two NEW warn gates REQ/CR-031 / CR-032 compare `dilution_max_dev` / `spike_max_dev` with `qa_quality_target_pct` (the
+--     plausibility target of IQC-Card 2). NOT proposed as block gates — prod's deviation gates are warn.
+-- Evidence [prod compliance_requirements.source_quote (CR-019), EV — no transcript]: "The greatest difference is decisive for the interpretation of the multiple determination. If the difference lies
+--     within the quality target, the spread is ok. If the difference is greater, the entire multiple determination should be repeated. [VC]"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 calculated_value), EV — no transcript]: "IQC-Card 5, Sheet 1 - Dilution: 2. Single steps: a) Determination of the MEASURED VALUE ORIGINAL
+--     SAMPLE (column 3) b) Dilution c) Determination of MEASURED VALUE DILUTED SAMPLE (column 5) | 3. Formulas for calculation: DILUTION FACTOR (column 4) = TOTAL VOLUME / SAMPLE VOLUME. CALCULATED
+--     VALUE (column 6) = DILUTION FACTOR · MEASURED VALUE DILUTED SAMPLE | If the variation between CALCULATED VALUE and MEASURED VALUE ORIGINAL SAMPLE is smaller than given in the internal
+--     specification (IQC-Card 2), there is no error in the matrix. If it is greater, an error in the matrix is likely. — printed p.35"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 measured_value_spiked_sample), EV — no transcript]: "If the measured value MEASURED VALUE SPIKED SAMPLE deviates from the NOMINAL VALUE
+--     SPIKED SAMPLE by more than the tolerance given in the internal specification (IQC-Card 2), a matrix error is likely. — printed p.36"
+-- Note: Depends on atv_a704e-G-2 (the md5 guards below are the POST-G-2 strings, computed with node:crypto in the generator — never typed). `qa_quality_target_pct` (-08) is inherited on -09 / -10
+--     (captured consumer_worksheets). New codes: the highest code in prod today is CR-030 — CR-031 / CR-032 are free. An EMPTY register leaves the maximum "manuell erforderlich", so the gate is
+--     pending, never a phantom pass.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_atv_a704e AS SELECT * FROM compliance_requirements WHERE false;
+-- -- G-2 must have been applied: the guards below are md5 of the POST-G-2 conditions.
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF multiple_determination_performed == true THEN max_dev_pct_calc <= qa_quality_target_pct',
+--   description = 'Plan 3 (atv_a704e-G-5): groesste Abweichung der Einzelbestimmungen (aus dem Register) gegen das Qualitaetsziel; der schlechteste Wert entscheidet.'
+--  WHERE c.id = '22f9df00-7368-4855-94a1-e68dff901654' AND md5(c.condition) = '82b143992cf7b2801a4d1b02ec4663bd';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF equivalency_check_performed == true THEN equivalency_max_dev <= qa_quality_target_pct',
+--   description = 'Plan 3 (atv_a704e-G-5): groesste Abweichung der Gleichwertigkeitsmessungen (aus dem Register) gegen das Qualitaetsziel.'
+--  WHERE c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc' AND md5(c.condition) = '91c7fd2875f8e2d08f0bf9446c806740';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF parallel_analysis_performed == true THEN parallel_max_dev <= qa_quality_target_pct',
+--   description = 'Plan 3 (atv_a704e-G-5): groesste Abweichung der Parallelanalysen (aus dem Register) gegen das Qualitaetsziel.'
+--  WHERE c.id = 'beabf464-e506-4e73-8176-8f29164136e4' AND md5(c.condition) = '5881d47a24bc89d6d7fe989d56b1347c';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, requires_attestation) SELECT (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09'), 'CR-031', 'Verduennungsversuche innerhalb des Qualitaetsziels', 'Dilution trials within the quality target', 'dilution_max_dev <= qa_quality_target_pct', 'IGC-Card 5, Sheet 1', 'warn', 'Plan 3 (atv_a704e-G-5, NEU): groesste Abweichung der Verduennungsversuche gegen das Qualitaetsziel der internen Vorgabe (IQC-Karte 2).', false WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND c2.code = 'CR-031');
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, requires_attestation) SELECT (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09'), 'CR-032', 'Aufstockungsversuche innerhalb des Qualitaetsziels', 'Spiking trials within the quality target', 'spike_max_dev <= qa_quality_target_pct', 'IGC-Card 5, Sheet 3', 'warn', 'Plan 3 (atv_a704e-G-5, NEU): groesste Abweichung der Aufstockungsversuche gegen das Qualitaetsziel der internen Vorgabe (IQC-Karte 2).', false WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND c2.code = 'CR-032');
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '22f9df00-7368-4855-94a1-e68dff901654'; UPDATE compliance_requirements c SET condition =
+--     a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM
+--     compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc'; UPDATE compliance_requirements c SET condition = a.condition, description =
+--     a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id
+--     = c.id AND c.id = 'beabf464-e506-4e73-8176-8f29164136e4'; DELETE FROM compliance_requirements c WHERE c.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id
+--     = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND c.code IN ('CR-031', 'CR-032') AND c.description LIKE 'Plan 3 (atv_a704e-G-5, NEU):%'; -- (the two RESTOREs bring
+--     back the ORIGINAL pre-G-2 conditions from the archive — apply G-2 again if only G-5 is to be undone.)
+--
+-- =====================================================================================================================
+-- atv_a704e-G-6 · ATV-A-704E · ATV-A-704E-07 · CR-018 (staff qualification attestation) — Replace the staff-qualification attestation by `mitarbeiter_count >= 1` once the personnel register is the record
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed: CR-018 stays `attest_atv_a_704e_07_cr_018 == True` (block, requires_attestation true). Proposal (after atv_a704e-C-3 carries `mitarbeiter_count` from -12 to
+--     -07): the gate reads the register count. Empty register ⇒ 0 ⇒ fail, never a phantom pass.
+-- Evidence [prod compliance_requirements.description (CR-018), EV — no transcript]: "An up-to-date overview of staff qualification and training measures shall be maintained."
+-- Evidence [prod fields.verification_quote (ATV-A-704E-12 employee_qualification), EV — no transcript]: "Qualification: Predominantly, qualification is certified by a corresponding vocational
+--     training. A training as \"specialist on wastewater technology\" or a similar training qualification should be listed here. A qualification that was gained otherwise must be presented in a
+--     corresponding way. — printed p.62"
+-- Note: Recommend DEFER together with atv_a704e-G-4 — the attestations are the only enforcement today.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_atv_a704e AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = '4e769f71-8c62-43d7-bc42-e017fa200431' AND md5(c.condition) = '749c7629603ed96c8526931dc3f07a13';
+-- UPDATE compliance_requirements c SET
+--   condition = 'mitarbeiter_count >= 1',
+--   description = 'Plan 3 (atv_a704e-G-6): Qualifikationsnachweis des Personals durch mindestens eine Zeile im Register mitarbeiter (statt einer Attestierung).'
+--  WHERE c.id = '4e769f71-8c62-43d7-bc42-e017fa200431' AND md5(c.condition) = '749c7629603ed96c8526931dc3f07a13';
+-- COMMIT;
+-- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '4e769f71-8c62-43d7-bc42-e017fa200431';
+--
+-- =====================================================================================================================
+-- atv_a704e-G-7 · ATV-A-704E · ATV-A-704E-07 · CR-028 (EMPTY condition) — The deviation-log gate has an EMPTY condition and can never fire — give it a computable form over the `abweichungen` register
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed. CR-028 ("Deviations and measures recorded", warn, clause "IGC-Card 11") carries an EMPTY `condition` (md5 d41d8cd98f00b204e9800998ecf8427e = md5 of the
+--     empty string): the engine cannot parse it, the gate is `manual` on every project and enforces nothing. Proposal: leave it MANUAL (a deviation log with zero rows is legitimate — nothing went
+--     wrong) OR, if the owner wants the log actively confirmed, a NEW boolean attestation "Abweichungen und Massnahmen gefuehrt" on -07 with `IF <that boolean> == false THEN abweichungen_count >= 1`.
+--     A bare `abweichungen_count >= 1` would DEMAND a deviation — wrong direction; it is deliberately NOT proposed.
+-- Evidence [prod compliance_requirements.description (CR-028), EV — no transcript]: "Detected deviations, their cause, the corrective measure and result shall be recorded (IGC-Card 11) to support
+--     optimisation of the operating analysis."
+-- Evidence [prod fields.verification_quote (ATV-A-704E-12 deviation_feature), EV — no transcript]: "Here, the date of the deviation is put down in column 1. The name of the person who detects the
+--     deviation (column 2), the type of distinctive features (column 3) and in which IQC-Card they are documented (column 4) are also noted. As soon as the cause is known, it is documented in column
+--     5 with the measured taken (column 6). The result of the measures introduced is entered together with date (date 7), the result of the measures (column 8) and the name of the person who
+--     determined the result (column 9). — printed p.67"
+-- Note: No SQL proposed for the "demand a deviation" reading. The empty condition is recorded as a prod-hygiene finding; the same applies to CR-029 (-05) and CR-030 (-08) — atv_a704e-G-8.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-G-8 · ATV-A-704E · ATV-A-704E-05 / -08 · CR-029 / CR-030 (EMPTY conditions) — Two more gates with an EMPTY condition — both point at EXTERNAL standards (DIN EN ISO 5667, DIN 38xxx) and are therefore content-boundary references, not checks
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed. CR-029 ("Sampling-reference standards observed (DIN EN ISO 5667)", warn, clause "Literature") and CR-030 ("Reference analytical methods observed (DIN
+--     38xxx)", warn, clause "Literature") both carry an EMPTY condition and are `manual` on every project. Both name DOCUMENTS OUTSIDE this standard (owner ruling 3d, content-boundary rule): the
+--     sampling standards of the DIN EN ISO 5667 family and the DIN 38xxx reference methods. The honest encoding is a `reference` field / a documented pointer, never an expanded option list or a
+--     seeded table — and the reference methods per parameter are the sign-off item atv_a704e-U-4. Proposal: keep both as manual warns and record the pointer; no SQL.
+-- Evidence [prod compliance_requirements.description (CR-029), EV — no transcript]: "Sampling and on-site assessment should follow the cited sampling standards (DIN 38402 Part 11; DIN EN ISO
+--     5667-1/-2/-3); detailed sampling methods are owned by those standards."
+-- Evidence [prod compliance_requirements.description (CR-030), EV — no transcript]: "Reference analytical methods (DIN 38404/38405/38406/38409, DIN EN 1899 etc.) cited in the Literature section
+--     define the reference values used for equivalency/parallel comparison."
+-- Note: Recorded so the three empty conditions of this standard are all visible in one place (the capture carries exactly three: CR-028, CR-029, CR-030 — pinned).
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-C-1 · ATV-A-704E · ATV-A-704E-05 · parallel_analysis_performed (consumed by -10) — The brief's hide `parallel_analysis_performed ← application_mode == 'parallel_to_reference'` is refused by the producer guard
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed — `parallel_analysis_performed` stays visible on -05. The producer guard refuses the hide because -10 inherits the boolean (`consumer_worksheets
+--     ["ATV-A-704E-10"]`): hiding a producer nulls the inherited value, so -10's own rules and the G-2 guard would read null instead of false. Options for the owner: (a) accept the null inheritance
+--     and apply the hide together with atv_a704e-G-2 (the -10 sections then hide on a pending driver — fail-safe visible); (b) leave it visible and let §4.1 drive only the -03 register column
+--     `betriebsmethoden.application_mode` (what this task encodes today). Recommendation: (b) until a real project shows the sheet is noisy.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-03 application_mode), EV — no transcript]: "For the reasonable application of operating methods the following guidelines apply: When pertaining
+--     to water and wastewater fee regulations, operating methods can only replace reference methods if this is regulated by law. [...] The use of operating methods can clearly reduce the need for
+--     reference methods. So, for example, in self-monitoring - except for the parallel analysis - reference methods can be omitted. — printed p.11"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-05 parallel_analysis_performed), EV — no transcript]: "parallel analyses as a comparison to reference methods, — printed p.12"
+-- Note: `application_mode` (-03) IS inherited on -05 (captured consumer_worksheets ["ATV-A-704E-05"]) — the refusal is about the HIDDEN symbol, not the driver.
+-- BEGIN;
+-- -- option (a) only, after atv_a704e-G-2:
+-- UPDATE fields f SET visible_when = 'application_mode == ''parallel_to_reference''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-05' AND f.symbol = 'parallel_analysis_performed' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-05' AND f.symbol = 'parallel_analysis_performed' AND f.active AND f.visible_when = 'application_mode == ''parallel_to_reference''';
+--
+-- =====================================================================================================================
+-- atv_a704e-C-2 · ATV-A-704E · ATV-A-704E-09 · blank_and_standard_controlled → -09 (+ the -09 D / -09 E section hides) — The §4.4 plausibility driver never reaches -09, so the dilution / standard-addition sections cannot be gated on it today
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed: the -09 D (Dilution Plausibility) and -09 E (Standard Addition) sections stay visible. The emitter ACCEPTS both rules (no gate reads those sections, no
+--     field of theirs is consumed — pinned in the test), so the withholding is a judgment, not a guard refusal: `blank_and_standard_controlled` (-05) carries `consumer_worksheets ["ATV-A-704E-07"]`
+--     and therefore never reaches -09, where the rule would evaluate `pending` (visible) forever. Proposal: ONE consumer edit plus the two section rules in the same transaction.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-05 blank_and_standard_controlled), EV — no transcript]: "check of plausibility by dilution and standard addition of the wastewater sample, —
+--     printed p.12"
+-- Note: Fail-safe either way: an unset driver is pending ⇒ visible. Apply after the DATA migration 20260917102710 so the two registers exist in the sections being gated.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['ATV-A-704E-07','ATV-A-704E-09']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-05' AND f.symbol = 'blank_and_standard_controlled' AND f.active AND f.consumer_worksheets = ARRAY['ATV-A-704E-07']::text[];
+-- UPDATE worksheet_sections ws SET visible_when = 'blank_and_standard_controlled == true' WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND ws.parent_section_id IS NULL AND ws.code IN ('D', 'E') AND ws.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET consumer_worksheets = ARRAY['ATV-A-704E-07']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND
+--     s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-05' AND f.symbol = 'blank_and_standard_controlled' AND f.active AND f.consumer_worksheets = ARRAY['ATV-A-704E-07','ATV-A-704E-09']::text[]; UPDATE
+--     worksheet_sections ws SET visible_when = NULL WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND
+--     w.code = 'ATV-A-704E-09') AND ws.code IN ('D', 'E') AND ws.visible_when = 'blank_and_standard_controlled == true';
+--
+-- =====================================================================================================================
+-- atv_a704e-C-3 · ATV-A-704E · ATV-A-704E-11 / -12 · pruefmittel_count → -08; mitarbeiter_count / abweichungen_count → -07 — Carry the created register counts to the worksheets whose gates would read them (needed by G-4 / G-6 / G-7)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed — a `create` never sets `consumer_worksheets` (Plan-3 convention), so the three counts live only on their own worksheet today and the G-4 / G-6 / G-7
+--     proposals cannot evaluate. Apply this block AFTER the DATA migration 20260917102710 and BEFORE the gate blocks that read the counts.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 testing_equipment), EV — no transcript]: "IQC-Card 9: Recommendations for control- and monitoring frequencies can be taken from the table. |
+--     Testing equipment / Monitoring: BOD-respirometer biannually | Photometer annually | Annealing furnace annually | Heating device/thermoblock annually | Ion exchange annually | Piston stroke
+--     pipettes quarterly | Refrigerator annually | Conductivity measuring device biannually | pH-meter monthly | Sampling equipment biannually | Reagents quarterly | Oxygen measuring device every two
+--     weeks | Thermometer quarterly | Thermo cabinet annually | Drying cabinet annually | Scales annually — printed p.54"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-12 instruction_training_record), EV — no transcript]: "Overview of instruction and training: This overview serves as a proof of training
+--     according to Section 4.3.3 of the Standard. Here the completed basic introduction as well as all internal and external successive training are recorded. Here, for example, also supportive
+--     visits by the manufacturer and DWA-courses must be registered. | Sheet 2 - Overview of Instructions and Training: 1 Event: topic and organising party | 2 Date | 3 Signature supervisor — printed
+--     p.62 and 66"
+-- Note: Guarded on the captured NULL so a re-run is a no-op; the rollback restores NULL. The register-fed equations themselves stay on the register's own worksheet (m277e trap 2) — only the OUTPUT is
+--     inherited.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['ATV-A-704E-08']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pruefmittel_count' AND f.active AND f.consumer_worksheets IS NULL;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['ATV-A-704E-07']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'mitarbeiter_count' AND f.active AND f.consumer_worksheets IS NULL;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['ATV-A-704E-07']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'abweichungen_count' AND f.active AND f.consumer_worksheets IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET consumer_worksheets = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND
+--     w.code = 'ATV-A-704E-11' AND f.symbol = 'pruefmittel_count' AND f.active AND f.consumer_worksheets = ARRAY['ATV-A-704E-08']::text[]; UPDATE fields f SET consumer_worksheets = NULL FROM
+--     worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'mitarbeiter_count' AND
+--     f.active AND f.consumer_worksheets = ARRAY['ATV-A-704E-07']::text[]; UPDATE fields f SET consumer_worksheets = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE
+--     f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'abweichungen_count' AND f.active AND f.consumer_worksheets =
+--     ARRAY['ATV-A-704E-07']::text[];
+--
+-- =====================================================================================================================
+-- atv_a704e-C-4 · ATV-A-704E · ATV-A-704E-01 · aqa_applied / parameter_name — consumer_worksheets ["ALL"] — The literal token "ALL" matches no worksheet code, so both fields reach NOTHING (prod-hygiene finding, m820_3 trap 4 class)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed. `loadInheritedFields` matches `code = ANY(consumer_worksheets)`, and no worksheet is called "ALL" — so `aqa_applied` and `parameter_name` are declared
+--     corpus-wide but inherited nowhere. This task keys NO rule on either (pinned), and the register `parameter` columns carry their own copy of the nine prod tokens instead. Proposal: expand both to
+--     the eleven other worksheet codes of the standard.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-01 parameter_name), EV — no transcript]: "2.2 Abbreviated Terms - Abbreviation / Description: Sett. substances [Abs. Stoffe] Settable substances
+--     | BOD5 [BSB5] Biochemical oxygen demand in five days | COD [CSB] Chemical oxygen demand | NH4-N Ammonium nitrogen | NO3-N Nitrate nitrogen | NO2-N Nitrite nitrogen | Ptotal Total phosphorus |
+--     TNb Total nitrogen bound | TOC Total organic carbon — printed p.9"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-01 aqa_applied), EV — no transcript]: "Analytical Quality Assurance (AQA): Measures for supporting own research results under controlled
+--     conditions. Analytical quality assurance comprises internal and external quality control. — printed p.8"
+-- Note: Same class as fll_gar-C-1 (a range string) and m820_3-C-1 ("ALL"). Recommend RATIFY — it is hygiene, not an enforcement change; nothing today reads the inherited value.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['ATV-A-704E-02','ATV-A-704E-03','ATV-A-704E-04','ATV-A-704E-05','ATV-A-704E-06','ATV-A-704E-07','ATV-A-704E-08','ATV-A-704E-09','ATV-A-704E-10','ATV-A-704E-11','ATV-A-704E-12']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-01' AND f.symbol = 'parameter_name' AND f.active AND f.consumer_worksheets = ARRAY['ALL']::text[];
+-- UPDATE fields f SET consumer_worksheets = ARRAY['ATV-A-704E-02','ATV-A-704E-03','ATV-A-704E-04','ATV-A-704E-05','ATV-A-704E-06','ATV-A-704E-07','ATV-A-704E-08','ATV-A-704E-09','ATV-A-704E-10','ATV-A-704E-11','ATV-A-704E-12']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-01' AND f.symbol = 'aqa_applied' AND f.active AND f.consumer_worksheets = ARRAY['ALL']::text[];
+-- COMMIT;
+-- Rollback: UPDATE fields f SET consumer_worksheets = ARRAY['ALL']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code =
+--     'ATV-A-704E' AND w.code = 'ATV-A-704E-01' AND f.symbol = 'parameter_name' AND f.active; UPDATE fields f SET consumer_worksheets = ARRAY['ALL']::text[] FROM worksheet_templates w JOIN standards
+--     s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-01' AND f.symbol = 'aqa_applied' AND f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-1 · ATV-A-704E · ATV-A-704E-09 · `single_result_i` ↔ `einzelbestimmungen.single_result` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification: the scalar is the LAST row;
+--     retire once the register is the record.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 single_result_i), EV — no transcript]: "IQC-Card 3 - Multiple Determinations (form header): 1 Date | 2 Name | 3 Sample designation | 4
+--     Measured value 1 [mg/l] | 5 Measured value 2 [mg/l] | 6 Measured value 3 [mg/l] | 7 Mean [mg/l] | 8 Greatest spread Difference [mg/l] | 9 Greatest spread Col 8 x 100% / Col 7 [%] | 10
+--     Interpretation: Quality target achieved? — printed p.30"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'single_result_i' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'single_result_i' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-2 · ATV-A-704E · ATV-A-704E-09 · `n_determinations` ↔ `n_determinations_calc (ATV-A-704E-09-D1)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification: the scalar =
+--     n_determinations_calc (EQ-01 reads it as a denominator — retire with atv_a704e-R-1).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 n_determinations), EV — no transcript]: "Usually it is sufficient to carry out a double determination of the sample to be analysed. A triple
+--     determination additionally increases the analytic reliability of the measuring results and should be carried out for greater variations in the measured values. — printed p.29"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'n_determinations' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'n_determinations' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-3 · ATV-A-704E · ATV-A-704E-09 · `mean_value` ↔ `mean_value_calc (ATV-A-704E-09-D2)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification: the scalar = mean_value_calc;
+--     EQ-01 writes it today (atv_a704e-R-1).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 mean_value), EV — no transcript]: "From the single results a mean value must be produced, which represents the measuring result. Here, all
+--     single results must be included in the mean. | From the single measured values the mean (add single measured values and divide them by the number of the measured values; column 7) is produced.
+--     | IQC-Card 3 - Multiple Determinations (form header): 1 Date | 2 Name | 3 Sample designation | 4 Measured value 1 [mg/l] | 5 Measured value 2 [mg/l] | 6 Measured value 3 [mg/l] | 7 Mean [mg/l]
+--     | 8 Greatest spread Difference [mg/l] | 9 Greatest spread Col 8 x 100% / Col 7 [%] | 10 Interpretation: Quality target achieved? — printed p.29 and 30"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'mean_value' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'mean_value' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-4 · ATV-A-704E · ATV-A-704E-09 · `deviation_single_pct` ↔ `max_dev_pct_calc (ATV-A-704E-09-D3)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates CR-019, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — read by CR-019 (atv_a704e-G-2 / G-5 re-point
+--     the gate first).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 deviation_single_pct), EV — no transcript]: "The greatest difference in the single measured values is entered into the IQC-Card in mg/l
+--     (column 8) and in % (greatest difference of the single measured values divided by the mean value; column 9). In column 10 the result of the control measure is documented. | IQC-Card 3 -
+--     Multiple Determinations (form header): 1 Date | 2 Name | 3 Sample designation | 4 Measured value 1 [mg/l] | 5 Measured value 2 [mg/l] | 6 Measured value 3 [mg/l] | 7 Mean [mg/l] | 8 Greatest
+--     spread Difference [mg/l] | 9 Greatest spread Col 8 x 100% / Col 7 [%] | 10 Interpretation: Quality target achieved? — printed p.29 and 30"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'deviation_single_pct' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'deviation_single_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-5 · ATV-A-704E · ATV-A-704E-09 · `control_measure_value` ↔ `(no register column)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required false, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — IQC-Card 3 column 10 is the INTERPRETATION of
+--     the control measure, not a measured row value; no column was created for it. If the owner wants it per row, add a text column `interpretation` to einzelbestimmungen.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 control_measure_value), EV — no transcript]: "The greatest difference in the single measured values is entered into the IQC-Card in mg/l
+--     (column 8) and in % (greatest difference of the single measured values divided by the mean value; column 9). In column 10 the result of the control measure is documented. — printed p.29"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'control_measure_value' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'control_measure_value' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-6 · ATV-A-704E · ATV-A-704E-09 · `sample_volume` ↔ `verduennungsversuche.sample_volume_ml` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification (last row); see atv_a704e-X-2
+--     for the sample_volume / volume_sample duplication.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 sample_volume), EV — no transcript]: "IQC-Card 5, Sheet 1 - Dilution: 2. Single steps: a) Determination of the MEASURED VALUE ORIGINAL SAMPLE
+--     (column 3) b) Dilution c) Determination of MEASURED VALUE DILUTED SAMPLE (column 5) | 3. Formulas for calculation: DILUTION FACTOR (column 4) = TOTAL VOLUME / SAMPLE VOLUME. CALCULATED VALUE
+--     (column 6) = DILUTION FACTOR · MEASURED VALUE DILUTED SAMPLE — printed p.35"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'sample_volume' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'sample_volume' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-7 · ATV-A-704E · ATV-A-704E-09 · `total_volume` ↔ `verduennungsversuche.total_volume_ml` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification (last row).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 total_volume), EV — no transcript]: "IQC-Card 5, Sheet 1 - Dilution: 2. Single steps: a) Determination of the MEASURED VALUE ORIGINAL SAMPLE
+--     (column 3) b) Dilution c) Determination of MEASURED VALUE DILUTED SAMPLE (column 5) | 3. Formulas for calculation: DILUTION FACTOR (column 4) = TOTAL VOLUME / SAMPLE VOLUME. CALCULATED VALUE
+--     (column 6) = DILUTION FACTOR · MEASURED VALUE DILUTED SAMPLE — printed p.35"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'total_volume' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'total_volume' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-8 · ATV-A-704E · ATV-A-704E-09 · `measured_value_diluted_sample` ↔ `verduennungsversuche.measured_diluted` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification (last row).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 measured_value_diluted_sample), EV — no transcript]: "IQC-Card 5, Sheet 1 - Dilution: 2. Single steps: a) Determination of the MEASURED VALUE
+--     ORIGINAL SAMPLE (column 3) b) Dilution c) Determination of MEASURED VALUE DILUTED SAMPLE (column 5) | 3. Formulas for calculation: DILUTION FACTOR (column 4) = TOTAL VOLUME / SAMPLE VOLUME.
+--     CALCULATED VALUE (column 6) = DILUTION FACTOR · MEASURED VALUE DILUTED SAMPLE — printed p.35"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'measured_value_diluted_sample' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'measured_value_diluted_sample' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-9 · ATV-A-704E · ATV-A-704E-09 · `calculated_value` ↔ `verduennungsversuche.calculated (EQ-03 per row)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — written by EQ-03 today (atv_a704e-R-1).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 calculated_value), EV — no transcript]: "IQC-Card 5, Sheet 1 - Dilution: 2. Single steps: a) Determination of the MEASURED VALUE ORIGINAL
+--     SAMPLE (column 3) b) Dilution c) Determination of MEASURED VALUE DILUTED SAMPLE (column 5) | 3. Formulas for calculation: DILUTION FACTOR (column 4) = TOTAL VOLUME / SAMPLE VOLUME. CALCULATED
+--     VALUE (column 6) = DILUTION FACTOR · MEASURED VALUE DILUTED SAMPLE | If the variation between CALCULATED VALUE and MEASURED VALUE ORIGINAL SAMPLE is smaller than given in the internal
+--     specification (IQC-Card 2), there is no error in the matrix. If it is greater, an error in the matrix is likely. — printed p.35"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'calculated_value' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'calculated_value' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-10 · ATV-A-704E · ATV-A-704E-09 · `measured_value_original_sample` ↔ `verduennungsversuche.reference` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — the same prod scalar is also the spiking
+--     register's `measured_original` (atv_a704e-D-14); it is an input of EQ-04.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 measured_value_original_sample), EV — no transcript]: "IQC-Card 5, Sheet 1 - Dilution: 2. Single steps: a) Determination of the MEASURED
+--     VALUE ORIGINAL SAMPLE (column 3) b) Dilution c) Determination of MEASURED VALUE DILUTED SAMPLE (column 5) | 3. Formulas for calculation: DILUTION FACTOR (column 4) = TOTAL VOLUME / SAMPLE
+--     VOLUME. CALCULATED VALUE (column 6) = DILUTION FACTOR · MEASURED VALUE DILUTED SAMPLE — printed p.35"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'measured_value_original_sample' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'measured_value_original_sample' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-11 · ATV-A-704E · ATV-A-704E-09 · `volume_sample` ↔ `aufstockungsversuche.sample_volume_ml` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — input of EQ-04; see atv_a704e-X-2.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 volume_sample), EV — no transcript]: "IQC-Card 5, Sheet 3 - standard addition (general procedure): 2. Single steps: Determination of the
+--     MEASURED VALUE ORIGINAL SAMPLE (column 3), Standard addition by adding the VOLUME STANDARD (column 5) in familiar CONCENTRATION STANDARD (column 6) to the defined VOLUME SAMPLE (column 4),
+--     Determination of MEASURED VALUE SPIKED SAMPLE (column 9). | 3. Calculation: NOMINAL VALUE SPIKED SAMPLE (NSS, column 8): NSS = [(volume sample · measured value original sample) + (volume
+--     standard · concentration standard)] / (volume sample + volume standard) — printed p.36"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'volume_sample' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'volume_sample' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-12 · ATV-A-704E · ATV-A-704E-09 · `volume_standard` ↔ `aufstockungsversuche.standard_volume_ml` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — input of EQ-04.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 volume_standard), EV — no transcript]: "IQC-Card 5, Sheet 3 - standard addition (general procedure): 2. Single steps: Determination of the
+--     MEASURED VALUE ORIGINAL SAMPLE (column 3), Standard addition by adding the VOLUME STANDARD (column 5) in familiar CONCENTRATION STANDARD (column 6) to the defined VOLUME SAMPLE (column 4),
+--     Determination of MEASURED VALUE SPIKED SAMPLE (column 9). | 3. Calculation: NOMINAL VALUE SPIKED SAMPLE (NSS, column 8): NSS = [(volume sample · measured value original sample) + (volume
+--     standard · concentration standard)] / (volume sample + volume standard) — printed p.36"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'volume_standard' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'volume_standard' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-13 · ATV-A-704E · ATV-A-704E-09 · `concentration_standard` ↔ `aufstockungsversuche.standard_concentration` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — input of EQ-04.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 concentration_standard), EV — no transcript]: "IQC-Card 5, Sheet 3 - standard addition (general procedure): 2. Single steps: Determination of
+--     the MEASURED VALUE ORIGINAL SAMPLE (column 3), Standard addition by adding the VOLUME STANDARD (column 5) in familiar CONCENTRATION STANDARD (column 6) to the defined VOLUME SAMPLE (column 4),
+--     Determination of MEASURED VALUE SPIKED SAMPLE (column 9). | 3. Calculation: NOMINAL VALUE SPIKED SAMPLE (NSS, column 8): NSS = [(volume sample · measured value original sample) + (volume
+--     standard · concentration standard)] / (volume sample + volume standard) — printed p.36"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'concentration_standard' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'concentration_standard' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-14 · ATV-A-704E · ATV-A-704E-09 · `measured_value_original_sample` ↔ `aufstockungsversuche.measured_original` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — the same prod scalar as atv_a704e-D-10; input
+--     of EQ-04.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 measured_value_original_sample), EV — no transcript]: "IQC-Card 5, Sheet 1 - Dilution: 2. Single steps: a) Determination of the MEASURED
+--     VALUE ORIGINAL SAMPLE (column 3) b) Dilution c) Determination of MEASURED VALUE DILUTED SAMPLE (column 5) | 3. Formulas for calculation: DILUTION FACTOR (column 4) = TOTAL VOLUME / SAMPLE
+--     VOLUME. CALCULATED VALUE (column 6) = DILUTION FACTOR · MEASURED VALUE DILUTED SAMPLE — printed p.35"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'measured_value_original_sample' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'measured_value_original_sample' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-15 · ATV-A-704E · ATV-A-704E-09 · `measured_value_spiked_sample` ↔ `aufstockungsversuche.measured_spiked` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification (last row).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 measured_value_spiked_sample), EV — no transcript]: "If the measured value MEASURED VALUE SPIKED SAMPLE deviates from the NOMINAL VALUE
+--     SPIKED SAMPLE by more than the tolerance given in the internal specification (IQC-Card 2), a matrix error is likely. — printed p.36"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'measured_value_spiked_sample' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'measured_value_spiked_sample' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-16 · ATV-A-704E · ATV-A-704E-09 · `NSS` ↔ `aufstockungsversuche.nss_nominal (EQ-04 per row)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — written by EQ-04 today (atv_a704e-R-1).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 NSS), EV — no transcript]: "IQC-Card 5, Sheet 3 - standard addition (general procedure): 2. Single steps: Determination of the MEASURED VALUE
+--     ORIGINAL SAMPLE (column 3), Standard addition by adding the VOLUME STANDARD (column 5) in familiar CONCENTRATION STANDARD (column 6) to the defined VOLUME SAMPLE (column 4), Determination of
+--     MEASURED VALUE SPIKED SAMPLE (column 9). | 3. Calculation: NOMINAL VALUE SPIKED SAMPLE (NSS, column 8): NSS = [(volume sample · measured value original sample) + (volume standard ·
+--     concentration standard)] / (volume sample + volume standard) — printed p.36"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'NSS' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-09' AND f.symbol = 'NSS' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-17 · ATV-A-704E · ATV-A-704E-10 · `measured_value_operating` ↔ `vergleichsmessungen.operating_value` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — input of EQ-05 AND EQ-06.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-10 measured_value_operating), EV — no transcript]: "IQC-Card 6 - Equivalency Measurements (form header): 1 Date | 2 Name | 3 Sample designation
+--     | 4 Parameter | 5 Mean [mg/l] | 6 Nominal value or mean of the equivalency measurements [mg/l] | 7 Deviation of the mean from the nominal value [mg/l] | 8 Deviation relative [%] | 9
+--     Interpretation: Quality target achieved? — printed p.45"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10' AND f.symbol = 'measured_value_operating' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-10' AND f.symbol = 'measured_value_operating' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-18 · ATV-A-704E · ATV-A-704E-10 · `nominal_value_reference` ↔ `vergleichsmessungen.reference_value (equivalency rows)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — input of EQ-05.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-10 nominal_value_reference), EV — no transcript]: "IQC-Card 6 - Equivalency Measurements (form header): 1 Date | 2 Name | 3 Sample designation |
+--     4 Parameter | 5 Mean [mg/l] | 6 Nominal value or mean of the equivalency measurements [mg/l] | 7 Deviation of the mean from the nominal value [mg/l] | 8 Deviation relative [%] | 9
+--     Interpretation: Quality target achieved? — printed p.45"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10' AND f.symbol = 'nominal_value_reference' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-10' AND f.symbol = 'nominal_value_reference' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-19 · ATV-A-704E · ATV-A-704E-10 · `measured_value_reference` ↔ `vergleichsmessungen.reference_value (parallel rows)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — input of EQ-06; the SAME register column
+--     serves both roles (atv_a704e-J-2).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-10 measured_value_reference), EV — no transcript]: "IQC-Card 7 - Parallel Measurements to the Reference Method (form header): 7 Referenced
+--     monitoring Measured value [mg/l] | 8 Measured value of the operating method [mg/l] | 9 Deviation absolute Col8-Col7 [mg/l] | 10 Deviation relative Col9 x 100/Col7 [%] | 11/12 Permissible
+--     deviation Condition [mg/l] [%] | 13 Interpretation: Quality target achieved? — printed p.48"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10' AND f.symbol = 'measured_value_reference' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-10' AND f.symbol = 'measured_value_reference' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-20 · ATV-A-704E · ATV-A-704E-10 · `deviation_equivalency_pct` ↔ `equivalency_max_dev (ATV-A-704E-10-D1)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates CR-022, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — read by CR-022 and written by EQ-05
+--     (atv_a704e-G-2 / G-5 / R-1).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-10 deviation_equivalency_pct), EV — no transcript]: "IQC-Card 6 - Equivalency Measurements (form header): 1 Date | 2 Name | 3 Sample designation
+--     | 4 Parameter | 5 Mean [mg/l] | 6 Nominal value or mean of the equivalency measurements [mg/l] | 7 Deviation of the mean from the nominal value [mg/l] | 8 Deviation relative [%] | 9
+--     Interpretation: Quality target achieved? | Usually, the deviation in the central measurement range should not exceed the quality target of < 20 % (in this regard also see IQC-Card 2: Internal
+--     Specifications). — printed p.45 and 43"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10' AND f.symbol = 'deviation_equivalency_pct' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-10' AND f.symbol = 'deviation_equivalency_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-21 · ATV-A-704E · ATV-A-704E-10 · `deviation_parallel_pct` ↔ `parallel_max_dev (ATV-A-704E-10-D2)` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates CR-023, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — read by CR-023 and written by EQ-06
+--     (atv_a704e-G-2 / G-5 / R-1).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-10 deviation_parallel_pct), EV — no transcript]: "IQC-Card 7 - Parallel Measurements to the Reference Method (form header): 7 Referenced
+--     monitoring Measured value [mg/l] | 8 Measured value of the operating method [mg/l] | 9 Deviation absolute Col8-Col7 [mg/l] | 10 Deviation relative Col9 x 100/Col7 [%] | 11/12 Permissible
+--     deviation Condition [mg/l] [%] | 13 Interpretation: Quality target achieved? | Usually, the deviation in the central measuring range should not exceed the quality target of < 20 % (see also
+--     IQC-Card 2 in this regard: Internal Specifications). Especially with measuring results in the lower concentration range (e. g. Ptotal < 1 mg/l) greater percental tolerances are possible. —
+--     printed p.48 and 46"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10' AND f.symbol = 'deviation_parallel_pct' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-10' AND f.symbol = 'deviation_parallel_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-22 · ATV-A-704E · ATV-A-704E-08 · `qa_measure` ↔ `qs_massnahmen.measure` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (enum,
+--     is_required true, gates none, consumers ["ATV-A-704E-09","ATV-A-704E-10","ATV-A-704E-11"]) stays typeable; no second equation is emitted for a quantity an existing input already carries
+--     (amendment K). Prod holds 0 stored project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — inherited
+--     by -09 / -10 / -11; retire only with atv_a704e-G-4.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-08 qa_measure), EV — no transcript]: "IQC-Card 2 Sheet 1 - Recommendations by the DWA-Working Group IG-4.3, col.1 Quality assurance measure:
+--     Multiple determinations | Measurement of standards | Plausibility checks (spiking, dilution) | Equivalency measurements and/or interlaboratory test (operating methods) | Parallel measurements
+--     to the reference method | Pipettes 100-1000 µl volume check | Pipettes > 1000 µl volume check | pH-meter check | Heating device/thermoblock check | Measuring device check (e.g. photometer) —
+--     printed p.23"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-08' AND f.symbol = 'qa_measure' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-08' AND f.symbol = 'qa_measure' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-23 · ATV-A-704E · ATV-A-704E-08 · `qa_minimum_frequency` ↔ `qs_massnahmen.frequency` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (text,
+--     is_required true, gates none, consumers ["ATV-A-704E-09","ATV-A-704E-10","ATV-A-704E-11"]) stays typeable; no second equation is emitted for a quantity an existing input already carries
+--     (amendment K). Prod holds 0 stored project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — inherited
+--     by -09 / -10 / -11.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-08 qa_minimum_frequency), EV — no transcript]: "IQC-Card 2 Sheet 1 - Recommendations by the DWA-Working Group IG-4.3, col.3 Minimum frequency:
+--     Multiple determinations 1x per month, person- and matrix-related | Measurement of standards after each 10th sample; at least 1x per month, person-related | Plausibility checks (spiking,
+--     dilution) if measuring results are implausible; if matrix changes; 1x per quarter | Equivalency measurements and/or interlaboratory test (operating methods) 1x per year, person-related |
+--     Parallel measurements to the reference method 1x per year, method-related | Pipettes 100-1000 µl volume check 4x per year | pH-meter check 1x per month | Heating device/thermoblock check 1x per
+--     year — printed p.23"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-08' AND f.symbol = 'qa_minimum_frequency' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-08' AND f.symbol = 'qa_minimum_frequency' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-24 · ATV-A-704E · ATV-A-704E-08 · `qa_quality_target_pct` ↔ `qs_massnahmen.target_pct` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates CR-019 / CR-022 / CR-023, consumers ["ATV-A-704E-09","ATV-A-704E-10"]) stays typeable; no second equation is emitted for a quantity an existing input already carries
+--     (amendment K). Prod holds 0 stored project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — the gate
+--     input of CR-019 / CR-022 / CR-023 on -09 / -10; a per-measure target needs the gates to read the register row first (atv_a704e-G-5).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-08 qa_quality_target_pct), EV — no transcript]: "IQC-Card 2 Sheet 1 - Recommendations by the DWA-Working Group IG-4.3, col.4 Quality target:
+--     Multiple determinations Random error < 10 % * | Measurement of standards Adherance to the permissible value range (control limits) | Plausibility checks (spiking, dilution) deviation < 20 % * |
+--     Equivalency measurements Deviation < 20 % * | Parallel measurements to the reference method Deviation < 20 % * | Pipettes 100-1000 µl Deviation < 2 % | Pipettes > 1000 µl Deviation < 1 % |
+--     pH-meter Deviation < 0.2 pH | Heating device/thermoblock Deviation < 3 °C | * For measuring results in the lower concentration range (e. g. Ptotal < 1 mg/l) greater percental tolerances are
+--     possible. In this case their permissible deviations should be defined in mg/l. — printed p.23"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-08' AND f.symbol = 'qa_quality_target_pct' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-08' AND f.symbol = 'qa_quality_target_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-25 · ATV-A-704E · ATV-A-704E-08 · `survey_measure_count` ↔ `qs_massnahmen.performed_count` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required false, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification: the scalar = the sum of the
+--     register's performed_count (no equation emitted today — amendment K forbids a second equation for an existing input).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-08 survey_measure_count), EV — no transcript]: "To be able to recognise all performed quality assurance measures for a wastewater system quickly
+--     and reliably, a survey card must be produced. In a structured way it documents the overall measures that were taken within a certain period of time - similar to an annual report. [...] The
+--     information on the number of measures taken is therefore only entered at the end of this period. [...] To receive a relation of the IQC-measures taken for the samples analysed, also their
+--     number must be given. — printed p.18"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-08' AND f.symbol = 'survey_measure_count' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-08' AND f.symbol = 'survey_measure_count' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-26 · ATV-A-704E · ATV-A-704E-11 · `testing_equipment` ↔ `pruefmittel.equipment` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (enum,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — read by CR-025 / CR-026 through the G-1 / G-3
+--     guards.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 testing_equipment), EV — no transcript]: "IQC-Card 9: Recommendations for control- and monitoring frequencies can be taken from the table. |
+--     Testing equipment / Monitoring: BOD-respirometer biannually | Photometer annually | Annealing furnace annually | Heating device/thermoblock annually | Ion exchange annually | Piston stroke
+--     pipettes quarterly | Refrigerator annually | Conductivity measuring device biannually | pH-meter monthly | Sampling equipment biannually | Reagents quarterly | Oxygen measuring device every two
+--     weeks | Thermometer quarterly | Thermo cabinet annually | Drying cabinet annually | Scales annually — printed p.54"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'testing_equipment' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-11' AND f.symbol = 'testing_equipment' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-27 · ATV-A-704E · ATV-A-704E-11 · `monitoring_interval` ↔ `pruefmittel.interval` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (enum,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification (last row); the printed
+--     interval table is atv_a704e-U-2.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 monitoring_interval), EV — no transcript]: "IQC-Card 9: Recommendations for control- and monitoring frequencies can be taken from the table.
+--     | Testing equipment / Monitoring: BOD-respirometer biannually | Photometer annually | Annealing furnace annually | Heating device/thermoblock annually | Ion exchange annually | Piston stroke
+--     pipettes quarterly | Refrigerator annually | Conductivity measuring device biannually | pH-meter monthly | Sampling equipment biannually | Reagents quarterly | Oxygen measuring device every two
+--     weeks | Thermometer quarterly | Thermo cabinet annually | Drying cabinet annually | Scales annually — printed p.54"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'monitoring_interval' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-11' AND f.symbol = 'monitoring_interval' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-28 · ATV-A-704E · ATV-A-704E-11 · `pipette_tested_volume` ↔ `pruefmittel.pipette_volume_ml` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required false, gates CR-025, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — read by CR-025 (atv_a704e-G-3).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 pipette_tested_volume), EV — no transcript]: "The mean must be calculated from the 5 results of the weightings. [...] The mean value must lie
+--     within a defined tolerance range (see table). | Tested volume [ml] / Deviation [%] / Tolerance range [g]: 0.100 / ≤ 2 / 0.098 - 0.102 | 0.200 / ≤ 2 / 0.196 - 0.204 | 0.500 / ≤ 2 / 0.490 - 0.510
+--     | 1.000 / ≤ 1 / 0.990 - 1.010 | 2.000 / ≤ 1 / 1.980 - 2.020 | 5.000 / ≤ 1 / 4.950 - 5.050 | If the results lie outside the tolerance range, the pipette must no longer be used as testing
+--     equipment (remove designation) and should be sent to the manufacturer for testing, if necessary. — printed p.55"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_tested_volume' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-11' AND f.symbol = 'pipette_tested_volume' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-29 · ATV-A-704E · ATV-A-704E-11 · `pipette_deviation_pct` ↔ `pruefmittel.pipette_dev_pct` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required false, gates CR-025, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — read by CR-025; pipette_dev_max is the
+--     register twin (atv_a704e-G-3 / U-3).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 pipette_deviation_pct), EV — no transcript]: "The mean must be calculated from the 5 results of the weightings. [...] The mean value must lie
+--     within a defined tolerance range (see table). | Tested volume [ml] / Deviation [%] / Tolerance range [g]: 0.100 / ≤ 2 / 0.098 - 0.102 | 0.200 / ≤ 2 / 0.196 - 0.204 | 0.500 / ≤ 2 / 0.490 - 0.510
+--     | 1.000 / ≤ 1 / 0.990 - 1.010 | 2.000 / ≤ 1 / 1.980 - 2.020 | 5.000 / ≤ 1 / 4.950 - 5.050 | If the results lie outside the tolerance range, the pipette must no longer be used as testing
+--     equipment (remove designation) and should be sent to the manufacturer for testing, if necessary. — printed p.55"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_deviation_pct' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-11' AND f.symbol = 'pipette_deviation_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-30 · ATV-A-704E · ATV-A-704E-11 · `heating_device_deviation` ↔ `pruefmittel.heating_dev_c` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required false, gates CR-026, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — read by CR-026 (atv_a704e-G-1).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 heating_device_deviation), EV — no transcript]: "Monitoring of heating device/thermoblock: Within the scope of testing equipment monitoring,
+--     the function of thermoblocks must be checked annually. Check of the required temperatures of 100 °C and/or 148 °C (± 3 °C). Alternatively, also other/further frequently used temperatures can be
+--     tested. — printed p.55"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'heating_device_deviation' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-11' AND f.symbol = 'heating_device_deviation' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-31 · ATV-A-704E · ATV-A-704E-11 · `photometer_check_done` ↔ `pruefmittel.photometer_check` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (boolean,
+--     is_required false, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification; this task only adds the
+--     visibility rule on the scalar (emitted).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 photometer_check_done), EV — no transcript]: "Monitoring of the photometer: Within the scope of testing equipment monitoring, the function of
+--     photometers must be tested regularly. The device must be checked annually according to the instructions manual. The test kit can be ordered as a test solution kit from the manufacturer of the
+--     photometer. The entire optical system of the photometers is checked. The monitoring must be documented on Sheet 1. — printed p.55"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'photometer_check_done' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-11' AND f.symbol = 'photometer_check_done' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-32 · ATV-A-704E · ATV-A-704E-12 · `employee_qualification` ↔ `mitarbeiter.qualification` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (text,
+--     is_required true, gates none, consumers ["ATV-A-704E-07"]) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — inherited by -07 and read by CR-018 through
+--     atv_a704e-G-6.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-12 employee_qualification), EV — no transcript]: "Qualification: Predominantly, qualification is certified by a corresponding vocational
+--     training. A training as \"specialist on wastewater technology\" or a similar training qualification should be listed here. A qualification that was gained otherwise must be presented in a
+--     corresponding way. — printed p.62"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'employee_qualification' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-12' AND f.symbol = 'employee_qualification' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-33 · ATV-A-704E · ATV-A-704E-12 · `instruction_training_record` ↔ `mitarbeiter.training_record` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (text,
+--     is_required true, gates none, consumers ["ATV-A-704E-07"]) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — inherited by -07.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-12 instruction_training_record), EV — no transcript]: "Overview of instruction and training: This overview serves as a proof of training
+--     according to Section 4.3.3 of the Standard. Here the completed basic introduction as well as all internal and external successive training are recorded. Here, for example, also supportive
+--     visits by the manufacturer and DWA-courses must be registered. | Sheet 2 - Overview of Instructions and Training: 1 Event: topic and organising party | 2 Date | 3 Signature supervisor — printed
+--     p.62 and 66"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'instruction_training_record' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-12' AND f.symbol = 'instruction_training_record' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-34 · ATV-A-704E · ATV-A-704E-12 · `deviation_feature` ↔ `abweichungen.feature` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (text,
+--     is_required false, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: retire on ratification: one deviation per row is the
+--     record (IQC-Card 11).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-12 deviation_feature), EV — no transcript]: "Here, the date of the deviation is put down in column 1. The name of the person who detects the
+--     deviation (column 2), the type of distinctive features (column 3) and in which IQC-Card they are documented (column 4) are also noted. As soon as the cause is known, it is documented in column
+--     5 with the measured taken (column 6). The result of the measures introduced is entered together with date (date 7), the result of the measures (column 8) and the name of the person who
+--     determined the result (column 9). — printed p.67"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'deviation_feature' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-12' AND f.symbol = 'deviation_feature' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-35 · ATV-A-704E · ATV-A-704E-12 · `deviation_cause` ↔ `abweichungen.cause` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (text,
+--     is_required false, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: retire on ratification.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-12 deviation_cause), EV — no transcript]: "Here, the date of the deviation is put down in column 1. The name of the person who detects the
+--     deviation (column 2), the type of distinctive features (column 3) and in which IQC-Card they are documented (column 4) are also noted. As soon as the cause is known, it is documented in column
+--     5 with the measured taken (column 6). The result of the measures introduced is entered together with date (date 7), the result of the measures (column 8) and the name of the person who
+--     determined the result (column 9). — printed p.67"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'deviation_cause' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-12' AND f.symbol = 'deviation_cause' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-36 · ATV-A-704E · ATV-A-704E-12 · `deviation_measure` ↔ `abweichungen.measure` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (text,
+--     is_required false, gates none, consumers ["ATV-A-704E-07"]) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — inherited by -07.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-12 deviation_measure), EV — no transcript]: "Here, the date of the deviation is put down in column 1. The name of the person who detects the
+--     deviation (column 2), the type of distinctive features (column 3) and in which IQC-Card they are documented (column 4) are also noted. As soon as the cause is known, it is documented in column
+--     5 with the measured taken (column 6). The result of the measures introduced is entered together with date (date 7), the result of the measures (column 8) and the name of the person who
+--     determined the result (column 9). — printed p.67"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'deviation_measure' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-12' AND f.symbol = 'deviation_measure' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-37 · ATV-A-704E · ATV-A-704E-12 · `deviation_iqc_card_ref` ↔ `abweichungen.iqc_card_ref` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (enum,
+--     is_required false, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: retire on ratification.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-12 deviation_iqc_card_ref), EV — no transcript]: "Here, the date of the deviation is put down in column 1. The name of the person who detects
+--     the deviation (column 2), the type of distinctive features (column 3) and in which IQC-Card they are documented (column 4) are also noted. As soon as the cause is known, it is documented in
+--     column 5 with the measured taken (column 6). The result of the measures introduced is entered together with date (date 7), the result of the measures (column 8) and the name of the person who
+--     determined the result (column 9). — printed p.67"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-12' AND f.symbol = 'deviation_iqc_card_ref' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-12' AND f.symbol = 'deviation_iqc_card_ref' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-38 · ATV-A-704E · ATV-A-704E-01 · `parameter_name` ↔ `betriebsmethoden.parameter` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (enum,
+--     is_required true, gates none, consumers ["ALL"]) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — the enum is the driver of the whole standard
+--     (see atv_a704e-C-4 for its dead "ALL" consumer token).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-01 parameter_name), EV — no transcript]: "2.2 Abbreviated Terms - Abbreviation / Description: Sett. substances [Abs. Stoffe] Settable substances
+--     | BOD5 [BSB5] Biochemical oxygen demand in five days | COD [CSB] Chemical oxygen demand | NH4-N Ammonium nitrogen | NO3-N Nitrate nitrogen | NO2-N Nitrite nitrogen | Ptotal Total phosphorus |
+--     TNb Total nitrogen bound | TOC Total organic carbon — printed p.9"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-01' AND f.symbol = 'parameter_name' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-01' AND f.symbol = 'parameter_name' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-39 · ATV-A-704E · ATV-A-704E-03 · `application_mode` ↔ `betriebsmethoden.application_mode` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (enum,
+--     is_required true, gates none, consumers ["ATV-A-704E-05"]) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — inherited by -05 and the driver of
+--     atv_a704e-C-1.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-03 application_mode), EV — no transcript]: "For the reasonable application of operating methods the following guidelines apply: When pertaining
+--     to water and wastewater fee regulations, operating methods can only replace reference methods if this is regulated by law. [...] The use of operating methods can clearly reduce the need for
+--     reference methods. So, for example, in self-monitoring - except for the parallel analysis - reference methods can be omitted. — printed p.11"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-03' AND f.symbol = 'application_mode' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-03' AND f.symbol = 'application_mode' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-40 · ATV-A-704E · ATV-A-704E-03 · `expected_concentration_range` ↔ `betriebsmethoden.expected_range` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers ["ATV-A-704E-10"]) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — inherited by -10; note the register column is
+--     TEXT (a range), the prod scalar a NUMBER in mg/l (atv_a704e-U-6).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-03 expected_concentration_range), EV — no transcript]: "By referring to the criteria mentioned in Sections 3.1 and 3.2, the operator must decide
+--     for the operating method that is suitable for his specific case of application. In doing so, especially the measuring range must be selected in such way that preferably the expected result can
+--     be found in the 20 % to 80 % interval of the measuring range. From experience, this range shows the greatest analytical reliability. Suitable dilution steps are permitted. — printed p.11"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-03' AND f.symbol = 'expected_concentration_range' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-03' AND f.symbol = 'expected_concentration_range' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-41 · ATV-A-704E · ATV-A-704E-03 · `validation_range_coverage_pct` ↔ `betriebsmethoden.validation_coverage_pct` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (number,
+--     is_required true, gates none, consumers none) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: derive on ratification (last row).
+-- Evidence [prod fields.verification_quote (ATV-A-704E-03 validation_range_coverage_pct), EV — no transcript]: "By referring to the criteria mentioned in Sections 3.1 and 3.2, the operator must
+--     decide for the operating method that is suitable for his specific case of application. In doing so, especially the measuring range must be selected in such way that preferably the expected
+--     result can be found in the 20 % to 80 % interval of the measuring range. From experience, this range shows the greatest analytical reliability. Suitable dilution steps are permitted. — printed
+--     p.11"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-03' AND f.symbol = 'validation_range_coverage_pct' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-03' AND f.symbol = 'validation_range_coverage_pct' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-D-42 · ATV-A-704E · ATV-A-704E-03 · `method_selected_suitable` ↔ `betriebsmethoden.suitable` — amendment K pair: the register column is the N-instances shape, the prod scalar stays typeable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay. The register column records one value PER ROW (per determination / trial / measurement / instrument / person / deviation / method), the prod scalar (boolean,
+--     is_required true, gates none, consumers ["ATV-A-704E-05"]) stays typeable; no second equation is emitted for a quantity an existing input already carries (amendment K). Prod holds 0 stored
+--     project_parameters and 12 worksheet instances for ATV-A-704E (read-only counts 2026-09-24), so any retirement is data-free today. Proposal: DEFER — inherited by -05.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-03 method_selected_suitable), EV — no transcript]: "By referring to the criteria mentioned in Sections 3.1 and 3.2, the operator must decide for
+--     the operating method that is suitable for his specific case of application. In doing so, especially the measuring range must be selected in such way that preferably the expected result can be
+--     found in the 20 % to 80 % interval of the measuring range. From experience, this range shows the greatest analytical reliability. Suitable dilution steps are permitted. — printed p.11"
+-- Note: Retirement pattern (when ratified): deactivate the scalar, never delete it. Rollback re-activates it.
+-- BEGIN;
+-- -- retirement pattern (only when this block is RATIFIED as "retire"):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-03' AND f.symbol = 'method_selected_suitable' AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-03' AND f.symbol = 'method_selected_suitable' AND NOT f.active;
+--
+-- =====================================================================================================================
+-- atv_a704e-R-1 · ATV-A-704E · ATV-A-704E-09 / -10 · EQ-01 … EQ-06 outputs are editable inputs — The six equation OUTPUTS are ALSO plain number inputs (the #22 class) — propose the archive-pattern switch onto the registers once the row versions are ratified
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing changed: EQ-01 … EQ-06 keep their rows, their formulas and their `verified_against_standard` status, and their outputs (`mean_value`, `deviation_single_pct`,
+--     `calculated_value`, `NSS`, `deviation_equivalency_pct`, `deviation_parallel_pct`) remain hand-enterable number fields with a ">= 0" validation rule — a derived value the engineer can overwrite.
+--     The Plan-3 rows of this task are NEW symbols beside them (`mean_value_calc`, `max_dev_pct_calc`, the two per-kind maxima) and the per-row versions live as register `derived` columns; nothing is
+--     replaced. Proposal, AFTER atv_a704e-D-2 / D-3 / D-4 / D-9 / D-16 / D-20 / D-21 are ratified: archive and DELETE the six prod equations (their math now lives per row) and mark the six scalars
+--     `active = false`.
+-- Evidence [prod equations.source_quote (EQ-01), EV — no transcript]: "DWA-A 704E, IQC-Card 3 – Multiple Determinations, Documentation: \"From the single measured values the mean (add single measured
+--     values and divide them by the number of the measured values; column 7) is produced.\" (p. 29)."
+-- Evidence [prod equations.source_quote (EQ-03), EV — no transcript]: "DWA-A 704E, IQC-Card 5 – Plausibility Check by Dilution and Standard Addition, Sheet 1 – Dilution, \"3. Formulas for
+--     calculation: DILUTION FACTOR (column 4) = TOTAL VOLUME / SAMPLE VOLUME. CALCULATED VALUE (column 6) = DILUTION FACTOR · MEASURED VALUE DILUTED SAMPLE\" (p. 35)."
+-- Evidence [prod equations.source_quote (EQ-04), EV — no transcript]: "DWA-A 704E, IQC-Card 5, Sheet 3 – standard addition (general procedure), \"3. Calculation: NOMINAL VALUE SPIKED SAMPLE (NSS,
+--     column 8): NSS = [(volume sample · measured value original sample) + (volume standard · concentration standard)] / (volume sample + volume standard)\" (p. 36)."
+-- Note: The archive re-INSERT below lists ALL 22 live `equations` columns (information_schema re-read read-only 2026-09-24 in this session). EQ-01 … EQ-06 carry non-null `verified_at` and
+--     `verification_note` (checked read-only) — a shorter column list would silently drop the provenance of six `verified_against_standard` rows on a ratify-then-rollback. EQ-01's stored
+--     `SUM(single_result_i)` form is NOT engine-eligible (the emitter would refuse it; `normalizeFormula` rewrites `SUM(x)` to the symbol `SUM_x`), which is a second reason it cannot simply be
+--     re-pointed.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_atv_a704e AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_atv_a704e SELECT e.* FROM equations e WHERE e.id = 'c4f4944e-9329-4a62-9724-3e9637a0891c' AND md5(e.formula) = '75efaf7051f17c0f86066aab6c87759d';
+-- INSERT INTO equations_archive_atv_a704e SELECT e.* FROM equations e WHERE e.id = 'a4287f3a-2d8f-4d0e-8f51-8ce6843496cf' AND md5(e.formula) = '4ff22a93dde07b5700008971dd51a384';
+-- INSERT INTO equations_archive_atv_a704e SELECT e.* FROM equations e WHERE e.id = 'f203bcc2-f1d4-4a40-85a6-de11bd2e7894' AND md5(e.formula) = '8c9d771f4dff6b0af58672a550048c52';
+-- INSERT INTO equations_archive_atv_a704e SELECT e.* FROM equations e WHERE e.id = '56f648dc-a38d-4f4a-81da-401d3ba36eb5' AND md5(e.formula) = '2a152d77d487c87163d8774388eddcaf';
+-- INSERT INTO equations_archive_atv_a704e SELECT e.* FROM equations e WHERE e.id = '3da75786-3ecf-4f6b-996a-bdd86e486605' AND md5(e.formula) = '1f2f389f1896fa4104b9c9624c8ac568';
+-- INSERT INTO equations_archive_atv_a704e SELECT e.* FROM equations e WHERE e.id = '5bb589a2-3706-4651-8e8c-13ac5cdd6c60' AND md5(e.formula) = 'dbe27722b8e847e271c47b59c1ca2b88';
+-- DELETE FROM equations e WHERE e.id = 'c4f4944e-9329-4a62-9724-3e9637a0891c' AND md5(e.formula) = '75efaf7051f17c0f86066aab6c87759d';
+-- DELETE FROM equations e WHERE e.id = 'a4287f3a-2d8f-4d0e-8f51-8ce6843496cf' AND md5(e.formula) = '4ff22a93dde07b5700008971dd51a384';
+-- DELETE FROM equations e WHERE e.id = 'f203bcc2-f1d4-4a40-85a6-de11bd2e7894' AND md5(e.formula) = '8c9d771f4dff6b0af58672a550048c52';
+-- DELETE FROM equations e WHERE e.id = '56f648dc-a38d-4f4a-81da-401d3ba36eb5' AND md5(e.formula) = '2a152d77d487c87163d8774388eddcaf';
+-- DELETE FROM equations e WHERE e.id = '3da75786-3ecf-4f6b-996a-bdd86e486605' AND md5(e.formula) = '1f2f389f1896fa4104b9c9624c8ac568';
+-- DELETE FROM equations e WHERE e.id = '5bb589a2-3706-4651-8e8c-13ac5cdd6c60' AND md5(e.formula) = 'dbe27722b8e847e271c47b59c1ca2b88';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'mean_value' AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'deviation_single_pct' AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'calculated_value' AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'NSS' AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10' AND f.symbol = 'deviation_equivalency_pct' AND f.active;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10' AND f.symbol = 'deviation_parallel_pct' AND f.active;
+-- COMMIT;
+-- Rollback: INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status,
+--     audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote) SELECT a.id,
+--     a.worksheet_template_id, a.equation_number, a.formula, a.formula_latex, a.input_symbols, a.output_symbol, a.output_unit, a.clause_reference, a.description, a.verification_status,
+--     a.audit_status, a.source_file, a.source_anchor, a.source_quote, a.audit_notes, a.audited_at, a.audited_by, a.verified_by_user_id, a.verified_at, a.verification_note, a.verification_quote FROM
+--     equations_archive_atv_a704e a WHERE a.id IN ('c4f4944e-9329-4a62-9724-3e9637a0891c', 'a4287f3a-2d8f-4d0e-8f51-8ce6843496cf', 'f203bcc2-f1d4-4a40-85a6-de11bd2e7894',
+--     '56f648dc-a38d-4f4a-81da-401d3ba36eb5', '3da75786-3ecf-4f6b-996a-bdd86e486605', '5bb589a2-3706-4651-8e8c-13ac5cdd6c60') AND NOT EXISTS (SELECT 1 FROM equations e2 WHERE e2.id = a.id); UPDATE
+--     fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND
+--     f.symbol = 'mean_value' AND NOT f.active; UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code =
+--     'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'deviation_single_pct' AND NOT f.active; UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id =
+--     w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'calculated_value' AND NOT f.active; UPDATE fields f SET active = true
+--     FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09' AND f.symbol = 'NSS' AND NOT
+--     f.active; UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-10' AND f.symbol = 'deviation_equivalency_pct' AND NOT f.active; UPDATE fields f SET active = true FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE
+--     f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10' AND f.symbol = 'deviation_parallel_pct' AND NOT f.active; -- drop equations_archive_atv_a704e once the
+--     deletion is signed off as final.
+--
+-- =====================================================================================================================
+-- atv_a704e-F-1 · ATV-A-704E · ATV-A-704E-09 · per-row deviation from the mean — [CODE] gap: a register row expression cannot reference an aggregate of its own register, so the printed per-value deviation column of IQC-Card 3 cannot be a row column
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The register `einzelbestimmungen` has NO deviation column. The deviation lives at worksheet level as `max_dev_pct_calc` (ATV-A-704E-09-D3), which is the stored EQ-02 math
+--     maximised over the rows — the worst row decides, which is also what the IQC-Card interpretation column asks. Intended row expression, recorded so a later [CODE] pass is mechanical: `dev_pct =
+--     (single_result - mean_rows(einzelbestimmungen, single_result)) / mean_rows(einzelbestimmungen, single_result) * 100`; `prepareRegisterRows` evaluates a row expression in ROW scope only
+--     (`RegisterRowsCtx`), so `mean_rows(<own register>, …)` has no engine path today.
+-- Evidence [prod equations.verification_quote (EQ-02), EV — no transcript]: "The greatest difference in the single measured values is entered into the IQC-Card in mg/l (column 8) and in % (greatest
+--     difference of the single measured values divided by the mean value; column 9). In column 10 the result of the control measure is documented. | IQC-Card 3 - Multiple Determinations (form
+--     header): 1 Date | 2 Name | 3 Sample designation | 4 Measured value 1 [mg/l] | 5 Measured value 2 [mg/l] | 6 Measured value 3 [mg/l] | 7 Mean [mg/l] | 8 Greatest spread Difference [mg/l] | 9
+--     Greatest spread Col 8 x 100% / Col 7 [%] | 10 Interpretation: Quality target achieved? — printed p.29 and 30"
+-- Note: Same class as the grouped-aggregate gap iso14046-F-1 and the checklist gap din14021-F-1 / iso46001-F-2 — all four want an aggregate the row scope cannot reach.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-J-1 · ATV-A-704E · ATV-A-704E-09 · EQ-02 vs the printed IQC-Card 3 column 9 — prod's own `source_quote` records that the PRINTED column-9 metric is a greatest SPREAD ÷ mean while the stored EQ-02 is a single value's deviation from the mean — the divergence is inherited by `max_dev_pct_calc` and stays an open ruling
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): `max_dev_pct_calc` re-expresses the STORED EQ-02 (controller resolution 1: the same math as stored, never a guess). It therefore reports max(max − mean, mean − min) × 100 /
+--     mean. If the printed card is authoritative, the metric would be (max − min) × 100 / mean — a different number whenever the values are asymmetric around the mean (100 / 130 / 95: 20,0 % vs 32,3
+--     %). That alternative is NOT emitted: no source in this session can settle which the standard prints, because ATV-A-704E has no transcript. Unblock path: the PDF page (SR-3) — see atv_a704e-U-1.
+-- Evidence [prod equations.source_quote (EQ-02) — carries prod's own RULING note, EV — no transcript]: "DWA-A 704E, IQC-Card 3 – Multiple Determinations, Documentation: \"The greatest difference in
+--     the single measured values is entered into the IQC-Card in mg/l (column 8) and in % (greatest difference of the single measured values divided by the mean value; column 9).\" (p. 29). [RULING:
+--     printed col.9 metric is the greatest difference of the single values ÷ mean value (a max-spread), which diverges semantically from the encoded formula 100*(single_result_i −
+--     mean_value)/mean_value — evidence only, formula not changed.]"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 deviation_single_pct), EV — no transcript]: "The greatest difference in the single measured values is entered into the IQC-Card in mg/l
+--     (column 8) and in % (greatest difference of the single measured values divided by the mean value; column 9). In column 10 the result of the control measure is documented. | IQC-Card 3 -
+--     Multiple Determinations (form header): 1 Date | 2 Name | 3 Sample designation | 4 Measured value 1 [mg/l] | 5 Measured value 2 [mg/l] | 6 Measured value 3 [mg/l] | 7 Mean [mg/l] | 8 Greatest
+--     spread Difference [mg/l] | 9 Greatest spread Col 8 x 100% / Col 7 [%] | 10 Interpretation: Quality target achieved? — printed p.29 and 30"
+-- Note: Recorded, never silently corrected (SR-1 / R-5). If ratified as "spread", the one-line change is `max_dev_pct_calc = (max_rows(einzelbestimmungen, single_result) -
+--     min_rows(einzelbestimmungen, single_result)) * 100 / mean_rows(einzelbestimmungen, single_result)` and EQ-02 itself becomes a replacement ruling.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-J-2 · ATV-A-704E · ATV-A-704E-10 · the brief's separate `nominal_value` column on `vergleichsmessungen` — Withheld: a second denominator column the deviation never reads would be a silent trap
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The register has ONE required `reference_value` column (label "Soll- bzw. Referenzwert") that carries the nominal value on an equivalency row (IQC-Card 6 column 6) and the
+--     reference-method measured value on a parallel row (IQC-Card 7 column 7) — exactly the two denominators of the stored EQ-05 and EQ-06, whose forms are otherwise identical. The brief also asks
+--     for a `nominal_value` column visible only for equivalency rows; with `dev_pct` reading `reference_value`, that column would be a number the engineer types and the deviation ignores. Alternative
+--     if the owner prefers two columns: both optional + `dev_pct` branching on `kind` — but then a row missing its denominator is COMPLETE with a null deviation and the register maxima turn "manuell
+--     erforderlich"; the single required column avoids that.
+-- Evidence [prod equations.source_quote (EQ-05), EV — no transcript]: "DWA-A 704E, IQC-Card 6 – Equivalency Measurements, information documented in Card 6: \"mean value of own measurements (column
+--     5), nominal or mean value, which was calculated within the scope of the equivalency measurements (column 6), deviation of the calculated mean value from the nominal or mean value in mg/l
+--     (column 7) and in per cent (column 8).\" (p. 43)."
+-- Evidence [prod equations.source_quote (EQ-06), EV — no transcript]: "DWA-A 704E, IQC-Card 7 – Parallel Analyses to the Reference Method, Documentation: \"the measured value (usually mean value) of
+--     the operating method (column 8) is put down ... according to the reference method (column 6) ... together with the determined measured value (column 7). The difference between both measured
+--     values must be formed and must be entered into the IQC-Card in absolute (column 9) as well as percental value (column 10) with reference to the result of the external laboratory.\" (p. 46)."
+-- Note: Judgment, not a guard refusal — recorded so the brief's shape is visibly the rejected option.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-U-1 · ATV-A-704E · ATV-A-704E-08 · IQC-Card 2 Sheet 1 — minimum frequencies and quality targets per QA measure — NOT SEEDED — the printed table exists only in the scanned PDF; every value is a sign-off item until an OCR or a manual transcription makes it quotable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): No regulation table is seeded for this standard (tables 0, no seed builder, no seed migration). The values the engineer needs are typed into the register columns instead.
+--     The prod `verification_quote` cell below CONTAINS what looks like the printed table — but it is second-hand (grade EV, written by an earlier encoder from the page images) and SR-1 forbids
+--     seeding a value that cannot be quoted from the standard's own text in this session. Proposed schema once the page is readable: TAB_IQC2_S1, key `qa_measure` (the nine prod tokens, G-A3), value
+--     columns `minimum_frequency` (text), `quality_target` (text, because the printed cells mix "< 10 %", "< 0.2 pH", "< 3 °C" and a sentence), `quality_target_pct` (number, only where the printed
+--     cell IS a percentage), `footnote` (the printed "*" sentence about the lower concentration range). Policy: the printed lead-in names the DWA working group's RECOMMENDATIONS — `anhaltswert` is
+--     the likely policy, but the modal verb must be read from the page before it is written. Once seeded, `qa_minimum_frequency` / `qa_quality_target_pct` become `lookup_fill` targets keyed on
+--     `qa_measure`.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-08 qa_quality_target_pct) — EV, second-hand, EV — no transcript]: "IQC-Card 2 Sheet 1 - Recommendations by the DWA-Working Group IG-4.3, col.4
+--     Quality target: Multiple determinations Random error < 10 % * | Measurement of standards Adherance to the permissible value range (control limits) | Plausibility checks (spiking, dilution)
+--     deviation < 20 % * | Equivalency measurements Deviation < 20 % * | Parallel measurements to the reference method Deviation < 20 % * | Pipettes 100-1000 µl Deviation < 2 % | Pipettes > 1000 µl
+--     Deviation < 1 % | pH-meter Deviation < 0.2 pH | Heating device/thermoblock Deviation < 3 °C | * For measuring results in the lower concentration range (e. g. Ptotal < 1 mg/l) greater percental
+--     tolerances are possible. In this case their permissible deviations should be defined in mg/l. — printed p.23"
+-- Note: UNBLOCK PATH: `pdftotext -layout` CANNOT work on this file — it is a 37-page scan with no text layer. Run in this session: `& "C:\Users\Ekowai\scoop\shims\pdftotext.exe" -layout "<the PDF>"
+--     out.txt` → exit 0, 37 bytes written, 37 form feeds, 0 non-whitespace characters (raw output in the task report, amendment O). The owner must either OCR the PDF (e.g. ocrmypdf / Acrobat) or
+--     transcribe the page by hand; then the table is seeded by a normal Plan-3 seed builder with `verbatim_quote` per row and `verification_status` `md_verified`. Until then: no table, no
+--     lookup_fill, and every figure above stays an engineer input.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-U-2 · ATV-A-704E · ATV-A-704E-11 · IQC-Card 9 — monitoring interval per item of testing equipment — NOT SEEDED — the printed table exists only in the scanned PDF; every value is a sign-off item until an OCR or a manual transcription makes it quotable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): No regulation table is seeded for this standard (tables 0, no seed builder, no seed migration). The values the engineer needs are typed into the register columns instead.
+--     The prod `verification_quote` cell below CONTAINS what looks like the printed table — but it is second-hand (grade EV, written by an earlier encoder from the page images) and SR-1 forbids
+--     seeding a value that cannot be quoted from the standard's own text in this session. Proposed schema once the page is readable: TAB_IQC9, key `testing_equipment` (the sixteen prod tokens), value
+--     column `monitoring_interval` (enum over the five prod interval tokens). Policy: the printed lead-in speaks of RECOMMENDATIONS and CR-024's text says the frequency is a minimum with manufacturer
+--     precedence — `anhaltswert` is the likely policy, to be read from the page. Once seeded, `monitoring_interval` becomes a `lookup_fill` keyed on `testing_equipment`, and the register's `interval`
+--     column a `lookup_value`.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 monitoring_interval) — EV, second-hand, EV — no transcript]: "IQC-Card 9: Recommendations for control- and monitoring frequencies can be
+--     taken from the table. | Testing equipment / Monitoring: BOD-respirometer biannually | Photometer annually | Annealing furnace annually | Heating device/thermoblock annually | Ion exchange
+--     annually | Piston stroke pipettes quarterly | Refrigerator annually | Conductivity measuring device biannually | pH-meter monthly | Sampling equipment biannually | Reagents quarterly | Oxygen
+--     measuring device every two weeks | Thermometer quarterly | Thermo cabinet annually | Drying cabinet annually | Scales annually — printed p.54"
+-- Note: UNBLOCK PATH: `pdftotext -layout` CANNOT work on this file — it is a 37-page scan with no text layer. Run in this session: `& "C:\Users\Ekowai\scoop\shims\pdftotext.exe" -layout "<the PDF>"
+--     out.txt` → exit 0, 37 bytes written, 37 form feeds, 0 non-whitespace characters (raw output in the task report, amendment O). The owner must either OCR the PDF (e.g. ocrmypdf / Acrobat) or
+--     transcribe the page by hand; then the table is seeded by a normal Plan-3 seed builder with `verbatim_quote` per row and `verification_status` `md_verified`. Until then: no table, no
+--     lookup_fill, and every figure above stays an engineer input.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-U-3 · ATV-A-704E · ATV-A-704E-11 · IQC-Card 9 Sheet 3 — tested pipette volume, permissible deviation and tolerance range — NOT SEEDED — the printed table exists only in the scanned PDF; every value is a sign-off item until an OCR or a manual transcription makes it quotable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): No regulation table is seeded for this standard (tables 0, no seed builder, no seed migration). The values the engineer needs are typed into the register columns instead.
+--     The prod `verification_quote` cell below CONTAINS what looks like the printed table — but it is second-hand (grade EV, written by an earlier encoder from the page images) and SR-1 forbids
+--     seeding a value that cannot be quoted from the standard's own text in this session. Proposed schema once the page is readable: TAB_IQC9_S3, key `tested_volume_ml` (the printed volumes as tokens
+--     `v0_100`, `v0_200`, `v0_500`, `v1_000`, `v2_000`, `v5_000`), value columns `deviation_max_pct` (number), `tolerance_from_g` / `tolerance_to_g` (number). Policy: `locked` (a tolerance table).
+--     Once seeded, `pipette_deviation_pct` gets a `lookup_fill` LIMIT twin keyed on `pipette_tested_volume`, CR-025 compares against it instead of carrying the 2 / 1 split in its own text, and the
+--     register's `pipette_volume_ml` becomes a `lookup_key`.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-11 pipette_tested_volume) — EV, second-hand, EV — no transcript]: "The mean must be calculated from the 5 results of the weightings. [...] The
+--     mean value must lie within a defined tolerance range (see table). | Tested volume [ml] / Deviation [%] / Tolerance range [g]: 0.100 / ≤ 2 / 0.098 - 0.102 | 0.200 / ≤ 2 / 0.196 - 0.204 | 0.500 /
+--     ≤ 2 / 0.490 - 0.510 | 1.000 / ≤ 1 / 0.990 - 1.010 | 2.000 / ≤ 1 / 1.980 - 2.020 | 5.000 / ≤ 1 / 4.950 - 5.050 | If the results lie outside the tolerance range, the pipette must no longer be
+--     used as testing equipment (remove designation) and should be sent to the manufacturer for testing, if necessary. — printed p.55"
+-- Note: UNBLOCK PATH: `pdftotext -layout` CANNOT work on this file — it is a 37-page scan with no text layer. Run in this session: `& "C:\Users\Ekowai\scoop\shims\pdftotext.exe" -layout "<the PDF>"
+--     out.txt` → exit 0, 37 bytes written, 37 form feeds, 0 non-whitespace characters (raw output in the task report, amendment O). The owner must either OCR the PDF (e.g. ocrmypdf / Acrobat) or
+--     transcribe the page by hand; then the table is seeded by a normal Plan-3 seed builder with `verbatim_quote` per row and `verification_status` `md_verified`. Until then: no table, no
+--     lookup_fill, and every figure above stays an engineer input.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-U-4 · ATV-A-704E · ATV-A-704E-01 · §2.2 / Literature — the reference method per analytical parameter (DIN 38404 / 38405 / 38406 / 38409, DIN EN 1899) — NOT SEEDED — the printed table exists only in the scanned PDF; every value is a sign-off item until an OCR or a manual transcription makes it quotable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): No regulation table is seeded for this standard (tables 0, no seed builder, no seed migration). The values the engineer needs are typed into the register columns instead.
+--     The prod `verification_quote` cell below CONTAINS what looks like the printed table — but it is second-hand (grade EV, written by an earlier encoder from the page images) and SR-1 forbids
+--     seeding a value that cannot be quoted from the standard's own text in this session. Proposed schema once the page is readable: TAB_REFMETHODS, key `parameter_name` (the nine prod tokens), value
+--     columns `reference_method` (text, the printed designation), `unit` (text). CONTENT-BOUNDARY CAVEAT (owner ruling 3d): the DIN documents themselves are NOT in this standard — only the
+--     designation printed here may be seeded; the methods' own tables belong to those standards. Policy: `locked` for the designation. Once seeded, the `betriebsmethoden` register gets a
+--     `reference_method` `lookup_value` column and CR-030 (empty condition, atv_a704e-G-8) can point at it.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-01 parameter_name) — EV, second-hand, EV — no transcript]: "2.2 Abbreviated Terms - Abbreviation / Description: Sett. substances [Abs. Stoffe]
+--     Settable substances | BOD5 [BSB5] Biochemical oxygen demand in five days | COD [CSB] Chemical oxygen demand | NH4-N Ammonium nitrogen | NO3-N Nitrate nitrogen | NO2-N Nitrite nitrogen | Ptotal
+--     Total phosphorus | TNb Total nitrogen bound | TOC Total organic carbon — printed p.9"
+-- Note: UNBLOCK PATH: `pdftotext -layout` CANNOT work on this file — it is a 37-page scan with no text layer. Run in this session: `& "C:\Users\Ekowai\scoop\shims\pdftotext.exe" -layout "<the PDF>"
+--     out.txt` → exit 0, 37 bytes written, 37 form feeds, 0 non-whitespace characters (raw output in the task report, amendment O). The owner must either OCR the PDF (e.g. ocrmypdf / Acrobat) or
+--     transcribe the page by hand; then the table is seeded by a normal Plan-3 seed builder with `verbatim_quote` per row and `verification_status` `md_verified`. Until then: no table, no
+--     lookup_fill, and every figure above stays an engineer input.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-U-5 · ATV-A-704E · ATV-A-704E-06 · IQC-Card 8 — preservation, storage temperature, maximum storage time and container material per sample type × parameter — NOT SEEDED — the printed table exists only in the scanned PDF; every value is a sign-off item until an OCR or a manual transcription makes it quotable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): No regulation table is seeded for this standard (tables 0, no seed builder, no seed migration). The values the engineer needs are typed into the register columns instead.
+--     The prod `verification_quote` cell below CONTAINS what looks like the printed table — but it is second-hand (grade EV, written by an earlier encoder from the page images) and SR-1 forbids
+--     seeding a value that cannot be quoted from the standard's own text in this session. Proposed schema once the page is readable: TAB_IQC8, keys `parameter_name` × `sample_type` (both prod token
+--     lists) — a TWO-key table, so the fills are `derived` columns `lookup('TAB_IQC8', parameter, sample_type, '<col>')` (gap G-1), value columns `preservation` (text), `storage_temperature_c`
+--     (number), `max_storage_time` (text), `container_material` (text). Policy: to be read from the page. Prod's own cell only carries the prose "around 4 °C for a short time" — no per-parameter row
+--     is quotable today.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-06 max_storage_time) — EV, second-hand, EV — no transcript]: "Storage of samples: What is the optimum storage temperature to eliminate changes
+--     of the sample in the best possible way? The wastewater sample should be stored at temperatures around 4 °C for a short time. In this way, for instance, the bacterial conversion of ammonium to
+--     nitrate can be suppressed. | Besides the current measuring results, all boundary conditions must be documented. Among those are time (or period), type and location of the sampling, type and
+--     duration of the storage, measures for pre-treatment (e. g. preservation) of the sample, information on the method of analysis, etc. — printed p.49 and 13"
+-- Note: UNBLOCK PATH: `pdftotext -layout` CANNOT work on this file — it is a 37-page scan with no text layer. Run in this session: `& "C:\Users\Ekowai\scoop\shims\pdftotext.exe" -layout "<the PDF>"
+--     out.txt` → exit 0, 37 bytes written, 37 form feeds, 0 non-whitespace characters (raw output in the task report, amendment O). The owner must either OCR the PDF (e.g. ocrmypdf / Acrobat) or
+--     transcribe the page by hand; then the table is seeded by a normal Plan-3 seed builder with `verbatim_quote` per row and `verification_status` `md_verified`. Until then: no table, no
+--     lookup_fill, and every figure above stays an engineer input.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-U-6 · ATV-A-704E · ATV-A-704E-03 · §4.2 — the 20 % … 80 % window of the measuring range — NOT SEEDED — the printed table exists only in the scanned PDF; every value is a sign-off item until an OCR or a manual transcription makes it quotable
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): No regulation table is seeded for this standard (tables 0, no seed builder, no seed migration). The values the engineer needs are typed into the register columns instead.
+--     The prod `verification_quote` cell below CONTAINS what looks like the printed table — but it is second-hand (grade EV, written by an earlier encoder from the page images) and SR-1 forbids
+--     seeding a value that cannot be quoted from the standard's own text in this session. Proposed schema once the page is readable: A ONE-ROW constant table TAB_S4_2_WINDOW (`window_from_pct` 20,
+--     `window_to_pct` 80) read by a `measuring_range_ok` verdict, OR — if the page's modal is "preferably" as prod's cell suggests — an `anhaltswert` with a documented-deviation path. NOTHING is
+--     seeded today: the two numbers appear ONLY inside a prod description cell (grade EV) and a threshold typed from an unverified cell is exactly what SR-1 forbids.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-03 expected_concentration_range) — EV, second-hand, EV — no transcript]: "By referring to the criteria mentioned in Sections 3.1 and 3.2, the
+--     operator must decide for the operating method that is suitable for his specific case of application. In doing so, especially the measuring range must be selected in such way that preferably the
+--     expected result can be found in the 20 % to 80 % interval of the measuring range. From experience, this range shows the greatest analytical reliability. Suitable dilution steps are permitted. —
+--     printed p.11"
+-- Note: UNBLOCK PATH: `pdftotext -layout` CANNOT work on this file — it is a 37-page scan with no text layer. Run in this session: `& "C:\Users\Ekowai\scoop\shims\pdftotext.exe" -layout "<the PDF>"
+--     out.txt` → exit 0, 37 bytes written, 37 form feeds, 0 non-whitespace characters (raw output in the task report, amendment O). The owner must either OCR the PDF (e.g. ocrmypdf / Acrobat) or
+--     transcribe the page by hand; then the table is seeded by a normal Plan-3 seed builder with `verbatim_quote` per row and `verification_status` `md_verified`. Until then: no table, no
+--     lookup_fill, and every figure above stays an engineer input.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-O-1 · ATV-A-704E · ATV-A-704E-08 / -09 · brief premise: "CR-020 / CR-021 are the dilution / spiking gates" — REFUTED by the capture — CR-020 and CR-021 are IQC-Card 2 ATTESTATION gates on -08; the deviation gates of this standard are CR-019 (-09), CR-022 and CR-023 (-10)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The G-2 / G-5 blocks name CR-019 / CR-022 / CR-023 only. Commands re-executable against the committed capture (C = src/lib/eval/field-configs/atv_a704e.text.prior.json):
+--     `node -e "…requirements.filter(c=>['CR-020','CR-021'].includes(c.code)).map(c=>[c.worksheet,c.severity,c.condition])"` → `[["ATV-A-704E-08","block","attest_atv_a_704e_08_cr_020 ==
+--     True"],["ATV-A-704E-08","block","attest_atv_a_704e_08_cr_021 == True"]]`; `grep -c "deviation_single_pct <= qa_quality_target_pct" C` → 1 (CR-019). No gate of this standard mentions a dilution
+--     or a spiking deviation: `grep -ci "dilution\|spik" C | (conditions only)` → 0.
+-- Evidence [prod compliance_requirements.description (CR-020), EV — no transcript]: "Calculated value (dilution factor * measured value diluted sample) shall agree with the measured value of the
+--     original sample within the quality target; else check pipettes/process/measurement and repeat."
+-- Evidence [prod compliance_requirements.description (CR-021), EV — no transcript]: "The measured value of the spiked sample shall lie within the confidence interval of the nominal value spiked
+--     sample (NSS); outside indicates a matrix error."
+-- Note: A false absence / presence record is the gravest incident class (amendment O, R-5) — the premise is recorded as refuted, not quietly worked around. The dilution / spiking gates the brief
+--     expects do not exist yet; atv_a704e-G-5 PROPOSES them as CR-031 / CR-032.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-O-2 · ATV-A-704E · ATV-A-704E · brief premise: "23 attest_* booleans" — REFUTED by the capture — prod holds 21
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The live capture holds 21 `attest_*` boolean fields: 8 on -01, 4 on -03, 2 on -05, 3 on -07, 4 on -08. Command (re-executable): `grep -oE '"ATV-A-704E-[0-9]{2}
+--     attest_[a-z0-9_]+"' src/lib/eval/field-configs/atv_a704e.prior.json | wc -l` → `21` (exit 0); the per-worksheet split comes from the same grep piped through `sed`/`uniq -c`. The count is pinned
+--     in `field-configs-atv_a704e.test.ts`. Nothing is changed by this: all 21 stay (atv_a704e-X-1).
+-- Evidence [prod compliance_requirements.description (CR-001) — the attestation class, EV — no transcript]: "The operating method shall be used only for the practical application of operating
+--     analysis (self-monitoring) within the scope of the standard."
+-- Note: Recorded because the brief and the inventory both say 23; the number is never rounded to match a premise.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-X-1 · ATV-A-704E · ATV-A-704E · the 21 `attest_*` booleans — All 21 attestation booleans STAY; the evidence registers are added beside them, deactivation is Phase 6
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing deactivated. The 21 `attest_*` booleans carry the entire normative text of §1–§5 through their block gates (CR-001 … CR-018, CR-020 / CR-021 / CR-024 / CR-027) and
+--     are the only enforcement this standard has today. This task adds the concrete evidence rows beside them (the personnel register, the deviation log, the QS-measure and Prüfmittel registers, the
+--     determination and comparison registers). Replacing an attestation by a computed check is an enforcement change: the proposals live in atv_a704e-G-4 / G-6, one gate family at a time.
+-- Evidence [prod compliance_requirements.description (CR-016), EV — no transcript]: "Representative measuring results shall be documented in a traceable, suitable form."
+-- Evidence [prod fields.verification_quote (ATV-A-704E-07 qualification_documented), EV — no transcript]: "Within the scope of the documentation, a constant up-to-date overview of the staff's
+--     qualification as well as of the participation in regular training measures should be kept. This allows the proof that measurements or sampling were carried out by qualified staff. — printed
+--     p.13"
+-- Note: Phase 6 pointer (spec §8). Do not deactivate before the register form is ratified AND a real project has data in it.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-X-2 · ATV-A-704E · ATV-A-704E-09 · `sample_volume` (IQC-Card 5 Sheet 1) vs `volume_sample` (Sheet 3) — Two prod symbols for the same physical quantity — kept apart, because the two printed sheets keep them apart
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both stay, and the two registers keep them apart: `verduennungsversuche.sample_volume_ml` (the dilution denominator, Sheet 1) and `aufstockungsversuche.sample_volume_ml`
+--     (the volume of sample in the spike, Sheet 3). They are the same physical quantity but NOT the same measurement: a dilution and a standard addition are two different trials. Merging them into
+--     one symbol would be a single-source claim the printed sheets do not support (owner ruling 3c applies to one quantity produced once, not to two trials that each measure a volume). Recorded
+--     because the inventory flags it as a duplicate.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 sample_volume), EV — no transcript]: "IQC-Card 5, Sheet 1 - Dilution: 2. Single steps: a) Determination of the MEASURED VALUE ORIGINAL SAMPLE
+--     (column 3) b) Dilution c) Determination of MEASURED VALUE DILUTED SAMPLE (column 5) | 3. Formulas for calculation: DILUTION FACTOR (column 4) = TOTAL VOLUME / SAMPLE VOLUME. CALCULATED VALUE
+--     (column 6) = DILUTION FACTOR · MEASURED VALUE DILUTED SAMPLE — printed p.35"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 volume_sample), EV — no transcript]: "IQC-Card 5, Sheet 3 - standard addition (general procedure): 2. Single steps: Determination of the
+--     MEASURED VALUE ORIGINAL SAMPLE (column 3), Standard addition by adding the VOLUME STANDARD (column 5) in familiar CONCENTRATION STANDARD (column 6) to the defined VOLUME SAMPLE (column 4),
+--     Determination of MEASURED VALUE SPIKED SAMPLE (column 9). | 3. Calculation: NOMINAL VALUE SPIKED SAMPLE (NSS, column 8): NSS = [(volume sample · measured value original sample) + (volume
+--     standard · concentration standard)] / (volume sample + volume standard) — printed p.36"
+-- Note: The register column keys are deliberately suffixed `_ml` so neither shadows a prod symbol of -09 in row scope (amendment P / iso46001 trap 4) — pinned.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-X-3 · ATV-A-704E · ATV-A-704E-06 · `sample_type` / `sampling_method` ↔ ISO-5667-10, DWA-M-1200-2 — Cross-standard twins of the sampling vocabulary — Phase 6, nothing encoded across standards here
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Nothing encoded. `sample_type` / `sampling_method` (-06) duplicate ISO-5667-10's `main_sampling_type` / `composite_mode` and DWA-M-1200-2's `probennahme_typ` with DIFFERENT
+--     enum token sets; CR-029 (empty condition) points at the DIN EN ISO 5667 family. Cross-standard inheritance is Phase 6 (spec §8) and a token mapping between three different printed vocabularies
+--     is a ruling, not a mechanical join.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-06 sample_type), EV — no transcript]: "The sampling of a wastewater sample can be carried out as single, random, qualified random or mixed
+--     sample: Single sample: A random (with reference to time and/or location) sample gained by single taking (mostly by scooping) from a body of water. | Random sample: One or several single samples
+--     taken in subsequent order to analyse the current condition. | Mixed sample: Two or several samples or semi-samples that are continuously taken and mixed in an adequate ratio in order to
+--     determine the average value of a certain parameter. | Qualified random sample: Special type of a mixed sample consisting of at least five random samples that are taken within a period of
+--     maximally two hours in intervals of not less than two minutes and are mixed. — printed p.49"
+-- Evidence [prod compliance_requirements.description (CR-029), EV — no transcript]: "Sampling and on-site assessment should follow the cited sampling standards (DIN 38402 Part 11; DIN EN ISO
+--     5667-1/-2/-3); detailed sampling methods are owned by those standards."
+-- Note: Phase 6 pointer.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-I-1 · ATV-A-704E · ATV-A-704E · materialisation of the 12 new equations — All twelve rows are register-fed on their own worksheet and materialise on save — noted once (amendment D)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Every equation of this task takes exactly ONE input, the register of its own worksheet, so the save-path materialiser computes and persists all twelve
+--     (`materialize-derived.ts` resolves registers of the worksheet being saved). No scalar-only row exists in this task, so the "scalar-only equations are not server-materialised" note does not bite
+--     here. The emitted `visible_when` rules hide on the form / report / PDF but are `pending` (visible) for the server-side `computeVisibility`, which reads templateFields only (the [CODE] item
+--     recorded as vsme-X-3) — fail-safe.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-09 mean_value), EV — no transcript]: "From the single results a mean value must be produced, which represents the measuring result. Here, all
+--     single results must be included in the mean. | From the single measured values the mean (add single measured values and divide them by the number of the measured values; column 7) is produced.
+--     | IQC-Card 3 - Multiple Determinations (form header): 1 Date | 2 Name | 3 Sample designation | 4 Measured value 1 [mg/l] | 5 Measured value 2 [mg/l] | 6 Measured value 3 [mg/l] | 7 Mean [mg/l]
+--     | 8 Greatest spread Difference [mg/l] | 9 Greatest spread Col 8 x 100% / Col 7 [%] | 10 Interpretation: Quality target achieved? — printed p.29 and 30"
+-- Note: Amendment D asks for this note once per task.
+-- (no SQL — judgment / gap record only.)
+--
+-- =====================================================================================================================
+-- atv_a704e-I-2 · ATV-A-704E · ATV-A-704E · the emitted `visible_when` UPDATE is not guarded on `visible_when IS NULL` — Shared-emitter asymmetry, recorded not fixed (the same item as iso14046-I-2)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): The three UPDATEs of `20260917102710` set `widget / ui_config / lookup / visible_when` unguarded, because `scripts/regulation-tables/emit-field-configs-sql.ts` builds ONE
+--     UPDATE shape for every Plan-3 standard. Adding `AND f.visible_when IS NULL` there would change the emitted SQL of every already-committed field-config migration and break their byte-freshness
+--     pins — amendment G forbids touching another standard's files, so the shared emitter is NOT changed. Consequence: prod's `visible_when` is NULL on all three fields today (captured 2026-09-24),
+--     so the first apply is idempotent in effect; a re-run after a later hand-edit would overwrite that field's rule (the rollback restores the captured NULL either way). Every STAGED hide in THIS
+--     file keeps its `IS NULL` guard.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-06 sampling_method), EV — no transcript]: "IQC-Card 8 - Sampling, Sampling Log, Method of sampling: manual sampling [ ] - automatic sampling [ ]
+--     time proportional [ ] volume proportional [ ] flow proportional [ ] — printed p.51"
+-- Note: The alternative the owner may prefer is a [CODE] item adding the guard AND re-emitting every Plan-3 field-config migration in one sweep (Task 30 scope).
+-- (no SQL — judgment / gap record only.)

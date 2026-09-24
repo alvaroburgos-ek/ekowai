@@ -38,5 +38,6 @@ export const FIELD_CONFIG_MODULES: Record<string, () => Promise<FieldConfigModul
   vsme: () => import('./vsme'),
   din14021: () => import('./din14021'),
   iso14046: () => import('./iso14046'),
-  // Plan-3 tasks append one line each, e.g. atv_a704e: () => import('./atv_a704e'),
+  atv_a704e: () => import('./atv_a704e'),
+  // Plan-3 tasks append one line each, e.g. iso5667_1: () => import('./iso5667_1'),
 };
