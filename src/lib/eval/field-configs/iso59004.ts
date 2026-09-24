@@ -91,6 +91,17 @@ const norm = collapseNoWatermark;
 // ---------------------------------------------------------------------------
 // prod enum tokens (captured READ-ONLY 2026-09-24 from iso59004.prior.json) — byte-identical, G-A3.
 // Every list below is asserted equal to the prior's `enum_values` in field-configs-iso59004.test.ts.
+//
+// ⚠ The four *_LABELS maps in THIS block are the ONLY ASCII-transliterated German in this module, and
+// they are transliterated because PROD IS: every `enum_values[].label_de` cell of ISO-59004 is stored
+// without umlauts ("Ueberdenken", "Wertschoepfung", "Oekosystem-Regeneration"). They are prod CELLS
+// copied byte-for-byte, not prose this task wrote — ACTION_LABELS and PRINCIPLE_LABELS are asserted
+// EQUAL to the prior, and CATEGORY_LABELS / FEASIBILITY_LABELS are asserted to START with the prod
+// label (they only append the clause number). Rewriting them with umlauts would (a) break the D-1 pin
+// and (b) make the register's option text differ from the same option on the prod scalar beside it.
+// Correcting prod's own labels is a separate prod-hygiene item, not a Plan-3 emission.
+// EVERY OTHER German string in this module — labels, titles, subtitles, notes, descriptions — is this
+// task's own prose and carries proper umlauts/ß.
 // ---------------------------------------------------------------------------
 /** prod `ISO-59004-05 selected_action` (13). The thirteen printed Table-1 Action labels in printed order. */
 export const ACTION_TOKENS = ['refuse', 'rethink', 'source', 'reduce', 'repair', 're_use', 'refurbish', 'remanufacture', 'repurpose', 'cascade', 'recycle', 'recover_energy', 're_mine'] as const;
@@ -131,10 +142,10 @@ export const LEVEL_TOKENS = ['global_regional_country_local', 'interorganization
  */
 export const CIRCULARITY_ASPECTS = [
   { value: 'durability', label_de: 'Dauerhaftigkeit (durability)' },
-  { value: 'recyclability', label_de: 'Recyclingfaehigkeit (recyclability)' },
+  { value: 'recyclability', label_de: 'Recyclingfähigkeit (recyclability)' },
   { value: 'reusability', label_de: 'Wiederverwendbarkeit (reusability)' },
   { value: 'repairability', label_de: 'Reparierbarkeit (repairability)' },
-  { value: 'recoverability', label_de: 'Rueckgewinnbarkeit (recoverability)' },
+  { value: 'recoverability', label_de: 'Rückgewinnbarkeit (recoverability)' },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -152,79 +163,79 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS02({
     symbol: 'circularity_aspects', widget: 'select_many',
     ui_config: {
-      title: 'Zirkularitaetsaspekte (§3.6.1)',
-      subtitle: 'Die fuenf in §3.6.1 als EXAMPLE gedruckten Aspekte ankreuzen — Definition: „element of an organization’s (3.4.1) activities or solutions (3.2.1) that interacts with the circular economy (3.1.1)“',
+      title: 'Zirkularitätsaspekte (§3.6.1)',
+      subtitle: 'Die fünf in §3.6.1 als EXAMPLE gedruckten Aspekte ankreuzen — Definition: „element of an organization’s (3.4.1) activities or solutions (3.2.1) that interacts with the circular economy (3.1.1)“',
       allow_custom: true,
-      note: `${norm(Q.L1414_1415)} EXAMPLE ${norm(Q.L1417)} — iso59004-U-3: Die fuenf Aspekte sind als EXAMPLE gedruckt, nicht als abgeschlossene Liste; das Freitextfeld circularity_aspect bleibt fuer alles Weitere (iso59004-D-10). Dieselbe Liste ist in ISO-59020 ein Enum — Vererbung ist Phase 6 (iso59004-X-1).`,
+      note: `${norm(Q.L1414_1415)} EXAMPLE ${norm(Q.L1417)} — iso59004-U-3: Die fünf Aspekte sind als EXAMPLE gedruckt, nicht als abgeschlossene Liste; das Freitextfeld circularity_aspect bleibt für alles Weitere (iso59004-D-10). Dieselbe Liste ist in ISO-59020 ein Enum — Vererbung ist Phase 6 (iso59004-X-1).`,
       groups: [{ label: '§3.6.1 EXAMPLE', options: CIRCULARITY_ASPECTS.map((a) => a.value) }],
     },
     enum_values: CIRCULARITY_ASPECTS.map((a, i) => ({ value: a.value, label_de: a.label_de, order_index: i + 1 })),
     verification_quote: `${norm(Q.L1414_1415)} EXAMPLE ${norm(Q.L1417)} — PDF p.20 (gedruckte S. 13), §3.6.1`,
-    create: { section_code: 'H', label_de: 'Zirkularitaetsaspekte (§3.6.1, Mehrfachauswahl)', data_type: 'json', unit: null, clause_reference: '§3.6.1',
-      description: 'Plan 3: Mehrfachauswahl ueber die fuenf in §3.6.1 als EXAMPLE gedruckten Zirkularitaetsaspekte (Durability, recyclability, reusability, repairability, recoverability); das bestehende Freitextfeld circularity_aspect bleibt (iso59004-D-10, Vererbung nach -05/-06 unveraendert). Die Liste ist ein Beispiel, keine abgeschlossene Aufzaehlung (iso59004-U-3).' },
+    create: { section_code: 'H', label_de: 'Zirkularitätsaspekte (§3.6.1, Mehrfachauswahl)', data_type: 'json', unit: null, clause_reference: '§3.6.1',
+      description: 'Plan 3: Mehrfachauswahl über die fünf in §3.6.1 als EXAMPLE gedruckten Zirkularitätsaspekte (Durability, recyclability, reusability, repairability, recoverability); das bestehende Freitextfeld circularity_aspect bleibt (iso59004-D-10, Vererbung nach -05/-06 unverändert). Die Liste ist ein Beispiel, keine abgeschlossene Aufzählung (iso59004-U-3).' },
   }),
 
   // ---- ISO-59004-04: the six principles as a checklist (selected_principle stays — D-9) ----
   WS04({
     symbol: 'principles', widget: 'select_many',
     ui_config: {
-      title: 'Grundsaetze (§5.2)',
-      subtitle: '„The set of principles given in 5.2, which are interlinked and complementary, should be considered by an organization to transition towards a circular economy.“ — alle sechs ankreuzen, die beruecksichtigt wurden',
-      note: `${norm(SENTENCE_5_3_2)} — Das Einzelfeld selected_principle (eine Auswahl von sechs) und das Hand-Boolean all_principles_considered (CR-013, Pflichtfeld) bleiben (iso59004-D-9); ein Vollstaendigkeits-Code ueber diese Liste ist NICHT materialisierbar — contains() erreicht den Motor nicht (iso59004-F-1).`,
+      title: 'Grundsätze (§5.2)',
+      subtitle: '„The set of principles given in 5.2, which are interlinked and complementary, should be considered by an organization to transition towards a circular economy.“ — alle sechs ankreuzen, die berücksichtigt wurden',
+      note: `${norm(SENTENCE_5_3_2)} — Das Einzelfeld selected_principle (eine Auswahl von sechs) und das Hand-Boolean all_principles_considered (CR-013, Pflichtfeld) bleiben (iso59004-D-9); ein Vollständigkeits-Code über diese Liste ist NICHT materialisierbar — contains() erreicht den Motor nicht (iso59004-F-1).`,
       groups: [{ label: '§5.2.1 – §5.2.6', options: [...PRINCIPLE_TOKENS] }],
     },
     enum_values: PRINCIPLE_TOKENS.map((t, i) => ({ value: t, label_de: PRINCIPLE_LABELS[t], order_index: i + 1 })),
     verification_quote: `${norm(Q.L1588_1589)} — ${norm(SENTENCE_5_3_2)} — PDF pp.22–23 (gedruckte S. 15–16), §5.1 / §5.3.2`,
-    create: { section_code: 'C', label_de: 'Beruecksichtigte Grundsaetze (§5.2.1 – §5.2.6, Mehrfachauswahl)', data_type: 'json', unit: null, clause_reference: '§5.1, §5.2, §5.3.2',
-      description: 'Plan 3: Mehrfachauswahl ueber die sechs gedruckten Grundsaetze (Token = prod selected_principle = Zeilenschluessel der Tabelle S5_2); das Einzelfeld selected_principle und das Pflicht-Boolean all_principles_considered bleiben (iso59004-D-9). all_principles_considered_code ist ZURUECKGEHALTEN (iso59004-F-1 — contains() ueber einen json-Traeger hat keinen Motorpfad).' },
+    create: { section_code: 'C', label_de: 'Berücksichtigte Grundsätze (§5.2.1 – §5.2.6, Mehrfachauswahl)', data_type: 'json', unit: null, clause_reference: '§5.1, §5.2, §5.3.2',
+      description: 'Plan 3: Mehrfachauswahl über die sechs gedruckten Grundsätze (Token = prod selected_principle = Zeilenschlüssel der Tabelle S5_2); das Einzelfeld selected_principle und das Pflicht-Boolean all_principles_considered bleiben (iso59004-D-9). all_principles_considered_code ist ZURÜCKGEHALTEN (iso59004-F-1 — contains() über einen json-Träger hat keinen Motorpfad).' },
   }),
 
   // ---- ISO-59004-05: the actions register (§6.1 / §6.7) ----
   WS05({
     symbol: 'actions', widget: 'register',
     ui_config: {
-      title: 'Massnahmen der Kreislaufwirtschaft (§6.7, Tabelle 1)',
-      subtitle: 'Je Massnahme eine Zeile: R-Strategie, Kategorie nach §6.2 – §6.6, Machbarkeitsdimensionen (§7.4.5), Pilot (§7.4.7), Lebenszyklus-Notiz (§6.7) und Wertschoepfungsmodell (§7.4.4)',
-      add_label: '+ Massnahme', placement: 'section',
+      title: 'Maßnahmen der Kreislaufwirtschaft (§6.7, Tabelle 1)',
+      subtitle: 'Je Maßnahme eine Zeile: R-Strategie, Kategorie nach §6.2 – §6.6, Machbarkeitsdimensionen (§7.4.5), Pilot (§7.4.7), Lebenszyklus-Notiz (§6.7) und Wertschöpfungsmodell (§7.4.4)',
+      add_label: '+ Maßnahme', placement: 'section',
       columns: [
-        { key: 'action', label: 'R-Strategie (Tabelle 1)', type: 'enum', required: true, discriminator: true, options: [...ACTION_TOKENS], option_labels: ACTION_LABELS, aria_label: 'Gewaehlte Massnahme nach Tabelle 1 (refuse … re-mine)' },
-        { key: 'category', label: 'Kategorie (§6.2 – §6.6)', type: 'enum', options: [...CATEGORY_TOKENS], option_labels: CATEGORY_LABELS, aria_label: 'Massnahmenkategorie nach §6.2 bis §6.6' },
-        { key: 'feasibility_dimensions', label: 'Machbarkeitsdimensionen (§7.4.5)', type: 'text', datalist: FEASIBILITY_TOKENS.map((t) => FEASIBILITY_LABELS[t]), aria_label: 'Gegen welche der sechs gedruckten Dimensionen die Massnahme bewertet wurde' },
-        { key: 'pilot', label: 'Pilot (§7.4.7)', type: 'boolean', aria_label: 'Massnahme wird zunaechst als Pilot umgesetzt' },
-        { key: 'value_creation_model', label: 'Wertschoepfungsmodell (§7.4.4)', type: 'text', aria_label: 'Zur Massnahme gehoerendes Wertschoepfungsmodell' },
-        { key: 'life_cycle_note', label: 'Lebenszyklus-Notiz (§6.7)', type: 'text', aria_label: 'Begruendung der Massnahmenwahl aus der Lebenszyklusperspektive' },
-        { key: 'preliminary', label: 'Vorlaeufige Massnahme', type: 'derived', expr: PRELIMINARY_EXPR, display: 'badge', value_labels: { '1': '§6.1: refuse / rethink — vorlaeufige Massnahme', '0': '' } },
+        { key: 'action', label: 'R-Strategie (Tabelle 1)', type: 'enum', required: true, discriminator: true, options: [...ACTION_TOKENS], option_labels: ACTION_LABELS, aria_label: 'Gewählte Maßnahme nach Tabelle 1 (refuse … re-mine)' },
+        { key: 'category', label: 'Kategorie (§6.2 – §6.6)', type: 'enum', options: [...CATEGORY_TOKENS], option_labels: CATEGORY_LABELS, aria_label: 'Maßnahmenkategorie nach §6.2 bis §6.6' },
+        { key: 'feasibility_dimensions', label: 'Machbarkeitsdimensionen (§7.4.5)', type: 'text', datalist: FEASIBILITY_TOKENS.map((t) => FEASIBILITY_LABELS[t]), aria_label: 'Gegen welche der sechs gedruckten Dimensionen die Maßnahme bewertet wurde' },
+        { key: 'pilot', label: 'Pilot (§7.4.7)', type: 'boolean', aria_label: 'Maßnahme wird zunächst als Pilot umgesetzt' },
+        { key: 'value_creation_model', label: 'Wertschöpfungsmodell (§7.4.4)', type: 'text', aria_label: 'Zur Maßnahme gehörendes Wertschöpfungsmodell' },
+        { key: 'life_cycle_note', label: 'Lebenszyklus-Notiz (§6.7)', type: 'text', aria_label: 'Begründung der Maßnahmenwahl aus der Lebenszyklusperspektive' },
+        { key: 'preliminary', label: 'Vorläufige Maßnahme', type: 'derived', expr: PRELIMINARY_EXPR, display: 'badge', value_labels: { '1': '§6.1: refuse / rethink — vorläufige Maßnahme', '0': '' } },
       ],
       footer: ['actions_count', 'refuse_rethink_first', 'pilot_actions_count'],
-      note: `${norm(Q.L2537_2540)} ${norm(Q.L2561_2563)} — iso59004-U-1: Tabelle 1 ist NICHT geseedet (keine gedruckte Kategoriespalte; die beiden gedruckten Spalten verschraenken sich in der Extraktion), daher wird „Kategorie“ vom Ingenieur gesetzt und nicht aus der Tabelle gefuellt. Die Einzelfelder selected_action / action_category / feasibility_dimension / pilot_project / value_creation_model / life_cycle_perspective_applied bleiben (iso59004-D-1 … D-6). Die Lebenszyklus-Notiz ist IMMER sichtbar (iso59004-J-3). Machbarkeitsdimensionen sind Freitext mit Vorschlagsliste — eine Mehrfachauswahl je Zeile kennt der Registervertrag nicht (iso59004-I-1).`,
+      note: `${norm(Q.L2537_2540)} ${norm(Q.L2561_2563)} — iso59004-U-1: Tabelle 1 ist NICHT geseedet (keine gedruckte Kategoriespalte; die beiden gedruckten Spalten verschränken sich in der Extraktion), daher wird „Kategorie“ vom Ingenieur gesetzt und nicht aus der Tabelle gefüllt. Die Einzelfelder selected_action / action_category / feasibility_dimension / pilot_project / value_creation_model / life_cycle_perspective_applied bleiben (iso59004-D-1 … D-6). Die Lebenszyklus-Notiz ist IMMER sichtbar (iso59004-J-3). Machbarkeitsdimensionen sind Freitext mit Vorschlagsliste — eine Mehrfachauswahl je Zeile kennt der Registervertrag nicht (iso59004-I-1).`,
     },
     verification_quote: `${norm(Q.L2537_2540)} — ${norm(Q.L1780)} — PDF pp.25, 34 (gedruckte S. 18, 27), §6.1 / §6.7`,
-    create: { section_code: 'G', label_de: 'Massnahmenregister (je Massnahme: R-Strategie, Kategorie, Machbarkeit, Pilot, Wertschoepfungsmodell, Lebenszyklus-Notiz)', data_type: 'json', unit: null, clause_reference: '§6.1, §6.7, Table 1',
-      description: 'Plan 3: Zeilen je Massnahme der Kreislaufwirtschaft — ersetzt die Ein-Massnahme-Einzelfelder der Arbeitsblaetter -05/-06 durch die N-Instanzen-Form. Anzahl → actions_count (ISO-59004-05-D1), refuse/rethink → refuse_rethink_first (-D2), Pilotmassnahmen → pilot_actions_count (-D3). Die Einzelfelder bleiben (iso59004-D-1 … D-6); Tabelle 1 ist nicht geseedet (iso59004-U-1).' },
+    create: { section_code: 'G', label_de: 'Maßnahmenregister (je Maßnahme: R-Strategie, Kategorie, Machbarkeit, Pilot, Wertschöpfungsmodell, Lebenszyklus-Notiz)', data_type: 'json', unit: null, clause_reference: '§6.1, §6.7, Table 1',
+      description: 'Plan 3: Zeilen je Maßnahme der Kreislaufwirtschaft — ersetzt die Ein-Maßnahme-Einzelfelder der Arbeitsblätter -05/-06 durch die N-Instanzen-Form. Anzahl → actions_count (ISO-59004-05-D1), refuse/rethink → refuse_rethink_first (-D2), Pilotmaßnahmen → pilot_actions_count (-D3). Die Einzelfelder bleiben (iso59004-D-1 … D-6); Tabelle 1 ist nicht geseedet (iso59004-U-1).' },
   }),
   WS05({
     symbol: 'actions_count', widget: 'derived', ui_config: null,
     verification_quote: `${norm(Q.L2541_2551)} — PDF p.34 (gedruckte S. 27), §6.7`,
-    create: { section_code: 'G', label_de: 'Anzahl erfasster Massnahmen', data_type: 'number', unit: null, clause_reference: '§6.7',
-      description: 'Plan 3: Ausgabe der Gleichung ISO-59004-05-D1 — count_rows ueber actions.' },
+    create: { section_code: 'G', label_de: 'Anzahl erfasster Maßnahmen', data_type: 'number', unit: null, clause_reference: '§6.7',
+      description: 'Plan 3: Ausgabe der Gleichung ISO-59004-05-D1 — count_rows über actions.' },
   }),
   WS05({
     symbol: 'refuse_rethink_first', widget: 'derived', ui_config: null,
     verification_quote: `${norm(Q.L1780)} — PDF p.25 (gedruckte S. 18), §6.1`,
-    create: { section_code: 'G', label_de: 'Massnahmen der Stufen refuse / rethink (§6.1 vorlaeufige Massnahmen)', data_type: 'number', unit: null, clause_reference: '§6.1',
+    create: { section_code: 'G', label_de: 'Maßnahmen der Stufen refuse / rethink (§6.1 vorläufige Maßnahmen)', data_type: 'number', unit: null, clause_reference: '§6.1',
       description: 'Plan 3: Ausgabe der Gleichung ISO-59004-05-D2 — Zeilen mit action refuse oder rethink („Organizations should consider refuse and rethink as preliminary actions.“); Zwilling des Hand-Booleans preliminary_action_refuse_rethink (CR-018, iso59004-D-11) — die Gate-Umstellung ist STAGED (iso59004-G-2).' },
   }),
   WS05({
     symbol: 'pilot_actions_count', widget: 'derived', ui_config: null,
     verification_quote: `${norm(Q.L3110_3117)} — PDF p.42 (gedruckte S. 35), §7.4.7`,
-    create: { section_code: 'G', label_de: 'Als Pilot geplante Massnahmen (§7.4.7)', data_type: 'number', unit: null, clause_reference: '§7.4.7',
+    create: { section_code: 'G', label_de: 'Als Pilot geplante Maßnahmen (§7.4.7)', data_type: 'number', unit: null, clause_reference: '§7.4.7',
       description: 'Plan 3: Ausgabe der Gleichung ISO-59004-05-D3 — Zeilen mit pilot == true; Zwilling des Booleans pilot_project auf -06 (iso59004-D-4).' },
   }),
   WS05({
     symbol: 'life_cycle_justification', widget: 'scalar', ui_config: null, visible_when: NOT_IN_PRINTED_ORDER,
     verification_quote: `${norm(Q.L2561_2563)} — PDF p.35 (gedruckte S. 28), §6.7`,
-    create: { section_code: 'G', label_de: 'Begruendung der Abweichung von reparieren → wiederaufbereiten → recyceln (§6.7)', data_type: 'text', unit: null, clause_reference: '§6.7',
-      description: 'Plan 3: „However, in cases where applying this guidance does not lead to the best outcome, organizations should consider applying a life cycle perspective to determine the best action.“ — nur sichtbar, wenn repair_before_remanufacture_before_recycle ausdruecklich false ist (unbesetzt ⇒ pending ⇒ sichtbar, ausfallsicher). Die passende Gate-Umschrift von CR-028 (IF … == false THEN life_cycle_justification IS NOT NULL) ist STAGED (iso59004-G-1).' },
+    create: { section_code: 'G', label_de: 'Begründung der Abweichung von reparieren → wiederaufbereiten → recyceln (§6.7)', data_type: 'text', unit: null, clause_reference: '§6.7',
+      description: 'Plan 3: „However, in cases where applying this guidance does not lead to the best outcome, organizations should consider applying a life cycle perspective to determine the best action.“ — nur sichtbar, wenn repair_before_remanufacture_before_recycle ausdrücklich false ist (unbesetzt ⇒ pending ⇒ sichtbar, ausfallsicher). Die passende Gate-Umschrift von CR-028 (IF … == false THEN life_cycle_justification IS NOT NULL) ist STAGED (iso59004-G-1).' },
   }),
 
   // ---- ISO-59004-06: goals (§7.3.2), indicators (§7.6), the §7.1.3 multi-level pair ----
@@ -237,11 +248,11 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
       columns: [
         { key: 'goal', label: 'Ziel', type: 'text', required: true, aria_label: 'Ziel der Kreislaufwirtschaft' },
         { key: 'intermediate_target', label: 'Zwischenziel', type: 'text', aria_label: 'Zwischenziel zu diesem Ziel' },
-        { key: 'year', label: 'Zieljahr', type: 'number', aria_label: 'Jahr, fuer das das Zwischenziel gilt' },
+        { key: 'year', label: 'Zieljahr', type: 'number', aria_label: 'Jahr, für das das Zwischenziel gilt' },
         { key: 'indicator', label: 'Indikator', type: 'text', aria_label: 'Indikator, an dem der Fortschritt gemessen wird' },
       ],
       footer: ['goals_count', 'goals_with_targets'],
-      note: `${norm(Q.L2937_2940)} Das Freitextfeld ce_goals (Pflichtfeld, CR-035) bleibt (iso59004-D-7). „Zwischenziel gesetzt“ zaehlt ueber IS NOT NULL: ein leerer Text zaehlt NICHT (in dieser Sitzung am Motor geprueft — der Vergleich != '' liefert manual_required, siehe iso59004-J-5).`,
+      note: `${norm(Q.L2937_2940)} Das Freitextfeld ce_goals (Pflichtfeld, CR-035) bleibt (iso59004-D-7). „Zwischenziel gesetzt“ zählt über IS NOT NULL: ein leerer Text zählt NICHT (in dieser Sitzung am Motor geprüft — der Vergleich != '' liefert manual_required, siehe iso59004-J-5).`,
     },
     verification_quote: `${norm(Q.L2937_2940)} — PDF p.40 (gedruckte S. 33), §7.3.2`,
     create: { section_code: 'D', label_de: 'Zielregister (je Ziel: Ziel, Zwischenziel, Zieljahr, Indikator)', data_type: 'json', unit: null, clause_reference: '§7.3.2',
@@ -251,43 +262,43 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     symbol: 'goals_count', widget: 'derived', ui_config: null,
     verification_quote: `${norm(Q.L2937_2940)} — PDF p.40 (gedruckte S. 33), §7.3.2`,
     create: { section_code: 'D', label_de: 'Anzahl erfasster Ziele', data_type: 'number', unit: null, clause_reference: '§7.3.2',
-      description: 'Plan 3: Ausgabe der Gleichung ISO-59004-06-D1 — count_rows ueber goals.' },
+      description: 'Plan 3: Ausgabe der Gleichung ISO-59004-06-D1 — count_rows über goals.' },
   }),
   WS06({
     symbol: 'goals_with_targets', widget: 'derived', ui_config: null,
     verification_quote: `${norm(Q.L2937_2940)} — PDF p.40 (gedruckte S. 33), §7.3.2`,
     create: { section_code: 'D', label_de: 'Ziele mit hinterlegtem Zwischenziel (§7.3.2)', data_type: 'number', unit: null, clause_reference: '§7.3.2',
-      description: 'Plan 3: Ausgabe der Gleichung ISO-59004-06-D2 — Zeilen, deren Zwischenziel gesetzt ist (IS NOT NULL; ein leerer Text zaehlt nicht — iso59004-J-5).' },
+      description: 'Plan 3: Ausgabe der Gleichung ISO-59004-06-D2 — Zeilen, deren Zwischenziel gesetzt ist (IS NOT NULL; ein leerer Text zählt nicht — iso59004-J-5).' },
   }),
   WS06({
     symbol: 'indicators_59004', widget: 'register',
     ui_config: {
-      title: 'Zirkularitaetsindikatoren mit Ausgangswert und Zielwert (§7.6)',
+      title: 'Zirkularitätsindikatoren mit Ausgangswert und Zielwert (§7.6)',
       subtitle: '„the organization should choose circularity indicators to assess the effectiveness and efficiency of the interventions adopted and monitor the progress“ — je Indikator eine Zeile',
       add_label: '+ Indikator', placement: 'section',
       columns: [
-        { key: 'indicator', label: 'Indikator', type: 'text', required: true, aria_label: 'Bezeichnung des Zirkularitaetsindikators' },
+        { key: 'indicator', label: 'Indikator', type: 'text', required: true, aria_label: 'Bezeichnung des Zirkularitätsindikators' },
         { key: 'baseline', label: 'Ausgangswert', type: 'number', aria_label: 'Ausgangswert des Indikators in der Referenzsituation' },
-        { key: 'target', label: 'Zielwert', type: 'number', aria_label: 'Zielwert des Indikators fuer die naechste Periode' },
+        { key: 'target', label: 'Zielwert', type: 'number', aria_label: 'Zielwert des Indikators für die nächste Periode' },
       ],
       footer: ['indicators_59004_count'],
-      note: `${norm(Q.L3229_3234)} ${norm(Q.L3251_3254)} Das Freitextfeld selected_circularity_indicator (Pflichtfeld) bleibt (iso59004-D-8). Die MESSUNG selbst liegt bei ISO 59020 („Guidance on how to measure and assess circularity performance is provided by ISO 59020.“) — die Verknuepfung mit den Tabelle-3-Indikatoren von ISO-59020 ist Phase 6 (iso59004-X-1), daher hier Freitext und kein lookup_key.`,
+      note: `${norm(Q.L3229_3234)} ${norm(Q.L3251_3254)} Das Freitextfeld selected_circularity_indicator (Pflichtfeld) bleibt (iso59004-D-8). Die MESSUNG selbst liegt bei ISO 59020 („Guidance on how to measure and assess circularity performance is provided by ISO 59020.“) — die Verknüpfung mit den Tabelle-3-Indikatoren von ISO-59020 ist Phase 6 (iso59004-X-1), daher hier Freitext und kein lookup_key.`,
     },
     verification_quote: `${norm(Q.L3229_3234)} — PDF p.43 (gedruckte S. 36), §7.6`,
     create: { section_code: 'G', label_de: 'Indikatorregister (je Indikator: Bezeichnung, Ausgangswert, Zielwert)', data_type: 'json', unit: null, clause_reference: '§7.6',
-      description: 'Plan 3: Zeilen je gewaehltem Zirkularitaetsindikator mit Ausgangswert und Zielwert („can include milestones and targets for the next period“); Anzahl → indicators_59004_count (ISO-59004-06-D3). Das Freitextfeld selected_circularity_indicator bleibt (iso59004-D-8); die Bindung an ISO-59020 Tabelle 3 ist Phase 6 (iso59004-X-1).' },
+      description: 'Plan 3: Zeilen je gewähltem Zirkularitätsindikator mit Ausgangswert und Zielwert („can include milestones and targets for the next period“); Anzahl → indicators_59004_count (ISO-59004-06-D3). Das Freitextfeld selected_circularity_indicator bleibt (iso59004-D-8); die Bindung an ISO-59020 Tabelle 3 ist Phase 6 (iso59004-X-1).' },
   }),
   WS06({
     symbol: 'indicators_59004_count', widget: 'derived', ui_config: null,
     verification_quote: `${norm(Q.L3229_3234)} — PDF p.43 (gedruckte S. 36), §7.6`,
-    create: { section_code: 'G', label_de: 'Anzahl erfasster Zirkularitaetsindikatoren', data_type: 'number', unit: null, clause_reference: '§7.6',
-      description: 'Plan 3: Ausgabe der Gleichung ISO-59004-06-D3 — count_rows ueber indicators_59004.' },
+    create: { section_code: 'G', label_de: 'Anzahl erfasster Zirkularitätsindikatoren', data_type: 'number', unit: null, clause_reference: '§7.6',
+      description: 'Plan 3: Ausgabe der Gleichung ISO-59004-06-D3 — count_rows über indicators_59004.' },
   }),
   WS06({
     symbol: 'operates_across_multiple_levels', widget: 'attestation', ui_config: null,
     verification_quote: `${norm(Q.L2717_2718)} — PDF p.36 (gedruckte S. 29), §7.1.3`,
-    create: { section_code: 'B', label_de: 'Organisation wirkt ueber mehr als eine Systemebene (§7.1.3)', data_type: 'boolean', unit: null, clause_reference: '§7.1.3',
-      description: 'Plan 3: Treiber fuer die Beziehungen zwischen den Systemebenen („Organizations that interact or operate across more than one system level should consider the relationships and interactions within and between the other system levels to achieve a circular economy.“). Das bestehende Enum implementation_level hat KEINEN Mehrebenen-Token (vier Token: global_regional_country_local / interorganizational / organizational / product) — deshalb ein eigenes Boolean statt einer erfundenen Option (iso59004-J-6).' },
+    create: { section_code: 'B', label_de: 'Organisation wirkt über mehr als eine Systemebene (§7.1.3)', data_type: 'boolean', unit: null, clause_reference: '§7.1.3',
+      description: 'Plan 3: Treiber für die Beziehungen zwischen den Systemebenen („Organizations that interact or operate across more than one system level should consider the relationships and interactions within and between the other system levels to achieve a circular economy.“). Das bestehende Enum implementation_level hat KEINEN Mehrebenen-Token (vier Token: global_regional_country_local / interorganizational / organizational / product) — deshalb ein eigenes Boolean statt einer erfundenen Option (iso59004-J-6).' },
   }),
   WS06({
     symbol: 'level_relationships', widget: 'scalar', ui_config: null, visible_when: MULTI_LEVEL,
@@ -302,13 +313,13 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS05({ symbol: 'selected_action', widget: 'select_one', ui_config: null, enum_values: 'keep_prod',
     verification_quote: `${norm(Q.L2541_2551)} — PDF p.34 (gedruckte S. 27), §6.7` }),
   WS05({ symbol: 'action_category', widget: 'select_one', ui_config: null, enum_values: 'keep_prod',
-    verification_quote: `${norm(Q.L2537_2540)} — PDF p.34 (gedruckte S. 27), §6.7 (die fuenf Kategorien sind die Ueberschriften §6.2 – §6.6)` }),
+    verification_quote: `${norm(Q.L2537_2540)} — PDF p.34 (gedruckte S. 27), §6.7 (die fünf Kategorien sind die Überschriften §6.2 – §6.6)` }),
   WS06({ symbol: 'implementation_stage', widget: 'select_one', ui_config: null, enum_values: 'keep_prod',
     verification_quote: `${norm(Q.L2731_2736)} — PDF p.37 (gedruckte S. 30), §7.1.4` }),
   WS06({ symbol: 'implementation_level', widget: 'select_one', ui_config: null, enum_values: 'keep_prod',
-    verification_quote: `${norm(Q.L2702)} ${norm(Q.L2717_2718)} — PDF p.36 (gedruckte S. 29), §7.1.3 (die vollstaendige Ebenenliste L2702–L2716 traegt ein in ein Wort eingeklebtes Wasserzeichen, „ojnongovernmental“ — iso59004-U-2)` }),
+    verification_quote: `${norm(Q.L2702)} ${norm(Q.L2717_2718)} — PDF p.36 (gedruckte S. 29), §7.1.3 (die vollständige Ebenenliste L2702–L2716 trägt ein in ein Wort eingeklebtes Wasserzeichen, „ojnongovernmental“ — iso59004-U-2)` }),
   WS06({ symbol: 'feasibility_dimension', widget: 'select_one', ui_config: null, enum_values: 'keep_prod',
-    verification_quote: `${norm(Q.L3044_3045)} — PDF p.41 (gedruckte S. 34), §7.4.5 (die sechs Aufzaehlungspunkte L3046–L3068 werden von pdftotext umsortiert — iso59004-U-4)` }),
+    verification_quote: `${norm(Q.L3044_3045)} — PDF p.41 (gedruckte S. 34), §7.4.5 (die sechs Aufzählungspunkte L3046–L3068 werden von pdftotext umsortiert — iso59004-U-4)` }),
 ];
 
 /** No section rule is emitted: no printed sentence makes a whole -0x section conditional, and §7.1.4's NOTE refutes stage-gating (iso59004-J-4). */

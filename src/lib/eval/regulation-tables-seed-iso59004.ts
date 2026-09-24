@@ -92,8 +92,11 @@ function inSpan(quote: string, cell: string | null, where: string): void {
 // `selected_principle` enum `value` strings, byte-identical (D-1 / G-A3): systems_thinking,
 // value_creation, value_sharing, resource_stewardship, resource_traceability, ecosystem_resilience.
 //
-// Policy `locked`: the six principles are a printed NAME CATALOGUE, not an adjustable value — there is
-// nothing for an engineer to override, so no consumer offers an override block. `override_quote` carries
+// Policy `locked` (iso59004-P-1 — a judgment, on the sheet with BOTH readings and the one-line switch SQL):
+// the six principles are a printed NAME CATALOGUE, not an adjustable value — there is
+// nothing for an engineer to override, so no consumer offers an override block. The quoted §5.1 cue is a
+// "should", i.e. the `anhaltswert` cue class on a strict reading of the Spec §7 vocabulary; the catalogue
+// reading won here and the owner rules. `override_quote` carries
 // §5.1 (L1588–L1589), the sentence that makes the set normative-by-guidance: "The set of principles
 // given in 5.2, which are interlinked and complementary, should be considered by an organization to
 // transition towards a circular economy."

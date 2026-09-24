@@ -10,8 +10,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   FIELD_CONFIGS, SECTION_VISIBILITY,
-  ACTION_TOKENS, ACTION_LABELS, CATEGORY_TOKENS, PRINCIPLE_TOKENS, PRINCIPLE_LABELS,
-  FEASIBILITY_TOKENS, STAGE_TOKENS, LEVEL_TOKENS, CIRCULARITY_ASPECTS,
+  ACTION_TOKENS, ACTION_LABELS, CATEGORY_TOKENS, CATEGORY_LABELS, PRINCIPLE_TOKENS, PRINCIPLE_LABELS,
+  FEASIBILITY_TOKENS, FEASIBILITY_LABELS, STAGE_TOKENS, LEVEL_TOKENS, CIRCULARITY_ASPECTS,
   PRELIMINARY_EXPR, NOT_IN_PRINTED_ORDER, MULTI_LEVEL,
   WITHHELD_STAGE_RULES, WITHHELD_04_D1_FORMULA, WITHHELD_04_D1_NESTED_FORM, WITHHELD_LIFE_CYCLE_NOTE_RULE, WITHHELD_LIFE_CYCLE_NOTE_ALTERNATIVE,
 } from '../field-configs/iso59004';
@@ -97,6 +97,20 @@ describe('ISO-59004 field configs (Plan 3 Task 29)', () => {
     expect([...CATEGORY_TOKENS]).toEqual(enumValues('ISO-59004-05 action_category'));
     expect([...PRINCIPLE_TOKENS]).toEqual(enumValues('ISO-59004-04 selected_principle'));
     expect(PRINCIPLE_LABELS).toEqual(enumLabels('ISO-59004-04 selected_principle'));
+    // CATEGORY_LABELS / FEASIBILITY_LABELS only APPEND the clause number to the prod label — the German
+    // part is prod's own cell byte-for-byte (prod stores every ISO-59004 label ASCII-transliterated).
+    const catProd = enumLabels('ISO-59004-05 action_category');
+    for (const t of CATEGORY_TOKENS) expect(CATEGORY_LABELS[t], `${t} label provenance`).toBe(`${catProd[t]} (§6.${CATEGORY_TOKENS.indexOf(t) + 2})`);
+    expect(FEASIBILITY_LABELS).toEqual(enumLabels('ISO-59004-06 feasibility_dimension'));
+    // …and NO string this task AUTHORED is ASCII-transliterated German (fix round 1)
+    const authored = FIELD_CONFIGS.flatMap((e) => [
+      e.create?.label_de, e.create?.description,
+      ...(e.ui_config ? Object.entries(e.ui_config as Record<string, unknown>).filter(([k]) => ['title', 'subtitle', 'note', 'add_label'].includes(k)).map(([, v]) => String(v)) : []),
+      ...(e.widget === 'register' ? (e.ui_config as RegisterUiConfig).columns.flatMap((c) => [c.label, c.aria_label, ...Object.values(c.value_labels ?? {})]) : []),
+    ].filter((x): x is string => typeof x === 'string'));
+    for (const s of authored) {
+      expect(s, `transliterated German: ${s}`).not.toMatch(/(Grundsaetze|Massnahme|Zirkularitaets|Wertschoepfung|Begruendung|Gewaehlte|vorlaeufig|fuenf|ueber|zaehlt|fuer)w*/i);
+    }
     expect([...FEASIBILITY_TOKENS]).toEqual(enumValues('ISO-59004-06 feasibility_dimension'));
     expect([...STAGE_TOKENS]).toEqual(enumValues('ISO-59004-06 implementation_stage'));
     expect([...LEVEL_TOKENS]).toEqual(enumValues('ISO-59004-06 implementation_level'));

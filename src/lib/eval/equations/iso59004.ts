@@ -53,7 +53,7 @@ export const EQUATIONS: EquationEntry[] = [
   // ---- ISO-59004-05: the §6.7 actions register ----
   ...rows('ISO-59004-05', [
     { n: 'D1', out: 'actions_count', rhs: 'count_rows(actions)', reg: 'actions', clause: '§6.7',
-      what: 'count_rows ueber actions — Anzahl der erfassten Massnahmen der Kreislaufwirtschaft.', quote: norm(Q.L2541_2551) },
+      what: 'count_rows über actions — Anzahl der erfassten Maßnahmen der Kreislaufwirtschaft.', quote: norm(Q.L2541_2551) },
     { n: 'D2', out: 'refuse_rethink_first', rhs: "count_rows(actions, action IN {'refuse', 'rethink'})", reg: 'actions', clause: '§6.1',
       what: 'Zeilen mit action refuse oder rethink („Organizations should consider refuse and rethink as preliminary actions.“); Zwilling des Hand-Booleans preliminary_action_refuse_rethink (CR-018) — die Gate-Umstellung ist STAGED (iso59004-G-2).', quote: norm(Q.L1780) },
     { n: 'D3', out: 'pilot_actions_count', rhs: 'count_rows(actions, pilot == true)', reg: 'actions', clause: '§7.4.7',
@@ -63,11 +63,11 @@ export const EQUATIONS: EquationEntry[] = [
   // ---- ISO-59004-06: the §7.3.2 goals register and the §7.6 indicator register ----
   ...rows('ISO-59004-06', [
     { n: 'D1', out: 'goals_count', rhs: 'count_rows(goals)', reg: 'goals', clause: '§7.3.2',
-      what: 'count_rows ueber goals — Anzahl der erfassten Ziele der Kreislaufwirtschaft.', quote: norm(Q.L2937_2940) },
+      what: 'count_rows über goals — Anzahl der erfassten Ziele der Kreislaufwirtschaft.', quote: norm(Q.L2937_2940) },
     { n: 'D2', out: 'goals_with_targets', rhs: 'count_rows(goals, intermediate_target IS NOT NULL)', reg: 'goals', clause: '§7.3.2',
-      what: 'Ziele mit hinterlegtem Zwischenziel („Intermediate targets should be established to allow for circularity assessments of progress from the reference situation towards the longer-term goals.“). IS NOT NULL statt des vom Briefing genannten != \'\': der Vergleich gegen das leere Literal liefert am Motor manual_required, waehrend IS NOT NULL einen leeren Text bereits als nicht gesetzt zaehlt (iso59004-J-5).', quote: norm(Q.L2937_2940) },
+      what: 'Ziele mit hinterlegtem Zwischenziel („Intermediate targets should be established to allow for circularity assessments of progress from the reference situation towards the longer-term goals.“). IS NOT NULL statt des vom Briefing genannten != \'\': der Vergleich gegen das leere Literal liefert am Motor manual_required, während IS NOT NULL einen leeren Text bereits als nicht gesetzt zählt (iso59004-J-5).', quote: norm(Q.L2937_2940) },
     { n: 'D3', out: 'indicators_59004_count', rhs: 'count_rows(indicators_59004)', reg: 'indicators_59004', clause: '§7.6',
-      what: 'count_rows ueber indicators_59004 — Anzahl der gewaehlten Zirkularitaetsindikatoren („the organization should choose circularity indicators to assess the effectiveness and efficiency of the interventions adopted and monitor the progress“).', quote: norm(Q.L3229_3234) },
+      what: 'count_rows über indicators_59004 — Anzahl der gewählten Zirkularitätsindikatoren („the organization should choose circularity indicators to assess the effectiveness and efficiency of the interventions adopted and monitor the progress“).', quote: norm(Q.L3229_3234) },
   ]),
 ];
 

@@ -95,7 +95,7 @@ describe('ISO-59004 Plan-3 equations', () => {
   it('-06: the goals register — iso59004-J-5, `IS NOT NULL` counts only the rows with a real intermediate target (an empty text does NOT count), while the brief\'s `!= \'\'` does not evaluate at all', () => {
     const rows = [
       { id: 'g1', goal: '2035 klimaneutrale Produktion', intermediate_target: '2030: 50 % Rezyklatanteil', year: 2030, indicator: 'Rezyklatanteil' },
-      { id: 'g2', goal: '2040 geschlossene Materialkreislaeufe', intermediate_target: '', year: 2035 },
+      { id: 'g2', goal: '2040 geschlossene Materialkreisläufe', intermediate_target: '', year: 2035 },
       { id: 'g3', goal: '2028 Reparaturquote verdoppeln', year: 2028 },
       { id: 'g4', intermediate_target: '2031: 10 %' }, // incomplete — no `goal`
     ];

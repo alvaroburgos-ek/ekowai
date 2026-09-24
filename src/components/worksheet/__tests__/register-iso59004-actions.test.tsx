@@ -51,7 +51,7 @@ describe('actions through the generic RegisterEditor (Plan 3 Task 29)', () => {
     expect(screen.getAllByTestId('register-row')).toHaveLength(2);
     expect(screen.getByTestId('rows-complete')).toHaveTextContent('2/2');
 
-    const strategies = screen.getAllByLabelText('Gewaehlte Massnahme nach Tabelle 1 (refuse … re-mine)') as HTMLSelectElement[];
+    const strategies = screen.getAllByLabelText('Gewählte Maßnahme nach Tabelle 1 (refuse … re-mine)') as HTMLSelectElement[];
     expect(strategies).toHaveLength(2);
     expect(strategies[0].value).toBe('refuse');
     expect(strategies[1].value).toBe('recycle');
@@ -60,13 +60,13 @@ describe('actions through the generic RegisterEditor (Plan 3 Task 29)', () => {
     expect(offered).toEqual([...ACTION_TOKENS]);
     expect([...strategies[0].options].find((o) => o.value === 'recover_energy')!.text).toContain('Energie zurueckgewinnen');
     // iso59004-U-1: the category is an engineer-entered select over the five prod tokens (no table fill)
-    const categories = screen.getAllByLabelText('Massnahmenkategorie nach §6.2 bis §6.6') as HTMLSelectElement[];
+    const categories = screen.getAllByLabelText('Maßnahmenkategorie nach §6.2 bis §6.6') as HTMLSelectElement[];
     expect([...categories[0].options].map((o) => o.value).filter((v) => v !== '')).toEqual([...CATEGORY_TOKENS]);
     // §6.1 badge: refuse is preliminary, recycle is not
     const badges = screen.getAllByTestId('derived-badge-preliminary');
-    expect(badges[0]).toHaveTextContent('§6.1: refuse / rethink — vorlaeufige Massnahme');
+    expect(badges[0]).toHaveTextContent('§6.1: refuse / rethink — vorläufige Maßnahme');
     // iso59004-J-3: the life-cycle note is offered on BOTH rows (no per-row visible_when)
-    expect(screen.getAllByLabelText('Begruendung der Massnahmenwahl aus der Lebenszyklusperspektive')).toHaveLength(2);
+    expect(screen.getAllByLabelText('Begründung der Maßnahmenwahl aus der Lebenszyklusperspektive')).toHaveLength(2);
     expect(screen.queryByTestId('register-diagnostics')).toBeNull();
 
     expect(evalOut('ISO-59004-05-D1', storedRows(ACTIONS_ID))).toMatchObject({ kind: 'computed', value: 2 });
@@ -77,15 +77,15 @@ describe('actions through the generic RegisterEditor (Plan 3 Task 29)', () => {
   it('switching the recycle row to rethink flips its §6.1 badge and D2 to 2; a new row without an R-strategy is incomplete and never counts', async () => {
     const user = userEvent.setup();
     render(<RegisterEditor fieldId={ACTIONS_ID} symbol="actions" config={ACTIONS} standardCode={STD} />);
-    await user.selectOptions(screen.getAllByLabelText('Gewaehlte Massnahme nach Tabelle 1 (refuse … re-mine)')[1], 'rethink');
+    await user.selectOptions(screen.getAllByLabelText('Gewählte Maßnahme nach Tabelle 1 (refuse … re-mine)')[1], 'rethink');
     expect(screen.getAllByTestId('derived-badge-preliminary')).toHaveLength(2);
     expect(evalOut('ISO-59004-05-D2', storedRows(ACTIONS_ID))).toMatchObject({ kind: 'computed', value: 2 });
 
-    await user.click(screen.getByRole('button', { name: '+ Massnahme' }));
+    await user.click(screen.getByRole('button', { name: '+ Maßnahme' }));
     expect(screen.getAllByTestId('register-row')).toHaveLength(3);
     expect(screen.getByTestId('rows-complete')).toHaveTextContent('2/3');
     expect(evalOut('ISO-59004-05-D1', storedRows(ACTIONS_ID))).toMatchObject({ kind: 'computed', value: 2 });
-    await user.selectOptions(screen.getAllByLabelText('Gewaehlte Massnahme nach Tabelle 1 (refuse … re-mine)')[2], 're_mine');
+    await user.selectOptions(screen.getAllByLabelText('Gewählte Maßnahme nach Tabelle 1 (refuse … re-mine)')[2], 're_mine');
     expect(screen.getByTestId('rows-complete')).toHaveTextContent('3/3');
     expect(evalOut('ISO-59004-05-D1', storedRows(ACTIONS_ID))).toMatchObject({ kind: 'computed', value: 3 });
     expect(evalOut('ISO-59004-05-D2', storedRows(ACTIONS_ID))).toMatchObject({ kind: 'computed', value: 2 });

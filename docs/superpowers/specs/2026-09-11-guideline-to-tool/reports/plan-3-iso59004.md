@@ -38,7 +38,7 @@
 | section `visible_when` | **0** | no printed sentence makes a whole section conditional |
 | equations emitted | **6** | `ISO-59004-05-D1/D2/D3`, `ISO-59004-06-D1/D2/D3` |
 | equations withheld | **1** | `ISO-59004-04-D1` (`iso59004-F-1`) |
-| sign-off blocks | **31** | J-1/J-2/J-3/J-4/J-5/J-6, G-1…G-4 (+G-5 folded into J-4), S-1, D-1…D-11, U-1…U-4, F-1, I-1…I-3, X-1 |
+| sign-off blocks | **32** | J-1…J-6, G-1…G-4, S-1, D-1…D-11, U-1…U-4, F-1, I-1…I-3, X-1, P-1 — the same 32 ids in `SIGN-OFF-plan-3.md` and in the STAGED file (diffed; fix round 1 withdrew the `G-5` co-id and added `P-1`) |
 | migrations (WRITTEN, NOT APPLIED) | **3 + 3 rollbacks** | `20260917102900` / `…10` / `…20` |
 | tests added | **26 in 4 files** | seed 7, field-configs 10, equations 7, register render 2 |
 | prod writes | **0** | — |
@@ -202,6 +202,8 @@ Re-mine          deGenerate useful energy from recovered resources.
 **Reason 1 — there is no category column.** The printed header is `Action` (L2575) and `Description` (L2577). The word "category" does not occur anywhere in the span, and none of the five prod `action_category` tokens does either. Both absences are **asserted** in `regulation-tables-seed-iso59004.test.ts` against the committed span, so they are re-executable rather than asserted in prose. Under controller resolution (2), a row whose category cell is not physically unambiguous is not seeded — that is every row, and `actions.category` stays an engineer-entered enum from the prod tokens.
 
 **Reason 2 — the two printed columns interleave.** Four of the thirteen description cells are not contiguous: `Rethink`'s runs over the `Source`/`Reduce` label lines; `Cascade`'s has the `Recycle` label sitting inside it; and `Recover energy`'s description is printed **on the `Re-mine` label line** with a watermark `de` glued to its first word. Re-associating them is reconstruction, which SR-3 / amendment F forbid. Two of these are asserted in the test (`'Re-mine deGenerate useful energy from recovered resources.'` and `'Recycle material to the environment.'`).
+
+**What is NOT the blocker, stated precisely so a later published-edition pass knows what has to change:** the Description column IS *ordinally* recoverable — thirteen labels in printed order and thirteen description blocks in the same order, so a positional zip would produce a plausible table. The two actual blockers are (a) the **absent category column**, which no amount of re-extraction fixes because this edition prints none, and (b) the **inconsistent same-line pairing**: L2599 pairs its own label and description on one line correctly (`Repair             Restore a defective or damaged product…`) while L2629 pairs a label with the *previous* row's description (`Re-mine          deGenerate useful energy from recovered resources.`). Because the same layout produces both, a positional zip cannot be validated from the extraction alone — which is exactly why it is reconstruction and not reading. A text-layer copy of the published edition, or a `-raw` extraction cross-checked against `-layout`, settles (b); only a new printed edition settles (a).
 
 **What IS settled** and is reported as a positive finding: the thirteen Action labels each stand alone on their own line, in the printed order *Refuse · Rethink · Source · Reduce · Repair · Re-use · Refurbish · Remanufacture · Repurpose · Cascade · Recycle · Recover energy · Re-mine*, and they match the thirteen prod `selected_action` tokens one-for-one **in order** (the printed order is asserted in the test). The ENUM is therefore PDF-verified even though the TABLE is not seedable — which is, in practice, most of the value the brief wanted from Table 1.
 
@@ -385,11 +387,13 @@ $ npx tsx scripts/regulation-tables/verify-regulation-tables.ts iso59004 "<scrat
 - `scripts/migrations/20260917102900_regulation_tables_seed_iso59004.sql` + rollback
 - `scripts/migrations/20260917102910_field_configs_iso59004.sql` + rollback
 - `scripts/migrations/20260917102920_equations_iso59004.sql` + rollback
-- `scripts/verification/iso59004-STAGED-plan3-rulings.sql` — 528 lines, **100 % SQL comments** (verified: `grep -vnE "^(--|$)"` is empty), 31 blocks
+- `scripts/verification/iso59004-STAGED-plan3-rulings.sql` — 561 lines, **100 % SQL comments** (verified: `grep -vnE "^(--|$)"` is empty), 32 blocks
+
+**Intra-task apply order (WRITTEN, NOT APPLIED — the owner applies them in this order and no other).** First `scripts/migrations/20260917102900_regulation_tables_seed_iso59004.sql` (the `S5_2` seed), then `scripts/migrations/20260917102910_field_configs_iso59004.sql` (14 field INSERTs + 6 UPDATEs), then `scripts/migrations/20260917102920_equations_iso59004.sql` (the six equations). Seed before field configs because the field-config test pins the created checklist against the seeded `S5_2` rows; field configs before equations because every equation names a register carrier AND a derived output field that the field-config migration creates. Each has its own rollback, applied in the reverse order (`…20` → `…10` → `…00`). The same statement is in the STAGED file's header.
 
 **Modified (shared registries only)**
 - `src/lib/eval/regulation-tables-seed-index.ts`, `src/lib/eval/field-configs/index.ts`, `src/lib/eval/equations/index.ts` — one line each
-- `docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md` — 31 blocks appended
+- `docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md` — 32 blocks appended
 - `docs/superpowers/guideline-to-tool-playbook.md` — one new trap block (9 traps)
 
 No other standard's files were touched (amendment G).
@@ -398,10 +402,49 @@ No other standard's files were touched (amendment G).
 
 ## 12. Honest residue
 
-1. **The whole encoding rests on a DRAFT** (`iso59004-J-1`). If the owner rejects draft-sourcing, all three migrations and all 31 blocks fall together. This is the largest open item and it is deliberately the first block.
+1. **The whole encoding rests on a DRAFT** (`iso59004-J-1`). If the owner rejects draft-sourcing, all three migrations and all 32 blocks fall together. This is the largest open item and it is deliberately the first block.
 2. **Table 1 is not encoded** (`iso59004-U-1`). The R-strategy descriptions — genuinely useful text for an engineer choosing an action — are not available in the tool, and the action→category mapping the brief wanted is engineer judgment. The unblock path is a published-edition text layer.
 3. **No completeness code over either checklist** (`iso59004-F-1` + `I-2` + `I-3`). The `principles` and `circularity_aspects` checklists are data-entry improvements only; nothing computes from them and no gate can read them per item. Three [CODE] items would close this (`carriers` in the production evaluator call, `AND` over calls, `contains` in the condition grammar) and they are the same three that block `din14021-F-1` and `iso14046-F-2`.
 4. **23 of the 24 empty-condition requirements stay empty** (`iso59004-G-4`). That is the honest state of a vocabulary/principles guidance standard written almost entirely in "should" prose with exactly one "shall" in 62 pages — but it means most of this standard's compliance layer is advisory text, and the report says so rather than inventing enforcement.
 5. **`feasibility_dimensions` is free text** (`iso59004-I-1`). The printed rule asks for an assessment against all six dimensions; the encoding can only offer the six as suggestions and a presence check.
 6. **Cross-standard measurement is deferred** (`iso59004-X-1`). §7.6 hands measurement to ISO 59020, whose `TABLE3` IS seeded in this corpus — the two are not yet wired, and ISO 59010 (§7.4.4) is not in the library at all (NR, acquisition list).
 7. **Nothing is applied.** Every migration is written-not-applied; the workflow metric for ISO-59004 is unchanged by this task, and the harness run above is a regression proof, not a claim that the new registers were driven through a deployed build.
+
+---
+
+## 13. Fix round 1 (2026-09-24) — reviewer verdict "Approved with minors", 0 Critical
+
+The reviewer made its own extraction and page map and independently confirmed 30/30 spans, 30/30 page numbers, the Table-1 unseedability (`grep -ic categor` = 0 across all 62 pages; inconsistent label/description pairing), both engine findings, every absence claim, the 24-not-22 correction, and the 8-of-11 guard refusals. Five minors, all applied in one fix commit.
+
+**1 (Important) — ASCII-transliterated German reached `fields.label_de`.** `Grundsaetze`, `Zirkularitaetsaspekte`, `Massnahmen…` were in the module's own prose and therefore in the emitted migration. Every string **this task authored** — `create.label_de`, `create.description`, `ui_config.title` / `subtitle` / `note` / `add_label`, every register column `label` / `aria_label` / `value_labels`, and the same class of strings in `equations/iso59004.ts` — now carries proper umlauts and ß (`Grundsätze (§5.2)`, `Maßnahmenregister`, `Zirkularitätsaspekte`, `Wertschöpfungsmodell`, `Begründung`, …). Both affected migrations were **re-emitted** (`20260917102910`, `20260917102920`) and checked: valid UTF-8, zero replacement characters, in all four generated SQL files.
+
+One deliberate exception, now documented in the module and **machine-checked**: the four `*_LABELS` maps stay transliterated because **prod is** — every `enum_values[].label_de` cell of ISO-59004 is stored without umlauts (`Ueberdenken`, `Wertschoepfung`, `Oekosystem-Regeneration`). They are prod cells copied byte-for-byte, not prose: `ACTION_LABELS` and `PRINCIPLE_LABELS` are asserted **equal** to the prior (a rewrite would break the D-1 pin), and `CATEGORY_LABELS` / `FEASIBILITY_LABELS` are now asserted to be prod's label plus only the appended clause number. Rewriting them would also make the register's option text differ from the same option on the prod scalar beside it. Correcting prod's own labels is a prod-hygiene item, not a Plan-3 emission.
+
+A new lint in `field-configs-iso59004.test.ts` walks every authored string and fails on the transliteration patterns, so the defect cannot come back. The other five ISO-59004 files were swept for the same pattern; only `equations/iso59004.ts` and the render test's label strings needed changes (the seed builder was already correct).
+
+**2 — `iso59004-G-5` withdrawn.** The co-id on the J-4 header had no STAGED block of its own (31 ids vs 32 headers). It is **withdrawn**, not given a block: amendment M asks that a guard refusal be routed to a staged gate rewrite, but here the rule that rewrite would serve is itself withheld on the printed §7.1.4 NOTE, so a standalone G-block would stage a gate change nobody has asked for. The IF-guarded `UPDATE` each of the eight gates would need is written out at the end of the `iso59004-J-4` block instead. Sheet and STAGED file now carry **32** ids each, and the two id sets were diffed (`diff <(grep …STAGED) <(grep …SIGN-OFF)` → empty).
+
+**3 — Intra-task apply order in prose.** Added to the STAGED file's header and to report §11: `…02900` seed → `…02910` field configs → `…02920` equations, with the reason for each edge (the field-config test pins the checklist against the seeded rows; every equation names a carrier and an output field the field-config migration creates) and the reverse order for the rollbacks.
+
+**4 — `iso59004-P-1` (new).** `S5_2` ships `override_policy: 'locked'` while its `override_quote` is the §5.1 "should be considered" sentence, which on a strict reading of the Spec §7 cue table is the `anhaltswert` class. The rationale was only a code comment; it is now a P-class block on the sheet and in the STAGED file with **both readings** stated and the one-line switch `UPDATE` + rollback. Nothing in the emitted seed changed; the builder's comment now points at `P-1`, and the seed test already pins the policy so builder and migration cannot drift if the block is ratified the other way.
+
+**5 — Table 1: what exactly is recoverable.** §4 now states that the Description column *is* ordinally recoverable (thirteen labels in printed order, thirteen description blocks in the same order), and that the two real blockers are the **absent category column** — which no re-extraction fixes, because this edition prints none — and the **inconsistent same-line pairing**: L2599 pairs its own label and description correctly while L2629 pairs a label with the previous row's description. Because one layout produces both, a positional zip cannot be validated from the extraction alone, which is why it is reconstruction. A published-edition text layer (or `-raw` cross-checked against `-layout`) settles the pairing; only a new printed edition settles the category column.
+
+### Fix-round verification (raw)
+
+```
+$ pnpm -s typecheck                → clean (exit 0, no output)
+$ pnpm test                        → Test Files 360 passed | 1 skipped (361)
+                                     Tests 3157 passed | 1 expected fail | 1 skipped (3159)
+$ pnpm vitest run --project unit <the 4 iso59004 files>   → 4 files, 26 tests passed
+$ pnpm vitest run --project integration tests/harness/iso59004-verify.integration.test.ts
+                                   → 1 file, 14 tests passed
+$ npx eslint <the 11 touched TS/TSX files>                → clean (exit 0, no output)
+$ npx tsx scripts/regulation-tables/verify-regulation-tables.ts iso59004 "<scratchpad>/iso59004.txt"
+                                   → 6/6 quotes verbatim
+$ UTF-8 check on the 4 generated SQL files                → valid-utf8=true, replacement-chars=0 (each)
+$ id-set diff STAGED ↔ SIGN-OFF                           → empty (32/32)
+$ grep -vcE "^(--|$)" scripts/verification/iso59004-STAGED-plan3-rulings.sql  → 0 (100 % comments)
+```
+
+Both migration freshness pins (field configs, equations) were re-asserted after the re-emit; the seed migration was **not** re-emitted because no seeded value changed.

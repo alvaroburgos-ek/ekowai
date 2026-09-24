@@ -1,5 +1,10 @@
 -- ISO-59004 — Plan 3 Task 29 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters). LAST of the 29 standards.
 -- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md (same ids).
+-- INTRA-TASK APPLY ORDER (the three DATA migrations of Task 29, in this order and no other): FIRST scripts/migrations/20260917102900_regulation_tables_seed_iso59004.sql (the S5_2 seed),
+--   THEN scripts/migrations/20260917102910_field_configs_iso59004.sql (the field configs — 14 INSERTs + 6 UPDATEs), THEN scripts/migrations/20260917102920_equations_iso59004.sql (the six equations).
+--   Seed before field configs because the field-config test pins the created checklist against the seeded S5_2 rows; field configs before equations because every equation names a register
+--   carrier AND a derived output field that the field-config migration creates. Each has its own rollback (scripts/rollback-<ts>-…sql), applied in the REVERSE order (…20 → …10 → …00).
+--
 -- Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the order it appears — with these dependencies:
 --   every block AFTER the three DATA migrations 20260917102900 (seed: S5_2, six §5.2 principle rows) · 20260917102910 (field configs: 14 created fields incl. three registers and two checklists, 6 widget UPDATEs) · 20260917102920 (equations ISO-59004-05-D1 … -06-D3);
 --   J-1 FIRST — it decides whether ANY of this may be encoded against a FINAL DRAFT at all; a REJECT on J-1 rejects every other block and the three DATA migrations with it;
@@ -219,8 +224,11 @@
 --   ISO-59004-06 CR-044 (id 4c2331e6-c3f4-4010-8fb0-0d3e8c4b7063, warn) "Value creation models & networks per ISO 59010" — §7.4.4 value creation models per ISO 59010 — CROSS-STANDARD and ISO 59010 is not in the corpus; `value_creation_model IS NOT NULL` is already CR-037.
 
 -- ======================================================================================================================
--- iso59004-J-4 / G-5 · ISO-59004 · ISO-59004-06 · the brief’s five `implementation_stage` visibility rules are WITHHELD — the standard itself refutes stage-gating
+-- iso59004-J-4 · ISO-59004 · ISO-59004-06 · the brief’s five `implementation_stage` visibility rules are WITHHELD — the standard itself refutes stage-gating
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Fix round 1: the co-id `iso59004-G-5` is WITHDRAWN. Amendment M asks that a guard refusal be routed to a staged gate rewrite, but here the RULE that rewrite would serve is itself
+--     withheld on the printed text, so a standalone G-block would stage a gate change nobody has asked for. The IF-guarded UPDATE each of the eight gates would need is written out at the END
+--     of THIS block instead, so an owner who overrides J-4 has the exact SQL without a second ratification box. This file and the sign-off sheet now carry the same 32 ids.
 -- Chosen now (fail-safe): NO field of ISO-59004-06 is hidden by `implementation_stage`. Every §7.2 – §7.6 field stays visible on every project, exactly as today.
 -- Reason 1 — the printed text refutes the premise.
 -- Evidence [PDF p.37 (printed p.30), §7.1.4, VA]: "The guidance is structured to allow for an iterative process. The stages of implementation can be altered and adapted to reflect
@@ -525,4 +533,29 @@
 --     (ISO-59004-06 ↔ ISO-59020 Table 3, which IS seeded under ISO-59020 as TABLE3 with 13 rows). Because of that last one, `indicators_59004.indicator` is deliberately a free-text
 --     column here and NOT a lookup_key into another standard’s table — the governing table belongs to ISO-59020 and is seeded under ITS task (constraint 3(d)).
 
--- END — 31 blocks. Nothing in this file has been applied.
+
+-- ======================================================================================================================
+-- iso59004-P-1 · ISO-59004 · S5_2 · override_policy is `locked` while the quoted §5.1 cue reads `anhaltswert` — a deliberate policy choice, not an oversight
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: S5_2 ships override_policy = 'locked' with override_quote = the §5.1 sentence. That is a JUDGMENT against the literal cue class, so fix round 1 moves it out of a code
+--     comment and onto the sheet. Nothing changes in the emitted seed unless this block is decided the other way.
+-- Evidence [PDF p.22 (printed p.15), §5.1, VA — the quoted cue]: "The set of principles given in 5.2, which are interlinked and complementary, should be considered by an organization to
+--     transition towards a circular economy."
+-- Reading A (what shipped — locked). S5_2 is a printed NAME CATALOGUE: its cells are the six principle identifiers, their printed sub-clause numbers and their printed paragraphs. There is
+--     nothing an engineer could “set differently with a reason” — an override toggle on a principle’s TITLE is meaningless — and no consumer offers one: the table’s only consumer is the
+--     created `principles` select_many checklist, and the override sidecar is a REGISTER feature (ui_config.override) that no register of this standard uses, because no register reads S5_2.
+--     Under the Spec §7 vocabulary `locked` is the one policy that emits no override block at all, which is exactly the rendering wanted.
+-- Reading B (the literal cue — anhaltswert). Spec §7 keys the policy off the guideline’s OWN WORDS, and “should be considered … to transition towards a circular economy” is a recommendation,
+--     not “ist anzusetzen” / “gilt” / “muss”. On a strict reading of the cue table the quoted sentence belongs to the `anhaltswert` class, and the policy field should say so even though nothing
+--     would ever render the override — the field is the TABLE’s own metadata, not a promise about a consumer.
+-- One-line SQL to switch to Reading B:
+-- BEGIN;
+-- UPDATE regulation_tables SET override_policy = 'anhaltswert' WHERE standard_code = 'ISO-59004' AND edition = 'FDIS 2024' AND table_code = 'S5_2' AND override_policy = 'locked';
+-- COMMIT;
+-- Rollback:
+-- BEGIN;
+-- UPDATE regulation_tables SET override_policy = 'locked' WHERE standard_code = 'ISO-59004' AND edition = 'FDIS 2024' AND table_code = 'S5_2' AND override_policy = 'anhaltswert';
+-- COMMIT;
+-- If Reading B is ratified the seed builder’s literal changes too (src/lib/eval/regulation-tables-seed-iso59004.ts) and 20260917102900 is RE-EMITTED — the seed test pins the policy, so the
+--     builder and the migration can never drift apart.
+-- END — 32 blocks. Nothing in this file has been applied.
