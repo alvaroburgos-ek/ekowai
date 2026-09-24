@@ -9181,3 +9181,298 @@ Report: `reports/plan-3-atv_a704e.md` · STAGED SQL: `scripts/verification/atv_a
   - **fll_gar-C-2** (FLL-GAR-2023) — `FLL-GAR-12 C`'s only in-section producer, `bauteildicke_cm`, is self-consumer only with no equations on FLL-GAR-12 — **now a re-emit candidate**; the other three withheld sections (FLL-GAR-10 C, FLL-GAR-14 C, FLL-GAR-16 C) hold real cross-worksheet producers and stay refused.
 - Evidence: `scripts/regulation-tables/emit-field-configs-sql.ts` (`producerChain`), the updated pins in `scripts/__tests__/emit-field-configs-sql-transitive.test.ts`, `scripts/__tests__/emit-field-configs-sql-guards.test.ts`, `src/lib/eval/__tests__/field-configs-din1989-1.test.ts`, `src/lib/eval/__tests__/field-configs-fll_gar.test.ts`, `src/lib/eval/__tests__/field-configs-m187.test.ts`; task report `.superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-12b-report.md`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+<!-- ===== Plan 3 Task 28 · ISO-5667-1 (slug iso5667_1) — appended 2026-09-24 ===== -->
+
+> **ISO-5667-1 source note (applies to every block below).** This is the ONE standard of the no-transcript group with a readable source: an IN-SESSION `pdftotext -layout` extraction of the standard's own PDF (`…\ISO 5667-1\ISO-5667-1.pdf` = NTC-ISO 5667-1:1995, the ICONTEC adoption of ISO 5667/1:1980; 74 428 bytes, 17 pages, 55 467 non-whitespace characters). Every quote marked `[PDF p.N]` is therefore **VA grade** (PDF-derived, page-referenced) under SR-3, with the page number taken from the form-feed mapping (a form feed ends a page; the document prints page N on PDF page N+1). The extraction is not committed; the command, its counts and the row-by-row `verify-regulation-tables.ts` proof (33/33 PASS) are in `docs/superpowers/specs/2026-09-11-guideline-to-tool/reports/plan-3-iso5667_1.md`. **Every quote is from the 1980 edition** — see `iso5667_1-J-1`.
+
+### iso5667_1-J-1 · ISO-5667-1 · standard · edition
+- Class: interface-gap (source edition)
+- Chosen now (fail-safe): The encoding is built on the 1980 edition, because that is the only copy in the library and the acquisition policy is "no external acquisitions". Prod already agrees: `standards.version` = `1980 (ISO 5667/1:1980; adopted as NTC-ISO 5667-1:1995)`; the seeded tables carry `edition = '1980'`. Nothing was re-numbered against the current ISO 5667-1.
+- Evidence: [PDF p.1, cover page, VA] "NORMA TÉCNICA NTC- COLOMBIANA 5667-1 | 1995-05-10 | GESTIÓN AMBIENTAL. CALIDAD DEL AGUA. MUESTREO. DIRECTRICES PARA EL DISEÑO DE PROGRAMAS DE MUESTREO"
+- Evidence: [PDF p.16 (printed p.15), DOCUMENTO DE REFERENCIA, VA] "Esta norma es idéntica a la INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. Water Quality. Sampling. Part 1: Guidance on the Design of Sampling Programmes. Geneva, 1980, 16 pp. (ISO 5667/1, 1980)." — [EN] "This standard is identical to ISO … Geneva, 1980, 16 pp. (ISO 5667/1, 1980)."
+- Proposed SQL / config: no SQL. What is asked: confirm that a 1980-dated encoding is acceptable, OR name the re-sourcing step. EVERY clause reference in this task (§5.1, §8.2/8.3/8.6/8.9/8.10/8.13, §9.3.2, §9.6.2, §10.2.4, §11.1, §12.1.1, §12.1.2, §13, §15, §16.2–§16.5, §17, §19.1–§19.4, §21.1–§21.4) is a 1980 clause number, and so is every clause_reference already in prod. Block `iso5667_1-J-1` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-J-2 · ISO-5667-1 · S16_4_K / S21 / S8_6 / S12_1_2 · `regulation_tables.verification_status`
+- Class: interface-gap (verification vocabulary)
+- Chosen now (fail-safe): All four seeded tables ship `imported_unverified`. The corpus has exactly two tokens — `md_verified` (rows lifted from a MARKDOWN transcript, grade VC) and `imported_unverified` — and this standard has no markdown transcript, so `md_verified` would be factually false. A third token is never introduced unilaterally. The cost is that the evidence is UNDER-stated: every row here was lifted from the standard's own PDF with a page reference, which SR-3 grades VA — strictly stronger than the `md_verified` rows elsewhere in this wave.
+- Evidence: [docs/verification-doctrine.md, SR-3] "Authority order is PDF > markdown > encoding > ledger > chat. … PDF-confirmed = VA; markdown-only = VC."
+- Evidence: [plan global constraints, rule 2] "`regulation_tables.verification_status` is free text (no CHECK) — use exactly these two tokens." (the column really is free text, so a third token needs no schema change)
+- Proposed SQL / config: propose a third token `pdf_verified`: `UPDATE regulation_tables SET verification_status = 'pdf_verified' WHERE standard_code = 'ISO-5667-1' AND edition = '1980' AND table_code IN ('S16_4_K','S21','S8_6','S12_1_2') AND verification_status = 'imported_unverified';` + rollback, block `iso5667_1-J-2` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql. If ratified, the emitter's status-upgrade rule and the Plan-3 conventions section learn the token in the final [CODE] wave.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-G-1 · ISO-5667-1 · ISO-5667-1-04 · CR-012 / CR-013 (`pipe_nominal_bore`, `isokinetic_sampling`)
+- Class: gate-guard
+- Chosen now (fail-safe): Both gates stay as captured and both fields stay visible on every project. The emitter REFUSED both hides — the exact messages are asserted in `src/lib/eval/__tests__/field-configs-iso5667-1.test.ts` (not merely claimed). The cost is real and is stated: a project that samples no pipe must TODAY still enter a nominal bore ≥ 25 mm or the BLOCK gate CR-012 refuses engineer approval.
+- Evidence: [PDF p.5 (printed p.4), §8.6, VA] "Los líquidos se deben bombear a través de tubos de tamaño adecuado (por ejemplo, al muestrear líquidos heterogéneos, de conducto nominal mínimo de 25 mm) a velocidades lineales suficientemente altas para mantener las características de flujo turbulento." — [EN] "Liquids shall be pumped through pipes of suitable size (for example, when sampling heterogeneous liquids, a minimum nominal bore of 25 mm) at linear velocities high enough to maintain turbulent flow."
+- Evidence: [PDF p.6 (printed p.5), §8.9, VA] "Idealmente, la velocidad lineal debe ser suficiente para inducir la turbulencia, y las muestras se deben tomar en condiciones isocinéticas (véase la NTC 3650-2 (ISO 6107/2))." — [EN] "Ideally the linear velocity should be sufficient to induce turbulence and samples should be taken under isokinetic conditions (see ISO 6107/2)."
+- Evidence: [emitter, re-runnable] `ISO-5667-1-04 pipe_nominal_bore: visible_when hides pipe_nominal_bore read by gate CR-012 (block: "pipe_nominal_bore >= 25") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`
+- Proposed SQL / config: block `iso5667_1-G-1` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — CREATE the two missing drivers (`pipe_sampling`, `suspended_solids_determined`, booleans on -04 section D, both with their printed §8.6 / §8.9 sentence), then the two IF-guarded gate rewrites (archive + md5 guard) and the two field hides, in ONE transaction. `flow_character` is deliberately NOT the driver (its printed meaning is turbulent/laminar/reverse, not "is a pipe sampled"); the brief's `heterogeneous` token does not exist in prod.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-G-2 · ISO-5667-1 · ISO-5667-1-05 · CR-016 / CR-017 / CR-018 (`groundwater_purged`, `sampling_depth`, `sludge_pipe_diameter`, `automatic_sampler_protection`)
+- Class: gate-guard
+- Chosen now (fail-safe): All three gates stay as captured and all four fields stay visible for every water situation. The emitter refused each hide (messages asserted in the test). The cost today: a project sampling only stormwater must still tick "Brunnen abgepumpt", enter a groundwater depth and enter a sludge-pipe diameter ≥ 50 mm, or the two BLOCK gates refuse approval. The per-ROW switch IS delivered by the DATA migration — the created `sites_1` register carries exactly these situation-specific columns, where no gate reads them.
+- Evidence: [PDF p.7 (printed p.6), §9.6.2, VA] "… el pozo debe bombearse antes de efectuar el muestreo para así asegurarse de que se extrae agua nueva del depósito. […] Siempre se debe registrar la profundidad por debajo del nivel del suelo a la cual se toma la muestra."
+- Evidence: [PDF p.10 (printed p.9), §12.1.2, VA] "Si el muestreo va a ser de una tubería, el conducto del muestreo debe tener al menos 50 mm de diámetro para así garantizar que la ocurrencia de bloqueos sea mínima…"
+- Evidence: [PDF p.11 (printed p.10), §13, VA] "Los dispositivos automáticos de muestreo que recogen muestras a intervalos regulares y que comienzan a un flujo prescrito, ofrecen muchas ventajas. Este equipo se debe instalar en un estado permanente de alistamiento."
+- Proposed SQL / config: block `iso5667_1-G-2` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — three IF-guards on `water_situation_type` (same worksheet, prod's 16 tokens unchanged) + the four field hides, one transaction, archive-pattern rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-G-3 · ISO-5667-1 · ISO-5667-1-06 · CR-022 (`abnormal_frequency_increase`)
+- Class: gate-guard
+- Chosen now (fail-safe): CR-022 stays as captured (warn) and the field stays visible. The emitter refused the hide (message asserted in the test). The DATA migration DOES create the driver `abnormal_conditions` (boolean, -06 section D) so the block has something to guard on, but ships it without a rule of its own — nothing changes until this block is ratified.
+- Evidence: [PDF p.13 (printed p.12), §17, VA] "Es posible que se necesite incrementar la frecuencia del muestreo mientras persistan condiciones anormales, por ejemplo durante la puesta en marcha de una planta por procesos, durante las condiciones de inundación en un río, o en tiempos de florecimiento de algas." — [EN] "It may be necessary to increase the sampling frequency while abnormal conditions persist, for example during the start-up of a process plant, during flood conditions in a river, or at times of algal bloom."
+- Proposed SQL / config: block `iso5667_1-G-3` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — `IF abnormal_conditions == true THEN abnormal_frequency_increase IS NOT NULL` + the field hide.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-C-1 · ISO-5667-1 · ISO-5667-1-06 · `target_statistic`
+- Class: consumer-edit
+- Chosen now (fail-safe): The field stays visible for every programme type. The producer guard refused the rule because `target_statistic` is inherited by ISO-5667-1-07 (prod consumer_worksheets = ["ISO-5667-1-07"]). The §15 switch the brief wanted IS delivered elsewhere without any consumer edit: `control_limits` hides under `programme_type == 'quality_control'` (emitted), and the created `determinands` register carries a per-determinand `target_statistic` column.
+- Evidence: [PDF p.11 (printed p.10), §15.2, VA] "Estos programas se proponen estimar uno o más parámetros estadísticos … Por ejemplo, la media aritmética o la mediana indican la tendencia central de los resultados, y la desviación estándar indica la variabilidad."
+- Evidence: [PDF p.11 (printed p.10), §15.1, VA] "Estos programas generalmente involucran el control de la concentración de uno o más factores determinantes dentro de límites definidos."
+- Proposed SQL / config: block `iso5667_1-C-1` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — `array_remove(consumer_worksheets, 'ISO-5667-1-07')` then the visibility rule, one transaction, fields-archive rollback. The narrow question: does -07 still need the SCALAR target statistic? If yes, REJECT and leave it visible.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-C-2 · ISO-5667-1 · ISO-5667-1-05 · `flow_proportional_sampling` + CR-019
+- Class: consumer-edit + gate-guard
+- Chosen now (fail-safe): The field stays visible for every water situation and CR-019 stays as captured (warn). TWO independent guards refuse the rule — the producer guard fires first (the symbol is inherited by ISO-5667-1-08), the gate-aware guard would refuse the same rule for CR-019. The per-row flag IS delivered by the created `sites_1` register (`flow_proportional` under `situation_type == 'stormwater'`).
+- Evidence: [PDF p.11 (printed p.10), §13, VA] "El muestreo de tales descargas presenta problemas especiales por su naturaleza intermitente… En muchos casos será deseable el muestreo proporcional al flujo." — [EN] "… In many cases flow-proportional sampling will be desirable." ("será deseable" is a recommendation — which is why CR-019 is a warn and why this block does not touch its severity.)
+- Proposed SQL / config: block `iso5667_1-C-2` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — the consumer edit + the IF-guarded CR-019 + the field hide, one transaction.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-E-1 · ISO-5667-1 · ISO-5667-1-07 · `K` (widget re-bind to `lookup_fill` on S16_4_K)
+- Class: widget re-bind (amendment J)
+- Chosen now (fail-safe): Prod's `K` (id 85996c78-5550-40e3-a8cb-a1fb033c9a17, number, is_required = true) is NOT re-bound. A TWIN fill `K_table` is CREATED beside it with the exact binding, so the engineer sees the printed K next to the field they still type. Reason the re-bind is not fail-safe today: the §16.4 table is `locked` (the standard's own words), and `LookupFillField` computes `canOverride = … && policy !== 'locked' && tableScalar != null` — under a locked policy NO input is rendered; while `confidence_level` is unset the state is `keys_missing`, so nothing is filled either. A REQUIRED field would become neither fillable nor typeable and prod equations 2 / 3 would stall.
+- Evidence: [PDF p.12 (printed p.11), §16.4, VA] "Cuando n es grande …, s difiere poco del valor verdadero σ, y el intervalo de confianza de X , calculado a partir de algún número de resultados n, es X ± K/n, donde K tiene el valor dado en la siguiente tabla, dependiendo del nivel de confianza adoptado." — the "tiene el valor dado" that makes the table `locked`.
+- Evidence: [PDF p.12 (printed p.11), §16.4, the printed table, VA] "Nivel de confianza 99 98 95 90 80 68 50 | K 2,58 2,33 1,96 1,64 1,28 1,00 0,67" — the seven seeded rows, one per printed column.
+- Proposed SQL / config: block `iso5667_1-E-1` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — `widget IS NULL`-guarded UPDATE of widget / ui_config / lookup + fields-archive rollback. Requires the Plan-1 schema migration 20260911100000 (fields.widget / .lookup do not exist in prod today). Ratify together with a decision that makes `confidence_level` effectively mandatory before K, or with a Plan-2b change that keeps a locked `lookup_fill` typeable while its keys are missing. SR-2 holds either way — the ENGINEER selects the confidence level; the table only supplies the K that follows.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-R-1 · ISO-5667-1 · ISO-5667-1-07 · Gl. 3 vs the brief's `n_required_calc`
+- Class: refuted brief premise (R-5)
+- Chosen now (fail-safe): NOT emitted, nothing to apply. The brief asked for a new equation `n_required_calc = (2 * K * sigma / L) ^ 2`. Prod ALREADY carries that exact derivation as Gl. 3 (id `8b5fc076-c947-447c-aa37-7ebbc3a3a81d`, `n = (2 * K * sigma / L)^2`, verified_against_standard) and the engine evaluates it: the printed §16.5 worked example reproduces 61,4656 ≈ 61 through the real `evaluateFormula` (pinned in `equations-iso5667-1.test.ts`). A second equation for a quantity one registered equation already produces is forbidden by the single-source derivation invariant.
+- Evidence: [PDF p.13 (printed p.12), §16.4 continued, VA] "Para estimar la media aritmética X para un intervalo de confianza dado L en el nivel de confianza seleccionado, el número de muestras necesarias es (2Kσ/L)2."
+- Evidence: [PDF p.13 (printed p.12), §16.5 worked example, VA] "Si el intervalo de confianza requerido fuera el 10 % de la media aritmética, el nivel de confianza requerido del 95 %, y la desviación estándar el 20 % de la media aritmética, entonces: 10 = 2 x 1,96 x 20 / n … y por consiguiente n = 7,84 y n ≈ 61."
+- Proposed SQL / config: no SQL. Block `iso5667_1-R-1` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql records the refutation. What the brief actually wanted — K from the printed table instead of typed — is delivered by `iso5667_1-E-1` (or today by the `K_table` twin) WITHOUT touching Gl. 3, because the equation reads the field `K`. The new `n_hist = count_rows(historical_results)` is a DIFFERENT quantity (results on the sheet, not results required).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-R-2 · ISO-5667-1 · ISO-5667-1-07 · Gl. 1 (`s`)
+- Class: equation-replacement
+- Chosen now (fail-safe): Gl. 1 keeps its stored formula `s = sqrt( SUM((x_i - x_mean)^2) / (n - 1) )` (id `d42f576c-c3c7-4e00-bf34-e2da20bf3886`, verified_against_standard). `SUM()` is not in the engine's function set, so that row can NEVER compute — the harness records it as NR. The working form ships under the DISTINCT symbol `s_calc` (ISO-5667-1-07-D3, `stdev_rows(historical_results, x_value)`); replacing a verified equation is always a ruling.
+- Evidence: [PDF p.12 (printed p.11), §16.4, VA] "… las estimaciones de la media aritmética verdadera X y la desviación estándar, σ, son la media aritmética, X , y s respectivamente de acuerdo con la siguiente fórmula: … S = … / n −1 … Donde xi representa los valores individuales." — the DIVISOR "n −1" is printed and readable (the radical and Σ are lost by pdftotext, `iso5667_1-U-1`).
+- Evidence: [engine, probed this session] `stdev_rows` is the SAMPLE (n − 1) form: four results 10/20/30/40 ⇒ √(500/3) = 12,90994…, explicitly NOT the population √(500/4) = 11,18034… — pinned numerically in `equations-iso5667-1.test.ts`. Gap G-4 does not bite: the printed definition and the engine agree.
+- Proposed SQL / config: block `iso5667_1-R-2` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — archive into `equations_archive_iso5667_1`, md5-guarded UPDATE of formula / input_symbols / description, rollback re-INSERTs ALL 22 live `equations` columns with an explicit list. Apply AFTER `iso5667_1-D-17` / `D-23` are decided.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-1 · ISO-5667-1 · ISO-5667-1-02 · `variability_profile` enum_values
+- Class: data_type / enum (owner ruling D-1)
+- Chosen now (fail-safe): Prod's three tokens stay byte-identical ([]); nothing in this task writes `enum_values` for this field. The §16.5 rule that IS emitted (the created `sampling_time_note` under `variability_profile == 'wide_rapid'`) therefore covers only the "amplias y rápidas" case — a determinand that varies CYCLICALLY cannot be recorded as such today.
+- Evidence: [PDF p.13 (printed p.12), §16.5, VA] "Las variaciones sistemáticas pueden ser tendencias o variaciones cíclicas … Si ocurren variaciones cíclicas, los tiempos de muestreo son importantes, bien sea para cubrir todo el ciclo o para detectar concentraciones de interés máximas o mínimas." — [EN] "Systematic variations may be trends or cyclic variations … If cyclic variations occur, the sampling times are important, either to cover the whole cycle or to detect maximum or minimum concentrations of interest."
+- Evidence: [PDF p.4 (printed p.3), §5.1, VA — the token prod DOES have] "Los programas de muestreo pueden ser complejos en situaciones en las cuales ocurren variaciones amplias y rápidas en las concentraciones de los factores determinantes que interesan."
+- Evidence: [grep, exit 1 — the brief's token does not exist] `grep -o '"cyclic"' src/lib/eval/field-configs/iso5667_1.prior.json` → no output, exit 1.
+- Proposed SQL / config: block `iso5667_1-D-1` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — append the `cyclic` token to `enum_values` (jsonb `||`, guarded by `NOT (enum_values @> …)`) and widen the `sampling_time_note` rule to `IN {'wide_rapid', 'cyclic'}` in the same transaction; fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-2 · ISO-5667-1 · register column `determinands.parameter` ↔ prod scalar `ISO-5667-1-02 parameter_list` (§3)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `4a2d2a4b-044d-4122-8535-5793d9b09e5d`, text, is_required = true, consumer_worksheets = ["ALL"]) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Die Freitext-Parameterliste hält alle Bestimmungsgrößen in EINEM Feld; die Registerspalte hält eine je Zeile.
+- Evidence: [PDF p.2 (printed p.1), §3, VA] "Adicionalmente, se debe compilar una lista de parámetros de interés y se deben consultar los procedimientos analíticos pertinentes…"
+- Proposed SQL / config: block `iso5667_1-D-2` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback. **The symbol is inherited by ["ALL"] — decide the consumer edit FIRST.** **is_required = true — deactivating changes the completeness computation.**
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-3 · ISO-5667-1 · register column `determinands.variability` ↔ prod scalar `ISO-5667-1-02 variability_profile` (§5.1, §16.5)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `6dccafd3-f475-4092-9fd4-f3200cb01637`, enum, is_required = true, consumer_worksheets = ["ISO-5667-1-06","ISO-5667-1-07"]) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Das Variabilitätsprofil ist je Bestimmungsgröße verschieden; der Skalar kann nur eines halten.
+- Evidence: [PDF p.13 (printed p.12), §16.5, VA] "La naturaleza de la variabilidad puede ser diferente para factores determinantes diferentes de la misma agua."
+- Proposed SQL / config: block `iso5667_1-D-3` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback. **The symbol is inherited by ["ISO-5667-1-06","ISO-5667-1-07"] — decide the consumer edit FIRST.** **is_required = true — deactivating changes the completeness computation.**
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-4 · ISO-5667-1 · register column `determinands.target_statistic` ↔ prod scalar `ISO-5667-1-06 target_statistic` (§15.2)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `c6ca0cc7-9395-4a9e-be4d-5f39324954f1`, enum, is_required = false, consumer_worksheets = ["ISO-5667-1-07"]) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Die Zielstatistik ist je Bestimmungsgröße verschieden; der -06-Skalar hält nur eine (siehe auch iso5667_1-C-1).
+- Evidence: [PDF p.11 (printed p.10), §15.2, VA] "Estos programas se proponen estimar uno o más parámetros estadísticos que caractericen la concentración o su variabilidad, o ambos, durante un período definido."
+- Proposed SQL / config: block `iso5667_1-D-4` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback. **The symbol is inherited by ["ISO-5667-1-07"] — decide the consumer edit FIRST.**
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-5 · ISO-5667-1 · register column `sites_1.situation_type` ↔ prod scalar `ISO-5667-1-05 water_situation_type` (§8.1, §9 – §13)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `5c1227a6-70ae-4fe5-85a9-9ea78eabc7ca`, enum, is_required = true, consumer_worksheets = ["ISO-5667-1-06","ISO-5667-1-08"]) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Ein Messnetz kann Stellen verschiedener Gewässersituationen umfassen; der Skalar hält nur eine.
+- Evidence: [PDF p.5 (printed p.4), §8.1, VA] "Dependiendo de los objetivos por alcanzar …, la red de muestreo puede tener cualquier forma desde un solo sitio hasta todo un desagüe de río."
+- Proposed SQL / config: block `iso5667_1-D-5` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback. **The symbol is inherited by ["ISO-5667-1-06","ISO-5667-1-08"] — decide the consumer edit FIRST.** **is_required = true — deactivating changes the completeness computation.**
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-6 · ISO-5667-1 · register column `sites_1.location_identified` ↔ prod scalar `ISO-5667-1-04 sampling_location_identified` (§8.2)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `7d10b346-d88b-45ab-a1a2-86d03eeb3fba`, boolean, is_required = true, consumer_worksheets = ["ISO-5667-1-05"]) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Die Identifikation ist je Stelle nachzuweisen; der -04-Skalar ist eine einmalige Bestätigung.
+- Evidence: [PDF p.5 (printed p.4), §8.2, VA] "La identificación de la localización del muestreo permite tomar muestras comparativas en otros momentos."
+- Proposed SQL / config: block `iso5667_1-D-6` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback. **The symbol is inherited by ["ISO-5667-1-05"] — decide the consumer edit FIRST.** **is_required = true — deactivating changes the completeness computation.**
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-7 · ISO-5667-1 · register column `sites_1.flow_character` ↔ prod scalar `ISO-5667-1-04 flow_character` (§8.3, §8.4)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `71e8af1f-fc0a-474a-afb5-f65a8e04288f`, enum, is_required = true, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Der Strömungscharakter ist je Stelle verschieden; der -04-Skalar hält nur einen.
+- Evidence: [PDF p.5 (printed p.4), §8.3, VA] "Idealmente, las muestras se deben tomar en líquidos turbulentos, bien mezclados; si se trata de flujos por conductos, siempre que sea posible, se debe inducir la turbulencia."
+- Proposed SQL / config: block `iso5667_1-D-7` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback. **is_required = true — deactivating changes the completeness computation.**
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-8 · ISO-5667-1 · register column `sites_1.weather` ↔ prod scalar `ISO-5667-1-04 weather_recorded` (§8.13)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `6f21cb89-2733-4b8d-902a-b6bd0d0dadc1`, boolean, is_required = false, consumer_worksheets = ["ISO-5667-1-08"]) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Die Witterung ist je Stelle und Termin zu erfassen; der -04-Skalar ist nur eine Ja/Nein-Bestätigung.
+- Evidence: [PDF p.6 (printed p.5), §8.13, VA] "Los cambios en las condiciones meteorológicas pueden inducir variaciones marcadas en la calidad del agua; tales cambios se deben registrar y se deben tener en cuenta al interpretar los resultados."
+- Proposed SQL / config: block `iso5667_1-D-8` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback. **The symbol is inherited by ["ISO-5667-1-08"] — decide the consumer edit FIRST.**
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-9 · ISO-5667-1 · register column `sites_1.depth_below_ground_m` ↔ prod scalar `ISO-5667-1-05 sampling_depth` (§9.6.2)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `b147ad8a-2ccc-4c2c-ab1b-80a2d978e3fc`, number, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: "Siempre se debe registrar la profundidad" gilt je Grundwasserstelle; der Skalar hält nur eine Tiefe.
+- Evidence: [PDF p.7 (printed p.6), §9.6.2, VA] "Siempre se debe registrar la profundidad por debajo del nivel del suelo a la cual se toma la muestra."
+- Proposed SQL / config: block `iso5667_1-D-9` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-10 · ISO-5667-1 · register column `sites_1.well_purged` ↔ prod scalar `ISO-5667-1-05 groundwater_purged` (§9.6.2)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `5859b2fd-f803-4b26-90fe-cd9ce2836b74`, boolean, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Das Abpumpen ist je Brunnen nachzuweisen; der Skalar ist eine einmalige Bestätigung.
+- Evidence: [PDF p.7 (printed p.6), §9.6.2, VA] "… el pozo debe bombearse antes de efectuar el muestreo para así asegurarse de que se extrae agua nueva del depósito."
+- Proposed SQL / config: block `iso5667_1-D-10` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-11 · ISO-5667-1 · register column `sites_1.upstream_downstream` ↔ prod scalar `ISO-5667-1-05 upstream_downstream_sampling` (§9.3.2)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `a725d48f-97a3-459a-8783-95568ffd8cc0`, boolean, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Ober-/Unterstrom ist eine Eigenschaft des Stellenpaares an einer Einleitung, nicht des Projekts.
+- Evidence: [PDF p.7 (printed p.6), §9.3.2, VA] "Si el propósito del muestreo es controlar los efectos de una descarga, se debe efectuar muestreo río arriba y río abajo…"
+- Proposed SQL / config: block `iso5667_1-D-11` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-12 · ISO-5667-1 · register column `sites_1.cooling_type` ↔ prod scalar `ISO-5667-1-05 cooling_system_type` (§10.2.4)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `a492fed6-eff8-4e5e-b97a-5a73d44c3dca`, enum, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Ein Werk kann mehrere Kühlsysteme verschiedenen Typs beproben; der Skalar hält nur einen Typ.
+- Evidence: [PDF p.9 (printed p.8), §10.2.4, VA] "Hay tres tipos principales de sistema de enfriamiento: a) Evaporación abierta. b) Un solo paso (de libre paso). c) Circuito cerrado."
+- Proposed SQL / config: block `iso5667_1-D-12` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-13 · ISO-5667-1 · register column `sites_1.manhole_no_entry` ↔ prod scalar `ISO-5667-1-05 manhole_sampled_without_entry` (§11.1)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `08fd0d81-54e2-4724-87e9-461d29f92568`, boolean, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Die Einstiegsfreiheit ist je Inspektionsschacht zu beurteilen.
+- Evidence: [PDF p.10 (printed p.9), §11.1, VA] "Con muestreo de cajas compactas de inspección (manhole), por razones de seguridad es preferible que dicha caja de inspección se diseñe de tal modo que se pueda efectuar el muestreo sin entrar."
+- Proposed SQL / config: block `iso5667_1-D-13` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-14 · ISO-5667-1 · register column `sites_1.composite_multipoint` ↔ prod scalar `ISO-5667-1-05 composite_multipoint_sample` (§12.1.1)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `61bc94ff-a44d-47a5-a7b8-d9f6b4b33024`, boolean, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Die Mehrpunkt-Mischprobe wird je Abwasserstelle entschieden.
+- Evidence: [PDF p.10 (printed p.9), §12.1.1, VA] "En muchos casos será necesario tomar dos o tres muestras de rutina en puntos diferentes y mezclar éstos para dar una muestra compuesta."
+- Proposed SQL / config: block `iso5667_1-D-14` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-15 · ISO-5667-1 · register column `sites_1.sludge_pipe_dn_mm` ↔ prod scalar `ISO-5667-1-05 sludge_pipe_diameter` (§12.1.2)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `f1598372-baf3-46bf-ba8a-0ffcec16df24`, number, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Mehrere Schlammleitungen können unterschiedliche Durchmesser haben; der Skalar hält nur einen.
+- Evidence: [PDF p.10 (printed p.9), §12.1.2, VA] "Si el muestreo va a ser de una tubería, el conducto del muestreo debe tener al menos 50 mm de diámetro…"
+- Proposed SQL / config: block `iso5667_1-D-15` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-16 · ISO-5667-1 · register column `sites_1.flow_proportional` ↔ prod scalar `ISO-5667-1-05 flow_proportional_sampling` (§13)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `44395743-9cd9-4826-a417-0e05d3fa4d76`, boolean, is_required = false, consumer_worksheets = ["ISO-5667-1-08"]) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Die Durchflussproportionalität wird je Entlastungsstelle entschieden (siehe auch iso5667_1-C-2).
+- Evidence: [PDF p.11 (printed p.10), §13, VA] "En muchos casos será deseable el muestreo proporcional al flujo."
+- Proposed SQL / config: block `iso5667_1-D-16` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback. **The symbol is inherited by ["ISO-5667-1-08"] — decide the consumer edit FIRST.**
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-17 · ISO-5667-1 · register column `historical_results.x_value` ↔ prod scalar `ISO-5667-1-07 x_i` (§16.4)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `bd3aec17-f34a-42be-8c31-c45971377c21`, number, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Es sind n Einzelwerte, kein einzelner; der Skalar kann x̄, n und s nicht speisen.
+- Evidence: [PDF p.12 (printed p.11), §16.4, VA] "Donde xi representa los valores individuales."
+- Proposed SQL / config: block `iso5667_1-D-17` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-18 · ISO-5667-1 · register column `flow_measurements.aspect` ↔ prod scalar `ISO-5667-1-08 flow_aspect` (§19.1)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `84a546f0-c152-494e-aa11-b8812082d321`, enum, is_required = true, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Ein Programm kann an verschiedenen Stellen verschiedene Aspekte messen; der Skalar hält nur einen.
+- Evidence: [PDF p.14 (printed p.13), §19.1, VA] "Hay tres aspectos del flujo que es necesario medir, a saber, a) Dirección del flujo. b) Velocidad del flujo. c) Tasa de flujo."
+- Proposed SQL / config: block `iso5667_1-D-18` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback. **is_required = true — deactivating changes the completeness computation.**
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-19 · ISO-5667-1 · register column `flow_measurements.method` ↔ prod scalar `ISO-5667-1-08 flow_measurement_method` (§21)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `6219d1a8-5c31-4630-9837-404a825126e5`, enum, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Das Verfahren ist je Messstelle zu wählen; der Skalar hält nur eines.
+- Evidence: [PDF p.15 (printed p.14), §21.2, VA] "La dirección y la velocidad se pueden medir utilizando: a) Dragas. b) Flotadores y barcos con redes rastreras. …"
+- Proposed SQL / config: block `iso5667_1-D-19` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-20 · ISO-5667-1 · register column `flow_measurements.mode` ↔ prod scalar `ISO-5667-1-08 flow_measurement_mode` (§21.1)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `7740ebba-6f5f-469d-b8be-f6023f8bf915`, enum, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Diskret oder kontinuierlich ist je Messstelle verschieden.
+- Evidence: [PDF p.15 (printed p.14), §21.1, VA] "Las mediciones pueden ser discretas, tales como las que se hacen utilizando flotadores en un estuario … o pueden ser continuas, tales como las que se hacen mediante la mayoría de los medidores del flujo de descarga."
+- Proposed SQL / config: block `iso5667_1-D-20` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-21 · ISO-5667-1 · register column `flow_measurements.velocity_measured` ↔ prod scalar `ISO-5667-1-08 flow_velocity` (§19.3)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `cf9f723b-93ec-4b07-aba2-af03212c513f`, number, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Die gemessene Geschwindigkeit gehört zur Messstelle, nicht zum Projekt.
+- Evidence: [PDF p.14 (printed p.13), §19.3, VA] "La velocidad de la corriente es importante: a) Para calcular la tasa de descarga…"
+- Proposed SQL / config: block `iso5667_1-D-21` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-22 · ISO-5667-1 · register column `flow_measurements.discharge_measured` ↔ prod scalar `ISO-5667-1-08 discharge_rate` (§19.4)
+- Class: deactivation (register column vs existing prod scalar, amendment K)
+- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id `b36c030f-2bb5-4697-83e2-586ffb84d0bd`, number, is_required = false, consumer_worksheets = null) stays active with every consumer and every gate it has today. No second equation is emitted for this quantity. Why the column exists: Der gemessene Abfluss gehört zur Messstelle, nicht zum Projekt.
+- Evidence: [PDF p.14 (printed p.13), §19.4, VA] "EL caudal de descarga es el volumen de líquido que pasa por un punto dado por unidad de tiempo."
+- Proposed SQL / config: block `iso5667_1-D-22` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — once ratified, DEACTIVATE the scalar (`active = false` + a description marker, never DELETE; instances may hold values), fields-archive rollback.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-D-23 · ISO-5667-1 · ISO-5667-1-07 · `x_mean_calc` / `n_hist` ↔ the typed `x_mean` / `n`
+- Class: deactivation (derived twin vs existing prod input)
+- Chosen now (fail-safe): Both prod inputs stay. `x_mean` (id `4462894b-4ee4-4b4e-8151-ec3815b6ee31`) is an input of prod Gl. 1; `n` (id `8e17b978-a178-4fa9-a55e-cd4bdc54ffbd`, is_required = true, consumer_worksheets ["ISO-5667-1-06"]) is BOTH the OUTPUT of prod Gl. 3 and an input of Gl. 1 / Gl. 2, and the -06 gate CR-023 (`n > 0`, block) reads it across the worksheet boundary. The DATA migration adds `x_mean_calc` / `n_hist` as SEPARATE symbols so nothing existing is re-produced.
+- Evidence: [PDF p.12 (printed p.11), §16.4, VA] "Para cierto número de resultados n, tomados al azar, las estimaciones de la media aritmética verdadera X y la desviación estándar, σ, son la media aritmética, X , y s respectivamente de acuerdo con la siguiente fórmula"
+- Proposed SQL / config: block `iso5667_1-D-23` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql. **`n` must NOT be retired** while Gl. 3 produces it, and `n_hist` is not the same quantity (results on the sheet vs results required) — do not collapse them. For `x_mean`, a deactivation guarded by "no live equation still lists x_mean in input_symbols" (a NO-OP until `iso5667_1-R-2` has replaced Gl. 1 — apply R-2 first).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-F-1 · ISO-5667-1 · [CODE] · `src/lib/expr` · a `lookup()` miss inside a register `derived` column
+- Class: interface-gap (engine)
+- Chosen now (fail-safe): The §21 catalogue check ships as a PER-ROW badge and NO equation is emitted over it. Observed in this session through the real code path and pinned in `equations-iso5667-1.test.ts`: a (aspect, method) pair with no S21 row yields `method_ok = null` with an EMPTY `reg.diagnostics` (the lookup miss is a recoverable `ExprError`, silent by design), and `count_rows(flow_measurements, method_ok == 0)` returns `{ kind: "manual_required", reason: "Fehlende Eingabe für count_rows(): method_ok" }`. Fail-safe (never a phantom pass) but also never a verdict.
+- Evidence: [engine, re-runnable] three rows — (discharge, venturi) 1, (velocity, current_meter) 1, (direction, venturi) null; `reg.diagnostics` = []; the count over the column ⇒ manual_required.
+- Proposed SQL / config: no prod SQL. Proposed engine addition for the final [CODE] wave (NOT applied here): a `lookup_default(table, keys…, column, default)` form, or a `has_row(table, keys…)` predicate, so a missing row can be expressed as 0 instead of null — additions to `src/lib/expr/functions.ts` + `evaluate.ts`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-J-3 · ISO-5667-1 · ISO-5667-1-04 · CR-012 severity
+- Class: severity (owner ruling)
+- Chosen now (fail-safe): Nothing changes: CR-012 stays `pipe_nominal_bore >= 25` at severity `block`. Severity changes are always an owner ruling and are never emitted. The observation: the normative verb in §8.6 attaches to "tubos de tamaño adecuado" (pipes of SUITABLE size); the 25 mm sits inside a parenthetical opened by "por ejemplo". Under the Spec §7 override vocabulary that cue reads ANHALTSWERT — which is why the seeded S8_6 ships `override_policy = 'anhaltswert'` while prod enforces the same figure as a BLOCK.
+- Evidence: [PDF p.5 (printed p.4), §8.6, VA] "Los líquidos se deben bombear a través de tubos de tamaño adecuado (por ejemplo, al muestrear líquidos heterogéneos, de conducto nominal mínimo de 25 mm)…"
+- Evidence: [PDF p.10 (printed p.9), §12.1.2, VA — the contrast, same standard] "el conducto del muestreo debe tener al menos 50 mm de diámetro" — a bare "debe", no example framing; S12_1_2 is seeded `locked` and CR-017's block severity matches it.
+- Proposed SQL / config: block `iso5667_1-J-3` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — the downgrade to `warn` (archive + guarded UPDATE) if the printed cue should govern; REJECT to keep `block` on the engineering-conservative reading (a bore under 25 mm will not hold turbulent flow for a heterogeneous liquid, so the example is effectively the requirement).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-J-4 · ISO-5667-1 · S21 · the two `discharge` rows that rest on §21.4 a)'s cross-reference to §21.3
+- Class: override-policy / seed content
+- Chosen now (fail-safe): 24 S21 rows are seeded, of which TWO — (discharge, current_meter) and (discharge, pneumatic) — are not printed as discharge items in their own right; they come from §21.4 a), a cross-reference to §21.3 INSIDE the same document. Both carry `via_cross_reference = true` in their row values (pinned in the seed test) so they can be dropped with one statement. Fail-safe as seeded: the `method_ok` badge reads 1 when a row exists and stays blank when it does not, so omitting them would print a blank verdict next to a method the standard does allow — a false alarm. Seeding them can at worst be too permissive on a `kann` catalogue that no gate reads.
+- Evidence: [PDF p.15 (printed p.14), §21.4 a), VA] "Mediciones de la velocidad, tales como las mencionadas en el numeral 21.3 efectuadas en un canal cuya área de sección transversal sea conocida."
+- Evidence: [PDF p.15 (printed p.14), §21.3, VA] "La velocidad también se puede medir utilizando: a) Medidores de la corriente, tipos de lectura directa y registro. b) Técnicas ultrasónicas. c) Técnicas electromagnéticas. d) Técnicas neumáticas."
+- Evidence: [PDF p.16 (printed p.15), §21.4 d) 4), VA — the two methods that ARE repeated for discharge and are NOT flagged] "Técnicas electromagnéticas, ultrasónicas y de otra índole."
+- Proposed SQL / config: block `iso5667_1-J-4` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — a `DELETE … WHERE row_key IN ('discharge|current_meter','discharge|pneumatic') AND row_values ->> 'via_cross_reference' = 'true'` if the cross-reference reading is rejected.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-U-1 · ISO-5667-1 · §16.4 / §16.5 · the printed formulas
+- Class: unreadable-cell
+- Chosen now (fail-safe): Recorded, nothing corrected. `pdftotext -layout` loses the radical and the summation sign of all three printed formulas: the §16.4 s-formula renders as "∑ (X − X )" / "S =" over "n −1"; the §16.4 confidence interval as "es X ± K/n" (printed X ± Kσ/√n); the §16.5 L-formula as "2 Kσ" over "L =" over "n"; the worked example as "n = 7,84" then "n ≈ 61" (printed √n = 7,84). **Nothing seeded depends on any of it** — the only thing the seed takes from these spans is the DIVISOR "n −1", which IS readable and settles that the printed s is the sample standard deviation. The s / L / n math stays in prod's own equations 1 / 2 / 3.
+- Evidence: [PDF p.12 (printed p.11) and PDF p.13 (printed p.12), VA, as extracted] the stacked fragments quoted above.
+- Proposed SQL / config: no SQL. Unblock path: read the three formulas off the rendered PDF page (a human page view, or an image-based OCR of PDF pp.12–13) and confirm prod's stored forms letter by letter.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-U-2 · ISO-5667-1 · §16.4 · the superscript of "(2Kσ/L)2"
+- Class: unreadable-cell
+- Chosen now (fail-safe): Recorded, resolved by the standard's own worked example rather than by direct reading. The text layer puts the exponent inline, so "(2Kσ/L)²" cannot be told from "(2Kσ/L)·2" from the extraction alone. Three lines later the printed example gives K = 1,96, σ = 20, L = 10 ⇒ "n ≈ 61", and (2·1,96·20/10)² = 7,84² = 61,4656 while ·2 would be 15,68. The squared reading is the only one consistent with the printed number and is also prod's stored Gl. 3. Reproduced end-to-end through the real `evaluateFormula` and pinned.
+- Evidence: [PDF p.13 (printed p.12), §16.4 continued, VA, verbatim as extracted] "… el número de muestras necesarias es (2Kσ/L)2."
+- Evidence: [PDF p.13 (printed p.12), §16.5, VA] "n = 7,84 … n ≈ 61."
+- Proposed SQL / config: no SQL. Recorded as a U-block rather than silently resolved because the resolution is an INFERENCE from a second printed value, not a direct reading of the first.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### iso5667_1-X-1 · ISO-5667-1 · ISO-5667-1-07 · Gl. 3 `source_quote` page reference
+- Class: prod hygiene (observation)
+- Chosen now (fail-safe): Nothing changed. Prod Gl. 3 carries `verification_quote` "… — printed p.12 / PDF p.13" and `source_quote` "…, §16.4, pág. impresa 11: …". Re-read in this session: the sentence is at extraction line 855, which is on PDF page 13, and PDF page 13 carries the printed page number "12" at its foot (the document prints page N on PDF page N+1 throughout). So `verification_quote` is right and `source_quote` says 11 where it should say 12; the clause number §16.4 is correct in both (the sentence is the last paragraph of §16.4, which runs over the page break).
+- Evidence: [PDF p.13 (printed p.12), VA] the page foot of PDF page 13 reads "12"; the §16.4 sentence sits above it.
+- Proposed SQL / config: block `iso5667_1-X-1` in scripts/verification/iso5667_1-STAGED-plan3-rulings.sql — a guarded `replace(source_quote, 'pág. impresa 11', 'pág. impresa 12')` with an equations-archive rollback. Not applied here: this task touches no prod equation row outside `iso5667_1-R-2`, and a provenance correction belongs in a fix pass with its own reproduction check.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+<!-- ===== end Plan 3 Task 28 · ISO-5667-1 ===== -->

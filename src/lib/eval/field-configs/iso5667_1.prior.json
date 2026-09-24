@@ -1,0 +1,1773 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs ISO-5667-1 iso5667_1",
+    "captured_at": "2026-09-24T12:18:38.328Z",
+    "standard": "ISO-5667-1",
+    "slug": "iso5667_1",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 51,
+    "section_rows": 41,
+    "sections_total": 41,
+    "equation_rows": 3,
+    "gate_rows": 27
+  },
+  "ISO-5667-1-01 matrix_type": {
+    "enum_values": [
+      {
+        "value": "water",
+        "label_de": "Wasser",
+        "label_en": "Water",
+        "order_index": 1,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "sediment",
+        "label_de": "Sediment",
+        "label_en": "Sediment",
+        "order_index": 2,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "sludge",
+        "label_de": "Schlamm",
+        "label_en": "Sludge",
+        "order_index": 3,
+        "regulation_reference": "§1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "enum",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "ISO-5667-1-01 normative_references_consulted": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-01 programme_purpose": {
+    "enum_values": [
+      {
+        "value": "quality_control",
+        "label_de": "Qualitaetskontrolle",
+        "label_en": "Quality control",
+        "order_index": 1,
+        "regulation_reference": "§3 a)"
+      },
+      {
+        "value": "quality_characterization",
+        "label_de": "Qualitaetscharakterisierung",
+        "label_en": "Quality characterization",
+        "order_index": 2,
+        "regulation_reference": "§3 b)"
+      },
+      {
+        "value": "pollution_source_identification",
+        "label_de": "Identifizierung von Verschmutzungsquellen",
+        "label_en": "Pollution-source identification",
+        "order_index": 3,
+        "regulation_reference": "§3 c)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-02",
+      "ISO-5667-1-06"
+    ],
+    "data_type": "enum",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "ISO-5667-1-02 boundary_sampling_avoided": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-5667-1-02 objectives_defined": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "boolean",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "ISO-5667-1-02 parameter_list": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-02 preliminary_survey_done": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-02 prior_data_reviewed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-02 requirement_class": {
+    "enum_values": [
+      {
+        "value": "general",
+        "label_de": "Allgemein",
+        "label_en": "General",
+        "order_index": 1,
+        "regulation_reference": "§4.1"
+      },
+      {
+        "value": "specific",
+        "label_de": "Spezifisch",
+        "label_en": "Specific",
+        "order_index": 2,
+        "regulation_reference": "§4.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-02 specific_objective": {
+    "enum_values": [
+      {
+        "value": "water_use_suitability",
+        "label_de": "Eignung fuer Nutzung",
+        "label_en": "Water-use suitability",
+        "order_index": 1,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "wastewater_discharge_effect",
+        "label_de": "Wirkung von Abwassereinleitung",
+        "label_en": "Wastewater-discharge effect",
+        "order_index": 2,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "treatment_performance",
+        "label_de": "Anlagenleistung",
+        "label_en": "Treatment performance & control",
+        "order_index": 3,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "estuary_mixing",
+        "label_de": "Aestuar-Mischung",
+        "label_en": "Estuary mixing/stratification",
+        "order_index": 4,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "industrial_loss_quantification",
+        "label_de": "Industrieller Produktverlust",
+        "label_en": "Industrial loss quantification",
+        "order_index": 5,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "boiler_recovered_water",
+        "label_de": "Kessel-/Rueckgewinnungswasser",
+        "label_en": "Boiler/recovered water quality",
+        "order_index": 6,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "cooling_system_control",
+        "label_de": "Kuehlsystem-Steuerung",
+        "label_en": "Cooling-system control",
+        "order_index": 7,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "atmospheric_rainwater",
+        "label_de": "Atmosphaerische Regenwasserguete",
+        "label_en": "Atmospheric rainwater quality",
+        "order_index": 8,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "land_input_effect",
+        "label_de": "Wirkung von Landeintraegen",
+        "label_en": "Land-input effect",
+        "order_index": 9,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "sediment_release_effect",
+        "label_de": "Sediment-Freisetzung",
+        "label_en": "Sediment accumulation/release effect",
+        "order_index": 10,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "river_regulation_effect",
+        "label_de": "Wirkung der Flussregulierung",
+        "label_en": "River-regulation effect",
+        "order_index": 11,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "distribution_quality_change",
+        "label_de": "Gueteaenderung im Verteilnetz",
+        "label_en": "Distribution-quality change",
+        "order_index": 12,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "hydrological_dynamics",
+        "label_de": "Hydrologische Dynamik",
+        "label_en": "Hydrological dynamics",
+        "order_index": 13,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "aquatic_ecology",
+        "label_de": "Aquatische Oekologie",
+        "label_en": "Aquatic ecology",
+        "order_index": 14,
+        "regulation_reference": "§4.2"
+      },
+      {
+        "value": "environmental_baseline",
+        "label_de": "Umwelt-Grundzustand",
+        "label_en": "Environmental baseline",
+        "order_index": 15,
+        "regulation_reference": "§4.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-02 variability_profile": {
+    "enum_values": [
+      {
+        "value": "stable",
+        "label_de": "Stabil",
+        "label_en": "Stable",
+        "order_index": 1,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "slow",
+        "label_de": "Langsam/gering",
+        "label_en": "Slow/not marked",
+        "order_index": 2,
+        "regulation_reference": "§5.2"
+      },
+      {
+        "value": "wide_rapid",
+        "label_de": "Weit/schnell",
+        "label_en": "Wide/rapid",
+        "order_index": 3,
+        "regulation_reference": "§5.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-06",
+      "ISO-5667-1-07"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-5667-1-03 electrical_hazard_minimized": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-03 hazardous_atmosphere_tested": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-03 life_jackets_lines_used": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-03 safety_regulations_considered": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "boolean",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "ISO-5667-1-04 flow_character": {
+    "enum_values": [
+      {
+        "value": "turbulent_well_mixed",
+        "label_de": "Turbulent gut durchmischt",
+        "label_en": "Turbulent well-mixed",
+        "order_index": 1,
+        "regulation_reference": "§8.3"
+      },
+      {
+        "value": "laminar_pipe",
+        "label_de": "Laminar/Conduit",
+        "label_en": "Laminar/conduit",
+        "order_index": 2,
+        "regulation_reference": "§8.4"
+      },
+      {
+        "value": "reverse_flow",
+        "label_de": "Rueckstroemung",
+        "label_en": "Reverse flow",
+        "order_index": 3,
+        "regulation_reference": "§8.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-04 isokinetic_sampling": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-5667-1-04 network_design": {
+    "enum_values": [
+      {
+        "value": "single_site",
+        "label_de": "Einzelstelle",
+        "label_en": "Single site",
+        "order_index": 1,
+        "regulation_reference": "§8.1"
+      },
+      {
+        "value": "partial",
+        "label_de": "Teilnetz",
+        "label_en": "Partial network",
+        "order_index": 2,
+        "regulation_reference": "§8.1"
+      },
+      {
+        "value": "whole_drainage",
+        "label_de": "Gesamtes Einzugsgebiet",
+        "label_en": "Whole river drainage",
+        "order_index": 3,
+        "regulation_reference": "§8.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-05"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-04 pipe_nominal_bore": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-5667-1-04 sampling_location_identified": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-04 volatiles_minimal_suction": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-5667-1-04 weather_recorded": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-08"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-5667-1-05 automatic_sampler_protection": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-5667-1-05 composite_multipoint_sample": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-5667-1-05 cooling_system_type": {
+    "enum_values": [
+      {
+        "value": "open_evaporative",
+        "label_de": "Offene Verdunstung",
+        "label_en": "Open evaporative",
+        "order_index": 1,
+        "regulation_reference": "§10.2.4 a)"
+      },
+      {
+        "value": "once_through",
+        "label_de": "Einmaldurchlauf",
+        "label_en": "Once-through (free-pass)",
+        "order_index": 2,
+        "regulation_reference": "§10.2.4 b)"
+      },
+      {
+        "value": "closed_circuit",
+        "label_de": "Geschlossener Kreislauf",
+        "label_en": "Closed circuit",
+        "order_index": 3,
+        "regulation_reference": "§10.2.4 c)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-05 flow_proportional_sampling": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-08"
+    ],
+    "data_type": "boolean",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "ISO-5667-1-05 groundwater_purged": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-05 manhole_sampled_without_entry": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-5667-1-05 sampling_depth": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-05 sludge_pipe_diameter": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-5667-1-05 upstream_downstream_sampling": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-05 water_situation_type": {
+    "enum_values": [
+      {
+        "value": "precipitation",
+        "label_de": "Niederschlag",
+        "label_en": "Precipitation",
+        "order_index": 1,
+        "regulation_reference": "§9.1"
+      },
+      {
+        "value": "estuary_coastal_sea",
+        "label_de": "Aestuar/Kueste/Meer",
+        "label_en": "Estuary/coastal/sea/ocean",
+        "order_index": 2,
+        "regulation_reference": "§9.2"
+      },
+      {
+        "value": "river_stream",
+        "label_de": "Fluss/Bach",
+        "label_en": "River/stream",
+        "order_index": 3,
+        "regulation_reference": "§9.3"
+      },
+      {
+        "value": "canal",
+        "label_de": "Kanal",
+        "label_en": "Canal",
+        "order_index": 4,
+        "regulation_reference": "§9.4"
+      },
+      {
+        "value": "reservoir_lake",
+        "label_de": "Speicher/See",
+        "label_en": "Reservoir/storage lake",
+        "order_index": 5,
+        "regulation_reference": "§9.5"
+      },
+      {
+        "value": "groundwater",
+        "label_de": "Grundwasser",
+        "label_en": "Groundwater",
+        "order_index": 6,
+        "regulation_reference": "§9.6"
+      },
+      {
+        "value": "sediment",
+        "label_de": "Sediment",
+        "label_en": "Sediment",
+        "order_index": 7,
+        "regulation_reference": "§9.7"
+      },
+      {
+        "value": "drinking_water",
+        "label_de": "Trinkwasser",
+        "label_en": "Drinking water",
+        "order_index": 8,
+        "regulation_reference": "§9.8"
+      },
+      {
+        "value": "bathing_water",
+        "label_de": "Badegewaesser",
+        "label_en": "Bathing water/pool",
+        "order_index": 9,
+        "regulation_reference": "§9.9"
+      },
+      {
+        "value": "industrial_supply",
+        "label_de": "Industrieversorgung",
+        "label_en": "Industrial supply water",
+        "order_index": 10,
+        "regulation_reference": "§10.1"
+      },
+      {
+        "value": "boiler_system",
+        "label_de": "Kesselsystem",
+        "label_en": "Boiler system",
+        "order_index": 11,
+        "regulation_reference": "§10.2"
+      },
+      {
+        "value": "cooling_system",
+        "label_de": "Kuehlsystem",
+        "label_en": "Cooling system",
+        "order_index": 12,
+        "regulation_reference": "§10.2.4"
+      },
+      {
+        "value": "commercial_effluent",
+        "label_de": "Gewerbeabwasser",
+        "label_en": "Commercial effluent",
+        "order_index": 13,
+        "regulation_reference": "§11"
+      },
+      {
+        "value": "wastewater",
+        "label_de": "Abwasser",
+        "label_en": "Wastewater",
+        "order_index": 14,
+        "regulation_reference": "§12"
+      },
+      {
+        "value": "wastewater_sludge",
+        "label_de": "Abwasserschlamm",
+        "label_en": "Wastewater sludge",
+        "order_index": 15,
+        "regulation_reference": "§12.1.2"
+      },
+      {
+        "value": "stormwater",
+        "label_de": "Regen-/Niederschlagsabfluss",
+        "label_en": "Stormwater/surface runoff",
+        "order_index": 16,
+        "regulation_reference": "§13"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-06",
+      "ISO-5667-1-08"
+    ],
+    "data_type": "enum",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "ISO-5667-1-06 abnormal_frequency_increase": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-5667-1-06 composite_sample_duration": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "ISO-5667-1-06 control_limits": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-06 programme_type": {
+    "enum_values": [
+      {
+        "value": "quality_control",
+        "label_de": "Qualitaetskontrolle",
+        "label_en": "Quality control",
+        "order_index": 1,
+        "regulation_reference": "§15.1"
+      },
+      {
+        "value": "quality_characterization",
+        "label_de": "Qualitaetscharakterisierung",
+        "label_en": "Quality characterization",
+        "order_index": 2,
+        "regulation_reference": "§15.2"
+      },
+      {
+        "value": "pollution_source_investigation",
+        "label_de": "Untersuchung von Verschmutzungsursachen",
+        "label_en": "Pollution-cause investigation",
+        "order_index": 3,
+        "regulation_reference": "§15.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-07"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-06 target_statistic": {
+    "enum_values": [
+      {
+        "value": "arithmetic_mean",
+        "label_de": "Arithmetisches Mittel",
+        "label_en": "Arithmetic mean",
+        "order_index": 1,
+        "regulation_reference": "§15.2, §16"
+      },
+      {
+        "value": "median",
+        "label_de": "Median",
+        "label_en": "Median",
+        "order_index": 2,
+        "regulation_reference": "§15.2"
+      },
+      {
+        "value": "standard_deviation",
+        "label_de": "Standardabweichung",
+        "label_en": "Standard deviation",
+        "order_index": 3,
+        "regulation_reference": "§15.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-07"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-07 confidence_level": {
+    "enum_values": [
+      {
+        "value": "99",
+        "label_de": "99 %",
+        "label_en": "99 %",
+        "order_index": 1,
+        "regulation_reference": "§16.4"
+      },
+      {
+        "value": "98",
+        "label_de": "98 %",
+        "label_en": "98 %",
+        "order_index": 2,
+        "regulation_reference": "§16.4"
+      },
+      {
+        "value": "95",
+        "label_de": "95 %",
+        "label_en": "95 %",
+        "order_index": 3,
+        "regulation_reference": "§16.4"
+      },
+      {
+        "value": "90",
+        "label_de": "90 %",
+        "label_en": "90 %",
+        "order_index": 4,
+        "regulation_reference": "§16.4"
+      },
+      {
+        "value": "80",
+        "label_de": "80 %",
+        "label_en": "80 %",
+        "order_index": 5,
+        "regulation_reference": "§16.4"
+      },
+      {
+        "value": "68",
+        "label_de": "68 %",
+        "label_en": "68 %",
+        "order_index": 6,
+        "regulation_reference": "§16.4"
+      },
+      {
+        "value": "50",
+        "label_de": "50 %",
+        "label_en": "50 %",
+        "order_index": 7,
+        "regulation_reference": "§16.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-07 K": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-07 L": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-07 n": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ISO-5667-1-06"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-07 s": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-07 sigma": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-07 x_i": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-07 x_mean": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "ISO-5667-1-08 discharge_rate": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-08 flow_aspect": {
+    "enum_values": [
+      {
+        "value": "direction",
+        "label_de": "Richtung",
+        "label_en": "Direction",
+        "order_index": 1,
+        "regulation_reference": "§19.1 a)"
+      },
+      {
+        "value": "velocity",
+        "label_de": "Geschwindigkeit",
+        "label_en": "Velocity",
+        "order_index": 2,
+        "regulation_reference": "§19.1 b)"
+      },
+      {
+        "value": "discharge",
+        "label_de": "Abfluss",
+        "label_en": "Discharge rate",
+        "order_index": 3,
+        "regulation_reference": "§19.1 c)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-08 flow_direction": {
+    "enum_values": [
+      {
+        "value": "unidirectional",
+        "label_de": "Einseitig gerichtet",
+        "label_en": "Unidirectional",
+        "order_index": 1,
+        "regulation_reference": "§19.2"
+      },
+      {
+        "value": "variable",
+        "label_de": "Veraenderlich",
+        "label_en": "Variable",
+        "order_index": 2,
+        "regulation_reference": "§19.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "ISO-5667-1-08 flow_measurement_method": {
+    "enum_values": [
+      {
+        "value": "drogue",
+        "label_de": "Treibanker/Drage",
+        "label_en": "Drogue",
+        "order_index": 1,
+        "regulation_reference": "§21.2 a)"
+      },
+      {
+        "value": "float_trawl",
+        "label_de": "Schwimmer/Schleppnetz",
+        "label_en": "Float/trawl",
+        "order_index": 2,
+        "regulation_reference": "§21.2 b)"
+      },
+      {
+        "value": "chemical_tracer",
+        "label_de": "Chemischer Tracer",
+        "label_en": "Chemical tracer (incl. dyes)",
+        "order_index": 3,
+        "regulation_reference": "§21.2 c)"
+      },
+      {
+        "value": "microbiological_tracer",
+        "label_de": "Mikrobiologischer Tracer",
+        "label_en": "Microbiological tracer",
+        "order_index": 4,
+        "regulation_reference": "§21.2 d)"
+      },
+      {
+        "value": "radioactive_tracer",
+        "label_de": "Radioaktiver Tracer",
+        "label_en": "Radioactive tracer",
+        "order_index": 5,
+        "regulation_reference": "§21.2 e)"
+      },
+      {
+        "value": "current_meter",
+        "label_de": "Stroemungsmesser",
+        "label_en": "Current meter",
+        "order_index": 6,
+        "regulation_reference": "§21.3 a)"
+      },
+      {
+        "value": "ultrasonic",
+        "label_de": "Ultraschall",
+        "label_en": "Ultrasonic",
+        "order_index": 7,
+        "regulation_reference": "§21.3 b)"
+      },
+      {
+        "value": "electromagnetic",
+        "label_de": "Elektromagnetisch",
+        "label_en": "Electromagnetic",
+        "order_index": 8,
+        "regulation_reference": "§21.3 c)"
+      },
+      {
+        "value": "pneumatic",
+        "label_de": "Pneumatisch",
+        "label_en": "Pneumatic",
+        "order_index": 9,
+        "regulation_reference": "§21.3 d)"
+      },
+      {
+        "value": "weir_level",
+        "label_de": "Wehr-Pegelmessung",
+        "label_en": "Weir level",
+        "order_index": 10,
+        "regulation_reference": "§21.4 c)"
+      },
+      {
+        "value": "venturi",
+        "label_de": "Venturi-Duese",
+        "label_en": "Venturi nozzle",
+        "order_index": 11,
+        "regulation_reference": "§21.4 d) 1)"
+      },
+      {
+        "value": "orifice_plate",
+        "label_de": "Blende",
+        "label_en": "Orifice plate",
+        "order_index": 12,
+        "regulation_reference": "§21.4 d) 2)"
+      },
+      {
+        "value": "pumping_rate",
+        "label_de": "Pumpenrate x Dauer",
+        "label_en": "Pumping rate x duration",
+        "order_index": 13,
+        "regulation_reference": "§21.4 d) 3)"
+      },
+      {
+        "value": "dilution_gauging",
+        "label_de": "Verduennungsmessung",
+        "label_en": "Dilution gauging",
+        "order_index": 14,
+        "regulation_reference": "§21.4 e)"
+      },
+      {
+        "value": "mechanical",
+        "label_de": "Mechanisch direkt",
+        "label_en": "Mechanical direct",
+        "order_index": 15,
+        "regulation_reference": "§21.4 b)"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-5667-1-08 flow_measurement_mode": {
+    "enum_values": [
+      {
+        "value": "discrete",
+        "label_de": "Diskret",
+        "label_en": "Discrete",
+        "order_index": 1,
+        "regulation_reference": "§21.1"
+      },
+      {
+        "value": "continuous",
+        "label_de": "Kontinuierlich",
+        "label_en": "Continuous",
+        "order_index": 2,
+        "regulation_reference": "§21.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "E"
+    ]
+  },
+  "ISO-5667-1-08 flow_velocity": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "sections": {
+    "ISO-5667-1-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-05 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-05 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-05 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-08 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-08 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-08 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-08 E": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "ISO-5667-1-08 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "ISO-5667-1-07 1": {
+      "id": "d42f576c-c3c7-4e00-bf34-e2da20bf3886",
+      "output_symbol": "s",
+      "input_symbols": [
+        "x_i",
+        "x_mean",
+        "n"
+      ]
+    },
+    "ISO-5667-1-07 2": {
+      "id": "db88161d-3cc3-4541-92bd-4271eba4b0fc",
+      "output_symbol": "L",
+      "input_symbols": [
+        "K",
+        "sigma",
+        "n"
+      ]
+    },
+    "ISO-5667-1-07 3": {
+      "id": "8b5fc076-c947-447c-aa37-7ebbc3a3a81d",
+      "output_symbol": "n",
+      "input_symbols": [
+        "K",
+        "sigma",
+        "L"
+      ]
+    }
+  },
+  "gates": {
+    "ISO-5667-1-01 CR-002": {
+      "condition": "programme_purpose IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "programme_purpose"
+      ]
+    },
+    "ISO-5667-1-01 CR-004": {
+      "condition": "normative_references_consulted == true",
+      "severity": "warn",
+      "symbols": [
+        "normative_references_consulted"
+      ]
+    },
+    "ISO-5667-1-01 CR-006": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-5667-1-02 CR-001": {
+      "condition": "objectives_defined == true",
+      "severity": "warn",
+      "symbols": [
+        "objectives_defined"
+      ]
+    },
+    "ISO-5667-1-02 CR-003": {
+      "condition": "preliminary_survey_done == true",
+      "severity": "block",
+      "symbols": [
+        "preliminary_survey_done"
+      ]
+    },
+    "ISO-5667-1-02 CR-005": {
+      "condition": "boundary_sampling_avoided == true",
+      "severity": "warn",
+      "symbols": [
+        "boundary_sampling_avoided"
+      ]
+    },
+    "ISO-5667-1-03 CR-007": {
+      "condition": "safety_regulations_considered == true",
+      "severity": "block",
+      "symbols": [
+        "safety_regulations_considered"
+      ]
+    },
+    "ISO-5667-1-03 CR-008": {
+      "condition": "hazardous_atmosphere_tested == True",
+      "severity": "block",
+      "symbols": [
+        "hazardous_atmosphere_tested"
+      ]
+    },
+    "ISO-5667-1-03 CR-009": {
+      "condition": "electrical_hazard_minimized == True",
+      "severity": "block",
+      "symbols": [
+        "electrical_hazard_minimized"
+      ]
+    },
+    "ISO-5667-1-04 CR-010": {
+      "condition": "sampling_location_identified == true",
+      "severity": "warn",
+      "symbols": [
+        "sampling_location_identified"
+      ]
+    },
+    "ISO-5667-1-04 CR-011": {
+      "condition": "flow_character IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "flow_character"
+      ]
+    },
+    "ISO-5667-1-04 CR-012": {
+      "condition": "pipe_nominal_bore >= 25",
+      "severity": "block",
+      "symbols": [
+        "pipe_nominal_bore"
+      ]
+    },
+    "ISO-5667-1-04 CR-013": {
+      "condition": "isokinetic_sampling IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "isokinetic_sampling"
+      ]
+    },
+    "ISO-5667-1-04 CR-014": {
+      "condition": "weather_recorded == True",
+      "severity": "block",
+      "symbols": [
+        "weather_recorded"
+      ]
+    },
+    "ISO-5667-1-05 CR-015": {
+      "condition": "water_situation_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "water_situation_type"
+      ]
+    },
+    "ISO-5667-1-05 CR-016": {
+      "condition": "groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "groundwater_purged",
+        "sampling_depth"
+      ]
+    },
+    "ISO-5667-1-05 CR-017": {
+      "condition": "sludge_pipe_diameter >= 50",
+      "severity": "block",
+      "symbols": [
+        "sludge_pipe_diameter"
+      ]
+    },
+    "ISO-5667-1-05 CR-018": {
+      "condition": "automatic_sampler_protection IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "automatic_sampler_protection"
+      ]
+    },
+    "ISO-5667-1-05 CR-019": {
+      "condition": "flow_proportional_sampling IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "flow_proportional_sampling"
+      ]
+    },
+    "ISO-5667-1-06 CR-020": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-5667-1-06 CR-021": {
+      "condition": "programme_type IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "programme_type"
+      ]
+    },
+    "ISO-5667-1-06 CR-022": {
+      "condition": "abnormal_frequency_increase IS NOT NULL",
+      "severity": "warn",
+      "symbols": [
+        "abnormal_frequency_increase"
+      ]
+    },
+    "ISO-5667-1-06 CR-023": {
+      "condition": "n > 0",
+      "severity": "block",
+      "symbols": [
+        "n"
+      ]
+    },
+    "ISO-5667-1-06 CR-025": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    },
+    "ISO-5667-1-07 CR-024": {
+      "condition": "L > 0",
+      "severity": "warn",
+      "symbols": [
+        "L"
+      ]
+    },
+    "ISO-5667-1-08 CR-026": {
+      "condition": "flow_aspect IS NOT NULL",
+      "severity": "block",
+      "symbols": [
+        "flow_aspect"
+      ]
+    },
+    "ISO-5667-1-08 CR-027": {
+      "condition": "",
+      "severity": "warn",
+      "symbols": [],
+      "parse_error": true
+    }
+  }
+}

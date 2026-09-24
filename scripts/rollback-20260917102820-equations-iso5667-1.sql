@@ -1,0 +1,10 @@
+-- Generated rollback for iso5667_1 equations (scripts/regulation-tables/emit-equations-sql.ts). Deletes only the 'Plan 3:' rows this migration inserted. Regenerate, do not hand-edit.
+BEGIN;
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-02' AND e.equation_number = 'ISO-5667-1-02-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-02' AND e.equation_number = 'ISO-5667-1-02-D2' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-05' AND e.equation_number = 'ISO-5667-1-05-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-07' AND e.equation_number = 'ISO-5667-1-07-D1' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-07' AND e.equation_number = 'ISO-5667-1-07-D2' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-07' AND e.equation_number = 'ISO-5667-1-07-D3' AND e.description LIKE 'Plan 3:%';
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-08' AND e.equation_number = 'ISO-5667-1-08-D1' AND e.description LIKE 'Plan 3:%';
+COMMIT;

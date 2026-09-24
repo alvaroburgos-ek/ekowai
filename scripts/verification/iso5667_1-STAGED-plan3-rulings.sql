@@ -1,0 +1,910 @@
+-- ISO-5667-1 — Plan 3 Task 28 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md (same ids).
+-- Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the order it appears — with these dependencies:
+--   every block AFTER the three DATA migrations 20260917102800 (seed: S16_4_K / S21 / S8_6 / S12_1_2) · 20260917102810 (field configs: 15 created fields incl. the four registers, 10 widget/visibility UPDATEs) · 20260917102820 (equations ISO-5667-1-02-D1 … -08-D1);
+--   E-1 AFTER 20260911100000_guideline_to_tool_schema.sql (it writes fields.widget / .lookup, columns that do NOT exist in prod today);
+--   G-2 BEFORE C-2 (C-2 guards CR-019 on its captured md5 and G-2 does not touch CR-019 — they are independent, but the four -05 hides of G-2 should land first so the sheet is consistent);
+--   R-2 AFTER D-17 / D-23 are decided (it replaces the equation whose inputs those blocks retire);
+--   D-1 is independent of everything else.
+--
+-- SOURCE. Unlike every other no-transcript standard in this wave, ISO-5667-1 HAS a readable source: an IN-SESSION `pdftotext -layout` extraction of the standard's own PDF
+-- ("C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 5667-1\ISO-5667-1.pdf" = NTC-ISO 5667-1:1995, the ICONTEC adoption of ISO 5667/1:1980; 74 428 bytes, 17 pages,
+-- 55 467 non-whitespace characters — the command and the page-mapping method are in the task report). Every "Evidence [PDF …]" line below is therefore a VERBATIM quote of the standard WITH its
+-- PDF page (grade VA under SR-3). Lines marked "Evidence [prod …]" are cells of the read-only prod capture (grade EV). The extraction itself is NOT committed.
+--
+-- EDITION CAVEAT (iso5667_1-J-1): every quote in this file is from the 1980 edition. See the J-1 block.
+--
+-- Prod facts (field ids, enum tokens, consumer_worksheets, gate ids / conditions / md5, equation ids / formulas / md5) were captured READ-ONLY on 2026-09-24
+--   (node scripts/regulation-tables/build-prior-snapshot.mjs ISO-5667-1 iso5667_1 ; node scripts/verification/capture-text.mjs ISO-5667-1 iso5667_1).
+-- This file is GENERATED (scratchpad gen-iso5667_1-staged.mjs); every id and every md5 below is read from those captures or recomputed with node:crypto, never typed.
+--
+-- Conventions: s.code = 'ISO-5667-1', worksheets by code, never by id; every UPDATE is guarded by the prior value (or md5) it replaces so a re-run is a no-op; each block names its rollback.
+-- A staged gate rewrite archives the full compliance_requirements row into compliance_requirements_archive_iso5667_1 in the SAME transaction
+--   (CREATE TABLE … AS SELECT * … WHERE false; INSERT … SELECT c.* WHERE c.id = … AND md5(c.condition) = …), guards the UPDATE on md5(condition), and rolls back by restoring
+--   condition / description / worksheet_template_id / severity / requires_attestation from the archive by id. A staged equation replacement archives into equations_archive_iso5667_1 the same way
+--   and rolls back by restoring ALL 22 live `equations` columns with an EXPLICIT list. A staged field change archives into fields_archive_iso5667_1 and restores an EXPLICIT 31-column list.
+--   Each archive table is dropped by the owner once every change of its class in this file is signed off as final.
+--
+-- Column lists (information_schema, re-read READ-ONLY in this session, 2026-09-24):
+--   equations (22, live order): id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   compliance_requirements (18): id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation   (no `active` column)
+--   fields (31): id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, enum_values, validation_rules, clause_reference, description, consumer_worksheets, order_index, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, active, default_value, verified_by_user_id, verified_at, verification_note, owner, xbrl_element_id, verification_quote
+--     (+ widget, ui_config, lookup, visible_when after 20260911100000 — still ABSENT in prod today, the Plan-1 schema migration is unapplied)
+--   worksheet_sections (7): id, worksheet_template_id, parent_section_id, code, title_de, title_en, order_index   (+ visible_when after 20260911100000)
+--
+-- Shorthand:  WS(code) = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = '<code>')
+--             RESTORE_CR(id, md5) = UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_iso5667_1 a WHERE a.id = c.id AND c.id = '<id>' AND md5(a.condition) = '<md5>';
+--             RESTORE_F(id) = UPDATE fields f SET section_id = a.section_id, symbol = a.symbol, label_de = a.label_de, label_en = a.label_en, data_type = a.data_type, unit = a.unit, is_required = a.is_required, enum_values = a.enum_values, validation_rules = a.validation_rules, clause_reference = a.clause_reference, description = a.description, consumer_worksheets = a.consumer_worksheets, order_index = a.order_index, verification_status = a.verification_status, audit_status = a.audit_status, source_file = a.source_file, source_anchor = a.source_anchor, source_quote = a.source_quote, audit_notes = a.audit_notes, audited_at = a.audited_at, audited_by = a.audited_by, active = a.active, default_value = a.default_value, verified_by_user_id = a.verified_by_user_id, verified_at = a.verified_at, verification_note = a.verification_note, owner = a.owner, xbrl_element_id = a.xbrl_element_id, verification_quote = a.verification_quote FROM fields_archive_iso5667_1 a WHERE a.id = f.id AND f.id = '<id>';
+--             (worksheet_template_id and id are the join keys and are never restored.)
+--
+-- Gates touched or named (read-only 2026-09-24):
+--   ISO-5667-1-04 CR-012 (id 4d2e32f9-ab1e-4bdc-b34b-79c1080ca811, block, md5 78e5362ca069ed81632b3cb8fb0d5c77, condition 'pipe_nominal_bore >= 25')
+--   ISO-5667-1-04 CR-013 (id 62b68d94-16d2-4c06-b865-3268d3ee49ea, warn, md5 2678138bbb32e609bc59d3c12750e145, condition 'isokinetic_sampling IS NOT NULL')
+--   ISO-5667-1-05 CR-016 (id 6263b2f4-6e7c-4960-a999-4fb1f06f2232, block, md5 fb23f29bd1cd2736f0d4e41b468661fc, condition 'groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL')
+--   ISO-5667-1-05 CR-017 (id 86a35bbe-7aef-4916-8f7d-b4b3a803b935, block, md5 7da80880c6d9bb4427e0131e9889195b, condition 'sludge_pipe_diameter >= 50')
+--   ISO-5667-1-05 CR-018 (id ab448330-f767-43fb-b3c1-48e7f1e6dbce, warn, md5 e6932b1dc4d0bc6de89782a44d3f15c3, condition 'automatic_sampler_protection IS NOT NULL')
+--   ISO-5667-1-05 CR-019 (id 0ffcf32b-1bea-4336-a855-593e5fcde2bd, warn, md5 cb914d29ef4ffb0c2493df7c139afc0f, condition 'flow_proportional_sampling IS NOT NULL')
+--   ISO-5667-1-06 CR-022 (id 266c19f4-9610-40a3-b7b7-dd1c6576edc3, warn, md5 022987e42d521c518844b6416afde89e, condition 'abnormal_frequency_increase IS NOT NULL')
+-- Equations (read-only 2026-09-24):
+--   ISO-5667-1-07 Gl. 1 (id d42f576c-c3c7-4e00-bf34-e2da20bf3886, md5 6ece325a6925c31859c21869e07643bf, verified_against_standard, formula 's = sqrt( SUM((x_i - x_mean)^2) / (n - 1) )', inputs ["x_i","x_mean","n"], output 's')
+--   ISO-5667-1-07 Gl. 2 (id db88161d-3cc3-4541-92bd-4271eba4b0fc, md5 9a2dbb720333b05caade8f646c9bd937, verified_against_standard, formula 'L = 2 * K * sigma / sqrt(n)', inputs ["K","sigma","n"], output 'L')
+--   ISO-5667-1-07 Gl. 3 (id 8b5fc076-c947-447c-aa37-7ebbc3a3a81d, md5 6c2ccf8165f426dc99739b814735dae2, verified_against_standard, formula 'n = (2 * K * sigma / L)^2', inputs ["K","sigma","L"], output 'n')
+--
+-- =====================================================================================================================
+-- iso5667_1-G-1 · ISO-5667-1 · ISO-5667-1-04 · CR-012 / CR-013 — §8.6 and §8.9 apply only to the sampling situations they describe: IF-guards on two CREATED
+--     drivers + the follow-up field hides
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): both gates stay exactly as captured and `pipe_nominal_bore` / `isokinetic_sampling` stay visible on every project. The emitter
+--     REFUSED both hides — the exact messages are pinned in src/lib/eval/__tests__/field-configs-iso5667-1.test.ts:
+-- "ISO-5667-1-04 pipe_nominal_bore: visible_when hides pipe_nominal_bore read by gate CR-012 (block: \"pipe_nominal_bore >= 25\") — hidden ⇒ null ⇒ the gate
+--     stops enforcing; STAGE as a G-block" and the same for CR-013.
+-- The cost of the fail-safe is real and is stated plainly: a project that samples no pipe at all must TODAY still enter a nominal bore ≥ 25 mm or the block
+--     gate CR-012 refuses engineer approval.
+-- Evidence [PDF p.5 (printed p.4), §8.6, VA]: "Los líquidos se deben bombear a través de tubos de tamaño adecuado (por ejemplo, al muestrear líquidos
+--     heterogéneos, de conducto nominal mínimo de 25 mm) a velocidades lineales suficientemente altas para mantener las características de flujo turbulento. Se
+--     deben evitar los recorridos de tubo horizontal."
+-- [EN] "Liquids shall be pumped through pipes of suitable size (for example, when sampling heterogeneous liquids, a minimum nominal bore of 25 mm) at linear
+--     velocities high enough to maintain turbulent flow characteristics. Horizontal pipe runs shall be avoided."
+-- Evidence [PDF p.6 (printed p.5), §8.9, VA]: "Idealmente, la velocidad lineal debe ser suficiente para inducir la turbulencia, y las muestras se deben tomar
+--     en condiciones isocinéticas (véase la NTC 3650-2 (ISO 6107/2)). Si esto no es posible, se debe tomar una muestra a través de una sección transversal
+--     completa del flujo."
+-- [EN] "Ideally the linear velocity should be sufficient to induce turbulence and samples should be taken under isokinetic conditions (see ISO 6107/2). If this
+--     is not possible, a sample shall be taken across a full cross-section of the flow."
+-- Note: neither clause has a driver in prod today — §8.6 speaks of sampling THROUGH A PIPE and §8.9 of determining SUSPENDED SOLIDS, and no prod field asks
+--     either question. The block therefore CREATES the two booleans first (additively, the same shape the DATA migration uses for determinand_volatile) and
+--     only then guards the gates. `flow_character` is NOT used as the driver: its printed meaning (§8.3 turbulent / laminar / reverse) is the character of the
+--     flow, not whether a pipe is sampled — the brief's `heterogeneous` token does not exist in prod (failing grep in the report).
+-- BEGIN;
+-- INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status, verification_quote, order_index, active)
+--   SELECT (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04'), (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04') AND ws.code = 'D'), 'pipe_sampling', 'Probenahme über eine Rohrleitung (§8.6)', 'boolean', NULL, false, '§8.6',
+--     'Plan 3 (iso5667_1-G-1): Treiber für die §8.6-Mindestnennweite — nur bei Probenahme über eine Rohrleitung anwendbar.', 'imported_unverified',
+--     'Los líquidos se deben bombear a través de tubos de tamaño adecuado (por ejemplo, al muestrear líquidos heterogéneos, de conducto nominal mínimo de 25 mm) a velocidades lineales suficientemente altas para mantener las características de flujo turbulento. — PDF p.5 (gedruckte S. 4), §8.6',
+--     (SELECT COALESCE(MAX(order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04')), true
+--   WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04') AND f2.symbol = 'pipe_sampling');
+-- INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status, verification_quote, order_index, active)
+--   SELECT (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04'), (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04') AND ws.code = 'D'), 'suspended_solids_determined', 'Schwebstoffe zu bestimmen (§8.9)', 'boolean', NULL, false, '§8.9',
+--     'Plan 3 (iso5667_1-G-1): Treiber für die §8.9-Isokinetik — nur bei der Bestimmung von Schwebstoffen anwendbar.', 'imported_unverified',
+--     'Idealmente, la velocidad lineal debe ser suficiente para inducir la turbulencia, y las muestras se deben tomar en condiciones isocinéticas (véase la NTC 3650-2 (ISO 6107/2)). — PDF p.6 (gedruckte S. 5), §8.9',
+--     (SELECT COALESCE(MAX(order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04')), true
+--   WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04') AND f2.symbol = 'suspended_solids_determined');
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso5667_1 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = '4d2e32f9-ab1e-4bdc-b34b-79c1080ca811' AND md5(c.condition) = '78e5362ca069ed81632b3cb8fb0d5c77';
+-- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = '62b68d94-16d2-4c06-b865-3268d3ee49ea' AND md5(c.condition) = '2678138bbb32e609bc59d3c12750e145';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF pipe_sampling == true THEN pipe_nominal_bore >= 25',
+--   description = 'Plan 3 (iso5667_1-G-1): Mindestnennweite 25 mm nur pruefen, wenn ueber eine Rohrleitung beprobt wird (IF-Guard auf pipe_sampling, Paragraph 8.6).'
+--  WHERE c.id = '4d2e32f9-ab1e-4bdc-b34b-79c1080ca811' AND md5(c.condition) = '78e5362ca069ed81632b3cb8fb0d5c77';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF suspended_solids_determined == true THEN isokinetic_sampling IS NOT NULL',
+--   description = 'Plan 3 (iso5667_1-G-1): Isokinetik nur pruefen, wenn Schwebstoffe bestimmt werden (IF-Guard auf suspended_solids_determined, Paragraph 8.9).'
+--  WHERE c.id = '62b68d94-16d2-4c06-b865-3268d3ee49ea' AND md5(c.condition) = '2678138bbb32e609bc59d3c12750e145';
+-- UPDATE fields f SET visible_when = 'pipe_sampling == true' WHERE f.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04') AND f.symbol = 'pipe_nominal_bore' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'suspended_solids_determined == true' WHERE f.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04') AND f.symbol = 'isokinetic_sampling' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE_CR('4d2e32f9-ab1e-4bdc-b34b-79c1080ca811', '78e5362ca069ed81632b3cb8fb0d5c77'); RESTORE_CR('62b68d94-16d2-4c06-b865-3268d3ee49ea',
+--     '2678138bbb32e609bc59d3c12750e145'); UPDATE fields f SET visible_when = NULL WHERE f.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN
+--     standards s ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04') AND f.symbol = 'pipe_nominal_bore' AND f.visible_when =
+--     'pipe_sampling == true'; UPDATE fields f SET visible_when = NULL WHERE f.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s
+--     ON s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04') AND f.symbol = 'isokinetic_sampling' AND f.visible_when =
+--     'suspended_solids_determined == true'; DELETE FROM fields f WHERE f.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON
+--     s.id = w.standard_id WHERE s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-04') AND f.symbol IN ('pipe_sampling', 'suspended_solids_determined') AND
+--     f.description LIKE 'Plan 3 (iso5667_1-G-1):%'; -- drop compliance_requirements_archive_iso5667_1 once every gate change of this file is signed off as
+--     final.
+--
+-- =====================================================================================================================
+-- iso5667_1-G-2 · ISO-5667-1 · ISO-5667-1-05 · CR-016 / CR-017 / CR-018 — the situation-specific checks of §9.6.2 / §12.1.2 / §13 apply only to their own water
+--     situation: IF-guards on `water_situation_type` + the follow-up field hides
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): all three gates stay as captured and `groundwater_purged` / `sampling_depth` / `sludge_pipe_diameter` /
+--     `automatic_sampler_protection` stay visible for every water situation. The emitter REFUSED each hide (messages pinned in
+--     field-configs-iso5667-1.test.ts):
+-- CR-016 (block, "groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL"), CR-017 (block, "sludge_pipe_diameter >= 50"), CR-018 (warn,
+--     "automatic_sampler_protection IS NOT NULL").
+-- The cost today: a project sampling only stormwater must still tick "Brunnen abgepumpt" and enter a groundwater depth, and enter a sludge-pipe diameter ≥ 50
+--     mm, or the two BLOCK gates refuse engineer approval.
+-- Evidence [PDF p.7 (printed p.6), §9.6.2, VA]: "Cuando se efectúa muestreo para evaluar la calidad del agua contenida en un depósito acuífero, el pozo debe
+--     bombearse antes de efectuar el muestreo para así asegurarse de que se extrae agua nueva del depósito. […] Siempre se debe registrar la profundidad por
+--     debajo del nivel del suelo a la cual se toma la muestra."
+-- [EN] "When sampling to assess the quality of water held in an aquifer, the well shall be pumped before sampling so that fresh water is drawn from the
+--     aquifer. […] The depth below ground level at which the sample is taken shall always be recorded."
+-- Evidence [PDF p.10 (printed p.9), §12.1.2, VA]: "Si el muestreo va a ser de una tubería, el conducto del muestreo debe tener al menos 50 mm de diámetro para
+--     así garantizar que la ocurrencia de bloqueos sea mínima, y las muestras se deben tomar a intervalos de tiempo frecuentes."
+-- [EN] "If sampling is to be from a pipe, the sampling conduit shall be at least 50 mm in diameter so that blockages are minimised, and samples shall be taken
+--     at frequent intervals."
+-- Evidence [PDF p.11 (printed p.10), §13, VA]: "Los dispositivos automáticos de muestreo que recogen muestras a intervalos regulares y que comienzan a un flujo
+--     prescrito, ofrecen muchas ventajas. Este equipo se debe instalar en un estado permanente de alistamiento. En muchos casos será deseable el muestreo
+--     proporcional al flujo."
+-- [EN] "Automatic sampling devices that collect samples at regular intervals and start at a prescribed flow offer many advantages. Such equipment shall be kept
+--     in a permanent state of readiness. In many cases flow-proportional sampling will be desirable."
+-- Note: `water_situation_type` lives on ISO-5667-1-05 itself (no inheritance needed) and its 16 tokens are prod's, unchanged. `flow_proportional_sampling` /
+--     CR-019 are NOT in this block — that symbol is also consumed by ISO-5667-1-08 and needs the consumer edit first (iso5667_1-C-2). The DATA migration
+--     already carries the same situation switch PER ROW in the created `sites_1` register, where no gate reads the columns; this block is only about the scalar
+--     sheet.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso5667_1 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = '6263b2f4-6e7c-4960-a999-4fb1f06f2232' AND md5(c.condition) = 'fb23f29bd1cd2736f0d4e41b468661fc';
+-- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = '86a35bbe-7aef-4916-8f7d-b4b3a803b935' AND md5(c.condition) = '7da80880c6d9bb4427e0131e9889195b';
+-- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = 'ab448330-f767-43fb-b3c1-48e7f1e6dbce' AND md5(c.condition) = 'e6932b1dc4d0bc6de89782a44d3f15c3';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF water_situation_type == ''groundwater'' THEN groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL',
+--   description = 'Plan 3 (iso5667_1-G-2): Abpumpen und Entnahmetiefe nur pruefen, wenn die Situation Grundwasser ist (IF-Guard auf water_situation_type, Paragraph 9.6.2).'
+--  WHERE c.id = '6263b2f4-6e7c-4960-a999-4fb1f06f2232' AND md5(c.condition) = 'fb23f29bd1cd2736f0d4e41b468661fc';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF water_situation_type == ''wastewater_sludge'' THEN sludge_pipe_diameter >= 50',
+--   description = 'Plan 3 (iso5667_1-G-2): Mindestdurchmesser 50 mm nur pruefen, wenn die Situation Klaerschlamm ist (IF-Guard auf water_situation_type, Paragraph 12.1.2).'
+--  WHERE c.id = '86a35bbe-7aef-4916-8f7d-b4b3a803b935' AND md5(c.condition) = '7da80880c6d9bb4427e0131e9889195b';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF water_situation_type IN {''wastewater'', ''stormwater''} THEN automatic_sampler_protection IS NOT NULL',
+--   description = 'Plan 3 (iso5667_1-G-2): Schutz des Automatik-Probenehmers nur pruefen, wenn die Situation Abwasser oder Regenwasserentlastung ist (IF-Guard auf water_situation_type, Paragraph 12.1.1 / 13).'
+--  WHERE c.id = 'ab448330-f767-43fb-b3c1-48e7f1e6dbce' AND md5(c.condition) = 'e6932b1dc4d0bc6de89782a44d3f15c3';
+-- UPDATE fields f SET visible_when = 'water_situation_type == ''groundwater''' WHERE f.id = '5859b2fd-f803-4b26-90fe-cd9ce2836b74' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'water_situation_type == ''groundwater''' WHERE f.id = 'b147ad8a-2ccc-4c2c-ab1b-80a2d978e3fc' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'water_situation_type == ''wastewater_sludge''' WHERE f.id = 'f1598372-baf3-46bf-ba8a-0ffcec16df24' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'water_situation_type IN {''wastewater'', ''stormwater''}' WHERE f.id = 'b8f1cbeb-120b-4e3e-b459-59f0b45a44d1' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE_CR('6263b2f4-6e7c-4960-a999-4fb1f06f2232', 'fb23f29bd1cd2736f0d4e41b468661fc'); RESTORE_CR('86a35bbe-7aef-4916-8f7d-b4b3a803b935',
+--     '7da80880c6d9bb4427e0131e9889195b'); RESTORE_CR('ab448330-f767-43fb-b3c1-48e7f1e6dbce', 'e6932b1dc4d0bc6de89782a44d3f15c3'); UPDATE fields f SET
+--     visible_when = NULL WHERE f.id = '5859b2fd-f803-4b26-90fe-cd9ce2836b74'; UPDATE fields f SET visible_when = NULL WHERE f.id =
+--     'b147ad8a-2ccc-4c2c-ab1b-80a2d978e3fc'; UPDATE fields f SET visible_when = NULL WHERE f.id = 'f1598372-baf3-46bf-ba8a-0ffcec16df24'; UPDATE fields f SET
+--     visible_when = NULL WHERE f.id = 'b8f1cbeb-120b-4e3e-b459-59f0b45a44d1';
+--
+-- =====================================================================================================================
+-- iso5667_1-G-3 · ISO-5667-1 · ISO-5667-1-06 · CR-022 — the §17 frequency increase applies only while abnormal conditions persist: IF-guard on the CREATED
+--     `abnormal_conditions` + the follow-up hide
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): CR-022 stays as captured (warn, "abnormal_frequency_increase IS NOT NULL") and `abnormal_frequency_increase` stays visible. The
+--     emitter REFUSED the hide: "ISO-5667-1-06 abnormal_frequency_increase: visible_when hides abnormal_frequency_increase read by gate CR-022 (warn:
+--     \"abnormal_frequency_increase IS NOT NULL\") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block" (pinned in the test).
+-- Evidence [PDF p.13 (printed p.12), §17, VA]: "Es posible que se necesite incrementar la frecuencia del muestreo mientras persistan condiciones anormales, por
+--     ejemplo durante la puesta en marcha de una planta por procesos, durante las condiciones de inundación en un río, o en tiempos de florecimiento de algas.
+--     Al calcular las tendencias a largo plazo, los resultados obtenidos a partir de estas muestras sólo se usarán si se prevé una frecuencia incrementada."
+-- [EN] "It may be necessary to increase the sampling frequency while abnormal conditions persist, for example during the start-up of a process plant, during
+--     flood conditions in a river, or at times of algal bloom. When calculating long-term trends, the results obtained from such samples will only be used if
+--     an increased frequency is foreseen."
+-- Note: the driver `abnormal_conditions` is CREATED by the DATA migration 20260917102810 (boolean, ISO-5667-1-06 section D, attestation widget) precisely so
+--     this block has something to guard on — it ships WITHOUT a visibility rule of its own, so nothing changes until this block is ratified.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso5667_1 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = '266c19f4-9610-40a3-b7b7-dd1c6576edc3' AND md5(c.condition) = '022987e42d521c518844b6416afde89e';
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF abnormal_conditions == true THEN abnormal_frequency_increase IS NOT NULL',
+--   description = 'Plan 3 (iso5667_1-G-3): Erhoehte Probenahmefrequenz nur pruefen, wenn anormale Bedingungen vorliegen (IF-Guard auf abnormal_conditions, Paragraph 17).'
+--  WHERE c.id = '266c19f4-9610-40a3-b7b7-dd1c6576edc3' AND md5(c.condition) = '022987e42d521c518844b6416afde89e';
+-- UPDATE fields f SET visible_when = 'abnormal_conditions == true' WHERE f.id = '2600e7e4-9e37-47c6-89e7-fb8f4c1518da' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE_CR('266c19f4-9610-40a3-b7b7-dd1c6576edc3', '022987e42d521c518844b6416afde89e'); UPDATE fields f SET visible_when = NULL WHERE f.id =
+--     '2600e7e4-9e37-47c6-89e7-fb8f4c1518da' AND f.visible_when = 'abnormal_conditions == true';
+--
+-- =====================================================================================================================
+-- iso5667_1-C-1 · ISO-5667-1 · ISO-5667-1-06 · `target_statistic` — the §15.2 target statistic is meaningful only for a quality-CHARACTERIZATION programme, but
+--     the symbol is inherited by ISO-5667-1-07
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): `target_statistic` stays visible for every programme type. The emitter REFUSED the rule: "ISO-5667-1-06 target_statistic:
+--     visible_when on a symbol consumed by another worksheet — hides target_statistic (consumed by ISO-5667-1-07) (hiding a producer, or an input of a
+--     producer, hides the inherited value; STAGE the consumer edit instead)" (pinned in the test). Prod consumer_worksheets = ["ISO-5667-1-07"].
+-- Evidence [PDF p.11 (printed p.10), §15.2, VA]: "Estos programas se proponen estimar uno o más parámetros estadísticos que caractericen la concentración o su
+--     variabilidad, o ambos, durante un período definido. Por ejemplo, la media aritmética o la mediana indican la tendencia central de los resultados, y la
+--     desviación estándar indica la variabilidad."
+-- [EN] "These programmes set out to estimate one or more statistical parameters characterising the concentration or its variability, or both, over a defined
+--     period. For example, the arithmetic mean or the median indicate the central tendency of the results, and the standard deviation indicates the
+--     variability."
+-- Evidence [PDF p.11 (printed p.10), §15.1, VA]: "Estos programas generalmente involucran el control de la concentración de uno o más factores determinantes
+--     dentro de límites definidos." [EN] "These programmes generally involve controlling the concentration of one or more determinands within defined limits."
+-- Note: the sheet already gains the intended §15 switch WITHOUT this edit — the DATA migration hides `control_limits` under `programme_type ==
+--     'quality_control'` (no consumer, no gate), and the created `determinands` register carries a per-determinand `target_statistic` column. The question for
+--     the owner is narrow: does ISO-5667-1-07 still need the SCALAR target statistic inherited from -06? If yes, REJECT this block and leave the field visible.
+--     If no, apply it — the consumer edit first, the visibility rule second, in one transaction.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = 'c6ca0cc7-9395-4a9e-be4d-5f39324954f1';
+-- UPDATE fields f SET consumer_worksheets = array_remove(f.consumer_worksheets, 'ISO-5667-1-07') WHERE f.id = 'c6ca0cc7-9395-4a9e-be4d-5f39324954f1' AND 'ISO-5667-1-07' = ANY(f.consumer_worksheets);
+-- UPDATE fields f SET visible_when = 'programme_type == ''quality_characterization''' WHERE f.id = 'c6ca0cc7-9395-4a9e-be4d-5f39324954f1' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE_F('c6ca0cc7-9395-4a9e-be4d-5f39324954f1'); UPDATE fields f SET visible_when = NULL WHERE f.id = 'c6ca0cc7-9395-4a9e-be4d-5f39324954f1' AND
+--     f.visible_when = 'programme_type == ''quality_characterization'''; -- drop fields_archive_iso5667_1 once every field change of this file is signed off as
+--     final.
+--
+-- =====================================================================================================================
+-- iso5667_1-C-2 · ISO-5667-1 · ISO-5667-1-05 · `flow_proportional_sampling` + CR-019 — the §13 flow-proportional readiness applies only to stormwater, but the
+--     symbol is inherited by ISO-5667-1-08 AND read by CR-019
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): the field stays visible for every water situation and CR-019 stays as captured (warn, "flow_proportional_sampling IS NOT NULL"). TWO
+--     independent guards refuse the rule — the producer guard fires first: "ISO-5667-1-05 flow_proportional_sampling: visible_when on a symbol consumed by
+--     another worksheet — hides flow_proportional_sampling (consumed by ISO-5667-1-08) (hiding a producer, or an input of a producer, hides the inherited
+--     value; STAGE the consumer edit instead)" (pinned in the test); behind it the gate-aware guard would refuse the same rule for CR-019.
+-- Evidence [PDF p.11 (printed p.10), §13, VA]: "El muestreo de tales descargas presenta problemas especiales por su naturaleza intermitente y porque la calidad
+--     puede cambiar marcadamente a lo largo del período de la descarga. […] En muchos casos será deseable el muestreo proporcional al flujo."
+-- [EN] "Sampling such discharges presents special problems because of their intermittent nature and because the quality may change markedly over the period of
+--     the discharge. […] In many cases flow-proportional sampling will be desirable."
+-- Note: "será deseable" is a RECOMMENDATION, which is why CR-019 is a warn and why this block does not touch its severity. Apply the consumer edit ONLY if the
+--     owner confirms ISO-5667-1-08 does not need the inherited flag (the created `flow_measurements` register carries its own per-measurement columns and does
+--     not read it).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso5667_1 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '44395743-9cd9-4826-a417-0e05d3fa4d76';
+-- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = '0ffcf32b-1bea-4336-a855-593e5fcde2bd' AND md5(c.condition) = 'cb914d29ef4ffb0c2493df7c139afc0f';
+-- UPDATE fields f SET consumer_worksheets = array_remove(f.consumer_worksheets, 'ISO-5667-1-08') WHERE f.id = '44395743-9cd9-4826-a417-0e05d3fa4d76' AND 'ISO-5667-1-08' = ANY(f.consumer_worksheets);
+-- UPDATE compliance_requirements c SET
+--   condition = 'IF water_situation_type == ''stormwater'' THEN flow_proportional_sampling IS NOT NULL',
+--   description = 'Plan 3 (iso5667_1-C-2): Durchflussproportionale Probenahme nur pruefen, wenn die Situation Regen-/Mischwasserentlastung ist (IF-Guard auf water_situation_type, Paragraph 13).'
+--  WHERE c.id = '0ffcf32b-1bea-4336-a855-593e5fcde2bd' AND md5(c.condition) = 'cb914d29ef4ffb0c2493df7c139afc0f';
+-- UPDATE fields f SET visible_when = 'water_situation_type == ''stormwater''' WHERE f.id = '44395743-9cd9-4826-a417-0e05d3fa4d76' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: RESTORE_F('44395743-9cd9-4826-a417-0e05d3fa4d76'); RESTORE_CR('0ffcf32b-1bea-4336-a855-593e5fcde2bd', 'cb914d29ef4ffb0c2493df7c139afc0f'); UPDATE
+--     fields f SET visible_when = NULL WHERE f.id = '44395743-9cd9-4826-a417-0e05d3fa4d76' AND f.visible_when = 'water_situation_type == ''stormwater''';
+--
+-- =====================================================================================================================
+-- iso5667_1-E-1 · ISO-5667-1 · ISO-5667-1-07 · `K` — re-bind the existing REQUIRED input to the seeded §16.4 table (lookup_fill on S16_4_K keyed by
+--     `confidence_level`)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe, amendment J): `K` (id 85996c78-5550-40e3-a8cb-a1fb033c9a17, number, is_required = true, consumer_worksheets = null) is NOT touched by
+--     the DATA migration. Instead a TWIN fill `K_table` is CREATED beside it with exactly the binding below, so the engineer sees the printed K next to the
+--     field they still type.
+-- Why the re-bind is not fail-safe today: the §16.4 table's override policy is `locked` (the standard prints "K tiene el valor dado en la siguiente tabla"),
+--     and `LookupFillField` computes `canOverride = mode === 'fill' && !readOnly && state.kind === 'resolved' && policy !== 'locked' && tableScalar != null` —
+--     under a locked policy NO input is rendered at all. While `confidence_level` is unset the widget state is `keys_missing`, so nothing is filled either: a
+--     REQUIRED field would be neither fillable nor typeable, and prod equations 2 and 3 (which read K) would stall. Ratify this block only together with a
+--     decision that makes `confidence_level` effectively mandatory before K, or with a Plan-2b change that keeps a locked lookup_fill typeable while its keys
+--     are missing.
+-- Evidence [PDF p.12 (printed p.11), §16.4, VA]: "Cuando n es grande (véase el numeral 16.1), s difiere poco del valor verdadero σ, y el intervalo de confianza
+--     de X , calculado a partir de algún número de resultados n, es X ± K/n, donde K tiene el valor dado en la siguiente tabla, dependiendo del nivel de
+--     confianza adoptado."
+-- [EN] "When n is large (see 16.1), s differs little from the true value σ, and the confidence interval of X, calculated from some number of results n, is X ±
+--     K/√n, where K has the value given in the following table, depending on the confidence level adopted." [the radical is lost by pdftotext — iso5667_1-U-1]
+-- Evidence [PDF p.12 (printed p.11), §16.4, the printed table, VA]: "Nivel de confianza 99 98 95 90 80 68 50 | K 2,58 2,33 1,96 1,64 1,28 1,00 0,67" (the
+--     seeded S16_4_K rows, one per printed column).
+-- Note: SR-2 is preserved either way — the ENGINEER selects `confidence_level` (prod tokens 99 / 98 / 95 / 90 / 80 / 68 / 50, unchanged); the table only
+--     supplies the K that follows from that choice. Requires the Plan-1 schema migration 20260911100000 (fields.widget / .lookup do not exist in prod today).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '85996c78-5550-40e3-a8cb-a1fb033c9a17' AND f.widget IS NULL;
+-- UPDATE fields f SET
+--   widget = 'lookup_fill',
+--   ui_config = '{"source_label":"§16.4-Tabelle"}'::jsonb,
+--   lookup = '{"table_code":"S16_4_K","edition":"1980","role":"value","keys":[{"column":"confidence_level","from_symbol":"confidence_level"}],"value":"k"}'::jsonb
+--  WHERE f.id = '85996c78-5550-40e3-a8cb-a1fb033c9a17' AND f.active AND f.widget IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET widget = NULL, ui_config = NULL, lookup = NULL WHERE f.id = '85996c78-5550-40e3-a8cb-a1fb033c9a17' AND f.widget =
+--     'lookup_fill'; RESTORE_F('85996c78-5550-40e3-a8cb-a1fb033c9a17');
+--
+-- =====================================================================================================================
+-- iso5667_1-R-1 · ISO-5667-1 · ISO-5667-1-07 · Gl. 3 vs the brief's `n_required_calc` — REFUTED PREMISE, nothing to apply
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: NO SQL. The task brief asked for a new equation `n_required_calc = (2 * K * sigma / L) ^ 2`. Prod ALREADY carries that exact derivation as Gl. 3
+--     (id 8b5fc076-c947-447c-aa37-7ebbc3a3a81d, formula 'n = (2 * K * sigma / L)^2', inputs ["K","sigma","L"], output 'n', verified_against_standard) and the
+--     engine evaluates it: the printed §16.5 worked example reproduces 61,4656 ≈ 61 through the real `evaluateFormula` (pinned in equations-iso5667-1.test.ts).
+--     Emitting `n_required_calc` would be a SECOND equation for a quantity one registered equation already produces — the single-source derivation invariant
+--     forbids it. The equation is therefore NOT emitted and Gl. 3 is left untouched.
+-- Evidence [PDF p.13 (printed p.12), §16.4 continued, VA]: "Para estimar la media aritmética X para un intervalo de confianza dado L en el nivel de confianza
+--     seleccionado, el número de muestras necesarias es (2Kσ/L)2. Esto es estrictamente cierto únicamente cuando se conoce σ. Cuando únicamente se dispone de
+--     una s estimada, se requerirán más muestras, aunque esto afectará muy poco al valor de K, si s se basa en un número relativamente grande de muestras."
+-- [EN] "To estimate the arithmetic mean X for a given confidence interval L at the selected confidence level, the number of samples required is (2Kσ/L)². This
+--     is strictly true only when σ is known. When only an estimated s is available, more samples will be required, although this will affect the value of K
+--     very little if s is based on a relatively large number of samples." [the superscript renders inline — iso5667_1-U-2]
+-- Evidence [PDF p.13 (printed p.12), §16.5 worked example, VA]: "Si el intervalo de confianza requerido fuera el 10 % de la media aritmética, el nivel de
+--     confianza requerido del 95 %, y la desviación estándar el 20 % de la media aritmética, entonces: 10 = 2 x 1,96 x 20 / n … y por consiguiente n = 7,84 y n
+--     ≈ 61." [the radical over n is lost by pdftotext: the printed line reads √n = 7,84, and 7,84² = 61,47 — iso5667_1-U-1]
+-- Note: what the brief actually wanted — K coming from the printed table instead of being typed — is delivered by iso5667_1-E-1 (or, today, by the created twin
+--     `K_table`), WITHOUT touching Gl. 3: the equation reads the field `K`, so a ratified E-1 makes Gl. 3 compute from the table value automatically. The new
+--     equation ISO-5667-1-07-D2 `n_hist = count_rows(historical_results)` is a DIFFERENT quantity (how many results are on the sheet) and does not collide with
+--     Gl. 3's `n`.
+-- No SQL — this block records a refuted brief premise (R-5). Rollback: none needed.
+--
+-- =====================================================================================================================
+-- iso5667_1-R-2 · ISO-5667-1 · ISO-5667-1-07 · Gl. 1 (`s`) — replace the engine-unsupported SUM() form with the register aggregate
+--     `stdev_rows(historical_results, x_value)`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Gl. 1 (id d42f576c-c3c7-4e00-bf34-e2da20bf3886, md5 6ece325a6925c31859c21869e07643bf, verified_against_standard) keeps its stored
+--     formula 's = sqrt( SUM((x_i - x_mean)^2) / (n - 1) )' unchanged. `SUM()` is not in the engine's function set (src/lib/expr/functions.ts), so that row can
+--     NEVER compute — the harness records it as NR. The DATA migration therefore ships the working form under a DISTINCT symbol, ISO-5667-1-07-D3 `s_calc =
+--     stdev_rows(historical_results, x_value)`, and this block proposes the replacement as a ruling (replacing a verified_against_standard equation is always a
+--     sign-off).
+-- Evidence [PDF p.12 (printed p.11), §16.4, VA]: "Para cierto número de resultados n, tomados al azar, las estimaciones de la media aritmética verdadera X y la
+--     desviación estándar, σ, son la media aritmética, X , y s respectivamente de acuerdo con la siguiente fórmula: […] S = […] / n −1 […] Donde xi representa
+--     los valores individuales."
+-- [EN] "For a given number of results n, taken at random, the estimates of the true arithmetic mean X and the standard deviation σ are the arithmetic mean X
+--     and s respectively, according to the following formula: s = √( Σ(Xi − X)² / (n − 1) ). Where xi represents the individual values." [the radical and the
+--     summation sign are lost by pdftotext; the DIVISOR "n −1" IS printed and readable — iso5667_1-U-1]
+-- Note: `stdev_rows` is the SAMPLE (n − 1) form — probed against the engine IN THIS SESSION and pinned numerically in equations-iso5667-1.test.ts (four results
+--     10/20/30/40 ⇒ √(500/3) = 12,90994…, and explicitly NOT the population √(500/4) = 11,18034…). It therefore matches the divisor the standard prints; gap
+--     G-4 does not bite here. The engine also refuses to produce a phantom value: 0 complete rows ⇒ "Keine vollständigen Zeilen", 1 complete row ⇒
+--     "stdev_rows(): mindestens 2 vollständige Zeilen erforderlich." — both pinned. Apply only after the `historical_results` register is in use
+--     (iso5667_1-D-17), otherwise the sheet loses `s` for projects that typed x_i / x_mean / n by hand.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_iso5667_1 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_iso5667_1 SELECT e.* FROM equations e WHERE e.id = 'd42f576c-c3c7-4e00-bf34-e2da20bf3886' AND md5(e.formula) = '6ece325a6925c31859c21869e07643bf';
+-- UPDATE equations e SET
+--   formula = 's = stdev_rows(historical_results, x_value)',
+--   input_symbols = ARRAY['historical_results']::text[],
+--   description = 'Plan 3 (iso5667_1-R-2): Stichproben-Standardabweichung s aus dem Register historical_results; identische gedruckte Form (Nenner n − 1), aber in der Funktionsmenge der Engine (stdev_rows ist die (n − 1)-Form).'
+--  WHERE e.id = 'd42f576c-c3c7-4e00-bf34-e2da20bf3886' AND md5(e.formula) = '6ece325a6925c31859c21869e07643bf';
+-- COMMIT;
+-- Rollback (re-INSERT with the COMPLETE explicit 22-column list): DELETE FROM equations WHERE id = 'd42f576c-c3c7-4e00-bf34-e2da20bf3886'; INSERT INTO
+--     equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description,
+--     verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at,
+--     verification_note, verification_quote) SELECT a.id, a.worksheet_template_id, a.equation_number, a.formula, a.formula_latex, a.input_symbols,
+--     a.output_symbol, a.output_unit, a.clause_reference, a.description, a.verification_status, a.audit_status, a.source_file, a.source_anchor, a.source_quote,
+--     a.audit_notes, a.audited_at, a.audited_by, a.verified_by_user_id, a.verified_at, a.verification_note, a.verification_quote FROM
+--     equations_archive_iso5667_1 a WHERE a.id = 'd42f576c-c3c7-4e00-bf34-e2da20bf3886' AND md5(a.formula) = '6ece325a6925c31859c21869e07643bf'; -- drop
+--     equations_archive_iso5667_1 once this block is signed off as final.
+--
+-- =====================================================================================================================
+-- iso5667_1-D-1 · ISO-5667-1 · ISO-5667-1-02 · `variability_profile` — the standard prints CYCLIC variation as its own kind, prod's enum does not have a token
+--     for it
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe, owner ruling D-1): prod's three tokens stay byte-identical — [] — and NOTHING in this task writes enum_values for this field. The
+--     §16.5 rule the DATA migration does emit (the created `sampling_time_note` under `variability_profile == 'wide_rapid'`) therefore covers only the "amplias
+--     y rápidas" case; a project whose determinand varies CYCLICALLY cannot say so today.
+-- Evidence [PDF p.13 (printed p.12), §16.5, VA]: "Las variaciones aleatorias comúnmente tienen una distribución normal o una distribución lognormal. Las
+--     variaciones sistemáticas pueden ser tendencias o variaciones cíclicas, y se pueden presentar combinaciones de las dos. La naturaleza de la variabilidad
+--     puede ser diferente para factores determinantes diferentes de la misma agua. […] Si ocurren variaciones cíclicas, los tiempos de muestreo son
+--     importantes, bien sea para cubrir todo el ciclo o para detectar concentraciones de interés máximas o mínimas. Los tiempos de muestreo deben ser
+--     espaciados en forma aproximadamente igual a lo largo de los períodos de tendencia."
+-- [EN] "Random variations commonly have a normal or a lognormal distribution. Systematic variations may be trends or cyclic variations, and combinations of the
+--     two may occur. The nature of the variability may be different for different determinands of the same water. […] If cyclic variations occur, the sampling
+--     times are important, either to cover the whole cycle or to detect maximum or minimum concentrations of interest. Sampling times should be spaced
+--     approximately equally over the trend periods."
+-- Evidence [PDF p.4 (printed p.3), §5.1, VA — the token prod DOES have]: "Los programas de muestreo pueden ser complejos en situaciones en las cuales ocurren
+--     variaciones amplias y rápidas en las concentraciones de los factores determinantes que interesan."
+-- Note: adding an enum token is a structure change and an owner ruling (D-1 never overwrites a non-null prod enum). If ratified, the created
+--     `sampling_time_note` rule and the `determinands.variability` register column should both widen to `IN {'wide_rapid', 'cyclic'}` in the same wave
+--     (follow-up UPDATEs below).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '6dccafd3-f475-4092-9fd4-f3200cb01637';
+-- UPDATE fields f SET enum_values = f.enum_values || '[{"value":"cyclic","label_de":"zyklisch veränderlich (variaciones cíclicas)","order_index":3}]'::jsonb WHERE f.id = '6dccafd3-f475-4092-9fd4-f3200cb01637' AND NOT (f.enum_values @> '[{"value":"cyclic"}]'::jsonb);
+-- UPDATE fields f SET visible_when = 'variability_profile IN {''wide_rapid'', ''cyclic''}' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-5667-1' AND w.code = 'ISO-5667-1-06' AND f.symbol = 'sampling_time_note' AND f.visible_when = 'variability_profile == ''wide_rapid''';
+-- COMMIT;
+-- Rollback: RESTORE_F('6dccafd3-f475-4092-9fd4-f3200cb01637'); UPDATE fields f SET visible_when = 'variability_profile == ''wide_rapid''' FROM
+--     worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ISO-5667-1' AND w.code =
+--     'ISO-5667-1-06' AND f.symbol = 'sampling_time_note' AND f.visible_when = 'variability_profile IN {''wide_rapid'', ''cyclic''}';
+--
+-- =====================================================================================================================
+-- iso5667_1-D-2 · ISO-5667-1 · ISO-5667-1-02 `determinands.parameter` ↔ ISO-5667-1-02 `parameter_list` (§3) — register column vs existing prod scalar
+--     (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 4a2d2a4b-044d-4122-8535-5793d9b09e5d, text, is_required
+--     = true, consumer_worksheets = ["ALL"]) stays active and keeps every consumer and every gate it has today. No second equation is emitted for this
+--     quantity.
+-- Why the register column exists: Die Freitext-Parameterliste hält alle Bestimmungsgrößen in einem Feld; die Registerspalte hält eine je Zeile.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). NOTE: this symbol is inherited by ["ALL"] — the consumer edit must be
+--     decided FIRST (a deactivated producer hides the inherited value). NOTE: is_required = true — deactivating a required field changes the completeness
+--     computation.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '4a2d2a4b-044d-4122-8535-5793d9b09e5d' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-2: abgeloest durch die Registerspalte determinands.parameter auf ISO-5667-1-02.]' WHERE f.id = '4a2d2a4b-044d-4122-8535-5793d9b09e5d' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('4a2d2a4b-044d-4122-8535-5793d9b09e5d');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-3 · ISO-5667-1 · ISO-5667-1-02 `determinands.variability` ↔ ISO-5667-1-02 `variability_profile` (§5.1, §16.5) — register column vs existing prod
+--     scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 6dccafd3-f475-4092-9fd4-f3200cb01637, enum, is_required
+--     = true, consumer_worksheets = ["ISO-5667-1-06","ISO-5667-1-07"]) stays active and keeps every consumer and every gate it has today. No second equation is
+--     emitted for this quantity.
+-- Why the register column exists: Das Variabilitätsprofil ist je Bestimmungsgröße verschieden ("La naturaleza de la variabilidad puede ser diferente para
+--     factores determinantes diferentes de la misma agua", §16.5); der Skalar kann nur eines halten.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). NOTE: this symbol is inherited by ["ISO-5667-1-06","ISO-5667-1-07"] — the
+--     consumer edit must be decided FIRST (a deactivated producer hides the inherited value). NOTE: is_required = true — deactivating a required field changes
+--     the completeness computation.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '6dccafd3-f475-4092-9fd4-f3200cb01637' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-3: abgeloest durch die Registerspalte determinands.variability auf ISO-5667-1-02.]' WHERE f.id = '6dccafd3-f475-4092-9fd4-f3200cb01637' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('6dccafd3-f475-4092-9fd4-f3200cb01637');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-4 · ISO-5667-1 · ISO-5667-1-02 `determinands.target_statistic` ↔ ISO-5667-1-06 `target_statistic` (§15.2) — register column vs existing prod
+--     scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id c6ca0cc7-9395-4a9e-be4d-5f39324954f1, enum, is_required
+--     = false, consumer_worksheets = ["ISO-5667-1-07"]) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: Die Zielstatistik ist je Bestimmungsgröße verschieden; der -06-Skalar hält nur eine (siehe auch iso5667_1-C-1).
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). NOTE: this symbol is inherited by ["ISO-5667-1-07"] — the consumer edit must
+--     be decided FIRST (a deactivated producer hides the inherited value).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = 'c6ca0cc7-9395-4a9e-be4d-5f39324954f1' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-4: abgeloest durch die Registerspalte determinands.target_statistic auf ISO-5667-1-02.]' WHERE f.id = 'c6ca0cc7-9395-4a9e-be4d-5f39324954f1' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('c6ca0cc7-9395-4a9e-be4d-5f39324954f1');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-5 · ISO-5667-1 · ISO-5667-1-05 `sites_1.situation_type` ↔ ISO-5667-1-05 `water_situation_type` (§9 – §13) — register column vs existing prod
+--     scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 5c1227a6-70ae-4fe5-85a9-9ea78eabc7ca, enum, is_required
+--     = true, consumer_worksheets = ["ISO-5667-1-06","ISO-5667-1-08"]) stays active and keeps every consumer and every gate it has today. No second equation is
+--     emitted for this quantity.
+-- Why the register column exists: Ein Messnetz kann Stellen verschiedener Gewässersituationen umfassen (§8.1); der Skalar hält nur eine.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). NOTE: this symbol is inherited by ["ISO-5667-1-06","ISO-5667-1-08"] — the
+--     consumer edit must be decided FIRST (a deactivated producer hides the inherited value). NOTE: is_required = true — deactivating a required field changes
+--     the completeness computation.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '5c1227a6-70ae-4fe5-85a9-9ea78eabc7ca' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-5: abgeloest durch die Registerspalte sites_1.situation_type auf ISO-5667-1-05.]' WHERE f.id = '5c1227a6-70ae-4fe5-85a9-9ea78eabc7ca' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('5c1227a6-70ae-4fe5-85a9-9ea78eabc7ca');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-6 · ISO-5667-1 · ISO-5667-1-05 `sites_1.location_identified` ↔ ISO-5667-1-04 `sampling_location_identified` (§8.2) — register column vs existing
+--     prod scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 7d10b346-d88b-45ab-a1a2-86d03eeb3fba, boolean,
+--     is_required = true, consumer_worksheets = ["ISO-5667-1-05"]) stays active and keeps every consumer and every gate it has today. No second equation is
+--     emitted for this quantity.
+-- Why the register column exists: Die Identifikation ist je Stelle nachzuweisen; der -04-Skalar ist eine einmalige Bestätigung.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). NOTE: this symbol is inherited by ["ISO-5667-1-05"] — the consumer edit must
+--     be decided FIRST (a deactivated producer hides the inherited value). NOTE: is_required = true — deactivating a required field changes the completeness
+--     computation.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '7d10b346-d88b-45ab-a1a2-86d03eeb3fba' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-6: abgeloest durch die Registerspalte sites_1.location_identified auf ISO-5667-1-05.]' WHERE f.id = '7d10b346-d88b-45ab-a1a2-86d03eeb3fba' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('7d10b346-d88b-45ab-a1a2-86d03eeb3fba');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-7 · ISO-5667-1 · ISO-5667-1-05 `sites_1.flow_character` ↔ ISO-5667-1-04 `flow_character` (§8.3, §8.4) — register column vs existing prod scalar
+--     (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 71e8af1f-fc0a-474a-afb5-f65a8e04288f, enum, is_required
+--     = true, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for this quantity.
+-- Why the register column exists: Der Strömungscharakter ist je Stelle verschieden; der -04-Skalar hält nur einen.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only. NOTE:
+--     is_required = true — deactivating a required field changes the completeness computation.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '71e8af1f-fc0a-474a-afb5-f65a8e04288f' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-7: abgeloest durch die Registerspalte sites_1.flow_character auf ISO-5667-1-05.]' WHERE f.id = '71e8af1f-fc0a-474a-afb5-f65a8e04288f' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('71e8af1f-fc0a-474a-afb5-f65a8e04288f');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-8 · ISO-5667-1 · ISO-5667-1-05 `sites_1.weather` ↔ ISO-5667-1-04 `weather_recorded` (§8.13) — register column vs existing prod scalar (amendment
+--     K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 6f21cb89-2733-4b8d-902a-b6bd0d0dadc1, boolean,
+--     is_required = false, consumer_worksheets = ["ISO-5667-1-08"]) stays active and keeps every consumer and every gate it has today. No second equation is
+--     emitted for this quantity.
+-- Why the register column exists: Die Witterung ist je Stelle und Termin zu erfassen; der -04-Skalar ist nur eine Ja/Nein-Bestätigung.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). NOTE: this symbol is inherited by ["ISO-5667-1-08"] — the consumer edit must
+--     be decided FIRST (a deactivated producer hides the inherited value).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '6f21cb89-2733-4b8d-902a-b6bd0d0dadc1' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-8: abgeloest durch die Registerspalte sites_1.weather auf ISO-5667-1-05.]' WHERE f.id = '6f21cb89-2733-4b8d-902a-b6bd0d0dadc1' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('6f21cb89-2733-4b8d-902a-b6bd0d0dadc1');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-9 · ISO-5667-1 · ISO-5667-1-05 `sites_1.depth_below_ground_m` ↔ ISO-5667-1-05 `sampling_depth` (§9.6.2) — register column vs existing prod scalar
+--     (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id b147ad8a-2ccc-4c2c-ab1b-80a2d978e3fc, number,
+--     is_required = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: "Siempre se debe registrar la profundidad" gilt je Grundwasserstelle; der Skalar hält nur eine Tiefe.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = 'b147ad8a-2ccc-4c2c-ab1b-80a2d978e3fc' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-9: abgeloest durch die Registerspalte sites_1.depth_below_ground_m auf ISO-5667-1-05.]' WHERE f.id = 'b147ad8a-2ccc-4c2c-ab1b-80a2d978e3fc' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('b147ad8a-2ccc-4c2c-ab1b-80a2d978e3fc');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-10 · ISO-5667-1 · ISO-5667-1-05 `sites_1.well_purged` ↔ ISO-5667-1-05 `groundwater_purged` (§9.6.2) — register column vs existing prod scalar
+--     (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 5859b2fd-f803-4b26-90fe-cd9ce2836b74, boolean,
+--     is_required = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: Das Abpumpen ist je Brunnen nachzuweisen; der Skalar ist eine einmalige Bestätigung.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '5859b2fd-f803-4b26-90fe-cd9ce2836b74' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-10: abgeloest durch die Registerspalte sites_1.well_purged auf ISO-5667-1-05.]' WHERE f.id = '5859b2fd-f803-4b26-90fe-cd9ce2836b74' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('5859b2fd-f803-4b26-90fe-cd9ce2836b74');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-11 · ISO-5667-1 · ISO-5667-1-05 `sites_1.upstream_downstream` ↔ ISO-5667-1-05 `upstream_downstream_sampling` (§9.3.2) — register column vs
+--     existing prod scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id a725d48f-97a3-459a-8783-95568ffd8cc0, boolean,
+--     is_required = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: Ober-/Unterstrom ist eine Eigenschaft des Stellenpaares an einer Einleitung, nicht des Projekts.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = 'a725d48f-97a3-459a-8783-95568ffd8cc0' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-11: abgeloest durch die Registerspalte sites_1.upstream_downstream auf ISO-5667-1-05.]' WHERE f.id = 'a725d48f-97a3-459a-8783-95568ffd8cc0' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('a725d48f-97a3-459a-8783-95568ffd8cc0');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-12 · ISO-5667-1 · ISO-5667-1-05 `sites_1.cooling_type` ↔ ISO-5667-1-05 `cooling_system_type` (§10.2.4) — register column vs existing prod scalar
+--     (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id a492fed6-eff8-4e5e-b97a-5a73d44c3dca, enum, is_required
+--     = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for this quantity.
+-- Why the register column exists: Ein Werk kann mehrere Kühlsysteme verschiedenen Typs beproben; der Skalar hält nur einen Typ.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = 'a492fed6-eff8-4e5e-b97a-5a73d44c3dca' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-12: abgeloest durch die Registerspalte sites_1.cooling_type auf ISO-5667-1-05.]' WHERE f.id = 'a492fed6-eff8-4e5e-b97a-5a73d44c3dca' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('a492fed6-eff8-4e5e-b97a-5a73d44c3dca');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-13 · ISO-5667-1 · ISO-5667-1-05 `sites_1.manhole_no_entry` ↔ ISO-5667-1-05 `manhole_sampled_without_entry` (§11.1) — register column vs existing
+--     prod scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 08fd0d81-54e2-4724-87e9-461d29f92568, boolean,
+--     is_required = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: Die Einstiegsfreiheit ist je Inspektionsschacht zu beurteilen.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '08fd0d81-54e2-4724-87e9-461d29f92568' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-13: abgeloest durch die Registerspalte sites_1.manhole_no_entry auf ISO-5667-1-05.]' WHERE f.id = '08fd0d81-54e2-4724-87e9-461d29f92568' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('08fd0d81-54e2-4724-87e9-461d29f92568');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-14 · ISO-5667-1 · ISO-5667-1-05 `sites_1.composite_multipoint` ↔ ISO-5667-1-05 `composite_multipoint_sample` (§12.1.1) — register column vs
+--     existing prod scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 61bc94ff-a44d-47a5-a7b8-d9f6b4b33024, boolean,
+--     is_required = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: Die Mehrpunkt-Mischprobe wird je Abwasserstelle entschieden ("dos o tres muestras de rutina en puntos diferentes").
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '61bc94ff-a44d-47a5-a7b8-d9f6b4b33024' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-14: abgeloest durch die Registerspalte sites_1.composite_multipoint auf ISO-5667-1-05.]' WHERE f.id = '61bc94ff-a44d-47a5-a7b8-d9f6b4b33024' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('61bc94ff-a44d-47a5-a7b8-d9f6b4b33024');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-15 · ISO-5667-1 · ISO-5667-1-05 `sites_1.sludge_pipe_dn_mm` ↔ ISO-5667-1-05 `sludge_pipe_diameter` (§12.1.2) — register column vs existing prod
+--     scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id f1598372-baf3-46bf-ba8a-0ffcec16df24, number,
+--     is_required = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: Mehrere Schlammleitungen können unterschiedliche Durchmesser haben; der Skalar hält nur einen.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = 'f1598372-baf3-46bf-ba8a-0ffcec16df24' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-15: abgeloest durch die Registerspalte sites_1.sludge_pipe_dn_mm auf ISO-5667-1-05.]' WHERE f.id = 'f1598372-baf3-46bf-ba8a-0ffcec16df24' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('f1598372-baf3-46bf-ba8a-0ffcec16df24');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-16 · ISO-5667-1 · ISO-5667-1-05 `sites_1.flow_proportional` ↔ ISO-5667-1-05 `flow_proportional_sampling` (§13) — register column vs existing prod
+--     scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 44395743-9cd9-4826-a417-0e05d3fa4d76, boolean,
+--     is_required = false, consumer_worksheets = ["ISO-5667-1-08"]) stays active and keeps every consumer and every gate it has today. No second equation is
+--     emitted for this quantity.
+-- Why the register column exists: Die Durchflussproportionalität wird je Entlastungsstelle entschieden (siehe auch iso5667_1-C-2).
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). NOTE: this symbol is inherited by ["ISO-5667-1-08"] — the consumer edit must
+--     be decided FIRST (a deactivated producer hides the inherited value).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '44395743-9cd9-4826-a417-0e05d3fa4d76' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-16: abgeloest durch die Registerspalte sites_1.flow_proportional auf ISO-5667-1-05.]' WHERE f.id = '44395743-9cd9-4826-a417-0e05d3fa4d76' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('44395743-9cd9-4826-a417-0e05d3fa4d76');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-17 · ISO-5667-1 · ISO-5667-1-07 `historical_results.x_value` ↔ ISO-5667-1-07 `x_i` (§16.4) — register column vs existing prod scalar (amendment
+--     K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id bd3aec17-f34a-42be-8c31-c45971377c21, number,
+--     is_required = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: "Donde xi representa los valores individuales" — es sind n Einzelwerte, kein einzelner; der Skalar kann x̄, n und s nicht
+--     speisen.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = 'bd3aec17-f34a-42be-8c31-c45971377c21' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-17: abgeloest durch die Registerspalte historical_results.x_value auf ISO-5667-1-07.]' WHERE f.id = 'bd3aec17-f34a-42be-8c31-c45971377c21' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('bd3aec17-f34a-42be-8c31-c45971377c21');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-18 · ISO-5667-1 · ISO-5667-1-08 `flow_measurements.aspect` ↔ ISO-5667-1-08 `flow_aspect` (§19.1) — register column vs existing prod scalar
+--     (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 84a546f0-c152-494e-aa11-b8812082d321, enum, is_required
+--     = true, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for this quantity.
+-- Why the register column exists: Ein Programm kann an verschiedenen Stellen verschiedene Aspekte messen; der Skalar hält nur einen.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only. NOTE:
+--     is_required = true — deactivating a required field changes the completeness computation.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '84a546f0-c152-494e-aa11-b8812082d321' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-18: abgeloest durch die Registerspalte flow_measurements.aspect auf ISO-5667-1-08.]' WHERE f.id = '84a546f0-c152-494e-aa11-b8812082d321' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('84a546f0-c152-494e-aa11-b8812082d321');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-19 · ISO-5667-1 · ISO-5667-1-08 `flow_measurements.method` ↔ ISO-5667-1-08 `flow_measurement_method` (§21) — register column vs existing prod
+--     scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 6219d1a8-5c31-4630-9837-404a825126e5, enum, is_required
+--     = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for this quantity.
+-- Why the register column exists: Das Verfahren ist je Messstelle zu wählen; der Skalar hält nur eines.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '6219d1a8-5c31-4630-9837-404a825126e5' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-19: abgeloest durch die Registerspalte flow_measurements.method auf ISO-5667-1-08.]' WHERE f.id = '6219d1a8-5c31-4630-9837-404a825126e5' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('6219d1a8-5c31-4630-9837-404a825126e5');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-20 · ISO-5667-1 · ISO-5667-1-08 `flow_measurements.mode` ↔ ISO-5667-1-08 `flow_measurement_mode` (§21.1) — register column vs existing prod
+--     scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id 7740ebba-6f5f-469d-b8be-f6023f8bf915, enum, is_required
+--     = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for this quantity.
+-- Why the register column exists: Diskret oder kontinuierlich ist je Messstelle verschieden ("pueden ser discretas … o pueden ser continuas").
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '7740ebba-6f5f-469d-b8be-f6023f8bf915' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-20: abgeloest durch die Registerspalte flow_measurements.mode auf ISO-5667-1-08.]' WHERE f.id = '7740ebba-6f5f-469d-b8be-f6023f8bf915' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('7740ebba-6f5f-469d-b8be-f6023f8bf915');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-21 · ISO-5667-1 · ISO-5667-1-08 `flow_measurements.velocity_measured` ↔ ISO-5667-1-08 `flow_velocity` (§19.3) — register column vs existing prod
+--     scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id cf9f723b-93ec-4b07-aba2-af03212c513f, number,
+--     is_required = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: Die gemessene Geschwindigkeit gehört zur Messstelle, nicht zum Projekt.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = 'cf9f723b-93ec-4b07-aba2-af03212c513f' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-21: abgeloest durch die Registerspalte flow_measurements.velocity_measured auf ISO-5667-1-08.]' WHERE f.id = 'cf9f723b-93ec-4b07-aba2-af03212c513f' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('cf9f723b-93ec-4b07-aba2-af03212c513f');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-22 · ISO-5667-1 · ISO-5667-1-08 `flow_measurements.discharge_measured` ↔ ISO-5667-1-08 `discharge_rate` (§19.4) — register column vs existing
+--     prod scalar (amendment K)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape; the prod scalar (id b36c030f-2bb5-4697-83e2-586ffb84d0bd, number,
+--     is_required = false, consumer_worksheets = null) stays active and keeps every consumer and every gate it has today. No second equation is emitted for
+--     this quantity.
+-- Why the register column exists: Der gemessene Abfluss gehört zur Messstelle, nicht zum Projekt.
+-- Once ratified: deactivate the scalar (never DELETE — instances may hold values). No consumer_worksheets — deactivation touches this worksheet only.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = 'b36c030f-2bb5-4697-83e2-586ffb84d0bd' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-22: abgeloest durch die Registerspalte flow_measurements.discharge_measured auf ISO-5667-1-08.]' WHERE f.id = 'b36c030f-2bb5-4697-83e2-586ffb84d0bd' AND f.active;
+-- COMMIT;
+-- Rollback: RESTORE_F('b36c030f-2bb5-4697-83e2-586ffb84d0bd');
+--
+-- =====================================================================================================================
+-- iso5667_1-D-23 · ISO-5667-1 · ISO-5667-1-07 `x_mean_calc` / `n_hist` ↔ the typed `x_mean` / `n` — derived twins vs existing prod inputs
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): both prod inputs stay. `x_mean` (id 4462894b-4ee4-4b4e-8151-ec3815b6ee31, consumer_worksheets null) is an input of prod Gl. 1; `n`
+--     (id 8e17b978-a178-4fa9-a55e-cd4bdc54ffbd, is_required = true, consumer_worksheets ["ISO-5667-1-06"]) is BOTH the OUTPUT of prod Gl. 3 and an input of Gl.
+--     1 / Gl. 2, and the -06 gate CR-023 ('n > 0') reads it across the worksheet boundary. The DATA migration adds `x_mean_calc` and `n_hist` as SEPARATE
+--     symbols so nothing existing is re-produced.
+-- Evidence [PDF p.12 (printed p.11), §16.4, VA]: "Para cierto número de resultados n, tomados al azar, las estimaciones de la media aritmética verdadera X y la
+--     desviación estándar, σ, son la media aritmética, X , y s respectivamente de acuerdo con la siguiente fórmula" [EN] "For a given number of results n,
+--     taken at random, the estimates of the true arithmetic mean X and the standard deviation σ are the arithmetic mean X and s respectively, according to the
+--     following formula".
+-- Note: `n_hist` and `n` are NOT the same quantity — `n_hist` counts the results already on the sheet, `n` (Gl. 3) is the number of samples REQUIRED for the
+--     target confidence interval. Do NOT collapse them. `x_mean` may be retired once every project feeds x̄ from the register; `n` must not be retired at all
+--     while Gl. 3 produces it.
+-- No SQL is proposed for `n`. For `x_mean`, once ratified:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS fields_archive_iso5667_1 AS SELECT * FROM fields WHERE false;
+-- INSERT INTO fields_archive_iso5667_1 SELECT f.* FROM fields f WHERE f.id = '4462894b-4ee4-4b4e-8151-ec3815b6ee31' AND f.active;
+-- UPDATE fields f SET active = false, description = COALESCE(f.description, '') || ' [Plan 3 iso5667_1-D-23: abgeloest durch ISO-5667-1-07-D1 x_mean_calc aus
+--     dem Register historical_results.]' WHERE f.id = '4462894b-4ee4-4b4e-8151-ec3815b6ee31' AND f.active AND NOT EXISTS (SELECT 1 FROM equations e WHERE
+--     e.worksheet_template_id = f.worksheet_template_id AND 'x_mean' = ANY(e.input_symbols) AND e.formula LIKE '%x_mean%');
+-- COMMIT;
+-- Rollback: RESTORE_F('4462894b-4ee4-4b4e-8151-ec3815b6ee31');
+-- NOTE: the guard above is deliberately restrictive — prod Gl. 1 (id d42f576c-c3c7-4e00-bf34-e2da20bf3886) lists 'x_mean' in input_symbols today, so the UPDATE
+--     is a NO-OP until iso5667_1-R-2 has replaced Gl. 1. Apply R-2 first.
+--
+-- =====================================================================================================================
+-- iso5667_1-F-1 · ENGINE GAP (no prod change) · a `lookup()` miss inside a register `derived` column yields a BLANK cell, and any aggregate over that column
+--     goes `manual_required`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Observed IN THIS SESSION through the real code path (`prepareRegisterRows` → `evalValue` → `evaluateFormula`), pinned in
+--     src/lib/eval/__tests__/equations-iso5667-1.test.ts:
+-- three `flow_measurements` rows — (discharge, venturi) and (velocity, current_meter) both have an S21 row, (direction, venturi) has none because §21.2 does
+--     not print the venturi nozzle for direction.
+-- `method_ok` = [1, 1, null]; `reg.diagnostics` = [] (the lookup miss is a RECOVERABLE ExprError and is silent by design);
+-- `count_rows(flow_measurements, method_ok == 0)` ⇒ { kind: "manual_required", reason: "Fehlende Eingabe für count_rows(): method_ok" }.
+-- Consequence for this standard: the §21 catalogue check can be a PER-ROW badge but never a worksheet-level count — one unprinted combination makes the whole
+--     aggregate manual. The DATA migration therefore ships `method_ok` as a badge only and emits NO equation over it (ISO-5667-1-08-D1 counts rows, not
+--     verdicts). This is fail-safe (never a phantom pass) but it is also never a verdict.
+-- Proposed engine addition (Plan-2b follow-up, NOT applied here): either a `lookup_default(table, keys…, column, default)` form, or a `has_row(table, keys…)`
+--     predicate, so a missing row can be expressed as 0 instead of null. Both are additions to src/lib/expr/functions.ts + evaluate.ts and belong to the final
+--     [CODE] wave — recorded here so the wave has the exact failing expression.
+-- No SQL. Rollback: none.
+--
+-- =====================================================================================================================
+-- iso5667_1-J-1 · EDITION CAVEAT · every quote of this task is from the 1980 edition of ISO 5667-1
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The only copy of this standard on the machine is "ISO-5667-1.pdf" = NTC-ISO 5667-1, the Colombian (ICONTEC) adoption. Its cover page and its DOCUMENTO DE
+--     REFERENCIA name the edition exactly:
+-- Evidence [PDF p.1, cover page, VA]: "NORMA TÉCNICA NTC- COLOMBIANA 5667-1 | 1995-05-10 | GESTIÓN AMBIENTAL. CALIDAD DEL AGUA. MUESTREO. DIRECTRICES PARA EL
+--     DISEÑO DE PROGRAMAS DE MUESTREO"
+-- Evidence [PDF p.16 (printed p.15), DOCUMENTO DE REFERENCIA, VA]: "Esta norma es idéntica a la INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. Water Quality.
+--     Sampling. Part 1: Guidance on the Design of Sampling Programmes. Geneva, 1980, 16 pp. (ISO 5667/1, 1980)."
+-- [EN] "This standard is identical to ISO, Water Quality — Sampling — Part 1: Guidance on the Design of Sampling Programmes, Geneva, 1980, 16 pp. (ISO 5667/1,
+--     1980)."
+-- Prod agrees: standards.version = '1980 (ISO 5667/1:1980; adopted as NTC-ISO 5667-1:1995)' (read-only 2026-09-24). The seeded tables carry edition '1980'.
+-- What the owner is asked to confirm: ISO 5667-1 has been revised since 1980 (the current part 1 carries a different clause structure and merges material from
+--     other parts). EVERY clause reference in this task — §5.1, §8.2, §8.3, §8.6, §8.9, §8.10, §8.13, §9.3.2, §9.6.2, §10.2.4, §11.1, §12.1.1, §12.1.2, §13,
+--     §15, §16.2 – §16.5, §17, §19.1 – §19.4, §21.1 – §21.4 — is a 1980 clause number, and so is every clause_reference already in prod. If the practice is to
+--     encode against the CURRENT edition, this standard must be re-sourced before any of it is used in a client deliverable; if the 1980 text is accepted (it
+--     is the only copy in the library, and the acquisition policy is "no external acquisitions"), tick RATIFIED and the encoding stands as an explicitly dated
+--     one.
+-- No SQL. Rollback: none.
+--
+-- =====================================================================================================================
+-- iso5667_1-J-2 · VERIFICATION VOCABULARY · propose a third `regulation_tables.verification_status` token `pdf_verified` for PDF-derived (VA) table rows
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): all four seeded tables ship `imported_unverified`. The corpus vocabulary has exactly two tokens: `md_verified` (every row lifted from
+--     a MARKDOWN transcript, grade VC) and `imported_unverified`. ISO-5667-1 has NO markdown transcript, so `md_verified` would be factually false; and a new
+--     token is never introduced unilaterally. The lower token is therefore the honest choice, at the cost of under-stating the evidence: every row of S16_4_K /
+--     S21 / S8_6 / S12_1_2 was lifted from the standard's OWN PDF with a page reference, which SR-3 grades VA — strictly stronger than the `md_verified` rows
+--     elsewhere in this wave.
+-- Evidence [docs/verification-doctrine.md, SR-3]: "Authority order is PDF > markdown > encoding > ledger > chat. […] PDF-confirmed = VA; markdown-only = VC".
+-- Evidence [the plan's global constraints, rule 2]: "`regulation_tables.verification_status` is free text (no CHECK) — use exactly these two tokens." The
+--     column really is free text (no CHECK constraint), so the token below applies without a schema change.
+-- Proposed, once ratified — and the same for every future PDF-sourced table:
+-- BEGIN;
+-- UPDATE regulation_tables SET verification_status = 'pdf_verified' WHERE standard_code = 'ISO-5667-1' AND edition = '1980' AND table_code IN ('S16_4_K', 'S21', 'S8_6', 'S12_1_2') AND verification_status = 'imported_unverified';
+-- COMMIT;
+-- Rollback: UPDATE regulation_tables SET verification_status = 'imported_unverified' WHERE standard_code = 'ISO-5667-1' AND edition = '1980' AND table_code IN
+--     ('S16_4_K', 'S21', 'S8_6', 'S12_1_2') AND verification_status = 'pdf_verified';
+-- Note: if the token is accepted, the emitter's status-upgrade rule (emit-seed-sql.ts upStatements: it emits the UPDATE only when the builder status is not
+--     `imported_unverified`) and the Plan-3 conventions section should learn the third token in the final [CODE] wave — recorded as an I-block item, not
+--     changed here.
+--
+-- =====================================================================================================================
+-- iso5667_1-J-3 · ISO-5667-1 · ISO-5667-1-04 · CR-012 severity — a BLOCK gate on a figure the standard prints inside "por ejemplo"
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): nothing changes. CR-012 stays `pipe_nominal_bore >= 25` at severity `block`. Severity changes are always an owner ruling and are
+--     never emitted.
+-- Evidence [PDF p.5 (printed p.4), §8.6, VA]: "Los líquidos se deben bombear a través de tubos de tamaño adecuado (por ejemplo, al muestrear líquidos
+--     heterogéneos, de conducto nominal mínimo de 25 mm) a velocidades lineales suficientemente altas para mantener las características de flujo turbulento."
+-- The observation: the normative verb in that sentence attaches to "tubos de tamaño adecuado" (pipes of SUITABLE size). The 25 mm is inside a parenthetical
+--     opened by "por ejemplo" — a printed EXAMPLE of a suitable size for heterogeneous liquids. Under the Spec §7 override vocabulary that cue reads
+--     ANHALTSWERT, which is why the seeded table S8_6 ships `override_policy = 'anhaltswert'` with that sentence as its `override_quote`. Prod enforces the
+--     same figure as a BLOCK.
+-- Contrast, same standard, same session [PDF p.10 (printed p.9), §12.1.2, VA]: "el conducto del muestreo debe tener al menos 50 mm de diámetro" — a bare
+--     "debe", no example framing. That one is seeded `locked` and CR-017's block severity matches it.
+-- What is asked: keep CR-012 at `block` (the engineering-conservative reading: a bore under 25 mm will not hold turbulent flow for a heterogeneous liquid, so
+--     the example is effectively the requirement), or downgrade it to `warn` to match the printed cue. Proposed SQL for the downgrade only:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_iso5667_1 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = '4d2e32f9-ab1e-4bdc-b34b-79c1080ca811' AND md5(c.condition) = '78e5362ca069ed81632b3cb8fb0d5c77';
+-- UPDATE compliance_requirements c SET severity = 'warn', description = COALESCE(c.description, '') || ' [Plan 3 iso5667_1-J-3: 25 mm ist im Druck ein "por ejemplo"-Wert (Paragraph 8.6) — Herabstufung auf warn.]' WHERE c.id = '4d2e32f9-ab1e-4bdc-b34b-79c1080ca811' AND c.severity = 'block';
+-- COMMIT;
+-- Rollback: RESTORE_CR('4d2e32f9-ab1e-4bdc-b34b-79c1080ca811', '78e5362ca069ed81632b3cb8fb0d5c77');
+--
+-- =====================================================================================================================
+-- iso5667_1-J-4 · SEED CONTENT · the two S21 `discharge` rows that rest on §21.4 a)'s cross-reference to §21.3
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now: 24 S21 rows are seeded, of which TWO — (discharge, current_meter) and (discharge, pneumatic) — are not printed as discharge items in their own
+--     right. They come from §21.4 a), which points back at §21.3 inside the SAME document. Both carry `via_cross_reference = true` in their row values so they
+--     can be dropped with one statement.
+-- Evidence [PDF p.15 (printed p.14), §21.4 a), VA]: "Mediciones de la velocidad, tales como las mencionadas en el numeral 21.3 efectuadas en un canal cuya área
+--     de sección transversal sea conocida."
+-- [EN] "Velocity measurements, such as those mentioned in 21.3, made in a channel whose cross-sectional area is known."
+-- Evidence [PDF p.15 (printed p.14), §21.3, VA]: "La velocidad también se puede medir utilizando: a) Medidores de la corriente, tipos de lectura directa y
+--     registro. b) Técnicas ultrasónicas. c) Técnicas electromagnéticas. d) Técnicas neumáticas."
+-- Why fail-safe as seeded: the `method_ok` badge reads 1 when a row EXISTS and stays blank when it does not (iso5667_1-F-1). Omitting the two rows would
+--     therefore print a blank verdict next to a method the standard does explicitly allow for discharge via its own cross-reference — a false alarm. Seeding
+--     them can at worst be too permissive on a `kann` catalogue, which cannot fail a gate (no gate reads S21).
+-- The two §21.3 methods that ARE repeated under §21.4 d) 4) ("Técnicas electromagnéticas, ultrasónicas y de otra índole", PDF p.16) are seeded from THAT line,
+--     not from the cross-reference, and are not flagged.
+-- If rejected, once ratified:
+-- BEGIN;
+-- DELETE FROM regulation_table_rows r USING regulation_tables t WHERE r.table_id = t.id AND t.standard_code = 'ISO-5667-1' AND t.edition = '1980' AND t.table_code = 'S21' AND r.row_key IN ('discharge|current_meter', 'discharge|pneumatic') AND r.row_values ->> 'via_cross_reference' = 'true';
+-- COMMIT;
+-- Rollback: re-run scripts/migrations/20260917102800_regulation_tables_seed_iso5667_1.sql (its row INSERTs are ON CONFLICT DO UPDATE and therefore idempotent),
+--     or remove the two rows from S21_ROWS in src/lib/eval/regulation-tables-seed-iso5667_1.ts and re-emit.
+--
+-- =====================================================================================================================
+-- iso5667_1-U-1 · UNREADABLE CELL · the radical and the summation sign of the §16.4 / §16.5 formulas are lost by the text layer
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- `pdftotext -layout` renders the three printed formulas as stacked fragments without the mathematical operators:
+-- §16.4 s-formula (PDF p.12): the numerator "∑ (X − X )" with "i =1" and a stray "2", then "S =" over "n −1" — the radical is absent and the exponent floats.
+-- §16.4 confidence interval (PDF p.12): "es X ± K/n" — the printed form is X ± Kσ/√n; both σ and the radical are lost.
+-- §16.5 L-formula (PDF p.13): "2 Kσ" over "L =" over "n" — the radical over n is lost.
+-- §16.5 worked example (PDF p.13): "10 = 2 x 1,96 x 20 / n", then "n = 7,84", then "n ≈ 61" — the two "n" are √n in the print (7,84² = 61,47 ≈ 61, which is
+--     what the printed result says).
+-- NOTHING SEEDED DEPENDS ON ANY OF THIS. The only thing the seed takes from these spans is the DIVISOR "n −1" (readable, PDF p.12), which settles that the
+--     printed s is the SAMPLE standard deviation and therefore matches the engine's `stdev_rows`. The s / L / n MATH stays in prod's own equations 1 / 2 / 3,
+--     whose stored formulas already carry `sqrt(n)` and `^2` and whose source_quote cells already record the same reconstruction.
+-- Unblock path: read the three formulas off the rendered PDF page (a human page view, or an image-based OCR of PDF pp.12–13) and confirm prod's stored forms
+--     letter by letter. Until then the formulas are prod's (grade EV/VC), not this task's.
+-- No SQL. Rollback: none.
+--
+-- =====================================================================================================================
+-- iso5667_1-U-2 · UNREADABLE CELL · the superscript of "(2Kσ/L)2" is not typographically marked in the text layer
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence [PDF p.13 (printed p.12), §16.4 continued, VA, verbatim as extracted]: "Para estimar la media aritmética X para un intervalo de confianza dado L en
+--     el nivel de confianza seleccionado, el número de muestras necesarias es (2Kσ/L)2." The trailing "2" is the exponent in the print; the text layer puts it
+--     inline, so a reader of the extraction alone cannot tell "(2Kσ/L)²" from "(2Kσ/L)·2".
+-- It is settled by the standard's OWN worked example three lines later (PDF p.13): with K = 1,96, σ = 20 and L = 10 the printed result is "n ≈ 61", and
+--     (2·1,96·20/10)² = 7,84² = 61,4656 — while (2·1,96·20/10)·2 would be 15,68. The squared reading is the only one consistent with the printed number, and it
+--     is also prod's stored Gl. 3 (`n = (2 * K * sigma / L)^2`). Reproduced end-to-end through the real `evaluateFormula` and pinned in
+--     equations-iso5667-1.test.ts.
+-- Recorded as a U-block rather than silently resolved because the resolution is an INFERENCE from a second printed value, not a direct reading of the first.
+-- No SQL. Rollback: none.
+--
+-- =====================================================================================================================
+-- iso5667_1-X-1 · PROD HYGIENE (observation, nothing changed) · Gl. 3's `source_quote` names the wrong printed page
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Prod Gl. 3 (id 8b5fc076-c947-447c-aa37-7ebbc3a3a81d) carries verification_quote "… — printed p.12 / PDF p.13" and source_quote "NTC-ISO 5667-1 (adopción de
+--     ISO 5667/1:1980), §16.4, pág. impresa 11: …". The two disagree by one page.
+-- Re-read in this session: the sentence "Para estimar la media aritmética X para un intervalo de confianza dado L …" is at line 855 of the extraction, which is
+--     on PDF page 13; PDF page 13 carries the printed page number "12" at its foot (the document prints page N on PDF page N+1 throughout). So
+--     `verification_quote` is right and `source_quote` says 11 where it should say 12. The clause number §16.4 in both cells is correct — the sentence is the
+--     last paragraph of §16.4, which runs over the page break.
+-- Not corrected here: this task does not touch prod equation rows outside iso5667_1-R-2, and a provenance correction is its own (pre-authorised) class that
+--     belongs in a fix pass with its own reproduction check. Recorded so it is not re-discovered.
+-- Proposed, once ratified:
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_iso5667_1 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_iso5667_1 SELECT e.* FROM equations e WHERE e.id = '8b5fc076-c947-447c-aa37-7ebbc3a3a81d' AND md5(e.formula) = '6c2ccf8165f426dc99739b814735dae2';
+-- UPDATE equations e SET source_quote = replace(e.source_quote, 'pág. impresa 11', 'pág. impresa 12') WHERE e.id = '8b5fc076-c947-447c-aa37-7ebbc3a3a81d' AND e.source_quote LIKE '%pág. impresa 11%';
+-- COMMIT;
+-- Rollback: UPDATE equations e SET source_quote = a.source_quote FROM equations_archive_iso5667_1 a WHERE a.id = e.id AND e.id =
+--     '8b5fc076-c947-447c-aa37-7ebbc3a3a81d';
+--
+-- =====================================================================================================================
+-- End of file. Blocks: G-1, G-2, G-3, C-1, C-2, E-1, R-1, R-2, D-1 … D-23, F-1, J-1, J-2, J-3, J-4, U-1, U-2, X-1.
+-- 100 % SQL comments: nothing in this file executes if it is run as-is.
