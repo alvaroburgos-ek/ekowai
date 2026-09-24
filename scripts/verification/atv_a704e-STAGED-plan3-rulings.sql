@@ -30,7 +30,8 @@
 --   worksheet_sections (7): id, worksheet_template_id, parent_section_id, code, title_de, title_en, order_index   (+ visible_when after 20260911100000)
 --
 -- Shorthand:  WS(code) = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = '<code>')
---             RESTORE(code) = UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '<id>';
+--             RESTORE(code) = UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '<id>' AND md5(a.condition) = '<the md5 of the state that block archived>';
+--             (the md5(a.condition) guard matters because G-5 archives the POST-G-2 state of CR-019 / CR-022 / CR-023, so the archive holds TWO rows per id — fix round 1.)
 --
 -- Gates (read-only 2026-09-24; conditions from the capture):
 --   ATV-A-704E-01 CR-001 (id 3595d9ff-f666-4a73-a3d4-45469955b1d3, block, md5 203d23782d6fe95a64dcd86a788a4944, attest true, condition 'attest_atv_a_704e_01_cr_001 == True')
@@ -95,10 +96,10 @@
 -- UPDATE fields f SET visible_when = 'testing_equipment == ''heating_device_thermoblock''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'heating_device_deviation' AND f.active AND f.visible_when IS NULL;
 -- COMMIT;
 -- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
---     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '907c09f6-a679-484e-aacb-c5c2a69a5046'; UPDATE fields f SET visible_when = NULL FROM
---     worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol =
---     'heating_device_deviation' AND f.active AND f.visible_when = 'testing_equipment == ''heating_device_thermoblock'''; -- drop compliance_requirements_archive_atv_a704e once every gate change of
---     this file is signed off as final.
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '907c09f6-a679-484e-aacb-c5c2a69a5046' AND md5(a.condition) =
+--     '19d23565c7d23b2a61436ca38d522b88'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code =
+--     'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'heating_device_deviation' AND f.active AND f.visible_when = 'testing_equipment == ''heating_device_thermoblock'''; -- drop
+--     compliance_requirements_archive_atv_a704e once every gate change of this file is signed off as final.
 --
 -- =====================================================================================================================
 -- atv_a704e-G-2 · ATV-A-704E · ATV-A-704E-09 / -10 · CR-019 / CR-022 / CR-023 + the -09 C / -10 C / -10 D section hides — §4.4 applicability: IF-guards on the three §4.4 booleans + the follow-up section hides (a plant that runs no equivalency measurement should not be asked for one)
@@ -140,16 +141,17 @@
 -- UPDATE worksheet_sections ws SET visible_when = 'parallel_analysis_performed == true' WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10') AND ws.parent_section_id IS NULL AND ws.code = 'D' AND ws.visible_when IS NULL;
 -- COMMIT;
 -- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
---     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '22f9df00-7368-4855-94a1-e68dff901654'; UPDATE compliance_requirements c SET condition =
---     a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM
---     compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc'; UPDATE compliance_requirements c SET condition = a.condition, description =
---     a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id
---     = c.id AND c.id = 'beabf464-e506-4e73-8176-8f29164136e4'; UPDATE worksheet_sections ws SET visible_when = NULL WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN
---     standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND ws.code = 'C' AND ws.visible_when = 'multiple_determination_performed == true'; UPDATE
---     worksheet_sections ws SET visible_when = NULL WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND
---     w.code = 'ATV-A-704E-10') AND ws.code = 'C' AND ws.visible_when = 'equivalency_check_performed == true'; UPDATE worksheet_sections ws SET visible_when = NULL WHERE ws.worksheet_template_id =
---     (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10') AND ws.code = 'D' AND ws.visible_when =
---     'parallel_analysis_performed == true';
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '22f9df00-7368-4855-94a1-e68dff901654' AND md5(a.condition) =
+--     '6ee9ad80eaa22abf5fd23f8733d0f4a1'; UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity =
+--     a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc' AND
+--     md5(a.condition) = '47803239cbdd3a98a288d5bbcd1a645b'; UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id =
+--     a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id =
+--     'beabf464-e506-4e73-8176-8f29164136e4' AND md5(a.condition) = '3c0912deb7605b5b9dbf912d7983a8fe'; UPDATE worksheet_sections ws SET visible_when = NULL WHERE ws.worksheet_template_id = (SELECT
+--     w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND ws.code = 'C' AND ws.visible_when =
+--     'multiple_determination_performed == true'; UPDATE worksheet_sections ws SET visible_when = NULL WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON
+--     s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10') AND ws.code = 'C' AND ws.visible_when = 'equivalency_check_performed == true'; UPDATE worksheet_sections ws SET
+--     visible_when = NULL WHERE ws.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-10')
+--     AND ws.code = 'D' AND ws.visible_when = 'parallel_analysis_performed == true';
 --
 -- =====================================================================================================================
 -- atv_a704e-G-3 · ATV-A-704E · ATV-A-704E-11 · CR-025 / pipette_tested_volume + pipette_deviation_pct — IF-guard on `testing_equipment == 'piston_stroke_pipettes'` + the follow-up hides of the two pipette fields
@@ -176,11 +178,11 @@
 -- UPDATE fields f SET visible_when = 'testing_equipment == ''piston_stroke_pipettes''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_deviation_pct' AND f.active AND f.visible_when IS NULL;
 -- COMMIT;
 -- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
---     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = 'c548fbde-1dfb-49a9-8ac1-d436dee7d623'; UPDATE fields f SET visible_when = NULL FROM
---     worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_tested_volume'
---     AND f.active AND f.visible_when = 'testing_equipment == ''piston_stroke_pipettes'''; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
---     WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_deviation_pct' AND f.active AND f.visible_when = 'testing_equipment ==
---     ''piston_stroke_pipettes''';
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = 'c548fbde-1dfb-49a9-8ac1-d436dee7d623' AND md5(a.condition) =
+--     'b87cac8599fd4132db67e4f067232da0'; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code =
+--     'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol = 'pipette_tested_volume' AND f.active AND f.visible_when = 'testing_equipment == ''piston_stroke_pipettes'''; UPDATE fields f SET
+--     visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-11' AND f.symbol
+--     = 'pipette_deviation_pct' AND f.active AND f.visible_when = 'testing_equipment == ''piston_stroke_pipettes''';
 --
 -- =====================================================================================================================
 -- atv_a704e-G-4 · ATV-A-704E · ATV-A-704E-08 · CR-020 / CR-021 / CR-024 (attestation gates) + CR-027 — Replace the IQC-Card 2 / IQC-Card 9 ATTESTATION gates by register-fed checks (`qa_measures_count >= 1`, `pruefmittel_count >= 1`) once the registers are the record
@@ -223,13 +225,14 @@
 --  WHERE c.id = '55e20532-c41b-4a54-8f45-7546844e8a72' AND md5(c.condition) = '277a7a84d768829ef3d4d020b0c0b365';
 -- COMMIT;
 -- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
---     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '5284c13d-79fe-4f9f-ae0b-5ec3f0adb495'; UPDATE compliance_requirements c SET condition =
---     a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM
---     compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '0db28ced-aeb9-4bcd-af9d-22f30dd3fc07'; UPDATE compliance_requirements c SET condition = a.condition, description =
---     a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id
---     = c.id AND c.id = 'dbf31510-c6ac-4076-94d7-4763adb0d169'; UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id =
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '5284c13d-79fe-4f9f-ae0b-5ec3f0adb495' AND md5(a.condition) =
+--     '1b53c546684931b39ee46f7f2736e5a5'; UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity =
+--     a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '0db28ced-aeb9-4bcd-af9d-22f30dd3fc07' AND
+--     md5(a.condition) = '102962df3b7ade10f39df117fe75f709'; UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id =
 --     a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id =
---     '55e20532-c41b-4a54-8f45-7546844e8a72';
+--     'dbf31510-c6ac-4076-94d7-4763adb0d169' AND md5(a.condition) = '270b021616778884dff876a10566059a'; UPDATE compliance_requirements c SET condition = a.condition, description = a.description,
+--     worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id
+--     = '55e20532-c41b-4a54-8f45-7546844e8a72' AND md5(a.condition) = '277a7a84d768829ef3d4d020b0c0b365';
 --
 -- =====================================================================================================================
 -- atv_a704e-G-5 · ATV-A-704E · ATV-A-704E-09 / -10 · CR-019 / CR-022 / CR-023 re-pointed onto the register maxima — Enforce the quality target over ALL rows (`max_dev_pct_calc` / `equivalency_max_dev` / `parallel_max_dev`) instead of one typed deviation, and propose two NEW warn gates for the dilution / spiking trials
@@ -252,6 +255,10 @@
 -- BEGIN;
 -- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_atv_a704e AS SELECT * FROM compliance_requirements WHERE false;
 -- -- G-2 must have been applied: the guards below are md5 of the POST-G-2 conditions.
+-- -- Archive the POST-G-2 state of the three rows THIS block changes (fix round 1 — the block previously archived nothing of its own):
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = '22f9df00-7368-4855-94a1-e68dff901654' AND md5(c.condition) = '82b143992cf7b2801a4d1b02ec4663bd';
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc' AND md5(c.condition) = '91c7fd2875f8e2d08f0bf9446c806740';
+-- INSERT INTO compliance_requirements_archive_atv_a704e SELECT c.* FROM compliance_requirements c WHERE c.id = 'beabf464-e506-4e73-8176-8f29164136e4' AND md5(c.condition) = '5881d47a24bc89d6d7fe989d56b1347c';
 -- UPDATE compliance_requirements c SET
 --   condition = 'IF multiple_determination_performed == true THEN max_dev_pct_calc <= qa_quality_target_pct',
 --   description = 'Plan 3 (atv_a704e-G-5): groesste Abweichung der Einzelbestimmungen (aus dem Register) gegen das Qualitaetsziel; der schlechteste Wert entscheidet.'
@@ -268,13 +275,16 @@
 -- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, requires_attestation) SELECT (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09'), 'CR-032', 'Aufstockungsversuche innerhalb des Qualitaetsziels', 'Spiking trials within the quality target', 'spike_max_dev <= qa_quality_target_pct', 'IGC-Card 5, Sheet 3', 'warn', 'Plan 3 (atv_a704e-G-5, NEU): groesste Abweichung der Aufstockungsversuche gegen das Qualitaetsziel der internen Vorgabe (IQC-Karte 2).', false WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND c2.code = 'CR-032');
 -- COMMIT;
 -- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
---     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '22f9df00-7368-4855-94a1-e68dff901654'; UPDATE compliance_requirements c SET condition =
---     a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM
---     compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc'; UPDATE compliance_requirements c SET condition = a.condition, description =
---     a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id
---     = c.id AND c.id = 'beabf464-e506-4e73-8176-8f29164136e4'; DELETE FROM compliance_requirements c WHERE c.worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id
---     = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND c.code IN ('CR-031', 'CR-032') AND c.description LIKE 'Plan 3 (atv_a704e-G-5, NEU):%'; -- (the two RESTOREs bring
---     back the ORIGINAL pre-G-2 conditions from the archive — apply G-2 again if only G-5 is to be undone.)
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '22f9df00-7368-4855-94a1-e68dff901654' AND md5(a.condition) =
+--     '82b143992cf7b2801a4d1b02ec4663bd'; UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity =
+--     a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc' AND
+--     md5(a.condition) = '91c7fd2875f8e2d08f0bf9446c806740'; UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id =
+--     a.worksheet_template_id, severity = a.severity, requires_attestation = a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id =
+--     'beabf464-e506-4e73-8176-8f29164136e4' AND md5(a.condition) = '5881d47a24bc89d6d7fe989d56b1347c'; DELETE FROM compliance_requirements c WHERE c.worksheet_template_id = (SELECT w.id FROM
+--     worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-09') AND c.code IN ('CR-031', 'CR-032') AND c.description LIKE 'Plan 3
+--     (atv_a704e-G-5, NEU):%'; -- (the THREE restores above pick the POST-G-2 archive row of each id by md5(a.condition), so undoing G-5 leaves G-2 in place; the archive now holds two rows per id —
+--     the pre-G-2 one written by G-2 and the post-G-2 one written by this block — and the md5 guard is what disambiguates them. To undo G-2 as well, run G-2's own rollback afterwards, whose guard is
+--     the ORIGINAL md5.)
 --
 -- =====================================================================================================================
 -- atv_a704e-G-6 · ATV-A-704E · ATV-A-704E-07 · CR-018 (staff qualification attestation) — Replace the staff-qualification attestation by `mitarbeiter_count >= 1` once the personnel register is the record
@@ -295,7 +305,8 @@
 --  WHERE c.id = '4e769f71-8c62-43d7-bc42-e017fa200431' AND md5(c.condition) = '749c7629603ed96c8526931dc3f07a13';
 -- COMMIT;
 -- Rollback: UPDATE compliance_requirements c SET condition = a.condition, description = a.description, worksheet_template_id = a.worksheet_template_id, severity = a.severity, requires_attestation =
---     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '4e769f71-8c62-43d7-bc42-e017fa200431';
+--     a.requires_attestation FROM compliance_requirements_archive_atv_a704e a WHERE a.id = c.id AND c.id = '4e769f71-8c62-43d7-bc42-e017fa200431' AND md5(a.condition) =
+--     '749c7629603ed96c8526931dc3f07a13';
 --
 -- =====================================================================================================================
 -- atv_a704e-G-7 · ATV-A-704E · ATV-A-704E-07 · CR-028 (EMPTY condition) — The deviation-log gate has an EMPTY condition and can never fire — give it a computable form over the `abweichungen` register
@@ -1277,6 +1288,36 @@
 -- (no SQL — judgment / gap record only.)
 --
 -- =====================================================================================================================
+-- atv_a704e-J-3 · ATV-A-704E · ATV-A-704E-06 · `precipitation_influence` / `storage_temperature` ← `sampling_method == 'automatic'` — WITHHELD (controller ruling, fix round 1): the emitter accepts both hides, but NO prod cell makes either field conditional on automatic sampling
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Chosen now (fail-safe): Both fields stay VISIBLE for every sampling method and NOTHING is emitted on -06. The two rules are the brief's Step-4 targets and the emitter ACCEPTS them (both fields are
+--     consumer-free and read by no gate — asserted in field-configs-atv_a704e.test.ts), so this is a judgment, not a guard refusal. The evidence below is the whole of what prod holds, and it does NOT
+--     settle the condition: the IQC-Card 8 sampling log prints the method boxes ("manual sampling [ ] - automatic sampling [ ] time proportional [ ] …") and the precipitation box ("Influence of
+--     precipitation: yes [ ] no [ ]") as SEPARATE log lines with no rule between them, and the storage-temperature cell is a general sentence about every wastewater sample ("The wastewater sample
+--     should be stored at temperatures around 4 °C for a short time"), not a statement about automatic sampling. The only basis for the rules is the inventory's §3 table ("ATV-A-704E-06 |
+--     `sampling_method` = automatic | `precipitation_influence`, storage temperature relevant | IQC-Card 8 | nothing"), and the plan's global constraints class an inventory line as a POINTER, not a
+--     source. Fail-safe is what is shipped: a manual-sampling plant must still be asked — hiding the fields would remove a question the standard may well ask of everyone.
+-- Evidence [prod fields.verification_quote (ATV-A-704E-06 sampling_method), EV — no transcript]: "IQC-Card 8 - Sampling, Sampling Log, Method of sampling: manual sampling [ ] - automatic sampling [ ]
+--     time proportional [ ] volume proportional [ ] flow proportional [ ] — printed p.51"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-06 precipitation_influence), EV — no transcript]: "IQC-Card 8 - Sampling, Sampling Log: Pre-treatment: none [ ] cooled [ ] added: ______ |
+--     Influence of precipitation: yes [ ] no [ ] — printed p.51"
+-- Evidence [prod fields.verification_quote (ATV-A-704E-06 storage_temperature), EV — no transcript]: "Storage of samples: What is the optimum storage temperature to eliminate changes of the sample in
+--     the best possible way? The wastewater sample should be stored at temperatures around 4 °C for a short time. In this way, for instance, the bacterial conversion of ammonium to nitrate can be
+--     suppressed. — printed p.49"
+-- Note: UNBLOCK PATH: the OCR of IQC-Card 8 (the sampling log and its notes, printed around p.49–51) and of §5.1 (the documentation of boundary conditions, printed around p.13) — the same OCR that
+--     unblocks atv_a704e-U-5. If a printed sentence ties either field to automatic sampling, ratify this block and the two UPDATEs below are the whole change; if it does not, REJECT and the fields
+--     stay unconditional for good. Proposed strings verbatim: `precipitation_influence` ← `sampling_method == 'automatic'`; `storage_temperature` ← `sampling_method == 'automatic'`. Both are guarded
+--     on `visible_when IS NULL` so a re-run is a no-op.
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'sampling_method == ''automatic''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-06' AND f.symbol = 'precipitation_influence' AND f.active AND f.visible_when IS NULL;
+-- UPDATE fields f SET visible_when = 'sampling_method == ''automatic''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-06' AND f.symbol = 'storage_temperature' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: UPDATE fields f SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code =
+--     'ATV-A-704E-06' AND f.symbol = 'precipitation_influence' AND f.active AND f.visible_when = 'sampling_method == ''automatic'''; UPDATE fields f SET visible_when = NULL FROM worksheet_templates w
+--     JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND s.code = 'ATV-A-704E' AND w.code = 'ATV-A-704E-06' AND f.symbol = 'storage_temperature' AND f.active AND
+--     f.visible_when = 'sampling_method == ''automatic''';
+--
+-- =====================================================================================================================
 -- atv_a704e-U-1 · ATV-A-704E · ATV-A-704E-08 · IQC-Card 2 Sheet 1 — minimum frequencies and quality targets per QA measure — NOT SEEDED — the printed table exists only in the scanned PDF; every value is a sign-off item until an OCR or a manual transcription makes it quotable
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Chosen now (fail-safe): No regulation table is seeded for this standard (tables 0, no seed builder, no seed migration). The values the engineer needs are typed into the register columns instead.
@@ -1285,7 +1326,11 @@
 --     columns `minimum_frequency` (text), `quality_target` (text, because the printed cells mix "< 10 %", "< 0.2 pH", "< 3 °C" and a sentence), `quality_target_pct` (number, only where the printed
 --     cell IS a percentage), `footnote` (the printed "*" sentence about the lower concentration range). Policy: the printed lead-in names the DWA working group's RECOMMENDATIONS — `anhaltswert` is
 --     the likely policy, but the modal verb must be read from the page before it is written. Once seeded, `qa_minimum_frequency` / `qa_quality_target_pct` become `lookup_fill` targets keyed on
---     `qa_measure`.
+--     `qa_measure`. **KEY AMBIGUITY a future lookup would inherit (fix round 1):** the prod cell quoted below prints TEN rows in column 1 while prod's `qa_measure` enum has NINE tokens — "Pipettes
+--     100-1000 µl volume check" and "Pipettes > 1000 µl volume check" are two printed rows that collapse into the single token `pipettes`, and the printed quality-target column splits them (< 2 % vs
+--     < 1 %) — exactly the split CR-025 already encodes as a volume band. A table keyed on `qa_measure` alone therefore cannot carry both target rows: either the key gains a second column (volume
+--     band) or prod's enum gains a tenth token. **Under owner ruling D-1 the enum is NOT touched by this task** (`atv_a704e-D-22` keeps it byte-for-byte); the decision belongs to whoever seeds the
+--     table after the OCR.
 -- Evidence [prod fields.verification_quote (ATV-A-704E-08 qa_quality_target_pct) — EV, second-hand, EV — no transcript]: "IQC-Card 2 Sheet 1 - Recommendations by the DWA-Working Group IG-4.3, col.4
 --     Quality target: Multiple determinations Random error < 10 % * | Measurement of standards Adherance to the permissible value range (control limits) | Plausibility checks (spiking, dilution)
 --     deviation < 20 % * | Equivalency measurements Deviation < 20 % * | Parallel measurements to the reference method Deviation < 20 % * | Pipettes 100-1000 µl Deviation < 2 % | Pipettes > 1000 µl

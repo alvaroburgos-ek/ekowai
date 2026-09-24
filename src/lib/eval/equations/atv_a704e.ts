@@ -10,8 +10,19 @@
  * EQ-01 … EQ-06 (`verified_against_standard`, captured read-only 2026-09-24),
  * re-expressed over register rows — but the stored rows are themselves grade EV for
  * this plan, so no source can attest the re-expression. Each row therefore ships with
- * `verification_quote: null` and a matching `atv_a704e-U-*` sign-off entry rather than
- * a quote that cannot be cited. Nothing here replaces a prod equation: EQ-01 … EQ-06
+ * `verification_quote: null` rather than a quote that cannot be cited.
+ *
+ * **Which rows carry an `atv_a704e-U-*` pointer, and which carry none** (corrected in fix
+ * round 1 — the earlier blanket claim was wrong): `-08-D1` → `U-1` (IQC-Card 2 Sheet 1
+ * frequencies / quality targets), `-09-D1 … D5` → `U-1` (the plausibility targets their
+ * maxima are compared against), `-10-D1 / D2` → `U-1`, `-11-D1` → `U-2` (IQC-Card 9
+ * intervals), `-11-D2` → `U-3` (IQC-Card 9 Sheet 3 pipette tolerances). `-12-D1`
+ * (`abweichungen_count`) and `-12-D2` (`mitarbeiter_count`) name NO U-entry, deliberately:
+ * they are STRUCTURAL counts of a deviation log and a personnel list, and IQC-Card 10 /
+ * IQC-Card 11 print FORMS, not tables of values — there is no printed source a U-block
+ * could ask for, so their descriptions say "kein Transkript" without a pointer.
+ *
+ * Nothing here replaces a prod equation: EQ-01 … EQ-06
  * keep their rows and their outputs (`mean_value`, `deviation_single_pct`,
  * `calculated_value`, `NSS`, `deviation_equivalency_pct`, `deviation_parallel_pct`);
  * making those outputs derived is STAGED (`atv_a704e-R-1`, archive pattern).

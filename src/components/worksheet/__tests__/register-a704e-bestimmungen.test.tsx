@@ -9,6 +9,12 @@
  * Adding a third value changes the mean and the greatest deviation live; a new row
  * without a result is incomplete and never counts (the count keeps the complete rows,
  * the mean stays the mean of what is entered).
+ *
+ * Fix round 1 adds the ATV-A-704E-11 `pruefmittel` register: a photometer row and a
+ * pipette row prove the FOUR row-scope `visible_when` columns through the real editor —
+ * each type-specific column renders only on its own row type, switching a row's
+ * `equipment` swaps which columns it shows, and the two -11 equations read the stored
+ * rows throughout.
  */
 import React from 'react';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -26,6 +32,8 @@ import { makeTableLookup, makeTableRows } from '@/lib/eval/regulation-tables-fal
 const STD = 'ATV-A-704E';
 const EINZ = parseFieldConfig({ widget: 'register', uiConfig: FIELD_CONFIGS.find((e) => e.worksheet === 'ATV-A-704E-09' && e.symbol === 'einzelbestimmungen')!.ui_config, lookup: null, visibleWhen: null }).ui as RegisterUiConfig;
 const EINZ_ID = 'fixture-einzelbestimmungen-a704e';
+const PRUEF = parseFieldConfig({ widget: 'register', uiConfig: FIELD_CONFIGS.find((e) => e.worksheet === 'ATV-A-704E-11' && e.symbol === 'pruefmittel')!.ui_config, lookup: null, visibleWhen: null }).ui as RegisterUiConfig;
+const PRUEF_ID = 'fixture-pruefmittel-a704e';
 
 type Row = Record<string, unknown> & { id: string };
 const ROWS: Row[] = [
@@ -89,5 +97,66 @@ describe('einzelbestimmungen through the generic RegisterEditor (Plan 3 Task 27)
     expect(screen.getByTestId('rows-complete')).toHaveTextContent('3/4');
     expect(evalOut('ATV-A-704E-09-D1', storedRows(EINZ_ID))).toMatchObject({ kind: 'computed', value: 3 });
     expect(evalOut('ATV-A-704E-09-D2', storedRows(EINZ_ID))).toMatchObject({ kind: 'computed', value: 100 });
+  });
+});
+
+const PRUEF_EQUIPMENT = 'Überwachtes Prüfmittel (IQC-Karte 9)';
+const PIPETTE_VOL = 'Geprüftes Volumen der Kolbenhubpipette (IQC-Karte 9 Blatt 3)';
+const PIPETTE_DEV = 'Gemessene Abweichung der Kolbenhubpipette in Prozent (IQC-Karte 9 Blatt 3)';
+const HEATING_DEV = 'Gemessene Temperaturabweichung des Heizgeräts bzw. Thermoblocks in Grad Celsius (IQC-Karte 9)';
+const PHOTOMETER_CHK = 'Photometer mit dem Testlösungssatz des Herstellers geprüft (IQC-Karte 9)';
+
+const pruefPrepared = (rows: unknown[]) => prepareRegisterRows({ rows }, PRUEF.columns, { table, tableRows: makeTableRows(STD), symbol: () => undefined });
+const pruefEval = (n: string, rows: unknown[]) => {
+  const e = EQUATIONS.find((x) => x.equation_number === n)!;
+  return evaluateFormula({ equationId: n, formula: e.formula, inputSymbols: e.input_symbols, outputSymbol: e.output_symbol, inputs: [], registers: { pruefmittel: pruefPrepared(rows) }, tableLookup: table });
+};
+
+describe('pruefmittel through the generic RegisterEditor (Plan 3 Task 27, fix round 1)', () => {
+  beforeEach(() => initStore({
+    [PRUEF_ID]: {
+      type: 'json',
+      value: {
+        rows: [
+          { id: 'p1', equipment: 'photometer', interval: 'annually', last_check: '2026-02-02', photometer_check: true },
+          { id: 'p2', equipment: 'piston_stroke_pipettes', interval: 'quarterly', last_check: '2026-01-10', pipette_volume_ml: 0.1, pipette_dev_pct: 1.5 },
+        ],
+      },
+    },
+  }));
+
+  it('a photometer row and a pipette row: each of the four type-specific columns renders ONLY on its own row type; count 2 and pipette maximum 1,5 read the stored rows', () => {
+    render(<RegisterEditor fieldId={PRUEF_ID} symbol="pruefmittel" config={PRUEF} standardCode={STD} />);
+    expect(screen.getAllByTestId('register-row')).toHaveLength(2);
+    expect(screen.getByTestId('rows-complete')).toHaveTextContent('2/2');
+    const equipment = screen.getAllByLabelText(PRUEF_EQUIPMENT) as HTMLSelectElement[];
+    expect(equipment.map((s) => s.value)).toEqual(['photometer', 'piston_stroke_pipettes']);
+    // the photometer row shows ONLY the photometer checkbox; the pipette row ONLY the two pipette numbers; neither shows the thermoblock field
+    expect(screen.getAllByLabelText(PHOTOMETER_CHK)).toHaveLength(1);
+    expect((screen.getByLabelText(PHOTOMETER_CHK) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getAllByLabelText(PIPETTE_VOL)).toHaveLength(1);
+    expect(screen.getAllByLabelText(PIPETTE_DEV)).toHaveLength(1);
+    expect((screen.getByLabelText(PIPETTE_DEV) as HTMLInputElement).value).toBe('1.5');
+    expect(screen.queryAllByLabelText(HEATING_DEV)).toHaveLength(0);
+    expect(screen.queryByTestId('register-diagnostics')).toBeNull();
+    expect(pruefEval('ATV-A-704E-11-D1', storedRows(PRUEF_ID))).toMatchObject({ kind: 'computed', value: 2 });
+    expect(pruefEval('ATV-A-704E-11-D2', storedRows(PRUEF_ID))).toMatchObject({ kind: 'computed', value: 1.5 });
+  });
+
+  it('switching the photometer row to a thermoblock swaps its checkbox for the temperature field; switching it to a pipette reveals the two pipette numbers and, once a deviation is typed, moves the maximum', async () => {
+    const user = userEvent.setup();
+    render(<RegisterEditor fieldId={PRUEF_ID} symbol="pruefmittel" config={PRUEF} standardCode={STD} />);
+    await user.selectOptions(screen.getAllByLabelText(PRUEF_EQUIPMENT)[0], 'heating_device_thermoblock');
+    expect(screen.queryAllByLabelText(PHOTOMETER_CHK)).toHaveLength(0);
+    expect(screen.getAllByLabelText(HEATING_DEV)).toHaveLength(1);
+    expect(screen.getAllByLabelText(PIPETTE_DEV)).toHaveLength(1); // still only the pipette row
+    expect(pruefEval('ATV-A-704E-11-D2', storedRows(PRUEF_ID))).toMatchObject({ kind: 'computed', value: 1.5 });
+    await user.selectOptions(screen.getAllByLabelText(PRUEF_EQUIPMENT)[0], 'piston_stroke_pipettes');
+    expect(screen.queryAllByLabelText(HEATING_DEV)).toHaveLength(0);
+    expect(screen.getAllByLabelText(PIPETTE_VOL)).toHaveLength(2);
+    expect(screen.getAllByLabelText(PIPETTE_DEV)).toHaveLength(2);
+    await user.type(screen.getAllByLabelText(PIPETTE_DEV)[0], '2.4');
+    expect(pruefEval('ATV-A-704E-11-D2', storedRows(PRUEF_ID))).toMatchObject({ kind: 'computed', value: 2.4 });
+    expect(pruefEval('ATV-A-704E-11-D1', storedRows(PRUEF_ID))).toMatchObject({ kind: 'computed', value: 2 });
   });
 });

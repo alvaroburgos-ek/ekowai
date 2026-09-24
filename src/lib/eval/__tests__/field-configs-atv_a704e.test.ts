@@ -3,8 +3,8 @@
  * contract, every register enum column equals the captured prod `enum_values`
  * byte-for-byte (D-1 / G-A3) and every rule literal is a prod token, no register
  * column is keyed `id` or shadows a prod symbol of its worksheet (amendment P),
- * the THREE UPDATEs on existing fields are consumer-free and gate-free and their
- * drivers live on the same worksheet, every other brief target is REFUSED by the
+ * the ONE emitted UPDATE on an existing field is consumer-free and gate-free (and the
+ * two -06 rules the brief asks for are ACCEPTED by the emitter yet WITHHELD — atv_a704e-J-3), every other brief target is REFUSED by the
  * emitter's own guards (asserted, not discovered: CR-025 / CR-026 gate readers, the
  * producer chain of `parallel_analysis_performed`, the -09 C / -10 C / -10 D section
  * rules through CR-019 / CR-022 / CR-023 and the EQ-02 / EQ-05 / EQ-06 hops), the two
@@ -19,7 +19,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  FIELD_CONFIGS, SECTION_VISIBILITY, STAGED_SECTION_RULES,
+  FIELD_CONFIGS, SECTION_VISIBILITY, STAGED_SECTION_RULES, WITHHELD_06_RULES,
   PARAMETERS, APPLICATION_MODES, QA_MEASURES, EQUIPMENT, INTERVALS, IQC_CARDS,
   AUTOMATIC_SAMPLING, PHOTOMETER, MULTI, EQ_OR_PAR, THERMOBLOCK, PIPETTES, PARALLEL_MODE, PLAUSIBILITY,
   ROW_PIPETTE, ROW_THERMOBLOCK, ROW_PHOTOMETER,
@@ -73,11 +73,9 @@ describe('ATV-A-704E field configs (Plan 3 Task 27)', () => {
     expect(Object.keys(SEED_BUILDERS)).not.toContain('atv_a704e');
   });
 
-  it('counts: 24 entries = 21 create (9 registers, 12 derived outputs) + 3 UPDATE (precipitation_influence, storage_temperature, photometer_check_done); the emitted rules and their drivers; the pruefmittel register carries three row-scope rules', () => {
-    expect(FIELD_CONFIGS).toHaveLength(24);
-    expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual([
-      'ATV-A-704E-06 precipitation_influence', 'ATV-A-704E-06 storage_temperature', 'ATV-A-704E-11 photometer_check_done',
-    ]);
+  it('counts: 22 entries = 21 create (9 registers, 12 derived outputs) + 1 UPDATE (photometer_check_done only — the two -06 rules are WITHHELD, atv_a704e-J-3); the emitted rules and their drivers; the pruefmittel register carries four row-scope rules', () => {
+    expect(FIELD_CONFIGS).toHaveLength(22);
+    expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['ATV-A-704E-11 photometer_check_done']);
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('register')).toEqual([
       'ATV-A-704E-01 betriebsmethoden', 'ATV-A-704E-08 qs_massnahmen',
@@ -92,15 +90,13 @@ describe('ATV-A-704E field configs (Plan 3 Task 27)', () => {
       'ATV-A-704E-11 pruefmittel_count', 'ATV-A-704E-11 pipette_dev_max',
       'ATV-A-704E-12 mitarbeiter_count', 'ATV-A-704E-12 abweichungen_count',
     ]);
-    expect(byWidget('select_one')).toEqual(['ATV-A-704E-06 precipitation_influence']);
-    expect(byWidget('scalar')).toEqual(['ATV-A-704E-06 storage_temperature']);
+    expect(byWidget('select_one')).toEqual([]);
+    expect(byWidget('scalar')).toEqual([]);
     expect(byWidget('attestation')).toEqual(['ATV-A-704E-11 photometer_check_done']);
     expect(byWidget('select_many')).toEqual([]);
     expect(byWidget('lookup_fill')).toEqual([]);
     const vis = FIELD_CONFIGS.filter((e) => e.visible_when).map((e) => `${e.worksheet} ${e.symbol} :: ${e.visible_when}`);
     expect(vis).toEqual([
-      `ATV-A-704E-06 precipitation_influence :: ${AUTOMATIC_SAMPLING}`,
-      `ATV-A-704E-06 storage_temperature :: ${AUTOMATIC_SAMPLING}`,
       `ATV-A-704E-09 einzelbestimmungen :: ${MULTI}`,
       `ATV-A-704E-09 n_determinations_calc :: ${MULTI}`,
       `ATV-A-704E-09 mean_value_calc :: ${MULTI}`,
@@ -228,12 +224,18 @@ describe('ATV-A-704E field configs (Plan 3 Task 27)', () => {
     expect(registerCfg('ATV-A-704E-01', 'betriebsmethoden').footer).toBeUndefined();
   });
 
-  it('guards: the three UPDATEs are consumer-free and gate-free; CR-026 refuses the thermoblock hide (G-1), CR-025 refuses both pipette hides (G-3), the producer guard refuses parallel_analysis_performed (C-1); the -09 C / -10 C / -10 D section rules are refused through CR-019 / CR-022 / CR-023 (G-2) while -09 D / E are ACCEPTED and withheld only because their driver is not inherited (C-2); the IF-guard exemption the G-blocks rely on', () => {
-    for (const [ws, sym, vw] of [['ATV-A-704E-06', 'precipitation_influence', AUTOMATIC_SAMPLING], ['ATV-A-704E-06', 'storage_temperature', AUTOMATIC_SAMPLING], ['ATV-A-704E-11', 'photometer_check_done', PHOTOMETER]] as Array<[string, string, string]>) {
+  it('guards: the one emitted UPDATE and the two WITHHELD -06 rules (atv_a704e-J-3) are all consumer-free and gate-free — the emitter ACCEPTS all three; CR-026 refuses the thermoblock hide (G-1), CR-025 refuses both pipette hides (G-3), the producer guard refuses parallel_analysis_performed (C-1); the -09 C / -10 C / -10 D section rules are refused through CR-019 / CR-022 / CR-023 (G-2) while -09 D / E are ACCEPTED and withheld only because their driver is not inherited (C-2); the IF-guard exemption the G-blocks rely on', () => {
+    // the ONE emitted rule plus the TWO withheld ones: the emitter ACCEPTS all three, so J-3 is a judgment, not a guard artefact
+    for (const [ws, sym, vw] of [['ATV-A-704E-11', 'photometer_check_done', PHOTOMETER], ...WITHHELD_06_RULES.map((r) => [r.worksheet, r.symbol, r.visible_when])] as Array<[string, string, string]>) {
       expect(gateReaders(prior, ws, sym, vw), `${sym} gate readers`).toEqual([]);
       expect(producerChain(prior, ws, sym), `${sym} chain`).toBeNull();
       expect(() => emitFieldConfigSql('atv_a704e', [rule(ws, sym, vw)], [], prior), `${sym} accepted`).not.toThrow();
     }
+    expect(WITHHELD_06_RULES.map((r) => `${r.worksheet} ${r.symbol} :: ${r.visible_when} → ${r.block}`)).toEqual([
+      `ATV-A-704E-06 precipitation_influence :: ${AUTOMATIC_SAMPLING} → atv_a704e-J-3`,
+      `ATV-A-704E-06 storage_temperature :: ${AUTOMATIC_SAMPLING} → atv_a704e-J-3`,
+    ]);
+    for (const r of WITHHELD_06_RULES) expect(FIELD_CONFIGS.find((e) => e.worksheet === r.worksheet && e.symbol === r.symbol), `${r.symbol} not emitted`).toBeUndefined();
     const refused: Array<[string, string, string, string[], RegExp | null]> = [
       ['ATV-A-704E-11', 'heating_device_deviation', THERMOBLOCK, ['CR-026'], null],
       ['ATV-A-704E-11', 'pipette_tested_volume', PIPETTES, ['CR-025'], null],
@@ -272,7 +274,7 @@ describe('ATV-A-704E field configs (Plan 3 Task 27)', () => {
     expect(gateReaders(guarded, 'ATV-A-704E-11', 'heating_device_deviation', THERMOBLOCK)).toEqual([]);
   });
 
-  it('the captured prod facts this task builds on: 91 fields / 101 sections / 6 equations / 30 gates (3 with an EMPTY condition, which never refuse), no self-consumers, the two "ALL" consumer tokens that reach no worksheet, and the 23 attest_* booleans that stay', () => {
+  it('the captured prod facts this task builds on: 91 fields / 101 sections / 6 equations / 30 gates (3 with an EMPTY condition, which never refuse), no self-consumers, the two "ALL" consumer tokens that reach no worksheet, and the 21 attest_* booleans that stay (the brief and the inventory say 23 — refuted, atv_a704e-O-2)', () => {
     expect(Object.keys(prior.gates!)).toHaveLength(30);
     expect(Object.entries(prior.gates!).filter(([, g]) => g.parse_error).map(([k]) => k)).toEqual(['ATV-A-704E-05 CR-029', 'ATV-A-704E-07 CR-028', 'ATV-A-704E-08 CR-030']);
     for (const code of ['CR-028', 'CR-029', 'CR-030']) expect(PROD_GATE[code].condition).toBe('');
@@ -311,17 +313,20 @@ describe('ATV-A-704E field configs (Plan 3 Task 27)', () => {
     for (const e of FIELD_CONFIGS) expect(e.visible_when ?? '', e.symbol).not.toContain('parameter_name');
   });
 
-  it('the committed migration + rollback equal a fresh emit against the committed prior (freshness pin, default refuse mode, no warnings): 21 INSERTs, 3 UPDATEs, 0 section UPDATEs, no enum_values UPDATE (D-1)', () => {
+  it('the committed migration + rollback equal a fresh emit against the committed prior (freshness pin, default refuse mode, no warnings): 21 INSERTs, 1 UPDATE, 0 section UPDATEs, no enum_values UPDATE (D-1)', () => {
     const { up, down, warnings } = emitFieldConfigSql('atv_a704e', FIELD_CONFIGS, SECTION_VISIBILITY, prior);
     expect(warnings).toEqual([]);
     const files = fieldConfigFilesFor('atv_a704e', '20260917102710');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(3);
+    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(1);
     expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(21);
     expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
-    expect(up).toMatch(/^UPDATE fields f SET widget = 'select_one', ui_config = NULL, lookup = NULL, visible_when = 'sampling_method == ''automatic''' FROM .* AND f\.symbol = 'precipitation_influence' AND w\.code = 'ATV-A-704E-06'/m);
+    // atv_a704e-J-3 — the two -06 rules are WITHHELD, so neither field is touched by the migration at all
+    expect(up).not.toContain("f.symbol = 'precipitation_influence'");
+    expect(up).not.toContain("f.symbol = 'storage_temperature'");
+    expect(up).not.toContain("sampling_method == ''automatic''");
     expect(up).toMatch(/^UPDATE fields f SET widget = 'attestation', ui_config = NULL, lookup = NULL, visible_when = 'testing_equipment == ''photometer''' FROM .* AND f\.symbol = 'photometer_check_done' AND w\.code = 'ATV-A-704E-11'/m);
     expect(up).not.toContain('regulation_table'); // no table seeded for this standard
   });

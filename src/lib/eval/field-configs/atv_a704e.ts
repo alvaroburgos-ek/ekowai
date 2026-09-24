@@ -30,9 +30,12 @@
  * Every register enum column copies prod's `value` + `label_de` byte-for-byte
  * (owner ruling D-1, pinned).
  *
- * Emitted rules on EXISTING fields: THREE — `precipitation_influence` and
- * `storage_temperature` (-06) ← `sampling_method == 'automatic'`, `photometer_check_done`
- * (-11) ← `testing_equipment == 'photometer'` (all consumer-free, no gate reads them).
+ * Emitted rules on EXISTING fields: ONE — `photometer_check_done` (-11) ←
+ * `testing_equipment == 'photometer'` (consumer-free, read by no gate). The brief's two
+ * -06 rules (`precipitation_influence` / `storage_temperature` ← `sampling_method ==
+ * 'automatic'`) would be ACCEPTED by the emitter but are WITHHELD (controller ruling,
+ * fix round 1 — `atv_a704e-J-3`): no prod cell ties either field to automatic sampling,
+ * and the inventory §3 line that suggests it is a pointer, not a source.
  * Every other brief target is REFUSED by the emitter's guards and routed to STAGED
  * (`scripts/verification/atv_a704e-STAGED-plan3-rulings.sql`):
  *   - `heating_device_deviation` (-11) ← thermoblock: CR-026 reads it → **G-1**;
@@ -62,7 +65,6 @@ const STD = 'ATV-A-704E';
 
 const on = (worksheet: string) => (e: Omit<FieldConfigEntry, 'standard' | 'worksheet'>): FieldConfigEntry => ({ standard: STD, worksheet, ...e });
 const WS01 = on('ATV-A-704E-01');
-const WS06 = on('ATV-A-704E-06');
 const WS08 = on('ATV-A-704E-08');
 const WS09 = on('ATV-A-704E-09');
 const WS10 = on('ATV-A-704E-10');
@@ -87,7 +89,11 @@ const opts = (xs: ReadonlyArray<{ value: string; label_de: string }>) => xs.map(
 const labels = (xs: ReadonlyArray<{ value: string; label_de: string }>) => Object.fromEntries(xs.map((x) => [x.value, x.label_de]));
 
 // ---- drivers (quoted enum tokens — Task 13 string-literal rule; booleans `== true`) ----
-/** -06 `sampling_method` token `automatic` (IQC-Card 8 sampling log) — EMITTED on precipitation_influence / storage_temperature. */
+/**
+ * -06 `sampling_method` token `automatic` (IQC-Card 8 sampling log). **NOT EMITTED** — the brief's two -06 rules are
+ * withheld (`atv_a704e-J-3`, controller ruling fix round 1): the emitter accepts them, but no prod cell makes either
+ * field conditional on automatic sampling. Kept as data for the J-block and the acceptance pin.
+ */
 export const AUTOMATIC_SAMPLING = "sampling_method == 'automatic'";
 /** -11 `testing_equipment` token `photometer` (IQC-Card 9) — EMITTED on photometer_check_done (no gate reads it on -11). */
 export const PHOTOMETER = "testing_equipment == 'photometer'";
@@ -145,15 +151,13 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
       description: 'Plan 3: Zeilen je Parameter × Betriebsmethode (prod hält je Feld einen Wert: parameter_name -01, application_mode / expected_concentration_range / validation_range_coverage_pct / method_selected_suitable -03); die Einzelfelder bleiben (atv_a704e-D-38 … D-42). Keine Tabelle hinterlegt — ohne Transkript ist kein gedruckter Wert zitierbar (atv_a704e-U-4 Referenzmethoden, U-6 20–80-%-Fenster).' },
   }),
 
-  // ================= ATV-A-704E-06 — sampling conditionals (the two EMITTED rules on existing fields) =================
-  WS06({
-    symbol: 'precipitation_influence', widget: 'select_one', ui_config: null, enum_values: 'keep_prod', visible_when: AUTOMATIC_SAMPLING,
-    verification_quote: `${Q.SAMPLING_METHOD} — ${Q.PRECIPITATION}${EV}`,
-  }),
-  WS06({
-    symbol: 'storage_temperature', widget: 'scalar', ui_config: null, visible_when: AUTOMATIC_SAMPLING,
-    verification_quote: `${Q.SAMPLING_METHOD} — ${Q.STORAGE_TEMPERATURE}${EV}`,
-  }),
+  // ================= ATV-A-704E-06 — NOTHING emitted: the two brief rules are WITHHELD (atv_a704e-J-3, fix round 1) =================
+  // `precipitation_influence` / `storage_temperature` ← `sampling_method == 'automatic'` would both be ACCEPTED by the
+  // emitter (consumer-free, read by no gate — pinned), but NO prod cell ties either field to automatic sampling: the
+  // IQC-Card 8 sampling log prints the method boxes and the precipitation box side by side without a condition, and the
+  // storage-temperature cell is a §5.1 / IQC-Card 8 sentence about every sample. The only basis is the inventory's §3
+  // table, which the global constraints class as a POINTER, not a source, and no transcript can settle it. Fail-safe is
+  // the field stays visible — a manual-sampling plant must still be asked. See atv_a704e-J-3.
 
   // ================= ATV-A-704E-08 — the QS-measure register (IQC-Card 2 Sheet 1) =================
   WS08({
@@ -167,7 +171,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'performed_count', label: 'Durchgeführt', type: 'number', min: 0, aria_label: 'Anzahl der im Berichtszeitraum durchgeführten Maßnahmen (Übersichtskarte, IQC-Karte 1)' },
       ],
       footer: ['qa_measures_count'],
-      note: `Je Maßnahme eine Zeile, damit alle neun QS-Maßnahmen einer Anlage nebeneinander stehen (prod hält qa_measure / qa_minimum_frequency / qa_quality_target_pct / survey_measure_count je genau einmal — atv_a704e-D-22 … D-25). **Häufigkeit und Qualitätsziel sind Ingenieureingaben**, keine hinterlegte Tabelle: die gedruckten Empfehlungen der IQC-Karte 2 Blatt 1 sind ohne Transkript nicht zitierbar (atv_a704e-U-1). Zur Einordnung der Text der prod-Zellen: ${Q.QA_FREQUENCY} | ${Q.QA_TARGET}${EV}`,
+      note: `Je Maßnahme eine Zeile, damit alle QS-Maßnahmen einer Anlage nebeneinander stehen (prod hält qa_measure / qa_minimum_frequency / qa_quality_target_pct / survey_measure_count je genau einmal — atv_a704e-D-22 … D-25). Die Auswahl bietet die NEUN prod-Token (D-1, unverändert); die gedruckte Spalte 1 der IQC-Karte 2 Blatt 1 nennt nach der prod-Zelle jedoch ZEHN Zeilen — „Pipettes 100-1000 µl volume check“ und „Pipettes > 1000 µl volume check“ fallen im prod-Token \`pipettes\` zusammen, obwohl die gedruckte Zielspalte sie trennt (< 2 % gegenüber < 1 %); genau diese Trennung steckt heute in CR-025 (atv_a704e-U-1). **Häufigkeit und Qualitätsziel sind Ingenieureingaben**, keine hinterlegte Tabelle: die gedruckten Empfehlungen sind ohne Transkript nicht zitierbar (atv_a704e-U-1 / U-3). Zur Einordnung der Text der prod-Zellen: ${Q.QA_FREQUENCY} | ${Q.QA_TARGET}${EV}`,
     },
     verification_quote: `${Q.QA_MEASURE} — ${Q.QA_TARGET}${EV}`,
     create: { section_code: 'E', label_de: 'QS-Maßnahmen (je Maßnahme: Mindesthäufigkeit, Qualitätsziel %, Anzahl durchgeführt)', data_type: 'json', unit: null, clause_reference: 'Annex A, IQC-Card 2 Sheet 1',
@@ -397,6 +401,15 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
  *     in one staged transaction), the vsme / iso14046 convention.
  */
 export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [];
+
+/**
+ * The two -06 rules the brief asks for, as data for `atv_a704e-J-3` and the ACCEPTANCE pin (never emitted — controller
+ * ruling fix round 1: the emitter would take them, so the withholding is a recorded judgment, not a guard artefact).
+ */
+export const WITHHELD_06_RULES: Array<{ worksheet: string; symbol: string; visible_when: string; block: string }> = [
+  { worksheet: 'ATV-A-704E-06', symbol: 'precipitation_influence', visible_when: AUTOMATIC_SAMPLING, block: 'atv_a704e-J-3' },
+  { worksheet: 'ATV-A-704E-06', symbol: 'storage_temperature', visible_when: AUTOMATIC_SAMPLING, block: 'atv_a704e-J-3' },
+];
 
 /** The five §4.4 section rules, as data for the STAGED blocks G-2 / C-2 and the guard pins (never emitted). */
 export const STAGED_SECTION_RULES: Array<{ worksheet: string; section_code: string; visible_when: string; block: string }> = [
