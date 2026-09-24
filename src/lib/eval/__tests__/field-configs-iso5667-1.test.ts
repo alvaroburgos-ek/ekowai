@@ -17,7 +17,7 @@ import {
 } from '../field-configs/iso5667_1';
 import type { FieldConfigEntry, PriorSnapshot } from '../field-configs/types';
 import { parseFieldConfig, type RegisterUiConfig } from '../field-config';
-import { parseCondition, parseNumeric } from '@/lib/expr';
+import { evalCondition, parseCondition, parseNumeric } from '@/lib/expr';
 import { s164KAsTable, s21AsTable, s1212AsTable } from '../regulation-tables-seed-iso5667_1';
 import { emitFieldConfigSql, fieldConfigFilesFor, loadPriorSnapshot } from '../../../../scripts/regulation-tables/emit-field-configs-sql';
 
@@ -208,5 +208,37 @@ describe('ISO-5667-1 field configs (Plan 3 Task 28)', () => {
     expect(up).not.toContain('GATE-REFUSAL');
     // amendment J is visible in the migration: `K` is never named as an UPDATE target
     expect(up).not.toMatch(/f\.symbol = 'K'/);
+  });
+
+  it('fix round 1 — every staged `IF … THEN` gate body parses, and a COMPOUND body (AND / OR) is PARENTHESISED (amendment M / corpus consistency); parenthesising CR-016 does not change what it evaluates to', () => {
+    const staged = readFileSync(join(ROOT, 'scripts/verification/iso5667_1-STAGED-plan3-rulings.sql'), 'utf8');
+    // every proposed rewrite in the STAGED file, un-escaped from its SQL string literal
+    const conditions = [...staged.matchAll(/^--\s+condition = '(IF .*)',$/gm)].map((m) => m[1].replace(/''/g, "'"));
+    expect(conditions).toHaveLength(7);
+    for (const c of conditions) {
+      expect(parseCondition(c), `does not parse: ${c}`).not.toBeNull();
+      const body = c.slice(c.indexOf(' THEN ') + ' THEN '.length);
+      const compound = /\s(AND|OR)\s/.test(body.replace(/^\(([\s\S]*)\)$/, '$1'));
+      expect(body.startsWith('(') && body.endsWith(')'), `compound body must be parenthesised, simple body must not: ${c}`).toBe(compound);
+    }
+    // exactly one compound body in this file — CR-016
+    expect(conditions.filter((c) => c.includes(' THEN ('))).toEqual([
+      "IF water_situation_type == 'groundwater' THEN (groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL)",
+    ]);
+    // …and the parentheses are cosmetic: identical verdicts on every state that matters
+    const BARE = "IF water_situation_type == 'groundwater' THEN groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL";
+    const PAREN = conditions.find((c) => c.includes(' THEN ('))!;
+    const states: Array<[string, Record<string, unknown>]> = [
+      ['river_stream (guard false)', { water_situation_type: 'river_stream', groundwater_purged: null, sampling_depth: null }],
+      ['groundwater, both null', { water_situation_type: 'groundwater', groundwater_purged: null, sampling_depth: null }],
+      ['groundwater, both set', { water_situation_type: 'groundwater', groundwater_purged: true, sampling_depth: 12.5 }],
+      ['groundwater, one set', { water_situation_type: 'groundwater', groundwater_purged: true, sampling_depth: null }],
+    ];
+    const verdicts = states.map(([, values]) => {
+      const symbol = (s: string) => (Object.hasOwn(values, s) ? (values[s] as never) : undefined);
+      return [evalCondition(BARE, { symbol }), evalCondition(PAREN, { symbol })] as const;
+    });
+    for (const [i, [a, b]] of verdicts.entries()) expect(b, states[i][0]).toEqual(a);
+    expect(verdicts.map(([a]) => a.kind)).toEqual(['pass', 'fail', 'pass', 'fail']);
   });
 });

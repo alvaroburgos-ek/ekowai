@@ -146,7 +146,7 @@
 -- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = '86a35bbe-7aef-4916-8f7d-b4b3a803b935' AND md5(c.condition) = '7da80880c6d9bb4427e0131e9889195b';
 -- INSERT INTO compliance_requirements_archive_iso5667_1 SELECT c.* FROM compliance_requirements c WHERE c.id = 'ab448330-f767-43fb-b3c1-48e7f1e6dbce' AND md5(c.condition) = 'e6932b1dc4d0bc6de89782a44d3f15c3';
 -- UPDATE compliance_requirements c SET
---   condition = 'IF water_situation_type == ''groundwater'' THEN groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL',
+--   condition = 'IF water_situation_type == ''groundwater'' THEN (groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL)',
 --   description = 'Plan 3 (iso5667_1-G-2): Abpumpen und Entnahmetiefe nur pruefen, wenn die Situation Grundwasser ist (IF-Guard auf water_situation_type, Paragraph 9.6.2).'
 --  WHERE c.id = '6263b2f4-6e7c-4960-a999-4fb1f06f2232' AND md5(c.condition) = 'fb23f29bd1cd2736f0d4e41b468661fc';
 -- UPDATE compliance_requirements c SET
@@ -304,7 +304,8 @@
 --     very little if s is based on a relatively large number of samples." [the superscript renders inline — iso5667_1-U-2]
 -- Evidence [PDF p.13 (printed p.12), §16.5 worked example, VA]: "Si el intervalo de confianza requerido fuera el 10 % de la media aritmética, el nivel de
 --     confianza requerido del 95 %, y la desviación estándar el 20 % de la media aritmética, entonces: 10 = 2 x 1,96 x 20 / n … y por consiguiente n = 7,84 y n
---     ≈ 61." [the radical over n is lost by pdftotext: the printed line reads √n = 7,84, and 7,84² = 61,47 — iso5667_1-U-1]
+--     ≈ 61." [reflowed from the displayed formula — iso5667_1-U-1] [the radical over n is lost by pdftotext: the printed line reads √n = 7,84, and 7,84² =
+--     61,47 — iso5667_1-U-1]
 -- Note: what the brief actually wanted — K coming from the printed table instead of being typed — is delivered by iso5667_1-E-1 (or, today, by the created twin
 --     `K_table`), WITHOUT touching Gl. 3: the equation reads the field `K`, so a ratified E-1 makes Gl. 3 compute from the table value automatically. The new
 --     equation ISO-5667-1-07-D2 `n_hist = count_rows(historical_results)` is a DIFFERENT quantity (how many results are on the sheet) and does not collide with
@@ -322,7 +323,7 @@
 --     sign-off).
 -- Evidence [PDF p.12 (printed p.11), §16.4, VA]: "Para cierto número de resultados n, tomados al azar, las estimaciones de la media aritmética verdadera X y la
 --     desviación estándar, σ, son la media aritmética, X , y s respectivamente de acuerdo con la siguiente fórmula: […] S = […] / n −1 […] Donde xi representa
---     los valores individuales."
+--     los valores individuales." [reflowed from the displayed formula — iso5667_1-U-1]
 -- [EN] "For a given number of results n, taken at random, the estimates of the true arithmetic mean X and the standard deviation σ are the arithmetic mean X
 --     and s respectively, according to the following formula: s = √( Σ(Xi − X)² / (n − 1) ). Where xi represents the individual values." [the radical and the
 --     summation sign are lost by pdftotext; the DIVISOR "n −1" IS printed and readable — iso5667_1-U-1]
@@ -775,13 +776,17 @@
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- The only copy of this standard on the machine is "ISO-5667-1.pdf" = NTC-ISO 5667-1, the Colombian (ICONTEC) adoption. Its cover page and its DOCUMENTO DE
 --     REFERENCIA name the edition exactly:
--- Evidence [PDF p.1, cover page, VA]: "NORMA TÉCNICA NTC- COLOMBIANA 5667-1 | 1995-05-10 | GESTIÓN AMBIENTAL. CALIDAD DEL AGUA. MUESTREO. DIRECTRICES PARA EL
---     DISEÑO DE PROGRAMAS DE MUESTREO"
+-- Evidence [PDF p.1, cover page, VA — the committed span `Q.L1_5`, BYTE-EXACT, JSON-escaped so the two printed columns and the CR line endings survive]: "NORMA TÉCNICA                                                                   NTC-ISO\r\nCOLOMBIANA                                                                       5667-1\r\n\r\n\r\n                                                                             1995-05-10\r"
+-- Reading (NOT a quote): the designator runs across the two printed columns — left "NORMA TÉCNICA / COLOMBIANA", right "NTC-ISO / 5667-1" — i.e. NTC-ISO
+--     5667-1, ratified 1995-05-10. The title line "GESTIÓN AMBIENTAL. CALIDAD DEL AGUA. MUESTREO. DIRECTRICES PARA EL DISEÑO DE PROGRAMAS DE MUESTREO" is
+--     printed further down the SAME page (L10–L11) and is NOT part of this span.
 -- Evidence [PDF p.16 (printed p.15), DOCUMENTO DE REFERENCIA, VA]: "Esta norma es idéntica a la INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. Water Quality.
 --     Sampling. Part 1: Guidance on the Design of Sampling Programmes. Geneva, 1980, 16 pp. (ISO 5667/1, 1980)."
 -- [EN] "This standard is identical to ISO, Water Quality — Sampling — Part 1: Guidance on the Design of Sampling Programmes, Geneva, 1980, 16 pp. (ISO 5667/1,
 --     1980)."
 -- Prod agrees: standards.version = '1980 (ISO 5667/1:1980; adopted as NTC-ISO 5667-1:1995)' (read-only 2026-09-24). The seeded tables carry edition '1980'.
+--     **The 1980 claim stands unchanged**: it rests on the BYTE-EXACT L1099–L1100 span above ("Geneva, 1980, 16 pp. (ISO 5667/1, 1980)") together with that
+--     prod version string — NOT on the cover page, which carries only the NTC designator and the 1995 ICONTEC ratification date.
 -- What the owner is asked to confirm: ISO 5667-1 has been revised since 1980 (the current part 1 carries a different clause structure and merges material from
 --     other parts). EVERY clause reference in this task — §5.1, §8.2, §8.3, §8.6, §8.9, §8.10, §8.13, §9.3.2, §9.6.2, §10.2.4, §11.1, §12.1.1, §12.1.2, §13,
 --     §15, §16.2 – §16.5, §17, §19.1 – §19.4, §21.1 – §21.4 — is a 1980 clause number, and so is every clause_reference already in prod. If the practice is to

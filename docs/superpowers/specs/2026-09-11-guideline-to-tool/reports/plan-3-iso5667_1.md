@@ -330,3 +330,137 @@ New tests added (all in the unit project):
 **Not encoded, with reason:** the cross-standard push of `n` into ISO-5667-10 `number_of_samples` (Phase 6, spec §8); §7's eleven safety clauses beyond the four booleans prod already carries (no printed values, prose duties already covered by CR-007/008/009); §§4, 6, 14, 18, 20 (descriptive/justificatory text, no normative value or closed list to encode).
 
 **The one thing a reader should not miss:** this encoding is dated. Every clause number in it, and every clause number already in prod, is a **1980** clause number. `iso5667_1-J-1` asks whether that is acceptable or whether the standard must be re-sourced before any of it reaches a client deliverable.
+
+## 11. Fix round 1 (2026-09-24) — reviewer verdict "Approved with minors", 0 Critical / 0 Important
+
+The reviewer made its own `pdftotext` extraction and independently confirmed 58/58 spans, 58/58 page
+citations, the R-1 refutation (61,4656 → 61), E-1 from the component source, F-1 through the register
+path, and all three absence greps. Three minors were raised; all three are applied below. **No
+migration content changed** — the three minors touch the STAGED rulings file, the sign-off sheet and
+one test only, so nothing was re-emitted:
+
+```
+$ git diff --quiet -- scripts/migrations scripts/rollback-2026091710280*.sql scripts/rollback-2026091710281*.sql scripts/rollback-2026091710282*.sql
+YES — no migration content changed, nothing to re-emit
+```
+
+### Minor 1 — the `J-1` cover-page evidence was not verbatim
+
+**Was:** `"NORMA TÉCNICA NTC- COLOMBIANA 5667-1 | 1995-05-10 | GESTIÓN AMBIENTAL. …"` — it dropped `ISO`
+from the designator (the printed token is `NTC-ISO`, split across two lines by the column layout),
+flattened the two printed columns with an inserted `|`, and appended the title line, which is printed
+further down the same page (L10–L11) and is **not** part of the L1–L5 span at all.
+
+**Now:** both the STAGED block and the sheet carry the committed span `Q.L1_5` **byte-exactly**,
+JSON-escaped so the column padding and the CR line endings survive, followed by a clearly-labelled
+*Reading (NOT a quote)* that spells out how the two columns combine. Checked mechanically:
+
+```
+STAGED contains the byte-exact JSON-escaped span: true
+sheet  contains the byte-exact JSON-escaped span: true
+old flattened string gone (both files):           true
+```
+
+Two mistakes were found and fixed while doing this, both worth recording because both would have
+silently re-introduced the defect:
+
+1. The STAGED generator's `wrap()` helper hard-wraps by splitting on spaces and rejoining with single
+   spaces — it **collapsed the column padding** on the first regeneration. That evidence line is now
+   emitted unwrapped through `w()`, with a comment saying why it must never be wrapped.
+2. In the sign-off generator the escaped span was first baked into a JS **single-quoted source
+   literal**, where `\r\n` is an escape sequence and became a real CR/LF, breaking both the byte
+   match and the markdown bullet. Both generators now parse `Q` out of the committed TS module and
+   call `JSON.stringify` at **generate** time, so the escaping can no longer be lost in transit.
+
+**The 1980 edition claim is unchanged**, and both files now say what it rests on: the byte-exact
+L1099–L1100 span (`"…Geneva, 1980, 16 pp. (ISO 5667/1, 1980)."`) together with prod
+`standards.version = '1980 (ISO 5667/1:1980; adopted as NTC-ISO 5667-1:1995)'` — **not** the cover
+page, which carries only the NTC designator and the 1995 ICONTEC ratification date.
+
+### Minor 2 — the two evidence lines that linearise displayed math are now annotated in place
+
+Both now carry `[reflowed from the displayed formula — iso5667_1-U-1]` immediately after the closing
+quotation mark, in the STAGED file and on the sheet, at each point of use:
+
+- §16.5 worked example — `"… entonces: 10 = 2 x 1,96 x 20 / n … y por consiguiente n = 7,84 y n ≈ 61."`
+  (blocks `R-1`, and the sheet's `R-1`);
+- §16.4 s-formula — `"… de acuerdo con la siguiente fórmula: […] S = […] / n −1 […] Donde xi representa
+  los valores individuales."` (blocks `R-2`, and the sheet's `R-2`).
+
+The `U-1` block already carried the prose; the annotation puts the editorial step where the reader
+meets the quote instead of one block away.
+
+### Minor 3 — compound `IF … THEN` bodies are parenthesised
+
+Every `IF … THEN` rewrite in the STAGED file now runs through one generated helper:
+
+```js
+const isCompound = (c) => /\s(AND|OR)\s/.test(c);
+const ifBody    = (c) => (isCompound(c) ? `(${c})` : c);
+```
+
+The decision is taken from the **captured** condition, never by hand, so a future capture with a
+different body is wrapped automatically. **All seven** proposed rewrites in the file were checked, not
+just CR-016; exactly one is compound:
+
+```
+IF pipe_sampling == true THEN pipe_nominal_bore >= 25
+IF suspended_solids_determined == true THEN isokinetic_sampling IS NOT NULL
+IF water_situation_type == 'groundwater' THEN (groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL)   ← the only compound body
+IF water_situation_type == 'wastewater_sludge' THEN sludge_pipe_diameter >= 50
+IF water_situation_type IN {'wastewater', 'stormwater'} THEN automatic_sampler_protection IS NOT NULL
+IF abnormal_conditions == true THEN abnormal_frequency_increase IS NOT NULL
+IF water_situation_type == 'stormwater' THEN flow_proportional_sampling IS NOT NULL
+```
+
+Parse check and three-state evaluation, run through the engine's own `parseCondition` /
+`evalCondition`:
+
+```
+BARE  parseCondition -> ok
+PAREN parseCondition -> ok
+river_stream (guard false)   bare={"kind":"pass"} paren={"kind":"pass"} same=true
+groundwater, both null       bare={"kind":"fail"} paren={"kind":"fail"} same=true
+groundwater, both set        bare={"kind":"pass"} paren={"kind":"pass"} same=true
+groundwater, one set         bare={"kind":"fail"} paren={"kind":"fail"} same=true
+```
+
+Both forms parse and the verdicts are identical on every state — the parentheses are cosmetic, as
+expected. The check is not a throwaway: it is now a **permanent pin** in
+`src/lib/eval/__tests__/field-configs-iso5667-1.test.ts` that reads the seven conditions back out of
+the committed STAGED file, asserts each one parses, asserts the parenthesisation matches
+compoundness **both ways** (compound ⇒ parenthesised, simple ⇒ bare), names CR-016 as the single
+compound body, and re-runs the four-state equivalence. The sheet's `G-2` block was regenerated from
+the same generator, so it mirrors the parenthesised form.
+
+### Fix-round verification (raw)
+
+```
+$ npx vitest run --project unit \
+    src/lib/eval/__tests__/regulation-tables-seed-iso5667-1.test.ts \
+    src/lib/eval/__tests__/field-configs-iso5667-1.test.ts \
+    src/lib/eval/__tests__/equations-iso5667-1.test.ts \
+    src/components/worksheet/__tests__/register-iso5667-1-results.test.tsx
+ Test Files  4 passed (4)
+      Tests  23 passed (23)          # was 22 — the new IF-body pin
+
+$ npx tsx scripts/regulation-tables/verify-regulation-tables.ts iso5667_1 "<scratchpad>/iso5667-1.txt"
+33/33 quotes verbatim
+
+$ pnpm test            # vitest run --project unit
+ Test Files  356 passed | 1 skipped (357)
+      Tests  3131 passed | 1 expected fail | 1 skipped (3133)
+
+$ pnpm -s typecheck
+typecheck exit=0
+```
+
+One typecheck error was introduced and fixed inside this round: the new pin first used the regex
+`dotAll` flag (`/…/s`), which this `tsconfig` target rejects (`TS1501`); it is now `[\s\S]`. The three
+migration freshness pins are green and byte-identical, which is the mechanical confirmation that no
+emitted SQL moved.
+
+Sign-off sheet: still **39 blocks**, ids unchanged and still identical to the STAGED file's; the
+section was regenerated in place (stripped and re-appended from the patched generator), not edited by
+hand. STAGED file 909 → 915 lines (`wc -l`; the added *Reading* line, the two annotations and the
+generator's own comment); still 100 % SQL comments, asserted by the generator before it writes.
