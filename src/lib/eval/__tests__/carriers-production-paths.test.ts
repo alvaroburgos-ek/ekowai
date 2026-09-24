@@ -109,6 +109,107 @@ describe('plan-3 wave A · defect 2 — the save-path materialiser', () => {
   });
 });
 
+/**
+ * WAVE A FIX ROUND 1 — the carrier extension of the materialiser's gate must
+ * not drag in an equation that merely NAMES a json symbol.
+ *
+ * Reviewer finding (Important): DWA-M-1200-2 `M12002-05` prod equation
+ * Gl. C.2-2 is `perzentil_50_log10 = median(log10_reduktionen)`, and
+ * `log10_reduktionen` is a prod json field with `widget: null` and no
+ * ui_config — i.e. a CARRIER candidate, not a register. `median` is not an
+ * engine function (only `median_rows` is), so the equation is
+ * `manual_required` and the materialiser emitted `{value: null}`, which the
+ * save path UPSERTs as `value_number = NULL, source_type='derived'` OVER the
+ * engineer's typed 50th percentile. Not reachable in prod today, but this
+ * branch's own 20260917101610_field_configs_m1200_2.sql adds a register to
+ * exactly that worksheet, so the apply order opens the path.
+ *
+ * The gate is now: carrier-fed means the formula actually READS the carrier
+ * through `contains()` / `cell()`. Naming a json symbol is not enough.
+ */
+describe('plan-3 wave A fix round 1 — a carrier symbol that is only NAMED never triggers a derived write', () => {
+  const C2_2_FIELDS = [
+    // the prod shape: json, widget NULL, no ui_config ⇒ carrier candidate, not a register
+    { id: 'f-lr', symbol: 'log10_reduktionen', dataType: 'json', unit: null },
+    { id: 'f-p50', symbol: 'perzentil_50_log10', dataType: 'number', unit: null },
+  ];
+  const C2_2_EQ = {
+    id: '0f237c28-c2-2',
+    equationNumber: 'Gl. C.2-2',
+    formula: 'perzentil_50_log10 = median(log10_reduktionen)',
+    inputSymbols: ['log10_reduktionen'],
+    outputSymbol: 'perzentil_50_log10',
+  };
+
+  it('DWA-M-1200-2 Gl. C.2-2 (`median(log10_reduktionen)`) emits NO write — an unsupported call must never null out the engineer\'s typed value', () => {
+    const cases: Array<Parameters<typeof materializeDerivedOutputs>[0]['valuesByFieldId']> = [
+      {},
+      { 'f-lr': { type: 'json', value: { rows: [] } } },
+      { 'f-lr': { type: 'json', value: [1, 2, 3] } },
+    ];
+    for (const valuesByFieldId of cases) {
+      const { writes } = materializeDerivedOutputs({
+        standardCode: 'DWA-M-1200-2', worksheetCode: 'M12002-05',
+        equations: [C2_2_EQ], fields: C2_2_FIELDS, valuesByFieldId,
+      });
+      expect(writes).toEqual([]);
+    }
+  });
+
+  it('nor does any other formula that merely NAMES a carrier without reading it', () => {
+    const named = (formula: string) => materializeDerivedOutputs({
+      standardCode: 'X', worksheetCode: 'X-01',
+      equations: [{ ...C2_2_EQ, formula }], fields: C2_2_FIELDS,
+      valuesByFieldId: { 'f-lr': { type: 'json', value: [1, 2, 3] } },
+    }).writes;
+    expect(named('perzentil_50_log10 = median(log10_reduktionen)')).toEqual([]);
+    expect(named('perzentil_50_log10 = log10_reduktionen * 2')).toEqual([]);
+    expect(named('perzentil_50_log10 = sum_rows(log10_reduktionen, x)')).toEqual([]);
+  });
+
+  it('…while an equation that DOES read the carrier through contains() is still materialised (both verdicts and the cleared state)', () => {
+    const run = (valuesByFieldId: Parameters<typeof materializeDerivedOutputs>[0]['valuesByFieldId']) =>
+      materializeDerivedOutputs({
+        standardCode: 'ISO-59004', worksheetCode: 'ISO-59004-04',
+        equations: [EQ], fields: FIELDS, valuesByFieldId,
+      }).writes;
+    expect(run({ 'f-p': { type: 'json', value: SIX } })[0].value).toBe(1);
+    expect(run({ 'f-p': { type: 'json', value: [] } })[0].value).toBe(0);
+    // unfilled ⇒ still WRITTEN as null, so a stale value is cleared (the Task-10 rule)
+    expect(run({})[0]).toMatchObject({ value: null });
+  });
+
+  it('a `cell()` read over a grid carrier also qualifies', () => {
+    const fields = [
+      { id: 'g', symbol: 'matrix', dataType: 'json', unit: null },
+      { id: 'o', symbol: 'out', dataType: 'number', unit: null },
+    ];
+    const { writes } = materializeDerivedOutputs({
+      standardCode: 'X', worksheetCode: 'X-01',
+      equations: [{ id: 'e-cell', equationNumber: 'E1', formula: "out = cell(matrix, 'r1', 'c1')", inputSymbols: ['matrix'], outputSymbol: 'out' }],
+      fields,
+      valuesByFieldId: { g: { type: 'json', value: { cells: { r1: { c1: 42 } } } } },
+    });
+    expect(writes).toHaveLength(1);
+    expect(writes[0].value).toBe(42);
+  });
+
+  it('a REGISTER-fed equation is untouched by the narrowing (it never depended on the carrier gate)', () => {
+    const fields = [
+      { id: 'r', symbol: 'flaechen', dataType: 'json', unit: null, widget: 'register', uiConfig: { title: 'F', columns: [{ key: 'a', type: 'number', label: 'A', required: true }] } },
+      { id: 'o', symbol: 'S', dataType: 'number', unit: null },
+    ];
+    const { writes } = materializeDerivedOutputs({
+      standardCode: 'X', worksheetCode: 'X-01',
+      equations: [{ id: 'e-sum', equationNumber: 'E1', formula: 'S = sum_rows(flaechen, a)', inputSymbols: ['flaechen'], outputSymbol: 'S' }],
+      fields,
+      valuesByFieldId: { r: { type: 'json', value: { rows: [{ id: '1', a: 4 }, { id: '2', a: 6 }] } } },
+    });
+    expect(writes).toHaveLength(1);
+    expect(writes[0].value).toBe(10);
+  });
+});
+
 describe('plan-3 wave A · defect 2 — the report / PDF equation evaluator', () => {
   const param = (valueJson: unknown) => [{
     fieldId: 'f-p', valueNumber: null, valueText: null, valueEnum: null,

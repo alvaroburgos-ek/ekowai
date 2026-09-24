@@ -79,6 +79,57 @@ describe('plan-3 wave A · defect 5 — a lookup() miss in a derived column is n
     }
   });
 
+  it('FIX ROUND 1: only the misses of the UNDECIDABLE column are cited — an unrelated column\'s miss is not an explanation', () => {
+    // `zweit_ok` misses on its own table; the aggregate is undecidable on `method_ok`.
+    const cols: RegisterColumn[] = [
+      ...COLUMNS,
+      { key: 'zweit_ok', type: 'derived', label: 'Z', expr: "if(lookup('S22', aspect, method, 'faktor') > 0, 1, 0)" },
+    ];
+    const table2: Scope['table'] = (code, keys) => (code === 'S21' ? TABLE[keys.map(String).join('|')] : undefined);
+    const reg = prepareRegisterRows({ rows: [
+      { id: '1', aspect: 'a', method: 'x' },  // method_ok hits, zweit_ok misses (S22 has no rows at all)
+      { id: '2', aspect: 'a', method: 'y' },  // method_ok misses too
+    ] }, cols, { table: table2 });
+    // method_ok misses once ([a,y]); zweit_ok misses on BOTH rows (S22 has no rows at all)
+    expect(reg.lookupMisses).toHaveLength(3);
+    const s = evaluateFormula({
+      equationId: 'probe', formula: 'bad = count_rows(flow, method_ok == 0)',
+      inputSymbols: ['flow'], outputSymbol: 'bad', inputs: [], registers: { flow: reg },
+    });
+    expect(s.kind).toBe('manual_required');
+    if (s.kind === 'manual_required') {
+      expect(s.reason).toContain('method_ok: lookup(): keine Zeile in S21');
+      expect(s.reason).not.toContain('zweit_ok'); // the unrelated column is NOT offered as the reason
+    }
+  });
+
+  it('FIX ROUND 1: the UNFILTERED aggregate explains itself too — sum_rows(reg, blanked_column)', () => {
+    const reg = prep([
+      { id: 'f1', aspect: 'a', method: 'x' },
+      { id: 'f3', aspect: 'a', method: 'y' }, // blanked by the missing S21 row
+    ]);
+    const s = evaluateFormula({
+      equationId: 'probe', formula: 'total = sum_rows(flow, method_ok)',
+      inputSymbols: ['flow'], outputSymbol: 'total', inputs: [], registers: { flow: reg },
+    });
+    expect(s.kind).toBe('manual_required'); // outcome unchanged
+    if (s.kind === 'manual_required') {
+      expect(s.reason).toBe(
+        'Unbekanntes Symbol "method_ok" im Ausdruck. — method_ok: lookup(): keine Zeile in S21 für Schlüssel [a, y] (Spalte faktor)',
+      );
+    }
+  });
+
+  it('FIX ROUND 1: an unfiltered aggregate over a column with NO miss keeps its bare message', () => {
+    const reg = prep([{ id: '1', aspect: 'a', method: 'x' }, { id: '2', aspect: 'a', method: 'y', menge: null }]);
+    const s = evaluateFormula({
+      equationId: 'probe', formula: 'total = sum_rows(flow, menge)',
+      inputSymbols: ['flow'], outputSymbol: 'total', inputs: [], registers: { flow: reg },
+    });
+    expect(s.kind).toBe('manual_required');
+    if (s.kind === 'manual_required') expect(s.reason).toBe('Unbekanntes Symbol "menge" im Ausdruck.');
+  });
+
   it('a register with NO miss leaves the aggregate message exactly as it was', () => {
     const reg = prepareRegisterRows({ rows: [{ id: '1', aspect: 'a', method: 'x' }] }, [
       ...COLUMNS,

@@ -158,7 +158,7 @@ export type EvalRequest = {
  * of the form `<lhs> ≥ <rhs>` are interpreted as "the engine returns the
  * RHS value", which is exactly the minimum (≥) or maximum (≤) the engineer
  * must satisfy. */
-function rhs(formula: string): string {
+export function formulaRhs(formula: string): string {
   // collapse newlines to spaces so a single-line regex covers multi-line input
   const flat = formula.replace(/\s+/g, ' ');
   const m = flat.match(/^\s*[A-Za-z_][\w()]*\s*(?:>=|<=|=|>|<)\s*(.+)\s*$/);
@@ -271,7 +271,7 @@ export function evaluateFormula(req: EvalRequest): EvalState {
   // 3. Evaluate the RHS via the in-tree arithmetic engine. Pre-normalise
   // source-formatting quirks like `r_D(n)` → `r_D_n` so the parser doesn't
   // mistake them for unsupported function calls.
-  const expression = normalizeFormula(rhs(formulaInUse));
+  const expression = normalizeFormula(formulaRhs(formulaInUse));
   if (!expression) {
     return { kind: 'error', message: 'Konnte RHS nicht extrahieren.' };
   }

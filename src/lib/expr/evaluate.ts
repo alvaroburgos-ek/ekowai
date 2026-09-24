@@ -252,11 +252,11 @@ function filterRows(
   condExpr: Expr | undefined,
   ctx: Ctx,
   fnName: string,
-): { name: string; rows: PreparedRow[] } | null {
+): { name: string; rows: PreparedRow[]; reg: PreparedRegister } | null {
   const r = resolveRegister(regExpr, ctx);
   if (r === null) return null;
   const complete = r.reg.rows.filter((row) => row.complete);
-  if (condExpr === undefined) return { name: r.name, rows: complete };
+  if (condExpr === undefined) return { name: r.name, rows: complete, reg: r.reg };
   const rows: PreparedRow[] = [];
   for (const row of complete) {
     const matched = rowMatches(condExpr, row, ctx);
@@ -265,13 +265,37 @@ function filterRows(
       // column is blank because its `lookup()` found NO ROW, say so. Without
       // this the engineer reads "Fehlende Eingabe für count_rows(): method_ok"
       // over a column they never fill by hand and cannot act on it.
-      const why = r.reg.lookupMisses ?? [];
+      // Fix round 1: cite ONLY the misses of the columns that are actually
+      // undecidable here — a register may carry misses in unrelated columns.
       const base = `Fehlende Eingabe für ${fnName}(): ${[...ctx.missing].join(', ')}`;
-      return fail(ctx, why.length > 0 ? `${base} — ${why.join('; ')}` : base);
+      return fail(ctx, citeMisses(base, r.reg, ctx.missing));
     }
     if (matched) rows.push(row);
   }
-  return { name: r.name, rows };
+  return { name: r.name, rows, reg: r.reg };
+}
+
+/**
+ * The register's lookup-miss lines whose COLUMN (`"<key>: …"`) is one of
+ * `keys`. Plan 3 final wave A fix round 1: the first cut appended every miss
+ * the register carried, so an aggregate over column A could be "explained" by
+ * a missing table row in unrelated column B.
+ */
+function missesFor(reg: PreparedRegister | undefined, keys: Iterable<string>): string[] {
+  const misses = reg?.lookupMisses;
+  if (!misses || misses.length === 0) return [];
+  const want = new Set(keys);
+  if (want.size === 0) return [];
+  return misses.filter((m) => {
+    const i = m.indexOf(':');
+    return i > 0 && want.has(m.slice(0, i));
+  });
+}
+
+/** Append the relevant lookup-miss reasons to a failure message (or leave it untouched). */
+function citeMisses(message: string, reg: PreparedRegister | undefined, keys: Iterable<string>): string {
+  const why = missesFor(reg, keys);
+  return why.length > 0 ? `${message} — ${why.join('; ')}` : message;
 }
 
 /**
@@ -280,14 +304,20 @@ function filterRows(
  * failure — a filter that leaves nothing is not a sum of zero. (`count_rows`
  * deliberately does not use this: a count of nothing is 0.)
  */
-function collectRows(regExpr: Expr, condExpr: Expr | undefined, ctx: Ctx, fnName: string): PreparedRow[] | null {
+function collectRows(
+  regExpr: Expr,
+  condExpr: Expr | undefined,
+  ctx: Ctx,
+  fnName: string,
+): { rows: PreparedRow[]; reg: PreparedRegister } | null {
   const r = filterRows(regExpr, condExpr, ctx, fnName);
   if (r === null) return null;
   if (r.rows.length === 0) {
     ctx.missing.add(r.name);
-    return fail(ctx, `Keine vollständigen Zeilen in "${r.name}".`);
+    fail(ctx, `Keine vollständigen Zeilen in "${r.name}".`);
+    return null;
   }
-  return r.rows;
+  return { rows: r.rows, reg: r.reg };
 }
 
 /**
@@ -307,12 +337,30 @@ function percentileInc(sorted: number[], p: number): number {
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (rank - lo);
 }
 
-/** Evaluate `expr` once per row (row values shadow the scope) to numbers. */
-function perRowNumbers(rows: PreparedRow[], expr: Expr, ctx: Ctx): number[] | null {
+/**
+ * Evaluate `expr` once per row (row values shadow the scope) to numbers.
+ *
+ * Plan 3 final wave A fix round 1: the UNFILTERED path. `sum_rows(reg, col)`
+ * with no row condition never reaches `filterRows`'s undecidable branch — it
+ * fails HERE, when a lookup-blanked cell hits `num()` as
+ * `Operand ist keine Zahl: null`. Cite the misses of the columns this
+ * expression actually reads, so the unfiltered aggregate explains itself like
+ * the filtered one does.
+ */
+function perRowNumbers(rows: PreparedRow[], expr: Expr, ctx: Ctx, reg?: PreparedRegister): number[] | null {
   const xs: number[] = [];
   for (const row of rows) {
     const rowCtx: Ctx = { ...ctx, row: row.values };
-    const v = num(evalExpr(expr, rowCtx), rowCtx);
+    let v: number | null;
+    try {
+      v = num(evalExpr(expr, rowCtx), rowCtx);
+    } catch (e) {
+      if (e instanceof ExprError) {
+        const cited = citeMisses(e.message, reg, extractSymbols(expr));
+        if (cited !== e.message) throw new ExprError(cited, e.recoverable);
+      }
+      throw e;
+    }
     if (v === null) return null;
     xs.push(v);
   }
@@ -404,12 +452,12 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
       if (n.args.length < 2 || n.args.length > 3) {
         return fail(ctx, `Erwarte 2 oder 3 Argument(e) in ${name}(...)`);
       }
-      const rows = collectRows(n.args[0], n.args[2], ctx, name);
-      if (rows === null) return null;
-      if (name === 'stdev_rows' && rows.length < 2) {
+      const got = collectRows(n.args[0], n.args[2], ctx, name);
+      if (got === null) return null;
+      if (name === 'stdev_rows' && got.rows.length < 2) {
         return fail(ctx, 'stdev_rows(): mindestens 2 vollständige Zeilen erforderlich.');
       }
-      const xs = perRowNumbers(rows, n.args[1], ctx);
+      const xs = perRowNumbers(got.rows, n.args[1], ctx, got.reg);
       if (xs === null) return null;
       const sum = xs.reduce((acc, x) => acc + x, 0);
       switch (name) {
@@ -435,9 +483,9 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
       const p = numArg(n.args[2], ctx);
       if (p === null) return null;
       if (!(p >= 0 && p <= 100)) return fail(ctx, 'percentile_rows(): p muss zwischen 0 und 100 liegen.', false);
-      const rows = collectRows(n.args[0], n.args[3], ctx, name);
-      if (rows === null) return null;
-      const xs = perRowNumbers(rows, n.args[1], ctx);
+      const got = collectRows(n.args[0], n.args[3], ctx, name);
+      if (got === null) return null;
+      const xs = perRowNumbers(got.rows, n.args[1], ctx, got.reg);
       if (xs === null) return null;
       return finite(percentileInc([...xs].sort((a, b) => a - b), p), ctx);
     }

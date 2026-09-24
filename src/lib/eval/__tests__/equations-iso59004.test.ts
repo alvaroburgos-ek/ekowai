@@ -152,12 +152,21 @@ describe('ISO-59004 Plan-3 equations', () => {
     expect(computed(probe(SIX))).toBe(1);
     expect(computed(probe(SIX.slice(0, 5)))).toBe(0);
     // WITHOUT a carrier it is still the fail-safe manual_required — never a phantom 0.
+    // BOTH no-carrier shapes are kept (fix round 1): the input-missing one, and the
+    // ORIGINAL pin's shape — a VALUED scalar input of that name, which resolves as a
+    // symbol but is still not a carrier, so `contains()` cannot read it.
     const noCarrier = evaluateFormula({
       equationId: 'probe-F-1', formula: WITHHELD_04_D1_FORMULA,
       inputSymbols: ['principles'], outputSymbol: 'all_principles_considered_code',
       inputs: [{ symbol: 'principles', value: null, unit: null }], tableLookup: table,
     });
     expect(manual(noCarrier)).toBe('Fehlende oder leere Eingaben: principles');
+    const scalarNotCarrier = evaluateFormula({
+      equationId: 'probe-F-1', formula: WITHHELD_04_D1_NESTED_FORM,
+      inputSymbols: ['principles'], outputSymbol: 'all_principles_considered_code',
+      inputs: [{ symbol: 'principles', value: 'systems_thinking', unit: null }], tableLookup: table,
+    });
+    expect(manual(scalarNotCarrier)).toBe('Unbekanntes Symbol "principles" im Ausdruck.');
     // …and the encoding is UNCHANGED by this wave: no equation row was added.
     expect(EQUATIONS.find((e) => e.output_symbol === 'all_principles_considered_code')).toBeUndefined();
   });

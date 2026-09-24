@@ -27,16 +27,16 @@
  * one `INSERT … ON CONFLICT DO UPDATE`, which Postgres rejects ("cannot affect row a second
  * time") and the whole save would roll back.
  */
-import { evaluateFormula, type EvalState } from './formula';
+import { evaluateFormula, formulaRhs, type EvalState } from './formula';
 import { engineInputValue } from './engine-input';
 import { hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
 import { equationProfiles } from './equation-profiles';
-import { normalizeSymbols } from './normalize-formula';
+import { normalizeFormula, normalizeSymbols } from './normalize-formula';
 import { rewriteRules } from './rewrites';
 import { resolveRegisterConfig, withFallbackRegisterEquations } from './register-configs';
 import { buildCarriers, buildRegisters, carrierFieldSymbols } from './register-rows';
 import { makeTableLookup } from './regulation-tables-fallback';
-import type { Value } from '@/lib/expr';
+import { canonicalFunctionName, isConditionNode, parseExpression, type ArithNode, type Expr, type Node, type Value } from '@/lib/expr';
 
 export type FieldValue =
   | { type: 'number'; value: number | null }
@@ -88,6 +88,72 @@ export function parametersToFieldValues(
     }
   }
   return out;
+}
+
+/**
+ * Calls that READ a json carrier. Both take the carrier symbol as argument 0
+ * (`src/lib/expr/evaluate.ts`: `contains` / `cell` require `target.kind === 'aref'`).
+ */
+const CARRIER_CALLS: ReadonlySet<string> = new Set(['contains', 'cell']);
+
+/**
+ * WAVE A FIX ROUND 1 — does this formula actually READ one of `carrierSymbols`
+ * through a carrier call?
+ *
+ * The first cut of the carrier extension asked only whether the equation NAMED
+ * a carrier symbol, which is far too wide. DWA-M-1200-2 `M12002-05` prod
+ * equation Gl. C.2-2 is `perzentil_50_log10 = median(log10_reduktionen)`, and
+ * `log10_reduktionen` is a prod json field with `widget: null` — a carrier
+ * candidate. `median` is not an engine function (only `median_rows` is), so the
+ * equation is `manual_required`, the materialiser emitted `{value: null}` and
+ * the save path would have UPSERTed `value_number = NULL, source_type='derived'`
+ * OVER the engineer's typed 50th percentile.
+ *
+ * The narrower of the two candidate gates was chosen. Gating on "the RHS parses"
+ * would NOT have caught this at all: `median(log10_reduktionen)` parses
+ * perfectly well — any identifier followed by `(` is a call node, and the
+ * refusal happens at EVALUATION (`Funktionsaufruf "median(...)" wird nicht
+ * unterstützt`). Gating on an actual carrier READ catches it, and also rejects
+ * `log10_reduktionen * 2` and `sum_rows(log10_reduktionen, x)`. It is also the
+ * honest statement of intent: the carrier extension exists so that an equation
+ * which reads a checklist gets materialised — nothing else.
+ */
+export function readsCarrier(formula: string, carrierSymbols: ReadonlySet<string>): boolean {
+  if (carrierSymbols.size === 0) return false;
+  const node = parseExpression(normalizeFormula(formulaRhs(formula)));
+  if (node === null) return false;
+  let hit = false;
+  const any = (e: Expr): void => { if (isConditionNode(e)) cond(e); else arith(e); };
+  const arith = (n: ArithNode): void => {
+    if (hit) return;
+    switch (n.kind) {
+      case 'aneg': arith(n.inner); return;
+      case 'abin': arith(n.left); arith(n.right); return;
+      case 'call': {
+        const fn = canonicalFunctionName(n.name);
+        const target = n.args[0];
+        if (fn !== null && CARRIER_CALLS.has(fn) && target?.kind === 'aref' && carrierSymbols.has(target.symbol)) {
+          hit = true;
+          return;
+        }
+        for (const a of n.args) any(a);
+        return;
+      }
+      default: return; // anum / astr / abool / anull / aref carry no carrier read
+    }
+  };
+  const cond = (n: Node): void => {
+    if (hit) return;
+    switch (n.kind) {
+      case 'acompare': arith(n.left); arith(n.right); return;
+      case 'and': case 'or': cond(n.left); cond(n.right); return;
+      case 'not': cond(n.inner); return;
+      case 'guard': cond(n.guard); cond(n.body); return;
+      default: return;
+    }
+  };
+  any(node);
+  return hit;
 }
 
 /** Field ids of this template's register carriers that hold a json value in `valuesByFieldId`. */
@@ -173,7 +239,15 @@ export function materializeDerivedOutputs(args: {
     const consumed = new Set([...normalizeSymbols(eq.inputSymbols ?? []), ...Object.values(rewriteRules[eq.id]?.remap ?? {})]);
     // Register-fed OR carrier-fed: both are json values the client cannot
     // persist as a scalar, so the save path is the one that materialises them.
-    if (![...consumed].some((s) => registerSymbols.has(s) || carrierSymbols.has(s))) continue;
+    // CARRIER-FED means the formula actually READS a carrier (`contains()` /
+    // `cell()`), not merely names a json symbol — see `readsCarrier`. Naming
+    // one is how DWA-M-1200-2's `median(log10_reduktionen)` slipped in and
+    // would have written NULL over an engineer's typed value.
+    const registerFed = [...consumed].some((s) => registerSymbols.has(s));
+    const carrierFed = registerFed
+      || readsCarrier(eq.formula, carrierSymbols)
+      || (rewriteRules[eq.id] ? readsCarrier(rewriteRules[eq.id].to, carrierSymbols) : false);
+    if (!carrierFed) continue;
     const outField = fieldBySymbol.get(eq.outputSymbol);
     if (!outField || writtenFieldIds.has(outField.id)) continue;
     writtenFieldIds.add(outField.id);
