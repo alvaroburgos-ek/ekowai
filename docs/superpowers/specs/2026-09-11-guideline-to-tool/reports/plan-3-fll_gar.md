@@ -135,6 +135,47 @@ Untouched: every a138 / din1989_1 / a262e / m277e / m1200_1 / m1200_3 file; the 
 2. **TAB1 covers 8 of 12 tokens**: the three asphalt rows depend on the Mischgutart → `TAB1_ASPHALT` keyed on the created `mischgutart` (fill on -13); `mineralisch_bitumen` / `stahl` / `alkalisilikat` / `gup` have no TAB1 row (E-1); row 12 "PEHD" is mapped to `bahn_pe` (J-7).
 3. **TAB26 has FIVE value columns**, not the brief's six (Bautenschutzmatten/-platten aus Gummi- oder PE-Granulat is ONE printed column); its rows are unambiguous in the transcript (five cells each) — kept `imported_unverified` (U-1) per amendment F because the plan flagged it and the PDF decides; the register's `material` column is an enum over all 12 tokens (a TAB1 `lookup_key` would offer 8).
 4. **Tab. 28 prints no "nein"** — the brief's `count_rows(randabschnitte, zulaessig == 'nein')` can never fire; `randabschnitte_sonder` counts the "-¹" cells (J-5); the row "0" has two EMPTY cells (U-4).
+
+   **Amendment-O evidence** (re-executed in the Task-30b absence pass, 2026-09-24, against the SR-1 transcript `C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\FLL-Gewässerabdichtungsrichtlinien.md`; full lines, no truncating filter). Tab. 28 printed whole (body L5729–L5748, caption L5765):
+
+   ```
+   $ awk 'NR>=5729 && NR<=5748 {printf "%d:%s\n", NR, $0}' "/c/Users/Ekowai/Desktop/Supabase data/Guidelines knowledge markdown/FLL-Gewässerabdichtungsrichtlinien.md"
+   5729:Nr. 1 2 3 4 5
+   5730:
+   5731:1
+   5732:An- /Abschlusshöhe der
+   5733:Randbefestigung
+   5734:über max. Wasserstand
+   5735:in cm
+   5736:
+   5737:Anwendungsfälle
+   5738:X \= Ausführung zugelassen
+   5739:(X) \= nur mit geeigneter Randbefestigung und Sicherung
+   5740:
+   5741:gegen Hinter- und Unterläufigkeit
+   5742:Bauteil/Bauwerk Freifläche Schwimmteich
+   5743:
+   5744:2 ≥ 15 (X) X X
+   5745:3 ≥ 10 \- 1 X X
+   5746:4 ≥ 5 \- 1 X \- 1
+   5747:5 0 \- 1
+   5748:1 Nur als Sonderkonstruktion, d. h. als besondere planerische und technische Lösung.
+   exit=0
+   ```
+
+   The absence, inside the table span and then over the whole transcript:
+
+   ```
+   $ sed -n '5729,5748p' "…FLL-Gewässerabdichtungsrichtlinien.md" | grep -n -i "nein"
+   (no output)
+   exit=1
+
+   $ grep -n -i -w "nein" "…FLL-Gewässerabdichtungsrichtlinien.md"
+   (no output)
+   exit=1
+   ```
+
+   **Verdict: the claim HOLDS, and more strongly than it was stated** — the token "nein" occurs nowhere in the FLL-GAR transcript at all, not merely in Tab. 28. The only cell values printed are `X`, `(X)`, the footnote marker `\- 1` ("-¹") and empty cells; the legend (L5737–L5741) defines exactly `X` and `(X)`, and the footnote (L5748) defines `-¹`. `FLL-GAR-23-D1` therefore counts `sonder` rows, as encoded.
 5. **Booleans are not formula inputs** (`engineInputValue`): the brief's R0-B "separate boolean" became the enum `neurissbildung`; the Gartenteich rule needs the enum `bahn_vorkonfektioniert`; the PEHD/PELD distinction the brief keyed on `abdichtungs_art` needs a created `pe_werkstoff` (prod has one token `bahn_pe`) — so `rhizome_required_code` on -09 is NOT emitted; `pe_rhizom_nachweis_code` on -18 is (D-5).
 6. **`evaluateFormula` requires every named scalar input** — FLL-GAR-05-D2 needs Versatz even for R1/R2 (label says "0, wenn keine"); `if()` short-circuits only its evaluation, not the missing-input check.
 7. **Boolean-keyed tables** (`gtd_polyolefin_beschichtung`, `polymerbitumen_beschichtung`) key on `'false'`/`'true'` (= `String(boolean)` in `resolveLookupFill`), not the brief's ohne/mit (I-1).

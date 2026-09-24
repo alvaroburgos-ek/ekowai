@@ -330,6 +330,26 @@
 -- Chosen now (fail-safe): BOTH stay. The register column is the N-instances shape the standard describes; the prod scalar keeps every gate and every inheritance exactly as today.
 -- Nothing is retired by this task and NO second equation is emitted for a quantity an existing input already carries.
 -- Why the pair exists: the register column is the per-action classification; the scalar is the project-level one. Both are engineer-entered because Table 1 prints no category column (iso59004-U-1).
+-- AMENDMENT-O ABSENCE EVIDENCE for "Table 1 prints no category column" — re-executed 2026-09-24 in the Task-30b
+-- absence pass (report .superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-30b-report.md),
+-- against a FRESH in-session extraction of the source PDF (not committed; scratchpad only):
+--   $ "/c/Users/Ekowai/scoop/shims/pdftotext.exe" -layout \
+--       "C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 59004\ISO_FDIS_59004_N.pdf" \
+--       "<scratchpad>/t30b-iso59004.txt"                                              -> exit=0, 4588 lines
+--   $ grep -n -iE "Table 1" t30b-iso59004.txt          -> L2541 (cross-reference), L2570 (the caption), exit=0
+--   $ awk 'NR>=2570 && NR<=2580 {printf "%d:%s\n", NR, $0}' t30b-iso59004.txt         -> exit=0
+--       2570:                         Table 1 — Guidance for resource management actions
+--       2575:        Action
+--       2577:                                                               Description
+--     i.e. the table declares exactly TWO column heads: Action and Description.
+--   $ awk 'NR>=2570 && NR<=2626' t30b-iso59004.txt | grep -n -i "categor"    -> (no output)  exit=1
+--   $ grep -n -i "categor" t30b-iso59004.txt                                 -> (no output)  exit=1
+-- VERDICT: the claim HOLDS, and more strongly than it was stated — the string "categor" does not occur ANYWHERE in the
+-- whole ISO/FDIS 59004:2024 extraction, not merely inside the Table-1 span. (This reproduces, from an independent
+-- extraction made in a different session, the `grep -ic categor` -> 0 / exit 1 recorded in §4/§5 of
+-- docs/superpowers/specs/2026-09-11-guideline-to-tool/reports/plan-3-iso59004.md and pinned in
+-- src/lib/eval/__tests__/regulation-tables-seed-iso59004.test.ts.) `actions.category` therefore stays engineer-entered
+-- and nothing in this block changes.
 -- Evidence [prod, EV]: ISO-59004-05 action_category (id 06d21589-3812-404c-bc62-0baf0432ff7c, enum, is_required false, consumer_worksheets ["ISO-59004-06"]).
 -- On ratification of RETIREMENT (not proposed here): archive the field row into fields_archive_iso59004 exactly as S-1 does, set active = false, and restore with RESTORE_F on rollback.
 --     Do NOT retire a field while a compliance_requirements condition still names it — rewrite the gate in its own block first.

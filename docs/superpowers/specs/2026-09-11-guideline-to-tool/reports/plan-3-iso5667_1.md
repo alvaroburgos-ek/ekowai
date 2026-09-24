@@ -14,7 +14,7 @@
 | `lookup_fill` | **1** | `K_table` (-07) ← `S16_4_K` by `confidence_level` (a TWIN; prod's `K` is untouched — amendment J, `iso5667_1-E-1`) |
 | `select_one` re-binds | **3** | `cooling_system_type`, `confidence_level`, `flow_direction` — all three keep prod's enums (`keep_prod`, D-1); two of them also carry a rule |
 | Field `visible_when` emitted | **10** | see §4 |
-| Section `visible_when` | **0** | the standard prints no whole-worksheet applicability rule |
+| Section `visible_when` | **0** | the standard prints no whole-worksheet applicability rule — **amendment-O evidence below the table** |
 | Fields created (`create`) | **15** | 4 register carriers + 7 derived outputs + `K_table` + 3 drivers/notes (`determinand_volatile`, `abnormal_conditions`, `sampling_time_note`) |
 | Fields updated | **10** | widget / visibility only; no `data_type`, no `is_required`, no `enum_values` written |
 | Equations emitted | **7** | `-02-D1/D2`, `-05-D1`, `-07-D1/D2/D3`, `-08-D1` |
@@ -24,6 +24,51 @@
 | STAGED file | 910 lines | 100 % SQL comments (asserted by the generator) |
 
 Files: `scripts/migrations/20260917102800_regulation_tables_seed_iso5667_1.sql` (148 lines) · `…102810_field_configs_iso5667_1.sql` (144) · `…102820_equations_iso5667_1.sql` (74) + the three `scripts/rollback-…` files (6 / 28 / 10) · `scripts/verification/iso5667_1-STAGED-plan3-rulings.sql` (910).
+
+### Amendment-O evidence for "Section `visible_when` 0 — the standard prints no whole-worksheet applicability rule"
+
+Re-executed in the Task-30b absence pass, 2026-09-24, against a **fresh in-session extraction** of the PDF named in the plan's source table (`C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 5667-1\ISO-5667-1.pdf`, NTC-ISO 5667-1:1995, Spanish). The extraction lives in the scratchpad only and is **not committed**:
+
+```
+$ "/c/Users/Ekowai/scoop/shims/pdftotext.exe" -layout \
+    "C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 5667-1\ISO-5667-1.pdf" \
+    "<scratchpad>/t30b-iso5667_1.txt"
+exit=0
+$ wc -l "<scratchpad>/t30b-iso5667_1.txt"
+1140 <scratchpad>/t30b-iso5667_1.txt          ← identical line count to the Task-28 extraction
+```
+
+This is a "no such rule is printed" claim, so it cannot rest on one empty grep; it was tested with two exhaustive Spanish cue sweeps over the whole extraction, and **every hit is printed in full and classified** (no `cut`, no truncation):
+
+```
+$ grep -n -iE "aplicab|se aplica|no aplica|aplicará|alcance|campo de aplicación" t30b-iso5667_1.txt
+exit=0 — 5 hits, none a clause-level applicability rule:
+  L307  (§8.3 CARÁCTER DEL FLUJO)  "debe inducir la turbulencia. Esto no se aplica a la recolección de muestras
+        para la determinación de gases disueltos y materiales volátiles, cuya"  → a one-sentence FIELD-level caveat
+        inside §8.3, and it is exactly the rule already emitted as the field rule `volatiles_minimal_suction`
+        (driver `determinand_volatile`); it does not switch a clause on or off.
+  L428  (§9.4.1 Flujo)  "En general, se aplican las consideraciones para los ríos y los torrentes, pero los
+        siguientes factores exigen atención especial."   → a cross-reference, not a condition.
+  L481  (§9.7)  "Muchos factores importantes en el muestreo de aguas, tales como el uso de botes, también se
+        aplican al muestreo de depósitos del fondo."     → a cross-reference, not a condition.
+  L788  "media aritmética; se supone que se aplica la distribución normal. …"   → a statistical assumption (§16).
+  L875  "Por ejemplo, si se aplica la distribución normal, de acuerdo con lo anterior, el intervalo de confianza L …"
+                                                                                  → a statistical assumption (§16).
+
+$ grep -n -iE "sólo se|solamente se|únicamente se|sólo aplica|no es aplicable|esta sección|este numeral (sólo|no)" t30b-iso5667_1.txt
+exit=0 — 6 hits, none a condition:
+  L79   "El propósito de esta sección es destacar los factores más importantes …"      → scope prose
+  L228  "En esta sección se tratan las diversas situaciones que se pueden encontrar …"  → scope prose
+  L936  "… En esta sección se indican los principios de flujos que se deben considerar …" → scope prose
+  L777 / L856 / L912 — inside the §16 statistical prose (sampling times, σ vs s, incremented frequency).
+
+$ grep -n -iE "no se requiere|no es necesario|se omite|se puede omitir|no se necesita|excepto cuando|salvo" t30b-iso5667_1.txt
+exit=0 — 1 hit, not a condition:
+  L211  (§5.1) "sistemas o cerca de éstas, salvo que las condiciones sean de interés especial."  → a sampling-LOCATION
+        caveat inside §5.1, not an applicability switch for any clause.
+```
+
+**Verdict: the claim HOLDS.** Not one printed sentence makes a whole clause of ISO 5667-1 conditionally applicable; every conditional the standard prints is scoped to a single field or a single sampling decision — which is why all ten emitted rules are field rules and the section count is 0. Stated honestly for the reader: this is a reasoned negative over a full-document cue sweep with every hit shown, not a single empty grep, because "no rule of kind X exists" cannot be proven by one pattern.
 
 ## 2. Source: the in-session PDF extraction (the one VA-grade task of this wave)
 

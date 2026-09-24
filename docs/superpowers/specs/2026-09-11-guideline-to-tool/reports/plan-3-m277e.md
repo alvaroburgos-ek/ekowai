@@ -123,6 +123,38 @@ Untouched: every a138 / din1989_1 / a262e file; the Plan-1/2 migrations incl. `2
 
 1. **Register outputs live on the register's worksheet.** The brief put `Q_GW_rows` on M277E-07 and `quality_category_code_rows` on M277E-14 while creating the registers on M277E-06 / -15: an equation reads a register of its own worksheet only, and a `create` never sets `consumer_worksheets`, so those rows would never compute. Built: register + outputs on M277E-06 and M277E-16 (Eq. (1)'s home); the re-points are R-1 / R-2 / C-1 / C-2.
 2. **Two Verbraucher registers instead of one** (person-based + area-based = the two Σ of Eq. (1), the DIN-1989-1 precedent): Table 5 prints no area row, a `lookup_key` column cannot carry an "irrigation area" option, and the Tab.-5 override affordance needs the lookup_key. `Q_SW_rows` guards the optional area register with `count_rows` (`sum_rows` over an empty register is `manual_required`).
+
+   **Amendment-O evidence for "Table 5 prints no area row"** (re-executed in the Task-30b absence pass, 2026-09-24, against the SR-1 transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-277E\DWA-M_277E (1).md`; no line-truncating filter used). Table 5 printed whole — two columns, six data rows, every value per capita and day:
+
+   ```
+   $ sed -n '634,647p' "/c/Users/Ekowai/Desktop/Guidelines/DWA-M-277E/DWA-M_277E (1).md"
+   \begin{table}
+   \captionsetup{labelformat=empty}
+   \caption{Table 5: Daily water consumption in household according to application (Source: BDEW 2015)}
+   \begin{tabular}{|l|l|}
+   \hline Consumer & Household consumption in litres per capita and day \\
+   \hline Toilets & 33 \\
+   \hline Personal hygiene & 44 \\
+   \hline Washing machine & 15 \\
+   \hline Cleaning/Irrigation & 7 \\
+   \hline Cooking/Drinking & 5 \\
+   \hline Kitchen/Dishwasher & 7 \\
+   \hline
+   \end{tabular}
+   \end{table}
+   exit=0
+   ```
+
+   The absence itself — no area-keyed row, no per-area unit, anywhere inside the table span:
+
+   ```
+   $ sed -n '634,647p' "/c/Users/Ekowai/Desktop/Guidelines/DWA-M-277E/DWA-M_277E (1).md" \
+       | grep -n -iE 'm\^?\{?2|m²|area|per m|/m'
+   (no output)
+   exit=1
+   ```
+
+   **Verdict: the claim HOLDS.** The only per-area figure in the standard (60 l/m² over a 150 m² kitchen garden and a 180-day season) is printed in the §9.2 worked example at L655/L658, *not* in Table 5 — which is exactly why `TABLE5_AREA` is seeded as `anhaltswert` worked-example reference under `m277e-J-3` and not as a Table-5 row.
 3. **Tab.-4 limits and the treated-sample register on M277E-24, not -14**: M277E-14 holds only `quality_category`; M277E-24 inherits it and already holds the treated-water scalars, so the limit symbols and the register's row-scope checks resolve on one worksheet today.
 4. **`TABLE4_LIMITS` is one single-key table** (row per category, value column per parameter) instead of eight `TABLE4_<PARAM>` tables; `TABLE4_USES_MIN` is a column of `TABLE4_USES`.
 5. **`Q_GWT_calc` / `V_buffer_calc` NOT emitted** — prod already has `Q_GWT = min(Q_GW, Q_SW)` and `V_buffer = Q_GWT * 1`; the brief's "identical rows" are a deactivation ruling (R-3 / R-4), not a new equation. Equations 14 new (brief: 8 + annual) — the annual set is five (V_GW / V_SW added to the brief's three), plus `treated_samples_count`, `treatment_method_allowed`.

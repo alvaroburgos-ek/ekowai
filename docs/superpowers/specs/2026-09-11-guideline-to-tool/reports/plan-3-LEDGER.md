@@ -182,8 +182,18 @@ $ node scripts/verification/_t30-absence-audit.mjs
   column" — this one IS backed by a grep, in §5 of the same standard's report, just not beside the
   claim).
 
-Per the controller's instruction the transcripts were **not** re-grepped here; the five above are
-recorded as findings for the next touch of those standards, not silently repaired.
+Per the controller's instruction the transcripts were **not** re-grepped in Task 30; the five above were
+recorded as findings, not silently repaired.
+
+**CLOSED in Task 30b (2026-09-24).** All five were re-executed against their own sources in one session —
+three md transcripts read with full-line `sed` / `awk` / `grep` (never `cut`), and two fresh in-session
+`pdftotext -layout` extractions of the ISO PDFs (scratchpad only, not committed). **All five HOLD**; none
+was the Task-19 incident class repeating, and no encoding was touched. Command, raw output and exit code
+now sit beside every one of them — in the standard's report and in the block that relies on it
+(`m277e-J-3`, `fll_gar-J-5`, `m820_3-F-1`, `iso59004-D-2`; the ISO-5667-1 claim is a counts-table statement
+with no dependent block). Two claims turned out to be stronger than stated: "nein" occurs nowhere in the
+FLL-GAR transcript at all, and "categor" nowhere in the ISO 59004 FDIS at all. Full pass:
+`.superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-30b-report.md`.
 
 ## Gate-guard debt — closed in this task
 

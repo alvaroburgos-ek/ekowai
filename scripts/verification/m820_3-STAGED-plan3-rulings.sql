@@ -1024,6 +1024,32 @@
 -- Auswahl an Kriterien dar, …" — the standard leaves the evaluation to the project team (L202 "Eine Vervollständigung an
 -- den jeweiligen Projektaufgaben wird im Projektteam durchgeführt.").
 -- Why staged: a formula described in words but not printed is an always-sign-off class.
+--
+-- AMENDMENT-O ABSENCE EVIDENCE — re-executed 2026-09-24 in the Task-30b absence pass (report
+-- .superpowers/sdd/2026-09-16-guideline-to-tool-plan-3-encode-29-standards/task-30b-report.md).
+-- Source: the SR-1 transcript C:\Users\Ekowai\Desktop\Guidelines\DWA-M-820-3\DWA-M_820-3.md (full lines; no truncating filter).
+--   $ grep -n -i "Erfüllungsgrad"  DWA-M_820-3.md   -> (no output)  exit=1
+--   $ grep -n -i "Ampel"           DWA-M_820-3.md   -> (no output)  exit=1
+--   $ grep -n -i "gewicht"         DWA-M_820-3.md   -> (no output)  exit=1
+--   $ grep -n -i "Gewichtung"      DWA-M_820-3.md   -> (no output)  exit=1
+--   $ grep -n -i "gelb"            DWA-M_820-3.md   -> (no output)  exit=1
+--   $ grep -n -i "teilweise|nicht zutreffend|n. z.|entfällt" (grep -E) -> 2 hits, exit=0, BOTH prose:
+--       L451 "… Diese Phase läuft teilweise parallel zur Ausführung."
+--       L583 "… sind in Vorbereitung oder bereits teilweise in der Umsetzung."
+--     i.e. no Y/P/N/NA rating legend is printed either.
+--   $ grep -n '%' DWA-M_820-3.md  -> 2 hits, exit=0, BOTH front/back matter, neither a fulfilment rate:
+--       L50   "Gedruckt auf 100 \% Recyclingpapier"
+--       L1269 "Fördernde DWA-Mitglieder erhalten 20 \% Rabatt auf den Ladenpreis."
+--   $ grep -n -i "grün" -> 4 hits, exit=0, ALL substring false positives ("Gründen", "begründet", "begründenden"), no colour band.
+--   $ grep -n -i "rot"  -> 2 hits, exit=0, ALL substring false positives ("protokolliert", "Planungsrisiken … Gründen"), no colour band.
+--   $ grep -n -iE "Bewertung|Punkte|Skala|Score|Kennzahl|Bewertungsmaßstab" -> 14 hits, exit=0, every one a catalogue
+--     item text or prose (e.g. L723 "Bewertung der Maßnahmen und Erstellung einer Prioritätenliste & Bewertungsmatrix
+--     (im Planungsteam abgestimmt und freigegeben)"); no rating scale, no weighting, no threshold is printed anywhere.
+--   The two cited quotes were re-read in full in the same pass: `sed -n '67p;202p' DWA-M_820-3.md` (exit=0) returns the
+--   L67 and L202 sentences verbatim as quoted above.
+-- VERDICT: the claim HOLDS. Nothing in the transcript prints a fulfilment formula, a P-weight, an NA treatment or a
+-- verdict band, so the 12 fulfilment_pct fields and the three verdict enums correctly stay MANUAL and the bands remain
+-- an owner ruling. Nothing in this block changes.
 
 -- =====================================================================================================================
 -- m820_3-G-1 · REQ-06 / REQ-07 / REQ-08 (M8203-04 / -05 / -06, block) guarded IF project_type IN {gesamtsystem, both} THEN (…)
