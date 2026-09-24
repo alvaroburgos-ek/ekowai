@@ -3,12 +3,14 @@
 import { useMemo } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { getTab9Entries, lookupTab9 } from '@/lib/eval/tab9';
+import { GUIDELINE_TABLES } from '@/lib/eval/guideline-tables';
 import {
   normalizeSurfaceCarrier,
   newSurfaceRow,
   rowKind,
   rowComplete,
   rowMismatch,
+  governingTab5Group,
   type SurfaceRow,
   type SurfaceInventoryCarrier,
 } from '@/lib/eval/surface-inventory';
@@ -24,6 +26,19 @@ const GROUP_LABEL: Record<1 | 2 | 3, string> = {
 function formatNum(v: number): string {
   return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(v);
 }
+
+/** Tab. 5 options for the per-row select — derived from the seeded table so the list
+ *  and the categories can never drift from the guideline text (§5.2.2, Tab. 5). */
+const TAB5_OPTIONS = GUIDELINE_TABLES.TAB5.rows.map((r) => {
+  const short = r.cells[1].split(';')[0];
+  return {
+    value: r.key,
+    label: r.key + ' — ' + (short.length > 60 ? short.slice(0, 60) + '…' : short),
+  };
+});
+const TAB5_BK: Record<string, string> = Object.fromEntries(
+  GUIDELINE_TABLES.TAB5.rows.map((r) => [r.key, 'BK ' + r.cells[3]]),
+);
 
 export function SurfaceInventoryEditor({ fieldId, readOnly = false }: Props) {
   const raw = useWorksheetStore((s) => s.values[fieldId]);
@@ -73,6 +88,7 @@ export function SurfaceInventoryEditor({ fieldId, readOnly = false }: Props) {
     }
   }
 
+  const governing = useMemo(() => governingTab5Group(carrier), [carrier]);
   const totals = useMemo(() => {
     let paved = 0;
     let unpaved = 0;
@@ -119,6 +135,7 @@ export function SurfaceInventoryEditor({ fieldId, readOnly = false }: Props) {
               <tr>
                 <th className="text-left font-normal pb-1 pr-2">Bezeichnung</th>
                 <th className="text-left font-normal pb-1 pr-2">Oberflächentyp</th>
+                <th className="text-left font-normal pb-1 pr-2">Flächengruppe (Tab. 5)</th>
                 <th className="text-right font-normal pb-1 pr-2">A (m²)</th>
                 <th className="text-right font-normal pb-1 pr-2">C_i</th>
                 <th className="text-right font-normal pb-1 pr-2">C_s</th>
@@ -191,6 +208,26 @@ export function SurfaceInventoryEditor({ fieldId, readOnly = false }: Props) {
                         <div data-testid="tab9-original" className="text-[10px] text-subtext mt-0.5">
                           Tab. 9: {formatNum(entry.cm)} / {formatNum(entry.cs)}
                         </div>
+                      )}
+                    </td>
+                    <td className="py-1.5 pr-2">
+                      <select
+                        aria-label="Flächengruppe (Tab. 5)"
+                        value={r.tab5_group ?? ''}
+                        disabled={readOnly}
+                        onChange={(e) => {
+                          if (readOnly) return;
+                          updateRow(r.id, { tab5_group: e.target.value || null });
+                        }}
+                        className="rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink focus:border-accent focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        <option value="">— (aus A138-06) —</option>
+                        {TAB5_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                      {r.tab5_group && (
+                        <div className="text-[10px] text-subtext mt-1">{TAB5_BK[r.tab5_group] ?? ''}</div>
                       )}
                     </td>
                     <td className="py-1.5 pr-2">
@@ -292,6 +329,19 @@ export function SurfaceInventoryEditor({ fieldId, readOnly = false }: Props) {
               </tr>
             </tfoot>
           </table>
+        </div>
+      )}
+
+      {governing.groups.length > 0 && (
+        <div className="rounded border border-hairline bg-paper-2/40 p-2 text-xs" data-testid="tab5-governing">
+          {governing.groups.length === 1 ? (
+            <span className="text-ink">Flächengruppe der Zeilen: <b>{governing.groups[0]}</b> ({TAB5_BK[governing.groups[0]] ?? '—'}). Diese Gruppe ist auf A138-06 zu wählen.</span>
+          ) : (
+            <span className="text-ink">
+              Mehrere Flächengruppen angeschlossen: {governing.groups.join(', ')}. Maßgebend ist die strengste Behandlungsanforderung — <b>{governing.governing}</b> ({TAB5_BK[governing.governing ?? ''] ?? '—'}) auf A138-06 wählen.
+              <span className="block text-[10px] text-subtext mt-0.5">§5.2.3.2 (L944): „Flächen mit unterschiedlichen Anforderungen an die Niederschlagswasserbehandlung können an eine gemeinsame Mulde oder ein gemeinsames Sickerbecken angeschlossen werden. Dabei gilt dann für alle Flächen die jeweils strengste Behandlungsanforderung, welche sich für eine der angeschlossenen Flächengruppen ergibt (z. B. Anschluss von Flächengruppen V1, V2 und V3 an eine Mulde: Es gelten die Anforderungen für V3).“</span>
+            </span>
+          )}
         </div>
       )}
     </div>

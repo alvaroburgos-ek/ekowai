@@ -42,6 +42,10 @@ export function GuidelineTablePanel({ tableCode, fieldsBySymbol, readOnly, extra
   const writable = !displayOnly && table.targets.every((t) => fieldsBySymbol[t] && !fieldsBySymbol[t]!.inheritedFrom);
   const canClick = !readOnly && writable;
   const matchedNotes = table.rows.filter((r) => matched.has(r.key) && r.note).map((r) => r.note!);
+  // A pure reference table (no row is ever selectable AND none matches) must not
+  // pretend to be a checklist — no boxes, no tick column.
+  const referenceOnly = displayOnly && matched.size === 0;
+  const box = (on: boolean) => (referenceOnly ? '' : on ? '☑ ' : '☐ ');
 
   const pick = (rowKey: string) => {
     if (!canClick) return;
@@ -79,7 +83,7 @@ export function GuidelineTablePanel({ tableCode, fieldsBySymbol, readOnly, extra
                 data-testid={`gt-row-${table.code}-${r.key}`}
                 className={`text-left rounded border p-2 text-xs ${on ? 'border-accent bg-accent/10' : 'border-hairline hover:bg-paper-2'} disabled:cursor-default`}
               >
-                <div className="font-medium text-ink">{on ? '☑ ' : '☐ '}{r.cells[0]} <span className="text-subtext font-normal">· {r.cells[1]}</span></div>
+                <div className="font-medium text-ink">{box(on)}{r.cells[0]} <span className="text-subtext font-normal">· {r.cells[1]}</span></div>
                 <ul className="mt-1 space-y-0.5 text-[11px] text-ink/85">
                   {r.cells.slice(2).map((c, i) => <li key={i}>{c}</li>)}
                 </ul>
@@ -100,7 +104,7 @@ export function GuidelineTablePanel({ tableCode, fieldsBySymbol, readOnly, extra
                   <tr key={r.key} className={`border-t border-hairline/60 align-top ${on ? 'bg-accent/10 font-medium' : ''} ${canClick ? 'cursor-pointer hover:bg-paper-2' : ''}`}
                       onClick={() => pick(r.key)} data-testid={`gt-row-${table.code}-${r.key}`} aria-selected={on}>
                     {r.cells.map((c, i) => (
-                      <td key={i} className="py-1 pr-2">{i === 0 ? (on ? '☑ ' : '☐ ') : ''}{c}{i === 0 && r.note && !displayOnly ? <div className="text-[10px] text-subtext font-normal">{r.note}</div> : null}</td>
+                      <td key={i} className="py-1 pr-2">{i === 0 ? box(on) : ''}{c}{i === 0 && r.note && !displayOnly ? <div className="text-[10px] text-subtext font-normal">{r.note}</div> : null}</td>
                     ))}
                   </tr>
                 );
