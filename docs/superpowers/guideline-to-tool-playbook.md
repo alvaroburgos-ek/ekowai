@@ -119,6 +119,15 @@ Order (the dependencies that make it load-bearing):
    Plan-1 rows are what the Plan-3 A138 seed *supersedes*: `SEED_BUILDERS.a138_p3` declares
    `supersedes: 'a138'`, and its rollback re-emits the Plan-1 rows byte-for-byte. Apply Plan-1's
    seed first so that rollback has something to restore to.
+   **RUN THE SELECTION-CONFIG FILES EXACTLY ONCE, HERE, AND NEVER AGAIN** *(added 2026-09-25 —
+   sign-off block `C-3`)*. Their `UPDATE fields` names the **standard only**, not a worksheet, and
+   carries no guard; the Plan-3 field configs in step 5 name **one worksheet each**. Six symbols
+   are written by both — `award_criteria_list`, `bewertungskommission_members`, `stakeholder_list`
+   (DWA-M-820-1), `change_orders` (DWA-M-820-2), `plant_species_list` (FLL-Naturteich),
+   `bewaesserungstagebuch` (DWA-M-1200-3). Re-running a Plan-1 selection-config file after step 5
+   silently overwrites the richer Plan-3 config on **every** worksheet of that standard, and the
+   Plan-3 re-apply that would repair it is a no-op on `visible_when` (sheet block `C-1`). A Plan-3
+   rollback restores the captured prior, which for all six is `NULL` — not the Plan-1 config.
 3. **Plan 2a — `20260916100000`, `20260916110000`, `20260916120000`** (any order among the three).
 4. **Plan 2b — `20260916130000`, `20260916140000`, `20260916150000`**; `20260916160000` stays
    EXCLUDED until sign-off `D-2b-3` is ratified.
@@ -930,7 +939,7 @@ the token budget per standard sat in a narrow 0.45–0.80 M band for all 27 meas
 STAGED authoring, which costs about the same). What DID fall is the share spent on mechanism
 discovery — the six engine/emitter fixes (Tasks 1b, 10b, 12b, 12c, 13b) are all in the first half.
 
-**Where the budget goes when the source is unreadable (U-entries).** 91 of the 1 276 sign-off
+**Where the budget goes when the source is unreadable (U-entries).** 91 of the 1 280 sign-off
 blocks are `U` (unreadable / unsourced cell) — counted with
 `node scripts/verification/_t30-signoff-index.mjs`. The standards that stopped at a cell rather
 than guessing it, with the printed rows that cost:
@@ -1360,8 +1369,8 @@ report; the frozen Plan-1 `a138` builder is excluded and its superseding `a138_p
 | equations emitted (`ON CONFLICT DO NOTHING`, `description LIKE 'Plan 3:%'`) | **679** |
 | fields created additively (`create`) | **1 096** |
 | migrations written / rollbacks written / **applied** | **85** / **85** / **0** |
-| sign-off blocks on `SIGN-OFF-plan-3.md` | **1 276** |
-| STAGED blocks across the 29 `scripts/verification/<slug>-STAGED-plan3-rulings.sql` files | **1 042** |
+| sign-off blocks on `SIGN-OFF-plan-3.md` | **1 280** (recounted 2026-09-25: `plan1-D-3-1` was invisible to the index script) |
+| STAGED blocks across the 29 `scripts/verification/<slug>-STAGED-plan3-rulings.sql` files | **1 045** |
 
 **New shared machinery** (Task 0 + the six mid-plan `[CODE]` rounds; all of it lives in
 `scripts/regulation-tables/` and `src/lib/eval/`):
@@ -1419,5 +1428,79 @@ report; the frozen Plan-1 `a138` builder is excluded and its superseding `a138_p
 
 **What Plan 3 deliberately did NOT do** — see "Honest residue" in
 `docs/superpowers/specs/2026-09-11-guideline-to-tool/reports/plan-3-LEDGER.md`: nothing applied,
-no browser pass, no cross-standard inheritance (Phase 6), no verified equation replaced, and the
-Plan-2c interface/engine backlog (17 items) still open.
+no browser pass, no cross-standard inheritance (Phase 6), no verified equation replaced, and
+**2 of the 17 Plan-2c interface/engine backlog items still open** — *(corrected 2026-09-25: this
+read "(17 items) still open". The final `[CODE]` waves A, B and C closed fifteen of them; the two
+that remain are "inputs inside an untaken `if()` branch are still required" and "`LookupFillField`
+renders no input under a `locked` policy". The per-item state, each with its fixing commit, is on
+the sign-off sheet under "Plan 2c backlog".)*
+
+---
+
+## RUNNING THE INTEGRATION PROJECT — read this before you conclude anything is slow
+
+**The rule: at most TWO files per `--no-file-parallelism` invocation.** *(Lowered from five,
+2026-09-25, on measurement.)* Each `tests/harness/*.integration.test.ts` stands up its own embedded
+Postgres; `--project integration` holds 135 of them plus ~20 DB-backed action/query suites. Two
+files per invocation finished in **10–14 s** each across 16 consecutive batches (32 files, 883
+tests, 0 failures) in the documentation-truth pass. Five is not safe — the wave-A brief said five
+and the close-out's own full-project run never printed a line in 43 minutes.
+
+```
+npx vitest run --project integration --no-file-parallelism <fileA> <fileB>
+```
+
+### THE WEDGE — recognise it in seconds, not in fifty minutes
+
+**Signature: no output at all — not even the vitest banner — and many live `postgres` processes
+that your run did not start.**
+
+```
+$ powershell -NoProfile -Command "(Get-Process postgres -ErrorAction SilentlyContinue | Measure-Object).Count"
+68
+```
+
+**Cause (diagnosed 2026-09-25).** Embedded-Postgres instances survive the vitest run that started
+them. They accumulate across SESSIONS, not just across batches. In this worktree 68 orphaned
+`postgres.exe` were alive with start times spanning **2026-09-17 09:13 to 2026-09-24 18:35** —
+seven days of leftovers from earlier sessions — and every one of them was the worktree's own
+`node_modules/.pnpm/@embedded-postgres+windows-x64@…/native/bin/postgres.exe`. With that many
+alive, a **two-file** batch produced **zero output for over ten minutes**. It is not slowness and
+it is not the batch size; a new instance cannot come up.
+
+**The check — is it orphans or is it mine?** Orphans have start times from before this session:
+
+```
+$ powershell -NoProfile -Command "Get-Process postgres | Select-Object Id,StartTime | Sort-Object StartTime"
+$ powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='postgres.exe'\" | Select-Object -First 1 CommandLine"
+  # confirm the path is .../@embedded-postgres/.../native/bin/postgres.exe — i.e. a TEST instance,
+  # never a real database. Local Supabase runs in Docker, not as a host postgres.exe.
+```
+
+**The fix — kill the orphans, then re-run the same batch:**
+
+```
+$ powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='postgres.exe'\" |
+    Where-Object { \$_.CommandLine -like '*@embedded-postgres*' } |
+    ForEach-Object { Stop-Process -Id \$_.ProcessId -Force -ErrorAction SilentlyContinue }"
+```
+
+**Measured, same two files, same command, immediately after:**
+
+```
+ Test Files  2 passed (2)
+      Tests  65 passed (65)
+   Duration  11.38s
+```
+
+**> 600 s → 11.38 s.** Kill the orphans FIRST, before the first batch, every session.
+
+**Orphaned `node` processes wedge it too.** The same worktree carried 77 stale `node` processes
+going back to 2026-09-15. One batch mid-sweep hung with **zero** `postgres` processes alive —
+vitest up, no database ever started. Killing the vitest processes that batch had started and
+re-running it gave `Test Files 2 passed (2) · Tests 29 passed (29) · Duration 10.71s`. So: if a
+batch produces no output for more than ~60 s, stop it, clear stale processes, and re-run that
+batch — never wait it out, and never conclude the tests are slow.
+
+**Never report "integration green" for the project from a partial sweep.** Name the files and the
+counts, as `plan-3-LEDGER.md` does under "Integration evidence at HEAD".

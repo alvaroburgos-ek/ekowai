@@ -6,12 +6,22 @@ import path from 'node:path';
 
 const SHEET = 'docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md';
 const STAGED_DIR = 'scripts/verification';
-const SLUGS = ['a138','din1989_1','a262e','m277e','m1200_1','m1200_3','fll_gar','fll_naturteich','m820_3','din18130_1','m205','m187','din276','a178','din16941_2','m1200_2','din1989_2','m820_1','m820_2','iso5667_10','iso59020','iso46001','iso5667_6','vsme','din14021','iso14046','atv_a704e','iso5667_1','iso59004'];
+// `plan1` is NOT one of the 29 Plan-3 standards: it is the Plan-1 amendment slug, and it carries
+// exactly one block — `plan1-D-3-1`, the legacy-`regulation_tables` rename that GATES the whole
+// apply list (playbook "Apply order"). It was invisible to this index until the documentation-truth
+// pass (2026-09-25) added it, which is why #SHEET_TOTAL read 1279 instead of 1280. It has no
+// `scripts/verification/plan1-STAGED-plan3-rulings.sql` — its SQL is the Plan-1 schema migration
+// `supabase/migrations/20260911100000_guideline_to_tool_schema.sql` — so its staged_file prints
+// MISSING by design, not by defect.
+const SLUGS = ['a138','din1989_1','a262e','m277e','m1200_1','m1200_3','fll_gar','fll_naturteich','m820_3','din18130_1','m205','m187','din276','a178','din16941_2','m1200_2','din1989_2','m820_1','m820_2','iso5667_10','iso59020','iso46001','iso5667_6','vsme','din14021','iso14046','atv_a704e','iso5667_1','iso59004','plan1'];
 // longest-slug-first so din1989_1 is not eaten by a shorter prefix
 const SLUG_RE = SLUGS.slice().sort((a, b) => b.length - a.length).join('|');
+// `plan1-D-3-1` is the only id whose number part is two-segment (Plan-1 amendment D-3, sub-item 1),
+// so the trailing `(?:-\d+)?` exists for it. No 29-standard id uses that shape.
+const NUM_RE = '(\\d+(?:-\\d+)?)';
 
 const sheet = fs.readFileSync(SHEET, 'utf8').split(/\r?\n/);
-const headRe = new RegExp(`^###\\s+((?:${SLUG_RE}))-([A-Z])-(\\d+)\\b`);
+const headRe = new RegExp(`^###\\s+((?:${SLUG_RE}))-([A-Z])-${NUM_RE}\\b`);
 const sheetIds = new Map(); // id -> line no
 const sheetOrder = [];
 sheet.forEach((l, i) => {
@@ -42,7 +52,7 @@ const perSlug = new Map();
 for (const slug of SLUGS) perSlug.set(slug, Object.fromEntries(CLASSES.map(c => [c, 0])));
 const otherClasses = new Map();
 for (const id of sheetOrder) {
-  const m = id.match(new RegExp(`^(${SLUG_RE})-([A-Z])-\\d+$`));
+  const m = id.match(new RegExp(`^(${SLUG_RE})-([A-Z])-${NUM_RE}$`));
   const [, slug, cls] = m;
   if (!perSlug.has(slug)) continue;
   if (CLASSES.includes(cls)) perSlug.get(slug)[cls]++;

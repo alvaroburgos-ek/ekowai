@@ -7,24 +7,39 @@ status: awaiting-signature
 
 # Sign-off sheet — Plan 3 (encode the 29 standards)
 
-## Index — 1 279 blocks, by standard and class (Task 30 close-out, 2026-09-24)
+## Index — 1 280 blocks, by standard and class (Task 30 close-out 2026-09-24; recounted in the documentation-truth pass 2026-09-25)
 
-Built and verified in-session:
+Re-built and re-verified in-session at HEAD `757a85d`:
 
 ```
 $ node scripts/verification/_t30-signoff-index.mjs        # parses this sheet's `### <slug>-<CLASS>-<n>` headings
-#SHEET_TOTAL                          1279                #   and every `-- <slug>-<CLASS>-<n>` block heading
+#SHEET_TOTAL                          1280                #   and every `-- <slug>-<CLASS>-<n>` block heading
 #STAGED_TOTAL                         1045                #   in the 29 scripts/verification/<slug>-STAGED-plan3-rulings.sql
 #UNKNOWN_CLASS_LETTERS                []
 #STAGED_NOT_ON_SHEET                  (none)
 ```
 
+**Corrected 2026-09-25: the total was 1 279 because the index script could not see `plan1-D-3-1`.**
+`plan1` was not in the script's `SLUGS` array and the id's number part is two-segment (`3-1`, the
+Plan-1 amendment D-3 sub-item 1) where the heading regex accepted `\d+` only. **That one invisible
+block is the one that gates the entire apply list** — the legacy `regulation_tables` rename
+(playbook "Apply order": *"`plan1-D-3-1` is the owner's rename-vs-adopt-legacy ruling and **gates
+the whole list**"*). Both were fixed in `scripts/verification/_t30-signoff-index.mjs` in this pass,
+and it now prints a `plan1` row (D = 1, `staged_blocks` 0, `staged_file` MISSING **by design** — its
+SQL is the Plan-1 schema migration, not a STAGED file).
+
 **Sheet ↔ STAGED reconciliation: clean.** Every one of the 1 045 STAGED blocks has a block on this
-sheet with the same id. The reverse is not expected to match — 234 sheet blocks are rulings with no
-SQL to stage (judgments, unreadable cells, observations, cross-standard notes). Two sheet blocks
-whose prose mentions "STAGED file" have no block of their own id, and both are correct as written:
-`a262e-E-3` (its SQL lives under the combined heading `-- a262e-C-3 / a262e-E-3` in the a262e STAGED
-file) and `m187-I-3` (a capture-vs-brief record whose "Proposed SQL / config" is *none*).
+sheet with the same id. The reverse is not expected to match. **The number of sheet blocks that are
+rulings with no SQL at all is 233** (judgments, unreadable cells, observations, cross-standard
+notes) — recounted in this pass and derived as: **1 280** sheet blocks − **1 045** STAGED blocks
+matched by their own id − **1** (`a262e-E-3`, whose SQL rides on the combined heading
+`-- a262e-C-3 / a262e-E-3` in the a262e STAGED file) − **1** (`plan1-D-3-1`, whose SQL is
+`supabase/migrations/20260911100000_guideline_to_tool_schema.sql`) = **233**. The sheet previously
+said 234; that figure was `1279 − 1045` and counted `a262e-E-3` as SQL-less while omitting
+`plan1-D-3-1` from the total — two errors that nearly cancelled. *(The final whole-branch review
+reported 232; that value could not be reproduced by the derivation above and 233 is what the
+recount gives.)* `m187-I-3` stays in the 233: it is a capture-vs-brief record whose "Proposed SQL /
+config" is genuinely *none*.
 
 **Class letters** (the sheet's own legend, §"IDs" above): **G** gate-guard · **R** range-SR-2 ·
 **D** deactivation · **S** structural / widget-switch · **C** consumer-edit · **M**
@@ -65,9 +80,11 @@ counts below are literal, by the letter actually used in the id.)
 | 27 | ATV-A-704E (`atv_a704e`) | 8 | 1 | 42 | 0 | 4 | 0 | 3 | 6 | 0 | 0 | 1 | 3 | 2 | 2 | 0 | **72** | 72 | `scripts/verification/atv_a704e-STAGED-plan3-rulings.sql` |
 | 28 | ISO-5667-1 (`iso5667_1`) | 3 | 2 | 23 | 0 | 2 | 0 | 4 | 2 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | **39** | 39 | `scripts/verification/iso5667_1-STAGED-plan3-rulings.sql` |
 | 29 | ISO-59004 (`iso59004`) | 4 | 0 | 11 | 1 | 0 | 0 | 6 | 4 | 1 | 0 | 1 | 1 | 3 | 0 | 0 | **32** | 32 | `scripts/verification/iso59004-STAGED-plan3-rulings.sql` |
-| | **TOTAL (29)** | **252** | **48** | **395** | **7** | **108** | **5** | **135** | **91** | **7** | **32** | **58** | **61** | **43** | **35** | **2** | **1279** | **1045** | 29 files |
+| 30 | **Plan 1 amendment** (`plan1`) | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **1** | 0 | *none — SQL is `supabase/migrations/20260911100000_guideline_to_tool_schema.sql`* |
+| | **TOTAL (29 + plan1)** | **252** | **48** | **396** | **7** | **108** | **5** | **135** | **91** | **7** | **32** | **58** | **61** | **43** | **35** | **2** | **1280** | **1045** | 29 files |
 
-**How to read the shape of this table.** **D** (395) is the largest class by far and is almost
+**How to read the shape of this table.** **D** (396, of which 395 are the 29 standards' and one is
+`plan1-D-3-1`) is the largest class by far and is almost
 entirely the *amendment-K pairs*: a register column and the prod scalar it duplicates, both kept,
 with a guarded deactivation proposed for the scalar — nothing is retired without a signature. **G**
 (252) is the second largest and is where the enforcement decisions live; **U** (91) is the honest
@@ -1813,7 +1830,8 @@ Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar
 - Class: interface-gap
 - Chosen now (fail-safe): TAB16 (`gtd_polyolefin_beschichtung`) and TAB22_UEBERLAPPUNG (`polymerbitumen_beschichtung`) key on `String(boolean)` because `resolveLookupFill` stringifies every key value and the Ja/Nein control stores an explicit `true` / `false`; an untouched boolean is "Schlüssel fehlt" until the engineer picks Ja or Nein. Booleans never reach `evaluateFormula` (engine-input.ts), so every yes/no driver of a NEW equation was created as an enum (`neurissbildung`, `bahn_vorkonfektioniert`, `pe_werkstoff`).
 - Evidence (verbatim, transcript line): none needed (codebase fact; `src/lib/eval/lookup-fill.ts` `String(keys[i])`, `src/lib/eval/engine-input.ts`).
-- Proposed SQL / config: none; if booleans should become formula inputs, that is a 2a amendment.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the closing conditional is now satisfied.** "If booleans should become formula inputs, that is a 2a amendment": final wave A defect 1 (`2b3f84c`, backlog item 2) made exactly that change — `engineInputValue` has a `boolean` case returning the value verbatim (`src/lib/eval/engine-input.ts:39-40`) and `false` counts as PRESENT, so **booleans ARE formula inputs at HEAD**. Re-executed in this session: `engineInputValue({type:'boolean', value:true}) => true`, `…value:false => false`, and `evaluateFormula('code = if(flag, 1, 0)')` with `flag = true` returns `{"kind":"computed","value":1}`. The `String(boolean)` lookup-fill keying described above is untouched and still correct — this correction only retires the *reason* the corpus invented `enum` yes/no drivers beside prod booleans. **No twin was removed and nothing was re-encoded.**
+- Proposed SQL / config: none; if booleans should become formula inputs, that is a 2a amendment — **DONE at `2b3f84c`.**
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### Observations (Task 7, no signature needed)
@@ -3776,7 +3794,9 @@ Report: `reports/plan-3-a178.md` · STAGED SQL: `scripts/verification/a178-STAGE
 - Class: override-policy (mechanism limit)
 - Chosen now (fail-safe): TABELLE1_VS fills 0,2 for `rkb_le10` / `rueb_db` (the footnote's permitted value — the reason to distinguish the type) and 0 for `stauraum_unten` / `sonstige`; the widget's `kann` alternatives come from the value column (`values: ['0', '0.2']`), so an engineer could pick 0,2 for a row whose base is 0 — the badge shows the row's Bedingung, `eta_VS` itself stays typed.
 - Evidence (verbatim, transcript line): L873 (as under E-2); "\hline AFS63 & $0^{11}$ & 0,95 & 0,50 & 0,60 \\" (L870)
-- Proposed SQL / config: **[CODE] tooling candidate — "per-row alternatives on RegulationRow"** (queued by the controller for the final wave, fix round 1): the `kann` select reads a per-row `alternatives` list when present and falls back to the value column's `values`; no DATA change here. Interim alternative: fill 0 for every row and let the engineer pick 0,2 via `kann`.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the mechanism limit is GONE; the DATA decision is not.** Final wave B item 6 (`c0aad97`, backlog item 17) shipped exactly the candidate below: `RegulationRow` gained `alternatives?: Record<string, string[]>` (keyed by value-column name, printed strings, printed order) and ONE exported resolution rule, `printedAlternatives(row, valueColumn)` = the row's own printed list, else the value column's list, else `null`. Both consumers call it — the register `kann` override select (`register-editor.tsx`, resolving the row by its `lookup.key_column` value) and `lookup-fill-field.tsx` on `state.row` / `state.valueColumn` — so a worksheet-wide `kann` field and a register cell cannot diverge.
+  **What is NOT done, deliberately:** `regulation-tables-seed-a178.ts` still emits `etaCol.values` only — re-checked in this pass, no `field-configs/**` or seed file was touched by wave B. **So the defect this block describes is still live in the shipped encoding**: TABELLE1_VS's `kann` select still offers 0 / 0,2 for every Vorstufe type. **What the owner can now choose that they could not before:** filling `alternatives` per Tab.-1 row (0,2 only for `rkb_le10` / `rueb_db`; 0 only for `stauraum_unten` / `sonstige`) is now expressible, so the "interim alternative" is no longer the only option. That fill is a DATA change on this standard's seed and was **not** made here.
+- Proposed SQL / config: **[CODE] tooling candidate — "per-row alternatives on RegulationRow"** (queued by the controller for the final wave, fix round 1): the `kann` select reads a per-row `alternatives` list when present and falls back to the value column's `values`; no DATA change here — **the [CODE] half is DONE at `c0aad97`; the seed fill is the remaining decision.** Interim alternative: fill 0 for every row and let the engineer pick 0,2 via `kann`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### a178-O-5 · DWA-A-178 · S6_LIMITS · rows with descriptive modals under the table's `locked` policy (h_rr_min / h_rr_max "liegen zwischen", deckschicht_cm "besteht aus", langzeitsimulation_min_a "basiert auf … mindestens")
@@ -4717,7 +4737,11 @@ Report: `reports/plan-3-din1989_2.md` · STAGED SQL: `scripts/verification/din19
 - Class: interface-gap
 - Chosen now (fail-safe): `src/lib/actions/worksheet.ts` (~L712–L724) calls `computeVisibility` and `materializeDerivedOutputs` with `templateFields` only (the worksheet's OWN fields), so the inherited drivers `filtertyp`, `DN` and `einbausystem` never resolve server-side: (a) the 18 `DN <= 200` / `DN > 200` rules and the `filtertyp` / `einbausystem` rules hide on the FORM only — on save every such rule is `pending` (nothing hidden) and register-fed outputs are materialised regardless of type (e.g. `m_verw_calc` = 0 and `filtertrennwirkung_code_c` for a Typ-A filter); fail-safe today because no prod gate reads a created symbol; (b) a register-fed twin naming `filtertyp` as a formula INPUT would persist null on every save while the form computes it — therefore Gl. 7 / 8 / 9 are three register-only twins (D13 … D15) plus two per-type codes (D16 / D17) and the "Gl. 7 vs 8/9" switch lives in `visible_when` and the STAGED gate (G-4), never in a formula input. Scalar-only rows (D1 … D4 on -03, D1 / D2 on -02, -01 D1) evaluate on the form / report only (amendment D). The controller has queued the engine fix (overlay the inherited values in the save path) — G-4 Step 2 and any gate on a created symbol should wait for it.
 - Evidence (verbatim, transcript line): "Die Filtertrennwirkung ist als Quotient aus zurückgehaltenen Prüfstoffen bzw. abgeleiteten Prüfstoffen zur Gesamtfeststoffmasse je nach Filtertyp zu ermitteln." (L384)
-- Proposed SQL / config: none here — [CODE] item queued by the controller (save path overlays `loadInheritedFields` values before `computeVisibility` / `materializeDerivedOutputs`); re-check the 18 DN rules and the per-type codes on the deployed build after it lands.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the INHERITED half of this premise is FALSE; the scalar-only half still holds.** The "Chosen now" text above is kept verbatim as the record of what the encoding was built against on 2026-09-22. What changed: final wave B (`c0aad97`, fix round `f7af30e`, backlog item 1) made the save path resolve inherited fields. Re-read at HEAD in this session, `src/lib/actions/worksheet.ts:696-745`: `loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode, tx)` is awaited **on the transaction client**, own symbols win over inherited ones (single-owner rule), `readableFields = [...templateFields, ...inheritedFields]` feeds `makeSymbolLookup` into `computeVisibility`, and `inheritedFields` is passed to `materializeDerivedOutputs`. `f7af30e` threaded the same pair through `reportVisibility` and `evaluateWorksheetEquations` via one shared `withInherited`, so the PDF and the save path agree. **Therefore: (a) `filtertyp` / `DN` / `einbausystem` DO resolve server-side now — the 18 `DN <= 200` / `DN > 200` rules and the per-type rules hide on save, not only on the form, and register-fed outputs are no longer materialised for rows that should be hidden; (b) a register-fed twin naming `filtertyp` as a formula INPUT would now persist the same value the form computes.**
+  **What is UNCHANGED and must not be read as fixed:** the whole inherited/materialise block is still entered only when the save batch contains at least one OWN register field (`if (batchRegisterIds.length > 0 && …)`, `worksheet.ts:688`), so **scalar-only rows (-01 D1, -02 D1 / D2, -03 D1 … D4) are still not server-materialised** (amendment D). That was never this item's subject and no wave changed it.
+  **What the owner can now do that they could not before:** `din1989_2-G-4` Step 2 — and any gate on a created symbol — no longer has to wait for the engine fix; the dependency this block recorded is discharged. The D13 … D17 register-only twin structure was chosen *because* of the old behaviour: it is still correct and still shipped, but it is no longer FORCED, so collapsing Gl. 7 / 8 / 9 back into a formula that reads `filtertyp` is now an available encoding option. **Nothing was re-encoded in this pass** — that is a decision on this sheet.
+  Verification owed unchanged: re-check the 18 DN rules and the per-type codes on the deployed build, because nothing here has been applied or deployed.
+- Proposed SQL / config: none here — [CODE] item queued by the controller (save path overlays `loadInheritedFields` values before `computeVisibility` / `materializeDerivedOutputs`) — **DONE in code at `c0aad97` + `f7af30e`**; re-check the 18 DN rules and the per-type codes on the deployed build after the migrations are applied.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din1989_2-J-1 · DIN-1989-2 · -01 · `DN` as a `select_one` of nominal sizes (the brief's `dn_nennweite`)
@@ -5086,13 +5110,22 @@ Report: `reports/plan-3-m820_1.md` (fix round 1 appended). STAGED SQL: `scripts/
 - Class: interface-gap
 - Chosen now (fail-safe): not emitted (a prod boolean is not a formula input — `engineInputValue` maps it to missing, the row would be `manual_required` forever); REQ-26 (`information_letters_sent == true AND contract_invalidity_135_gwb_risk == false`) already binds both booleans.
 - Evidence (verbatim, transcript line): "Unterlässt der Auftraggeber diese Information oder gibt er sie nur unvollständig, so regelt § 135 GWB, dass der Vertrag von Anfang an unwirksam ist." (L1346)
-- Proposed SQL / config: boolean-native form in the STAGED file (`IF information_letters_sent == false THEN contract_invalidity_135_gwb_risk == true`, warn) — on the owner's word.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the premise is FALSE.** "A prod boolean is not a formula input — `engineInputValue` maps it to missing" was true at the time and is not true now: final wave A defect 1 (`2b3f84c`, backlog item 2) gave `engineInputValue` a `boolean` case that hands the value over verbatim (`src/lib/eval/engine-input.ts:39-40`), and `formula.ts`'s missing-rule admits `false` as PRESENT (only a never-answered `null` is missing). Re-executed at HEAD in this session:
+  ```
+  engineInputValue({type:'boolean', value:true})  => true
+  engineInputValue({type:'boolean', value:false}) => false
+  evaluateFormula('code = if(flag, 1, 0)', inputs=[{symbol:'flag', value:true}])
+    => {"kind":"computed","value":1,"substituted":{"flag":true},"formulaEvaluated":"if(flag, 1, 0)"}
+  ```
+  **What the owner can now choose that they could not before:** `contract_invalidity_code` over the boolean `information_letters_sent` **is** encodable as an equation — it would no longer be `manual_required` forever. So this block is now a genuine two-way choice, not a forced refusal: **(i)** keep it un-emitted and let REQ-26 (`information_letters_sent == true AND contract_invalidity_135_gwb_risk == false`) carry the meaning, as shipped; **(ii)** take the boolean-native GATE form in the STAGED file (this block's own proposal, unchanged and still the ruling's preference); or **(iii)** emit `M820-23` as an equation reading the boolean directly. **Nothing was emitted in this pass** — no equation row, no migration, no STAGED change.
+- Proposed SQL / config: boolean-native form in the STAGED file (`IF information_letters_sent == false THEN contract_invalidity_135_gwb_risk == true`, warn) — on the owner's word. Option (iii), an equation over the boolean, is now also available.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m820_1-I-2 · DWA-M-820-1 · engine · scalar-only outputs not server-materialised; inherited drivers resolve on the form only
 - Class: interface-gap (standing amendment D / Task 17 I-2 observation)
 - Chosen now: the 12 scalar-only rows (-09 D1 … D7, -13 D1, -22 D1 … D4) compute on the hook / report / snapshot / PDF and are not persisted; the 24 register-fed rows are materialised on save — except -09 D11 / D14 / D15, which name the INHERITED fee (fix round 1, amendment K) and therefore persist null (Task 17 trap 1); the Tab. D.1 codes and `oberschwellig_code` read INHERITED inputs (`estimated_construction_cost`, `liability_insurance_*`, `estimated_engineering_fee`) that the save-path materialiser and server-side visibility resolve for own fields only — every G-block that would make a consumer or a gate on another worksheet read such a code waits for the engine-output materialisation workstream (noted in G-3 / G-11 / D-4 / D-6 / D-7 / D-9).
-- Evidence: `src/lib/eval/materialize-derived.ts` (register-fed only), `src/lib/actions/worksheet.ts` (`templateFields` symbol lookup).
+- Evidence **[the second clause was RECORDED AT THE TIME and is FALSE at HEAD]**: `src/lib/eval/materialize-derived.ts` (register-fed only), `src/lib/actions/worksheet.ts` (`templateFields` symbol lookup).
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25).** The heading's second half — "inherited drivers resolve on the form only" — is no longer true. Final wave B (`c0aad97` + `f7af30e`, backlog item 1) makes `saveWorksheet` load the inherited fields on the transaction client and pass them to BOTH `computeVisibility` and `materializeDerivedOutputs` (`src/lib/actions/worksheet.ts:696-745`), and `f7af30e` gave the report path the same pair through a shared `withInherited`. **D11 / D14 / D15 are therefore no longer `manual_required` on save** — the very consequence this block recorded is discharged. The FIRST half stands unchanged: the 12 scalar-only rows (-09 D1 … D7, -13 D1, -22 D1 … D4) are still not persisted, because the materialise block is still entered only when the save batch carries an OWN register field (`worksheet.ts:688`). Amendment D is untouched. Nothing was re-encoded.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m820_1-X-1 · DWA-M-820-1 · M820-06 / M820-07 · `risk_register` / `risk_mitigation_plan`
@@ -5284,7 +5317,9 @@ Report: `reports/plan-3-m820_2.md`. STAGED SQL: `scripts/verification/m820_2-STA
 - Class: interface-gap (data format; D-1 keeps prod)
 - Chosen now (fail-safe): NO UPDATE emitted for `lph_completed` (its prod `enum_values` `lph_0 … lph_9` are non-null — `keep_prod`; the Plan-1 pair `lph_completed` / `included_hoai_phases` stays un-migrated, playbook I-1) — the Plan-1 TS checklists keep storing the label strings ("LPH 0 – Bedarfsplanung", …); `included_hoai_phases` has NULL `enum_values`. 0 stored values for either field (read-only count).
 - Evidence (verbatim, transcript line): "Teil 2 umfasst die Leistungserbringung aller Projektbeteiligten über alle Phasen hinweg, d. h. von der Bedarfsplanung (LPH 0) bis zur Objektbetreuung (LPH 9), inklusive Inbetriebnahme und Übergabe an den Betrieb." (L338)
-- Proposed SQL / config: STAGED block E-1 (copy the token set onto `included_hoai_phases`, switch both to DB `select_many`; nothing to convert). OPEN [CODE] item: the ChecklistEditor renders `enum_values[].value`, not the label — a DB checklist over `lph_0 …` would show the tokens until the editor takes `{value,label}` pairs.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the "OPEN [CODE] item" below is CLOSED.** Final wave B item 2 (`c0aad97`, backlog item 8) made the checklist render the option LABEL rather than `enum_values[].value`, and `f7af30e` added the fallback that an empty or whitespace-only `label_de` falls back to the value in both `fromDbField` and `labelOf`, so a blank label can no longer produce a blank checkbox. **A DB `select_many` over `lph_0 … lph_9` would therefore now display "LPH 0 – Bedarfsplanung", not the token.** The *reason* this block deferred the switch has gone.
+  **What the owner can now choose that they could not before:** ratifying STAGED block `E-1` — copy the token set onto `included_hoai_phases` and switch both fields to a DB `select_many` — no longer ships an editor that shows raw tokens to the engineer. **Nothing was migrated in this pass**: `lph_completed` keeps its prod `enum_values` (`keep_prod`, playbook I-1), the Plan-1 pair stays un-migrated, and the DATA switch remains the owner's decision, unchanged and un-taken.
+- Proposed SQL / config: STAGED block E-1 (copy the token set onto `included_hoai_phases`, switch both to DB `select_many`; nothing to convert). ~~OPEN [CODE] item: the ChecklistEditor renders `enum_values[].value`, not the label~~ — **CLOSED at `c0aad97` + `f7af30e`**; the editor renders labels, so the E-1 switch no longer carries that cost.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m820_2-M-1 · DWA-M-820-2 · 820-2-15 · `lph_completed ⊆ included_hoai_phases` (both multi-select) as a gate
@@ -6089,6 +6124,8 @@ Report: `reports/plan-3-iso59020.md`. STAGED SQL: `scripts/verification/iso59020
 - Class: interface-gap
 - Chosen now (fail-safe): Two rows picking the same Table-3 indicator both count in mandatory_core_covered (-04-D4, a display count); since fix round 1 the code -04-D5 and the G-4 gate name every Mandatory token with "== 1", so a duplicate or a missing mandatory row fails without [CODE] (pinned: six + a duplicate ⇒ 0; a duplicate masking a missing token ⇒ 0). Residual: duplicates of OPTIONAL rows are not detected (they change nothing enforced); a `count_distinct_rows` [CODE] candidate would make -04-D4 exact.
 - Evidence (verbatim, transcript line): "The resource inflows and resource outflows of the system in focus shall be quantified and fully balanced with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in stocks into account. If a core circularity indicator is not applicable, the organization should explain why and can count the indicator value as zero." (L1068–L1071)
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the [CODE] candidate SHIPPED, as a warning rather than a constraint.** Final wave B item 5 (`c0aad97`, backlog item 7) added `unique_by: z.array(z.string().min(1)).min(1).optional()` to `registerUi` (`src/lib/eval/field-config.ts`) and a duplicate detector to `register-editor.tsx`: rows are grouped by the JSON tuple of the declared columns and every group with n > 1 renders under `data-testid="register-duplicates"` as `Doppelte Zeile: K „<row>“ — 2× erfasst; zählende Prüfungen zählen sie mehrfach.` **Nothing is dropped, merged, renumbered or re-sorted and the stored carrier is byte-identical** — a duplicate becomes VISIBLE, it does not become a failure, and a `count_rows` gate still counts it.
+  **What is NOT done:** no standard declares `unique_by` — not one `field-configs/**` file was touched, re-checked in this pass. **So the shipped enforcement is unchanged:** `-04-D5` and `iso59020-G-4` still close the hole by naming every Mandatory token with `== 1`, and the residual (duplicates of OPTIONAL rows undetected, `-04-D4` still not exact) stands. **What the owner can now choose that they could not before:** declaring `unique_by` on the indicator register in a re-emit, so a duplicate is flagged at entry instead of being inferred from a failing per-token code. A `count_distinct_rows` engine function is still NOT implemented — that half of the candidate is untouched.
 - Proposed SQL / config: [CODE] candidate, no SQL.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -6540,7 +6577,16 @@ Encoded 2026-09-18 from `C:\Users\Ekowai\Desktop\Guidelines\_site_audit\ISO-4600
 - Class: interface-gap
 - Chosen now (fail-safe): The select_many is emitted (the seven printed items); a code "all seven ticked" is NOT emitted — the save-path materialiser passes register carriers only (materialize-derived.ts: json carriers are registers), so contains(monitoring_items, '…') would never materialise; G-3 lists the gate proposal for when [CODE] lands.
 - Evidence (verbatim, transcript line): "1) monitor and measure as a minimum:" (L660–L671)
-- Proposed SQL / config: STAGED block F-2 (rollback: n/a)
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the premise is FALSE.** "The save-path materialiser passes register carriers only (`materialize-derived.ts`: json carriers are registers)" was true at the time; final wave A defect 2 (`2b3f84c`, backlog item 9) changed it. `buildCarriers` now feeds raw json `select_many` carriers to **all five** production callers — re-grepped at HEAD: `materialize-derived.ts:260`, `evaluate-for-report.ts:274`, `use-equation-engine.ts:221`, `pdf/assemble-standard-report.ts:666`, `snapshots/payload.ts:289` — and an AND-chain of `contains()` parses and evaluates. Probe re-executed in this session:
+  ```
+  evaluateFormula("code = if(contains(items,'a') AND contains(items,'b'), 1, 0)", carriers={items:['a','b']})
+    => {"kind":"computed","value":1}
+  … same formula asking for a token the carrier does not hold
+    => {"kind":"computed","value":0}
+  ```
+  The save-path materialiser gates on `readsCarrier()` — an AST walk for a real `contains()` / `cell()` read — so an equation that merely NAMES a json symbol writes nothing; a genuine `contains()` reader materialises.
+  **What the owner can now choose that they could not before:** `contains(monitoring_items, '…')` over all seven §9.1 1) items IS now computable on the save path, so a completeness code is a real option and the `iso46001-G-3` gate proposal no longer waits on [CODE]. **Nothing was emitted in this pass** — no equation, no field config, no migration, no STAGED change. `F-2` stays withheld for the owner's ratification.
+- Proposed SQL / config: STAGED block F-2 (rollback: n/a) — the [CODE] prerequisite it names is DONE at `2b3f84c` + `cc6b9ed`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### iso46001-I-1 · ISO-46001 · ISO-46001-04 · `water_efficiency_indicator_calc` (-04-D1) is a SCALAR-only equation — computed on the form / report, not server-materialised
@@ -7698,7 +7744,15 @@ Encoded 2026-09-18 from the bilingual (DE / EN) markdown transcript `C:\Users\Ek
 - Class: gate-guard
 - Chosen now (fail-safe): REQ-26 stays TRUE (it passes on every project — an inert block gate). The 5.2 sentence it quotes is a pointer to ISO 14020 (no field carries it); the nearest printed content is the §5.3 – §5.10 block the created checklist general_requirements_items (-03, migration 20260917102510) enumerates. Proposed rewrite (the gate reads all eight printed headings ticked): contains(general_requirements_items, '5.3 …') == true AND … (eight clauses, values = the checklist's enum_values[].value — the printed headings). CAVEAT: the runtime gate scope maps a json carrier to a presence marker (src/lib/compliance/evaluate.ts "Resolve a JSON carrier field's value FOR THE CONDITION DSL … never arithmetic") and passes no contains() carrier — the rewritten gate would read manual until din14021-F-1 lands; parse-checked in-session, not evaluated. Alternative: REJECT (keep TRUE) and rely on REQ-01 … REQ-10 / REQ-48 which already read the twelve -03 booleans.
 - Evidence (verbatim, transcript line): "Die in Abschnitt 5 aufgeführten Anforderungen gelten für sämtliche umweltbezogenen Anbietererklärungen, unabhängig davon, ob es eine von den ausgewählten Aussagen ist, auf die in Abschnitt 7 verwiesen wird, oder eine sonstige Umweltaussage." (L757); "darf nicht gemacht werden" (L783); "Umweltbezogene Anbietererklärungen und ergänzende Erklärungen sind Gegenstand aller Anforderungen in 5.7. Derartige Aussagen, einschließlich jeder ergänzenden Erklärung:" (L823)
-- Note: Apply AFTER 20260917102510 AND after din14021-F-1 ([CODE]); the twelve -03 booleans are din14021-D-26 … D-35.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the recorded CAVEAT is RETIRED.** This block's proposal (REQ-26 rewritten as "the engineer ticked all eight printed §5.3 – §5.10 headings", i.e. eight `contains()` clauses in the gate condition) carried the caveat that the runtime gate scope passes no `contains()` carrier and the condition grammar has no `contains` at all. Final wave A defect 4 (`2b3f84c`, backlog item 11) added the boolean-valued CALL as a condition atom **and** routed the carrier into the gate scope. Probes re-executed in this session against `src/lib/compliance/evaluate.ts`:
+  ```
+  parseCondition("contains(principles, 'systems_thinking')")                                   => PARSES
+  evaluateCondition(same, carrier principles=['systems_thinking','value_creation'])            => {"kind":"pass"}
+  evaluateCondition("contains(principles, 'resource_stewardship')", same carrier)              => {"kind":"fail"}
+  evaluateCondition("contains(principles,'systems_thinking') AND contains(principles,'value_creation')", same carrier) => {"kind":"pass"}
+  ```
+  So the eight-clause rewrite is now evaluable and returns a real verdict, not `manual`. **What the owner can now choose that they could not before:** ratifying G-20 no longer depends on a [CODE] item — only on the enforcement judgement (turning an inert `TRUE` block gate into one that actually blocks). **Nothing was rewritten in this pass**; the STAGED block is unchanged and REQ-26 still ships as `TRUE`.
+- Note: Apply AFTER 20260917102510 AND after din14021-F-1 ([CODE] — **the [CODE] half is DONE at `2b3f84c`**); the twelve -03 booleans are din14021-D-26 … D-35.
 - Proposed SQL / config: STAGED block G-20 (first statement: CREATE TABLE IF NOT EXISTS compliance_requirements_archive_din14021 AS SELECT * FROM compliance_requirements WHERE false;; rollback: RESTORE('da592ff5-47cb-45d1-ac51-6060f963217b');)
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -8090,7 +8144,20 @@ Encoded 2026-09-18 from the bilingual (DE / EN) markdown transcript `C:\Users\Ek
 - Class: interface-gap
 - Chosen now (fail-safe): Not emitted (the three equations would read "Unbekanntes Symbol" forever): src/lib/eval/materialize-derived.ts builds registers + scalar inputs only (json carriers that are not registers are dropped — "json carriers are registers, not scalars"), src/lib/eval/use-equation-engine.ts / evaluate-for-report.ts pass registers + tableLookup and no carriers, and booleans never reach scalar equations (engine-input.ts) — probed in-session; iso46001-F-2 is the precedent. Intended rows once [CODE] lands (values = the checklists' enum_values[].value, i.e. the printed lines): DIN-14021-03-D1 general_requirements_met_code = if(contains(general_requirements_items, '5.3 Unbestimmte oder unspezifische Aussagen') AND contains(general_requirements_items, '5.4 Aussagen von „... frei“') AND contains(general_requirements_items, '5.5 Aussagen zur Nachhaltigkeit') AND contains(general_requirements_items, '5.6 Anwendung von ergänzenden Erklärungen') AND contains(general_requirements_items, '5.7 Besondere Anforderungen') AND contains(general_requirements_items, '5.8 Verwendung von Symbolen für Umweltaussagen') AND contains(general_requirements_items, '5.9 Sonstige Informationen oder Aussagen') AND contains(general_requirements_items, '5.10 Spezifische Symbole'), 1, 0); DIN-14021-04-D1 verification_requirements_met_code = if(contains(documentation_items, 'a) …') AND contains(documentation_items, 'b) …') AND contains(documentation_items, 'c) …') AND contains(documentation_items, 'd) …') AND contains(documentation_items, 'e) …') AND contains(documentation_items, 'f) …') AND contains(documentation_items, 'g) …') AND verifiable_without_confidential_code == 1, 1, 0) — with verifiable_without_confidential a BOOLEAN that needs an enum twin or a gate-side reading; DIN-14021-06-D1 compliance_verdict_code = if(general_requirements_met_code == 1 AND specific_requirements_met_code == 1 AND verification_requirements_met_code == 1, 1, 0) (inputs inherited via C-blocks). Until then the -06 booleans general_requirements_met / verification_requirements_met and compliance_verdict stay hand-typed; specific_requirements_met_code IS computed (register-fed, -01).
 - Evidence (verbatim, transcript line): "6.5.3 Die Mindestangaben, die nach 6.2 zu dokumentieren und aufzubewahren sind, müssen Folgendes enthalten:" (L1032); "6.5.1 Eine umweltbezogene Anbietererklärung ist nur dann als überprüfbar zu betrachten, wenn eine derartige Überprüfung ohne Zugang zu vertraulichen Geschäftsangaben vorgenommen werden kann. Die Aussagen dürfen nicht erfolgen, wenn sie nur mithilfe vertraulicher Geschäftsangaben überprüft werden können." (L1030); "Die in Abschnitt 5 aufgeführten Anforderungen gelten für sämtliche umweltbezogenen Anbietererklärungen, unabhängig davon, ob es eine von den ausgewählten Aussagen ist, auf die in Abschnitt 7 verwiesen wird, oder eine sonstige Umweltaussage." (L757)
-- Note: [CODE] item; STAGED block F-1 has no SQL (rollback: n/a).
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the premise is FALSE on all THREE of its clauses.** The "Chosen now (fail-safe)" text above is kept verbatim as the record of what the encoding was built against; every reason it gives was removed by final wave A (`2b3f84c`, fix round `cc6b9ed`):
+  1. **"`materialize-derived.ts` builds registers + scalar inputs only (json carriers that are not registers are dropped)"** — defect 2, backlog item 9. `buildCarriers` now feeds raw json `select_many` carriers to all five production callers (re-grepped at HEAD: `materialize-derived.ts:260`, `evaluate-for-report.ts:274`, `use-equation-engine.ts:221`, `pdf/assemble-standard-report.ts:666`, `snapshots/payload.ts:289`). The save-path gate is `readsCarrier()` — an AST walk for a real `contains()` / `cell()` read — so naming a json symbol without reading it still writes nothing.
+  2. **"`use-equation-engine.ts` / `evaluate-for-report.ts` pass registers + tableLookup and no carriers"** — same fix; both now pass carriers.
+  3. **"booleans never reach scalar equations (`engine-input.ts`)"** — defect 1, backlog item 2. `engineInputValue` has a `boolean` case returning the value verbatim (`engine-input.ts:39-40`).
+  Probes re-executed in this session:
+  ```
+  engineInputValue({type:'boolean', value:true})  => true      // verifiable_without_confidential
+  evaluateFormula("code = if(contains(items,'a') AND contains(items,'b'), 1, 0)", carriers={items:['a','b']})
+    => {"kind":"computed","value":1}
+  … asking for a token the carrier does not hold  => {"kind":"computed","value":0}
+  ```
+  **What the owner can now choose that they could not before:** all three intended rows are computable exactly as written above — `DIN-14021-03-D1` (eight `contains()` over `general_requirements_items`), `DIN-14021-04-D1` (seven `contains()` over `documentation_items` **AND** `verifiable_without_confidential_code == 1`, which no longer needs an enum twin or a gate-side reading — the boolean itself is readable), and `DIN-14021-06-D1` over the three inherited codes. The `-06` booleans `general_requirements_met` / `verification_requirements_met` / `compliance_verdict` no longer have to stay hand-typed. `din14021-G-20`'s recorded CAVEAT is retired with it.
+  **NOTHING WAS EMITTED IN THIS PASS.** No equation row, field config, migration or STAGED file was written — emitting these three is an encoding decision on this sheet.
+- Note: [CODE] item; STAGED block F-1 has no SQL (rollback: n/a). **The [CODE] prerequisite is DONE at `2b3f84c` + `cc6b9ed`; what is left is the owner's ratification.**
 - Proposed SQL / config: STAGED block F-1 (no statement; rollback: n/a)
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -8512,7 +8579,13 @@ Encoded 2026-09-18 from the SPANISH markdown transcript `C:\Users\Ekowai\Desktop
 - Class: function-gap [CODE]
 - Chosen now (fail-safe): Not emitted (a row reading "Unbekanntes Symbol" forever would be worse than no row). The checklists ARE emitted (data_quality_items on -02 F, third_party_report_items on -06 C — values = the printed lines). Intended formulas once the carriers reach the materialiser / form / report / gate scopes: data_quality_complete_code = if(contains(data_quality_items, 'a) …') AND contains(data_quality_items, 'b) …') AND contains(data_quality_items, 'c) …') AND contains(data_quality_items, 'd) …') AND contains(data_quality_items, 'e) …') AND contains(data_quality_items, 'f) …') AND contains(data_quality_items, 'g) …') AND contains(data_quality_items, 'h) …') AND contains(data_quality_items, 'i) …') AND contains(data_quality_items, 'j) …'), 1, 0); third_party_report_complete_code = if(contains(third_party_report_items, 'a) aspectos generales:') AND contains(third_party_report_items, 'b) objetivo del estudio:') AND contains(third_party_report_items, 'c) alcance del estudio:') AND contains(third_party_report_items, 'd) análisis del inventario de la huella de agua:') AND contains(third_party_report_items, 'e) evaluación de la huella de agua, cuando aplique:') AND contains(third_party_report_items, 'f) interpretación:') AND contains(third_party_report_items, 'g) revisión crítica, cuando aplique:'), 1, 0) — the literals are the checklists' enum_values[].value (the printed lines, abbreviated here). G-12 carries the REQ-06 gate form.
 - Evidence (verbatim, transcript line): "Los requisitos para la calidad de los datos deberían tratar lo siguiente:" (L595); "El informe de tercera parte debe cubrir los siguientes aspectos:" (L909)
-- Note: [CODE] follow-up; no SQL.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the premise is FALSE.** "json checklist carriers are never passed to `contains()`" was true when this block was written and is not true now: final wave A defect 2 (`2b3f84c`, backlog item 9) routes raw json `select_many` carriers to all five production callers (`materialize-derived.ts:260`, `evaluate-for-report.ts:274`, `use-equation-engine.ts:221`, `pdf/assemble-standard-report.ts:666`, `snapshots/payload.ts:289`), and defect 3 (backlog item 10) made the parser accept an AND-chain of `contains()`. Probe re-executed in this session:
+  ```
+  evaluateFormula("code = if(contains(items,'a') AND contains(items,'b'), 1, 0)", carriers={items:['a','b']})
+    => {"kind":"computed","value":1}      // and 0 when a listed token is absent
+  ```
+  **What the owner can now choose that they could not before:** both intended formulas — `data_quality_complete_code` (ten `contains()` over `data_quality_items`) and `third_party_report_complete_code` (seven over `third_party_report_items`) — are computable exactly as written above, and `iso14046-G-12`'s REQ-06 gate form is evaluable with them. The two checklists are already emitted, so only the two code rows are missing. **Nothing was emitted in this pass** — no equation row, no migration, no STAGED change. Note also `C-2` below: two of the six now-false `ui_config.note` strings sit on this standard (`iso14046.ts:107`, `:252`) and still tell the engineer a completeness code is impossible.
+- Note: [CODE] follow-up; no SQL. **The [CODE] prerequisite is DONE at `2b3f84c` + `cc6b9ed`; the two rows remain withheld pending ratification.**
 - Proposed SQL / config: STAGED block F-2 (no statement; rollback: n/a)
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -8536,7 +8609,8 @@ Encoded 2026-09-18 from the SPANISH markdown transcript `C:\Users\Ekowai\Desktop
 - Class: observation (emitter asymmetry)
 - Chosen now (fail-safe): Recorded, NOT changed (fix round 1, reviewer minor 2). The guard would have to go into scripts/regulation-tables/emit-field-configs-sql.ts, whose UPDATE statement is shared by every Plan-3 standard: adding `AND f.visible_when IS NULL` there would change the emitted SQL of the already-committed field-config migrations of OTHER standards and break their byte-freshness pins (amendment G forbids touching another standard's files). Option chosen: leave the shared emitter untouched and record the asymmetry here. Consequence: re-running 20260917102610 after a later hand-edit of that field's visible_when would overwrite it (the rollback restores the captured prior NULL either way); the prod value is NULL today (captured 2026-09-18), so the first apply is idempotent in effect. The STAGED hides keep their IS NULL guards, so a re-run of any ratified block is a no-op. Alternative (owner may prefer): a [CODE] item adding the guard to the emitter AND re-emitting every Plan-3 field-config migration in one sweep (Task 30 scope), which is the only way to keep the byte pins honest.
 - Evidence (verbatim, transcript line): "un panel de revisión constituido por al menos tres miembros" (L1030); "p) tipo de revisión crítica. Si hay (véase el Capítulo 7)." (L538)
-- Note: Observation; no SQL here ([CODE] alternative named).
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — this observation is ANSWERED.** Final wave C item 3 (`95d0ea3`, fix round `757a85d`, backlog item 15) put `AND f.visible_when IS NULL` into the shared emitter and re-emitted the corpus: 140 field UPDATEs + 290 section UPDATEs across 24 of the 29 field-config migrations now carry the guard, this standard's single `review_panel_members` UPDATE among them, and every guarded UP's rollback statement carries a re-capture warning. **The re-emit was proven mechanical — reversing the guard strings reproduces the previous commit byte-for-byte on all 24 files.** Two consequences you must read before ratifying anything on this standard: **`C-1`** (a re-apply is now a silent no-op on `visible_when`, so the recovery path is rollback-then-reapply — with **16 exceptions** that still clear a rule unconditionally, listed there) and **`C-3`** (six symbols configured by both a Plan-1 and a Plan-3 migration). No separate signature is needed for this block.
+- Note: Observation; no SQL here ([CODE] alternative named) — **the [CODE] alternative SHIPPED at `95d0ea3`.**
 - Proposed SQL / config: STAGED block I-2 (no statement; rollback: n/a)
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -9511,7 +9585,8 @@ Report: `reports/plan-3-atv_a704e.md` · STAGED SQL: `scripts/verification/atv_a
 - Class: interface-gap (engine)
 - Chosen now (fail-safe): The §21 catalogue check ships as a PER-ROW badge and NO equation is emitted over it. Observed in this session through the real code path and pinned in `equations-iso5667-1.test.ts`: a (aspect, method) pair with no S21 row yields `method_ok = null` with an EMPTY `reg.diagnostics` (the lookup miss is a recoverable `ExprError`, silent by design), and `count_rows(flow_measurements, method_ok == 0)` returns `{ kind: "manual_required", reason: "Fehlende Eingabe für count_rows(): method_ok" }`. Fail-safe (never a phantom pass) but also never a verdict.
 - Evidence: [engine, re-runnable] three rows — (discharge, venturi) 1, (velocity, current_meter) 1, (direction, venturi) null; `reg.diagnostics` = []; the count over the column ⇒ manual_required.
-- Proposed SQL / config: no prod SQL. Proposed engine addition for the final [CODE] wave (NOT applied here): a `lookup_default(table, keys…, column, default)` form, or a `has_row(table, keys…)` predicate, so a missing row can be expressed as 0 instead of null — additions to `src/lib/expr/functions.ts` + `evaluate.ts`.
+- **PARTLY CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the SILENCE is fixed; the VERDICT question is NOT, and this block stays open on that half.** Final wave A defect 5 (`2b3f84c`, fix round `cc6b9ed`, backlog item 5) added a citation: `citeMisses()` / `missesFor()` in `register-rows.ts` filter the register's `lookupMiss` list by the failing column's `"<key>: "` prefix and attach it to the aggregate's `ExprError`, on BOTH the filtered (`filterRows`) and the unfiltered (`perRowNumbers`) paths, so an aggregate that goes `manual_required` now names the row and the table lookup that blanked the cell instead of failing mutely. Wave A also pinned that an unrelated column's miss is NOT cited and that a miss-free register keeps its byte-identical bare message. **The proposal below — `lookup_default(...)` / `has_row(...)` — was deliberately NOT implemented**, because turning "the standard does not print this combination" into a `0` is a judgement about what an unprinted row MEANS, and that judgement is the owner's. So the fail-safe outcome is unchanged: `ISO-5667-1-08-D1` still counts rows, not verdicts, `method_ok` stays a per-row badge, and no equation was emitted over it. **Nothing changed in this standard's encoding.**
+- Proposed SQL / config: no prod SQL. Proposed engine addition for the final [CODE] wave (**still NOT implemented at HEAD `757a85d` — see the correction above**): a `lookup_default(table, keys…, column, default)` form, or a `has_row(table, keys…)` predicate, so a missing row can be expressed as 0 instead of null — additions to `src/lib/expr/functions.ts` + `evaluate.ts`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### iso5667_1-J-3 · ISO-5667-1 · ISO-5667-1-04 · CR-012 severity
@@ -9617,7 +9692,14 @@ Report: `reports/plan-3-atv_a704e.md` · STAGED SQL: `scripts/verification/atv_a
 - Block 1 [CODE] — **it does not even parse.** Evidence: [probe, re-executable via `equations-iso59004.test.ts`] `parseNumeric(<rhs>)` ⇒ `{"ok":false,"message":"Ausdruck erwartet."}`, while `parseNumeric("if(contains(principles, 'systems_thinking'), 1, 0)")` ⇒ `{"ok":true,…}`. So it is the `AND` chain, not `contains`. This is NEW: `din14021-F-1` and `iso14046-F-2` recorded only the carrier gap. See `iso59004-I-2`.
 - Block 2 [CODE] — even the nested-`if` rewrite that DOES parse cannot evaluate. Evidence: [probe] `evaluateFormula(WITHHELD_04_D1_NESTED_FORM, inputs: [{symbol:"principles", …}])` ⇒ `{"kind":"manual_required","reason":"Unbekanntes Symbol \"principles\" im Ausdruck."}` — `contains()` over a json `select_many` carrier has no engine path because no production `evaluateFormula` caller passes `carriers`. Confirmed a fourth time here (after din14021, iso14046 and Task 27's reviewer).
 - Evidence: [PDF p.23 (printed p.16), §5.3.2, VA — the sentence the code would have enforced] "Considering the integration of all the circular economy principles is important, as focusing on only one or two principles can undermine the achievements that would otherwise occur if all the principles were considered."
-- Proposed SQL / config: no prod SQL. Both blockers are [CODE] items for the final wave; the nested rewrite is exported as `WITHHELD_04_D1_NESTED_FORM` and its parse is pinned, so the day `carriers` lands the emission is one line. Block `iso59004-F-1`.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — BOTH blockers are gone.** Block 1 ("it does not even parse") was removed by final wave A defect 3 (`2b3f84c`, backlog item 10) and block 2 ("even the nested rewrite cannot evaluate") by defect 2 (backlog item 9 — `buildCarriers` now feeds json `select_many` carriers to all five production callers). The AND-chain form — the one recorded verbatim as `WITHHELD_04_D1_FORMULA` — now parses AND evaluates, so the nested rewrite is no longer needed either. Probe re-executed in this session:
+  ```
+  evaluateFormula("code = if(contains(items,'a') AND contains(items,'b'), 1, 0)", carriers={items:['a','b']})
+    => {"kind":"computed","value":1}
+  … asking for a token the carrier does not hold => {"kind":"computed","value":0}
+  ```
+  **What the owner can now choose that they could not before:** `ISO-59004-04-D1` can be emitted in its printed AND-chain form against the `principles` checklist. The block said "the day `carriers` lands the emission is one line" — that day has come; the line was deliberately **not** written here, because emitting an equation beside a required prod hand boolean is a D-class decision, not a session's. **Nothing was emitted.**
+- Proposed SQL / config: no prod SQL. Both blockers are [CODE] items for the final wave — **BOTH DONE at `2b3f84c`**; the nested rewrite is exported as `WITHHELD_04_D1_NESTED_FORM` and its parse is pinned, and the direct AND-chain now evaluates too, so the emission is one line whenever the owner says so. Block `iso59004-F-1`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### iso59004-I-1 · ISO-59004 · [CODE] · `src/lib/eval/field-config.ts` · a register column cannot be a MULTI-select
@@ -9632,15 +9714,40 @@ Report: `reports/plan-3-atv_a704e.md` · STAGED SQL: `scripts/verification/atv_a
 - Chosen now (fail-safe): nothing emitted; `iso59004-F-1` is withheld partly because of this.
 - Evidence: [probe, re-executable] `parseNumeric("if(contains(p,'a') AND contains(p,'b'), 1, 0)")` ⇒ `{"ok":false,"message":"Ausdruck erwartet."}`; `parseNumeric("if(contains(p,'a'), 1, 0)")` ⇒ ok; `parseNumeric("if(x == 1 AND y == 2, 1, 0)")` ⇒ ok. Any boolean combination of function results must be written as nested `if()`s today.
 - Consequence beyond this standard: every "all of these N checklist items are ticked" code in the corpus is blocked by BOTH this and the carrier gap, not only by the carrier gap. The completeness codes withheld by `din14021-F-1` and `iso14046-F-2` have the same shape and would hit this first.
-- Proposed SQL / config: no prod SQL. Proposal: allow a CALL wherever a COMPARISON is accepted inside `and`/`or` (the evaluator already coerces a numeric result to truth inside `if()`), pinned with this standard's `WITHHELD_04_D1_FORMULA` as the regression fixture. Block `iso59004-I-2`.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — the premise is FALSE; the proposal below was IMPLEMENTED.** Final wave A defect 3 (`2b3f84c`, backlog item 10) allows a CALL wherever a COMPARISON is accepted inside `and` / `or`, with this standard's withheld `-04-D1` shape as the regression fixture — exactly as proposed. Probe re-executed in this session:
+  ```
+  evaluateFormula("code = if(contains(items,'a') AND contains(items,'b'), 1, 0)", carriers={items:['a','b']})
+    => {"kind":"computed","value":1}
+  … asking for a token the carrier does not hold => {"kind":"computed","value":0}
+  ```
+  Together with defect 2 (the carrier path) **both** reasons `iso59004-F-1` was withheld are gone. **Nothing was emitted in this pass.**
+- Proposed SQL / config: no prod SQL. Proposal: allow a CALL wherever a COMPARISON is accepted inside `and`/`or` (the evaluator already coerces a numeric result to truth inside `if()`), pinned with this standard's `WITHHELD_04_D1_FORMULA` as the regression fixture — **DONE at `2b3f84c`**. Block `iso59004-I-2`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### iso59004-I-3 · ISO-59004 · [CODE] · the GATE condition grammar has no `contains` at all
 - Class: interface-gap (engine)
 - Chosen now (fail-safe): the six §5.2 principle requirements CR-006 … CR-011 stay empty-conditioned (see `iso59004-G-4`) rather than take an invented enforcement.
-- Evidence: [probe, re-executable] `parseCondition("contains(principles, 'systems_thinking')")` ⇒ `null`; `parseCondition("principles IS NOT NULL")` ⇒ parses and evaluates `pass` over a two-token checklist value. So the only checklist predicate a gate can express today is "at least one ticked", which cannot distinguish six requirements that each name ONE principle.
-- Proposed SQL / config: no prod SQL. Proposal: add a membership test to the condition grammar (`<carrier> CONTAINS '<token>'`, or `contains(<carrier>, '<token>')` for symmetry with the formula set), with the six ISO-59004 principle CRs as the fixture. Block `iso59004-I-3`.
-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+- Evidence **[RECORDED AT THE TIME — 2026-09-24, base `c8b6dc4`; the first clause is FALSE at HEAD, see below]**: [probe, re-executable] `parseCondition("contains(principles, 'systems_thinking')")` ⇒ `null`; `parseCondition("principles IS NOT NULL")` ⇒ parses and evaluates `pass` over a two-token checklist value. So the only checklist predicate a gate can express today is "at least one ticked", which cannot distinguish six requirements that each name ONE principle.
+- **CORRECTED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25) — THE PREMISE OF THIS BLOCK NO LONGER HOLDS.** Final wave A defect 4 (`2b3f84c`, backlog item 11) added a boolean-valued CALL as a condition atom **and** routed the json carrier into the gate scope, so the grammar now has exactly the membership test this block asked for. Re-executed in this session against `src/lib/compliance/evaluate.ts` at HEAD:
+  ```
+  parseCondition("contains(principles, 'systems_thinking')")
+    => PARSES {"kind":"acompare","left":{"kind":"call","name":"contains","args":[
+         {"kind":"aref","symbol":"principles"},{"kind":"astr","value":"systems_thinking"}]},
+       "op":"==","right":{"kind":"abool","value":true}}
+  parseCondition("contains(principles,'systems_thinking') AND contains(principles,'value_creation')")
+    => PARSES
+  evaluateCondition("contains(principles, 'systems_thinking')",  carrier principles=['systems_thinking','value_creation'])  => {"kind":"pass"}
+  evaluateCondition("contains(principles, 'resource_stewardship')", same carrier)                                           => {"kind":"fail"}
+  evaluateCondition("contains(principles,'systems_thinking') AND contains(principles,'value_creation')", same carrier)      => {"kind":"pass"}
+  ```
+  A gate can now distinguish the six §5.2 principles, and it returns a real verdict (`pass` / `fail`), not `manual`.
+- **WHAT THE OWNER CAN NOW CHOOSE THAT THEY COULD NOT BEFORE.** Prod, read-only 2026-09-25: `ISO-59004` carries **44** `compliance_requirements`, **24** of them with an empty condition (`node scripts/verification/prod-query.mjs` — `total = 44 · empty_condition = 24`). Until wave A the only honest option was (a). All three are now open:
+  - **(a) LEAVE ALL 24 EMPTY — what the branch ships today.** An empty condition is `manual` at runtime: the engineer attests, nothing is machine-enforced. This is what "Chosen now (fail-safe)" above means, and it remains a legitimate choice — it is the *only* one that needs no new judgement about what each requirement means.
+  - **(b) CONDITION THE SIX §5.2 PRINCIPLE ROWS ONLY** (CR-006 … CR-011), each on `contains(principles, '<its own token>')`. This is the narrow, mechanical option: the six requirements differ only in which printed principle they name, the tokens are already the `principles` checklist's own `enum_values[].value`, and the grammar now expresses it. It retires the "invented enforcement" objection that forced (a).
+  - **(c) CONDITION ALL 23 CONDITIONABLE ROWS.** The 24th is the one the missing operator never blocked. This is the largest enforcement change on the standard and needs a per-row reading of what each ISO-59004 clause actually requires — i.e. 23 separate judgements, not one.
+  **NOTHING WAS ENCODED IN THIS PASS.** No condition was written, no migration or STAGED file changed: which of (a) / (b) / (c) applies is an enforcement decision, and enforcement decisions are ratified on this sheet, never taken by a session. If the owner picks (b) or (c), the work is a new STAGED block on `iso59004` with the archive-rollback pattern and an md5 guard per row.
+- Proposed SQL / config: no prod SQL **from this block**. The original proposal (add a membership test to the condition grammar, `contains(<carrier>, '<token>')`, with the six ISO-59004 principle CRs as the fixture) is **DONE in code** — ratify it as a record, then rule on (a) / (b) / (c) above. Block `iso59004-I-3`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER  · enforcement choice: ☐ (a) leave all 24 empty ☐ (b) the six §5.2 principle rows ☐ (c) all 23
 
 ### iso59004-J-3 · ISO-59004 · ISO-59004-05 · the brief's per-row rule for `actions.life_cycle_note` is REFUTED
 - Class: visibility (premise refuted, R-5)
@@ -9881,6 +9988,40 @@ Seventeen items. Each is a real limitation demonstrated by a named standard, not
 the encoding as shipped — but each one costs an engineer something today. Ordered roughly by how
 much: server-side correctness first, then engine expressiveness, then emitter hygiene.
 
+> ### RE-STATED AT HEAD `757a85d` (documentation-truth pass, 2026-09-25)
+>
+> **The list below was written seven commits before the final `[CODE]` waves A, B and C and was
+> never refreshed.** Fifteen of the seventeen items are now fixed in code; two are still open.
+> The body of each item is left **exactly as it was written** — it is the record of what the
+> encoding was built against — and each one now carries a dated **HEAD** line naming the state at
+> `757a85d` and the commit that changed it. Nothing was re-encoded on the strength of these
+> closures: an item being fixed only means the owner now has an option the encoding did not have.
+>
+> | # | item | state at HEAD `757a85d` | fixed by |
+> |---|---|---|---|
+> | 1 | inherited fields in server-side visibility / materialisation | **CLOSED** (with one carried scope note) | `c0aad97` + `f7af30e` (wave B) |
+> | 2 | booleans do not reach scalar equations | **CLOSED** | `2b3f84c` (wave A, defect 1) |
+> | 3 | inputs inside an untaken `if()` branch are still required | **OPEN** | — |
+> | 4 | an overridden register row is never refilled | **CLOSED as a signal, not as a refill** | `c0aad97` (wave B, item 3) |
+> | 5 | a `lookup()` miss in a register `derived` column blanks the cell silently | **CLOSED for the silence; the fail-safe verdict is unchanged by design** | `2b3f84c` + `cc6b9ed` (wave A, defect 5) |
+> | 6 | `LookupFillField` renders no input under a `locked` policy | **OPEN** | — |
+> | 7 | register rows have no uniqueness constraint | **CLOSED as a declarable key + visible warning** | `c0aad97` (wave B, item 5) |
+> | 8 | checklists render enum VALUES, not labels | **CLOSED** | `c0aad97` + `f7af30e` (wave B, item 2) |
+> | 9 | `contains()` over a json carrier has no engine path | **CLOSED** | `2b3f84c` + `cc6b9ed` (wave A, defect 2) |
+> | 10 | the parser rejects an AND-chain of `contains()` | **CLOSED** | `2b3f84c` (wave A, defect 3) |
+> | 11 | the GATE condition grammar has no `contains` | **CLOSED** | `2b3f84c` (wave A, defect 4) |
+> | 12 | the equations emitter reads `AND (` as a CALL | **CLOSED** | `95d0ea3` (wave C, item 1) |
+> | 13 | `fmt()` has no epsilon guard | **CLOSED** | `c0aad97` (wave B, item 4) |
+> | 14 | no PDF-side quoted-string test | **CLOSED** | `c0aad97` (wave B, item 7) |
+> | 15 | no `AND f.visible_when IS NULL` guard on emitted UPDATEs | **CLOSED** | `95d0ea3` + `757a85d` (wave C, item 3) |
+> | 16 | the emitter accepts reserved register column keys | **CLOSED** | `95d0ea3` (wave C, item 2) |
+> | 17 | no per-row `alternatives` on a `RegulationRow` | **CLOSED as a capability; no seed filled** | `c0aad97` (wave B, item 6) |
+>
+> **Open: 2 of 17 (items 3 and 6).** Both were re-probed at HEAD in this pass — the probes are on
+> the items themselves. **The count of items that still cost an engineer something today is
+> therefore 2, not 17**, and residue item 9 of `plan-3-LEDGER.md` (which named four of these as
+> live) is corrected there.
+
 **Server-side / correctness**
 
 1. **`computeVisibility` + `materializeDerivedOutputs` ignore inherited fields.**
@@ -9891,32 +10032,101 @@ much: server-side correctness first, then engine expressiveness, then emitter hy
    broadened from the Task-17 review); its consequence is recorded again on DWA-M-820-1
    (`m820_1-I-2`: D11 / D14 / D15 are `manual_required` on save until this is fixed). Fail-safe
    today only because no gate reads the affected outputs.
+   > **HEAD `757a85d` — CLOSED** by wave B (`c0aad97`, fix round `f7af30e`). `saveWorksheet` now
+   > calls `loadInheritedFields` **on the transaction client** and passes the result to both
+   > helpers. Re-read in this pass: `src/lib/actions/worksheet.ts:696-745` — `const inheritedRows
+   > = savedStandardId ? await loadInheritedFields(instance.worksheetTemplateId, savedStandardId,
+   > savedTemplateCode, tx) : []`, own symbols win, `readableFields = [...templateFields,
+   > ...inheritedFields]` feeds `makeSymbolLookup` for `computeVisibility` and
+   > `inheritedFields` is passed to `materializeDerivedOutputs`. The report path was brought into
+   > line in `f7af30e` (one shared `withInherited` used by BOTH `reportVisibility` and
+   > `evaluateWorksheetEquations`), so the PDF no longer contradicts the save path.
+   > **Carried scope note, NOT a reopening:** the whole block is still entered only when the save
+   > batch contains at least one OWN register field (`if (batchRegisterIds.length > 0 && …)`,
+   > `worksheet.ts:688`). Scalar-only equations remain form/report-computed and un-materialised
+   > (amendment D) — that is a separate, deliberately unchanged design, not this item.
 2. **Booleans do not reach scalar equations.** `engine-input.ts` maps a boolean field to
    *missing* for a scalar formula input, so `if(flag, a, b)` at worksheet level is unusable.
    Found by DWA-M-820-1 (`m820_1-I-1`); worked around everywhere by creating an `enum`
    yes/no driver instead of using the boolean (FLL-GAR `fll_gar-I-1`).
+   > **HEAD `757a85d` — CLOSED** by wave A defect 1 (`2b3f84c`). `engineInputValue` has a
+   > `boolean` case that hands the value over verbatim (`src/lib/eval/engine-input.ts:39-40`), and
+   > `formula.ts`'s missing-rule admits `false` (`false === ''` is false), so only a never-answered
+   > `null` is missing. Probe re-executed at HEAD in this pass:
+   > ```
+   > engineInputValue({type:'boolean', value:true})  => true
+   > engineInputValue({type:'boolean', value:false}) => false
+   > evaluateFormula('code = if(flag, 1, 0)', inputs=[{flag:true}])
+   >   => {"kind":"computed","value":1,"substituted":{"flag":true}}
+   > ```
+   > The enum yes/no twin is therefore no longer forced anywhere. Nothing was re-encoded.
 3. **Inputs inside an untaken `if()` branch are still required.** The engine demands every symbol
    named in a formula, so a conditional whose other branch names a field the project will never
    fill reports `manual_required` in the nominal case. Found by DWA-M-187 (Task 12 fix round:
    `M187-22-D7 carbonatschicht_nachweis` exists only because the folded conditional could not be
    used); confirmed in `formula.ts` by the Task-12 re-review.
+   > **HEAD `757a85d` — STILL OPEN.** Re-probed in this pass: `src/lib/eval/formula.ts:213-231`
+   > still loops over **every** symbol in `symbolsNeeded` and pushes any unresolved one onto
+   > `missing`, with no awareness of which `if()` branch names it. Waves A/B/C touched the boolean
+   > and carrier cases inside that loop and left the branch question alone. `M187-22-D7
+   > carbonatschicht_nachweis` therefore still has to exist.
 4. **An overridden register row is never refilled.** Once a `lookup_value` cell carries an
    override, a later key change does not re-fetch the table value. Found by DWA-M-1200-2
    (`m1200_2-I-2`).
+   > **HEAD `757a85d` — CLOSED as a SIGNAL, not as a refill** (wave B item 3, `c0aad97`). The
+   > deliberate decision was that **nothing is refilled and nothing is overwritten** — the
+   > engineer's stored value stays. What changed: a `lookup_value` column the override does NOT
+   > claim now renders a non-blocking line under the cell,
+   > `Tab. N: <current table value> — nicht übernommen (Zeile abweichend)`, so a stale cell is
+   > visible instead of silent. Claimed columns already print the current table value through the
+   > existing `mismatch` marker. If the owner wants an actual re-fetch, that is a new decision.
 5. **A `lookup()` miss inside a register `derived` column blanks the cell silently and poisons
    every aggregate over it** (`register-rows.ts` — a recoverable `ExprError` leaves the cell
    `null` with no diagnostic, so `sum_rows`/`mean_rows` over it goes `manual_required`). Found by
    ISO-5667-1 (`iso5667_1-F-1`), confirmed by its reviewer.
+   > **HEAD `757a85d` — CLOSED for the SILENCE** (wave A defect 5, `2b3f84c` + `cc6b9ed`). A
+   > `lookup()` miss inside a register `derived` column now carries a citation: `citeMisses()` /
+   > `missesFor()` in `register-rows.ts` filter the register's `lookupMiss` list by the failing
+   > column's `"<key>: "` prefix and attach it to the aggregate's `ExprError`, on BOTH the filtered
+   > (`filterRows`) and the unfiltered (`perRowNumbers`) paths, so the aggregate says which row and
+   > which table lookup left the cell null. **The VERDICT is unchanged on purpose:** the aggregate
+   > is still `manual_required` (fail-safe), because turning "the standard does not print this
+   > combination" into a `0` is a judgement about what an unprinted row MEANS. The ruling's own
+   > `lookup_default(...)` / `has_row(...)` proposal is therefore **NOT** implemented and
+   > `ISO-5667-1-08-D1` still counts rows, not verdicts — see `iso5667_1-F-1`, which stays open on
+   > exactly that half.
 6. **`LookupFillField` renders NO input when the table policy is `locked` and the keys are
    missing** (`lookup-fill-field.tsx`: `canOverride` requires `policy !== 'locked'`, and the fill
    effect returns early unless the row resolves). A required field can then be neither filled nor
    typed. Found by ISO-5667-1 (`iso5667_1-E-1`) — the reason the whole corpus uses twins instead
    of re-binds on required fields.
+   > **HEAD `757a85d` — STILL OPEN.** Re-probed in this pass:
+   > `src/components/worksheet/lookup-fill-field.tsx:181` still reads
+   > `const canOverride = mode === 'fill' && !readOnly && state.kind === 'resolved' && policy !==
+   > 'locked' && tableScalar != null;`, and `showInput` (`:182`) is gated on `canOverride`, so a
+   > `locked` table with unresolved keys still renders no input at all. Wave B touched this file
+   > only to add per-row `alternatives` (item 17). **The twin-not-re-bind convention therefore
+   > still stands for every required or gate-bearing prod field** — do not relax it.
 7. **Register rows have no uniqueness constraint.** A duplicate row passes every count-based
    gate. Found by ISO-59020 (`iso59020-F-2`); its G-4 had to be rewritten as six per-token
    clauses to close the hole. Wanted: unique-key columns declared in `ui_config`.
+   > **HEAD `757a85d` — CLOSED as a DECLARABLE KEY + a visible warning** (wave B item 5,
+   > `c0aad97`). `registerUi` in `src/lib/eval/field-config.ts` gained
+   > `unique_by: z.array(z.string().min(1)).min(1).optional()`, and `register-editor.tsx` groups
+   > the prepared rows by the JSON tuple of those columns and renders every group with n > 1 under
+   > `data-testid="register-duplicates"` as `Doppelte Zeile: … — 2× erfasst; zählende Prüfungen
+   > zählen sie mehrfach.` **Nothing is dropped, merged, renumbered or re-sorted** and the stored
+   > carrier is byte-identical — it is a warning, not a constraint. **No standard declares
+   > `unique_by` yet**: not one `field-configs/**` file was touched, so `iso59020-G-4`'s six
+   > per-token clauses stay the enforcing form until the owner ratifies a re-emit.
 8. **Checklists render enum VALUES, not labels.** Found by DWA-M-820-2 (`m820_2-E-1`); every
    Spanish/English option list is affected (ISO-5667-10 names it too).
+   > **HEAD `757a85d` — CLOSED** (wave B item 2, `c0aad97`; label fallback hardened in `f7af30e`).
+   > The checklist renders the option LABEL, and an empty or whitespace-only `label_de` falls back
+   > to the value in both `fromDbField` and `labelOf`, so a blank label can no longer produce a
+   > blank checkbox. This is the [CODE] half of `m820_2-E-1`; the DATA half (copying the token set
+   > onto `included_hoai_phases` and switching both fields to a DB `select_many`) is still the
+   > owner's to ratify — see the corrected `m820_2-E-1` block.
 
 **Engine expressiveness**
 
@@ -9924,18 +10134,59 @@ much: server-side correctness first, then engine expressiveness, then emitter hy
    no production `evaluateFormula` caller passes `carriers`. Found by DIN-14021 (`din14021-F-1`),
    independently re-confirmed by ISO-46001 (`iso46001-F-2`) and ISO-14046; three standards had to
    withhold equations because of it.
+    > **HEAD `757a85d` — CLOSED** (wave A defect 2, `2b3f84c`; gate narrowed in `cc6b9ed`).
+    > `buildCarriers` now feeds raw json `select_many` carriers to **all five** production
+    > callers — re-grepped at HEAD: `materialize-derived.ts:260`, `evaluate-for-report.ts:274`,
+    > `use-equation-engine.ts:221`, `pdf/assemble-standard-report.ts:666`,
+    > `snapshots/payload.ts:289`. The save-path materialiser gates on `readsCarrier()` (an AST
+    > walk for a real `contains()` / `cell()` read), so an equation that merely NAMES a json
+    > symbol writes nothing — that guard is what keeps `median(log10_reduktionen)` from
+    > null-writing over an engineer's value.
 10. **The expression parser rejects an AND-chain of `contains()` outright** ("Ausdruck erwartet").
     Found by ISO-59004 (`iso59004-F-1` / `I-2`), re-probed by its reviewer.
+    > **HEAD `757a85d` — CLOSED** (wave A defect 3, `2b3f84c`). Probe re-executed in this pass:
+    > ```
+    > evaluateFormula("code = if(contains(items,'a') AND contains(items,'b'), 1, 0)",
+    >                 carriers={items:['a','b']})
+    >   => {"kind":"computed","value":1}
+    > … with one token missing (items=['a','b'], asks for 'z')
+    >   => {"kind":"computed","value":0}
+    > ```
 11. **The GATE condition grammar has no `contains` operator at all** — `parseCondition` has no
     call node. Found by ISO-59004 (`iso59004-I-3`): **23 of 24** empty-condition compliance rows
     on that standard cannot be given a condition without it.
+    > **HEAD `757a85d` — CLOSED** (wave A defect 4, `2b3f84c`). A boolean-valued call is now a
+    > condition ATOM on its own and inside `AND` / `OR` / `NOT`, and the carrier reaches the gate
+    > scope. Probes re-executed in this pass (`src/lib/compliance/evaluate.ts`):
+    > ```
+    > parseCondition("contains(principles, 'systems_thinking')")            => PARSES
+    > evaluateCondition(same, carrier: principles=['systems_thinking','value_creation'])
+    >                                                                      => {"kind":"pass"}
+    > evaluateCondition("contains(principles, 'resource_stewardship')", …)  => {"kind":"fail"}
+    > evaluateCondition("contains(principles,'systems_thinking') AND contains(principles,'value_creation')", …)
+    >                                                                      => {"kind":"pass"}
+    > ```
+    > **This is the premise `iso59004-I-3` was decided on. That block is corrected in place — read
+    > it before ratifying the 23 empty conditions.**
 12. **The equations emitter's legacy CALL regex reads `AND (` as a function call**, so a
     parenthesised compound condition is refused inside a formula. Found by ISO-59020 (fix round
     1 — `-04-D5` had to ship unparenthesised).
+    > **HEAD `757a85d` — CLOSED** (wave C item 1, `95d0ea3`; the eligibility gate was made to
+    > actually parse in `757a85d`). The detection now accepts `AND (`, `OR (`, `NOT (`,
+    > lower-case `and (` and nested parens while still refusing `SUM(` / `log(`; a silent
+    > `AND (b)` → `AND_b` mangling was found and fixed in the same pass. **The corpus was
+    > re-verified, not re-emitted: 679/679 equations still parse, 0 newly refused.** `-04-D5`
+    > itself was NOT re-parenthesised — that is an encoding change on `iso59020`'s sheet.
 13. **`fmt()` has no epsilon guard** — float noise around 1e-13 now renders in scientific form
     instead of "0" (a side effect of the Task-10b fix; no pinned register is affected today).
+    > **HEAD `757a85d` — CLOSED** (wave B item 4, `c0aad97`), by reusing the existing
+    > scientific-notation path rather than adding a second rounding rule. No pinned register
+    > changed.
 14. **No PDF-side quoted-string test.** Parked from the Task-1b review; the PDF path is the one
     place the Task-13b quoted-literal rule is not pinned.
+    > **HEAD `757a85d` — CLOSED** (wave B item 7, `c0aad97`):
+    > `src/lib/pdf/__tests__/pdf-quoted-literal.test.tsx` drives the whole `@react-pdf` chain, so
+    > `din276-X-1`'s quoted-literal rule is now pinned on the PDF path too.
 
 **Emitter hygiene**
 
@@ -9944,12 +10195,27 @@ much: server-side correctness first, then engine expressiveness, then emitter hy
     re-applying one would overwrite a value someone set in between. Found by ISO-14046
     (`iso14046-I-2`). Fixing it rewrites **every** standard's field-config migration, so it belongs
     in a corpus-wide re-emit, never in one standard's fix round.
+    > **HEAD `757a85d` — CLOSED** (wave C item 3, `95d0ea3` + `757a85d`). 140 field UPDATEs and
+    > 290 section UPDATEs across 24 of the 29 field-config migrations now carry the guard, and
+    > every one of the 430 guarded UPs has a re-capture note above its rollback statement.
+    > **Two consequences the owner must read: `C-1` (a re-apply is a silent no-op — and its 16
+    > exceptions) and `C-3` (the dual-configured symbols) below.**
 16. **The emitter accepts reserved register column keys** (`id`, …), which collide with
     `register-rows.ts`'s own row identity (`:168` / `:184`). Found by ISO-5667-10 (the `id` column
     trap; the column was renamed `kennung` and the same rename was applied pre-emptively in Tasks
     23 and 28). Wanted: a refusal, not a convention.
+    > **HEAD `757a85d` — CLOSED** (wave C item 2, `95d0ea3`): the emitter now REFUSES a reserved
+    > register column key. `id` is the only key the row shape owns; the existing `kennung` renames
+    > stand.
 17. **No per-row `alternatives` on a `RegulationRow`** — a `kann` table that prints two permitted
     values per row cannot offer the choice per row. Found by DWA-A-178 (`a178-O-4`).
+    > **HEAD `757a85d` — CLOSED as a CAPABILITY** (wave B item 6, `c0aad97`). `RegulationRow`
+    > gained `alternatives?: Record<string, string[]>` and one exported resolution rule,
+    > `printedAlternatives(row, valueColumn)` = the row's own printed list, else the value
+    > column's list, else `null`; both the register `kann` override select and `LookupFillField`
+    > call it, so the two cannot diverge. **No seed was filled** —
+    > `regulation-tables-seed-a178.ts` still emits `etaCol.values` only, so `a178-O-4` is still
+    > live as a DATA decision.
 
 
 ### Plan 3 final wave C — items 15 and 16 are CLOSED; two consequences the owner must know
@@ -9971,6 +10237,62 @@ guard now says this in a comment directly above it — and warns that the unguar
 overwrites a rule a human set after the migration was applied, so prod must be re-captured before
 a rollback is run.
 
+> **AMENDED 2026-09-25 (documentation-truth pass, HEAD `757a85d`) — "changes that field's
+> `visible_when` not at all" IS FALSE FOR SIXTEEN WRITES. Read this before you rely on C-1.**
+> The guard went onto the 430 statements that WRITE a rule (`visible_when = '<json>'`). It did
+> NOT go onto the statements that write `visible_when = NULL` — those clear the cell
+> **unconditionally**. For the sixteen fields below, re-applying the migration **does** change
+> the field's `visible_when`: it wipes it, including a rule a human set by hand after the first
+> apply, and reports success. Re-executed in this session:
+>
+> ```
+> $ grep -rn "visible_when = NULL" scripts/migrations/*.sql | wc -l
+> 16
+> $ grep -rn "visible_when = NULL" scripts/migrations/*.sql | grep -c "visible_when IS NULL"
+> 0                      # not one of the sixteen is guarded
+> $ grep -rc "visible_when = NULL" scripts/migrations/*.sql | grep -v ":0"
+> …100110_field_configs_a138.sql:1            …101810_field_configs_m820_1.sql:3
+> …100310_field_configs_a262e.sql:1           …101910_field_configs_m820_2.sql:1
+> …100610_field_configs_m1200_3.sql:2         …102810_field_configs_iso5667_1.sql:1
+> …100810_field_configs_fll_naturteich.sql:1  …102910_field_configs_iso59004.sql:6
+> ```
+>
+> | migration | line | symbol | worksheet |
+> |---|--:|---|---|
+> | `20260917100110_field_configs_a138.sql` | 4 | `belastungskategorie` | A138-06 |
+> | `20260917100310_field_configs_a262e.sql` | 62 | `B_CSB_Grauwasser` | A262-26 |
+> | `20260917100610_field_configs_m1200_3.sql` | 87 | `bewaesserungstagebuch` | M12003-18 |
+> | `20260917100610_field_configs_m1200_3.sql` | 100 | `bewaesserungstagebuch` | M12003-04 |
+> | `20260917100810_field_configs_fll_naturteich.sql` | 105 | `plant_species_list` | FLLNT-12 |
+> | `20260917101810_field_configs_m820_1.sql` | 4 | `stakeholder_list` | M820-03 |
+> | `20260917101810_field_configs_m820_1.sql` | 71 | `award_criteria_list` | M820-14 |
+> | `20260917101810_field_configs_m820_1.sql` | 81 | `bewertungskommission_members` | M820-16 |
+> | `20260917101910_field_configs_m820_2.sql` | 55 | `change_orders` | 820-2-21 |
+> | `20260917102810_field_configs_iso5667_1.sql` | 98 | `confidence_level` | ISO-5667-1-07 |
+> | `20260917102910_field_configs_iso59004.sql` | 46 | `selected_principle` | ISO-59004-04 |
+> | `20260917102910_field_configs_iso59004.sql` | 47 | `selected_action` | ISO-59004-05 |
+> | `20260917102910_field_configs_iso59004.sql` | 48 | `action_category` | ISO-59004-05 |
+> | `20260917102910_field_configs_iso59004.sql` | 49 | `implementation_stage` | ISO-59004-06 |
+> | `20260917102910_field_configs_iso59004.sql` | 50 | `implementation_level` | ISO-59004-06 |
+> | `20260917102910_field_configs_iso59004.sql` | 51 | `feasibility_dimension` | ISO-59004-06 |
+>
+> **Sixteen writes across eight files, not twelve** — the final whole-branch review said twelve;
+> the grep above is the count. **Why it is deliberate and why it is still a hazard.** It is
+> deliberate: these sixteen fields are ones whose Plan-3 config asserts "this field has no
+> visibility rule", and the emitter writes the whole four-column shape
+> (`widget` / `ui_config` / `lookup` / `visible_when`) for every field it configures. It is
+> a hazard because the guarded and the unguarded statements sit side by side in the same file
+> and read identically to a human scanning for `visible_when`, so C-1's promise ("a re-apply
+> cannot change a rule") invites exactly the mistake it was written to prevent.
+> **Operationally, for these sixteen fields only:** a re-apply is NOT a no-op — it is a clear.
+> If a human has set a `visible_when` on one of them by hand, **re-capture prod and re-read the
+> statement before re-applying**, because the rollback's captured prior is what you will get
+> back, and it is `NULL`. The rollback re-capture warning wave C added covers the 430 guarded
+> UPs; it does **not** cover these sixteen.
+> **Nothing was changed to fix this** — adding a guard to a NULL-write is an emitter change plus
+> a corpus re-emit, i.e. an encoding decision, not a documentation one. Recorded as an open
+> [CODE] candidate for the next emitter touch.
+
 **C-2 · Six `ui_config.note` strings still assert an engine limit that final wave A removed.**
 They are ENCODED VALUES (emitted into `ui_config`, shown to the engineer under the widget), not
 descriptions, so wave C deliberately did NOT touch them; the four `fields.description` strings
@@ -9990,6 +10312,86 @@ the F-blocks they reference:
 does not reach the engine. Since final wave A it does — `buildCarriers` feeds json `select_many`
 carriers to all five production callers — so each clause is false while the block it names is still
 correctly STAGED.)
+
+**C-3 · SIX SYMBOLS ARE CONFIGURED TWICE — by an unguarded, standard-wide Plan-1 migration AND by
+a worksheet-scoped Plan-3 one. The same symbol can render two different widgets.**
+*(New block, written in the documentation-truth pass 2026-09-25 at HEAD `757a85d`; needs a
+signature.)*
+
+- Class: interface-gap (apply-order / scope asymmetry between two plans)
+- **The asymmetry, verified in this session.** The Plan-1 `20260911120000_selection_configs_<STD>.sql`
+  migrations write `widget` / `ui_config` with a WHERE clause that names the **standard only** —
+  every worksheet of it, `active` or not, and with no `visible_when IS NULL`-style guard:
+  ```
+  $ sed -n '5p' scripts/migrations/20260911120000_selection_configs_DWA_M_820_1.sql | grep -o "FROM worksheet_templates.*$"
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+   WHERE f.symbol = 'award_criteria_list' AND s.code = 'DWA-M-820-1' AND f.worksheet_template_id = w.id;
+  ```
+  The Plan-3 `20260917*_field_configs_<slug>.sql` migrations write the same columns with a WHERE
+  clause that additionally names **one worksheet** and requires `f.active`
+  (`… AND w.code = 'M820-14' AND s.code = 'DWA-M-820-1' AND f.active`). So Plan 3 supersedes Plan 1
+  **only on the worksheets it names**; on any other worksheet of the same standard the older,
+  thinner Plan-1 config survives.
+- **The six symbols, enumerated (not taken on trust).** Intersection of the symbols written by the
+  Plan-1 selection-config migrations and by the Plan-3 field-config migrations, computed in this
+  session:
+  ```
+  $ cd scripts/migrations
+  $ grep -ohE "f\.symbol = '[a-zA-Z0-9_]+'" 20260911120000_selection_configs_*.sql | sed "s/.*'\(.*\)'/\1/" | sort -u > p1   # 31 symbols
+  $ grep -ohE "f\.symbol = '[a-zA-Z0-9_]+'" 20260917*_field_configs_*.sql      | sed "s/.*'\(.*\)'/\1/" | sort -u > p3   # 148 symbols
+  $ comm -12 p1 p3
+  award_criteria_list · bewaesserungstagebuch · bewertungskommission_members
+  change_orders · plant_species_list · stakeholder_list
+  $ grep -c "f\.symbol IN" 20260911120000_selection_configs_*.sql 20260917*_field_configs_*.sql | grep -v ":0"
+  (no output — no migration uses an IN-list, so the per-symbol grep is complete)
+  ```
+  **Six, and no more** — the list in the final whole-branch review is confirmed, with nothing
+  missed. Each pair is within one standard (`award_criteria_list`, `bewertungskommission_members`,
+  `stakeholder_list` → DWA-M-820-1; `change_orders` → DWA-M-820-2; `plant_species_list` →
+  FLL-Naturteich; `bewaesserungstagebuch` → DWA-M-1200-3).
+- **Does any of them live on more than one worksheet? Prod, READ-ONLY, 2026-09-25**
+  (`node scripts/verification/prod-query.mjs`, 7 rows):
+
+  | standard | symbol | worksheet(s) in prod | Plan-3 rewrites |
+  |---|---|---|---|
+  | DWA-M-1200-3 | `bewaesserungstagebuch` | **M12003-04 and M12003-18** | **both** (`…100610` L87 + L100) |
+  | DWA-M-820-1 | `award_criteria_list` | M820-14 | that one |
+  | DWA-M-820-1 | `bewertungskommission_members` | M820-16 | that one |
+  | DWA-M-820-1 | `stakeholder_list` | M820-03 | that one |
+  | DWA-M-820-2 | `change_orders` | 820-2-21 | that one |
+  | FLL-Naturteich | `plant_species_list` | FLLNT-12 | that one |
+
+  **So TODAY there is no worksheet Plan 3 leaves behind** — the one symbol that sits on two
+  worksheets is rewritten on both. The exposure is real but latent, not live.
+- **The risk, stated plainly.** Three ways the latent case becomes a live one, none of them exotic:
+  1. **A new worksheet gains the symbol.** The Plan-1 config lands on it standard-wide; Plan 3
+     never names it. Two worksheets of the same standard then render the same symbol with two
+     different widgets — the Plan-1 one is the older, thinner config (e.g. for
+     `award_criteria_list` it has no `gewichtung` bounds, no derived `ist_preis` column and no
+     footer, and its `note` asserts "Summe der Gewichtungen = 100 %", which `m820_1-F-1` REFUTED —
+     the merkblatt names no such sum).
+  2. **Apply order inverted.** The Plan-1 files are timestamped `20260911120000` and the Plan-3
+     files `20260917*`, so a straight forward apply is safe. But the Plan-1 UPDATE is **unguarded
+     and standard-wide**: re-running it after Plan 3 — a re-apply, a replay of the schema step,
+     a recovery run — silently overwrites the richer Plan-3 config on **every** worksheet, not
+     just the one. Combined with `C-1` this is the sharp edge: the Plan-3 re-apply that would
+     repair it is a no-op on `visible_when`, so the damage is not self-healing.
+  3. **A Plan-3 rollback.** It restores the CAPTURED PRIOR, which for these six is `NULL` (see the
+     `C-1` amendment — all six are among the sixteen unguarded `visible_when = NULL` writes), not
+     the Plan-1 config. Rolling Plan 3 back therefore leaves the field with no widget config at
+     all unless the Plan-1 migration is re-run — and re-running it is hazard 2.
+- **Fail-safe today:** nothing is applied. Prod has no `widget` column at all
+  (`prod-query.mjs` on `fields` → `ERROR: column f.widget does not exist`), so neither plan's
+  configs exist in the database and no engineer can see a divergence yet.
+- **Proposed (NOT taken here):** on apply, either (a) run the six Plan-1 statements **before** the
+  Plan-3 field configs and never again — the documented order, which the playbook already implies
+  by timestamp but does not say out loud for these six; or (b) drop the six symbols from the
+  Plan-1 migrations entirely, since Plan 3 supersedes them, and accept that a future worksheet
+  gets no config until it is encoded; or (c) widen the Plan-3 statements for these six to
+  standard-wide scope, matching Plan 1. **(a) is the least destructive and needs no file change;
+  (c) changes emitted SQL and is an encoding decision.** Nothing was changed in this pass — no
+  migration, no rollback, no emitter.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER  · order choice: ☐ (a) Plan-1 first, once ☐ (b) drop the six from Plan 1 ☐ (c) widen Plan 3
 
 **Also carried, from the STAGED-file audit (Task 30):** every archive-rollback re-INSERT column
 list must match the LIVE schema — `equations` 22 columns, `compliance_requirements` 18,
