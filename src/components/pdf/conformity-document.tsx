@@ -1,4 +1,5 @@
 import { Document, Page, Text, View } from '@react-pdf/renderer';
+import { formatSignoffDe } from '@/lib/approval/signoff';
 import { styles } from './styles';
 import { LetterheadHeader } from './letterhead-header';
 import { ReportFooter } from './footer';
@@ -59,6 +60,8 @@ export function ConformityDocument({ data }: { data: ConformityData }) {
               <Text style={styles.siteLabel}>{`${w.code} · ${w.titleDe}`}</Text>
               <Text style={styles.siteValue}>
                 {w.status === 'deactivated' ? 'nicht zutreffend' : (w.status ?? 'nicht begonnen')}
+                {w.signoff ? `
+${formatSignoffDe(w.signoff)}` : ''}
               </Text>
             </View>
           ))}

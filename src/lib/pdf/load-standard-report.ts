@@ -224,8 +224,7 @@ export async function loadStandardReportData(
         eq(worksheetTemplates.standardId, std.id),
       ),
     )
-    .orderBy(desc(approvalEvents.occurredAt))
-    .limit(25);
+    .orderBy(desc(approvalEvents.occurredAt));
 
   const auditRows = await db
     .select({

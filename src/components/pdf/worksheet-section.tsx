@@ -1,4 +1,5 @@
 import { View, Text } from '@react-pdf/renderer';
+import { formatSignoffDe } from '@/lib/approval/signoff';
 import { styles, colors } from './styles';
 import { EngineVerdict } from './engine-verdict';
 import type {
@@ -40,6 +41,9 @@ export function WorksheetSection({ worksheet }: { worksheet: ReportWorksheet }) 
         </View>
         <Text style={styles.smallCaps}>Status · {statusLabel}</Text>
       </View>
+      {worksheet.signoff && (
+        <Text style={styles.note}>{formatSignoffDe(worksheet.signoff)}</Text>
+      )}
 
       {/* Sections */}
       {worksheet.sections.length === 0 ? (

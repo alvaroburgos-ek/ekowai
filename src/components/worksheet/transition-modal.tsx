@@ -70,6 +70,13 @@ export function TransitionModal({
         <h2 id="transition-modal-title" className="text-lg font-semibold text-ink">
           {actionLabel}
         </h2>
+        {eventType === 'engineer_approve' && (
+          <p className="text-sm text-ink bg-accent-soft px-3 py-2 rounded-md">
+            Haben Sie diesen Stand selbst eingereicht, wird die Genehmigung als Selbstprüfung
+            (keine Zweitprüfung) mit Ihrem Namen protokolliert und so im Bericht und in der
+            Konformitätserklärung ausgewiesen.
+          </p>
+        )}
         <p className="text-sm text-subtext">
           Kommentar (Pflicht — wird permanent im Auditprotokoll gespeichert):
         </p>

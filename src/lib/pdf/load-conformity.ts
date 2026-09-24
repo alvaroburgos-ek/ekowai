@@ -9,10 +9,13 @@ import {
   calculationSnapshots,
   projectParameters,
   fields,
+  approvalEvents,
+  profiles,
 } from '@/lib/db/schema';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { checkApprovalGate } from '@/lib/actions/approval-gate';
 import type { ReportLetterhead } from './assemble-standard-report';
+import { deriveSignoffs, type WorksheetSignoff } from '@/lib/approval/signoff';
 
 /**
  * Konformitätserklärung data (Stage 4 — deliverable emission).
@@ -32,6 +35,8 @@ export type ConformityWorksheetRow = {
   /** Instance status, or null when the worksheet was never started. */
   status: string | null;
   failingBlockCodes: string[];
+  /** Current sign-off (approver, date, self-approval). Optional for fixtures. */
+  signoff?: WorksheetSignoff | null;
 };
 
 /** Worksheets the engineer marked "Nicht zutreffend" (state-machine `deactivate`).
@@ -154,6 +159,22 @@ export async function loadConformityData(
       );
   const instanceByTemplate = new Map(instances.map((i) => [i.worksheetTemplateId, i]));
 
+  // Every approval event of these instances → current sign-off per instance.
+  const signoffEvents = instances.length === 0
+    ? []
+    : await db
+      .select({
+        worksheetKey: approvalEvents.worksheetInstanceId,
+        eventType: approvalEvents.eventType,
+        actorId: approvalEvents.actorId,
+        actorName: profiles.fullName,
+        occurredAt: approvalEvents.occurredAt,
+      })
+      .from(approvalEvents)
+      .leftJoin(profiles, eq(profiles.id, approvalEvents.actorId))
+      .where(inArray(approvalEvents.worksheetInstanceId, instances.map((i) => i.id)));
+  const signoffByInstance = deriveSignoffs(signoffEvents);
+
   // Live block-gate re-check per approved/final instance (same gate as the
   // approve transition). Un-approved instances are already blocking via status.
   const rows: ConformityWorksheetRow[] = [];
@@ -169,6 +190,7 @@ export async function loadConformityData(
       titleDe: t.titleDe,
       status: inst?.status ?? null,
       failingBlockCodes,
+      signoff: inst ? signoffByInstance.get(inst.id) ?? null : null,
     });
   }
 

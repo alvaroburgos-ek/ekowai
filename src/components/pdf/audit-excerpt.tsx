@@ -5,6 +5,13 @@ import type { AuditExcerptEntry } from '@/lib/pdf/load-standard-report';
 const ACTION_DE: Record<string, string> = {
   submit_for_review: 'eingereicht',
   approve: 'freigegeben',
+  submit: 'eingereicht',
+  engineer_approve: 'genehmigt',
+  engineer_reject: 'zurückgegeben',
+  finalize: 'finalisiert',
+  reopen: 'wieder geöffnet',
+  deactivate: 'nicht zutreffend',
+  reactivate: 'wieder aufgenommen',
   reject: 'abgelehnt',
   withdraw: 'zurückgezogen',
   manual_override: 'manuelle Überschreibung',
