@@ -434,7 +434,7 @@
 
 -- =====================================================================================================================
 -- a262e-G-11 · A262-05 · REQ-05 — the gate reads `m_multiplier`, which the emitted field rule hides
--- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- ☑ RATIFIED ☐ REJECTED ☐ DEFER — ratified by Alvaro 2026-09-25 (session walkthrough; apply as staged)
 -- (Plan 3 Task 30 close-out: the gate-guard debt the ledger carries. Written here for the first time — Task 3 predates
 --  the gate-aware guard of Task 12c, which is why this standard's field configs are emitted in `--gate-guard=warn`
 --  mode; the freshness pin holds the refusal count at 9.)
@@ -483,7 +483,7 @@
 
 -- =====================================================================================================================
 -- a262e-G-12 · A262-11 / -13 / -16 / -20 / -22 / -26 · the EIGHT section-minimum gates the section rules hide
--- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- ☑ RATIFIED ☐ REJECTED ☐ DEFER — ratified by Alvaro 2026-09-25 (session walkthrough; apply as staged)
 -- (Plan 3 Task 30 close-out: the second half of the gate-guard debt. Eight refused SECTION rules, ten gates.)
 --
 -- What the guard refuses, re-executed IN THIS SESSION (`--gate-guard=warn`, the eight section lines verbatim):

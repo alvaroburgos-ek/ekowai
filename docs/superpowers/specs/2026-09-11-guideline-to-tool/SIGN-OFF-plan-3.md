@@ -1072,7 +1072,7 @@ Report: `reports/plan-3-m277e.md` · STAGED SQL: `scripts/verification/m277e-STA
 - Chosen now: the Plan-1 schema migration gains a guarded `DO` block BEFORE `CREATE TABLE IF NOT EXISTS regulation_tables`: if `public.regulation_tables` exists AND has no column `standard_code` (= legacy per-cell shape), it renames the table to `regulation_tables_legacy_v1`, its constraints `regulation_tables_pkey` → `regulation_tables_legacy_v1_pkey` and `regulation_tables_standard_id_fkey` → `regulation_tables_legacy_v1_standard_id_fkey`, and its indexes `regulation_tables_std_idx` / `regulation_tables_table_idx` → `…_legacy_v1_…`; data untouched; idempotent (a second run sees `standard_code` and does nothing); refuses if both names already exist. **Rename, not adopt-legacy:** the legacy shape is one row per CELL (`parameter_label` × `variant_value` → `value_text` / `value_numeric`, no edition, no verbatim quote per printed row, no override policy), the Plan-1 contract is one row per printed table ROW with JSONB keys/values and a `verbatim_quote` — adopting it would mean rewriting every accessor, emitter and the 2a/2b engine paths that already read the Plan-1 shape; the legacy rows keep serving whatever wrote them (one-off scripts `scripts/m1024-tables-to-sql.mjs` / `20260728110000_m277e_tbl2_realign.sql`; 0 app readers — `grep -rn regulation_tables src/` finds only the Plan-1 drizzle model and its queries). The drizzle model (`src/lib/db/schema.ts`) is untouched except for a two-line comment.
 - Evidence (re-executable, read-only 2026-09-17): `node scripts/verification/prod-query.mjs --sql "select column_name from information_schema.columns where table_name='regulation_tables' order by ordinal_position"` → id, standard_id, table_id, table_name, row_number, parameter_label, parameter_symbol, variant_dimension, variant_value, value_text, value_numeric, unit, comparison, clause_reference, verification_status, source_quote, source_file, audit_status, created_at (no standard_code / edition / table_code) · `… "select count(*) as n, count(distinct standard_id) as stds, count(distinct table_id) as tids from regulation_tables"` → 5382 / 35 / 410 · `… "select conname, contype from pg_constraint where conrelid = 'public.regulation_tables'::regclass"` → regulation_tables_pkey (p), regulation_tables_standard_id_fkey (f) · `… "select indexname from pg_indexes where tablename='regulation_tables'"` → regulation_tables_pkey, regulation_tables_std_idx, regulation_tables_table_idx · policies 0, views 0, child FKs 0, triggers 0, RLS on (`relrowsecurity = true`). Reproduction on embedded Postgres (`tests/harness/guideline-to-tool-schema-legacy-rename.integration.test.ts`, 3/3): the Plan-3 seed INSERT fails on the legacy table ("column standard_code"), the forward migration renames it and the same INSERT lands, a re-run is a no-op, the rollback refuses while the Plan-1 table holds rows ("still holds 1 rows"), drops the Plan-1 tables once empty and renames the legacy table + pkey/fkey/indexes back, and refuses on a legacy-only DB ("legacy shape").
 - Proposed SQL / config: the amended forward migration (the `DO` block, L11–L41 of the file: comment L11–L22, `DO` L23–L41) and `supabase/migrations/rollback-20260911100000_guideline_to_tool_schema.sql` (refuse-if-rows → drop Plan-1 tables → rename back → drop the `fields` / `worksheet_sections` columns); pinned by `src/lib/db/__tests__/schema-guideline-to-tool.test.ts` (guard before CREATE, constraint renames, rollback refusal before the DROP). Apply-order step 1 in the playbook now names the rename. Owner alternatives: (b) adopt-legacy (rewrite Plan 1–3 onto the per-cell shape) or (c) drop the legacy table after exporting it — neither proposed.
-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+- ☑ RATIFIED ☐ REJECTED ☐ DEFER — ratified by Alvaro 2026-09-25 (session walkthrough; apply as staged)
 
 ### Observations (Task 4, no signature needed)
 
@@ -9950,7 +9950,7 @@ standard's STAGED file, as usual.
   `IF ueberlauf_versickerung == true THEN versickerung_bemessung_a138 == true` (archive pattern,
   md5-guarded, complete 18-column restore). Alternatives (b) drop the rule, (c) ship as is, are
   stated in the block.
-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+- ☑ RATIFIED ☐ REJECTED ☐ DEFER — ratified by Alvaro 2026-09-25 (session walkthrough; apply as staged)
 
 ### a262e-G-11 · DWA-A-262E · A262-05 · `m_multiplier` / REQ-05
 - Class: gate-guard (gate-guard debt; Task 3 predates the Task-12c gate-aware guard)
@@ -9959,7 +9959,7 @@ standard's STAGED file, as usual.
   `Error: A262-05 m_multiplier: visible_when hides m_multiplier read by gate REQ-05 (block: "m_multiplier >= 1") — hidden ⇒ null ⇒ the gate stops enforcing; STAGE as a G-block`
 - Evidence (verbatim, transcript line): "Maximum wastewater flow from separate sewer networks:" (L579). Prod capture READ-ONLY 2026-09-24: id `4d3f2c87-ca57-412a-bdad-eba11f16ae72`, `block`, `m_multiplier >= 1`, `md5 = 44b9a62e2288a9128ea1bb7964bb1f36`.
 - Proposed SQL / config: block `a262e-G-11` — `IF sewer_system_type == separate_sewer THEN m_multiplier >= 1`. Prerequisite `a262e-C-2` (the driver reaches A262-05 by inheritance).
-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+- ☑ RATIFIED ☐ REJECTED ☐ DEFER — ratified by Alvaro 2026-09-25 (session walkthrough; apply as staged)
 
 ### a262e-G-12 · DWA-A-262E · A262-11 / -13 / -16 / -20 / -22 / -26 · the eight section-minimum gates
 - Class: gate-guard (gate-guard debt — eight refused SECTION rules, **ten** gates)
@@ -9977,7 +9977,7 @@ standard's STAGED file, as usual.
 - Proposed SQL / config: block `a262e-G-12` in `scripts/verification/a262e-STAGED-plan3-rulings.sql`
   — ten md5-guarded rewrites in one transaction, one shared archive table with `a262e-G-11`,
   complete 18-column restore, `DROP TABLE` in the rollback. Prerequisite `a262e-C-2`.
-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+- ☑ RATIFIED ☐ REJECTED ☐ DEFER — ratified by Alvaro 2026-09-25 (session walkthrough; apply as staged)
 
 ---
 

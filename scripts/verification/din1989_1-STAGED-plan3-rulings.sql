@@ -176,7 +176,7 @@
 
 -- =====================================================================================================================
 -- din1989_1-G-4 · DIN-1989-1-05 · CR-11 — the gate reads `versickerung_bemessung_a138`, which the emitted rule hides
--- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- ☑ RATIFIED ☐ REJECTED ☐ DEFER — ratified by Alvaro 2026-09-25 (session walkthrough; apply as staged)
 -- (Plan 3 Task 30 close-out: the gate-guard debt the ledger carries. Written here for the first time — Task 2 predates
 --  the gate-aware guard of Task 12c, which is why the rule shipped in `--gate-guard=warn` mode and no G-block existed.)
 --
