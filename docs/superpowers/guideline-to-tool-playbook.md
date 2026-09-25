@@ -54,7 +54,13 @@ Apply strictly in this order, never skip or reorder a step:
    `soil_bodenart_tab13` and `a_s_m_provenance` (only `WHERE visible_when IS NULL`).
 7. `scripts/migrations/20260916130000_a138_07_surface_inventory_widget.sql` — DWA-A-138-1
    `surface_inventory` gets `widget='register'` + the `ui_config` the TS fallback serves today
-   (Plan 2b; retires `REGISTER_CONFIGS_FALLBACK.surface_inventory`).
+   (Plan 2b; retires `REGISTER_CONFIGS_FALLBACK.surface_inventory`). **Since the origin/main merge
+   (2026-09-25) this config drives the ENGINE only** (`prepareRegisterRows` columns, the six
+   `sum_rows` producers); the FORM editor of `surface_inventory` is main's bespoke
+   `SurfaceInventoryEditor` (Tab. 5 group per row), pinned in `widgets.tsx`
+   `BESPOKE_PINNED_SYMBOLS` for ANY widget — so the migration applies unchanged and still changes
+   nothing on screen. `tab5_group` is not a register column: the engine ignores it and the stored
+   carrier keeps it.
 8. `scripts/migrations/20260916140000_vsme_b04_pollutant_register_widget.sql` — VSME
    `pollutant_register` gets `widget='register'` + `ui_config` incl. the `not_applicable` flag
    (retires `REGISTER_CONFIGS_FALLBACK.pollutant_register`; the migration header still names
@@ -1297,6 +1303,13 @@ since the fix wave (C-1) all of them, plus the project report loader, ALSO call
 list under "Apply order" — read its freshness-pin paragraph before deleting anything.
 
 ### What is NOT built (honest residue)
+
+- **origin/main merge (2026-09-25) — two sources for the same A138 tables.** Main's
+  `src/lib/eval/guideline-tables.ts` hardcodes TAB4/5/6/7/8/11/12/13/14/A1/q_VS for the "as printed"
+  panels while this branch seeds TAB5/6/9/13 (Plan 1) and the Plan-3 A138 tables into
+  `regulation_tables`. Both stay until a single-source pass reads the panels from the regulation
+  tables (not done in the merge by instruction). Same for the per-row Tab. 5 options in
+  `surface-inventory-editor.tsx` (from `GUIDELINE_TABLES.TAB5`).
 
 - **Task 9 — risk-register grid** (`grid` column type as an editor, the multi-party assessment
   pattern, `catalog` picker, `grid_mean/grid_stdev/grid_count` reducers): SKIPPED by ruling —

@@ -18,6 +18,8 @@ export type { RegisterFlag };
 
 // Retired by scripts/migrations/20260916130000_a138_07_surface_inventory_widget.sql (Plan 2b Task 5; emitted from
 // this constant — the freshness pin keeps the SQL byte-equal to it).
+// Since the origin/main merge (2026-09-25) it drives the ENGINE only (prepareRegisterRows, the six sum_rows
+// producers): the form editor is main's SurfaceInventoryEditor, pinned in widgets.tsx BESPOKE_PINNED_SYMBOLS.
 // Required set = byte-for-byte rowComplete() in surface-inventory.ts (engine shim)
 // (label NOT required; tab9_value/area_m2/c_i/c_s required). Do not "improve" it.
 const SURFACE_INVENTORY: RegisterUiConfig = {
