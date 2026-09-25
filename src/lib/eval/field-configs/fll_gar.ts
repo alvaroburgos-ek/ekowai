@@ -32,7 +32,7 @@
  * the full UPDATE + rollback sits in the STAGED file under fll_gar-E-2 (fix round 1). Every other Step-4 target of the brief is a consumed producer
  * (`wassereinwirkungsklasse` / `rissklasse` / `standortklasse` → -15/-16/-17;
  * `anzahl_lagen` → -15) → refused by the guard → fll_gar-C-3 / -C-4 (STAGED); the
- * section C of FLL-GAR-10 / -12 / -14 / -16 holds consumed producers → fll_gar-C-2.
+ * section C of FLL-GAR-10 / -14 / -16 holds consumed producers → fll_gar-C-2 (FLL-GAR-12 C emits since T-12b).
  *
  * Boolean drivers: `gtd_polyolefin_beschichtung` and `polymerbitumen_beschichtung`
  * are prod BOOLEANS; `resolveLookupFill` stringifies them, so TAB16 /
@@ -537,13 +537,14 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
 
 /**
  * Section rules on the twelve material worksheets FLL-GAR-10 … -21: each shows only for its own `abdichtungs_art`
- * token (§5 / §6 / §7 structure; REQ-12 … REQ-22 guard by the same token). The section C of -10 / -12 / -14 / -16
- * holds consumed producers (kf_abdichtung … on -10; bauteildicke_cm on -12 — "consumed" by itself, prod oddity;
- * gtd_auflast_funktion on -14; bahnendicke_mm / fuegeverfahren / nahtbreite_min_mm on -16) → withheld
- * (fll_gar-C-2). The driver is not inherited on any of them until fll_gar-C-1 — the rules are `pending` (visible)
+ * token (§5 / §6 / §7 structure; REQ-12 … REQ-22 guard by the same token). The section C of -10 / -14 / -16
+ * holds consumed producers (kf_abdichtung … on -10; gtd_auflast_funktion on -14; bahnendicke_mm / fuegeverfahren /
+ * nahtbreite_min_mm on -16) → withheld (fll_gar-C-2). FLL-GAR-12 C was withheld too, only because bauteildicke_cm is
+ * "consumed" by its own worksheet (prod oddity); since ruling T-12b a self-only consumer_worksheets entry is not a
+ * producer, so its rule is emitted (2026-09-25). The driver is not inherited on any of them until fll_gar-C-1 — the rules are `pending` (visible)
  * until then.
  */
-export const PRODUCER_SECTIONS: ReadonlyArray<readonly [string, string]> = [['FLL-GAR-10', 'C'], ['FLL-GAR-12', 'C'], ['FLL-GAR-14', 'C'], ['FLL-GAR-16', 'C']];
+export const PRODUCER_SECTIONS: ReadonlyArray<readonly [string, string]> = [['FLL-GAR-10', 'C'], ['FLL-GAR-14', 'C'], ['FLL-GAR-16', 'C']];
 const SECTION_CODES = ['A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M'] as const;
 export const SECTION_VISIBILITY: SectionVisibilityEntry[] = ABDICHTUNGS_ART_TOKENS.flatMap((tok) => {
   const worksheet = MATERIAL_WORKSHEET[tok];

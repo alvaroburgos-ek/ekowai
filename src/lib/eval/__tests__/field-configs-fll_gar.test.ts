@@ -50,7 +50,7 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
     for (const s of SECTION_VISIBILITY) expect(parseCondition(s.visible_when), `${s.worksheet} ${s.section_code}`).not.toBeNull();
   });
 
-  it('counts: 60 entries — 59 create (9 registers, 7 select_one, 20 lookup_fill, 19 derived outputs, 3 scalar inputs, 1 attestation) + 1 UPDATE (verzinkung_dicke_um scalar; the nahtbreite_min_mm re-bind is STAGED, E-2); 4 field rules; 104 section rules', () => {
+  it('counts: 60 entries — 59 create (9 registers, 7 select_one, 20 lookup_fill, 19 derived outputs, 3 scalar inputs, 1 attestation) + 1 UPDATE (verzinkung_dicke_um scalar; the nahtbreite_min_mm re-bind is STAGED, E-2); 4 field rules; 105 section rules', () => {
     expect(FIELD_CONFIGS).toHaveLength(60);
     expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(59);
     expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['FLL-GAR-19 verzinkung_dicke_um']);
@@ -74,6 +74,8 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
       `FLL-GAR-18 peld_nenndicke_min_mm :: ${PE_PELD}`, `FLL-GAR-18 pehd_nenndicke_min_mm :: ${PE_PEHD}`,
       `FLL-GAR-19 verzinkung_dicke_um :: ${STAHL_UNLEGIERT}`,
     ]);
+    // T-12b: FLL-GAR-12 C is no longer withheld (its only "producer" bauteildicke_cm is self-consumed); -10/-14/-16 C stay withheld (fll_gar-C-2)
+    expect(PRODUCER_SECTIONS).toEqual([['FLL-GAR-10', 'C'], ['FLL-GAR-14', 'C'], ['FLL-GAR-16', 'C']]);
     expect(SECTION_VISIBILITY).toHaveLength(12 * 9 - PRODUCER_SECTIONS.length);
     for (const tok of ABDICHTUNGS_ART_TOKENS) {
       const ws = MATERIAL_WORKSHEET[tok];
@@ -163,7 +165,7 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
     expect(cons('FLL-GAR-01 planer')).toEqual(['All']); // the same class of unresolvable token (observation)
   });
 
-  it('producer guard: every created rule passes producerChain (skipDirect); the 104 section rules pass; the four producer sections and the brief\'s rules on existing fields would be REFUSED (fll_gar-C-2 … -C-4)', () => {
+  it('producer guard: every created rule passes producerChain (skipDirect); the 105 section rules pass; the three producer sections and the brief\'s rules on existing fields would be REFUSED (fll_gar-C-2 … -C-4)', () => {
     for (const e of FIELD_CONFIGS) {
       if (e.create) {
         expect(priorRow(`${e.worksheet} ${e.symbol}`), `${e.worksheet} ${e.symbol} must not exist in prod`).toBeUndefined();
@@ -172,7 +174,7 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
       if (e.visible_when) expect(producerChain(prior, e.worksheet, e.symbol, { skipDirect: !!e.create }), `${e.worksheet} ${e.symbol}`).toBeNull();
     }
     for (const s of SECTION_VISIBILITY) expect(`${s.worksheet} ${s.section_code}` in prior.sections!, `${s.worksheet} ${s.section_code}`).toBe(true);
-    // the four withheld sections hold consumed producers (fll_gar-C-2)
+    // the three withheld sections hold consumed producers (fll_gar-C-2); FLL-GAR-12 C was the fourth until T-12b
     const refusal = (worksheet: string, section_code: string) => {
       const tok = (Object.keys(MATERIAL_WORKSHEET) as Array<keyof typeof MATERIAL_WORKSHEET>).find((t) => MATERIAL_WORKSHEET[t] === worksheet)!;
       return () => emitFieldConfigSql('fll_gar', [], [{ standard: 'FLL-GAR-2023', worksheet, section_code, visible_when: `abdichtungs_art == '${tok}'`, verification_quote: 'x' }], prior);
@@ -180,7 +182,7 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
     expect(refusal('FLL-GAR-10', 'C')).toThrow(/kf_abdichtung|kornanteil_unter_2micron|schichtdicke_abdichtung_cm|schichtdicke_auflast_cm|verdichtungsgrad_Dpr/);
     // FLL-GAR-12 C's only prod "producer" is bauteildicke_cm, and its consumer_worksheets lists ONLY FLL-GAR-12 itself (a prod data oddity, fix round 2) —
     // since Task 12b the guard strips the owner worksheet before deciding, so this is no longer a producer and the section is NOT refused (fll_gar-C-2 candidate
-    // for re-emit on FLL-GAR-12 C specifically; the other three withheld sections are untouched by this ruling and stay refused).
+    // for re-emit on FLL-GAR-12 C specifically — now EMITTED in 20260917100710; the other three withheld sections are untouched by this ruling and stay refused).
     expect(producerChain(prior, 'FLL-GAR-12', 'bauteildicke_cm')).toBeNull();
     expect(refusal('FLL-GAR-12', 'C')).not.toThrow();
     expect(refusal('FLL-GAR-14', 'C')).toThrow(/gtd_auflast_funktion \(consumed by FLL-GAR-22\)/);
@@ -204,7 +206,11 @@ describe('FLL-GAR-2023 field configs (Plan 3 Task 7)', () => {
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
     expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(1);
     expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(59);
-    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(104);
+    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(105);
+    // T-12b: the FLL-GAR-12 section C rule emits, guarded; -10 / -14 / -16 C do not
+    expect(up).toContain("UPDATE worksheet_sections ws SET visible_when = 'abdichtungs_art == ''mineralisch_hydraulisch''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND ws.code = 'C' AND w.code = 'FLL-GAR-12' AND s.code = 'FLL-GAR-2023' AND ws.visible_when IS NULL;");
+    expect(down).toMatch(/^UPDATE worksheet_sections ws SET visible_when = NULL .* AND ws.code = 'C' AND w.code = 'FLL-GAR-12' AND s.code = 'FLL-GAR-2023';$/m);
+    for (const w of ['FLL-GAR-10', 'FLL-GAR-14', 'FLL-GAR-16']) expect(up, w).not.toContain(`ws.code = 'C' AND w.code = '${w}'`);
     expect(up).not.toMatch(/SET [^\n]*enum_values = /); // D-1: no prod enum touched (created rows carry their own lists)
     expect(down).not.toMatch(/nahtbreite_min_mm/);
     expect(down).toMatch(/AND f.symbol = 'verzinkung_dicke_um' AND w.code = 'FLL-GAR-19'/);

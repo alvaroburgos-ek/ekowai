@@ -59,24 +59,26 @@
 -- on -10 schichtdicke_abdichtung_cm — none resolves (fll_gar-X-5 on the sheet).
 
 -- =====================================================================================================================
--- fll_gar-C-2 · section C of FLL-GAR-10 / -12 / -14 / -16 ← abdichtungs_art == '<token>' (withheld; consumed producers)
+-- fll_gar-C-2 · section C of FLL-GAR-10 / -14 / -16 ← abdichtungs_art == '<token>' (withheld; consumed producers)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
 -- Capture (guard refusals, pinned in field-configs-fll_gar.test.ts): -10 C holds kf_abdichtung (→ -11, -14, -20),
 -- kornanteil_unter_2micron / verdichtungsgrad_Dpr (→ -11), schichtdicke_abdichtung_cm (→ 'FLL-GAR-11..14', unresolvable),
--- schichtdicke_auflast_cm (→ -22); -12 C holds bauteildicke_cm ("consumed only by itself (FLL-GAR-12) — prod data oddity");
--- -14 C holds gtd_auflast_funktion (→ -22); -16 C holds bahnendicke_mm / fuegeverfahren / nahtbreite_min_mm (→ -15, -18).
--- The other eight sections of each of these four worksheets carry the rule (20260917100710).
+-- schichtdicke_auflast_cm (→ -22); -14 C holds gtd_auflast_funktion (→ -22); -16 C holds bahnendicke_mm / fuegeverfahren /
+-- nahtbreite_min_mm (→ -15, -18). The other eight sections of each of these three worksheets carry the rule (20260917100710).
+-- 2026-09-25: FLL-GAR-12 C removed from this block — its only "producer" bauteildicke_cm is consumed only by itself
+-- (prod data oddity), which since ruling T-12b is not a producer; its rule is now EMITTED in 20260917100710 (all nine
+-- sections of FLL-GAR-12 carry it).
 -- Why staged: hiding a producer nulls the inherited value on its consumers; the owner decides whether a GTD Auflast
 -- function should read as null on -22 when the sealing is not a GTD (semantically right, mechanically a consumer edit).
 -- Option (after ratification; Plan-3 columns present):
 -- BEGIN;
 -- UPDATE worksheet_sections ws SET visible_when = v.rule FROM (VALUES
---   ('FLL-GAR-10', 'abdichtungs_art == ''mineralisch_ohne_zusatzstoffe'''), ('FLL-GAR-12', 'abdichtungs_art == ''mineralisch_hydraulisch'''),
+--   ('FLL-GAR-10', 'abdichtungs_art == ''mineralisch_ohne_zusatzstoffe'''),
 --   ('FLL-GAR-14', 'abdichtungs_art == ''verbundwerkstoff_gtd'''), ('FLL-GAR-16', 'abdichtungs_art == ''bahn_kunststoff_elastomer''')) AS v(code, rule),
 --   worksheet_templates w JOIN standards s ON s.id = w.standard_id
 --  WHERE ws.worksheet_template_id = w.id AND ws.code = 'C' AND w.code = v.code AND s.code = 'FLL-GAR-2023' AND ws.visible_when IS NULL;
 -- COMMIT;
--- Rollback: SET visible_when = NULL on those four sections.
+-- Rollback: SET visible_when = NULL on those three sections.
 
 -- =====================================================================================================================
 -- fll_gar-C-3 · FLL-GAR-05 wassereinwirkungsklasse / rissklasse / standortklasse ← abdichtungs_art IN {bahn_bitumen, bahn_kunststoff_elastomer, fluessigkunststoff, bahn_pe} (withheld)

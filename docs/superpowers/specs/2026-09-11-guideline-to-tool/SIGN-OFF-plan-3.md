@@ -1523,6 +1523,7 @@ Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar
 - Evidence (verbatim, transcript line): §5–§7 structure — "5.1 Mineralische Stoffe ohne Zusatzstoffe" (L1880), "5.3 Mineralische Abdichtungsstoffe mit hydraulischen Bindemitteln" (L2412), "6.4 Kunststoffbahnen aus Polyethylen" (L4448); capture as above.
 - Proposed SQL / config: STAGED block fll_gar-C-2 (four `UPDATE worksheet_sections … code = 'C'`).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
+- **2026-09-25:** FLL-GAR-12 C emitted in 20260917100710 at the commit that adds this line (child of `39c38e4`, subject `fix(fll_gar): fll_gar-C-2 — FLL-GAR-12 section C emits under T-12b`) under T-12b; block now covers -10/-14/-16. (`PRODUCER_SECTIONS` in `fll_gar.ts` lost its `FLL-GAR-12 C` entry; re-emit added exactly one guarded `UPDATE worksheet_sections … ws.code = 'C' AND w.code = 'FLL-GAR-12'` and its rollback restore + re-capture note; the STAGED block's VALUES list now names three worksheets.)
 
 ### fll_gar-C-3 · FLL-GAR-2023 · FLL-GAR-05 · wassereinwirkungsklasse / rissklasse / standortklasse visible_when (withheld)
 - Class: consumer-edit
