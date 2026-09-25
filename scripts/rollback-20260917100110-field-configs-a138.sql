@@ -1,6 +1,6 @@
 -- Generated rollback for a138 field configs (scripts/regulation-tables/emit-field-configs-sql.ts). Restores the captured prior; deletes only 'Plan 3:' rows. Regenerate, do not hand-edit.
 BEGIN;
-UPDATE fields f SET widget = NULL, ui_config = NULL, lookup = NULL, visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND f.symbol = 'belastungskategorie' AND w.code = 'A138-06' AND s.code = 'DWA-A-138-1' AND f.active;
+UPDATE fields f SET widget = NULL, ui_config = NULL, lookup = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.worksheet_template_id = w.id AND f.symbol = 'belastungskategorie' AND w.code = 'A138-06' AND s.code = 'DWA-A-138-1' AND f.active;
 DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-A-138-1' AND w.code = 'A138-06' AND f.symbol = 'a138_tier' AND f.description LIKE 'Plan 3:%';
 DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-A-138-1' AND w.code = 'A138-06' AND f.symbol = 'eta_afs63_required' AND f.description LIKE 'Plan 3:%';
 DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-A-138-1' AND w.code = 'A138-06' AND f.symbol = 'eta_geloest_required' AND f.description LIKE 'Plan 3:%';

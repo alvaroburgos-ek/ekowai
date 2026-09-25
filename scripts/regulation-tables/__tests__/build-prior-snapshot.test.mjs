@@ -76,7 +76,7 @@ describe('sectionPath / foldSnapshot', () => {
       'A138-07 B': { visible_when: null, parent_code: null },
     });
     // the emitter consumes it: the rollback restores the captured object byte-for-byte
-    const { down } = emitFieldConfigSql('a138', [{ standard: 'DWA-A-138-1', worksheet: 'A138-07', symbol: 'surface_inventory', widget: 'register', ui_config: { title: 'U', columns: [{ key: 'b', label: 'B', type: 'text' }] }, verification_quote: 'q' }], [], snap);
+    const { down } = emitFieldConfigSql('a138', [{ standard: 'DWA-A-138-1', worksheet: 'A138-07', symbol: 'surface_inventory', widget: 'register', ui_config: { title: 'U', columns: [{ key: 'b', label: 'B', type: 'text' }] }, visible_when: "m == 'a'", verification_quote: 'q' }], [], snap); // a rule-bearing entry: since the sign-off C-1 closure only such an entry restores visible_when
     expect(down).toContain(`ui_config = '${JSON.stringify(fieldRows[1].ui_config)}'::jsonb`);
     expect(down).toContain("visible_when = 'x == ''y'''");
     // the section-level producer guard sees A_C (null-coded grandchild of A) through section_path — for A and for A.1

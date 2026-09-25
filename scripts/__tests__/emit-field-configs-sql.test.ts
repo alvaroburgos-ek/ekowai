@@ -50,6 +50,6 @@ describe('emitFieldConfigSql', () => {
   it('rollback restores each touched field to its prior four columns and prior enum_values', () => {
     const prior = { 'S-01 k': { enum_values: null, widget: null, ui_config: null, lookup: null, visible_when: null, consumer_worksheets: null } };
     const { down } = emitFieldConfigSql('x', [{ standard: 'S', worksheet: 'S-01', symbol: 'k', widget: 'select_one', enum_values: [{ value: 'a', label_de: 'A', order_index: 0 }], verification_quote: 'q' }], [], prior);
-    expect(down).toContain('widget = NULL, ui_config = NULL, lookup = NULL, visible_when = NULL, enum_values = NULL');
+    expect(down).toContain('widget = NULL, ui_config = NULL, lookup = NULL, enum_values = NULL'); // sign-off C-1 closure: no rule ⇒ visible_when is not restored
   });
 });

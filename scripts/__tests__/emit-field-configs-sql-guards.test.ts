@@ -21,9 +21,10 @@ const bad = (v: unknown) => v as unknown as PriorSnapshot;
 const exactly = (msg: string) => new RegExp(`^${msg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
 
 describe('emitFieldConfigSql — guards beyond the brief (fix round 1)', () => {
-  it('lookup and visible_when are ALWAYS written, as NULL when absent, on every UPDATE; the UPDATE is scoped to active rows', () => {
+  it('lookup is ALWAYS written (NULL when absent) on every UPDATE; visible_when only when the entry carries a rule (sign-off C-1 closure); the UPDATE is scoped to active rows', () => {
     const { up } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar' }], [], {});
-    expect(up).toContain("UPDATE fields f SET widget = 'scalar', ui_config = NULL, lookup = NULL, visible_when = NULL FROM worksheet_templates w");
+    expect(up).toContain("UPDATE fields f SET widget = 'scalar', ui_config = NULL, lookup = NULL FROM worksheet_templates w");
+    expect(up).not.toContain('visible_when');
     expect(up).toContain("AND s.code = 'S' AND f.active;");
   });
   it('stricter D-1: an enum list on an UPDATE entry requires a CAPTURED prior row (an absent row is not evidence of NULL)', () => {
@@ -59,7 +60,7 @@ describe('emitFieldConfigSql — guards beyond the brief (fix round 1)', () => {
     const si = lines.findIndex((l) => l.startsWith('UPDATE worksheet_sections ws SET visible_when = NULL'));
     expect(lines[si - 2]).toMatch(/^-- section S-01 S-01\.1: no prior snapshot row captured/);
     expect(lines[si - 1]).toMatch(/^-- section S-01 S-01\.1: the UP writes visible_when under an IS NULL guard/);
-    const captured = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar' }], [], { 'S-01 n': row({ widget: 'scalar', visible_when: 'b == 2' }) }).down;
+    const captured = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar', visible_when: "m == 'a'" }], [], { 'S-01 n': row({ widget: 'scalar', visible_when: 'b == 2' }) }).down;
     expect(captured).not.toContain('no prior snapshot row captured');
     expect(captured).toContain("UPDATE fields f SET widget = 'scalar', ui_config = NULL, lookup = NULL, visible_when = 'b == 2'");
   });
@@ -229,10 +230,11 @@ describe('emitFieldConfigSql — visible_when UPDATEs are IS NULL guarded (final
     expect(up).toContain("AND s.code = 'S' AND f.active AND f.visible_when IS NULL;");
   });
 
-  it('an UPDATE that writes visible_when = NULL is NOT guarded (the always-written invariant stays a plain write)', () => {
+  it('an entry WITHOUT a rule does not touch visible_when at all — neither SET nor WHERE (sign-off C-1 closure)', () => {
     const { up } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar' }], [], {});
     expect(up).toContain("AND s.code = 'S' AND f.active;");
     expect(up).not.toContain('f.visible_when IS NULL');
+    expect(up).not.toContain('visible_when = NULL');
   });
 
   it('the rollback is never guarded — it restores the captured prior unconditionally', () => {
@@ -271,7 +273,7 @@ describe('emitFieldConfigSql — a guarded UP gets a re-capture note on its rest
     expect(lines[i - 1]).toMatch(RECAPTURE);
   });
 
-  it('an entry that writes visible_when = NULL (unguarded UP) gets NO note', () => {
+  it('an entry without a rule (its UP leaves visible_when alone) gets NO note', () => {
     const prior = { 'S-01 n': row({ widget: 'scalar' }) };
     const { down } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar' }], [], prior);
     expect(down).not.toContain('IS NULL guard');
@@ -291,5 +293,35 @@ describe('emitFieldConfigSql — a guarded UP gets a re-capture note on its rest
     const i = lines.findIndex((l) => l.startsWith('UPDATE fields f SET'));
     expect(lines[i - 2]).toMatch(/^-- S-01 n: no prior snapshot row captured/);
     expect(lines[i - 1]).toMatch(RECAPTURE);
+  });
+});
+
+/**
+ * Sign-off C-1 closure (2026-09-25) — the sixteen unguarded `visible_when = NULL` writes.
+ * An entry with no `visible_when` used to write `visible_when = NULL` with NO guard, so any
+ * re-apply cleared a rule a human had set after the first apply. The emitter now leaves the
+ * column out of the statement entirely, and the rollback mirrors it: restoring the captured
+ * prior into a column the UP never wrote would be the same clear in reverse.
+ */
+describe('emitFieldConfigSql — an entry without a rule never writes visible_when (sign-off C-1 closure)', () => {
+  it('UP: SET lists widget / ui_config / lookup (+ enum_values) only; WHERE carries no visible_when guard', () => {
+    const { up } = emitFieldConfigSql('x', [{ ...base, symbol: 'k', widget: 'select_one', enum_values: ev }], [], { 'S-01 k': row() });
+    const stmt = up.split('\n').find((l) => l.startsWith('UPDATE fields f SET'))!;
+    expect(stmt).toMatch(/^UPDATE fields f SET widget = 'select_one', ui_config = NULL, lookup = NULL, enum_values = '\[.*\]'::jsonb FROM worksheet_templates w /);
+    expect(stmt).not.toContain('visible_when');
+    expect(stmt.endsWith("AND s.code = 'S' AND f.active;")).toBe(true);
+  });
+  it('DOWN: the restore of such an entry does not mention visible_when either, even when the captured prior holds a rule', () => {
+    const { down } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar' }], [], { 'S-01 n': row({ widget: 'scalar', visible_when: 'b == 2' }) });
+    const stmt = down.split('\n').find((l) => l.startsWith('UPDATE fields f SET'))!;
+    expect(stmt).toMatch(/^UPDATE fields f SET widget = 'scalar', ui_config = NULL, lookup = NULL FROM worksheet_templates w /);
+    expect(stmt).not.toContain('visible_when');
+  });
+  it('an entry WITH a rule is unchanged: SET writes it, WHERE guards it, the restore writes the prior back under the re-capture note', () => {
+    const { up, down } = emitFieldConfigSql('x', [{ ...base, symbol: 'n', widget: 'scalar', visible_when: "m == 'a'" }], [], { 'S-01 n': row() });
+    expect(up).toContain("lookup = NULL, visible_when = 'm == ''a''' FROM");
+    expect(up).toContain('AND f.active AND f.visible_when IS NULL;');
+    expect(down).toContain('lookup = NULL, visible_when = NULL FROM');
+    expect(down).toContain('the UP writes visible_when under an IS NULL guard');
   });
 });

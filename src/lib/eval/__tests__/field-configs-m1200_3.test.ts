@@ -173,6 +173,7 @@ describe('DWA-M-1200-3 field configs (Plan 3 Task 6)', () => {
     expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(22);
     expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(8);
     expect(up).not.toMatch(/enum_values = /); // D-1: no prod enum touched
-    expect(down).toMatch(/UPDATE fields f SET widget = NULL, ui_config = NULL, lookup = NULL, visible_when = NULL .* AND f.symbol = 'bewaesserungstagebuch' AND w.code = 'M12003-18'/);
+    expect(down).toMatch(/UPDATE fields f SET widget = NULL, ui_config = NULL, lookup = NULL FROM .* AND f.symbol = 'bewaesserungstagebuch' AND w.code = 'M12003-18'/); // sign-off C-1 closure: no rule ⇒ visible_when neither written nor restored
+    expect(up).not.toContain('visible_when = NULL');
   });
 });

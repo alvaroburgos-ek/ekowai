@@ -397,10 +397,10 @@ export function equationReach(prior: PriorSnapshot, worksheet: string, symbol: s
 /**
  * Plan 3 final wave C (item 3): `guardVisibleWhen` appends `AND f.visible_when IS NULL`
  * — the guard every STAGED block's hide carries and the generated migrations did not
- * (`iso14046-I-2`, `atv_a704e-I-2`). It rides ONLY on statements that WRITE a rule: an
- * entry with no `visible_when` writes `visible_when = NULL` under the emitter's
- * always-written invariant, and guarding that would silently skip its widget/ui_config
- * write on any field that already carries a rule in prod. The ROLLBACK is never
+ * (`iso14046-I-2`, `atv_a704e-I-2`). It rides ONLY on statements that WRITE a rule; since
+ * the sign-off C-1 closure (2026-09-25) an entry with no `visible_when` does not mention the
+ * column at all (neither SET nor WHERE, and its rollback does not restore it), so its
+ * widget/ui_config write lands on any field whatever rule it carries. The ROLLBACK is never
  * guarded — it restores the captured prior unconditionally.
  */
 const where = (e: { standard: string; worksheet: string; symbol: string }, guardVisibleWhen = false) =>
@@ -625,20 +625,26 @@ ${JOIN} WHERE NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id
       down.push(`DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = ${q(e.standard)} AND w.code = ${q(e.worksheet)} AND f.symbol = ${q(e.symbol)} AND f.description LIKE 'Plan 3:%';`);
       continue;
     }
-    const sets = [`widget = ${q(e.widget)}`, `ui_config = ${jsonOrNull(e.ui_config)}`, `lookup = ${jsonOrNull(e.lookup)}`, `visible_when = ${textOrNull(e.visible_when)}`];
+    // Sign-off C-1 closure (2026-09-25): `visible_when` is written ONLY by an entry that carries a rule. An entry
+    // without one used to write `visible_when = NULL` with no guard, so every re-apply cleared a rule set by hand
+    // after the first apply (16 statements in 8 migrations); it now leaves the column out of the statement.
+    const writesRule = e.visible_when != null;
+    const sets = [`widget = ${q(e.widget)}`, `ui_config = ${jsonOrNull(e.ui_config)}`, `lookup = ${jsonOrNull(e.lookup)}`];
+    if (writesRule) sets.push(`visible_when = ${q(e.visible_when as string)}`);
     const writesEnum = Array.isArray(e.enum_values);
     if (writesEnum) sets.push(`enum_values = ${j(e.enum_values)}`);
-    up.push(`UPDATE fields f SET ${sets.join(', ')} ${where(e, e.visible_when != null)};`);
+    up.push(`UPDATE fields f SET ${sets.join(', ')} ${where(e, writesRule)};`);
     const restore = [
       `widget = ${textOrNull(p?.widget)}`,
       `ui_config = ${jsonOrNull(p?.ui_config)}`,
       `lookup = ${jsonOrNull(p?.lookup)}`,
-      `visible_when = ${textOrNull(p?.visible_when)}`,
     ];
+    // Mirror of the UP: a restore of a column the UP never wrote would be the same unconditional clear in reverse.
+    if (writesRule) restore.push(`visible_when = ${textOrNull(p?.visible_when)}`);
     if (writesEnum) restore.push(`enum_values = ${jsonOrNull(p?.enum_values)}`);
     // A missing prior row cannot be refused (an enum list is — see validateEntry), but the rollback must say what it assumes.
     if (!p) down.push(NO_PRIOR_NOTE(key));
-    if (e.visible_when != null) down.push(GUARDED_RESTORE_NOTE(key));
+    if (writesRule) down.push(GUARDED_RESTORE_NOTE(key));
     down.push(`UPDATE fields f SET ${restore.join(', ')} ${where(e)};`);
   }
   const seenSections = new Set<string>();

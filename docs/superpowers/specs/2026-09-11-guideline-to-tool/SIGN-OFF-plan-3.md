@@ -10292,6 +10292,15 @@ a rollback is run.
 > **Nothing was changed to fix this** — adding a guard to a NULL-write is an emitter change plus
 > a corpus re-emit, i.e. an encoding decision, not a documentation one. Recorded as an open
 > [CODE] candidate for the next emitter touch.
+>
+> **2026-09-25 — CLOSED at the commit that adds this line (child of `b3aa7ba`, subject
+> `fix(emitter): sign-off C-1 — an entry without a rule never writes visible_when`):** the
+> emitter no longer writes `visible_when` for an entry without a rule; 16 statements in 8 files
+> removed; rollbacks mirrored (the 16 matching restores no longer name `visible_when`). The
+> guarded writes and their re-capture notes are unchanged. Proof: a normaliser that deletes
+> `, visible_when = NULL` from exactly those 16 UP statements and their 16 DOWN restores in the
+> `b3aa7ba` blobs reproduces all 58 field-config migration/rollback files byte-for-byte
+> (UNEXPLAINED=0); every one of the 16 captured priors was `NULL`, so no prior rule is left behind.
 
 **C-2 · Six `ui_config.note` strings still assert an engine limit that final wave A removed.**
 They are ENCODED VALUES (emitted into `ui_config`, shown to the engineer under the widget), not
@@ -10380,6 +10389,12 @@ signature.)*
      `C-1` amendment — all six are among the sixteen unguarded `visible_when = NULL` writes), not
      the Plan-1 config. Rolling Plan 3 back therefore leaves the field with no widget config at
      all unless the Plan-1 migration is re-run — and re-running it is hazard 2.
+  > **2026-09-25 — hazard 3, `visible_when` half CLOSED at the same commit as the `C-1` closure
+  > (child of `b3aa7ba`):** the emitter no longer writes `visible_when` for an entry without a
+  > rule; 16 statements in 8 files removed; rollbacks mirrored — so a Plan-3 rollback of these
+  > six no longer touches `visible_when`. The `widget` / `ui_config` / `lookup` restore to the
+  > captured `NULL` is unchanged, so the widget-config half of hazard 3, and hazards 1 and 2,
+  > stand.
 - **Fail-safe today:** nothing is applied. Prod has no `widget` column at all
   (`prod-query.mjs` on `fields` → `ERROR: column f.widget does not exist`), so neither plan's
   configs exist in the database and no engineer can see a divergence yet.
