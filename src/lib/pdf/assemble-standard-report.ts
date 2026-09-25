@@ -3,6 +3,7 @@ import { engineInputValue } from '@/lib/eval/engine-input';
 import { buildCarriers, buildRegisters } from '@/lib/eval/register-rows';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
+import { deriveSignoffs, SELF_APPROVAL_NOTE_DE, type WorksheetSignoff } from '@/lib/approval/signoff';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
 import { computeVisibility, hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
 import { explainCondition, type ExplainLeaf } from '@/lib/compliance/explain';
@@ -10,6 +11,9 @@ import { blocksVerificationGate } from '@/lib/verification-status';
 import { resolveFromSiteProfile, SITE_PROFILE_ENTRIES } from '@/lib/site-profile/symbol-map';
 import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 import { timeRangeLabel } from '@/lib/actions/monitoring-core';
+
+/** Approval events shown in the PDF audit excerpt (sign-offs use all of them). */
+const AUDIT_EXCERPT_APPROVALS = 25;
 
 /**
  * Pure assembler for the per-standard PDF report data.
@@ -121,6 +125,10 @@ export type ReportWorksheet = {
    * For all other worksheets and for the non-manual methods this is null.
    */
   aSmProvenanceLine: string | null;
+  /** Current sign-off from approval_events: approver, date and whether it
+   * was a self-approval (no second reviewer). Null = not approved.
+   * Optional so hand-built render fixtures stay valid. */
+  signoff?: WorksheetSignoff | null;
 };
 
 export type ReportLetterhead = {
@@ -349,6 +357,8 @@ export type AssemblerApprovalRow = {
   comment: string;
   worksheetCode: string;
   actorName: string | null;
+  /** Needed to tell a self-approval from a second review (optional for fixtures). */
+  actorId?: string | null;
 };
 
 export type AssemblerAuditRow = {
@@ -443,6 +453,17 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
   } = input;
 
   const instanceByTemplateId = new Map(instances.map((i) => [i.worksheetTemplateId, i]));
+  // Sign-off per worksheet from ALL approval events (the audit excerpt below
+  // shows only the most recent ones).
+  const signoffByCode = deriveSignoffs(
+    approvals.map((a) => ({
+      worksheetKey: a.worksheetCode,
+      eventType: a.eventType,
+      actorId: a.actorId ?? null,
+      actorName: a.actorName ?? null,
+      occurredAt: toDate(a.occurredAt),
+    })),
+  );
   const paramByFieldId = new Map(parameters.map((p) => [p.fieldId, p]));
   const docById = new Map(documents.map((d) => [d.id, d]));
 
@@ -790,6 +811,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         compliance: evaluatedCompliance,
         unverifiedFields,
         aSmProvenanceLine,
+        signoff: signoffByCode.get(tpl.code) ?? null,
       };
     });
 
@@ -835,13 +857,21 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
   // Audit excerpt — flatten approval + audit_log rows into a single timeline.
   // ---------------------------------------------------------------------------
   const auditExcerpt: AuditExcerptEntry[] = [];
-  for (const a of approvals) {
+  const recentApprovals = [...approvals]
+    .sort((a, b) => toDate(b.occurredAt).getTime() - toDate(a.occurredAt).getTime())
+    .slice(0, AUDIT_EXCERPT_APPROVALS);
+  const selfApprovedAt = new Set(
+    [...signoffByCode.entries()].filter(([, s]) => s.selfApproved).map(([code, s]) => `${code}|${s.approvedAt}`),
+  );
+  for (const a of recentApprovals) {
+    const self = a.eventType === 'engineer_approve'
+      && selfApprovedAt.has(`${a.worksheetCode}|${toDate(a.occurredAt).toISOString()}`);
     auditExcerpt.push({
       occurredAt: toDate(a.occurredAt).toISOString(),
       actorName: a.actorName ?? null,
       actorRole: a.actorRole,
       action: a.eventType,
-      detail: `${a.fromStatus} → ${a.toStatus} · „${a.comment}"`,
+      detail: `${a.fromStatus} → ${a.toStatus} · „${a.comment}"${self ? ` · ${SELF_APPROVAL_NOTE_DE}` : ''}`,
       worksheetCode: a.worksheetCode,
     });
   }

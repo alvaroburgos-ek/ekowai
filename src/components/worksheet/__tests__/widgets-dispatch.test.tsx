@@ -6,8 +6,8 @@
  * widget IS NULL; ui_config.editor when set; a DB register config wins).
  */
 import { describe, it, expect } from 'vitest';
-import { effectiveWidget, widgetPlacement, resolveBespokeEditor, BESPOKE_TITLES, BESPOKE_BY_SYMBOL } from '../widgets';
-import { resolveRegisterConfig } from '@/lib/eval/register-configs';
+import { effectiveWidget, widgetPlacement, resolveBespokeEditor, BESPOKE_TITLES, BESPOKE_BY_SYMBOL, BESPOKE_PINNED_SYMBOLS } from '../widgets';
+import { resolveRegisterConfig, REGISTER_CONFIGS_FALLBACK } from '@/lib/eval/register-configs';
 import { registerPlacement } from '../register-editor';
 
 const base = {
@@ -26,9 +26,15 @@ describe('effectiveWidget / placement / bespoke', () => {
     expect(effectiveWidget({ ...base, symbol: 'n', dataType: 'number', widget: 'lookup_fill' })).toBe('lookup_fill');
   });
 
-  it('surface_inventory (widget NULL) is a register placed at the bottom (fallback pins placement bottom)', () => {
+  it('surface_inventory is main\'s bespoke SurfaceInventoryEditor at the bottom under main\'s h2 — widget NULL AND after 20260916130000 (widget=register)', () => {
+    // Merge of origin/main 2026-09-25: the live editor (Tab. 5 group per row, 4045651) wins over the generic RegisterEditor.
+    const title = 'Flächenverzeichnis (Tab. 9 — C_i für Gl. 2 und C_s für Gl. 10)';
     const f = { ...base, symbol: 'surface_inventory', dataType: 'json' as const };
-    expect(widgetPlacement(f)).toEqual({ placement: 'bottom', title: 'Flächenverzeichnis' });
+    expect(widgetPlacement(f)).toEqual({ placement: 'bottom', title });
+    // The migration writes exactly the TS fallback as ui_config (byte-pinned) — the pin must survive it.
+    const migrated = { ...f, widget: 'register', uiConfig: REGISTER_CONFIGS_FALLBACK.surface_inventory };
+    expect(widgetPlacement(migrated)).toEqual({ placement: 'bottom', title });
+    expect(BESPOKE_PINNED_SYMBOLS.has('surface_inventory')).toBe(true);
   });
 
   it('a DB register config without placement defaults to bottom via registerPlacement(); placement: section is honoured', () => {
@@ -49,12 +55,19 @@ describe('effectiveWidget / placement / bespoke', () => {
     expect(resolveBespokeEditor({ ...base, symbol: 'risk_register', dataType: 'json', widget: 'register' }, { title: 't', columns: [{ key: 'a', type: 'text', label: 'A' }] })).toBeNull();
     // An unknown ui_config.editor never dispatches.
     expect(resolveBespokeEditor({ ...base, symbol: 'x', dataType: 'json', widget: 'register' }, { title: 't', columns: [{ key: 'a', type: 'text', label: 'A' }], editor: 'nope' })).toBeNull();
-    // surface_inventory has NO bespoke editor any more — it is the generic RegisterEditor.
-    expect(resolveBespokeEditor({ ...base, symbol: 'surface_inventory', dataType: 'json' }, resolveRegisterConfig({ symbol: 'surface_inventory', dataType: 'json', widget: null }))).toBeNull();
+    // surface_inventory is PINNED to main's SurfaceInventoryEditor (merge 2026-09-25): with the TS fallback config,
+    // with the migrated DB config (widget='register'), and even against a different ui_config.editor.
+    const siCfg = resolveRegisterConfig({ symbol: 'surface_inventory', dataType: 'json', widget: null });
+    expect(resolveBespokeEditor({ ...base, symbol: 'surface_inventory', dataType: 'json' }, siCfg)).toBe('surface_inventory');
+    expect(resolveBespokeEditor({ ...base, symbol: 'surface_inventory', dataType: 'json', widget: 'register' }, siCfg)).toBe('surface_inventory');
+    expect(resolveBespokeEditor({ ...base, symbol: 'surface_inventory', dataType: 'json', widget: 'register' }, { title: 't', columns: [{ key: 'a', type: 'text', label: 'A' }], editor: 'risk_register' })).toBe('surface_inventory');
+    // Only surface_inventory is pinned — the other symbol-table editors still yield to a DB register config (line above).
+    expect([...BESPOKE_PINNED_SYMBOLS]).toEqual(['surface_inventory']);
     expect(BESPOKE_TITLES.rainfall_tables).toBe('Regenspendentabellen (für V_VA nach Gl. 8)');
     expect(BESPOKE_TITLES.risk_register).toBe('Risikoanalyse (Anhang A — Tab. A.1)');
     expect(BESPOKE_TITLES.risk_mitigation_plan).toBe('Risiko-Maßnahmenplan (Anhang A — Tab. A.2)');
-    expect((BESPOKE_BY_SYMBOL as Record<string, string>).surface_inventory).toBeUndefined();
+    expect(BESPOKE_TITLES.surface_inventory).toBe('Flächenverzeichnis (Tab. 9 — C_i für Gl. 2 und C_s für Gl. 10)');
+    expect((BESPOKE_BY_SYMBOL as Record<string, string>).surface_inventory).toBe('surface_inventory');
   });
 
   it("the bespoke carriers keep their bottom placement + today's h2 titles while widget IS NULL", () => {

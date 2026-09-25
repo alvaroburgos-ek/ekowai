@@ -1,4 +1,6 @@
-// Plan 2b: moved from surface-inventory-editor.test.tsx (component deleted); same carrier shape, same assertions, testids mapped per Plan 2b Task 2.
+// Plan 2b: moved from surface-inventory-editor.test.tsx; same carrier shape, same assertions, testids mapped per Plan 2b Task 2.
+// Merge of origin/main (2026-09-25): the bespoke SurfaceInventoryEditor is back as the FORM editor (its own test file is
+// restored); the first three cases keep pinning the generic RegisterEditor under the surface_inventory config (differential).
 //   c_i-readonly → lookup-value-c_i · c_s-readonly → lookup-value-c_s · kind-badge → derived-badge-kind ·
 //   tab9-original → lookup-original · total-paved → footer-A_E_ba · total-unpaved → footer-A_E_nba · rows-complete → rows-complete.
 // The two footer totals are ENGINE states now (single-source), so they are asserted through the real WorksheetForm
@@ -23,7 +25,12 @@ vi.mock('../section-group', () => ({ SectionGroup: () => null }));
 vi.mock('../equations-block', () => ({ EquationsBlock: () => null }));
 vi.mock('../compliance-block', () => ({ ComplianceBlock: () => null }));
 vi.mock('../approval-bar', () => ({ ApprovalBar: () => null }));
-vi.mock('../equation-engine-card', () => ({ EquationEngineCard: () => null }));
+// Merge 2026-09-25: the card renders the engine verdict as text so the form case can read the Σ outputs.
+vi.mock('../equation-engine-card', () => ({
+  EquationEngineCard: ({ outputSymbol, state }: { outputSymbol: string; state: { kind: string; value?: number } }) => (
+    <span data-testid={`engine-${outputSymbol}`}>{state.kind === 'computed' ? String(state.value) : state.kind}</span>
+  ),
+}));
 vi.mock('../rainfall-tables-editor', () => ({ RainfallTablesEditor: () => null }));
 vi.mock('../surface-source-banner', () => ({ SurfaceSourceBanner: () => null }));
 vi.mock('@/components/form-templates/SourceFormReferencePanel', () => ({ SourceFormReferencePanel: () => null }));
@@ -193,7 +200,10 @@ describe('surface_inventory through WorksheetForm — footer totals from the eng
     act(() => { useWorksheetStore.getState().init('reset', {}, {}, {}); });
   });
 
-  it('legacy two-row carrier: footer A_E_ba = 1.575,9 (Parkplatz only), A_E_nba = 0; no Phase-2 placeholder', () => {
+  // Merge of origin/main (2026-09-25): the form renders main's live SurfaceInventoryEditor for surface_inventory
+  // (BESPOKE_PINNED_SYMBOLS), not the generic RegisterEditor. The generic engine still computes the Σ outputs from
+  // the same carrier — both are asserted here.
+  it('legacy two-row carrier: main editor totals and engine Σ agree (A_E_ba = 1575.9 Parkplatz only, A_E_nba = 0); no Phase-2 placeholder', () => {
     render(
       <WorksheetForm
         {...baseProps}
@@ -210,14 +220,17 @@ describe('surface_inventory through WorksheetForm — footer totals from the eng
         }}
       />,
     );
-    // Footer totals: A_E,b,a counts only complete paved rows (Parkplatz 1575.9);
-    // Gewächshausdach is incomplete ⇒ excluded.
-    expect(screen.getByTestId('footer-A_E_ba')).toHaveTextContent('1.575,9'); // was total-paved
-    expect(screen.getByTestId('footer-A_E_nba')).toHaveTextContent('0'); // was total-unpaved
-    expect(screen.getByTestId('register-editor').dataset.symbol).toBe('surface_inventory');
+    // Totals: A_E,b,a counts only complete paved rows (Parkplatz 1575.9); Gewächshausdach is incomplete ⇒ excluded.
+    expect(screen.getByTestId('surface-inventory-editor')).toBeTruthy();
+    expect(screen.queryByTestId('register-editor')).toBeNull();
+    expect(screen.getByTestId('total-paved')).toHaveTextContent('1.575,9');
+    expect(screen.getByTestId('total-unpaved')).toHaveTextContent('0');
+    // The engine (sum_rows over the register config) computes the same Σ from the same carrier.
+    expect(screen.getByTestId('engine-A_E_ba')).toHaveTextContent('1575.9');
+    expect(screen.getByTestId('engine-A_E_nba')).toHaveTextContent('0');
     expect(screen.queryByText('Mehrzeilige Eingabe — Phase 2')).toBeNull();
-    // Bottom strip: the register section carries the config title (deliberate delta from the old hand-written h2).
+    // Bottom strip: main's h2 over the editor.
     const section = screen.getByTestId('bottom-surface_inventory');
-    expect(section.querySelector('h2')?.textContent).toBe('Flächenverzeichnis');
+    expect(section.querySelector('h2')?.textContent).toBe('Flächenverzeichnis (Tab. 9 — C_i für Gl. 2 und C_s für Gl. 10)');
   });
 });

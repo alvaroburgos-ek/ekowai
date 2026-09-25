@@ -8,12 +8,18 @@ import { SectionGroup } from './section-group';
 import { EquationsBlock } from './equations-block';
 import { ComplianceBlock } from './compliance-block';
 import { ApprovalBar } from './approval-bar';
+import { RationalePanel } from './rationale-panel';
 import { EquationEngineCard } from './equation-engine-card';
 import {
   ManualOverridePill,
   useManualOverride,
 } from './manual-override-pill';
 import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
+import { DesignWindowPanel } from './design-window-panel';
+import { FeasibilityTablePanel } from './feasibility-table-panel';
+import { GuidelineTablePanel } from './guideline-table-panel';
+import { designWindowInputs, tab3Inputs, guidelineTableInputs, sitePortalFieldIds } from './panel-inputs';
+import { SitePortalLinks } from './site-portal-links';
 import { SurfaceSourceBanner } from './surface-source-banner';
 import { carrierSourceState } from '@/lib/eval/carrier-source-state';
 import { registerTables, type RegulationTable } from '@/lib/eval/regulation-tables';
@@ -118,7 +124,7 @@ type Props = {
   initialValues: Record<string, FieldValue>;
   initialSources: Record<string, { docId: string; page?: number; note?: string } | null>;
   initialCitations: Record<string, Array<{ id: string; docId: string; page: number | null; note: string | null }>>;
-  sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>>;
+  sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol?: string }>>;
   /** symbol → worksheet code from which the initial value was inherited (no
    * local saved value existed). Used to render the "← [code]" hint. */
   inheritedFromBySymbol: Record<string, string>;
@@ -130,7 +136,11 @@ type Props = {
    * pre-fill (norm default or project site profile). Lets the field display
    * a small "Norm-Default" / "Projekt-Standort" badge until the engineer
    * touches the value. */
-  prefillSourceByFieldId?: Record<string, 'standard_default' | 'site_profile'>;
+  prefillSourceByFieldId?: Record<string, 'standard_default' | 'site_profile' | 'twin'>;
+  /** field_id → upstream worksheet + symbol that supplied a TWIN pre-fill (same
+   * quantity under another symbol, TWIN_SYMBOLS). Drives the badge and the
+   * "Alle Vorbefüllungen übernehmen" bar. */
+  twinSourceByFieldId?: Record<string, { worksheetCode: string; symbol: string }>;
   /** field_id → site-profile JSON key that supplied the pre-fill. Only set
    * for fields where prefillSourceByFieldId is 'site_profile'. Shown in the
    * field's tooltip so the engineer can find the source entry. */
@@ -201,6 +211,7 @@ export function WorksheetForm({
   ambiguousSymbols,
   prefillSourceByFieldId,
   siteProfileKeyByFieldId,
+  twinSourceByFieldId,
   clientSuppliedByFieldId,
   standardCode,
   docs,
@@ -504,6 +515,20 @@ export function WorksheetForm({
     return facilityReturnPeriod(worksheet.template.code, pick);
   }, [fieldBySymbol, values, worksheet.template.code]);
 
+  // origin/main panels (design window, Tab. 3, guideline tables as printed, site
+  // portal links): inputs computed by panel-inputs.ts — main's memo bodies moved
+  // verbatim so this form keeps no symbol-keyed carrier reads (merge 2026-09-25).
+  const designWindow = useMemo(
+    () => designWindowInputs({ worksheetCode: worksheet.template.code, fields, fieldBySymbol, values, designReturnPeriod: rainfallDesignReturnPeriod }),
+    [worksheet.template.code, fields, fieldBySymbol, values, rainfallDesignReturnPeriod],
+  );
+  const tab3 = useMemo(() => tab3Inputs(worksheet.template.code, fieldBySymbol), [worksheet.template.code, fieldBySymbol]);
+  const guidelineTables = useMemo(
+    () => guidelineTableInputs(worksheet.template.code, fieldBySymbol, values),
+    [worksheet.template.code, fieldBySymbol, values],
+  );
+  const sitePortal = useMemo(() => sitePortalFieldIds(fields), [fields]);
+
   // Plan 2b (Task 4): register-output provenance hint, generic. For every
   // register field of THIS worksheet, the output symbols of the equations
   // (DB rows + Plan 2a fallback) that consume it get "Aus dem Register
@@ -635,6 +660,21 @@ export function WorksheetForm({
     return result;
   }, [fieldsBySectionId, sections, visibility]);
 
+  // Twin pre-fills not yet persisted: the value is in the store (render-only)
+  // but not in pendingFieldIds and there is no saved row — "Alle übernehmen"
+  // marks them pending so the next autosave persists them in one go.
+  const twinPrefillIds = useMemo(() => {
+    if (!twinSourceByFieldId) return [] as string[];
+    return Object.keys(twinSourceByFieldId).filter((id) => values[id] != null && !pendingFieldIds.has(id));
+  }, [twinSourceByFieldId, values, pendingFieldIds]);
+  const acceptAllTwinPrefills = () => {
+    if (locked) return;
+    for (const id of twinPrefillIds) {
+      const v = values[id];
+      if (v) setField(id, v);
+    }
+  };
+
   const topSections = sections.filter((s) => s.parentSectionId === null);
   const orphanFields = fieldsBySectionId.map.get(null) ?? [];
   const title = locale === 'de' ? worksheet.template.titleDe : worksheet.template.titleEn ?? worksheet.template.titleDe;
@@ -715,6 +755,7 @@ export function WorksheetForm({
         computedHint={computedHint}
         prefillSource={prefillSourceByFieldId?.[f.id]}
         siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
+        twinSource={twinSourceByFieldId?.[f.id]}
         clientSupplied={clientSuppliedByFieldId?.[f.id] ?? false}
         inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
         overridePill={
@@ -797,6 +838,26 @@ export function WorksheetForm({
       )}
 
       <SourceFormReferencePanel standardCode={standardCode} locale={locale} />
+
+      {twinPrefillIds.length > 0 && !locked && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 rounded border border-accent/40 bg-accent/5 px-3 py-2 text-sm"
+          data-testid="twin-prefill-bar"
+        >
+          <span>
+            {twinPrefillIds.length === 1
+              ? '1 Feld aus vorgelagerten Arbeitsblättern vorbefüllt (noch nicht gespeichert).'
+              : `${twinPrefillIds.length} Felder aus vorgelagerten Arbeitsblättern vorbefüllt (noch nicht gespeichert).`}
+          </span>
+          <button
+            type="button"
+            onClick={acceptAllTwinPrefills}
+            className="text-xs px-3 py-1 rounded border border-hairline-strong hover:bg-paper-2 text-ink"
+          >
+            Alle Vorbefüllungen übernehmen
+          </button>
+        </div>
+      )}
 
       {registerSourceStates.map((s) => s.state && <SurfaceSourceBanner key={s.symbol} state={s.state} />)}
 
@@ -899,6 +960,40 @@ export function WorksheetForm({
         ) : null,
       )}
 
+      {/* origin/main panels (site portal links, guideline tables as printed,
+          Tab. 3, design window) — before the bottom strip, i.e. before the
+          surface inventory / register editors, as on main. */}
+      {sitePortal && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+          <SitePortalLinks latFieldId={sitePortal.latFieldId} lonFieldId={sitePortal.lonFieldId} label={title} />
+        </section>
+      )}
+
+      {guidelineTables.map((g) => (
+        <div key={g.code} className="border-t border-hairline pt-6 mt-8">
+          <GuidelineTablePanel tableCode={g.code} fieldsBySymbol={g.metas} readOnly={locked} extraValues={g.extra} />
+        </div>
+      ))}
+
+      {tab3 && (
+        <div className="border-t border-hairline pt-6 mt-8">
+          <FeasibilityTablePanel fieldsBySymbol={tab3.metas} determinationFieldId={tab3.determinationFieldId} readOnly={locked} locale={locale} projectId={projectId} standardCode={standardCode} />
+        </div>
+      )}
+
+      {designWindow && !locked && (
+        <div className="border-t border-hairline pt-6 mt-8">
+          <DesignWindowPanel
+            facility={designWindow.facility}
+            rows={designWindow.rows}
+            designReturnPeriod={designWindow.T}
+            compareRows={designWindow.compareRows}
+            scalars={designWindow.scalars}
+            current={designWindow.current}
+          />
+        </div>
+      )}
+
       {/* Bottom strip (Plan 2b Task 3): every own visible field whose widget
           places it at the bottom — registers (generic RegisterEditor or a
           bespoke editor: KOSTRA tables, risk register, mitigation plan) and
@@ -947,6 +1042,7 @@ export function WorksheetForm({
         projectId={projectId}
         hiddenSymbols={visibility.hiddenSymbols}
       />
+      <RationalePanel instanceId={instance.id} locale={locale} />
       <ApprovalBar
         instanceId={instance.id}
         status={instance.status}

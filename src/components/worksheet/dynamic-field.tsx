@@ -9,6 +9,7 @@ import { CitationPicker } from '@/components/documents/citation-picker';
 import { CitationChips } from '@/components/documents/citation-chips';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
 import { VerifyButton } from './verify-button';
+import { verificationStatusLabel, verificationStatusTitle } from '@/lib/verification-status';
 import { AcAsRatioCheckStatus } from './ac-as-ratio-check-status';
 import { AsmMethodStatus, type AsmMethodBadgeState } from './asm-method-status';
 
@@ -54,7 +55,7 @@ type Props = {
   /** Standard code (e.g. "DWA-A-138-1"). Needed to build the deep-link URL on
    * the inheritance badge so the engineer can jump to the source worksheet. */
   standardCode: string;
-  sameSymbolHints?: Array<{ worksheetCode: string; value: unknown }>;
+  sameSymbolHints?: Array<{ worksheetCode: string; value: unknown; viaSymbol?: string }>;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
   /** True if this field is the output of an equation (auto-computed sub-total or total). */
   isComputed?: boolean;
@@ -67,7 +68,9 @@ type Props = {
   inheritedFrom?: string;
   /** Source of the initial value if not yet user-touched. Drives the small
    * badge that tells the engineer where the pre-fill came from. */
-  prefillSource?: 'standard_default' | 'site_profile';
+  prefillSource?: 'standard_default' | 'site_profile' | 'twin';
+  /** Upstream worksheet + symbol of a twin pre-fill (prefillSource === 'twin'). */
+  twinSource?: { worksheetCode: string; symbol: string };
   /** Site-profile JSON key that supplied the pre-fill (when prefillSource ===
    * 'site_profile'). Shown in the tooltip so the engineer can find the source
    * entry in the project's Standortprofil. */
@@ -108,7 +111,7 @@ type Props = {
   clientSupplied?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, computedHint, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, computedHint, inheritedFrom, prefillSource, siteProfileKey, twinSource, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -252,6 +255,16 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             >
               Norm-Default
             </span>
+          )}
+          {prefillSource === 'twin' && twinSource && !isDirty && (
+            <Link
+              href={`/${locale}/projects/${projectId}/standards/${standardCode}/worksheets/${twinSource.worksheetCode}`}
+              className="text-accent normal-case tracking-normal underline-offset-2 hover:underline"
+              title={`${field.symbol} = ${formatProvenanceValue(value, field.unit)} vorbefüllt aus ${twinSource.worksheetCode} (${twinSource.symbol}) — bestätigen (Übernehmen) oder überschreiben.`}
+              data-testid="twin-prefill-badge"
+            >
+              Vorbefüllt ← {twinSource.worksheetCode} · {twinSource.symbol}
+            </Link>
           )}
           {prefillSource === 'site_profile' && !isDirty && (
             <span
@@ -797,7 +810,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           button would be a no-op. */}
       {!inheritedFrom && sameSymbolHints && sameSymbolHints.length > 0 && (
         <div className="text-xs text-subtext">
-          Bereits in {sameSymbolHints.map((h) => h.worksheetCode).join(', ')}:
+          Bereits in {sameSymbolHints.map((h) => (h.viaSymbol ? `${h.worksheetCode} (als ${h.viaSymbol})` : h.worksheetCode)).join(', ')}:
           {' '}
           {sameSymbolHints.map((h) => String(h.value)).join(', ')}{' '}
           <button
@@ -866,45 +879,6 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
       {inlineEngineCard}
     </div>
   );
-}
-
-const VERIFICATION_LABELS_DE: Record<string, { short: string; title: string }> = {
-  imported_unverified: {
-    short: 'Quelle ungeprüft',
-    title: 'Aus Pass3c-Workbook importiert, noch nicht gegen die Norm geprüft.',
-  },
-  engineer_verified: {
-    short: 'Ingenieur bestätigt',
-    title: 'Von einem Ingenieur gegen die Quellnorm bestätigt.',
-  },
-  verified_against_standard: {
-    short: 'Quelle bestätigt',
-    title: 'Inhalt wurde gegen die Quellnorm verifiziert (Pile-Audit).',
-  },
-  needs_engineer_review: {
-    short: 'Engineer-Review nötig',
-    title: 'Quellebenenfrage offen — Ingenieur muss prüfen.',
-  },
-  inferred_from_worksheet: {
-    short: 'Wizard-intern',
-    title: 'Aus Wizard-Logik abgeleitet, nicht direkt in der Norm.',
-  },
-  disputed: {
-    short: 'Strittig',
-    title: 'Verifikation angefochten — Wert/Definition weicht mutmaßlich von der Norm ab.',
-  },
-  corrected: {
-    short: 'Korrigiert',
-    title: 'Nach Beanstandung gegen die Norm korrigiert und erneut verifiziert.',
-  },
-};
-
-function verificationStatusLabel(status: string): string {
-  return VERIFICATION_LABELS_DE[status]?.short ?? status;
-}
-
-function verificationStatusTitle(status: string): string {
-  return VERIFICATION_LABELS_DE[status]?.title ?? status;
 }
 
 function formatHintNumber(n: number): string {

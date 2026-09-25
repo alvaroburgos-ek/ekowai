@@ -332,6 +332,15 @@ not a queue to drain.**
 
 **Never block a wave on a missing source.** Cap the affected nodes per doctrine, list the standard as
 source-absent, and keep moving. **Never fill a source gap from memory.**
+
+# Deploy workflow — staging-first
+
+Default working branch is **`staging`**, not `main`. Do the work and deploy it on
+`staging` first (push to `staging` → Vercel auto-deploy), then Nacho reviews it on Slack.
+Promote to `main` (production) **only after Nacho's OK**. When Johannes says "deploy"
+without qualification, deploy to `staging`. Never push to `main` unless he explicitly
+says it's approved for production.
+
 # Verification Doctrine (BINDING — read `docs/verification-doctrine.md` in full)
 
 All regulation-encoding, harness, and verification work follows the doctrine in

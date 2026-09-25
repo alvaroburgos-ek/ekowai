@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { FileDown } from 'lucide-react';
+import { FileDown, ListChecks } from 'lucide-react';
+import { StandardProgressPanel } from './standard-progress-panel';
 
 const STATUS_DOT: Record<string, string> = {
   draft: 'bg-ink/20',
@@ -52,7 +53,27 @@ export function WorksheetListSidebar({
 
   return (
     <nav className="space-y-4 sm:space-y-6 lg:sticky lg:top-6">
+      <StandardProgressPanel
+        projectId={projectId}
+        standardCode={standardCode}
+        locale={locale}
+        worksheets={worksheets.map((w) => ({
+          code: w.code,
+          titleDe: w.titleDe,
+          status: w.status,
+          totalRequired: w.totalRequired,
+          filledRequired: w.filledRequired,
+        }))}
+      />
       <div className="flex flex-col gap-1.5">
+        <Link
+          href={`/${locale}/projects/${projectId}/standards/${standardCode}/inputs`}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
+          data-testid="input-map-link"
+        >
+          <ListChecks className="size-3.5" aria-hidden />
+          {locale === 'de' ? 'Eingabe-Steckbrief' : 'Input map'}
+        </Link>
         <a
           href={`/api/projects/${projectId}/standards/${standardCode}/report`}
           target="_blank"

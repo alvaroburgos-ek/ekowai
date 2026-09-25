@@ -9,10 +9,13 @@ import {
   calculationSnapshots,
   projectParameters,
   fields,
+  approvalEvents,
+  profiles,
 } from '@/lib/db/schema';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { checkApprovalGate } from '@/lib/actions/approval-gate';
 import type { ReportLetterhead } from './assemble-standard-report';
+import { deriveSignoffs, type WorksheetSignoff } from '@/lib/approval/signoff';
 
 /**
  * Konformitätserklärung data (Stage 4 — deliverable emission).
@@ -32,20 +35,38 @@ export type ConformityWorksheetRow = {
   /** Instance status, or null when the worksheet was never started. */
   status: string | null;
   failingBlockCodes: string[];
+  /** Current sign-off (approver, date, self-approval). Optional for fixtures. */
+  signoff?: WorksheetSignoff | null;
 };
+
+/** Worksheets the engineer marked "Nicht zutreffend" (state-machine `deactivate`).
+ * They are listed on the declaration but never gate it. */
+export const NOT_APPLICABLE_STATUS = 'deactivated';
 
 export type ConformityDecision = {
   eligible: boolean;
   konform: boolean;
   blocking: string[];
+  /** Worksheet codes marked not applicable — excluded from the precondition, printed on the declaration. */
+  notApplicable: string[];
 };
 
 /** Pure decision core — unit-tested without a DB. */
 export function decideConformity(rows: ConformityWorksheetRow[]): ConformityDecision {
-  const statusBlocking = rows
+  const notApplicable = rows.filter((r) => r.status === NOT_APPLICABLE_STATUS).map((r) => r.code);
+  const applicable = rows.filter((r) => r.status !== NOT_APPLICABLE_STATUS);
+  if (applicable.length === 0) {
+    return {
+      eligible: false,
+      konform: false,
+      blocking: ['Alle Arbeitsblätter sind als „nicht zutreffend“ markiert — es gibt nichts zu erklären.'],
+      notApplicable,
+    };
+  }
+  const statusBlocking = applicable
     .filter((r) => !r.status || !APPROVED_STATUSES.has(r.status))
     .map((r) => `${r.code}: Status „${r.status ?? 'nicht begonnen'}“ (erfordert engineer_approved/final)`);
-  const gateBlocking = rows.flatMap((r) =>
+  const gateBlocking = applicable.flatMap((r) =>
     r.failingBlockCodes.map((c) => `${r.code}: Block-Anforderung ${c} verletzt`),
   );
   const eligible = statusBlocking.length === 0;
@@ -53,6 +74,7 @@ export function decideConformity(rows: ConformityWorksheetRow[]): ConformityDeci
     eligible,
     konform: eligible && gateBlocking.length === 0,
     blocking: [...statusBlocking, ...gateBlocking],
+    notApplicable,
   };
 }
 
@@ -137,6 +159,22 @@ export async function loadConformityData(
       );
   const instanceByTemplate = new Map(instances.map((i) => [i.worksheetTemplateId, i]));
 
+  // Every approval event of these instances → current sign-off per instance.
+  const signoffEvents = instances.length === 0
+    ? []
+    : await db
+      .select({
+        worksheetKey: approvalEvents.worksheetInstanceId,
+        eventType: approvalEvents.eventType,
+        actorId: approvalEvents.actorId,
+        actorName: profiles.fullName,
+        occurredAt: approvalEvents.occurredAt,
+      })
+      .from(approvalEvents)
+      .leftJoin(profiles, eq(profiles.id, approvalEvents.actorId))
+      .where(inArray(approvalEvents.worksheetInstanceId, instances.map((i) => i.id)));
+  const signoffByInstance = deriveSignoffs(signoffEvents);
+
   // Live block-gate re-check per approved/final instance (same gate as the
   // approve transition). Un-approved instances are already blocking via status.
   const rows: ConformityWorksheetRow[] = [];
@@ -152,6 +190,7 @@ export async function loadConformityData(
       titleDe: t.titleDe,
       status: inst?.status ?? null,
       failingBlockCodes,
+      signoff: inst ? signoffByInstance.get(inst.id) ?? null : null,
     });
   }
 

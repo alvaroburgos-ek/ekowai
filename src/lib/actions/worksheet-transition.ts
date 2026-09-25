@@ -10,7 +10,8 @@ import {
   worksheetTemplates,
   standards,
 } from '@/lib/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
+import { isSelfApproval } from '@/lib/approval/signoff';
 import { createClient } from '@/lib/supabase/server';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import {
@@ -24,7 +25,10 @@ import { checkFinalizeGate, formatFinalizeGateError } from './finalize-gate';
 
 export type TransitionInput = {
   instanceId: string;
-  eventType: Exclude<TransitionEvent, 'deactivate' | 'reactivate'>;
+  /** All state-machine events, incl. `deactivate` (= engineer marks the
+   * worksheet "Nicht zutreffend") and `reactivate`. The comment is the
+   * audit-logged reason in every case. */
+  eventType: TransitionEvent;
   comment: string;
 };
 
@@ -101,6 +105,26 @@ export async function transitionWorksheet(
     if (!gate.ok) {
       return { ok: false, error: formatApprovalGateError(gate) };
     }
+  }
+
+  // Self-approval (owner ruling 2026-09-24): the signing engineer may approve
+  // their own submission, but the record must say so. The submit being
+  // approved is the most recent one on this worksheet.
+  let selfApproval: { selfApproved: boolean; submittedById: string | null } | null = null;
+  if (input.eventType === 'engineer_approve') {
+    const [lastSubmit] = await db
+      .select({ actorId: approvalEvents.actorId })
+      .from(approvalEvents)
+      .where(
+        and(
+          eq(approvalEvents.worksheetInstanceId, input.instanceId),
+          eq(approvalEvents.eventType, 'submit'),
+        ),
+      )
+      .orderBy(desc(approvalEvents.occurredAt))
+      .limit(1);
+    const submittedById = lastSubmit?.actorId ?? null;
+    selfApproval = { selfApproved: isSelfApproval(submittedById, userId), submittedById };
   }
 
   // Stage-1 verification gate (SR-1): a worksheet whose used fields are not
@@ -193,6 +217,7 @@ export async function transitionWorksheet(
           // Cross-reference the snapshot id in audit_log so a reviewer can
           // navigate from the audit timeline directly to the diff view.
           ...(snapshotId ? { snapshotId } : {}),
+          ...(selfApproval ?? {}),
         },
       });
 

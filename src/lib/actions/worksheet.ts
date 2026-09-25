@@ -922,7 +922,7 @@ export async function saveWorksheet(
           A_C:  crossNumBySymbol.get('A_C')  ?? (null as unknown as number),
           A_VA: crossNumBySymbol.get('A_VA') ?? (null as unknown as number),
           Q_S:  crossNumBySymbol.get('Q_S')  ?? (null as unknown as number),
-          Q_Dr: crossNumBySymbol.get('Q_Dr') ?? (null as unknown as number),
+          Q_Dr: crossNumBySymbol.get('Q_Dr') ?? 0, // no throttle ⇒ 0 (src/lib/eval/optional-inputs.ts)
           f_Z:  crossNumBySymbol.get('f_Z')  ?? (null as unknown as number),
           f_A:  crossNumBySymbol.get('f_A')  ?? (null as unknown as number),
         };

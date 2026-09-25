@@ -22,6 +22,7 @@ import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateFormula, type EvalState } from './formula';
 import { engineInputValue } from './engine-input';
 import { rewriteRules } from './rewrites';
+import { withAbsentDefault, defaultForAbsent } from './optional-inputs';
 import type {
   KostraCarrier,
   Gl8Scalars,
@@ -337,7 +338,7 @@ export function useEquationEngine({
       A_C: pick('A_C'),
       A_VA: pick('A_VA'),
       Q_S: pick('Q_S'),
-      Q_Dr: pick('Q_Dr'),
+      Q_Dr: withAbsentDefault('Q_Dr', pick('Q_Dr')), // no throttle ⇒ 0 (optional-inputs.ts)
       f_Z: pick('f_Z'),
       f_A: pick('f_A'),
       V_Zisterne: pick('V_Zisterne'),
@@ -377,7 +378,7 @@ export function useEquationEngine({
     return {
       A_VA: pick('A_VA'),
       Q_S: pick('Q_S'),
-      Q_Dr: pick('Q_Dr'),
+      Q_Dr: withAbsentDefault('Q_Dr', pick('Q_Dr')), // no throttle ⇒ 0 (optional-inputs.ts)
       D: pick('D_min') ?? pick('D'),
       V_VA: pick('V_VA'),
       r_D_T_n_Ue: pick('r_D_30'),
@@ -511,8 +512,11 @@ export function useEquationEngine({
         // number computed from a value the engineer cannot see.
         // Plan 3 Task 1b: number → number; enum/text → the string verbatim;
         // ''/null → missing (engineInputValue — the ONE rule all callers share).
+        // origin/main 18485c1: an absent optional-zero input (Q_Dr, no throttle)
+        // is 0, not missing (optional-inputs.ts) — the default is a constant, never
+        // a hidden field's value.
         const v = f ? storeValue(f.id) : undefined;
-        return { symbol: sym, value: engineInputValue(v), unit: f?.unit ?? null };
+        return { symbol: sym, value: engineInputValue(v) ?? defaultForAbsent(sym), unit: f?.unit ?? null };
       });
 
       const expectedUnits: Record<string, string | null> = {};

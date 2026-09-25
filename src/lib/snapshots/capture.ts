@@ -61,7 +61,7 @@ export { buildSnapshotPayload } from './payload';
  * with parameters by field_id (which for inherited fields lives on the
  * origin worksheet's row).
  */
-async function loadCaptureInputs(args: {
+export async function loadCaptureInputs(args: {
   worksheetInstanceId: string;
   txDb?: DrizzleClient;
 }): Promise<{

@@ -16,6 +16,7 @@ import { engineInputValue } from './engine-input';
 import { evaluateCondition, type EvalResult } from '../compliance/evaluate';
 import { computeVisibility, hiddenFieldIdsOf, withHidden, type Visibility, type VisibilitySection } from '../compliance/visibility';
 import { equationProfiles } from './equation-profiles';
+import { withAbsentDefault, defaultForAbsent } from './optional-inputs';
 import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
 import { shouldEngineEvaluate } from './equation-manual-denylist';
@@ -371,7 +372,7 @@ export function evaluateWorksheetEquations(
     A_C: pickNum('A_C'),
     A_VA: pickNum('A_VA'),
     Q_S: pickNum('Q_S'),
-    Q_Dr: pickNum('Q_Dr'),
+    Q_Dr: withAbsentDefault('Q_Dr', pickNum('Q_Dr')), // no throttle ⇒ 0
     f_Z: pickNum('f_Z'),
     f_A: pickNum('f_A'),
     V_Zisterne: pickNum('V_Zisterne'),
@@ -380,7 +381,7 @@ export function evaluateWorksheetEquations(
   const gl10Scalars: Gl10Scalars = {
     A_VA: pickNum('A_VA'),
     Q_S: pickNum('Q_S'),
-    Q_Dr: pickNum('Q_Dr'),
+    Q_Dr: withAbsentDefault('Q_Dr', pickNum('Q_Dr')), // no throttle ⇒ 0
     D: pickNum('D_min') ?? pickNum('D'),
     V_VA: pickNum('V_VA'),
     r_D_T_n_Ue: pickNum('r_D_30'),
@@ -412,7 +413,8 @@ export function evaluateWorksheetEquations(
           ? engineInputValue({ type: f.dataType, value: strOf(f.id) ?? null })
           : engineInputValue({ type: 'number', value: numOf(f.id) ?? null })
         : null;
-      return { symbol: sym, value, unit: f?.unit ?? null };
+      // origin/main 18485c1: an absent optional-zero input (Q_Dr, no throttle) is 0, not missing.
+      return { symbol: sym, value: value ?? defaultForAbsent(sym), unit: f?.unit ?? null };
     });
 
     const expectedUnits: Record<string, string | null> = {};

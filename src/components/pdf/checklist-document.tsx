@@ -18,9 +18,11 @@ export function ChecklistDocument({ data }: { data: ConformityData }) {
 
   const items: Array<{ done: boolean; label: string; detail?: string }> = [
     ...data.worksheets.map((w) => ({
-      done: w.status === 'engineer_approved' || w.status === 'final',
+      // Not-applicable worksheets are "done" for the checklist: they neither
+      // block the declaration nor need any further action.
+      done: w.status === 'engineer_approved' || w.status === 'final' || w.status === 'deactivated',
       label: `Arbeitsblatt ${w.code} · ${w.titleDe}`,
-      detail: w.status ?? 'nicht begonnen',
+      detail: w.status === 'deactivated' ? 'nicht zutreffend' : (w.status ?? 'nicht begonnen'),
     })),
     { done: gatesClean, label: 'Alle Block-Anforderungen erfüllt', detail: gatesClean ? undefined : `${data.blocking.length} offen` },
     { done: hasSnapshots, label: 'Genehmigter Berechnungsstand (Snapshot) vorhanden' },

@@ -163,7 +163,7 @@ export default function LoginPage() {
 
           <div className="border-t border-hairline pt-4">
             <a
-              href="https://ekowai-engineering.de"
+              href="https://www.ekowai-engineering.de"
               className="text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-ink transition-colors"
             >
               {t('marketing')}

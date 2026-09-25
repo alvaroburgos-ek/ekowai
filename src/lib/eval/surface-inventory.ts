@@ -3,17 +3,36 @@
  * migrating normalizer — the ORIGINAL single parse/migration path that the
  * hand-built SurfaceInventoryEditor and the engine once shared.
  *
- * Plan 2b: no production code imports this module any more. The editor is the
- * generic RegisterEditor dispatched by the WIDGETS registry, and the engine
- * reads the carrier through `register-rows.ts` (`prepareRegisterRows`), whose
- * legacy replay generalises `normalizeSurfaceCarrier` / `rowComplete`. The
- * module stays as the DIFFERENTIAL oracle for those tests
+ * Plan 2b moved the ENGINE off this module: it reads the carrier through
+ * `register-rows.ts` (`prepareRegisterRows`), whose legacy replay generalises
+ * `normalizeSurfaceCarrier` / `rowComplete`. Merge of origin/main (2026-09-25):
+ * the A138-07 EDITOR is again the bespoke SurfaceInventoryEditor (pinned in
+ * widgets.tsx BESPOKE_PINNED_SYMBOLS), which imports this module — including
+ * main's optional per-row Tab. 5 group (`tab5_group`, `governingTab5Group`,
+ * §5.2.3.2). `tab5_group` is not a register column, so `prepareRegisterRows`
+ * ignores it (it never enters an equation) and the stored carrier keeps it.
+ * The module also stays as the DIFFERENTIAL oracle for those tests
  * (register-rows.test.ts, register-editor-a138-07.test.tsx,
  * surface-inventory*.test.ts): row-by-row equality against this normalizer is
  * what proves the generic path never diverged. Tab. 9 values flow only through
  * ./tab9 accessors.
  */
 import { getTab9Entries, lookupTab9 } from './tab9';
+
+/** Tab. 5 group tokens (prod enum of `flaechengruppe`), ordered by the strictness of the
+ * treatment requirement: BK I rows first, then BK II, then BK III / the (*) groups.
+ * §5.2.3.2 (L944): "Dabei gilt dann für alle Flächen die jeweils strengste Behandlungs-
+ * anforderung, welche sich für eine der angeschlossenen Flächengruppen ergibt
+ * (z. B. Anschluss von Flächengruppen V1, V2 und V3 an eine Mulde: Es gelten die
+ * Anforderungen für V3)." */
+export const TAB5_GROUPS_BY_STRICTNESS = [
+  'VW1', 'V1', 'BG1',                                  // BK I, no requirement beyond the soil zone
+  'D',                                                  // BK I but (*) — authority decides
+  'VW2', 'V2', 'BF', 'BG2',                             // BK II, A_C/A_S,m ≤ 30 / 50
+  'BL', 'V3', 'BG3',                                    // BK II/III, A_C/A_S,m ≤ 15 / 30
+  'SD1', 'SD2', 'SV', 'SVW', 'SF', 'SL', 'SG', 'SA',    // (*) special loads — authority decides
+] as const;
+export type Tab5Group = (typeof TAB5_GROUPS_BY_STRICTNESS)[number];
 
 export type SurfaceRow = {
   id: string;
@@ -23,6 +42,9 @@ export type SurfaceRow = {
   area_m2: number | null;
   c_i: number | null;
   c_s: number | null;
+  /** Tab. 5 surface group of THIS row (optional; when several rows carry groups the
+   *  strictest governs the treatment requirement, §5.2.3.2 L944). */
+  tab5_group?: string | null;
   /** true ⇒ engineer adjusted c_i/c_s away from the Tab. 9 pair ("abweichend"). */
   coeff_override: boolean;
 };
@@ -43,7 +65,7 @@ function genId(): string {
 }
 
 export function newSurfaceRow(): SurfaceRow {
-  return { id: genId(), label: '', tab9_value: null, area_m2: null, c_i: null, c_s: null, coeff_override: false };
+  return { id: genId(), label: '', tab9_value: null, area_m2: null, c_i: null, c_s: null, tab5_group: null, coeff_override: false };
 }
 
 export function rowKind(row: SurfaceRow): 'paved' | 'unpaved' | null {
@@ -85,6 +107,7 @@ function normalizeRow(raw: unknown): SurfaceRow {
     id: typeof r.id === 'string' && r.id.length > 0 ? r.id : genId(),
     label: typeof r.label === 'string' ? r.label : '',
     tab9_value: null,
+    tab5_group: typeof r.tab5_group === 'string' && r.tab5_group ? r.tab5_group : null,
     area_m2: num(r.area_m2),
     c_i: num(r.c_i),
     c_s: num(r.c_s),
@@ -118,6 +141,23 @@ export function normalizeSurfaceCarrier(value: unknown): SurfaceInventoryCarrier
   const v = value as { rows?: unknown };
   if (!Array.isArray(v.rows)) return { rows: [] };
   return { rows: v.rows.map(normalizeRow) };
+}
+
+/** Distinct Tab. 5 groups on the rows, and the strictest of them (§5.2.3.2, L944).
+ * Rows without a group are ignored; `governing` is null when no row carries one. */
+export function governingTab5Group(carrier: SurfaceInventoryCarrier): { groups: string[]; governing: string | null } {
+  const seen: string[] = [];
+  for (const r of carrier.rows) {
+    const g = r.tab5_group;
+    if (typeof g === 'string' && g && !seen.includes(g)) seen.push(g);
+  }
+  const order = (g: string) => {
+    const i = (TAB5_GROUPS_BY_STRICTNESS as readonly string[]).indexOf(g);
+    return i < 0 ? -1 : i;
+  };
+  const ranked = seen.filter((g) => order(g) >= 0);
+  const governing = ranked.length ? ranked.reduce((a, b) => (order(b) > order(a) ? b : a)) : null;
+  return { groups: seen, governing };
 }
 
 export type SurfaceSummary = {

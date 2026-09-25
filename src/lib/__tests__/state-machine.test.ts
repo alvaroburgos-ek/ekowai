@@ -68,11 +68,14 @@ describe('state-machine — nextStatus()', () => {
 });
 
 describe('state-machine — userActionsFor()', () => {
-  it('draft shows submit only', () => {
+  it('draft shows submit + mark-not-applicable (deactivate, destructive)', () => {
     const actions = userActionsFor('draft');
-    expect(actions).toHaveLength(1);
-    expect(actions[0].event).toBe('submit');
+    expect(actions.map((a) => a.event)).toEqual(['submit', 'deactivate']);
     expect(actions[0].destructive).toBeUndefined();
+    const na = actions.find((a) => a.event === 'deactivate');
+    expect(na?.labelDe).toBe('Nicht zutreffend');
+    expect(na?.labelEn).toBe('Not applicable');
+    expect(na?.destructive).toBe(true);
   });
 
   it('submitted_for_review shows approve + reject (reject destructive)', () => {
@@ -98,9 +101,11 @@ describe('state-machine — userActionsFor()', () => {
     expect(actions[0].destructive).toBe(true);
   });
 
-  it('deactivated shows no user actions (re-activation is system-level)', () => {
+  it('deactivated (= not applicable) offers only reactivate', () => {
     const actions = userActionsFor('deactivated');
-    expect(actions).toEqual([]);
+    expect(actions.map((a) => a.event)).toEqual(['reactivate']);
+    expect(actions[0].labelDe).toBe('Wieder aufnehmen');
+    expect(actions[0].labelEn).toBe('Reactivate');
   });
 
   it('every returned action has German + English labels', () => {
@@ -112,8 +117,8 @@ describe('state-machine — userActionsFor()', () => {
     }
   });
 
-  it('excludes system-only events (deactivate/reactivate)', () => {
-    for (const status of ['draft', 'submitted_for_review', 'engineer_approved', 'final', 'deactivated'] as WorksheetStatus[]) {
+  it('not-applicable is only offered from draft; reactivate only from deactivated', () => {
+    for (const status of ['submitted_for_review', 'engineer_approved', 'final'] as WorksheetStatus[]) {
       const events = userActionsFor(status).map((a) => a.event);
       expect(events).not.toContain('deactivate');
       expect(events).not.toContain('reactivate');

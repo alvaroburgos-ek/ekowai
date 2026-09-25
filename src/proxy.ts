@@ -63,6 +63,20 @@ export async function proxy(request: NextRequest) {
   return intlResponse;
 }
 
+// Two OAuth paths are excluded on purpose:
+//
+// `.well-known` — RFC 8615 discovery documents must be reachable without a
+// session. An MCP client reads /.well-known/oauth-protected-resource *before*
+// it holds any token, and the auth redirect would hand it an HTML login page
+// instead of the metadata.
+//
+// `oauth` — Supabase sends the engineer to the fixed path /oauth/consent, which
+// carries no locale prefix. The intl middleware would rewrite it to
+// /de/oauth/consent and the auth redirect would drop the authorization_id, so
+// the consent flow would break. The page checks the session itself and
+// redirects to login preserving the authorization_id.
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|images|icons|fonts|api|auth).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|images|icons|fonts|api|auth|oauth|\\.well-known).*)',
+  ],
 };

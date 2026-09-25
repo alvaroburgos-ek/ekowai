@@ -153,14 +153,19 @@ export async function loadInheritedFields(
   currentTemplateId: string,
   currentStandardId: string,
   currentWorksheetCode: string,
-  /** Task 10b: the caller's transaction handle when running inside a
-   * `db.transaction`. Querying the global pool from inside an open tx waits
-   * for a connection the tx itself holds → deadlock once the pool is
-   * exhausted (prod "Zur Prüfung einreichen" hang, 2026-09-17). Callers
-   * outside a transaction (page render, reports) keep the default. */
-  dbi: DrizzleClient = db,
+  /**
+   * Client to run the SELECT on. Defaults to the global pool. A caller that
+   * is inside `db.transaction` MUST pass its `tx` handle: running this query
+   * on the global pool while the transaction holds a second connection made
+   * the prod submit hang idle-in-transaction (2026-09-17 "Zur Prüfung
+   * einreichen", captureSnapshot). Fixed on both lines of history (branch
+   * Task 10b `dbi: DrizzleClient`, origin/main e5fed75 `client`); merged into
+   * main's signature, which accepts both a `DrizzleClient` and a bare
+   * `{ select }` test double.
+   */
+  client: Pick<typeof db, 'select'> = db,
 ): Promise<InheritedField[]> {
-  const rows = await dbi
+  const rows = await client
     .select({
       field: fields,
       originCode: worksheetTemplates.code,

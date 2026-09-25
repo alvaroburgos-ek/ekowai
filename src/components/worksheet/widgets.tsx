@@ -14,7 +14,9 @@
  *   TS fallbacks while widget IS NULL) and renders the generic `RegisterEditor`,
  *   unless a BESPOKE editor claims the field (`ui_config.editor`, or — while
  *   widget IS NULL — the symbol table below: KOSTRA rainfall tables, risk
- *   register, mitigation plan). pollutant_register (VSME-B04.100) renders
+ *   register, mitigation plan; A138-07 surface_inventory is PINNED to its
+ *   bespoke SurfaceInventoryEditor for ANY widget — BESPOKE_PINNED_SYMBOLS,
+ *   merge of origin/main 2026-09-25). pollutant_register (VSME-B04.100) renders
  *   through the generic editor since Task 4 — its three per-medium sums are
  *   the Plan 2a fallback-equation states.
  * - `reference` renders `ReferenceField` (Task 6): a select over another
@@ -51,6 +53,7 @@ import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { ReferenceField } from './reference-field';
 import { LookupFillField } from './lookup-fill-field';
 import { RiskRegisterEditor } from './risk-register-editor';
+import { SurfaceInventoryEditor } from './surface-inventory-editor';
 import { MitigationPlanEditor } from './mitigation-plan-editor';
 import { EditorErrorBoundary } from './editor-error-boundary';
 
@@ -84,19 +87,31 @@ export type WidgetContext = {
 
 export type BespokeEditorKey =
   | 'rainfall_tables'
+  | 'surface_inventory'
   | 'risk_register'
   | 'risk_mitigation_plan';
 
 /** Symbol-keyed bespoke editors — consulted ONLY while `widget IS NULL`. */
 export const BESPOKE_BY_SYMBOL = {
   r_D_n_table: 'rainfall_tables',
+  surface_inventory: 'surface_inventory',
   risk_register: 'risk_register',
   risk_mitigation_plan: 'risk_mitigation_plan',
 } as const satisfies Record<string, BespokeEditorKey>;
 
+/** Symbols whose BESPOKE_BY_SYMBOL editor wins over ANY widget / ui_config — including a DB `widget='register'`.
+ * Merge of origin/main (2026-09-25): A138-07 `surface_inventory` renders main's live SurfaceInventoryEditor
+ * (optional Tab. 5 group per row + strictest-group note, 4045651), not the generic RegisterEditor, both before and
+ * after scripts/migrations/20260916130000 sets widget='register'. That migration's ui_config still drives the
+ * ENGINE (prepareRegisterRows reads its columns; unknown row keys such as `tab5_group` are ignored, never dropped
+ * from the stored carrier), so it applies as is. */
+export const BESPOKE_PINNED_SYMBOLS: ReadonlySet<string> = new Set(['surface_inventory']);
+
 /** Today's bottom-section h2 strings (worksheet-form.tsx before Plan 2b Task 3). */
 export const BESPOKE_TITLES: Readonly<Record<BespokeEditorKey, string>> = {
   rainfall_tables: 'Regenspendentabellen (für V_VA nach Gl. 8)',
+  // = origin/main worksheet-form.tsx h2 above <SurfaceInventoryEditor>.
+  surface_inventory: 'Flächenverzeichnis (Tab. 9 — C_i für Gl. 2 und C_s für Gl. 10)',
   risk_register: 'Risikoanalyse (Anhang A — Tab. A.1)',
   risk_mitigation_plan: 'Risiko-Maßnahmenplan (Anhang A — Tab. A.2)',
 };
@@ -105,9 +120,11 @@ export function effectiveWidget(f: WorksheetFormField): Widget {
   return (f.widget as Widget | null | undefined) ?? inferWidget(f.dataType, (f.enumValues?.length ?? 0) > 0);
 }
 
-/** `ui_config.editor` when set; else the symbol table while `widget IS NULL`; unknown keys never dispatch. */
+/** A pinned symbol's editor first (BESPOKE_PINNED_SYMBOLS); else `ui_config.editor` when set; else the symbol table
+ * while `widget IS NULL`; unknown keys never dispatch. */
 export function resolveBespokeEditor(f: WorksheetFormField, cfg: RegisterUiConfig | null): BespokeEditorKey | null {
-  const key = cfg?.editor ?? (f.widget == null ? BESPOKE_BY_SYMBOL[f.symbol as keyof typeof BESPOKE_BY_SYMBOL] : undefined);
+  const bySymbol: string | undefined = Object.hasOwn(BESPOKE_BY_SYMBOL, f.symbol) ? BESPOKE_BY_SYMBOL[f.symbol as keyof typeof BESPOKE_BY_SYMBOL] : undefined;
+  const key = (BESPOKE_PINNED_SYMBOLS.has(f.symbol) ? bySymbol : undefined) ?? cfg?.editor ?? (f.widget == null ? bySymbol : undefined);
   return key != null && Object.hasOwn(BESPOKE_TITLES, key) ? (key as BespokeEditorKey) : null;
 }
 
@@ -166,6 +183,12 @@ function renderBespoke(key: BespokeEditorKey, f: WorksheetFormField, ctx: Widget
   switch (key) {
     case 'rainfall_tables':
       return <RainfallTablesEditor fieldId={f.id} readOnly={ctx.readOnly} designReturnPeriod={ctx.rainfallDesignReturnPeriod} />;
+    case 'surface_inventory':
+      return (
+        <EditorErrorBoundary label="Flächenverzeichnis">
+          <SurfaceInventoryEditor fieldId={f.id} readOnly={ctx.readOnly} />
+        </EditorErrorBoundary>
+      );
     case 'risk_register':
       return (
         <EditorErrorBoundary label="Risikoregister">

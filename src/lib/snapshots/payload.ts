@@ -18,6 +18,7 @@ import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { buildCarriers, buildRegisters } from '@/lib/eval/register-rows';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
 import type { Value } from '@/lib/expr';
+import { withAbsentDefault, defaultForAbsent } from '@/lib/eval/optional-inputs';
 import {
   normalizeRainfallCarrier,
   resolveSelectedTable,
@@ -400,7 +401,7 @@ export function buildSnapshotPayload(args: {
   const gl10Scalars: Gl10Scalars = {
     A_VA: numberBySymbol('A_VA'),
     Q_S: numberBySymbol('Q_S'),
-    Q_Dr: numberBySymbol('Q_Dr'),
+    Q_Dr: withAbsentDefault('Q_Dr', numberBySymbol('Q_Dr')), // no throttle ⇒ 0
     D: numberBySymbol('D_min') ?? numberBySymbol('D'),
     V_VA: numberBySymbol('V_VA'),
     r_D_T_n_Ue: numberBySymbol('r_D_30'),
@@ -418,7 +419,7 @@ export function buildSnapshotPayload(args: {
     A_C: gl8Pick('A_C'),
     A_VA: gl8Pick('A_VA'),
     Q_S: gl8Pick('Q_S'),
-    Q_Dr: gl8Pick('Q_Dr'),
+    Q_Dr: withAbsentDefault('Q_Dr', gl8Pick('Q_Dr')), // no throttle ⇒ 0
     f_Z: gl8Pick('f_Z'),
     f_A: gl8Pick('f_A'),
   };
@@ -473,7 +474,8 @@ export function buildSnapshotPayload(args: {
       // Plan 3 Task 1b: number → number; enum/text → the string verbatim; ''/null → missing.
       const p = f ? paramForEngine(f.id) : undefined;
       const value = f && p ? engineInputValue(readValue(p, f.dataType)) : null;
-      return { symbol: sym, value, unit: f?.unit ?? null };
+      // origin/main 18485c1: an absent optional-zero input (Q_Dr, no throttle) is 0, not missing.
+      return { symbol: sym, value: value ?? defaultForAbsent(sym), unit: f?.unit ?? null };
     });
 
     const expectedUnits: Record<string, string | null> = {};

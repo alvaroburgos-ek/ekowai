@@ -27,8 +27,8 @@ export default async function ImpressumPage({
           <p>{t('impressum.taxId')}</p>
           <p className="text-xs text-slate-500 mt-4">
             {locale === 'de'
-              ? 'Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV'
-              : 'Responsible for content per § 55 (2) RStV'}
+              ? 'Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV'
+              : 'Responsible for content per § 18 (2) MStV'}
           </p>
         </div>
       </Card>

@@ -73,7 +73,7 @@ const STATUS_LABEL: Record<WorksheetStatus, string> = {
   submitted_for_review: 'In Prüfung',
   engineer_approved: 'Genehmigt',
   final: 'Final',
-  deactivated: 'Deaktiviert',
+  deactivated: 'Nicht zutreffend',
 };
 
 const LAYER_LABEL_DE: Record<Layer, string> = {
