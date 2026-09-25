@@ -1,0 +1,6 @@
+-- Per-standard Plan-3 read-back (READ ONLY). Replace __CODE__ with the standard code, e.g. DWA-A-138-1.
+select t.table_code, t.override_policy, count(r.id) as rows from regulation_tables t left join regulation_table_rows r on r.table_id = t.id where t.standard_code = '__CODE__' group by 1, 2 order by 1;
+select f.widget, count(*) as fields from fields f join worksheet_templates w on w.id = f.worksheet_template_id join standards s on s.id = w.standard_id where s.code = '__CODE__' and f.widget is not null group by 1 order by 1;
+select count(*) as fields_with_visible_when from fields f join worksheet_templates w on w.id = f.worksheet_template_id join standards s on s.id = w.standard_id where s.code = '__CODE__' and f.visible_when is not null;
+select count(*) as sections_with_visible_when from worksheet_sections ws join worksheet_templates w on w.id = ws.worksheet_template_id join standards s on s.id = w.standard_id where s.code = '__CODE__' and ws.visible_when is not null;
+select w.code as ws, e.equation_number, e.output_symbol from equations e join worksheet_templates w on w.id = e.worksheet_template_id join standards s on s.id = w.standard_id where s.code = '__CODE__' and e.description like 'Plan 3:%' order by 1, 2;
