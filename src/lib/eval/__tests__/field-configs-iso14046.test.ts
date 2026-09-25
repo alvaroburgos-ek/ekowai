@@ -265,4 +265,9 @@ describe('ISO-14046 field configs (Plan 3 Task 26)', () => {
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
     expect(up).toMatch(/^UPDATE fields f SET widget = 'scalar', ui_config = NULL, lookup = NULL, visible_when = 'critical_review_type == ''panel_review''' FROM .* AND f\.symbol = 'review_panel_members' AND w\.code = 'ISO-14046-07'/m);
   });
+  it('sign-off C-2 (2026-09-25): no ui_config note claims the engine limit final wave A removed; the completeness code is named as not encoded yet, decided on the sheet (iso14046-F-2)', () => {
+    const notes = JSON.stringify(FIELD_CONFIGS.map((e) => e.ui_config ?? null));
+    expect(notes).not.toMatch(/nicht materialisierbar|liest keine Checklisten|erreicht den Motor nicht/i);
+    expect(notes.split('noch nicht codiert — Entscheidung auf dem Sign-off-Bogen (iso14046-F-2)').length - 1).toBe(2);
+  });
 });

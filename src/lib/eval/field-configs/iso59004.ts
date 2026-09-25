@@ -181,7 +181,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     ui_config: {
       title: 'Grundsätze (§5.2)',
       subtitle: '„The set of principles given in 5.2, which are interlinked and complementary, should be considered by an organization to transition towards a circular economy.“ — alle sechs ankreuzen, die berücksichtigt wurden',
-      note: `${norm(SENTENCE_5_3_2)} — Das Einzelfeld selected_principle (eine Auswahl von sechs) und das Hand-Boolean all_principles_considered (CR-013, Pflichtfeld) bleiben (iso59004-D-9); ein Vollständigkeits-Code über diese Liste ist NICHT materialisierbar — contains() erreicht den Motor nicht (iso59004-F-1).`,
+      note: `${norm(SENTENCE_5_3_2)} — Das Einzelfeld selected_principle (eine Auswahl von sechs) und das Hand-Boolean all_principles_considered (CR-013, Pflichtfeld) bleiben (iso59004-D-9); ein Vollständigkeits-Code über diese Liste ist noch nicht codiert — Entscheidung auf dem Sign-off-Bogen (iso59004-F-1).`,
       groups: [{ label: '§5.2.1 – §5.2.6', options: [...PRINCIPLE_TOKENS] }],
     },
     enum_values: PRINCIPLE_TOKENS.map((t, i) => ({ value: t, label_de: PRINCIPLE_LABELS[t], order_index: i + 1 })),

@@ -10323,6 +10323,18 @@ does not reach the engine. Since final wave A it does — `buildCarriers` feeds 
 carriers to all five production callers — so each clause is false while the block it names is still
 correctly STAGED.)
 
+> **2026-09-25 — CLOSED at the commit that adds this line (child of `c0609fb`, subject
+> `fix(field-configs): sign-off C-2 — six ui_config notes no longer claim an engine limit`):**
+> only the false clause of each of the six notes was replaced; each now says the completeness
+> code is **not encoded yet** and is decided on the sign-off sheet under the block it names
+> („… ist noch nicht codiert — Entscheidung auf dem Sign-off-Bogen (<block>)"; the
+> `iso5667_6` note: „der Vollständigkeits-Code ist noch nicht codiert, Entscheidung auf dem
+> Sign-off-Bogen, iso5667_6-F-2"). The F-blocks themselves are unchanged and still need a
+> signature. Re-emitted `…102310` (iso5667_6), `…102510` (din14021), `…102610` (iso14046),
+> `…102910` (iso59004); a normaliser that maps each new string back to its old one reproduces
+> all four migrations byte-for-byte (each string found exactly once, UNEXPLAINED=0); no
+> rollback changed.
+
 **C-3 · SIX SYMBOLS ARE CONFIGURED TWICE — by an unguarded, standard-wide Plan-1 migration AND by
 a worksheet-scoped Plan-3 one. The same symbol can render two different widgets.**
 *(New block, written in the documentation-truth pass 2026-09-25 at HEAD `757a85d`; needs a

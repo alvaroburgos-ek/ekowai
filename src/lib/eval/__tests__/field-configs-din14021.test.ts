@@ -234,4 +234,9 @@ describe('DIN-14021 field configs (Plan 3 Task 25)', () => {
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
     expect(up).not.toContain("claimant's evaluation"); // no English line inside a German span
   });
+  it('sign-off C-2 (2026-09-25): no ui_config note claims the engine limit final wave A removed; the completeness code is named as not encoded yet, decided on the sheet (din14021-F-1)', () => {
+    const notes = JSON.stringify(FIELD_CONFIGS.map((e) => e.ui_config ?? null));
+    expect(notes).not.toMatch(/nicht materialisierbar|liest keine Checklisten|erreicht den Motor nicht/i);
+    expect(notes.split('noch nicht codiert — Entscheidung auf dem Sign-off-Bogen (din14021-F-1)').length - 1).toBe(2);
+  });
 });

@@ -185,7 +185,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS03({
     symbol: 'general_requirements_items', widget: 'select_many',
     ui_config: {
-      title: 'Anforderungen an alle umweltbezogenen Anbietererklärungen (§5.3 – §5.10)', subtitle: '„Die in Abschnitt 5 aufgeführten Anforderungen gelten für sämtliche umweltbezogenen Anbietererklärungen“ — ankreuzen, welche Abschnitte geprüft und erfüllt sind', note: `${Q.L757} Die zwölf Einzel-Booleans dieses Arbeitsblatts (5.3 … 5.7 a/b/h/i/r, 5.8.3, 5.8.5, 5.10.2) bleiben bis zur Ratifizierung (din14021-D-26 … D-35); ein Vollständigkeits-Code (alle acht angekreuzt) ist nicht materialisierbar — der Materialisierer liest keine Checklisten (din14021-F-1).`,
+      title: 'Anforderungen an alle umweltbezogenen Anbietererklärungen (§5.3 – §5.10)', subtitle: '„Die in Abschnitt 5 aufgeführten Anforderungen gelten für sämtliche umweltbezogenen Anbietererklärungen“ — ankreuzen, welche Abschnitte geprüft und erfüllt sind', note: `${Q.L757} Die zwölf Einzel-Booleans dieses Arbeitsblatts (5.3 … 5.7 a/b/h/i/r, 5.8.3, 5.8.5, 5.10.2) bleiben bis zur Ratifizierung (din14021-D-26 … D-35); ein Vollständigkeits-Code (alle acht angekreuzt) ist noch nicht codiert — Entscheidung auf dem Sign-off-Bogen (din14021-F-1).`,
       groups: [{ label: '§5.3 – §5.10', options: GENERAL_REQUIREMENT_ITEMS.map((m) => m.value) }],
     },
     enum_values: GENERAL_REQUIREMENT_ITEMS.map((m) => ({ value: m.value, label_de: m.label_de, order_index: m.order_index })),
@@ -198,7 +198,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS04({
     symbol: 'documentation_items', widget: 'select_many',
     ui_config: {
-      title: 'Mindestangaben der Dokumentation (§6.5.3 a) – g))', subtitle: '„Die Mindestangaben, die nach 6.2 zu dokumentieren und aufzubewahren sind, müssen Folgendes enthalten:“ — ankreuzen, was dokumentiert und aufbewahrt ist', note: `${Q.L1032} Das Einzelfeld info_documented_min (ein Boolean für alle sieben) bleibt bis zur Ratifizierung (din14021-D-36); REQ-19 liest heute den Skalar — ein Vollständigkeits-Code ist nicht materialisierbar (din14021-F-1).`,
+      title: 'Mindestangaben der Dokumentation (§6.5.3 a) – g))', subtitle: '„Die Mindestangaben, die nach 6.2 zu dokumentieren und aufzubewahren sind, müssen Folgendes enthalten:“ — ankreuzen, was dokumentiert und aufbewahrt ist', note: `${Q.L1032} Das Einzelfeld info_documented_min (ein Boolean für alle sieben) bleibt bis zur Ratifizierung (din14021-D-36); REQ-19 liest heute den Skalar — ein Vollständigkeits-Code ist noch nicht codiert — Entscheidung auf dem Sign-off-Bogen (din14021-F-1).`,
       groups: [{ label: '§6.5.3 a) – g)', options: DOCUMENTATION_ITEMS.map((m) => m.value) }],
     },
     enum_values: DOCUMENTATION_ITEMS.map((m) => ({ value: m.value, label_de: m.label_de, order_index: m.order_index })),

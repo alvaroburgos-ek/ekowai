@@ -241,4 +241,9 @@ describe('ISO-5667-6 field configs (Plan 3 Task 23)', () => {
     expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
   });
+  it('sign-off C-2 (2026-09-25): no ui_config note claims the engine limit final wave A removed; the completeness code is named as not encoded yet, decided on the sheet (iso5667_6-F-2)', () => {
+    const notes = JSON.stringify(FIELD_CONFIGS.map((e) => e.ui_config ?? null));
+    expect(notes).not.toMatch(/nicht materialisierbar|liest keine Checklisten|erreicht den Motor nicht/i);
+    expect(notes.split('noch nicht codiert, Entscheidung auf dem Sign-off-Bogen, iso5667_6-F-2').length - 1).toBe(1);
+  });
 });

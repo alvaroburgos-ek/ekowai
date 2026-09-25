@@ -104,7 +104,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS02({
     symbol: 'data_quality_items', widget: 'select_many',
     ui_config: {
-      title: 'Anforderungen an die Datenqualität (§5.2.4.2 a) – j))', subtitle: '„Los requisitos para la calidad de los datos deberían tratar lo siguiente:“ — ankreuzen, welche Punkte die Datenqualitätsanforderungen behandeln', note: `${Q.L595} Das Einzelfeld data_quality_requirements (ein Boolean für alle zehn) bleibt bis zur Ratifizierung (iso14046-D-24); REQ-06 liest heute den Boolean — ein Vollständigkeits-Code über die Checkliste ist nicht materialisierbar (iso14046-F-2). Modalverb „deberían“ (sollten) — Anhaltswert, keine Pflichtliste.`,
+      title: 'Anforderungen an die Datenqualität (§5.2.4.2 a) – j))', subtitle: '„Los requisitos para la calidad de los datos deberían tratar lo siguiente:“ — ankreuzen, welche Punkte die Datenqualitätsanforderungen behandeln', note: `${Q.L595} Das Einzelfeld data_quality_requirements (ein Boolean für alle zehn) bleibt bis zur Ratifizierung (iso14046-D-24); REQ-06 liest heute den Boolean — ein Vollständigkeits-Code über die Checkliste ist noch nicht codiert — Entscheidung auf dem Sign-off-Bogen (iso14046-F-2). Modalverb „deberían“ (sollten) — Anhaltswert, keine Pflichtliste.`,
       groups: [{ label: '§5.2.4.2 a) – j)', options: DATA_QUALITY_ITEMS.map((m) => m.value) }],
     },
     enum_values: DATA_QUALITY_ITEMS.map((m) => ({ value: m.value, label_de: m.label_de, order_index: m.order_index })),
@@ -249,7 +249,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS06({
     symbol: 'third_party_report_items', widget: 'select_many', visible_when: THIRD_PARTY,
     ui_config: {
-      title: 'Inhalte des Berichts an Dritte (§6.2 a) – g))', subtitle: '„El informe de tercera parte debe cubrir los siguientes aspectos:“ — ankreuzen, welche Aspekte der Bericht an Dritte abdeckt (die Unterpunkte 1) … / i) … stehen in der Tabelle S6_2_TP)', note: `${Q.L909} Das Einzelfeld third_party_report (ein Boolean für alle sieben) bleibt bis zur Ratifizierung (iso14046-D-25); REQ-18 liest heute den Boolean in ODER-Form — IF-Guard STAGED (iso14046-G-5); ein Vollständigkeits-Code über die Checkliste ist nicht materialisierbar (iso14046-F-2).`,
+      title: 'Inhalte des Berichts an Dritte (§6.2 a) – g))', subtitle: '„El informe de tercera parte debe cubrir los siguientes aspectos:“ — ankreuzen, welche Aspekte der Bericht an Dritte abdeckt (die Unterpunkte 1) … / i) … stehen in der Tabelle S6_2_TP)', note: `${Q.L909} Das Einzelfeld third_party_report (ein Boolean für alle sieben) bleibt bis zur Ratifizierung (iso14046-D-25); REQ-18 liest heute den Boolean in ODER-Form — IF-Guard STAGED (iso14046-G-5); ein Vollständigkeits-Code über die Checkliste ist noch nicht codiert — Entscheidung auf dem Sign-off-Bogen (iso14046-F-2).`,
       groups: [{ label: '§6.2 a) – g)', options: THIRD_PARTY_ITEMS.map((m) => m.value) }],
     },
     enum_values: THIRD_PARTY_ITEMS.map((m) => ({ value: m.value, label_de: m.label_de, order_index: m.order_index })),

@@ -272,7 +272,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   WS11({
     symbol: 'report_items_6', widget: 'select_many',
     ui_config: {
-      title: 'Elemente des Probenahmeberichts (§13.1 a) – q))', subtitle: '„Los asuntos que se podrían considerar para su inclusión son:“ — ankreuzen, was der Bericht enthält', note: `${Q.L1946_1948} Das Einzelfeld report_item (ein Element je Auswahl) bleibt bis zur Ratifizierung (iso5667_6-D-1); ein Vollständigkeits-Gate neben CR-027 ist STAGED (iso5667_6-G-7 — der Materialisierer liest keine Checklisten, iso5667_6-F-2).`,
+      title: 'Elemente des Probenahmeberichts (§13.1 a) – q))', subtitle: '„Los asuntos que se podrían considerar para su inclusión son:“ — ankreuzen, was der Bericht enthält', note: `${Q.L1946_1948} Das Einzelfeld report_item (ein Element je Auswahl) bleibt bis zur Ratifizierung (iso5667_6-D-1); ein Vollständigkeits-Gate neben CR-027 ist STAGED (iso5667_6-G-7 — der Vollständigkeits-Code ist noch nicht codiert, Entscheidung auf dem Sign-off-Bogen, iso5667_6-F-2).`,
       groups: [{ label: '§13.1 a) – q)', options: REPORT_ITEMS.map((m) => m.value) }],
     },
     enum_values: REPORT_ITEMS.map((m) => ({ value: m.value, label_de: m.label_de, order_index: m.order_index })),

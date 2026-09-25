@@ -254,4 +254,9 @@ describe('ISO-59004 field configs (Plan 3 Task 29)', () => {
     expect(up).not.toMatch(/f\.symbol = 'defined_term'/);
     expect(up).not.toContain("'lookup_fill'");
   });
+  it('sign-off C-2 (2026-09-25): no ui_config note claims the engine limit final wave A removed; the completeness code is named as not encoded yet, decided on the sheet (iso59004-F-1)', () => {
+    const notes = JSON.stringify(FIELD_CONFIGS.map((e) => e.ui_config ?? null));
+    expect(notes).not.toMatch(/nicht materialisierbar|liest keine Checklisten|erreicht den Motor nicht/i);
+    expect(notes.split('noch nicht codiert — Entscheidung auf dem Sign-off-Bogen (iso59004-F-1)').length - 1).toBe(1);
+  });
 });
