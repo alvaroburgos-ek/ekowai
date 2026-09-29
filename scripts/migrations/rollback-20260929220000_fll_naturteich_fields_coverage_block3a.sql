@@ -1,0 +1,5 @@
+-- ROLLBACK for 20260929220000_fll_naturteich_fields_coverage_block3a.sql (deleting a field cascades to entered values — run only if intended).
+BEGIN;
+DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'FLL-Naturteich' AND (w.code, f.symbol) IN (('FLLNT-06', 'total_water_volume_m3'), ('FLLNT-07', 'liner_on_concrete_base'), ('FLLNT-07', 'crease_height_max_cm'), ('FLLNT-07', 'crease_length_max_m'), ('FLLNT-07', 'crease_min_distance_m'), ('FLLNT-07', 'creases_crossing'), ('FLLNT-07', 'entry_exit_point_count'), ('FLLNT-11', 'surface_discharge_hours_per_day'), ('FLLNT-11', 'filter_feed_volume_per_day_m3'), ('FLLNT-11', 'feed_share_of_volume_pct'), ('FLLNT-11', 'filter_operation_hours_per_day'), ('FLLNT-11', 'filter_max_downtime_h'), ('FLLNT-11', 'overflow_connected_water_surface_m2'));
+DELETE FROM equations e USING worksheet_templates w, standards s WHERE e.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'FLL-Naturteich' AND w.code = 'FLLNT-11' AND e.equation_number = 'FLLNT-11-D3';
+COMMIT;
