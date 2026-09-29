@@ -1,7 +1,10 @@
 -- FLL-TP-RHIZOM-2023 · REQ-16 / REQ-17 / REQ-18 (2026-09-29, coverage walk Table B-2, source-settled class (a):
 -- symbol mismatch between a gate and the standard's own declared fields).
--- Print (TP §3.7, pdftotext line 379): "…in den Prüfgefäßen muss mindestens 80 % der Bestandsdichte der Pflanzen in den
--- Kontrollgefäßen…" — the 80 % ratio applies to EVERY evaluation (6, 12, 18, 24 months). The encoding declares one
+-- VA — rendered PDF page 11 (printed p. 10), §3.7 "Wuchsleistung der Testpflanzen", read 2026-09-29:
+--   "1. Zwischenauswertung (nach 6 Monaten) ≥ 80 Halme/Gefäße · 2. (nach 12 Monaten) ≥ 120 · 3. (nach 18 Monaten) ≥ 160 ·
+--    4. Endauswertung (nach 24 Monaten) ≥ 160 Halme/Gefäße"
+--   "Die Bestandsdichte der Testpflanzen in den Prüfgefäßen muss mindestens 80 % der Bestandsdichte der Pflanzen in den
+--    Kontrollgefäßen betragen." — during the WHOLE test ("während der gesamten Prüfdauer"), i.e. at every evaluation. The encoding declares one
 -- ratio field per evaluation (RHZ-13 dichte_relativ_prozent = 6 months, RHZ-14 relativ_prozent_12mon,
 -- RHZ-15 relativ_prozent_18mon, RHZ-16 relativ_prozent_24mon) but the 12/18/24-month gates all read the 6-month
 -- symbol, so the later ratios are never checked. Fix = point each gate at its own evaluation's field.
