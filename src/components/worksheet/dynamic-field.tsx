@@ -565,7 +565,9 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                 </span>
               )}
               <SegmentedControl
-                value={v ?? options[0]?.value ?? ''}
+                // Empty enum ⇒ NO segment pressed. Painting the first option while the store holds null
+                // made an unanswered field read as answered (aria-pressed=true) — FLL test 2026-09-29.
+                value={v ?? ''}
                 onChange={(val) => {
                   if (enumLocked) return;
                   setField(field.id, { type: 'enum', value: val });

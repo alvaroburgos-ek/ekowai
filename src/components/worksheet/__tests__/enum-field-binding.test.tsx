@@ -146,6 +146,24 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
     expect(none).toHaveAttribute('aria-pressed', 'false');
   });
 
+  it('FIX (FLL test 2026-09-29) — an EMPTY enum leaves NO option pressed', () => {
+    // Before: `value={v ?? options[0]?.value}` painted "None" as chosen while the store held null,
+    // so an unanswered field read as answered (aria-pressed=true) on FLLNT-15, FLL-GAR-05/-18/-22/-23.
+    render(
+      <DynamicField
+        field={{ ...FIELD_BASE, enumValues: POPULATED_ENUM }}
+        locale="en"
+        projectId="fixture-project"
+        standardCode="DWA-A-138-1"
+        docs={[]}
+      />,
+    );
+    expect(getStoredEnum()).toBeNull();
+    for (const name of ['None', 'Nearby', 'Present']) {
+      expect(screen.getByRole('button', { name })).toHaveAttribute('aria-pressed', 'false');
+    }
+  });
+
   it('REPAIR — null enum_values renders NO fabricated options, only a visible "not configured" notice', () => {
     // Previously this rendered a silent, empty SegmentedControl (zero buttons,
     // no explanation). The repaired widget must (a) still NOT invent any option
