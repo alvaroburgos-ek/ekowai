@@ -60,7 +60,8 @@ function walk(n: ConditionNode, lookup: Lookup, out: ExplainLeaf[]): void {
       return;
     }
     case 'guard': {
-      const g = evaluateNode(n.guard, lookup);
+      // The antecedent keeps the legacy existence semantics (A1) — same as the evaluator's guard node.
+      const g = evaluateNode(n.guard, lookup, { existsOnAbsent: 'definite' });
       if (g === 'false') {
         out.push({
           text: `Bedingung nicht anwendbar — Voraussetzung „${nodeToText(n.guard)}“ greift nicht`,
@@ -122,12 +123,14 @@ function leaf(n: ConditionNode, lookup: Lookup): ExplainLeaf {
     case 'exists': {
       const v = lookup(n.symbol);
       const present = v !== undefined && v !== null && v !== '';
+      // A1: a never-entered symbol under IS NOT NULL is `pending` (satisfied null), not a
+      // violation — the "erfassen/ausfüllen" hint is still the way forward, so keep it.
       return {
         text,
         satisfied,
         actual: present ? `${n.symbol} = ${fmt(v as ConditionValue)}` : `${n.symbol} fehlt`,
         required: n.negate ? 'erforderlich: Wert vorhanden' : 'erforderlich: kein Wert',
-        ...(satisfied === false && n.negate
+        ...(satisfied !== true && n.negate
           ? { wouldPass: `${n.symbol} erfassen/ausfüllen` }
           : {}),
       };

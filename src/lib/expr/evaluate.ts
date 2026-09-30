@@ -41,7 +41,20 @@ import {
  * write-only and additive: nothing about the RESULT changes when it is
  * present, and every caller that omits it behaves exactly as before.
  */
-type Ctx = { scope: Scope; strict: boolean; missing: Set<string>; row?: RowValues; diagnostics?: string[] };
+/**
+ * `existsPending` (A1, 2026-09-30): when set, an existence check (`x IS NOT
+ * NULL` / `x IS NOT EMPTY`) on a symbol that has NO value at all (`undefined`
+ * — never entered) is `missing` (⇒ `pending`, x reported), exactly like a
+ * comparison on a missing symbol — never a definite ✗ before the engineer has
+ * typed anything. `x IS NULL` / `x IS EMPTY` on that symbol stays `true` (the
+ * guard idiom `swk_klasse IS NULL OR …` keeps passing). A symbol that resolves
+ * to `null` / `''` (a carrier that EXISTS but is empty maps to `''`, see
+ * `jsonConditionValue`) is a definite verdict either way. The flag is set by
+ * the top-level condition path only (`evalCondition`, `evaluateNodeLenient`)
+ * and reset inside a guard antecedent (`IF cond THEN …`), an `if()` test and
+ * row scope — those keep the legacy definite semantics.
+ */
+type Ctx = { scope: Scope; strict: boolean; missing: Set<string>; row?: RowValues; diagnostics?: string[]; existsPending?: boolean };
 
 type Ternary = 'true' | 'false' | 'missing';
 
@@ -225,7 +238,9 @@ function resolveRegister(e: Expr, ctx: Ctx): { reg: PreparedRegister; name: stri
  */
 function rowMatches(cond: Expr, row: PreparedRow, ctx: Ctx): boolean | null {
   const rowMissing = new Set<string>();
-  const rowCtx: Ctx = { ...ctx, strict: false, row: row.values, missing: rowMissing };
+  // Row scope keeps the legacy existence semantics (A1: `existsPending` off) — a
+  // blank cell under `col IS NOT NULL` is a row that does not match, never `pending`.
+  const rowCtx: Ctx = { ...ctx, strict: false, row: row.values, missing: rowMissing, existsPending: false };
   let matched: boolean | null;
   if (isConditionNode(cond)) {
     const t = evalNodeCore(cond, rowCtx);
@@ -350,7 +365,7 @@ function percentileInc(sorted: number[], p: number): number {
 function perRowNumbers(rows: PreparedRow[], expr: Expr, ctx: Ctx, reg?: PreparedRegister): number[] | null {
   const xs: number[] = [];
   for (const row of rows) {
-    const rowCtx: Ctx = { ...ctx, row: row.values };
+    const rowCtx: Ctx = { ...ctx, row: row.values, existsPending: false };
     let v: number | null;
     try {
       v = num(evalExpr(expr, rowCtx), rowCtx);
@@ -395,7 +410,8 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
       const [test, whenTrue, whenFalse] = n.args;
       let taken: boolean;
       if (isConditionNode(test)) {
-        const t = evalNodeCore(test, ctx);
+        // An `if()` test keeps the legacy existence semantics (A1: `existsPending` off).
+        const t = evalNodeCore(test, ctx.existsPending ? { ...ctx, existsPending: false } : ctx);
         if (t === 'missing') return fail(ctx, `Fehlende Eingabe für if(): ${[...ctx.missing].join(', ')}`);
         taken = t === 'true';
       } else {
@@ -590,6 +606,10 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
     }
     case 'exists': {
       const v = readSymbol(c, n.symbol);
+      // A1: never-entered (`undefined`) + IS NOT NULL / IS NOT EMPTY ⇒ pending
+      // on the top-level condition path (see `Ctx.existsPending`). `null`/`''`
+      // (a present-but-empty carrier) stay a definite verdict.
+      if (c.existsPending && n.negate && v === undefined) { c.missing.add(n.symbol); return 'missing'; }
       const exists = !isMissing(v);
       const result = n.negate ? exists : !exists;
       return result ? 'true' : 'false';
@@ -658,7 +678,8 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
       // IF guard THEN body — vacuously pass when the guard is false; pending
       // when the guard is missing (only the guard's symbols are reported).
       const guardMissing = new Set<string>();
-      const g = evalNodeCore(n.guard, { ...c, missing: guardMissing });
+      // The antecedent keeps the legacy existence semantics (A1: `existsPending` off).
+      const g = evalNodeCore(n.guard, { ...c, missing: guardMissing, existsPending: false });
       if (g === 'missing') {
         for (const m of guardMissing) c.missing.add(m);
         return 'missing';
@@ -752,14 +773,19 @@ export function evalCondition(src: string, scope: Scope, opts?: ConditionOptions
   const withCarrier: Scope = scope.carrier === undefined && opts?.carrier !== undefined
     ? { ...scope, carrier: opts.carrier }
     : scope;
-  const ctx: Ctx = { scope: withCarrier, strict: false, missing: new Set() };
+  const ctx: Ctx = { scope: withCarrier, strict: false, missing: new Set(), existsPending: opts?.existsOnAbsent !== 'definite' };
   const r = evalNodeCore(ast, ctx);
   if (r === 'missing') return { kind: 'pending', missingSymbols: [...ctx.missing] };
   return r === 'true' ? { kind: 'pass' } : { kind: 'fail' };
 }
 
-export function evaluateNodeLenient(n: Node, scope: Scope): Ternary {
-  return evalNodeCore(n, { scope, strict: false, missing: new Set() });
+/**
+ * Lenient single-node evaluation (the gate explainer). Same A1 existence
+ * semantics as `evalCondition` by default; pass `{ existsOnAbsent: 'definite' }`
+ * for a guard antecedent.
+ */
+export function evaluateNodeLenient(n: Node, scope: Scope, opts?: Pick<ConditionOptions, 'existsOnAbsent'>): Ternary {
+  return evalNodeCore(n, { scope, strict: false, missing: new Set(), existsPending: opts?.existsOnAbsent !== 'definite' });
 }
 
 export function evaluateArithLenient(n: ArithNode, scope: Scope): number | null {

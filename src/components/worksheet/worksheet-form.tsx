@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
-import { useEffect, useMemo, useRef } from 'react';
-import { useWorksheetStore, type SaveStatus, type FieldValue } from '@/lib/state/worksheet-store';
+import { isValidElement, memo, useEffect, useMemo, useRef } from 'react';
+import { useWorksheetStore, type FieldValue } from '@/lib/state/worksheet-store';
 import { saveWorksheet } from '@/lib/actions/worksheet';
 import { DynamicField } from './dynamic-field';
 import { SectionGroup } from './section-group';
@@ -63,7 +63,113 @@ const LOADING_CHECK_SYMBOLS = new Set([
 // keeps this harmless on every other worksheet/standard.
 const PHASE4_READONLY_SYMBOLS = new Set(['recommended_phase_4_gate']);
 
-function SaveIndicator({ status }: { status: SaveStatus }) {
+// ---------------------------------------------------------------------------
+// Render-churn control (FLL register stall, 2026-09-30).
+//
+// The form subscribes to the whole `values` map, so EVERY store write (each
+// register keystroke, each engine write-back, each server `derived` apply)
+// re-renders it. What must NOT follow it down the tree: the ~N DynamicFields
+// whose props did not change, the engine cards (KaTeX) whose verdict did not
+// change, the equations block, the compliance/approval/rationale panels.
+// Everything below keeps those subtrees on `memo` with reference-stable props.
+// ---------------------------------------------------------------------------
+
+/** The card element a DynamicField receives as `inlineEngineCard`. A flat
+ * component (no wrapper `<div>` around the element) so the element's props
+ * ARE the card's props and `elementPropsEqual` below can compare them. */
+function EngineCardSlot(props: Parameters<typeof EquationEngineCard>[0]) {
+  return (
+    <div className="mt-3">
+      <EquationEngineCard {...props} />
+    </div>
+  );
+}
+
+/** Structural equality for plain data (an EvalState: primitives, arrays,
+ * plain objects — no functions, no cycles). Kept LOCAL (not imported from
+ * equation-engine-card, which carries the same rule for its own memo) because
+ * a number of render tests mock that module with only the component export. */
+function deepEqualPlain(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    const bb = b as unknown[];
+    if (a.length !== bb.length) return false;
+    for (let i = 0; i < a.length; i++) if (!deepEqualPlain(a[i], bb[i])) return false;
+    return true;
+  }
+  const ao = a as Record<string, unknown>;
+  const bo = b as Record<string, unknown>;
+  const ka = Object.keys(ao);
+  if (ka.length !== Object.keys(bo).length) return false;
+  for (const k of ka) {
+    if (!Object.prototype.hasOwnProperty.call(bo, k)) return false;
+    if (!deepEqualPlain(ao[k], bo[k])) return false;
+  }
+  return true;
+}
+
+/** Two React elements are "the same" when they have the same type and equal
+ * props — every prop by reference, `state` (the engine's EvalState) by
+ * structure. Used for the two element-valued props of DynamicField, whose
+ * elements are rebuilt whenever the engine hook emits a fresh states record —
+ * i.e. on every store write — while their props rarely move. */
+function elementPropsEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (!isValidElement(a) || !isValidElement(b)) return false;
+  if (a.type !== b.type || a.key !== b.key) return false;
+  const pa = a.props as Record<string, unknown>;
+  const pb = b.props as Record<string, unknown>;
+  const keys = new Set([...Object.keys(pa), ...Object.keys(pb)]);
+  for (const k of keys) {
+    if (k === 'state' ? !deepEqualPlain(pa[k], pb[k]) : !Object.is(pa[k], pb[k])) return false;
+  }
+  return true;
+}
+
+/** DynamicField comparator: shallow on everything except the two element
+ * props, which compare by (type, props). All other props the form passes are
+ * primitives or references memoised on their real inputs (see the per-field
+ * maps below), so this is exact — a parent re-render caused by an unrelated
+ * store write is a no-op for the field. `DynamicField` still re-renders on
+ * ITS OWN value / citations / pending change through its own store
+ * selectors — that is the intended path. */
+function dynamicFieldPropsEqual(
+  prev: Readonly<Record<string, unknown>>,
+  next: Readonly<Record<string, unknown>>,
+): boolean {
+  const keys = new Set([...Object.keys(prev), ...Object.keys(next)]);
+  for (const k of keys) {
+    const a = prev[k];
+    const b = next[k];
+    if (k === 'inlineEngineCard' || k === 'overridePill') {
+      if (!elementPropsEqual(a, b)) return false;
+    } else if (!Object.is(a, b)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/** Memoised children (see dynamicFieldPropsEqual; the others take primitives
+ * or props memoised in the form, so React's default shallow compare is exact). */
+const MemoDynamicField = memo(
+  DynamicField,
+  dynamicFieldPropsEqual as (prev: Readonly<Parameters<typeof DynamicField>[0]>, next: Readonly<Parameters<typeof DynamicField>[0]>) => boolean,
+);
+const MemoEquationsBlock = memo(EquationsBlock);
+const MemoComplianceBlock = memo(ComplianceBlock);
+const MemoRationalePanel = memo(RationalePanel);
+const MemoApprovalBar = memo(ApprovalBar);
+const MemoSourceFormReferencePanel = memo(SourceFormReferencePanel);
+
+/** Reads its own slice of the store so the save-status transitions
+ * (idle → saving → saved → idle, three store writes per autosave) re-render
+ * this one span and not the whole form. */
+function SaveIndicator() {
+  const status = useWorksheetStore((s) => s.saveStatus);
   if (status === 'idle') return null;
   if (status === 'saving') {
     return (
@@ -90,6 +196,27 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
     <span className="text-xs text-error bg-error/10 px-2 py-0.5 rounded">
       ✗ Speichern fehlgeschlagen
     </span>
+  );
+}
+
+/** Same reasoning as SaveIndicator: `lastWarnings` is written on every flush
+ * (cleared at start, set at end) — own subscription, not the form's. */
+function SaveWarningsBanner() {
+  const lastWarnings = useWorksheetStore((s) => s.lastWarnings);
+  if (lastWarnings.length === 0) return null;
+  return (
+    <div
+      role="alert"
+      data-testid="save-warnings-banner"
+      className="border border-warning/40 rounded p-3 text-sm bg-warning/8 text-ink space-y-1"
+    >
+      {lastWarnings.map((w, i) => (
+        <p key={i} className="flex gap-2">
+          <span aria-hidden="true" className="shrink-0 text-warning">⚠</span>
+          {w}
+        </p>
+      ))}
+    </div>
   );
 }
 
@@ -236,8 +363,9 @@ export function WorksheetForm({
   const flush = useWorksheetStore((s) => s.flush);
   const setField = useWorksheetStore((s) => s.setField);
   const values = useWorksheetStore((s) => s.values);
-  const saveStatus = useWorksheetStore((s) => s.saveStatus);
-  const lastWarnings = useWorksheetStore((s) => s.lastWarnings);
+  // saveStatus / lastWarnings are read by <SaveIndicator/> and
+  // <SaveWarningsBanner/> through their own selectors — not here, so the
+  // three status writes per autosave do not re-render the whole form.
   const pendingFieldIds = useWorksheetStore((s) => s.pendingFieldIds);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const locked = !isWorksheetEditable(instance.status as WorksheetStatus);
@@ -276,6 +404,18 @@ export function WorksheetForm({
     () => [...equations].sort((a, b) => (a.equationNumber ?? '').localeCompare(b.equationNumber ?? '')),
     [equations],
   );
+
+  // Σ badge signal (fix wave 2026-09-30): a field is a genuine sum only when it is the output of an
+  // equation whose right-hand side starts with sum_rows( / sum( — never inferred from a `_total`
+  // suffix in the symbol (P_total is a concentration, not a sum).
+  const sumOutputSymbols = useMemo(() => {
+    const s = new Set<string>();
+    for (const eq of equations) {
+      const rhs = (eq.formula ?? '').split('=').slice(1).join('=').trim();
+      if (eq.outputSymbol && /^sum(_rows)?\(/.test(rhs)) s.add(eq.outputSymbol);
+    }
+    return s;
+  }, [equations]);
 
   const fieldBySymbol = useMemo(() => {
     const m = new Map<string, FieldDef>();
@@ -404,6 +544,10 @@ export function WorksheetForm({
     [ownFields, sections, symbolLookup],
   );
 
+  // NOTE: `engineStates` is a fresh record (fresh EvalState objects) on every
+  // store write. The consumers below that must not re-render on an unchanged
+  // verdict compare the state STRUCTURALLY (engineCardPropsEqual on the card,
+  // elementPropsEqual on the elements handed to DynamicField).
   const { engineEquationIds, engineStates } = useEquationEngine({
     worksheetCode: worksheet.template.code,
     standardCode,
@@ -428,6 +572,9 @@ export function WorksheetForm({
   // renders the matching card directly below its input so inputs and verdict
   // stay together. Equations whose outputSymbol does NOT map to a visible
   // field fall through to the bottom-section fallback below.
+  // Rebuilt on every engine emission (= every store write); that is fine —
+  // the elements are flat `EngineCardSlot`s whose props DynamicField's
+  // comparator reads, so an output field whose verdict did not move bails out.
   const engineCardsByOutputFieldId = useMemo(() => {
     const map = new Map<string, React.ReactNode>();
     // `engineEquations` (DB list + Plan 2a fallback register equations) so a
@@ -440,17 +587,15 @@ export function WorksheetForm({
       if (!outField) continue;
       map.set(
         outField.id,
-        <div className="mt-3">
-          <EquationEngineCard
-            equationNumber={eq.equationNumber}
-            sourceFormula={eq.formula}
-            state={state}
-            outputSymbol={eq.outputSymbol ?? ''}
-            outputUnit={outField.unit ?? null}
-            unitBySymbol={unitBySymbol}
-            inheritedFromBySymbol={inheritedFromBySymbol}
-          />
-        </div>,
+        <EngineCardSlot
+          equationNumber={eq.equationNumber}
+          sourceFormula={eq.formula}
+          state={state}
+          outputSymbol={eq.outputSymbol ?? ''}
+          outputUnit={outField.unit ?? null}
+          unitBySymbol={unitBySymbol}
+          inheritedFromBySymbol={inheritedFromBySymbol}
+        />,
       );
     }
     return map;
@@ -487,6 +632,25 @@ export function WorksheetForm({
     }
     return map;
   }, [engineEquations, engineEquationIds, engineStates, fieldBySymbol]);
+
+  // The pill ELEMENT per output field (all-primitive props, so DynamicField's
+  // comparator can tell an unchanged pill from a moved one).
+  const overridePillByOutputFieldId = useMemo(() => {
+    const map = new Map<string, React.ReactNode>();
+    for (const [fieldId, meta] of overrideMetaByOutputFieldId) {
+      map.set(
+        fieldId,
+        <OverridePillForField
+          fieldId={fieldId}
+          projectId={projectId}
+          equationNumber={meta.equationNumber}
+          outputSymbol={meta.outputSymbol}
+          computedValue={meta.computedValue}
+        />,
+      );
+    }
+    return map;
+  }, [overrideMetaByOutputFieldId, projectId]);
 
   // Engine equations whose outputSymbol has NO visible field — keep these in
   // the legacy bottom section so the engineer still sees the verdict.
@@ -553,6 +717,42 @@ export function WorksheetForm({
     () => new Set(serverComputedFieldIds ?? []),
     [serverComputedFieldIds],
   );
+
+  // Provenance hint per field (object prop of DynamicField) — built once per
+  // (fields, server-computed set, register hints) instead of a fresh literal
+  // on every render, so the memoised DynamicField sees a stable reference.
+  // The VSME hints render even BEFORE the engine has ever written a value
+  // (empty project): without them the CO₂ calculator / register is
+  // invisible from the worksheet and the engineer types the totals by
+  // hand. Pre-computation the field stays editable — only the hint shows.
+  const computedHintByFieldId = useMemo(() => {
+    const m = new Map<string, { label: string; href?: string; hrefLabel?: string }>();
+    const isVsme = standardCode === 'VSME';
+    for (const f of fields) {
+      const isServerComputed = serverComputedSet.has(f.id);
+      const regHint = registerOutputHints.get(f.symbol);
+      const hint = isVsme && VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
+        ? {
+            label: isServerComputed
+              ? 'Automatisch berechnet aus den CO₂-Aktivitätslinien.'
+              : 'Dieses Feld berechnet der CO₂-Rechner aus den erfassten Aktivitäten.',
+            href: `/${locale}/projects/${projectId}/vsme/emissions`,
+            hrefLabel: '→ CO₂-Rechner öffnen',
+          }
+        : regHint
+          ? {
+              label: isServerComputed
+                // Neutral wording: the output may be a sum (VSME B04), a weighted mean (A138-07 C_m) or any register-derived value.
+                ? `Aus dem Register „${regHint.title}“ berechnet (${regHint.placement === 'bottom' ? 'unten auf dieser Seite' : 'in diesem Abschnitt'}).`
+                : `Wird beim Speichern aus dem Register „${regHint.title}“ berechnet.`,
+            }
+          : isServerComputed
+            ? { label: 'Serverseitig berechneter Wert.' }
+            : undefined;
+      if (hint) m.set(f.id, hint);
+    }
+    return m;
+  }, [fields, serverComputedSet, registerOutputHints, standardCode, locale, projectId]);
 
   // Plan 2b (Task 3): upstream-cause state per CONSUMED register (the
   // `registerSources` prop — an owner worksheet's carrier this worksheet reads).
@@ -677,6 +877,8 @@ export function WorksheetForm({
 
   const topSections = sections.filter((s) => s.parentSectionId === null);
   const orphanFields = fieldsBySectionId.map.get(null) ?? [];
+  // ComplianceBlock's field-ref list — one array per `fields`, not per render.
+  const complianceFields = useMemo(() => fields.map((f) => ({ id: f.id, symbol: f.symbol })), [fields]);
   const title = locale === 'de' ? worksheet.template.titleDe : worksheet.template.titleEn ?? worksheet.template.titleDe;
 
   // asmMethod is resolved above (hoisted before useEquationEngine) so it can be
@@ -698,37 +900,12 @@ export function WorksheetForm({
   // threads per-field context (computedHint, statusReason, override pill, ASM
   // props); the WIDGETS registry calls it for every non-register widget.
   const renderDynamic = (f: FieldDef) => {
-    const overrideMeta = overrideMetaByOutputFieldId.get(f.id);
-
     // Server-engine-written value (source_type='computed' / VSME 'derived'):
     // locked via the existing isComputed path + a provenance hint telling the
-    // engineer WHERE the value is produced (single-source rule).
-    //
-    // The VSME hints render even BEFORE the engine has ever written a value
-    // (empty project): without them the CO₂ calculator / register is
-    // invisible from the worksheet and the engineer types the totals by
-    // hand. Pre-computation the field stays editable — only the hint shows.
+    // engineer WHERE the value is produced (single-source rule). The hint
+    // object comes from the memoised map above (stable prop reference).
     const isServerComputed = serverComputedSet.has(f.id);
-    const isVsme = standardCode === 'VSME';
-    const regHint = registerOutputHints.get(f.symbol);
-    const computedHint = isVsme && VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
-      ? {
-          label: isServerComputed
-            ? 'Automatisch berechnet aus den CO₂-Aktivitätslinien.'
-            : 'Dieses Feld berechnet der CO₂-Rechner aus den erfassten Aktivitäten.',
-          href: `/${locale}/projects/${projectId}/vsme/emissions`,
-          hrefLabel: '→ CO₂-Rechner öffnen',
-        }
-      : regHint
-        ? {
-            label: isServerComputed
-              // Neutral wording: the output may be a sum (VSME B04), a weighted mean (A138-07 C_m) or any register-derived value.
-              ? `Aus dem Register „${regHint.title}“ berechnet (${regHint.placement === 'bottom' ? 'unten auf dieser Seite' : 'in diesem Abschnitt'}).`
-              : `Wird beim Speichern aus dem Register „${regHint.title}“ berechnet.`,
-          }
-        : isServerComputed
-          ? { label: 'Serverseitig berechneter Wert.' }
-          : undefined;
+    const computedHint = computedHintByFieldId.get(f.id);
 
     // For ac_as_ratio_check, resolve the sibling reason field's current
     // value and thread it in as statusReason so AcAsRatioCheckStatus can
@@ -742,8 +919,11 @@ export function WorksheetForm({
       }
     }
 
+    // Every prop below is a primitive or a reference kept stable across an
+    // unrelated store write (props of the form, memoised maps, cached
+    // elements) — MemoDynamicField's shallow compare is therefore exact.
     return (
-      <DynamicField
+      <MemoDynamicField
         field={f}
         locale={locale}
         projectId={projectId}
@@ -752,23 +932,14 @@ export function WorksheetForm({
         inheritedFrom={inheritedFromBySymbol[f.symbol]}
         docs={docs}
         isComputed={(computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')) || isServerComputed}
+        sumOutput={sumOutputSymbols.has(f.symbol)}
         computedHint={computedHint}
         prefillSource={prefillSourceByFieldId?.[f.id]}
         siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
         twinSource={twinSourceByFieldId?.[f.id]}
         clientSupplied={clientSuppliedByFieldId?.[f.id] ?? false}
         inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
-        overridePill={
-          overrideMeta ? (
-            <OverridePillForField
-              fieldId={f.id}
-              projectId={projectId}
-              equationNumber={overrideMeta.equationNumber}
-              outputSymbol={overrideMeta.outputSymbol}
-              computedValue={overrideMeta.computedValue}
-            />
-          ) : undefined
-        }
+        overridePill={overridePillByOutputFieldId.get(f.id)}
         isPlatformEngineer={isPlatformEngineer}
         readOnly={locked}
         statusReason={statusReason}
@@ -808,7 +979,7 @@ export function WorksheetForm({
         </div>
         <div className="flex items-baseline gap-3 flex-wrap">
           <h1 className="text-2xl font-semibold text-ink tracking-tight">{title}</h1>
-          <SaveIndicator status={saveStatus} />
+          <SaveIndicator />
         </div>
       </header>
 
@@ -822,22 +993,9 @@ export function WorksheetForm({
         </div>
       )}
 
-      {lastWarnings.length > 0 && (
-        <div
-          role="alert"
-          data-testid="save-warnings-banner"
-          className="border border-warning/40 rounded p-3 text-sm bg-warning/8 text-ink space-y-1"
-        >
-          {lastWarnings.map((w, i) => (
-            <p key={i} className="flex gap-2">
-              <span aria-hidden="true" className="shrink-0 text-warning">⚠</span>
-              {w}
-            </p>
-          ))}
-        </div>
-      )}
+      <SaveWarningsBanner />
 
-      <SourceFormReferencePanel standardCode={standardCode} locale={locale} />
+      <MemoSourceFormReferencePanel standardCode={standardCode} locale={locale} />
 
       {twinPrefillIds.length > 0 && !locked && (
         <div
@@ -1010,7 +1168,7 @@ export function WorksheetForm({
         );
       })}
 
-      <EquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} />
+      <MemoEquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} />
 
       {orphanEngineEquations.length > 0 && (
         <section className="border-t border-hairline pt-6 mt-2 space-y-3">
@@ -1034,16 +1192,16 @@ export function WorksheetForm({
         </section>
       )}
 
-      <ComplianceBlock
+      <MemoComplianceBlock
         requirements={complianceRequirements}
         suggestions={complianceSuggestions}
-        fields={fields.map((f) => ({ id: f.id, symbol: f.symbol }))}
+        fields={complianceFields}
         locale={locale}
         projectId={projectId}
         hiddenSymbols={visibility.hiddenSymbols}
       />
-      <RationalePanel instanceId={instance.id} locale={locale} />
-      <ApprovalBar
+      <MemoRationalePanel instanceId={instance.id} locale={locale} />
+      <MemoApprovalBar
         instanceId={instance.id}
         status={instance.status}
         locale={locale}

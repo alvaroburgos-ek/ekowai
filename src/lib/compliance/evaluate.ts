@@ -88,12 +88,17 @@ export function parseCondition(condition: string): Node | null {
   return parseExprCondition(condition);
 }
 
-/** Evaluate a single node to the internal ternary — reused by the explainer. */
+/**
+ * Evaluate a single node to the internal ternary — reused by the explainer.
+ * Same A1 existence semantics as `evaluateCondition` (never-entered + IS NOT
+ * NULL ⇒ missing); pass `{ existsOnAbsent: 'definite' }` for a guard antecedent.
+ */
 export function evaluateNode(
   n: Node,
   lookup: (sym: string) => Value | undefined,
+  opts?: Pick<ConditionOptions, 'existsOnAbsent'>,
 ): 'true' | 'false' | 'missing' {
-  return evaluateNodeLenient(n, { symbol: lookup });
+  return evaluateNodeLenient(n, { symbol: lookup }, opts);
 }
 
 /** Evaluate an arithmetic operand to a number (null = missing/non-finite). */
@@ -107,21 +112,31 @@ export function evaluateArithNode(
 /**
  * Resolve a JSON carrier field's value FOR THE CONDITION DSL. The DSL only does
  * existence checks on carriers (`symbol IS NOT NULL` / `IS NOT EMPTY`), never
- * arithmetic — so map a carrier to a presence marker: a non-empty string when
- * it has content, else `null`. `{rows: []}` / `{}` / `[]` / null ⇒ null
- * (absent), so an empty inventory correctly fails `IS NOT NULL`/`IS NOT EMPTY`.
+ * arithmetic — so map a carrier to a presence marker with THREE states:
+ *   - `'present'` — the carrier has content (rows / keys / elements);
+ *   - `''`        — the carrier EXISTS but is empty (`{rows: []}` / `{}` / `[]`):
+ *                   a definite "nothing recorded", so an empty inventory still
+ *                   FAILS `IS NOT NULL` / `IS NOT EMPTY` (the engineer opened the
+ *                   register and left it empty);
+ *   - `null`      — no carrier at all (never saved): the lookups drop it
+ *                   (`makeSymbolLookup`, the gate's `extractValue`) so the symbol
+ *                   reads `undefined` ⇒ `IS NOT NULL` is `pending` (A1), like a
+ *                   comparison on a never-entered symbol.
+ * `''` survives both lookups (`m != null` / `?? undefined`) and the evaluator
+ * treats it as a definite absent value (`isMissing('')` for comparisons ⇒
+ * pending, which the DSL never does on carriers anyway).
  * Without this, json fields are skipped from the lookup → such gates always fail
  * even when the carrier is populated.
  */
 export function jsonConditionValue(json: unknown): string | null {
   if (json == null) return null;
-  if (Array.isArray(json)) return json.length > 0 ? 'present' : null;
+  if (Array.isArray(json)) return json.length > 0 ? 'present' : '';
   if (typeof json === 'object') {
     const o = json as Record<string, unknown>;
     if (Array.isArray((o as { rows?: unknown }).rows)) {
-      return (o.rows as unknown[]).length > 0 ? 'present' : null;
+      return (o.rows as unknown[]).length > 0 ? 'present' : '';
     }
-    return Object.keys(o).length > 0 ? 'present' : null;
+    return Object.keys(o).length > 0 ? 'present' : '';
   }
   return 'present'; // primitive non-null (unusual for a carrier) ⇒ present
 }

@@ -94,10 +94,10 @@ describe('WorksheetForm — consumed registers (registerSources) without a local
     act(() => { useWorksheetStore.getState().init('reset', {}, {}, {}); });
   });
 
-  it('draft owner + two complete rows ⇒ "nicht final (2/2)" banner AND the read-only mirror', () => {
+  it('draft owner + two complete rows ⇒ "noch nicht freigegeben (2/2)" banner AND the read-only mirror', () => {
     render(<WorksheetForm {...PROPS} registerSources={source('draft', TWO_COMPLETE_ROWS)} />);
     expect(screen.getByTestId('surface-source-banner')).toHaveTextContent(
-      'Quelle A138-07 nicht final (2/2 Zeilen vollständig) — abgeleitete Werte ausgeblendet.',
+      'Quelle A138-07 noch nicht freigegeben (2/2 Zeilen vollständig) — abgeleitete Werte ausgeblendet.',
     );
     const mirror = screen.getByTestId('source-surface_inventory');
     expect(mirror.querySelector('h2')?.textContent).toBe('Flächenverzeichnis (aus A138-07 — schreibgeschützt)');
@@ -145,9 +145,9 @@ describe('WorksheetForm — multiple registerSources; DB config beats the symbol
     render(<WorksheetForm {...PROPS} registerSources={[...source('draft', TWO_COMPLETE_ROWS), DB_REGISTER]} />);
     const banners = screen.getAllByTestId('surface-source-banner');
     expect(banners.map((b) => b.textContent)).toEqual([
-      'Quelle A138-07 nicht final (2/2 Zeilen vollständig) — abgeleitete Werte ausgeblendet.',
+      'Quelle A138-07 noch nicht freigegeben (2/2 Zeilen vollständig) — abgeleitete Werte ausgeblendet.',
       // reg_x produces nothing this consumer carries (no producedSymbols) => no withholding claim (round 2).
-      'Quelle A138-99 nicht final (1/2 Zeilen vollständig).',
+      'Quelle A138-99 noch nicht freigegeben (1/2 Zeilen vollständig).',
     ]);
     expect(screen.getByTestId('source-surface_inventory').querySelector('h2')?.textContent).toBe('Flächenverzeichnis (aus A138-07 — schreibgeschützt)');
     const x = screen.getByTestId('source-reg_x');
@@ -158,7 +158,7 @@ describe('WorksheetForm — multiple registerSources; DB config beats the symbol
   it('a source with NO produced symbols on this consumer (selection register) never claims withholding: banner without "ausgeblendet", mirror still renders', () => {
     const sel = { symbol: 'stakeholder_list', ownerCode: 'M820-01', status: 'draft', carrier: { rows: [{ id: '1', name: 'A' }] }, widget: 'register', uiConfig: { title: 'Beteiligte', columns: [{ key: 'name', type: 'text', label: 'Name', required: true }] }, producedSymbols: [] };
     const first = render(<WorksheetForm {...PROPS} registerSources={[sel]} />);
-    expect(screen.getByTestId('surface-source-banner').textContent).toBe('Quelle M820-01 nicht final (1/1 Zeilen vollständig).');
+    expect(screen.getByTestId('surface-source-banner').textContent).toBe('Quelle M820-01 noch nicht freigegeben (1/1 Zeilen vollständig).');
     expect(screen.getByTestId('source-stakeholder_list')).toBeInTheDocument();
     first.unmount();
     render(<WorksheetForm {...PROPS} registerSources={[{ ...sel, carrier: null }]} />);
@@ -168,7 +168,7 @@ describe('WorksheetForm — multiple registerSources; DB config beats the symbol
   it('produced symbols that this consumer does NOT carry ⇒ no withholding claim either', () => {
     const src = { ...source('draft', TWO_COMPLETE_ROWS)[0], producedSymbols: ['A_C_sealed_only_elsewhere'] };
     render(<WorksheetForm {...PROPS} registerSources={[src]} />);
-    expect(screen.getByTestId('surface-source-banner').textContent).toBe('Quelle A138-07 nicht final (2/2 Zeilen vollständig).');
+    expect(screen.getByTestId('surface-source-banner').textContent).toBe('Quelle A138-07 noch nicht freigegeben (2/2 Zeilen vollständig).');
   });
 
   it('a DB config on the source entry wins over the symbol-keyed fallback for the same symbol', () => {

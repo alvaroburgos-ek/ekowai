@@ -14,8 +14,21 @@ export type ProgressWorksheet = {
   titleDe: string;
   status: string | null;
   totalRequired: number;
+  /** Required fields with an OWN saved value. Producers may fold inherited
+   * satisfaction in here (`countRequiredFields` in `required-fields.ts` does)
+   * or report it separately via `inheritedRequired`. */
   filledRequired: number;
+  /** A4 (2026-09-30): required fields WITHOUT an own value for which a
+   * conflict-free project-wide value resolves (the sheet offers it as
+   * "aus <WS> … oder überschreiben"). They are satisfied — the same rule as
+   * the approval gate (`missingRequiredFields`) — and never count as open. */
+  inheritedRequired?: number;
 };
+
+/** Open required fields of one worksheet — own value or inherited value satisfies (A4). */
+export function openRequiredCount(r: Pick<ProgressWorksheet, 'totalRequired' | 'filledRequired' | 'inheritedRequired'>): number {
+  return Math.max(0, r.totalRequired - r.filledRequired - (r.inheritedRequired ?? 0));
+}
 
 export type NextStep = {
   code: string;
@@ -50,7 +63,7 @@ export function summarizeStandardProgress(rows: ProgressWorksheet[]): StandardPr
     if (r.status === 'submitted_for_review') {
       next = { code: r.code, titleDe: r.titleDe, reason: 'in_review' };
     } else {
-      const missing = Math.max(0, r.totalRequired - r.filledRequired);
+      const missing = openRequiredCount(r);
       next = missing > 0
         ? { code: r.code, titleDe: r.titleDe, reason: 'fill', missingRequired: missing }
         : { code: r.code, titleDe: r.titleDe, reason: 'submit' };

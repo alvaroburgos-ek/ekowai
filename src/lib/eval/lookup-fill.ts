@@ -104,6 +104,41 @@ export function resolveLookupFill(binding: LookupBinding, standardCode: string, 
   return { kind: 'resolved', tableValue, row, policy: t.override_policy, label, valueColumn: t.value_columns.find((c) => c.name === binding.value) };
 }
 
+/**
+ * What the SAVE path does with a `lookup_fill` value (A2/A3, 2026-09-30).
+ * The widget fills client-side and the value then travels through the ordinary
+ * save batch, so the server decides provenance and staleness from the SAME
+ * resolution the widget used (`resolveLookupFill` over own + inherited values):
+ *   - `'clear'`   — a key symbol is missing (never entered / cleared to null /
+ *                   '') and a value is still stored: the fill has no row to
+ *                   stand on any more → written back as null (A2: a cleared
+ *                   Typ key must not keep the Typ-I row's fills).
+ *   - `'derived'` — the value equals the bound row's cell under the field's
+ *                   type: a table figure, `source_type = 'derived'` (A3: never
+ *                   `'entered'`, the engineer did not type it).
+ *   - `'entered'` — the value deviates from the resolved cell: an engineer
+ *                   override (its reason goes through `recordManualOverride`).
+ *   - `'keep'`    — nothing to decide (no value; or no row / no table, where
+ *                   there is no figure to compare against).
+ * `cellScalar` mirrors the widget's coercion: a number field takes a numeric
+ * cell only; text / enum compare `String(cell)`.
+ */
+export type LookupFillWriteDecision = 'clear' | 'derived' | 'entered' | 'keep';
+
+export function lookupFillWriteDecision(
+  state: LookupFillState,
+  dataType: string,
+  value: Value | undefined,
+): LookupFillWriteDecision {
+  const hasValue = value !== undefined && value !== null && value !== '';
+  if (state.kind === 'keys_missing') return hasValue ? 'clear' : 'keep';
+  if (state.kind !== 'resolved' || !hasValue) return 'keep';
+  const cell = state.tableValue;
+  if (cell == null) return 'entered';
+  if (dataType === 'number') return typeof cell === 'number' && cell === value ? 'derived' : 'entered';
+  return String(cell) === String(value) ? 'derived' : 'entered';
+}
+
 function resolveTable(binding: LookupBinding, standardCode: string): RegulationTable | undefined {
   if (!binding.edition) return resolveRegulationTable(standardCode, binding.table_code);
   // Edition pin: the registry entry for exactly that edition, else the latest/seed table only when it IS that edition.

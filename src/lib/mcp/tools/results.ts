@@ -95,8 +95,34 @@ export function registerResultTools(server: McpServer) {
         )
         .groupBy(fields.worksheetTemplateId);
 
+      // Required fields with NO value on their own sheet but exactly one conflict-free value for the
+      // same symbol on another template of the project count as filled (the inherited project-wide
+      // fallback the sheet itself offers — fix wave 2026-09-30, F-2 class; mirrors the sidebar SQL).
+      const inheritedCounts = await db.execute<{ template_id: string; inherited: number }>(sql`
+        SELECT f.worksheet_template_id AS template_id, COUNT(*)::int AS inherited
+        FROM fields f
+        LEFT JOIN project_parameters pp ON pp.field_id = f.id AND pp.project_id = ${projectId}
+        WHERE f.worksheet_template_id = ANY(${templateIds}::uuid[]) AND f.is_required AND f.active
+          AND pp.id IS NULL
+          AND (
+            SELECT COUNT(DISTINCT COALESCE(pp2.value_number::text, NULLIF(pp2.value_text, ''), NULLIF(pp2.value_enum, ''),
+                                           pp2.value_date::text, pp2.value_boolean::text, pp2.value_json::text))
+            FROM fields f2
+            JOIN project_parameters pp2 ON pp2.field_id = f2.id AND pp2.project_id = ${projectId}
+            WHERE f2.symbol = f.symbol AND f2.active AND f2.worksheet_template_id <> f.worksheet_template_id
+              AND COALESCE(pp2.value_number::text, NULLIF(pp2.value_text, ''), NULLIF(pp2.value_enum, ''),
+                           pp2.value_date::text, pp2.value_boolean::text, pp2.value_json::text) IS NOT NULL
+          ) = 1
+        GROUP BY f.worksheet_template_id
+      `);
+      const inheritedRows: { template_id: string; inherited: number }[] = Array.isArray(inheritedCounts)
+        ? (inheritedCounts as unknown as { template_id: string; inherited: number }[])
+        : ((inheritedCounts as unknown as { rows?: { template_id: string; inherited: number }[] }).rows ?? []);
+      const inheritedBy = new Map(inheritedRows.map((r) => [r.template_id, r.inherited]));
+
       const totalBy = new Map(requiredCounts.map((r) => [r.templateId, r.total]));
-      const filledBy = new Map(filledCounts.map((r) => [r.templateId, r.filled]));
+      const filledBy = new Map(filledCounts.map((r) => [r.templateId, (r.filled ?? 0)]));
+      for (const [t, n] of inheritedBy) filledBy.set(t, (filledBy.get(t) ?? 0) + n);
 
       const progress = summarizeStandardProgress(
         worksheets.map((w) => ({

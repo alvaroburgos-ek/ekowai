@@ -18,7 +18,7 @@ describe('surfaceSourceState', () => {
     const r = surfaceSourceState(partial, 'final');
     expect(r.state).toBe('incomplete');
     expect(r.message).toContain('1/2');
-    expect(r.message).toMatch(/nicht final/);
+    expect(r.message).toMatch(/noch nicht freigegeben/);
   });
   it('incomplete when complete rows but source still draft', () => {
     expect(surfaceSourceState(full, 'draft').state).toBe('incomplete');

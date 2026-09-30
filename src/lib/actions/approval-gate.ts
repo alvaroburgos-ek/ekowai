@@ -13,6 +13,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { evaluateCondition, jsonConditionValue } from '@/lib/compliance/evaluate';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
+import { inheritedSymbolSet, missingRequiredFields as missingRequiredFieldsShared } from '@/lib/projects/required-fields';
 
 /**
  * Result of the engineer-approve readiness check. The transition is
@@ -25,6 +26,56 @@ export type ApprovalGateResult = {
 };
 
 export type GateValue = number | string | boolean | null;
+
+/** One saved, typed occurrence of a symbol somewhere in the project (any worksheet template). */
+export type ProjectWideEntry = { symbol: string; value: GateValue; templateId: string };
+
+/**
+ * Every saved, typed occurrence of every active field symbol across the
+ * project's worksheet templates. Feeds BOTH the gate's conflict-free fallback
+ * (`buildFallbackValues`) and the A4 inherited-required rule
+ * (`inheritedSymbolSet`, other templates only) — shared with the finalize gate.
+ */
+export async function loadProjectWideEntries(projectId: string): Promise<ProjectWideEntry[]> {
+  const projInstances = await db
+    .select({ wtid: worksheetInstances.worksheetTemplateId })
+    .from(worksheetInstances)
+    .where(eq(worksheetInstances.projectId, projectId));
+  const projWtids = [...new Set(projInstances.map((r) => r.wtid))];
+  const projFields = projWtids.length === 0
+    ? []
+    : await db
+      .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, templateId: fields.worksheetTemplateId })
+      .from(fields)
+      .where(and(inArray(fields.worksheetTemplateId, projWtids), eq(fields.active, true)));
+  const projFieldIds = projFields.map((f) => f.id);
+  const projParams = projFieldIds.length === 0
+    ? []
+    : await db
+      .select()
+      .from(projectParameters)
+      .where(
+        and(
+          eq(projectParameters.projectId, projectId),
+          inArray(projectParameters.fieldId, projFieldIds),
+        ),
+      );
+  const projParamByFieldId = new Map(projParams.map((p) => [p.fieldId, p]));
+  const entries: ProjectWideEntry[] = [];
+  for (const f of projFields) {
+    const p = projParamByFieldId.get(f.id);
+    if (!p) continue;
+    const v = extractValue(f.dataType, p);
+    if (v !== undefined) entries.push({ symbol: f.symbol, value: v, templateId: f.templateId });
+  }
+  return entries;
+}
+
+/** A4: symbols a conflict-free project-wide value resolves for, from worksheets OTHER than `ownTemplateId`. */
+export async function loadInheritedSymbolsForTemplate(projectId: string, ownTemplateId: string): Promise<Set<string>> {
+  const entries = await loadProjectWideEntries(projectId);
+  return inheritedSymbolSet(entries.filter((e) => e.templateId !== ownTemplateId));
+}
 
 /** Extract the typed value from a project_parameters row for a field's data type. */
 function extractValue(
@@ -197,38 +248,14 @@ export async function checkApprovalGate(
   // Project-wide fallback: for symbols that are NOT fields on THIS worksheet,
   // resolve from the project's value wherever it is entered (e.g. a config
   // selector like quality_category on another worksheet). Conflict-free only.
-  const projInstances = await db
-    .select({ wtid: worksheetInstances.worksheetTemplateId })
-    .from(worksheetInstances)
-    .where(eq(worksheetInstances.projectId, instance.projectId));
-  const projWtids = [...new Set(projInstances.map((r) => r.wtid))];
-  const projFields = projWtids.length === 0
-    ? []
-    : await db
-      .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
-      .from(fields)
-      .where(and(inArray(fields.worksheetTemplateId, projWtids), eq(fields.active, true)));
-  const projFieldIds = projFields.map((f) => f.id);
-  const projParams = projFieldIds.length === 0
-    ? []
-    : await db
-      .select()
-      .from(projectParameters)
-      .where(
-        and(
-          eq(projectParameters.projectId, instance.projectId),
-          inArray(projectParameters.fieldId, projFieldIds),
-        ),
-      );
-  const projParamByFieldId = new Map(projParams.map((p) => [p.fieldId, p]));
-  const fallbackEntries: Array<{ symbol: string; value: GateValue }> = [];
-  for (const f of projFields) {
-    const p = projParamByFieldId.get(f.id);
-    if (!p) continue;
-    const v = extractValue(f.dataType, p);
-    if (v !== undefined) fallbackEntries.push({ symbol: f.symbol, value: v });
-  }
-  const fallback = buildFallbackValues(fallbackEntries);
+  const projectEntries = await loadProjectWideEntries(instance.projectId);
+  const fallback = buildFallbackValues(projectEntries);
+  // A4: the symbols an inherited project-wide value resolves for (OTHER
+  // worksheets only, conflict-free) — a required field the sheet offers as
+  // "aus <WS> … oder überschreiben" is satisfied without re-typing.
+  const inheritedSymbols = inheritedSymbolSet(
+    projectEntries.filter((e) => e.templateId !== instance.worksheetTemplateId),
+  );
 
   const lookup = makeGateLookup(localSymbols, bySymbol, fallback);
 
@@ -254,27 +281,11 @@ export async function checkApprovalGate(
   // is not "missing" (it cannot be filled in).
   const { hiddenFieldIds, hiddenSymbols } = computeVisibility(tmplFields, tmplSections, lookup);
 
-  // Missing required-field check: a field with is_required=true must
-  // have a non-null value of its declared type. JSON fields are
-  // satisfied when valueJson is non-null.
-  const missingRequiredFields: Array<{ symbol: string; labelDe: string }> = [];
-  for (const f of tmplFields) {
-    if (!f.isRequired) continue;
-    if (hiddenFieldIds.has(f.id)) continue;
-    const p = paramByFieldId.get(f.id);
-    let hasValue = false;
-    if (p) {
-      switch (f.dataType) {
-        case 'number': hasValue = p.valueNumber != null; break;
-        case 'text': hasValue = p.valueText != null && p.valueText !== ''; break;
-        case 'enum': hasValue = p.valueEnum != null && p.valueEnum !== ''; break;
-        case 'boolean': hasValue = p.valueBoolean != null; break;
-        case 'date': hasValue = p.valueDate != null; break;
-        case 'json': hasValue = p.valueJson != null; break;
-      }
-    }
-    if (!hasValue) missingRequiredFields.push({ symbol: f.symbol, labelDe: f.labelDe });
-  }
+  // Missing required-field check: a field with is_required=true must have a
+  // non-null value of its declared type (JSON: valueJson non-null) — OR an
+  // inherited project-wide value must resolve for its symbol (A4). One shared
+  // rule with the finalize gate and the progress counts (`required-fields.ts`).
+  const missingRequiredFields = missingRequiredFieldsShared(tmplFields, paramByFieldId, { hiddenFieldIds, inheritedSymbols });
 
   // Block-severity compliance check. Only conditions that evaluate to a
   // definite `fail` block; `pass`, `pending`, `manual` (attestation or

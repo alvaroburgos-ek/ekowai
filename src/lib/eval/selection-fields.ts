@@ -577,16 +577,17 @@ export const SELECTION_CONFIGS: Record<string, SelectionConfig> = {
     note: 'Gabapentin gemäß Tab. 19 wegen höherer Relevanz für die Wasserwiederverwendung ergänzt. Kategorie 3 (Vorsorgescreening): Summe PFAS-20 < 100 ng/l.',
   },
 
-  /* ═══ FLL-Naturteich (source PDF not in library — options NOT seeded) ══════ */
-  // The FLL-Naturteich guideline is not currently in the source library, so the
-  // element/zone option lists are NOT pre-filled (never invented — content
-  // boundary). Free-text registers with the printed column structure only.
+  /* ═══ FLL-Naturteich (guideline prints no element / species list) ═════════ */
+  // The FLL-Naturteich guideline prints the column structure of these registers
+  // but no closed list of equipment elements or plant species, so the cells are
+  // free text (never invented — content boundary). The library status of the
+  // source is NOT what decides this and is not claimed in the note (B3).
   equipment_elements_list: {
     kind: 'register',
     title: 'Anlagenausstattung',
     subtitle: '§8.3 — Ausstattungselemente',
     addLabel: '+ Element',
-    note: 'Quelle FLL-Naturteich derzeit nicht in der Bibliothek — Auswahllisten nicht vorbelegt (nicht erfunden). Freitext.',
+    note: 'Die Richtlinie druckt keine Liste der Ausstattungselemente — Auswahlliste nicht vorbelegt (nicht erfunden). Freitext.',
     columns: [
       { key: 'element', label: 'Element', type: 'text', placeholder: 'z. B. Skimmer, Pumpe, UV, Steuerung' },
       { key: 'typ', label: 'Typ / Hersteller', type: 'text' },
@@ -598,7 +599,7 @@ export const SELECTION_CONFIGS: Record<string, SelectionConfig> = {
     title: 'Pflanzenliste',
     subtitle: '§10.4 — Pflanzenarten nach Zone / Beckentyp',
     addLabel: '+ Pflanzenart',
-    note: 'Quelle FLL-Naturteich derzeit nicht in der Bibliothek — Zonen-/Artenlisten nicht vorbelegt (nicht erfunden). Freitext.',
+    note: 'Die Richtlinie druckt keine Zonen-/Artenliste — Auswahlliste nicht vorbelegt (nicht erfunden). Freitext.',
     columns: [
       { key: 'art', label: 'Pflanzenart', type: 'text' },
       { key: 'zone', label: 'Zone / Beckentyp', type: 'text' },

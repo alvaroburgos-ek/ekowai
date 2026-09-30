@@ -106,6 +106,9 @@ export default async function WorksheetPage({
       SELECT
         wt.id AS worksheet_template_id,
         COUNT(*) FILTER (WHERE f.is_required AND f.active)::int AS total_required,
+        -- A required field counts as filled when it carries a value on this sheet OR when exactly one
+        -- conflict-free value for the same symbol exists on another template of the project (the
+        -- inherited project-wide fallback the sheet itself offers — fix wave 2026-09-30, F-2 class).
         COUNT(*) FILTER (
           WHERE f.is_required AND f.active
           AND (
@@ -114,7 +117,16 @@ export default async function WorksheetPage({
             pp.value_enum    IS NOT NULL OR
             pp.value_date    IS NOT NULL OR
             pp.value_boolean IS NOT NULL OR
-            pp.value_json    IS NOT NULL
+            pp.value_json    IS NOT NULL OR
+            (
+              SELECT COUNT(DISTINCT COALESCE(pp2.value_number::text, NULLIF(pp2.value_text, ''), NULLIF(pp2.value_enum, ''),
+                                             pp2.value_date::text, pp2.value_boolean::text, pp2.value_json::text))
+              FROM fields f2
+              JOIN project_parameters pp2 ON pp2.field_id = f2.id AND pp2.project_id = ${projectId}
+              WHERE f2.symbol = f.symbol AND f2.active AND f2.worksheet_template_id <> f.worksheet_template_id
+                AND COALESCE(pp2.value_number::text, NULLIF(pp2.value_text, ''), NULLIF(pp2.value_enum, ''),
+                             pp2.value_date::text, pp2.value_boolean::text, pp2.value_json::text) IS NOT NULL
+            ) = 1
           )
         )::int AS filled_required
       FROM worksheet_templates wt

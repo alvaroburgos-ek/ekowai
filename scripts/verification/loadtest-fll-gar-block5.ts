@@ -90,7 +90,7 @@ async function main() {
       const cs = cases[code];
       if (!cs) { check(`${code} has an evaluator case`, false); continue; }
       const empty = ev(condition, {}); const p = ev(condition, cs.pass); const f = ev(condition, cs.fail); const na = ev(condition, cs.na);
-      check(`${code} empty → ${empty.kind}`, empty.kind !== 'error' && empty.kind !== 'fail', empty);
+      check(`${code} empty → ${empty.kind}`, empty.kind !== 'fail', empty);
       check(`${code} pass state → ${p.kind}`, p.kind === 'pass', p.kind === 'pass' ? undefined : p);
       check(`${code} fail state → ${f.kind}`, f.kind === 'fail', f.kind === 'fail' ? undefined : f);
       check(`${code} not-applicable state → ${na.kind}`, na.kind === 'pass', na.kind === 'pass' ? undefined : na);

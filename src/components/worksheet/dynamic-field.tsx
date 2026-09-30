@@ -59,6 +59,10 @@ type Props = {
   docs: Array<{ id: string; title: string; citationLabel: string }>;
   /** True if this field is the output of an equation (auto-computed sub-total or total). */
   isComputed?: boolean;
+  /** B2 (Σ badge): true ONLY when the producing equation is a genuine sum — its formula starts with
+   * `sum_rows(` / `sum(` (the caller reads the equation, this component never sees a formula). The
+   * badge is never inferred from the symbol name: `water_test_p_total` is P_total, a concentration. */
+  sumOutput?: boolean;
   /** Provenance hint for server-engine-written values (source_type='computed'
    * rows, e.g. the VSME CO₂ engine; VSME B04 register sums). Rendered under
    * the label; `href`/`hrefLabel` add a deep link to the producing surface. */
@@ -111,7 +115,7 @@ type Props = {
   clientSupplied?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, computedHint, inheritedFrom, prefillSource, siteProfileKey, twinSource, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, sumOutput = false, computedHint, inheritedFrom, prefillSource, siteProfileKey, twinSource, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -148,7 +152,11 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   // it is computed after the asmProvenanceRequired block and used in the
   // text/number branches where the dynamic requirement applies.
   const required = field.isRequired || undefined;
-  const isSubTotal = field.symbol.endsWith('_total');
+  // B2: the Σ badge marks a genuine sum. Signals, in order: an explicit `ui_config.sum_badge: true`
+  // on the field, or the caller's `sumOutput` (equation formula starts with sum_rows( / sum(). The
+  // former "_total" symbol-suffix inference is gone — it marked concentrations (P_total) as sums.
+  const uiSumBadge = !!field.uiConfig && typeof field.uiConfig === 'object' && (field.uiConfig as { sum_badge?: unknown }).sum_badge === true;
+  const isSubTotal = uiSumBadge || sumOutput;
   const isCurrency = field.unit === 'EUR';
   const min = field.validationRules?.min;
   const max = field.validationRules?.max;

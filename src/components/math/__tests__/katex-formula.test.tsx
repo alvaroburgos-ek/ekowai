@@ -12,10 +12,59 @@
  * its outermost wrapper; that class is the canonical sign-off that math
  * was actually typeset and not just dropped as a text node.
  */
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { useState } from 'react';
+import { render, act } from '@testing-library/react';
+import katex from 'katex';
 import { KatexFormula } from '../katex-formula';
 import { EquationsBlock } from '@/components/worksheet/equations-block';
+
+describe('KatexFormula — memoisation (FLL register stall, 2026-09-30)', () => {
+  it('typesets ONCE across 25 parent re-renders and 5 unmount/remount cycles of the same formula', () => {
+    const spy = vi.spyOn(katex, 'renderToString');
+    const SOURCE = 'V_churn = SUM(A_i * C_i) + pi/4 * d^2';
+    let bump!: () => void;
+    let toggle!: () => void;
+    function Parent() {
+      const [n, setN] = useState(0);
+      const [shown, setShown] = useState(true);
+      bump = () => setN((v) => v + 1);
+      toggle = () => setShown((v) => !v);
+      return (
+        <div data-n={n}>
+          {shown && <KatexFormula source={SOURCE} displayMode />}
+        </div>
+      );
+    }
+    const { container } = render(<Parent />);
+    expect(container.querySelector('.katex')).not.toBeNull();
+    const afterMount = spy.mock.calls.length;
+    expect(afterMount).toBe(1);
+
+    // Parent re-renders with identical props: memo bails out, no typeset.
+    for (let i = 0; i < 25; i++) act(() => bump());
+    expect(spy.mock.calls.length).toBe(afterMount);
+
+    // Unmount + remount: the module-level HTML cache answers, no typeset.
+    for (let i = 0; i < 5; i++) {
+      act(() => toggle());
+      act(() => toggle());
+    }
+    expect(container.querySelector('.katex')).not.toBeNull();
+    expect(spy.mock.calls.length).toBe(afterMount);
+    spy.mockRestore();
+  });
+
+  it('a changed formula string DOES typeset again (memo keys on the source)', () => {
+    const spy = vi.spyOn(katex, 'renderToString');
+    const { rerender } = render(<KatexFormula source="a_1 + b_1" />);
+    const first = spy.mock.calls.length;
+    expect(first).toBeGreaterThanOrEqual(0);
+    rerender(<KatexFormula source="a_1 + b_1 + c_1" />);
+    expect(spy.mock.calls.length).toBe(first + 1);
+    spy.mockRestore();
+  });
+});
 
 describe('KatexFormula', () => {
   it('renders a KaTeX-typeset formula for an A138-18 reference equation', () => {

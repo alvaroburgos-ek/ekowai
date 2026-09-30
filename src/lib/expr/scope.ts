@@ -67,8 +67,18 @@ export type EvalResult =
  * passes positionally; `evalCondition` folds it into the scope it builds.
  * Omitted ⇒ `contains()` over a carrier is `pending` (fail-safe), never a
  * verdict.
+ *
+ * `existsOnAbsent` (A1, 2026-09-30): what `x IS NOT NULL` / `x IS NOT EMPTY`
+ * yields when `x` was never entered (`undefined`). Default `'pending'` — the
+ * gate reads "○ pending — FEHLEND" like a comparison on a missing symbol.
+ * `'definite'` restores the legacy verdict (absent ⇒ ✗), e.g. for a
+ * `visible_when` rule that must HIDE until its driver is entered.
  */
-export type ConditionOptions = { hiddenSymbols?: ReadonlySet<string>; carrier?: (sym: string) => unknown };
+export type ConditionOptions = {
+  hiddenSymbols?: ReadonlySet<string>;
+  carrier?: (sym: string) => unknown;
+  existsOnAbsent?: 'pending' | 'definite';
+};
 
 /**
  * Thrown by the strict evaluation mode. `recoverable` = true when the

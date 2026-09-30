@@ -14,6 +14,8 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import { loadInheritedFields } from '@/lib/db/queries/worksheet';
+import { lookupFillWriteDecision, resolveLookupFill, resolveLookupFillConfig } from '@/lib/eval/lookup-fill';
+import type { Value } from '@/lib/expr';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
 import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { computeVisibility } from '@/lib/compliance/visibility';
@@ -531,6 +533,110 @@ export async function saveWorksheet(
     }
   }
   // ── End A_S,m validation ───────────────────────────────────────────────────
+
+  // ── lookup_fill provenance + stale-fill clearing (A2/A3, 2026-09-30) ──────
+  // The `lookup_fill` widget fills its field CLIENT-side (lookup-fill-field.tsx)
+  // and the value then travels through this batch like a typed one, so without
+  // this block a table figure persisted as source_type='entered' (A3: the
+  // Tab.-25 fill stored 'entered') and a fill whose KEY was cleared afterwards
+  // kept the old row's figure (A2: the Typ-I row's four Tab.-1 fills survived
+  // `typ = NULL`, because the widget writes nothing while its keys are missing).
+  // Resolve every own `widget = 'lookup_fill'` field against the SAME state the
+  // widget saw (own + inherited fields, persisted values overlaid by this batch,
+  // rejected values excluded) and decide per field (`lookupFillWriteDecision`):
+  //   derived → the batch value equals the bound cell ⇒ source_type 'derived';
+  //   entered → the value deviates (an override) ⇒ stays 'entered';
+  //   clear   → a key symbol is missing and a value is still stored ⇒ written
+  //             back as null (source_type 'derived') — in place for a batch row,
+  //             else as an extra row with its own audit entry — and returned in
+  //             `derived` so the client store drops it too; a warning names it;
+  //   keep    → nothing to do.
+  // Equation outputs (`derivedSymbols`) are never touched — the widget renders
+  // those in display mode and their producer materialises them. The TS
+  // `LOOKUP_BINDINGS_FALLBACK` (widget IS NULL, A138-12 `ac_as_ratio_limit`) is
+  // deliberately NOT consulted: that symbol is server-owned.
+  if (savedTemplateRow?.standardCode && fieldIds.length > 0) {
+    const ownFieldRows = await db
+      .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, widget: fields.widget, uiConfig: fields.uiConfig, lookup: fields.lookup })
+      .from(fields)
+      .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+    const boundFills = ownFieldRows
+      .filter((f) => f.widget === 'lookup_fill' && !derivedSymbols.has(f.symbol))
+      .flatMap((f) => {
+        const cfg = resolveLookupFillConfig(f);
+        return cfg ? [{ field: f, binding: cfg.binding }] : [];
+      });
+    if (boundFills.length > 0) {
+      const inheritedRows = savedStandardId && savedTemplateCode
+        ? await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode)
+        : [];
+      const ownSymbols = new Set(ownFieldRows.map((f) => f.symbol));
+      const readable = [
+        ...ownFieldRows.map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType })),
+        ...inheritedRows.filter((f) => !ownSymbols.has(f.symbol)).map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType })),
+      ];
+      const persistedRows = await db
+        .select({
+          fieldId: projectParameters.fieldId,
+          valueNumber: projectParameters.valueNumber,
+          valueText: projectParameters.valueText,
+          valueEnum: projectParameters.valueEnum,
+          valueDate: projectParameters.valueDate,
+          valueBoolean: projectParameters.valueBoolean,
+          valueJson: projectParameters.valueJson,
+        })
+        .from(projectParameters)
+        .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, readable.map((f) => f.id))));
+      const persistedValues = parametersToFieldValues(persistedRows, readable);
+      const acceptedBatch = Object.fromEntries(Object.entries(input.values).filter(([id]) => !rejectedFieldIds.has(id)));
+      const mergedValues = { ...persistedValues, ...acceptedBatch };
+      const fillLookup = makeSymbolLookup(readable, mergedValues);
+      const nullColumns = { valueNumber: null, valueText: null, valueEnum: null, valueDate: null, valueBoolean: null, valueJson: null };
+      for (const { field, binding } of boundFills) {
+        const state = resolveLookupFill(binding, savedTemplateRow.standardCode, fillLookup);
+        const current = mergedValues[field.id];
+        const value: Value | undefined = current && current.type !== 'json' ? (current.value as Value) : undefined;
+        const decision = lookupFillWriteDecision(state, field.dataType, value);
+        if (decision === 'keep' || decision === 'entered') continue;
+        const batchRow = parameterValues.find((r) => r.fieldId === field.id);
+        if (decision === 'derived') {
+          if (batchRow) batchRow.sourceType = 'derived';
+          continue;
+        }
+        // 'clear' — the key(s) the fill depended on are gone.
+        const missingKeys = state.kind === 'keys_missing' ? state.missing.join(', ') : '';
+        const reason = `lookup_fill (${state.label}): Schlüssel fehlt (${missingKeys}) — Tabellenwert gelöscht`;
+        if (batchRow) {
+          Object.assign(batchRow, nullColumns, { sourceType: 'derived' });
+          const audit = auditValues.find((a) => a.recordId === field.id);
+          if (audit) audit.changes = { ...audit.changes, after: null, reason };
+        } else {
+          const persistedBefore = persistedValues[field.id];
+          parameterValues.push({
+            projectId: instance.projectId,
+            fieldId: field.id,
+            sourceWorksheetInstanceId: instance.id,
+            sourceType: 'derived',
+            enteredBy: userId,
+            ...nullColumns,
+          });
+          auditValues.push({
+            actorId: userId,
+            actorRole: 'engineer',
+            projectId: instance.projectId,
+            tableName: 'project_parameters',
+            recordId: field.id,
+            action: persistedBefore ? 'update' : 'insert',
+            changes: { fieldId: field.id, before: persistedBefore?.value ?? null, after: null, reason },
+          });
+        }
+        // Sent back with the materialised rows so the client store drops the stale fill too.
+        rejectRevertRows.push({ fieldId: field.id, valueNumber: null, valueText: null });
+        warnings.push(`${field.symbol}: ${reason}`);
+      }
+    }
+  }
+  // ── End lookup_fill provenance ─────────────────────────────────────────────
 
   const savedCount = parameterValues.length;
 

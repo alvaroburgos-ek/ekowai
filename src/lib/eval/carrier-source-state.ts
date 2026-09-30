@@ -39,7 +39,7 @@ export type CarrierSourceOpts = {
   /** Round 2 (final review): does a not-`ok` source actually WITHHOLD values on this consumer (the page deletes
    * inherited produced symbols — `carrierWithholdFieldIds`)? Only then may the message say
    * "— abgeleitete Werte ausgeblendet"; a register nothing is derived from (the TS selection registers on
-   * DWA-M-820 / FLL-NT) gets the plain "nicht erfasst." / "nicht final (n/m …)." Default true (the A138-07
+   * DWA-M-820 / FLL-NT) gets the plain "nicht erfasst." / "noch nicht freigegeben (n/m …)." Default true (the A138-07
    * surface shim always withholds). */
   withholds?: boolean;
 };
@@ -66,11 +66,13 @@ export function carrierSourceState(
   const complete = rows.filter((r) => r.complete).length;
   const ready = complete === total && sourceStatus != null && READY_STATUSES.has(sourceStatus);
   if (ready) return { state: 'ok', complete, total, message: null };
+  // A5 (2026-09-30): the state is "not yet approved" (rows incomplete and/or the owner
+  // worksheet not engineer-approved/final) — "nicht final" read as "provisional" and misled.
   return {
     state: 'incomplete',
     complete,
     total,
-    message: `Quelle ${opts.ownerLabel} nicht final (${complete}/${total} Zeilen vollständig)${suffix}`,
+    message: `Quelle ${opts.ownerLabel} noch nicht freigegeben (${complete}/${total} Zeilen vollständig)${suffix}`,
   };
 }
 

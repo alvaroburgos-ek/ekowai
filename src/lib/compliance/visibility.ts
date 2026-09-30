@@ -134,8 +134,11 @@ export function computeVisibility(
   sections: readonly VisibilitySection[],
   lookup: (sym: string) => Value | undefined,
 ): Visibility {
+  // A1 (2026-09-30): `visible_when = 'x IS NOT NULL'` must keep HIDING until its driver is
+  // entered (A138-12 `a_s_m_determination_method`), so the rule keeps the legacy definite
+  // existence verdict — the `pending` reading is for gates (a never-entered value is not a ✗).
   const hides = (cond: string | null): boolean =>
-    cond != null && cond.trim() !== '' && evaluateCondition(cond, lookup).kind === 'fail';
+    cond != null && cond.trim() !== '' && evaluateCondition(cond, lookup, { existsOnAbsent: 'definite' }).kind === 'fail';
 
   const parent = new Map<string, string | null>(sections.map((s) => [s.id, s.parentSectionId]));
   const own = new Map<string, boolean>(sections.map((s) => [s.id, hides(s.visibleWhen ?? null)]));

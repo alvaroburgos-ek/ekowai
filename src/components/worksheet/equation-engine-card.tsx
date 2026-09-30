@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import type { EvalState } from '@/lib/eval/formula';
 import { quoteStringInput } from '@/lib/eval/engine-input';
 import { KatexFormula } from '@/components/math/katex-formula';
@@ -37,8 +37,15 @@ type Props = {
  *                        scroll the user to the offending field. NEVER shows
  *                        a computed number.
  *   - error            : same prominent treatment, with the mathjs error.
+ *
+ * Memoised on `engineCardPropsEqual`: the form re-renders on every store
+ * write (each register keystroke) and `useEquationEngine` hands it a FRESH
+ * EvalState object per equation every time, even when no verdict moved. The
+ * comparator reads `state` structurally, so a card re-renders only when ITS
+ * verdict actually changed; `unitBySymbol` / `inheritedFromBySymbol` are
+ * memoised upstream and the rest are primitives.
  */
-export function EquationEngineCard({
+export const EquationEngineCard = memo(function EquationEngineCard({
   equationNumber,
   sourceFormula,
   state,
@@ -274,6 +281,44 @@ export function EquationEngineCard({
       )}
     </section>
   );
+}, engineCardPropsEqual);
+
+/** Structural equality for plain data (EvalState: primitives, arrays, plain
+ * objects — no functions, no cycles). */
+export function deepEqualPlain(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    const bb = b as unknown[];
+    if (a.length !== bb.length) return false;
+    for (let i = 0; i < a.length; i++) if (!deepEqualPlain(a[i], bb[i])) return false;
+    return true;
+  }
+  const ao = a as Record<string, unknown>;
+  const bo = b as Record<string, unknown>;
+  const ka = Object.keys(ao);
+  if (ka.length !== Object.keys(bo).length) return false;
+  for (const k of ka) {
+    if (!Object.prototype.hasOwnProperty.call(bo, k)) return false;
+    if (!deepEqualPlain(ao[k], bo[k])) return false;
+  }
+  return true;
+}
+
+/** Props comparator for the card: every prop by reference, `state` by structure.
+ * Exported so the form can apply the same rule to the card ELEMENT it passes
+ * down as `inlineEngineCard` (element identity changes on every rebuild; its
+ * props are what matter). */
+export function engineCardPropsEqual(prev: Readonly<Record<string, unknown>>, next: Readonly<Record<string, unknown>>): boolean {
+  if (prev === next) return true;
+  const keys = new Set([...Object.keys(prev), ...Object.keys(next)]);
+  for (const k of keys) {
+    const a = prev[k];
+    const b = next[k];
+    if (k === 'state' ? !deepEqualPlain(a, b) : !Object.is(a, b)) return false;
+  }
+  return true;
 }
 
 /** Plan 3 Task 1b: a string input (enum token / text) renders QUOTED and verbatim —

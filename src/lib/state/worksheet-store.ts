@@ -59,7 +59,21 @@ type WorksheetStore = {
   flush: (saveFn: typeof saveWorksheet) => Promise<void>;
 };
 
-export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
+export const useWorksheetStore = create<WorksheetStore>((set, get) => {
+  /**
+   * The save currently on the wire, or null. `flush` is called by the form's
+   * debounced autosave; while a save is in flight a second call must NOT open
+   * a second server round-trip over the same field ids (two concurrent
+   * saveWorksheet transactions race their materialize passes and doubled the
+   * network churn observed on the FLL register sheets). The caller gets the
+   * in-flight promise instead; ids that were edited during the flight stay in
+   * `pendingFieldIds` when it lands (see the success branch), the store's
+   * pendingFieldIds identity changes, and the form's debounce effect schedules
+   * the follow-up save — one flush at a time, nothing dropped.
+   */
+  let inFlight: Promise<void> | null = null;
+
+  return {
   instanceId: null,
   values: {},
   sources: {},
@@ -90,17 +104,30 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
   setSource: (fieldId, source) =>
     set((s) => ({ sources: { ...s.sources, [fieldId]: source } })),
 
-  flush: async (saveFn) => {
+  flush: (saveFn) => {
+    if (inFlight) return inFlight;
     const state = get();
-    if (!state.instanceId || state.pendingFieldIds.size === 0) return;
+    if (!state.instanceId || state.pendingFieldIds.size === 0) return Promise.resolve();
     const valuesToSave: Record<string, FieldValue> = {};
     for (const id of state.pendingFieldIds) {
       valuesToSave[id] = state.values[id];
     }
+    inFlight = runFlush(saveFn, state.instanceId, valuesToSave).finally(() => {
+      inFlight = null;
+    });
+    return inFlight;
+  },
+  };
+
+  async function runFlush(
+    saveFn: typeof saveWorksheet,
+    instanceId: string,
+    valuesToSave: Record<string, FieldValue>,
+  ): Promise<void> {
     // Clear stale warnings at the start of each new flush so a prior rejected-save
     // message does not persist across a subsequent clean save.
     set({ saveStatus: 'saving', lastWarnings: [] });
-    const result = await saveFn({ instanceId: state.instanceId, values: valuesToSave });
+    const result = await saveFn({ instanceId, values: valuesToSave });
     if (result.ok) {
       // Apply server-materialized derived values surgically to the store.
       // Only the field ids returned in `derived` are updated; all other fields —
@@ -128,22 +155,35 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
           // If no existing entry and both columns are null, skip (nothing to write).
         }
       }
-      set((s) => ({
-        saveStatus: 'saved',
-        lastSavedAt: new Date().toISOString(),
-        pendingFieldIds: new Set(),
-        // Surface server warnings (e.g. rejected A_S,m without provenance) so the
-        // UI can display them. The server already returned the persisted value via
-        // derived rows, so the field reverts automatically via the derivedUpdates
-        // merge below. lastWarnings was cleared at the START of this flush (above).
-        lastWarnings: result.warnings ?? [],
-        // Merge derived updates on top of current values. pendingFieldIds was
-        // cleared above so there are no dirty fields to protect at this point;
-        // but this spread preserves any fields not in derivedUpdates untouched.
-        values: Object.keys(derivedUpdates).length > 0
-          ? { ...s.values, ...derivedUpdates }
-          : s.values,
-      }));
+      set((s) => {
+        // An id leaves `pending` only if the value we just persisted is still
+        // the value in the store. A field edited while this save was on the
+        // wire (setField always stores a fresh object) keeps its pending mark
+        // and rides the follow-up flush — previously the blanket `new Set()`
+        // here dropped such edits: the form's debounce effect saw size 0,
+        // cleared its timer, and the edit was never saved (register rows
+        // typed during a save vanished on the next reload).
+        const stillPending = new Set<string>();
+        for (const id of s.pendingFieldIds) {
+          if (!(id in valuesToSave) || s.values[id] !== valuesToSave[id]) stillPending.add(id);
+        }
+        return {
+          saveStatus: 'saved',
+          lastSavedAt: new Date().toISOString(),
+          pendingFieldIds: stillPending,
+          // Surface server warnings (e.g. rejected A_S,m without provenance) so the
+          // UI can display them. The server already returned the persisted value via
+          // derived rows, so the field reverts automatically via the derivedUpdates
+          // merge below. lastWarnings was cleared at the START of this flush (above).
+          lastWarnings: result.warnings ?? [],
+          // Merge derived updates on top of current values. Derived fields are
+          // never engineer-edited, so this spread only touches server-owned
+          // ids and preserves every other field (dirty or not) untouched.
+          values: Object.keys(derivedUpdates).length > 0
+            ? { ...s.values, ...derivedUpdates }
+            : s.values,
+        };
+      });
       // Auto-clear 'saved' after 3s
       setTimeout(() => {
         if (get().saveStatus === 'saved') set({ saveStatus: 'idle' });
@@ -151,5 +191,5 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
     } else {
       set({ saveStatus: 'error' });
     }
-  },
-}));
+  }
+});

@@ -17,7 +17,7 @@ describe('carrierSourceState (generic)', () => {
 
     const rows = [{ id: 'a', label: 'x', pollutant: 'NOT-A-POLLUTANT', medium: 'air', amount_t: 1 }];
     expect(carrierSourceState({ rows }, cols, 'final', opts)).toMatchObject({ state: 'incomplete', complete: 0, total: 1 });
-    expect(carrierSourceState({ rows }, cols, 'final', opts).message).toBe('Quelle VSME-B04.100 nicht final (0/1 Zeilen vollständig) — abgeleitete Werte ausgeblendet.');
+    expect(carrierSourceState({ rows }, cols, 'final', opts).message).toBe('Quelle VSME-B04.100 noch nicht freigegeben (0/1 Zeilen vollständig) — abgeleitete Werte ausgeblendet.');
 
     const good = [{ id: 'a', label: 'x', pollutant: 'AmmoniaNH3Member', medium: 'air', amount_t: 1 }];
     expect(carrierSourceState({ rows: good }, cols, 'draft', opts)).toMatchObject({ state: 'incomplete', complete: 1, total: 1 });
@@ -44,11 +44,11 @@ describe('carrierSourceState (generic)', () => {
 // column `visible_when` over a worksheet symbol decides completeness the same way the engine does.
 // Round 2: a banner must never claim withholding that does not happen — `withholds: false` drops the suffix.
 describe('carrierSourceState — withholds flag (message wording)', () => {
-  it('withholds=false ⇒ "nicht erfasst." / "nicht final (n/m Zeilen vollständig)." without the suffix; default (true) keeps it', () => {
+  it('withholds=false ⇒ "nicht erfasst." / "noch nicht freigegeben (n/m Zeilen vollständig)." without the suffix; default (true) keeps it', () => {
     const o = { ownerLabel: 'M820-01', standardCode: 'DWA-M-820-1' };
     const cols2 = [{ key: 'name', type: 'text' as const, label: 'Name', required: true }];
     expect(carrierSourceState(null, cols2, 'final', { ...o, withholds: false }).message).toBe('Quelle M820-01 nicht erfasst.');
-    expect(carrierSourceState({ rows: [{ id: '1', name: '' }] }, cols2, 'final', { ...o, withholds: false }).message).toBe('Quelle M820-01 nicht final (0/1 Zeilen vollständig).');
+    expect(carrierSourceState({ rows: [{ id: '1', name: '' }] }, cols2, 'final', { ...o, withholds: false }).message).toBe('Quelle M820-01 noch nicht freigegeben (0/1 Zeilen vollständig).');
     expect(carrierSourceState(null, cols2, 'final', o).message).toBe('Quelle M820-01 nicht erfasst — abgeleitete Werte ausgeblendet.');
     expect(carrierSourceState({ rows: [{ id: '1', name: 'x' }] }, cols2, 'final', { ...o, withholds: false })).toEqual({ state: 'ok', complete: 1, total: 1, message: null });
   });

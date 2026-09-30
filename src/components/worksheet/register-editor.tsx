@@ -118,7 +118,40 @@ export function registerPlacement(config: { placement?: RegisterUiConfig['placem
 export { tableLabel };
 
 const cellInput = 'block w-full rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink focus:border-accent focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed';
+/**
+ * UI-1 (owner rule, 100 % zoom): a register may be wider than the content column, the PAGE may not.
+ * The table lives in its own horizontal scroll container; cells carry a minimum width so a value
+ * never renders clipped ("1,17" for 1,179; a select showing only its chevron). Numeric cells fit
+ * 6 characters plus the unit suffix (`NUM_CELL_MIN`), select cells fit a chosen option label
+ * (`SELECT_CELL_MIN`); the first visible column stays pinned while scrolling (`STICKY_FIRST`).
+ */
+export const NUM_CELL_MIN = 'min-w-[7.5rem]';
+export const SELECT_CELL_MIN = 'min-w-[11rem]';
+export const TEXT_CELL_MIN = 'min-w-[9rem]';
+const STICKY_FIRST = 'sticky left-0 z-[1] bg-paper';
 const NO_SYMBOL: NonNullable<Scope['symbol']> = () => undefined;
+
+/**
+ * B3 (FLLNT-08 equipment list): a register whose column config marks NO column required would count
+ * an empty row as complete ("1/1 vollständig" right after "+ Element"). For such a config the first
+ * text column (the label column) is treated as required for completeness — display rule only, the
+ * stored carrier is untouched. A config with any explicit `required` is returned as-is.
+ */
+export function withDefaultRequired(columns: readonly RegisterColumn[]): readonly RegisterColumn[] {
+  if (columns.some((c) => c.required)) return columns;
+  const i = columns.findIndex((c) => c.type === 'text');
+  if (i < 0) return columns;
+  return columns.map((c, j) => (j === i ? { ...c, required: true } : c));
+}
+/** Min-width class per column type (UI-1). Derived cells have no input and carry no minimum. */
+function cellMinWidth(c: RegisterColumn): string {
+  switch (c.type) {
+    case 'number': case 'lookup_value': return NUM_CELL_MIN;
+    case 'enum': case 'lookup_key': return SELECT_CELL_MIN;
+    case 'text': case 'date': return TEXT_CELL_MIN;
+    default: return '';
+  }
+}
 
 function slug(s: string): string { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
 function genId(): string {
@@ -198,14 +231,15 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
     () => ({ legacyMap: config.legacy_map, flagKeys, overrideFlagKey: config.override?.flag_key, overrideAppliesTo: config.override?.applies_to }),
     [config, flagKeys],
   );
-  const prepared = useMemo(
-    () => prepareRegisterRows(raw?.type === 'json' ? raw.value : null, config.columns, { table, tableRows, symbol: rowSymbol }, opts),
-    [raw, config.columns, table, tableRows, rowSymbol, opts],
-  );
   // `columns` = the stored contract (write side, storedRows); `visibleColumns` = what renders. The
   // override flag column is a stored cell driven ONLY by the toggle button — rendering it as a checkbox
   // would add a second override-off path that skips the table-pair revert in toggleOverride (fix round 1).
-  const columns = config.columns;
+  // B3: `withDefaultRequired` only adds a `required` flag for completeness (see its doc) — same keys, same types.
+  const columns = useMemo(() => withDefaultRequired(config.columns), [config.columns]);
+  const prepared = useMemo(
+    () => prepareRegisterRows(raw?.type === 'json' ? raw.value : null, columns, { table, tableRows, symbol: rowSymbol }, opts),
+    [raw, columns, table, tableRows, rowSymbol, opts],
+  );
   const override = config.override;
   const visibleColumns = useMemo(() => columns.filter((c) => c.key !== override?.flag_key), [columns, override?.flag_key]);
   const keyCol = columns.find((c) => c.type === 'lookup_key');
@@ -366,23 +400,35 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
       {rowsDisabled ? null : prepared.rows.length === 0 ? (
         <p className="text-xs text-subtext italic">Noch keine Einträge. „{addLabel}“ fügt eine Zeile hinzu.</p>
       ) : (
-        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <table className="w-full min-w-[40rem] text-sm">
+        // UI-1: the register scrolls INSIDE this box — the page column and the sidebar never move.
+        <div data-testid="register-scroll" className="overflow-x-auto max-w-full w-full">
+          <table className="w-full text-sm">
             <thead className="text-[10px] uppercase tracking-[0.18em] text-subtext">
               <tr>
-                {visibleColumns.map((c) => (
-                  <th key={c.key} className={`font-normal pb-1 pr-2 ${isRightAligned(c) ? 'text-right' : 'text-left'} ${c.width ?? ''}`}>
-                    {c.label}{c.unit ? ` (${c.unit})` : ''}
-                  </th>
-                ))}
+                {visibleColumns.map((c, i) => {
+                  const head = `${c.label}${c.unit ? ` (${c.unit})` : ''}`;
+                  return (
+                    <th
+                      key={c.key}
+                      title={head}
+                      className={`font-normal pb-1 pr-2 whitespace-nowrap ${isRightAligned(c) ? 'text-right' : 'text-left'} ${cellMinWidth(c)} ${i === 0 ? STICKY_FIRST : ''} ${c.width ?? ''}`}
+                    >
+                      {head}
+                    </th>
+                  );
+                })}
                 <th aria-hidden="true" className="w-8" />
               </tr>
             </thead>
             <tbody>
               {prepared.rows.map((r) => (
                 <tr key={r.id} data-testid="register-row" className="border-t border-hairline align-top">
-                  {visibleColumns.map((c) => (
-                    <td key={c.key} data-testid={`cell-${c.key}`} className={`py-1.5 pr-2 ${c.type === 'number' || c.type === 'lookup_value' ? 'text-right tabular-nums' : ''}`}>
+                  {visibleColumns.map((c, i) => (
+                    <td
+                      key={c.key}
+                      data-testid={`cell-${c.key}`}
+                      className={`py-1.5 pr-2 ${cellMinWidth(c)} ${i === 0 ? STICKY_FIRST : ''} ${c.type === 'number' || c.type === 'lookup_value' ? 'text-right tabular-nums' : ''}`}
+                    >
                       {cellHidden(r, c) ? null : (
                         <Cell
                           col={c}
@@ -464,7 +510,8 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
       {config.note ? <p className="text-[11px] text-subtext">{config.note}</p> : null}
 
       <div className="text-[11px] text-subtext border-t border-hairline-strong pt-2">
-        <span className="font-mono">{complete}</span> Einträge · <span data-testid="rows-complete">{complete}/{prepared.rows.length}</span> vollständig
+        {/* B3: the first number counts ROWS, the pair counts complete rows of those. */}
+        <span data-testid="rows-count" className="font-mono">{prepared.rows.length}</span> Einträge · <span data-testid="rows-complete">{complete}/{prepared.rows.length}</span> vollständig
         {config.footer?.map((sym) => {
           const f = footerStates?.[sym];
           const st = f?.state;
@@ -530,7 +577,8 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn,
             type="number" inputMode="decimal" step="any" min={col.min} max={col.max}
             value={typeof v === 'number' ? v : ''} disabled={readOnly} aria-label={aria} placeholder={col.placeholder}
             onChange={(e) => onChange(numberOrNull(e.target.value))}
-            className={`${cellInput} text-right tabular-nums`}
+            className={`${cellInput} ${NUM_CELL_MIN} text-right tabular-nums`}
+            title={typeof v === 'number' ? `${fmt(v)}${col.unit ? ` ${col.unit}` : ''}` : undefined}
           />
           {typeof v === 'number' && col.min !== undefined && v < col.min && (
             <div className="text-[10px] text-warning mt-1">{col.label} muss ≥ {col.min} sein</div>
@@ -548,9 +596,13 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn,
       if (col.sort_by_label) opts.sort((a, b) => a.label.localeCompare(b.label));
       return (
         <>
-          <select value={typeof v === 'string' ? v : ''} disabled={readOnly} aria-label={aria} onChange={(e) => onChange(e.target.value || null)} className={cellInput}>
+          <select
+            value={typeof v === 'string' ? v : ''} disabled={readOnly} aria-label={aria} onChange={(e) => onChange(e.target.value || null)}
+            className={`${cellInput} ${SELECT_CELL_MIN}`}
+            title={typeof v === 'string' ? (opts.find((o) => o.value === v)?.label ?? v) : undefined}
+          >
             <option value="" disabled={!!col.required}>— wählen —</option>
-            {opts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {opts.map((o) => <option key={o.value} value={o.value} title={o.label}>{o.label}</option>)}
           </select>
           {col.required && v == null && <div data-testid={`reselect-${col.key}`} className="text-[10px] text-warning mt-1">⚠ {col.label} wählen</div>}
         </>
@@ -560,13 +612,17 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn,
       const tl = tableLabel(col.lookup?.table_code ?? '');
       return (
         <>
-          <select aria-label={aria} value={typeof v === 'string' ? v : ''} disabled={readOnly} onChange={(e) => onSelectKey(e.target.value)} className={cellInput}>
+          <select
+            aria-label={aria} value={typeof v === 'string' ? v : ''} disabled={readOnly} onChange={(e) => onSelectKey(e.target.value)}
+            className={`${cellInput} ${SELECT_CELL_MIN}`}
+            title={typeof v === 'string' ? (tableRows.find((tr) => tr.row_key === v)?.label_de ?? v) : undefined}
+          >
             <option value="" disabled>— wählen —</option>
             {groupRows(tableRows, col.lookup?.group_by).map((g) => g.label == null
-              ? g.rows.map((tr) => <option key={tr.row_key} value={tr.row_key}>{tr.label_de}</option>)
+              ? g.rows.map((tr) => <option key={tr.row_key} value={tr.row_key} title={tr.label_de}>{tr.label_de}</option>)
               : (
                 <optgroup key={g.label} label={g.label}>
-                  {g.rows.map((tr) => <option key={tr.row_key} value={tr.row_key}>{tr.label_de}</option>)}
+                  {g.rows.map((tr) => <option key={tr.row_key} value={tr.row_key} title={tr.label_de}>{tr.label_de}</option>)}
                 </optgroup>
               ))}
           </select>
@@ -595,22 +651,23 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn,
         <>
           {overridden && isApplies ? (
             alternatives ? (
-              <select aria-label={label} value={v == null ? '' : String(v)} disabled={readOnly} onChange={(e) => { if (e.target.value === '') return; onChange(numeric ? Number(e.target.value) : e.target.value); }} className={cellInput}>
+              <select aria-label={label} value={v == null ? '' : String(v)} disabled={readOnly} onChange={(e) => { if (e.target.value === '') return; onChange(numeric ? Number(e.target.value) : e.target.value); }} className={`${cellInput} ${SELECT_CELL_MIN}`} title={v == null ? undefined : String(v)}>
                 {v == null && <option value="">— wählen —</option>}
-                {alternatives.map((a) => <option key={a} value={a}>{a}</option>)}
+                {alternatives.map((a) => <option key={a} value={a} title={a}>{a}</option>)}
               </select>
             ) : numeric ? (
               <input
                 type="number" inputMode="decimal" step="any" min={col.min} max={col.max}
                 aria-label={label} value={typeof v === 'number' ? v : ''} disabled={readOnly}
                 onChange={(e) => onChange(numberOrNull(e.target.value))}
-                className={`${cellInput} text-right tabular-nums`}
+                className={`${cellInput} ${NUM_CELL_MIN} text-right tabular-nums`}
+                title={typeof v === 'number' ? `${fmt(v)}${col.unit ? ` ${col.unit}` : ''}` : undefined}
               />
             ) : (
               <input type="text" aria-label={label} value={typeof v === 'string' ? v : ''} disabled={readOnly} onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)} className={cellInput} />
             )
           ) : (
-            <span data-testid={`lookup-value-${col.key}`} className="font-mono text-ink">{fmt(v)}</span>
+            <span data-testid={`lookup-value-${col.key}`} className="font-mono text-ink whitespace-nowrap" title={`${fmt(v)}${col.unit ? ` ${col.unit}` : ''}`}>{fmt(v)}</span>
           )}
           {mismatch && <div data-testid={`mismatch-${col.key}`} className="text-[10px] text-warning">{col.label} weicht von {tl} ab</div>}
           {staleTable && (
@@ -624,9 +681,9 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn,
     case 'derived': {
       const label = v == null ? null : (col.value_labels?.[String(v)] ?? fmt(v));
       if (col.display === 'badge') {
-        return label ? <div data-testid={`derived-badge-${col.key}`} className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-1">{label}</div> : null;
+        return label ? <div data-testid={`derived-badge-${col.key}`} title={label} className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-1 whitespace-nowrap">{label}</div> : null;
       }
-      return <span data-testid={`derived-${col.key}`} className="font-mono text-sm text-ink">{label ?? <span className="text-subtext">—</span>}</span>;
+      return <span data-testid={`derived-${col.key}`} title={label ?? undefined} className="font-mono text-sm text-ink whitespace-nowrap">{label ?? <span className="text-subtext">—</span>}</span>;
     }
     case 'grid':
       return <GridCell />;
@@ -634,7 +691,8 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn,
       return (
         <input
           type="text" value={typeof v === 'string' ? v : ''} disabled={readOnly} aria-label={aria} list={listId} placeholder={col.placeholder}
-          onChange={(e) => onChange(e.target.value)} className={cellInput}
+          title={typeof v === 'string' && v !== '' ? v : undefined}
+          onChange={(e) => onChange(e.target.value)} className={`${cellInput} ${TEXT_CELL_MIN}`}
         />
       );
   }

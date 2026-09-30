@@ -77,11 +77,17 @@ describe('explainCondition — leaves carry actual · required · wouldPass', ()
     expect(r.leaves[0].required).toContain('Q * 25');
   });
 
-  it('IS NOT NULL leaf', () => {
+  it('IS NOT NULL leaf — never entered ⇒ pending (A1), hint kept; empty carrier ⇒ violated', () => {
     const r = explainCondition('protokoll IS NOT NULL', lookup({}));
     if (r.kind !== 'explained') throw new Error('expected explained');
-    expect(r.leaves[0].satisfied).toBe(false);
+    // Old expectation: satisfied false — encoded the A1 defect (✗ before anything was typed).
+    expect(r.leaves[0].satisfied).toBeNull();
+    expect(r.leaves[0].actual).toBe('protokoll fehlt');
     expect(r.leaves[0].wouldPass).toMatch(/ausfüllen|erfassen/i);
+    const e = explainCondition('protokoll IS NOT NULL', lookup({ protokoll: '' }));
+    if (e.kind !== 'explained') throw new Error('expected explained');
+    expect(e.leaves[0].satisfied).toBe(false);
+    expect(e.leaves[0].wouldPass).toMatch(/ausfüllen|erfassen/i);
   });
 
   it('unparseable prose → manual', () => {

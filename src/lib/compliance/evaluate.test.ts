@@ -9,10 +9,12 @@ describe('jsonConditionValue — carrier presence for the condition DSL', () => 
   it("returns 'present' for a carrier with rows", () => {
     expect(jsonConditionValue({ rows: [{ id: '1' }] })).toBe('present');
   });
-  it('returns null for an empty carrier / empty object / empty array / null', () => {
-    expect(jsonConditionValue({ rows: [] })).toBeNull();
-    expect(jsonConditionValue({})).toBeNull();
-    expect(jsonConditionValue([])).toBeNull();
+  // A1 (2026-09-30): an EXISTING but empty carrier is the '' marker (definite "nothing
+  // recorded"); only a carrier that was never saved (null) is absent.
+  it("returns '' for an empty carrier / empty object / empty array, null for null", () => {
+    expect(jsonConditionValue({ rows: [] })).toBe('');
+    expect(jsonConditionValue({})).toBe('');
+    expect(jsonConditionValue([])).toBe('');
     expect(jsonConditionValue(null)).toBeNull();
   });
   it("returns 'present' for a non-empty array/object", () => {
@@ -29,9 +31,10 @@ describe('json carrier IS NOT NULL (regression: REQ-06 surface_inventory)', () =
   it('passes when the carrier has rows', () => {
     expect(gate({ rows: [{ id: '1' }, { id: '2' }, { id: '3' }] })).toBe('pass');
   });
-  it('fails when the carrier is empty or absent', () => {
+  it('fails when the carrier exists but is empty; a never-saved carrier is pending (A1)', () => {
     expect(gate({ rows: [] })).toBe('fail');
-    expect(gate(null)).toBe('fail');
+    // Old expectation: 'fail' — encoded the A1 defect (an untouched register read as ✗).
+    expect(gate(null)).toBe('pending');
   });
 });
 
@@ -62,9 +65,10 @@ describe('evaluateCondition', () => {
     expect(evaluateCondition('x >= 1', lookup({ x: '' })).kind).toBe('pending');
   });
 
-  it('IS NOT NULL is pass when value present', () => {
+  it('IS NOT NULL is pass when value present, pending when never entered (A1)', () => {
     expect(evaluateCondition('input_documents_register IS NOT NULL', lookup({ input_documents_register: 'foo' }))).toEqual({ kind: 'pass' });
-    expect(evaluateCondition('input_documents_register IS NOT NULL', lookup({}))).toEqual({ kind: 'fail' });
+    // Old expectation: { kind: 'fail' } — encoded the A1 defect (✗ before anything was typed).
+    expect(evaluateCondition('input_documents_register IS NOT NULL', lookup({}))).toEqual({ kind: 'pending', missingSymbols: ['input_documents_register'] });
   });
 
   it('IS NOT EMPTY accepts string and number', () => {

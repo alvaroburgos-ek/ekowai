@@ -14,7 +14,7 @@ describe('SurfaceSourceBanner', () => {
       { id: '1', tab9_value: 'beton', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false },
       { id: '2', tab9_value: null, area_m2: null, c_i: null, c_s: null, coeff_override: false },
     ] }, 'final')} />);
-    expect(screen.getByText(/Quelle A138-07 nicht final \(1\/2/)).toBeInTheDocument();
+    expect(screen.getByText(/Quelle A138-07 noch nicht freigegeben \(1\/2/)).toBeInTheDocument();
   });
   it('shows the missing cause', () => {
     render(<SurfaceSourceBanner state={surfaceSourceState(null, 'final')} />);

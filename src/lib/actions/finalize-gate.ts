@@ -8,6 +8,8 @@ import {
 import { and, eq, inArray } from 'drizzle-orm';
 import { projects } from '@/lib/db/schema';
 import { resolveFromSiteProfile } from '@/lib/site-profile/symbol-map';
+import { requiredFieldSatisfied } from '@/lib/projects/required-fields';
+import { loadInheritedSymbolsForTemplate } from './approval-gate';
 
 /**
  * Stage-1 verification blocking rule (SR-1, roadmap tracker):
@@ -44,25 +46,6 @@ export function decideFinalizeGate(rows: FinalizeGateRow[]): FinalizeGateResult 
       verificationStatus: r.verificationStatus,
     }));
   return { ok: unverifiedFields.length === 0, unverifiedFields };
-}
-
-/** Presence check per data type — mirrors the approval gate's required-field check. */
-function paramHasValue(
-  dataType: string,
-  p: {
-    valueNumber: unknown; valueText: string | null; valueEnum: string | null;
-    valueBoolean: boolean | null; valueDate: string | null; valueJson: unknown;
-  },
-): boolean {
-  switch (dataType) {
-    case 'number': return p.valueNumber != null;
-    case 'text': return p.valueText != null && p.valueText !== '';
-    case 'enum': return p.valueEnum != null && p.valueEnum !== '';
-    case 'boolean': return p.valueBoolean != null;
-    case 'date': return p.valueDate != null;
-    case 'json': return p.valueJson != null;
-    default: return false;
-  }
 }
 
 /** DB-bound loader: assemble the instance's field rows and decide. */
@@ -123,6 +106,11 @@ export async function checkFinalizeGate(instanceId: string): Promise<FinalizeGat
     .limit(1);
   const siteProfile = proj?.siteProfile ?? null;
 
+  // A4: an inherited project-wide value (same symbol on another worksheet,
+  // conflict-free) counts as "used" exactly like an entered one — the same
+  // `requiredFieldSatisfied` rule the approval gate and the progress counts apply.
+  const inheritedSymbols = await loadInheritedSymbolsForTemplate(instance.projectId, instance.worksheetTemplateId);
+
   return decideFinalizeGate(
     tmplFields.map((f) => {
       const p = paramByFieldId.get(f.id);
@@ -132,7 +120,7 @@ export async function checkFinalizeGate(instanceId: string): Promise<FinalizeGat
         labelDe: f.labelDe,
         isRequired: f.isRequired ?? false,
         verificationStatus: f.verificationStatus,
-        hasValue: (p ? paramHasValue(f.dataType, p) : false) || fromSite?.value != null,
+        hasValue: requiredFieldSatisfied(f, p, inheritedSymbols) || fromSite?.value != null,
       };
     }),
   );
