@@ -221,7 +221,7 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
     const card = screen.getByTestId('engine-card-gl-8');
     expect(card).toHaveAttribute('data-engine-state', 'manual_required');
     expect(
-      within(card).getByText(/rechnerisch nicht bestätigt — manuell prüfen/i),
+      within(card).getByText(/noch nicht berechenbar — Eingaben fehlen/i),
     ).toBeInTheDocument();
     // The reason names Q_S as the missing input
     expect(within(card).getAllByText(/Q_S/).length).toBeGreaterThan(0);

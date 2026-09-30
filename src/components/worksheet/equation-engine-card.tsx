@@ -57,6 +57,11 @@ export const EquationEngineCard = memo(function EquationEngineCard({
   const isComputed = state.kind === 'computed';
   const isManual = state.kind === 'manual_required';
   const isError = state.kind === 'error';
+  // Readiness run 2026-09-30: an equation whose INPUTS are simply not there yet (an upstream sheet not
+  // approved, a value not entered) is not a computation the engineer must check by hand — it is waiting.
+  // Keep the red "manuell prüfen" for real manual cases (criterion formulas, engine refusals).
+  const isWaitingForInputs =
+    isManual && /^Fehlende (oder leere |Skalar-)?Eingaben/.test((state as { reason?: string }).reason ?? '');
   const [showBreakdown, setShowBreakdown] = useState(false);
   const showOriginColumn = inheritedFromBySymbol !== undefined;
 
@@ -67,6 +72,8 @@ export const EquationEngineCard = memo(function EquationEngineCard({
       className={`rounded border p-3 sm:p-4 space-y-3 text-sm ${
         isComputed
           ? 'border-success/30 bg-success/5'
+          : isWaitingForInputs
+          ? 'border-warning/40 bg-warning/5'
           : 'border-error/40 bg-error/5'
       }`}
     >
@@ -79,7 +86,12 @@ export const EquationEngineCard = memo(function EquationEngineCard({
             rechnerisch bestätigt
           </span>
         )}
-        {(isManual || isError) && (
+        {isWaitingForInputs && (
+          <span className="text-[10px] uppercase tracking-[0.18em] text-warning font-semibold">
+            noch nicht berechenbar — Eingaben fehlen
+          </span>
+        )}
+        {(isManual || isError) && !isWaitingForInputs && (
           <span className="text-[10px] uppercase tracking-[0.18em] text-error font-semibold">
             rechnerisch nicht bestätigt — manuell prüfen
           </span>
