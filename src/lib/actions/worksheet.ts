@@ -2563,7 +2563,10 @@ export async function saveWorksheet(
 
           // 2. facility_type_selected (A138-15) — scoped. Map to the dimensioned
           //    facility worksheet code (superset map incl. mre/mrs composites).
-          const rawFtP4 = await readScopedEnumText('facility_type_selected');
+          // A138-15 stores the composites as the enum tokens 'MRE' / 'MRS' (uppercase) while the engine
+          // types are lowercase — normalise, or the summary reports 'facility_type_selected missing'
+          // for every Mulden-Rigolen case (readiness run 2026-09-30, case A6).
+          const rawFtP4 = (await readScopedEnumText('facility_type_selected'))?.toLowerCase() ?? null;
           const facilityTypeP4: Phase4FacilityType | null =
             rawFtP4 === 'flaeche' || rawFtP4 === 'mulde' || rawFtP4 === 'rigole' ||
             rawFtP4 === 'mre' || rawFtP4 === 'mrs' || rawFtP4 === 'schacht' ||
