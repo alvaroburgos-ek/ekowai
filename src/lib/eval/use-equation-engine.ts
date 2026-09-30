@@ -29,6 +29,7 @@ import type {
   FloodSubAreasCarrier,
   Gl10Scalars,
 } from './aggregators';
+import { floodCarrierFromSum } from './aggregators';
 import { buildCarriers, buildRegisters } from './register-rows';
 import { makeTableLookup } from './regulation-tables-fallback';
 import type { Value } from '@/lib/expr';
@@ -354,13 +355,20 @@ export function useEquationEngine({
     [fields],
   );
   const floodCarrier = useMemo<FloodSubAreasCarrier | null>(() => {
-    if (!floodCarrierField) return null;
-    const v = storeValue(floodCarrierField.id);
-    if (v?.type !== 'json') return null;
-    const raw = v.value as { rows?: unknown } | null | undefined;
-    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
-    return raw as FloodSubAreasCarrier;
-  }, [storeValue, floodCarrierField]);
+    const fromField = ((): FloodSubAreasCarrier | null => {
+      if (!floodCarrierField) return null;
+      const v = storeValue(floodCarrierField.id);
+      if (v?.type !== 'json') return null;
+      const raw = v.value as { rows?: unknown } | null | undefined;
+      if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
+      return raw as FloodSubAreasCarrier;
+    })();
+    if (fromField && fromField.rows.length > 0) return fromField;
+    // Single source: the A138-26-D1 sum over the paved rows of the A138-07 register.
+    const sumField = fieldBySymbol.get('A_C_s_flood');
+    const sv = sumField ? storeValue(sumField.id) : undefined;
+    return floodCarrierFromSum(sv?.type === 'number' ? sv.value : null) ?? fromField;
+  }, [storeValue, floodCarrierField, fieldBySymbol]);
 
   // Gl. 10 scalars. Origin worksheets in production: A_VA← A138-10,
   // Q_S← A138-12, Q_Dr← A138-20, D← A138-04, V_VA← A138-13, r_D_T_n_Ue

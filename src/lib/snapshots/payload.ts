@@ -32,6 +32,7 @@ import type {
   FloodSubAreasCarrier,
   Gl10Scalars,
 } from '@/lib/eval/aggregators';
+import { floodCarrierFromSum } from '@/lib/eval/aggregators';
 // Type-only schema imports — keeps this module free of any runtime `db`
 // dependency so unit tests can call buildSnapshotPayload without env vars.
 import type {
@@ -360,7 +361,7 @@ export function buildSnapshotPayload(args: {
 
   // Flood sub-area carrier (A138-26 Gl.10).
   const floodSubAreasField = fieldList.find((f) => f.symbol === 'sub_areas_A138_26');
-  const floodCarrier: FloodSubAreasCarrier | null = (() => {
+  const floodFromField: FloodSubAreasCarrier | null = (() => {
     if (!floodSubAreasField) return null;
     const p = paramForEngine(floodSubAreasField.id);
     if (!p || p.valueJson == null) return { rows: [] };
@@ -368,6 +369,11 @@ export function buildSnapshotPayload(args: {
     if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
     return raw as FloodSubAreasCarrier;
   })();
+  // Single source: the A138-26-D1 sum over the paved rows of the A138-07 register.
+  const floodCarrier: FloodSubAreasCarrier | null =
+    floodFromField && floodFromField.rows.length > 0
+      ? floodFromField
+      : (floodCarrierFromSum(numberBySymbol('A_C_s_flood')) ?? floodFromField);
 
   // Task 5 — Flood 30-column resolution (snapshot path).
   // T_n=30 is FIXED for the flood case (§5.3.4), regardless of facility T_n.

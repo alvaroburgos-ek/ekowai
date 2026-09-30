@@ -36,6 +36,7 @@ import type {
   Gl8Scalars,
   Gl10Scalars,
 } from './aggregators';
+import { floodCarrierFromSum } from './aggregators';
 
 // Plan 2a: the six A138-07 surface producers are formula strings over the
 // `surface_inventory` register (rewrites.ts A138_07_REGISTER_FORMULAS) —
@@ -336,9 +337,15 @@ export function evaluateWorksheetEquations(
       : null;
 
   const floodJson = jsonOf('sub_areas_A138_26') as { rows?: unknown } | undefined;
-  const floodCarrier: FloodSubAreasCarrier | null = floodJson && Array.isArray(floodJson.rows)
+  const floodFromField: FloodSubAreasCarrier | null = floodJson && Array.isArray(floodJson.rows)
     ? (floodJson as FloodSubAreasCarrier)
     : null;
+  // Single source: the A138-26-D1 sum over the paved rows of the A138-07 register.
+  const floodSumField = fieldBySymbol.get('A_C_s_flood');
+  const floodCarrier: FloodSubAreasCarrier | null =
+    floodFromField && floodFromField.rows.length > 0
+      ? floodFromField
+      : (floodCarrierFromSum(floodSumField ? numOf(floodSumField.id) : null) ?? floodFromField);
 
   // Task 5 — Flood 30-column resolution (server path).
   // Resolve T_n=30 from the same KOSTRA grid, FIXED at 30 regardless of the

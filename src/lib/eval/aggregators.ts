@@ -66,6 +66,26 @@ export type FloodSubArea = {
   c_S: number | null;
 };
 
+/**
+ * Gl. 10 carrier from the SINGLE SOURCE of paved areas: A138-26-D1 already sums
+ * Σ(A_E,b,a · C_S) over the paved rows of the A138-07 surface register (`A_C_s_flood`).
+ * Production has no separate `sub_areas_A138_26` register, so the aggregator saw "no flood
+ * sub-areas" on every project (readiness run 2026-09-30, case A10). One synthetic row with
+ * C_S = 1 reproduces the sum exactly and names its origin in the substituted map.
+ */
+export function floodCarrierFromSum(sum: number | null | undefined): FloodSubAreasCarrier | null {
+  if (typeof sum !== 'number' || !Number.isFinite(sum)) return null;
+  return {
+    rows: [{
+      id: 'A_C_s_flood',
+      label: 'Σ(A_E,b,a·C_S) aus dem Flächenverzeichnis (A138-26-D1)',
+      kind: 'paved',
+      area_m2: sum,
+      c_S: 1,
+    }],
+  };
+}
+
 export type FloodSubAreasCarrier = {
   rows: FloodSubArea[];
 };
