@@ -104,6 +104,12 @@ export const PHASE4_SUMMARY_CONSUMER_CODE = 'A138-23';
 // facility's governing storage volume (V_MR / V_S / V_B). mulde/rigole ride the `asm`
 // branch instead (geometry sweep), so their inputs are NOT here.
 const FACILITY_VOLUME_INPUT_SYMBOLS = [
+  // Mulde (A138-17, Gl.15 on the DIRECT A_S,m path — readiness run 2026-09-30): the geometry
+  // sweep (`asm` branch) persists V_M only when A_S,m comes from Gl.16; a swale whose A_S,m was
+  // entered directly on A138-12 never got its volume → A138-23 "fehlende Größen V_M".
+  'h_M', 'A_VA_Mulde', 'b_M', 'L_M', 'n_M_Bemessung',
+  // Rigole (A138-18, Gl.20/21): geometry + storage coefficient inputs.
+  'b_R', 'h_R', 'L_R', 's_F', 'az', 'd_i', 'd_a', 'n_R_Bemessung',
   // MRE (A138-19, Gl.26): sum of persisted component volumes.
   'V_M_MRE', 'V_R_MRE', 'n_R', 'A_VA_MRE',
   // Schacht (A138-21, Gl.36/37): inner/outer diameter drive the swept V_S.

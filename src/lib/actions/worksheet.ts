@@ -2704,7 +2704,7 @@ export async function saveWorksheet(
             }
           }
         } else if (producerEntry.id === 'facility_volume') {
-          // ── Facility governing-volume producer (MRE/Schacht/Becken) ─────────
+          // ── Facility governing-volume producer (Mulde direct / Rigole / MRE / Schacht / Becken) ──
           // Fan-out: mulde/rigole volumes ride the `asm` branch; these three get their
           // OWN materialize, fired when a volume-driving input changes on their facility
           // worksheet (FACILITY_VOLUME_INPUT_SYMBOLS). producer == consumer: the volume
@@ -2715,7 +2715,9 @@ export async function saveWorksheet(
           //   Becken (A138-22): V_B via the Gl.41 governing sweep (GOVERNING_PROFILES).
           const fvCode = savedTemplateCode;
           const fvFacility: Phase4FacilityType | null =
-            fvCode === 'A138-19' ? 'mre'
+            fvCode === 'A138-17' ? 'mulde'
+            : fvCode === 'A138-18' ? 'rigole'
+            : fvCode === 'A138-19' ? 'mre'
             : fvCode === 'A138-21' ? 'schacht'
             : fvCode === 'A138-22' ? 'becken'
             : null;
@@ -2810,7 +2812,28 @@ export async function saveWorksheet(
 
           // Compute the governing volume per facility.
           let fvInputs: Parameters<typeof facilityVolumeMaterialize>[1] | null = null;
-          if (fvFacility === 'mre') {
+          if (fvFacility === 'mulde') {
+            // Gl.15: V_M = A_S,m · h_M — the DIRECT-A_S,m path (readiness run 2026-09-30). When
+            // A_S,m comes from the geometry sweep the `asm` branch already wrote the same value;
+            // here A_S,m is read scoped (A138-12 owns it), h_M from the saved sheet / batch.
+            const A_S_m = await fvReadNum('A_S_m');
+            const h_M = await fvNum('h_M');
+            fvInputs = { A_S_m, h_M };
+          } else if (fvFacility === 'rigole') {
+            // Gl.20: V_R = b_R · h_R · L_R · s_R, s_R per Gl.21 (exact) from the fill material
+            // and the embedded pipes (az = 0 when no pipe is entered).
+            const b_R = await fvNum('b_R');
+            const h_R = await fvNum('h_R');
+            const L_R = await fvNum('L_R');
+            const s_F = await fvNum('s_F');
+            const az = (await fvNum('az')) ?? 0;
+            const d_i = await fvNum('d_i');
+            const d_a = await fvNum('d_a');
+            const s_R = s_F != null && b_R != null && h_R != null
+              ? computeRigoleStorageCoefficient({ s_F, b_R, h_R, az, d_i, d_a })
+              : null;
+            fvInputs = { A_S_m: null, h_M: null, b_R, h_R, L_R, s_R };
+          } else if (fvFacility === 'mre') {
             // Gl.26: V_MR = persisted V_M (A138-17) + persisted V_R (A138-18), scoped.
             const vM = await fvReadNum('V_M');
             const vR = await fvReadNum('V_R');
