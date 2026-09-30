@@ -47,8 +47,20 @@ export function toFieldValue(dataType: string, raw: unknown) {
       return { type: 'date' as const, value: String(raw) };
     case 'enum':
       return { type: 'enum' as const, value: String(raw) };
-    case 'json':
+    case 'json': {
+      // A JSON carrier (register rows, KOSTRA table) arrives through the tool schema as a
+      // STRING. Postgres accepted the raw text as jsonb, but the same-batch derivation
+      // (surface inventory → A_C, C_m, sums) saw a string and wrote nulls (readiness run
+      // 2026-09-30, TEST-A138-Rigole). Parse it here so the save path sees the object.
+      if (typeof raw === 'string') {
+        try {
+          return { type: 'json' as const, value: JSON.parse(raw) as unknown };
+        } catch {
+          throw new Error('Wert ist kein gültiges JSON, das Feld erwartet aber einen JSON-Träger (z. B. {"rows":[…]}).');
+        }
+      }
       return { type: 'json' as const, value: raw };
+    }
     default:
       return { type: 'text' as const, value: String(raw) };
   }

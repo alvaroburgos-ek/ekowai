@@ -86,3 +86,22 @@ describe('toFieldValue — other types', () => {
     expect(toFieldValue('text', undefined)).toEqual({ type: 'text', value: null });
   });
 });
+
+describe('toFieldValue — JSON carriers (readiness run 2026-09-30)', () => {
+  it('parses a JSON string so the same-batch derivation (surface inventory → A_C) sees rows, not text', () => {
+    const carrier = '{"rows":[{"id":"r1","label":"Dach","area_m2":104.6,"c_i":0.9}]}';
+    expect(toFieldValue('json', carrier)).toEqual({
+      type: 'json',
+      value: { rows: [{ id: 'r1', label: 'Dach', area_m2: 104.6, c_i: 0.9 }] },
+    });
+  });
+
+  it('passes an already-structured object through unchanged', () => {
+    const obj = { tables: [{ id: 't1', rows: [] }] };
+    expect(toFieldValue('json', obj)).toEqual({ type: 'json', value: obj });
+  });
+
+  it('rejects text that is not JSON instead of storing it as a string carrier', () => {
+    expect(() => toFieldValue('json', 'rows: 5')).toThrow(/kein gültiges JSON/);
+  });
+});
