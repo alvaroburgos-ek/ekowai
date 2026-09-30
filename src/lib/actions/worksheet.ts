@@ -23,7 +23,7 @@ import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
-import { materializeBasinGoverning } from '@/lib/eval/materialize-basin-governing';
+import { materializeBasinGoverning, explainBasinGoverningGap } from '@/lib/eval/materialize-basin-governing';
 import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
@@ -993,18 +993,22 @@ export async function saveWorksheet(
               ))
           : [];
 
-        // Build symbol→numeric map (first non-null wins per symbol).
+        // Build symbol→numeric map: first NON-NULL value wins per symbol. A symbol can be
+        // defined on several templates (A_C on A138-07 and, as an inherited carrier, on
+        // A138-10; r_D_n on A138-13 and A138-10); the old `!has(symbol)` guard let an
+        // EMPTY row that happened to come first shadow the valued row — the materialiser
+        // then withheld and wrote nulls (readiness run 2026-09-30, BESS case).
         const crossNumBySymbol = new Map<string, number | null>();
         const crossTextBySymbol = new Map<string, string | null>();
         const crossFieldById = new Map(crossFields.map((f) => [f.id, f]));
         for (const p of crossParams) {
           const f = crossFieldById.get(p.fieldId);
           if (!f) continue;
-          if (f.dataType === 'number' && !crossNumBySymbol.has(f.symbol)) {
+          if (f.dataType === 'number' && crossNumBySymbol.get(f.symbol) == null) {
             const v = p.valueNumber != null ? Number(p.valueNumber) : null;
             crossNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
           }
-          if (f.dataType === 'text' && !crossTextBySymbol.has(f.symbol)) {
+          if (f.dataType === 'text' && crossTextBySymbol.get(f.symbol) == null) {
             crossTextBySymbol.set(f.symbol, p.valueText ?? null);
           }
         }
@@ -1040,6 +1044,12 @@ export async function saveWorksheet(
           T_n,
           scalars,
         });
+        if (governing == null) {
+          // Readiness run 2026-09-30: a silent withhold wrote empty r_D_n / D_min rows and left
+          // Q_zu (A138-10) and the Flächenversickerung sheet without a visible cause. Name it.
+          const why = explainBasinGoverningGap({ carrierRaw, rainfallTableRef, T_n, scalars });
+          if (why && !warnings.includes(why)) warnings.push(why);
+        }
 
         // 8. UPSERT the two derived rows, or clear them when not computable.
         //    Clearing (valueNumber=null) ensures A138-10 blanks-with-cause when

@@ -117,3 +117,28 @@ export function materializeBasinGoverning(
     D_min: governing.governingD,
   };
 }
+
+/**
+ * Why did materializeBasinGoverning withhold? Re-runs the same prerequisite chain and names the
+ * FIRST failing step in the engineer's words (German, like every other save warning). Returns null
+ * when nothing is missing (the pair is computable). Added in the readiness run 2026-09-30: a silent
+ * null wrote empty r_D_n / D_min rows on A138-13 without a trace, which left Q_zu (A138-10) and the
+ * Flächenversickerung sheet dead with no visible cause.
+ */
+export function explainBasinGoverningGap(input: BasinGoverningInput): string | null {
+  const missing = REQUIRED_SCALAR_KEYS.filter((k) => {
+    const v = input.scalars[k];
+    return typeof v !== 'number' || !Number.isFinite(v);
+  });
+  if (missing.length > 0) return `Maßgebende Dauerstufe nicht bestimmbar: Eingang fehlt (${missing.join(', ')})`;
+  const carrier = normalizeRainfallCarrier(input.carrierRaw);
+  if (carrier.tables.length === 0) return 'Maßgebende Dauerstufe nicht bestimmbar: keine Regenspendentabelle (r_D_n_table auf A138-04) vorhanden';
+  const table = resolveSelectedTable(carrier, input.rainfallTableRef);
+  if (!table) return 'Maßgebende Dauerstufe nicht bestimmbar: gewählte Regenspendentabelle nicht gefunden';
+  if (!table.legacyDesignColumn && input.T_n === null) return 'Maßgebende Dauerstufe nicht bestimmbar: Wiederkehrzeit T_n nicht bestimmbar (n auf A138-08 setzen)';
+  const col = resolveColumn(table, input.T_n);
+  if (col.status === 'missing') return `Maßgebende Dauerstufe nicht bestimmbar: Spalte T = ${input.T_n} a fehlt in der Tabelle „${table.name}“`;
+  if (col.rows.length === 0) return 'Maßgebende Dauerstufe nicht bestimmbar: Regenspendentabelle ohne Zeilen';
+  if (materializeBasinGoverning(input) === null) return 'Maßgebende Dauerstufe nicht bestimmbar: keine vollständige Tabellenzeile auswertbar';
+  return null;
+}
