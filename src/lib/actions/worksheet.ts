@@ -2867,6 +2867,13 @@ export async function saveWorksheet(
               h_S = computeSchachtHeadSweep(rows, { A_C, d_a, d_i, k_i, f_Z }).h_S;
             }
             fvInputs = { A_S_m: null, h_M: null, d_i, h_S };
+            // h_S (Gl. 37, governing D) and A_S,Schacht (Gl. 34 at that head) are required derived
+            // fields of A138-21: persist the values V_S was computed with (readiness run 2026-09-30,
+            // case A8 — the sheet otherwise stays "Bemessung unvollständig: A_S_Schacht").
+            if (h_S != null && Number.isFinite(h_S) && d_a != null) {
+              fvExtraWrites.push({ symbol: 'h_S', value: h_S });
+              fvExtraWrites.push({ symbol: 'A_S_Schacht', value: (Math.PI * d_a * d_a) / 4 + (Math.PI * d_a * h_S) / 2 });
+            }
           } else if (fvFacility === 'becken') {
             // Gl.41 governing sweep (GOVERNING_PROFILES 'A138-22').
             const beckenProfile = GOVERNING_PROFILES.find((p) => p.facility === 'A138-22');
