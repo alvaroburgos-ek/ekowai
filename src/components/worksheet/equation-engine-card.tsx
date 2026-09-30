@@ -4,6 +4,7 @@ import { memo, useState } from 'react';
 import type { EvalState } from '@/lib/eval/formula';
 import { quoteStringInput } from '@/lib/eval/engine-input';
 import { KatexFormula } from '@/components/math/katex-formula';
+import { formatNumberDe } from '@/lib/format-number-de';
 
 type Props = {
   equationNumber: string;
@@ -344,9 +345,10 @@ function formatInput(v: number | string | boolean): string {
 }
 
 function formatNumber(v: number): string {
-  if (Math.abs(v) >= 1000 || (v !== 0 && Math.abs(v) < 0.01)) {
-    return v.toPrecision(6);
-  }
+  // Small values print as mantissa · 10^exp (6,6·10⁻⁷), never as a raw exponent string
+  // ('6.60000e-7' — readiness run 2026-09-30); large values keep the 6-significant form.
+  if (v !== 0 && Math.abs(v) < 0.01) return formatNumberDe(v);
+  if (Math.abs(v) >= 1000) return v.toPrecision(6);
   // German locale for engineer-facing decimals. Kept at 4 fractional digits
   // to match the verdict format that several integration tests assert on.
   return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(v);
@@ -359,9 +361,8 @@ function formatNumber(v: number): string {
  * narrower 4-fraction-digit format that existing tests pin on.
  */
 function formatNumberWide(v: number): string {
-  if (Math.abs(v) >= 1000 || (v !== 0 && Math.abs(v) < 0.01)) {
-    return v.toPrecision(6);
-  }
+  if (v !== 0 && Math.abs(v) < 0.01) return formatNumberDe(v);
+  if (Math.abs(v) >= 1000) return v.toPrecision(6);
   return new Intl.NumberFormat('de-DE', { maximumSignificantDigits: 6 }).format(v);
 }
 

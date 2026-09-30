@@ -1272,7 +1272,10 @@ export async function saveWorksheet(
         // V-2: when method='geometry' and A_S_max is present, warn if the geometry-derived
         // A_S,m falls below A_S,max (§6.3.2 Flächenbedarf-Untergrenze). Flag-only — does
         // NOT change the computed A_S_m value.
-        if (method === 'geometry' && out.A_S_m != null) {
+        // §6.3.2 is the SWALE clause: for a trench the full-head wetted area A_S,max is by
+        // construction larger than the Gl. 17 mean, so the warning fired on every Rigole
+        // (readiness run 2026-09-30, case A5) — swale only.
+        if (method === 'geometry' && facilityType === 'mulde' && out.A_S_m != null) {
           const v2 = validateGeometryAgainstMax(out.A_S_m, A_S_max);
           if (v2.flag && v2.reason) {
             warnings.push(v2.reason);
@@ -1933,10 +1936,13 @@ export async function saveWorksheet(
               for (const p of rigoleParams) {
                 const f = rigoleFieldById.get(p.fieldId);
                 if (!f) continue;
-                if (!rigoleNumBySymbol.has(f.symbol)) {
-                  const v = p.valueNumber != null ? Number(p.valueNumber) : null;
-                  rigoleNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
-                }
+                // First NON-NULL occurrence wins: an empty same-symbol row on another sheet must
+                // not shadow the A138-18 value (readiness run 2026-09-30 — the method switch on
+                // A138-12 alone did not materialise A_S,m for the trench).
+                const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+                const num = v != null && Number.isFinite(v) ? v : null;
+                if (num != null && rigoleNumBySymbol.get(f.symbol) == null) rigoleNumBySymbol.set(f.symbol, num);
+                else if (!rigoleNumBySymbol.has(f.symbol)) rigoleNumBySymbol.set(f.symbol, null);
               }
               // Prefer current save batch for the producer (A138-18) overrides.
               const rigoleWsFields = await tx
