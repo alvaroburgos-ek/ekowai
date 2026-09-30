@@ -160,7 +160,7 @@ describe('assemblePhase4Summary — Mulde pilot', () => {
     expect(out.recommendation).toBe('PASS');
     // Finding A: facility_type_dimensioned is the facility TYPE ('mulde'), not
     // the mapped design-worksheet code ('A138-17').
-    expect(out.get('facility_type_dimensioned')).toBe('mulde');
+    expect(out.get('facility_type_dimensioned')).toBe('versickerungsmulde');
     expect(out.get('facility_specific_volume_m3')).toBe(120);
     expect(out.get('facility_footprint_m2')).toBe(45);
     expect(out.get('facility_meets_qsac')).toBe(true);
@@ -245,7 +245,7 @@ describe('assemblePhase4Summary — flaeche REQ-31 Gl.13 feasibility (fan-out)',
     expect(out.get('facility_specific_volume_m3')).toBeNull();
     expect(out.get('facility_footprint_m2')).toBe(200);
     // Finding A: TYPE not CODE.
-    expect(out.get('facility_type_dimensioned')).toBe('flaeche');
+    expect(out.get('facility_type_dimensioned')).toBe('versickerungsflaeche');
   });
 
   it('flaeche feasible (k_i > r_D(n)·10⁻⁷) + otherwise-PASS → PASS, no manual-check note', () => {

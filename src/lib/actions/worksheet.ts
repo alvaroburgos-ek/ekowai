@@ -2469,6 +2469,7 @@ export async function saveWorksheet(
             .from(fields)
             .where(and(eq(fields.worksheetTemplateId, p4ConsumerTmpl.id), eq(fields.active, true)));
           const p4CIdBySymbol = new Map(p4CWsFields.map((f) => [f.symbol, f.id]));
+          const p4CTypeBySymbol = new Map(p4CWsFields.map((f) => [f.symbol, f.dataType]));
 
           // Scoped by-symbol readers — every cross-worksheet read routes through an
           // innerJoin(worksheetTemplates)+eq(standardId, savedStandardId) (§10c rider).
@@ -2660,14 +2661,22 @@ export async function saveWorksheet(
             enteredBy: string;
             enteredAt: Date;
           };
-          const p4Writes = assembled.writes.map((w) => ({
+          // A choice-valued write lands in the column the TARGET field reads (readiness run 2026-09-30:
+          // facility_type_dimensioned is an enum field in prod; a text-column write left the gate reading null).
+          const p4Writes = assembled.writes.map((w) => {
+            const targetType = p4CTypeBySymbol.get(w.symbol);
+            const choice = w.kind === 'enum' || w.kind === 'text';
+            const asText = choice && targetType === 'text';
+            const asEnum = choice && targetType !== 'text';
+            return {
             symbol: w.symbol,
             valueNumber: w.kind === 'number' ? (w.value != null ? String(w.value) : null) : undefined,
-            valueText: w.kind === 'text' ? w.value : undefined,
+            valueText: asText ? w.value : undefined,
             valueBoolean: w.kind === 'boolean' ? w.value : undefined,
-            valueEnum: w.kind === 'enum' ? w.value : undefined,
+            valueEnum: asEnum ? w.value : undefined,
             valueDate: w.kind === 'date' ? w.value : undefined,
-          }));
+            };
+          });
 
           const p4Rows: P4Row[] = p4Writes
             .map((w) => ({ ...w, fieldId: p4CIdBySymbol.get(w.symbol) }))

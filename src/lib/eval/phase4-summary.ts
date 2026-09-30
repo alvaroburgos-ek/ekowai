@@ -46,6 +46,24 @@ export const FACILITY_TYPE_TO_SUMMARY_WORKSHEET: Record<FacilityType, string> = 
   becken:  'A138-22',
 };
 
+/**
+ * Engine facility type → the value vocabulary of the A138-23 field `facility_type_dimensioned`
+ * (its declared enum_values: versickerungsflaeche · versickerungsmulde · rigole ·
+ * mulden_rigolen_element · mulden_rigolen_system · versickerungsschacht · versickerungsbecken).
+ * Readiness run 2026-09-30: the summary wrote the engine token 'mulde' as TEXT into this ENUM field,
+ * so the approval gate reported "Pflichteingaben fehlen: Dimensionierter Anlagentyp" although the
+ * sheet displayed a value. The field's enum is the contract; the write speaks its vocabulary.
+ */
+export const FACILITY_TYPE_TO_A138_23_ENUM: Record<FacilityType, string> = {
+  flaeche: 'versickerungsflaeche',
+  mulde:   'versickerungsmulde',
+  rigole:  'rigole',
+  mre:     'mulden_rigolen_element',
+  mrs:     'mulden_rigolen_system',
+  schacht: 'versickerungsschacht',
+  becken:  'versickerungsbecken',
+};
+
 // ---------------------------------------------------------------------------
 // facilitySummaryInputs
 // ---------------------------------------------------------------------------
@@ -542,7 +560,11 @@ export function assemblePhase4Summary(
     // Previously wrote g.facilityWorksheetCode (e.g. 'A138-17'), which is the
     // mapped code, so A138-23 showed "A138-17" instead of "mulde". Write the
     // raw facility type.
-    { symbol: 'facility_type_dimensioned', kind: 'text', value: g.facilityType },
+    {
+      symbol: 'facility_type_dimensioned',
+      kind: 'enum',
+      value: g.facilityType == null ? null : FACILITY_TYPE_TO_A138_23_ENUM[g.facilityType],
+    },
     { symbol: 'facility_specific_volume_m3', kind: 'number', value: g.volumeValue },
     { symbol: 'facility_footprint_m2', kind: 'number', value: g.footprintValue },
     { symbol: 'facility_meets_qsac', kind: 'boolean', value: meetsQsac },

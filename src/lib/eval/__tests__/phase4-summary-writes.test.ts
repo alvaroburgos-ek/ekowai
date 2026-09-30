@@ -35,8 +35,8 @@ describe('assemblePhase4Summary — Finding A: facility_type_dimensioned = TYPE 
     const { writes } = assemblePhase4Summary(gathered, NOW);
     const w = findWrite(writes, 'facility_type_dimensioned');
     expect(w).toBeDefined();
-    expect(w!.kind).toBe('text');
-    expect(w!.value).toBe('mulde');
+    expect(w!.kind).toBe('enum');
+    expect(w!.value).toBe('versickerungsmulde');
     expect(w!.value).not.toBe('A138-17');
   });
 

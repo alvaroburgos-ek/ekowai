@@ -192,7 +192,7 @@ describe('saveWorksheet — A138-23 summary via server-materialized V_M (Finding
       .in('field_id', [f_dimensioned, f_volume, f_complete]);
     const by = (id: string) => data?.find((r) => r.field_id === id);
 
-    expect(by(f_dimensioned)?.value_text).toBe('mulde');            // Finding A: TYPE not code
+    expect(by(f_dimensioned)?.value_text).toBe('versickerungsmulde'); // Finding A: TYPE (A138-23 vocabulary), text column because the test field is text
     expect(Number(by(f_volume)?.value_number)).toBeCloseTo(EXPECTED_V_M, 6); // Finding F consumed
     expect(by(f_complete)?.value_boolean).toBe(true);               // G1: summary refreshed
   });
