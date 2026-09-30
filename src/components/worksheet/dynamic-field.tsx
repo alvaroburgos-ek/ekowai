@@ -2,6 +2,7 @@
 import { useState, useId, useMemo, useTransition } from 'react';
 import Link from 'next/link';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
+import { formatNumberDe } from '@/lib/format-number-de';
 import { setClientSupplied } from '@/lib/actions/client-supplied';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Select } from '@/components/ui/select';
@@ -822,7 +823,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         <div className="text-xs text-subtext">
           Bereits in {sameSymbolHints.map((h) => (h.viaSymbol ? `${h.worksheetCode} (als ${h.viaSymbol})` : h.worksheetCode)).join(', ')}:
           {' '}
-          {sameSymbolHints.map((h) => String(h.value)).join(', ')}{' '}
+          {sameSymbolHints.map((h) => formatNumberDe(h.value)).join(', ')}{' '}
           <button
             type="button"
             className="text-xs text-accent-2 px-1.5 py-0.5 rounded hover:bg-accent-2/10 transition-colors"

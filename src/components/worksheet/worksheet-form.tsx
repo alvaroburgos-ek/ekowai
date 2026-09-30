@@ -34,6 +34,7 @@ import { computeVisibility } from '@/lib/compliance/visibility';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
 import { computeComputedSymbols } from '@/lib/eval/computed-symbols';
+import { formatNumberDe } from '@/lib/format-number-de';
 
 // Derived symbols that the materialize pipeline writes on every A138-13 save.
 // They are NOT live formula-engine outputs, but share the same single-source
@@ -1036,7 +1037,7 @@ export function WorksheetForm({
               const v = values[f.id];
               const display =
                 v?.type === 'number' && v.value != null && Number.isFinite(v.value)
-                  ? new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(v.value)
+                  ? formatNumberDe(v.value)
                   : v?.type === 'json' && v.value && typeof v.value === 'object'
                   ? '(Tabelle)'
                   : v?.type === 'enum' && v.value != null
