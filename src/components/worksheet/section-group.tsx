@@ -34,8 +34,11 @@ export function SectionGroup({ section, allSections, visibleSectionIds, renderFi
 
   const title = locale === 'de' ? section.titleDe : section.titleEn ?? section.titleDe;
 
+  // min-w-0: a <fieldset> defaults to min-inline-size: min-content, which lets a wide register
+  // table grow the section past the content column instead of scrolling inside its own
+  // overflow-x-auto box (UI-1, seen on the served FLLNT-04 after the fix wave).
   return (
-    <fieldset className="space-y-6 border-l border-hairline pl-4">
+    <fieldset className="min-w-0 space-y-6 border-l border-hairline pl-4">
       <legend className="text-xs uppercase tracking-[0.2em] text-subtext px-1">
         {section.code ? `${section.code} · ${title}` : title}
       </legend>
