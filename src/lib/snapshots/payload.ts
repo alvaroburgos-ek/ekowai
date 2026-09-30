@@ -475,7 +475,13 @@ export function buildSnapshotPayload(args: {
       const p = f ? paramForEngine(f.id) : undefined;
       const value = f && p ? engineInputValue(readValue(p, f.dataType)) : null;
       // origin/main 18485c1: an absent optional-zero input (Q_Dr, no throttle) is 0, not missing.
-      return { symbol: sym, value: value ?? defaultForAbsent(sym), unit: f?.unit ?? null };
+      const resolveGate = (s: string): number | null => {
+        const g = fieldBySymbol.get(aliasFor(s));
+        const gp = g ? paramForEngine(g.id) : undefined;
+        const gv = g && gp ? engineInputValue(readValue(gp, g.dataType)) : null;
+        return typeof gv === 'number' ? gv : null;
+      };
+      return { symbol: sym, value: value ?? defaultForAbsent(sym, resolveGate), unit: f?.unit ?? null };
     });
 
     const expectedUnits: Record<string, string | null> = {};

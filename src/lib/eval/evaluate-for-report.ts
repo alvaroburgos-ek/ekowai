@@ -414,7 +414,11 @@ export function evaluateWorksheetEquations(
           : engineInputValue({ type: 'number', value: numOf(f.id) ?? null })
         : null;
       // origin/main 18485c1: an absent optional-zero input (Q_Dr, no throttle) is 0, not missing.
-      return { symbol: sym, value: value ?? defaultForAbsent(sym), unit: f?.unit ?? null };
+      const resolveGate = (s: string): number | null => {
+        const g = fieldBySymbol.get(aliasFor(s));
+        return g ? (numOf(g.id) ?? null) : null;
+      };
+      return { symbol: sym, value: value ?? defaultForAbsent(sym, resolveGate), unit: f?.unit ?? null };
     });
 
     const expectedUnits: Record<string, string | null> = {};

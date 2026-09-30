@@ -516,7 +516,13 @@ export function useEquationEngine({
         // is 0, not missing (optional-inputs.ts) — the default is a constant, never
         // a hidden field's value.
         const v = f ? storeValue(f.id) : undefined;
-        return { symbol: sym, value: engineInputValue(v) ?? defaultForAbsent(sym), unit: f?.unit ?? null };
+        // Conditional-zero inputs (d_i/d_a when az = 0) resolve their gate the same way.
+        const resolveGate = (s: string): number | null => {
+          const g = fieldBySymbol.get(aliasFor(s));
+          const gv = g ? engineInputValue(storeValue(g.id)) : null;
+          return typeof gv === 'number' ? gv : null;
+        };
+        return { symbol: sym, value: engineInputValue(v) ?? defaultForAbsent(sym, resolveGate), unit: f?.unit ?? null };
       });
 
       const expectedUnits: Record<string, string | null> = {};

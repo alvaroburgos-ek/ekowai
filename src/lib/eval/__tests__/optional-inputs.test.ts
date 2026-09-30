@@ -32,3 +32,40 @@ describe('optional-zero inputs (Q_Dr)', () => {
     if (ok.kind === 'computed') expect(ok.value).toBeCloseTo(10.17, 2);
   });
 });
+
+describe('optional-zero az and conditional-zero pipe diameters (readiness run 2026-09-30, case A6)', () => {
+  it('az defaults to 0 (no seepage pipe); d_i/d_a default to 0 only when az resolves to 0', () => {
+    expect(defaultForAbsent('az')).toBe(0);
+    // Gate absent → az is absent-zero → diameters are 0.
+    expect(defaultForAbsent('d_i', () => null)).toBe(0);
+    expect(defaultForAbsent('d_a', () => null)).toBe(0);
+    // Gate explicitly 0 → 0.
+    expect(defaultForAbsent('d_i', (s) => (s === 'az' ? 0 : null))).toBe(0);
+    // Gate 1 (a pipe is declared) → the diameter is genuinely missing.
+    expect(defaultForAbsent('d_i', (s) => (s === 'az' ? 1 : null))).toBeNull();
+    // Without a resolver the conditional default never applies (fail-safe).
+    expect(defaultForAbsent('d_i')).toBeNull();
+    expect(withAbsentDefault('d_a', 0.32, () => 0)).toBe(0.32);
+  });
+
+  it('Gl. 21 evaluates s_R = s_F for a pipe-less trench once az/d_i/d_a resolve to 0', () => {
+    const formula = 's_R = (s_F / (b_R * h_R)) * (b_R * h_R + az * (pi / 4) * ((d_i^2 / s_F) - d_a^2))';
+    const resolve = () => null;
+    const r = evaluateFormula({
+      equationId: 'test-gl21',
+      formula,
+      inputSymbols: ['s_F', 'b_R', 'h_R', 'az', 'd_i', 'd_a'],
+      inputs: [
+        { symbol: 's_F', value: 0.35, unit: null },
+        { symbol: 'b_R', value: 1, unit: 'm' },
+        { symbol: 'h_R', value: 1, unit: 'm' },
+        { symbol: 'az', value: defaultForAbsent('az', resolve), unit: null },
+        { symbol: 'd_i', value: defaultForAbsent('d_i', resolve), unit: 'm' },
+        { symbol: 'd_a', value: defaultForAbsent('d_a', resolve), unit: 'm' },
+      ],
+      constants: { pi: Math.PI },
+    } as never);
+    expect(r.kind).toBe('computed');
+    if (r.kind === 'computed') expect(r.value).toBeCloseTo(0.35, 12);
+  });
+});

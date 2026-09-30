@@ -11,6 +11,7 @@ import {
   worksheetTemplates,
 } from '@/lib/db/schema';
 import { defineTool } from '../define-tool';
+import { paramHasValue } from '@/lib/projects/required-fields';
 import { assertInternalAccess } from './projects';
 
 /** Renders a project_parameters row as the plain value the model should see. */
@@ -144,7 +145,10 @@ export function registerWorksheetTools(server: McpServer) {
           value: readValue(param),
           sourceType: param?.sourceType ?? null,
           clientSupplied: param?.clientSupplied ?? false,
-          isFilled: param !== undefined,
+          // A derived row with a null value is NOT filled — the approval gate uses the same
+          // rule (readiness run 2026-09-30: the tool said "0 missing" while the gate refused
+          // A138-18 for an empty s_R).
+          isFilled: param !== undefined && paramHasValue(f.dataType, param),
         };
       });
 
