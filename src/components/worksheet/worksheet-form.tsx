@@ -25,6 +25,7 @@ import { carrierSourceState } from '@/lib/eval/carrier-source-state';
 import { registerTables, type RegulationTable } from '@/lib/eval/regulation-tables';
 import { SourceFormReferencePanel } from '@/components/form-templates/SourceFormReferencePanel';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
+import { equationProfiles } from '@/lib/eval/equation-profiles';
 import { withFallbackRegisterEquations, resolveRegisterConfig, registerFlagKeys } from '@/lib/eval/register-configs';
 import { renderWidget, widgetPlacement, type WorksheetFormField, type WidgetContext } from './widgets';
 import { ReadOnlyRegisterTable, registerPlacement } from './register-editor';
@@ -578,6 +579,11 @@ export function WorksheetForm({
   // comparator reads, so an output field whose verdict did not move bails out.
   const engineCardsByOutputFieldId = useMemo(() => {
     const map = new Map<string, React.ReactNode>();
+    // The card beside a field belongs to the equation that WRITES the field. A displayOnly
+    // alternative form (e.g. A138-18 Gl. 22 thin-wall s_R next to the Gl. 21 writer) may only
+    // take the slot when no writer targets the field — readiness run 2026-09-30: the card said
+    // s_R = 0,3959 (Gl. 22) while the saved value was 0,3925 (Gl. 21).
+    const slotIsDisplayOnly = new Set<string>();
     // `engineEquations` (DB list + Plan 2a fallback register equations) so a
     // fallback output field (e.g. VSME B04 AmountOfEmissionToAir) gets its card.
     for (const eq of engineEquations) {
@@ -586,6 +592,11 @@ export function WorksheetForm({
       if (!state) continue;
       const outField = eq.outputSymbol ? fieldBySymbol.get(eq.outputSymbol) : undefined;
       if (!outField) continue;
+      const displayOnly = equationProfiles[eq.id]?.displayOnly === true;
+      if (map.has(outField.id)) {
+        if (displayOnly || !slotIsDisplayOnly.has(outField.id)) continue;
+      }
+      if (displayOnly) slotIsDisplayOnly.add(outField.id); else slotIsDisplayOnly.delete(outField.id);
       map.set(
         outField.id,
         <EngineCardSlot
@@ -655,15 +666,22 @@ export function WorksheetForm({
 
   // Engine equations whose outputSymbol has NO visible field — keep these in
   // the legacy bottom section so the engineer still sees the verdict.
-  const orphanEngineEquations = useMemo(
-    () =>
-      sortedEquations.filter((eq) => {
-        if (!engineEquationIds.has(eq.id)) return false;
-        const outField = eq.outputSymbol ? fieldBySymbol.get(eq.outputSymbol) : undefined;
-        return !outField;
-      }),
-    [sortedEquations, engineEquationIds, fieldBySymbol],
-  );
+  const orphanEngineEquations = useMemo(() => {
+    // Fields that have a WRITER card (non-displayOnly equation) — a displayOnly alternative
+    // form for such a field is shown here instead of beside the field.
+    const writerFieldIds = new Set<string>();
+    for (const eq of sortedEquations) {
+      if (!engineEquationIds.has(eq.id) || equationProfiles[eq.id]?.displayOnly) continue;
+      const outField = eq.outputSymbol ? fieldBySymbol.get(eq.outputSymbol) : undefined;
+      if (outField) writerFieldIds.add(outField.id);
+    }
+    return sortedEquations.filter((eq) => {
+      if (!engineEquationIds.has(eq.id)) return false;
+      const outField = eq.outputSymbol ? fieldBySymbol.get(eq.outputSymbol) : undefined;
+      if (!outField) return true;
+      return equationProfiles[eq.id]?.displayOnly === true && writerFieldIds.has(outField.id);
+    });
+  }, [sortedEquations, engineEquationIds, fieldBySymbol]);
 
   // Design return-period for the bespoke rainfall editor (A138-04 KOSTRA
   // carrier, dispatched by the WIDGETS registry via BESPOKE_BY_SYMBOL): resolve project

@@ -2821,6 +2821,9 @@ export async function saveWorksheet(
 
           // Compute the governing volume per facility.
           let fvInputs: Parameters<typeof facilityVolumeMaterialize>[1] | null = null;
+          // Further derived numbers of the facility sheet that the volume was computed with
+          // (persisted with the same scoped field resolution as the volume itself).
+          const fvExtraWrites: Array<{ symbol: string; value: number }> = [];
           if (fvFacility === 'mulde') {
             // Gl.15: V_M = A_S,m · h_M — the DIRECT-A_S,m path (readiness run 2026-09-30). When
             // A_S,m comes from the geometry sweep the `asm` branch already wrote the same value;
@@ -2842,6 +2845,10 @@ export async function saveWorksheet(
               ? computeRigoleStorageCoefficient({ s_F, b_R, h_R, az, d_i, d_a })
               : null;
             fvInputs = { A_S_m: null, h_M: null, b_R, h_R, L_R, s_R };
+            // s_R is a required derived field of A138-18: persist the value the volume was
+            // computed with, so the API save path leaves no "missing required" behind
+            // (readiness run 2026-09-30, case A5; the browser path writes it via Gl. 21).
+            if (s_R != null && Number.isFinite(s_R)) fvExtraWrites.push({ symbol: 's_R', value: s_R });
           } else if (fvFacility === 'mre') {
             // Gl.26: V_MR = persisted V_M (A138-17) + persisted V_R (A138-18), scoped.
             const vM = await fvReadNum('V_M');
@@ -2887,44 +2894,48 @@ export async function saveWorksheet(
 
           if (fvInputs) {
             const volumeWrite = facilityVolumeMaterialize(fvFacility, fvInputs);
-            if (volumeWrite) {
-              // Resolve the volume field id on the SAVED facility worksheet, scoped.
+            // The volume row first, then the facility-sheet derived numbers it was computed with
+            // (s_R for the trench); each resolved on the SAVED facility worksheet, scoped.
+            const fvWrites = [
+              ...(volumeWrite ? [{ symbol: volumeWrite.volumeSymbol, value: volumeWrite.value }] : []),
+              ...fvExtraWrites,
+            ];
+            for (const w of fvWrites) {
               const fvFieldRows = await tx
                 .select({ id: fields.id })
                 .from(fields)
                 .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
                 .where(and(
-                  eq(fields.symbol, volumeWrite.volumeSymbol),
+                  eq(fields.symbol, w.symbol),
                   eq(fields.active, true),
                   eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
                   savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
                 ))
                 .limit(1);
               const fvFieldId = fvFieldRows[0]?.id;
-              if (fvFieldId) {
-                await tx
-                  .insert(projectParameters)
-                  .values([{
-                    projectId: instance.projectId,
-                    fieldId: fvFieldId,
-                    valueNumber: String(volumeWrite.value),
-                    valueText: null,
-                    sourceType: 'derived',
-                    enteredBy: userId,
+              if (!fvFieldId) continue;
+              await tx
+                .insert(projectParameters)
+                .values([{
+                  projectId: instance.projectId,
+                  fieldId: fvFieldId,
+                  valueNumber: String(w.value),
+                  valueText: null,
+                  sourceType: 'derived',
+                  enteredBy: userId,
+                  enteredAt: now,
+                }])
+                .onConflictDoUpdate({
+                  target: [projectParameters.projectId, projectParameters.fieldId],
+                  set: {
+                    valueNumber: sql`excluded.value_number`,
+                    valueText: sql`excluded.value_text`,
+                    sourceType: sql`excluded.source_type`,
+                    enteredBy: sql`excluded.entered_by`,
                     enteredAt: now,
-                  }])
-                  .onConflictDoUpdate({
-                    target: [projectParameters.projectId, projectParameters.fieldId],
-                    set: {
-                      valueNumber: sql`excluded.value_number`,
-                      valueText: sql`excluded.value_text`,
-                      sourceType: sql`excluded.source_type`,
-                      enteredBy: sql`excluded.entered_by`,
-                      enteredAt: now,
-                    },
-                  });
-                writtenDerived.push({ fieldId: fvFieldId, valueNumber: String(volumeWrite.value), valueText: null });
-              }
+                  },
+                });
+              writtenDerived.push({ fieldId: fvFieldId, valueNumber: String(w.value), valueText: null });
             }
           }
         }
