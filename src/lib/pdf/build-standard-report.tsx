@@ -1,5 +1,5 @@
 import 'server-only';
-import { renderToBuffer } from '@react-pdf/renderer';
+import { renderPdf } from './render-pdf';
 import { StandardReportDocument } from '@/components/pdf/standard-report-document';
 import { loadStandardReportData } from './load-standard-report';
 
@@ -17,5 +17,5 @@ export async function buildStandardReport(
   standardCode: string,
 ): Promise<Buffer> {
   const data = await loadStandardReportData(projectId, standardCode);
-  return renderToBuffer(<StandardReportDocument data={data} />);
+  return renderPdf(<StandardReportDocument data={data} />);
 }

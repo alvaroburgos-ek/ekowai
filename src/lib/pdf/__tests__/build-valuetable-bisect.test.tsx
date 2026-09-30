@@ -6,8 +6,8 @@ import type { ValuetableData } from '@/lib/pdf/load-valuetable';
  * DWA-A-138-1 Wertetabelle and no local input reproduced it. The builder therefore names
  * the rows the renderer cannot draw (bisection) instead of surfacing an opaque message.
  */
-vi.mock('@react-pdf/renderer', () => ({
-  renderToBuffer: vi.fn(async (el: { props: { data: ValuetableData } }) => {
+vi.mock('@/lib/pdf/render-pdf', () => ({
+  renderPdf: vi.fn(async (el: { props: { data: ValuetableData } }) => {
     const rows = el.props.data.rows;
     if (rows.some((r) => r.symbol.startsWith('BAD'))) throw new Error('unsupported number: -1.7793471615011557e+21');
     return Buffer.from('%PDF-ok');

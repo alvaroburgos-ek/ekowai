@@ -34,13 +34,11 @@ export function ValuetableDocument({ data }: { data: ValuetableData }) {
           {data.rows.length === 0 ? (
             <Text style={styles.note}>Keine gespeicherten Werte.</Text>
           ) : (
-            // Rows wrap across pages on purpose: a non-wrapping row (wrap={false}) that lands on the page boundary
-            // together with the fixed footer makes @react-pdf/renderer 4.5 emit a garbage text coordinate and pdfkit
-            // throws "unsupported number: -1.78e+21" (readiness run 2026-09-30, 174-row DWA-A-138-1 table — fixture test).
             data.rows.map((r, i) => (
               <View
                 key={`${r.worksheetCode}-${r.symbol}-${i}`}
                 style={[styles.siteRow, { flexDirection: 'row' }]}
+                wrap={false}
               >
                 <Text style={[styles.mono, { width: '14%' }]}>{r.worksheetCode}</Text>
                 <Text style={[styles.mono, { width: '16%' }]}>{r.symbol}</Text>

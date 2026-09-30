@@ -1,5 +1,5 @@
 import 'server-only';
-import { renderToBuffer } from '@react-pdf/renderer';
+import { renderPdf } from './render-pdf';
 import { db } from '@/lib/db';
 import {
   costEstimates,
@@ -199,5 +199,5 @@ export async function loadCostEstimateData(
 }
 
 export async function buildCostEstimatePdf(data: CostEstimatePdfData): Promise<Buffer> {
-  return renderToBuffer(<CostEstimateDocument data={data} />);
+  return renderPdf(<CostEstimateDocument data={data} />);
 }

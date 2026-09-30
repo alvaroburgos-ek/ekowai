@@ -1,5 +1,5 @@
 import 'server-only';
-import { renderToBuffer } from '@react-pdf/renderer';
+import { renderPdf } from './render-pdf';
 import { db } from '@/lib/db';
 import { offers, offerPositions, projects, orgs } from '@/lib/db/schema';
 import { and, asc, eq } from 'drizzle-orm';
@@ -117,5 +117,5 @@ export async function loadOfferData(
 }
 
 export async function buildOfferPdf(data: OfferPdfData): Promise<Buffer> {
-  return renderToBuffer(<OfferDocument data={data} />);
+  return renderPdf(<OfferDocument data={data} />);
 }

@@ -1,5 +1,5 @@
 import 'server-only';
-import { renderToBuffer } from '@react-pdf/renderer';
+import { renderPdf } from './render-pdf';
 import { ValuetableDocument } from '@/components/pdf/valuetable-document';
 import { loadValuetableData, type ValuetableData, type ValuetableRow } from './load-valuetable';
 
@@ -23,7 +23,7 @@ export class ValuetableRenderError extends Error {
 const MAX_BISECTION_RENDERS = 40;
 
 async function render(data: ValuetableData): Promise<Buffer> {
-  return renderToBuffer(<ValuetableDocument data={data} />);
+  return renderPdf(<ValuetableDocument data={data} />);
 }
 
 /** Smallest rows that fail on their own, found by halving; bounded so a broken renderer cannot loop. */
