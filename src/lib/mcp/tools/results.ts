@@ -102,7 +102,7 @@ export function registerResultTools(server: McpServer) {
         SELECT f.worksheet_template_id AS template_id, COUNT(*)::int AS inherited
         FROM fields f
         LEFT JOIN project_parameters pp ON pp.field_id = f.id AND pp.project_id = ${projectId}
-        WHERE f.worksheet_template_id = ANY(${templateIds}::uuid[]) AND f.is_required AND f.active
+        WHERE f.worksheet_template_id IN (${sql.join(templateIds.map((id) => sql`${id}`), sql`, `)}) AND f.is_required AND f.active
           AND pp.id IS NULL
           AND (
             SELECT COUNT(DISTINCT COALESCE(pp2.value_number::text, NULLIF(pp2.value_text, ''), NULLIF(pp2.value_enum, ''),
