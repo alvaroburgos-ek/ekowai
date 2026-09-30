@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
-import { buildValuetablePdf, loadValuetableData } from '@/lib/pdf/build-valuetable';
+import { buildValuetablePdf, loadValuetableData, ValuetableRenderError } from '@/lib/pdf/build-valuetable';
 import { recordDeliverable } from '@/lib/deliverables/record';
 
 /**
@@ -59,6 +59,19 @@ export async function GET(
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     const status = /not found/i.test(message) ? 404 : 500;
+    if (err instanceof ValuetableRenderError) {
+      // Name the rows the renderer cannot draw (readiness run 2026-09-30) so the defect is
+      // locatable from the response instead of an opaque PDF-writer message.
+      const offendingRows = err.offendingRows.map((r) => ({
+        worksheetCode: r.worksheetCode,
+        symbol: r.symbol,
+        valuePreview: r.value.slice(0, 80),
+        valueLength: r.value.length,
+        unit: r.unit,
+      }));
+      console.error('[valuetable] render failed', { projectId: id, standardCode, message, offendingRows });
+      return NextResponse.json({ error: message, offendingRows }, { status: 500 });
+    }
     return NextResponse.json({ error: message }, { status });
   }
 }
