@@ -84,7 +84,10 @@ export function designWindowInputs(args: {
   // overrained area A_VA_Mulde is passed separately — the two are NOT identified silently, F-3c).
   const current = pick(def.variable.symbol);
   const scalars: Record<string, number | null> = {
-    A_C: pick('A_C'), k_i: pick('k_i'), f_Z: pick('f_Z'), f_A: pick('f_A') ?? 1, Q_Dr: pick('Q_Dr') ?? 0,
+    A_C: pick('A_C'), k_i: pick('k_i'), f_Z: pick('f_Z'), f_A: pick('f_A') ?? 1,
+    // Q_Dr is optional-zero everywhere (no throttle = 0) EXCEPT for the Mulden-Rigolen-System, whose
+    // throttle is the defining part (§6.6.1): there an absent Q_Dr is a missing input, never 0.
+    Q_Dr: facility === 'MRS' ? pick('Q_Dr') : pick('Q_Dr') ?? 0,
     A_VA: facility === 'mulde' ? pick('A_VA_Mulde') : pick('A_VA_MRE') ?? pick('A_VA'),
     V_M: pick('V_M_MRE') ?? pick('V_M'),
     b_R: pick('b_R'), h_R: pick('h_R'), s_R: pick('s_R') ?? pick('s_F'),

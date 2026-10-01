@@ -103,8 +103,8 @@ describe('facilitySummaryInputs — verbatim symbol mapping', () => {
     expect(facilitySummaryInputs('mre')).toEqual({ volumeSymbol: 'V_MR', footprintSymbol: 'A_S_m' });
   });
 
-  it('mrs: V_MUE, A_S_m', () => {
-    expect(facilitySummaryInputs('mrs')).toEqual({ volumeSymbol: 'V_MUE', footprintSymbol: 'A_S_m' });
+  it('mrs: V_MR (Gl.26 via §6.6.2 "analog"), A_S_m — V_MÜ is the overflow volume, never the storage', () => {
+    expect(facilitySummaryInputs('mrs')).toEqual({ volumeSymbol: 'V_MR', footprintSymbol: 'A_S_m' });
   });
 
   it('schacht: V_S, A_S_Schacht (active footprint, Gl.34)', () => {

@@ -112,6 +112,10 @@ const FACILITY_VOLUME_INPUT_SYMBOLS = [
   'b_R', 'h_R', 'L_R', 's_F', 'az', 'd_i', 'd_a', 'n_R_Bemessung',
   // MRE (A138-19, Gl.26): sum of persisted component volumes.
   'V_M_MRE', 'V_R_MRE', 'n_R', 'A_VA_MRE',
+  // MRS (A138-20, Gl.26 "analog" + Gl.30–33): throttle, trench frequency, overflow inputs.
+  'Q_Dr_min', 'Q_Dr_max', 'n_R_MRS',
+  // Vegetated soil zone of a Mulden-Rigolen facility (§5.3.3.6 / §6.5.2): k_i,BBZ inputs on A138-19/-20.
+  'k_f_BBZ', 'k_f_BBZ_quelle',
   // Schacht (A138-21, Gl.36/37): inner/outer diameter drive the swept V_S.
   'd_S_innen', 'd_S_aussen', 'n_S_Bemessung',
   // Becken (A138-22, Gl.41): overregnete area + basin design inputs.

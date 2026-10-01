@@ -131,9 +131,13 @@ export const equationProfiles: Record<string, EquationProfile> = {
       // The Mulde worksheet doesn't carry its own r_D field; the generic
       // A138-10 `r_D_n` flows in via cross-worksheet inheritance.
       r_D_n: 'r_D_n',
+      // §6.5.2 L1925: inside a Mulden-Rigolen-Element/-System the swale's governing layer is the
+      // vegetated soil zone → the A138-17 field k_i_Mulde (server-materialised: k_i,BBZ for a
+      // composite, the project k_i otherwise). Falls back to k_i while the field is absent.
+      k_i: 'k_i_Mulde',
     },
     notes:
-      '§6.3.2 Gl. (16): mittlere Versickerungsfläche der Mulde. D in min ist die gewählte Dauerstufe.',
+      '§6.3.2 Gl. (16): mittlere Versickerungsfläche der Mulde. D in min ist die gewählte Dauerstufe. k_i = bemessungsrelevante Infiltrationsrate der Mulde (k_i_Mulde: bewachsene Bodenzone im Mulden-Rigolen-Element/-System, §6.5.2).',
   },
 
   // A138-18 · Gl. (17) · §6.4.2 — A_S,m Rigole (Geometrie)
@@ -226,13 +230,42 @@ export const equationProfiles: Record<string, EquationProfile> = {
       // to the generic A138-10 `r_D_n` field via inheritance.
       r_D_n_R: 'r_D_n',
     },
-    notes: '§6.5.2/§6.6.2 Gl. (30): Muldenüberlauf-Volumen. r_D(n_R) ist die Regenspende für die Rigolen-Bemessungshäufigkeit.',
+    // 2026-10-01: Gl. 30 is ITERATED over D ("iterativ ermittelt, für welche Regenspende r_D(nR) ein
+    // Überlauf auftritt", L1960) on the n_R column — a server sweep (worksheet.ts facility_volume
+    // branch, computeMuldenUeberlauf) persists V_MÜ / r_MÜ / Q_MÜ. The client card cannot resolve
+    // r_D(n_R) and would write null over them (Finding-H class) → displayOnly.
+    displayOnly: true,
+    notes: '§6.5.2/§6.6.2 Gl. (30): Muldenüberlauf-Volumen. r_D(n_R) ist die Regenspende für die Rigolen-Bemessungshäufigkeit; der Server iteriert D und schreibt V_MÜ, r_MÜ und Q_MÜ.',
   },
 
   // A138-20 · Gl. (31) · §6.5.2/§6.6.2 — Q_MUE Muldenüberlauf-Abfluss
   '71af6131-12d3-4294-b192-256878ce7ecf': {
     expectedUnits: { A_C: 'm²', r_MUE: 'l/(s·ha)', A_VA: 'm²', k_i: 'm/s' },
-    notes: '§6.5.2/§6.6.2 Gl. (31): Muldenüberlauf-Abfluss in l/s. A_C·10⁻⁴ konvertiert m²→ha, ·1000 konvertiert m³/s→l/s im A_VA-Term.',
+    // 2026-10-01: Q_MÜ is persisted by the same server sweep as Gl. 30 (with the SWALE's k_i,BBZ,
+    // §6.5.2 L1909); displayOnly so the client never overwrites it with the subsoil k_i.
+    displayOnly: true,
+    notes: '§6.5.2/§6.6.2 Gl. (31): Muldenüberlauf-Abfluss in l/s. A_C·10⁻⁴ konvertiert m²→ha, ·1000 konvertiert m³/s→l/s im A_VA-Term. Server-materialisiert (k_i der bewachsenen Bodenzone).',
+  },
+
+  // A138-20 · Gl. (26) applied to the Mulden-Rigolen-System · §6.6.2 L2023 "analog … 6.5.2" — V_MR = V_M + V_R
+  // (staged block 20261001100000; the server facility_volume branch persists V_MR, the card displays it).
+  '5c1b7a9e-3d2f-4e8a-9b61-a13820000026': {
+    expectedUnits: { V_M: 'm³', V_R: 'm³' },
+    displayOnly: true,
+    notes: '§6.6.2 (L2023): Bemessung des Mulden-Rigolen-Systems „analog zur Bemessung von Mulden-Rigolen-Elementen (siehe 6.5.2)“ → Speichervolumen V_MR = V_M + V_R (Gl. 26). displayOnly — server-materialisiert.',
+  },
+
+  // A138-19 / A138-20 · D1 · §5.3.3.6 L1395 — k_i,BBZ = k_f,BBZ · (f_Ort | f_K): the swale's design
+  // infiltration rate from the vegetated soil zone (f_Methode neglected for the printed Bild-1 range).
+  '5c1b7a9e-3d2f-4e8a-9b61-a13819000b01': {
+    expectedUnits: { k_f_BBZ: 'm/s', k_f_BBZ_quelle: null, f_ort: null, f_K: null },
+    displayOnly: true,
+    notes: '§5.3.3.6 (L1395): k_f der bewachsenen Bodenzone 1·10⁻⁵ bis 5·10⁻⁵ m/s, wenn 5.2.3.2 und Bild 1 erfüllt — dann entfällt f_Methode (k_i,BBZ = k_f,BBZ·f_Ort); gemessen gilt f_K. displayOnly — server-materialisiert.',
+  },
+  '5c1b7a9e-3d2f-4e8a-9b61-a13820000b01': {
+    expectedUnits: { k_f_BBZ: 'm/s', k_f_BBZ_quelle: null, f_ort: null, f_K: null },
+    displayOnly: true,
+    notes: '§5.3.3.6 (L1395): k_f der bewachsenen Bodenzone 1·10⁻⁵ bis 5·10⁻⁵ m/s, wenn 5.2.3.2 und Bild 1 erfüllt — dann entfällt f_Methode (k_i,BBZ = k_f,BBZ·f_Ort); gemessen gilt f_K. displayOnly — server-materialisiert.',
   },
 
   // A138-20 · Gl. (32) · §6.6.2 — L_R MRS
@@ -358,6 +391,9 @@ export const equationProfiles: Record<string, EquationProfile> = {
       D: 'min',
       f_Z: null,
     },
+    // §6.5.2 L1925: the swale of a Mulden-Rigolen facility uses k_i,BBZ → A138-17 k_i_Mulde
+    // (server-materialised; falls back to k_i while the field is absent).
+    symbolAliases: { k_i: 'k_i_Mulde' },
     // Finding H (§6.3.2): Gl.14 needs D — the GOVERNING Dauerstufe from the
     // server-only Mulde geometry sweep (worksheet.ts computeMuldeGeometrySweep).
     // The CLIENT engine cannot resolve D → client-side Gl.14 can't compute → its

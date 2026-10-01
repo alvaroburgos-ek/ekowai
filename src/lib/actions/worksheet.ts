@@ -28,7 +28,10 @@ import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
-import { materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize, computeRigoleStorageCoefficient, computeSchachtHeadSweep } from '@/lib/eval/materialize-asm';
+import {
+  materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize, computeRigoleStorageCoefficient, computeSchachtHeadSweep,
+  computeKiBBZ, swaleDesignInfiltrationRate, computeMuldeRequiredVolumeSweep, computeMuldenUeberlauf, computeMrsTrenchLengthSweep,
+} from '@/lib/eval/materialize-asm';
 import { GOVERNING_PROFILES } from '@/lib/eval/governing-duration';
 import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange, resolveManualAsmReject } from '@/lib/eval/asm-source';
 import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
@@ -2722,13 +2725,18 @@ export async function saveWorksheet(
             }
           }
         } else if (producerEntry.id === 'facility_volume') {
-          // ── Facility governing-volume producer (Mulde direct / Rigole / MRE / Schacht / Becken) ──
+          // ── Facility governing-volume producer (Mulde direct / Rigole / MRE / MRS / Schacht / Becken) ──
           // Fan-out: mulde/rigole volumes ride the `asm` branch; these three get their
           // OWN materialize, fired when a volume-driving input changes on their facility
           // worksheet (FACILITY_VOLUME_INPUT_SYMBOLS). producer == consumer: the volume
           // lands on the SAVED facility worksheet. Then the summary chain-fires (G1).
           //
           //   MRE (A138-19): V_MR = persisted V_M + persisted V_R (Gl.26, cross-ws sum).
+          //   MRS (A138-20): V_MR as for the MRE (§6.6.2 L2023 "analog … 6.5.2"), plus the throttle
+          //     Q_Dr (Gl.33), the Gl.32 governing rainfall r_D(n_R) and the swale overflow
+          //     V_MÜ / r_MÜ / Q_MÜ (Gl.30/31, n_R column, swale k_i,BBZ) — 2026-10-01.
+          //   Swale of a Mulden-Rigolen facility (A138-17): k_i_Mulde = k_i,BBZ (§6.5.2 L1925) and the
+          //     REQUIRED volume V_M,erf (Gl.14, governing D) next to the available V_M (Gl.15).
           //   Schacht (A138-21): V_S = π·d_i²/4·h_S (Gl.36; h_S swept via Gl.37).
           //   Becken (A138-22): V_B via the Gl.41 governing sweep (GOVERNING_PROFILES).
           const fvCode = savedTemplateCode;
@@ -2736,6 +2744,7 @@ export async function saveWorksheet(
             fvCode === 'A138-17' ? 'mulde'
             : fvCode === 'A138-18' ? 'rigole'
             : fvCode === 'A138-19' ? 'mre'
+            : fvCode === 'A138-20' ? 'mrs'
             : fvCode === 'A138-21' ? 'schacht'
             : fvCode === 'A138-22' ? 'becken'
             : null;
@@ -2769,6 +2778,32 @@ export async function saveWorksheet(
             }
             return null;
           };
+          // Scoped by-symbol enum/text reader (facility_type_selected, k_f_BBZ_quelle).
+          const fvReadEnum = async (symbol: string): Promise<string | null> => {
+            const cand = await tx
+              .select({ id: fields.id })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(fields.symbol, symbol),
+                eq(fields.active, true),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ));
+            const ids = cand.map((c) => c.id);
+            if (ids.length === 0) return null;
+            const rows = await tx
+              .select({ valueEnum: projectParameters.valueEnum, valueText: projectParameters.valueText })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, ids),
+              ));
+            for (const r of rows) {
+              const v = r.valueEnum ?? r.valueText ?? null;
+              if (v != null && v !== '') return v;
+            }
+            return null;
+          };
           // Prefer a value from the current save batch (on the SAVED facility ws) over
           // the persisted one — so an in-batch geometry change is used immediately.
           const savedFacilityFields = await tx
@@ -2787,9 +2822,17 @@ export async function saveWorksheet(
             }
             return fvReadNum(symbol);
           };
+          const fvEnum = async (symbol: string): Promise<string | null> => {
+            for (const sf of savedFacilityFields) {
+              if (sf.symbol !== symbol) continue;
+              const saved = input.values[sf.id];
+              if ((saved?.type === 'enum' || saved?.type === 'text') && typeof saved.value === 'string' && saved.value !== '') return saved.value;
+            }
+            return fvReadEnum(symbol);
+          };
 
           // Resolve the rainfall column governing D (schacht/becken need the sweep).
-          const fvResolveRows = async (): Promise<Array<{ D_min: number | null; r_D_n: number | null }>> => {
+          const fvResolveRows = async (forCode: string = fvCode!): Promise<Array<{ D_min: number | null; r_D_n: number | null }>> => {
             // Carrier lives on A138-04 (global symbol lookup like the mulde block).
             const carrierRows = await tx
               .select({ valueJson: projectParameters.valueJson })
@@ -2817,11 +2860,11 @@ export async function saveWorksheet(
             const table = resolveSelectedTable(carrier, refRows[0]?.valueText ?? null);
             if (!table) return [];
             // Resolve the facility's return period (local selector else project n).
-            const localSym = FACILITY_FREQUENCY_SYMBOL[fvCode!];
+            const localSym = FACILITY_FREQUENCY_SYMBOL[forCode];
             const nLocal = localSym ? await fvNum(localSym) : null;
             const nProj = await fvReadNum('n');
             const tnProj = await fvReadNum('T_n');
-            const T_n = facilityReturnPeriod(fvCode!, (s) =>
+            const T_n = facilityReturnPeriod(forCode, (s) =>
               s === (localSym ?? '') ? nLocal : s === 'n' ? nProj : s === 'T_n' ? tnProj : null,
             );
             const col = resolveColumn(table, T_n);
@@ -2832,7 +2875,48 @@ export async function saveWorksheet(
           let fvInputs: Parameters<typeof facilityVolumeMaterialize>[1] | null = null;
           // Further derived numbers of the facility sheet that the volume was computed with
           // (persisted with the same scoped field resolution as the volume itself).
-          const fvExtraWrites: Array<{ symbol: string; value: number }> = [];
+          const fvExtraWrites: Array<{ symbol: string; value: number; worksheetCode?: string }> = [];
+
+          // ── Swale rules shared by mulde / mre / mrs (2026-10-01, guideline-settled) ──────────
+          // §6.5.2 L1909/L1925: the swale of a Mulden-Rigolen facility uses the infiltration rate of
+          // the vegetated soil zone k_i,BBZ (A138-19/-20 inputs k_f_BBZ + k_f_BBZ_quelle, §5.3.3.6
+          // L1395); a plain swale keeps the project k_i. Persisted on A138-17 as k_i_Mulde — the
+          // value Gl.14/16 read (equation-profiles alias) — together with the REQUIRED volume
+          // V_M,erf (Gl.14, governing D, swale frequency n_M) so the sheet can check the available
+          // Gl.15 volume against it (A138-REQ-34, staged). Writes are skipped while the staged
+          // A138-17 fields do not exist (fvWrites resolves by symbol and `continue`s).
+          const facilityTypeFv = ((await fvEnum('facility_type_selected')) ?? '').toLowerCase();
+          const compositeFv: Phase4FacilityType | null =
+            facilityTypeFv === 'mre' || facilityTypeFv === 'mrs' ? facilityTypeFv : null;
+          const kiBBZFv = async (): Promise<number | null> => {
+            const k_f_BBZ = await fvNum('k_f_BBZ');
+            if (k_f_BBZ == null) return fvReadNum('k_i_BBZ'); // persisted by the other composite sheet, if any
+            return computeKiBBZ({
+              k_f_BBZ,
+              quelle: await fvEnum('k_f_BBZ_quelle'),
+              f_ort: await fvReadNum('f_ort'),
+              f_K: await fvReadNum('f_K'),
+            });
+          };
+          const swaleWrites = async (k_i_BBZ: number | null): Promise<Array<{ symbol: string; value: number; worksheetCode: string }>> => {
+            const out: Array<{ symbol: string; value: number; worksheetCode: string }> = [];
+            const k_i = await fvReadNum('k_i');
+            const k_i_M = swaleDesignInfiltrationRate(compositeFv, k_i, k_i_BBZ);
+            if (k_i_M == null) return out;
+            out.push({ symbol: 'k_i_Mulde', value: k_i_M, worksheetCode: 'A138-17' });
+            const A_C = await fvReadNum('A_C');
+            const A_S_m = await fvReadNum('A_S_m');
+            const f_Z = await fvReadNum('f_Z');
+            // A_VA: the swale's own overrained area, else the project A_VA (A138-10), else the §6.3.2
+            // approximation A_VA = A_S,m (L1705) — the same order the design window uses.
+            const A_VA = (await fvReadNum('A_VA_Mulde')) ?? (await fvReadNum('A_VA')) ?? A_S_m;
+            if (A_C == null || A_S_m == null || f_Z == null || A_VA == null) return out;
+            const rows = await fvResolveRows('A138-17');
+            const req = computeMuldeRequiredVolumeSweep(rows, { A_C, A_VA, A_S_m, k_i: k_i_M, f_Z });
+            if (req.V_M_erf != null && Number.isFinite(req.V_M_erf)) out.push({ symbol: 'V_M_erf', value: req.V_M_erf, worksheetCode: 'A138-17' });
+            return out;
+          };
+
           if (fvFacility === 'mulde') {
             // Gl.15: V_M = A_S,m · h_M — the DIRECT-A_S,m path (readiness run 2026-09-30). When
             // A_S,m comes from the geometry sweep the `asm` branch already wrote the same value;
@@ -2840,6 +2924,7 @@ export async function saveWorksheet(
             const A_S_m = await fvReadNum('A_S_m');
             const h_M = await fvNum('h_M');
             fvInputs = { A_S_m, h_M };
+            fvExtraWrites.push(...(await swaleWrites(compositeFv ? await fvReadNum('k_i_BBZ') : null)));
           } else if (fvFacility === 'rigole') {
             // Gl.20: V_R = b_R · h_R · L_R · s_R, s_R per Gl.21 (exact) from the fill material
             // and the embedded pipes (az = 0 when no pipe is entered).
@@ -2858,11 +2943,51 @@ export async function saveWorksheet(
             // computed with, so the API save path leaves no "missing required" behind
             // (readiness run 2026-09-30, case A5; the browser path writes it via Gl. 21).
             if (s_R != null && Number.isFinite(s_R)) fvExtraWrites.push({ symbol: 's_R', value: s_R });
-          } else if (fvFacility === 'mre') {
-            // Gl.26: V_MR = persisted V_M (A138-17) + persisted V_R (A138-18), scoped.
+          } else if (fvFacility === 'mre' || fvFacility === 'mrs') {
+            // Gl.26: V_MR = persisted V_M (A138-17) + persisted V_R (A138-18), scoped. The MRS is
+            // designed "analog zur Bemessung von Mulden-Rigolen-Elementen" (§6.6.2 L2023).
             const vM = await fvReadNum('V_M');
             const vR = await fvReadNum('V_R');
             fvInputs = { A_S_m: null, h_M: null, V_M: vM, V_R: vR };
+            // §5.3.3.6 / §6.5.2: the swale's k_i,BBZ — persisted on this composite sheet and mirrored
+            // onto the swale sheet (k_i_Mulde, V_M,erf).
+            const k_i_BBZ = await kiBBZFv();
+            if (k_i_BBZ != null && Number.isFinite(k_i_BBZ)) fvExtraWrites.push({ symbol: 'k_i_BBZ', value: k_i_BBZ });
+            fvExtraWrites.push(...(await swaleWrites(k_i_BBZ)));
+            const A_C = await fvReadNum('A_C');
+            const A_VA = (await fvNum('A_VA_MRE')) ?? (await fvReadNum('A_VA'));
+            const A_S_m = await fvReadNum('A_S_m');
+            const f_Z = await fvReadNum('f_Z');
+            const k_i = await fvReadNum('k_i');
+            const k_i_swale = swaleDesignInfiltrationRate(fvFacility, k_i, k_i_BBZ);
+            if (fvFacility === 'mrs') {
+              // Gl.33 (L2063): the mean throttle outflow — persisted so the API path leaves no
+              // "missing required" Q_Dr behind (the browser path writes it via the Gl.33 card).
+              const qMin = await fvNum('Q_Dr_min');
+              const qMax = await fvNum('Q_Dr_max');
+              const Q_Dr = qMin != null && qMax != null ? (qMin + qMax) / 2 : await fvNum('Q_Dr');
+              if (qMin != null && qMax != null) fvExtraWrites.push({ symbol: 'Q_Dr', value: (qMin + qMax) / 2 });
+              const rowsR = await fvResolveRows('A138-20'); // trench frequency n_R (n_R_MRS)
+              // Gl.32 (L2031): governing rainfall r_D(n_R) of the trench design and the inflow sum
+              // Q_zu = r·(A_C + A_VA)·10⁻⁴ (Gl.3) at that rainfall.
+              const b_R = await fvReadNum('b_R');
+              const h_R = await fvReadNum('h_R');
+              const s_R = await fvReadNum('s_R');
+              if (A_C != null && A_VA != null && vM != null && k_i != null && f_Z != null && b_R != null && h_R != null && s_R != null && Q_Dr != null) {
+                const len = computeMrsTrenchLengthSweep(rowsR, { A_C, A_VA, V_M: vM, k_i, f_Z, b_R, h_R, s_R, Q_Dr });
+                if (len.r_D_at_governing != null) {
+                  fvExtraWrites.push({ symbol: 'r_D_nR', value: len.r_D_at_governing });
+                  fvExtraWrites.push({ symbol: 'Q_zu_total_MRS', value: len.r_D_at_governing * (A_C + A_VA) * 1e-4 });
+                }
+              }
+              // Gl.30/31 (L1960–L1996): swale overflow on the n_R column with the SWALE's k_i.
+              if (A_C != null && A_VA != null && A_S_m != null && k_i_swale != null && f_Z != null && vM != null) {
+                const ov = computeMuldenUeberlauf(rowsR, { A_C, A_VA, A_S_m, k_i: k_i_swale, f_Z, V_M: vM });
+                if (ov.V_MUE != null && Number.isFinite(ov.V_MUE)) fvExtraWrites.push({ symbol: 'V_MUE', value: ov.V_MUE });
+                fvExtraWrites.push({ symbol: 'r_MUE', value: ov.r_MUE });
+                fvExtraWrites.push({ symbol: 'Q_MUE', value: ov.Q_MUE });
+              }
+            }
           } else if (fvFacility === 'schacht') {
             // Gl.36/37: V_S = π·d_i²/4·h_S, h_S swept via Gl.37 (governing D).
             const A_C = await fvReadNum('A_C');
@@ -2917,6 +3042,8 @@ export async function saveWorksheet(
               ...fvExtraWrites,
             ];
             for (const w of fvWrites) {
+              // Own-sheet writes resolve on the SAVED worksheet; cross-sheet writes (the swale's
+              // k_i_Mulde / V_M,erf from the MRE/MRS branch) resolve by worksheet code, scoped.
               const fvFieldRows = await tx
                 .select({ id: fields.id })
                 .from(fields)
@@ -2924,7 +3051,9 @@ export async function saveWorksheet(
                 .where(and(
                   eq(fields.symbol, w.symbol),
                   eq(fields.active, true),
-                  eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+                  w.worksheetCode
+                    ? eq(worksheetTemplates.code, w.worksheetCode)
+                    : eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
                   savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
                 ))
                 .limit(1);

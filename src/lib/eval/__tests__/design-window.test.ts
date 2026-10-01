@@ -80,6 +80,20 @@ describe('design window — Rigole and Mulden-Rigolen-Element', () => {
     expect(w.window.min).toBeLessThanOrEqual(25);
   });
 
+  it('system (§6.6, Gl. 32): the same element with a 0.02 l/s throttle needs 16.4 m at D = 1440 min; without throttle Gl. 32 = Gl. 29', () => {
+    const base = { ...CASE, A_VA: 50, V_M: 5.5, b_R: 1, h_R: 1, s_R: 0.35 };
+    const w = ok(evaluateDesignWindow('MRS', asRows(KOSTRA_123107_T10), { ...base, Q_Dr: 0.02 }, 20));
+    expect(w.current!.derived.L_req).toBeCloseTo(16.39, 2);
+    expect(w.current!.derived.D).toBe(1440);
+    expect(w.current!.derived.V_MR).toBeCloseTo(5.5 + 7.0, 1);
+    expect(w.current!.ok).toBe(true);
+    const noThrottle = ok(evaluateDesignWindow('MRS', asRows(KOSTRA_123107_T10), { ...base, Q_Dr: 0 }, 20));
+    const element = ok(evaluateDesignWindow('MRE', asRows(KOSTRA_123107_T10), base, 20));
+    expect(noThrottle.current!.derived.L_req).toBeCloseTo(element.current!.derived.L_req!, 9);
+    // Q_Dr is a REQUIRED input of the system window (no optional-zero): absent → error, never 0
+    expect('error' in evaluateDesignWindow('MRS', asRows(KOSTRA_123107_T10), base, 20)).toBe(true);
+  });
+
   it('element: 50 m² swale (V_M 7.5 m³) over a 1 × 1 m trench needs 18.1 m at D = 2880 min', () => {
     const w = ok(evaluateDesignWindow('MRE', asRows(KOSTRA_123107_T10), { ...CASE, A_VA: 50, V_M: 7.5, b_R: 1, h_R: 1, s_R: 0.35 }, 20));
     expect(w.current!.derived.L_req).toBeCloseTo(18.1, 1);
@@ -111,8 +125,9 @@ describe('design window — Flächenversickerung and Becken', () => {
   });
 
   it('exposes the definitions the panel needs', () => {
-    expect(Object.keys(DESIGN_WINDOWS).sort()).toEqual(['MRE', 'becken', 'flaeche', 'mulde', 'rigole']);
+    expect(Object.keys(DESIGN_WINDOWS).sort()).toEqual(['MRE', 'MRS', 'becken', 'flaeche', 'mulde', 'rigole']);
     expect(WINDOW_BY_WORKSHEET['A138-17']).toBe('mulde');
-    expect('error' in evaluateDesignWindow('MRS', [], {}, 1)).toBe(true);
+    expect(WINDOW_BY_WORKSHEET['A138-20']).toBe('MRS');
+    expect('error' in evaluateDesignWindow('schacht', [], {}, 1)).toBe(true);
   });
 });

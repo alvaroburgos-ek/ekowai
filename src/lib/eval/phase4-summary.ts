@@ -34,7 +34,8 @@ export type FacilityType =
  * COMPOSITE facilities mre (Mulden-Rigolen-Element → A138-19) and mrs
  * (Mulden-Rigolen-System → A138-20), which the A_S,m single-source map omits
  * (they don't produce A_S,m via geometry). The summary DOES need them because
- * their governing storage volumes (V_MR / V_MUE) live on those worksheets.
+ * their governing storage volume V_MR (Gl.26; §6.6.2 L2023 designs the MRS
+ * "analog zur Bemessung von Mulden-Rigolen-Elementen") lives on those worksheets.
  */
 export const FACILITY_TYPE_TO_SUMMARY_WORKSHEET: Record<FacilityType, string> = {
   flaeche: 'A138-16',
@@ -90,7 +91,11 @@ export function facilitySummaryInputs(facilityType: FacilityType): {
     case 'rigole':  return { volumeSymbol: 'V_R',   footprintSymbol: 'A_S_m' };
     // mre: V_MR = V_M + V_R (§6.5.2 Gl.26); footprint A_S_m inherited.
     case 'mre':     return { volumeSymbol: 'V_MR',  footprintSymbol: 'A_S_m' };
-    case 'mrs':     return { volumeSymbol: 'V_MUE', footprintSymbol: 'A_S_m' };
+    // mrs: V_MR = V_M + V_R as for the MRE (§6.6.2 L2023 "analog … 6.5.2" → Gl.26). V_MÜ (Gl.30)
+    // is the swale OVERFLOW volume that sizes the overflow outlet Q_MÜ (Gl.31) — never the storage.
+    // Until 2026-10-01 the summary read V_MUE here (parked as a "ratification"); the printed text
+    // settles it. The A138-20 V_MR field is added by the staged block 20261001100000.
+    case 'mrs':     return { volumeSymbol: 'V_MR',  footprintSymbol: 'A_S_m' };
     // schacht: V_S (§6.7.2 Gl.36); footprint = the active `A_S_Schacht`
     // ("Versickerungsfläche Schacht", Gl.34), NOT the dead generic `A_S`.
     case 'schacht': return { volumeSymbol: 'V_S',   footprintSymbol: 'A_S_Schacht' };

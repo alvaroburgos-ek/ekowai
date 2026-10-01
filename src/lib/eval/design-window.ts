@@ -22,9 +22,9 @@
  * "near" marks a value within `nearFraction` of its bound (amber band).
  *
  * Facilities covered now: flaeche (§6.2), mulde (§6.3), rigole (§6.4),
- * MRE (§6.5, with V_M as fixed input), becken (§6.8). MRS (§6.6, needs the
- * throttle Q_Dr and the overflow route) and schacht (§6.7, Gl. 34–38 with the
- * shaft geometry) follow the same shape and are not defined yet.
+ * MRE (§6.5, with V_M as fixed input), MRS (§6.6, Gl. 32 = Gl. 29 plus the
+ * throttle Q_Dr of Gl. 33), becken (§6.8). Schacht (§6.7, Gl. 34–38 with the
+ * shaft geometry) follows the same shape and is not defined yet.
  */
 import { iterateGoverningDuration, fixedDurationIntensity } from './governing-duration';
 
@@ -234,6 +234,40 @@ const MRE: WindowDef = {
   notesDe: ['V_M ist das Muldenvolumen über der Rigole (Gl. 15, L1720); Bemessungshäufigkeit der Mulde i. d. R. n = 1/a (§6.5.2, L1922); Überlauf in die Rigole n_M nach Tab. 6.'],
 };
 
+const MRS: WindowDef = {
+  facility: 'MRS',
+  titleDe: 'Bemessungsfenster Mulden-Rigolen-System (§6.6)',
+  variable: { symbol: 'L_R', labelDe: 'Rigolenlänge L_R unter der Mulde', unit: 'm', min: 1 },
+  // Q_Dr is REQUIRED here (not optional-zero as elsewhere): a system without throttle is an element (§6.6.1).
+  requires: ['A_C', 'A_VA', 'V_M', 'k_i', 'f_Z', 'b_R', 'h_R', 's_R', 'Q_Dr'],
+  derived: [
+    { key: 'L_req', labelDe: 'erforderliche Länge L_R,erf (Gl. 32, max über D)', unit: 'm', digits: 1 },
+    { key: 'D', labelDe: 'maßgebende Dauerstufe', unit: 'min', digits: 0 },
+    { key: 'V_R', labelDe: 'V_R = b·h·L·s_R (Gl. 20)', unit: 'm³', digits: 1 },
+    { key: 'V_MR', labelDe: 'V_MR = V_M + V_R (Gl. 26, §6.6.2 „analog“)', unit: 'm³', digits: 1 },
+    { key: 'L_ratio', labelDe: 'L_R / L_R,erf', unit: '–', digits: 2 },
+  ],
+  evaluate: (rows, s, x) => {
+    // Gl. 32 (L2031): L_R = ((A_C+A_VA)·10⁻⁷·r − b·h·k_i − V_M/(D·60·f_Z) − Q_Dr·10⁻³) / (b·h·s_R/(D·60·f_Z) + (b+h)·k_i)
+    const g = iterateGoverningDuration(rows, (D, r) => {
+      const t = D * 60 * s.f_Z;
+      const num = (s.A_C + s.A_VA) * 1e-7 * r - s.b_R * s.h_R * s.k_i - s.V_M / t - s.Q_Dr * 1e-3;
+      const den = (s.b_R * s.h_R * s.s_R) / t + (s.b_R + s.h_R) * s.k_i;
+      return num / den;
+    });
+    const V_R = s.b_R * s.h_R * x * s.s_R;
+    return { L_req: g.governingValue, D: g.governingD, V_R, V_MR: s.V_M + V_R, L_ratio: g.governingValue != null && g.governingValue > 0 ? x / g.governingValue : null };
+  },
+  limits: [{ key: 'length', labelDe: 'L_R ≥ L_R,erf', clause: '§6.6.2 Gl. 32 (L2031)', on: 'L_ratio', kind: 'min', bound: 1, unit: '–', severity: 'hard',
+    quoteDe: '§6.6.2: „Die Bemessungsgleichung Gl. (29) des Einfachen Verfahrens wird um den Drosselabfluss Q_Dr ergänzt“ (L2029); „Die erforderliche Länge der Rigole L_R erhält man durch die iterative Anwendung … für unterschiedliche Dauerstufen D“ (L2055).', leverDe: 'Länge erhöhen, Querschnitt oder Muldenvolumen V_M vergrößern — oder einen größeren Drosselabfluss mit der Wasserbehörde/dem Kanalnetzbetreiber abstimmen (§6.6.2, L2057).' }],
+  notesDe: [
+    'Bemessung „analog zur Bemessung von Mulden-Rigolen-Elementen (siehe 6.5.2)“ (§6.6.2, L2023): V_M nach Gl. 15 für n_M, Rigole für n_R; das Speichervolumen ist V_MR = V_M + V_R (Gl. 26).',
+    'Q_Dr = (Q_Dr,min + Q_Dr,max)/2 (Gl. 33, L2063) — ein konstanter mittlerer Drosselabfluss genügt im Einfachen Verfahren; die maximale Drosselleistung ist mit der Wasserbehörde oder dem Kanalnetzbetreiber abzustimmen (L2057).',
+    'Der Muldenüberlauf (V_MÜ nach Gl. 30, Q_MÜ nach Gl. 31) bemisst nur den Überlauf in die Rigole — er ist kein Speichervolumen (§6.6.2, L2069: „analog zu 6.5.2“).',
+    'Rigolenvolumen unterhalb der Sohle des Ablaufrohrs zum Drosselschacht ist im Einfachen Verfahren zu vernachlässigen (§6.6.1, L2011) — h_R entsprechend ansetzen.',
+  ],
+};
+
 const BECKEN: WindowDef = {
   facility: 'becken',
   titleDe: 'Bemessungsfenster Versickerungsbecken (§6.8)',
@@ -303,7 +337,7 @@ export function interpretRowDe(def: WindowDef, row: WindowRow, window: { min: nu
 }
 
 export const DESIGN_WINDOWS: Partial<Record<FacilityKey, WindowDef>> = {
-  flaeche: FLAECHE, mulde: MULDE, rigole: RIGOLE, MRE, becken: BECKEN,
+  flaeche: FLAECHE, mulde: MULDE, rigole: RIGOLE, MRE, MRS, becken: BECKEN,
 };
 
 /** Worksheet code → facility key (DWA-A-138-1 chain). */
@@ -342,7 +376,7 @@ export function evaluateDesignWindow(
   current: number | null,
 ): WindowResult | { error: string } {
   const def = DESIGN_WINDOWS[facility];
-  if (!def) return { error: `Kein Bemessungsfenster für ${facility} definiert (MRS: Drosselabfluss; Schacht: Gl. 34–38 folgen).` };
+  if (!def) return { error: `Kein Bemessungsfenster für ${facility} definiert (Schacht: Gl. 34–38 folgen).` };
   const s: Record<string, number> = {};
   const missing: string[] = [];
   for (const k of def.requires) {
@@ -377,7 +411,8 @@ export function evaluateDesignWindow(
       facility === 'mulde' ? (D: number, r: number) => ((s.A_C + (typeof s.A_VA === 'number' ? s.A_VA : xs)) * 1e-7 * r - xs * s.k_i) * D * 60 * s.f_Z
       : facility === 'becken' ? (D: number, r: number) => ((s.A_C + s.A_VA) * 1e-7 * r - xs * s.k_i - Q_Dr * 1e-3) * D * 60 * s.f_Z * s.f_A
       : facility === 'rigole' ? (D: number, r: number) => (s.A_C * 1e-7 * r - s.b_R * s.h_R * s.k_i - Q_Dr * 1e-3) / ((s.b_R * s.h_R * s.s_R) / (D * 60 * s.f_Z) + (s.b_R + s.h_R) * s.k_i)
-      : (D: number, r: number) => { const t = D * 60 * s.f_Z; return ((s.A_C + s.A_VA) * 1e-7 * r - s.b_R * s.h_R * s.k_i - s.V_M / t) / ((s.b_R * s.h_R * s.s_R) / t + (s.b_R + s.h_R) * s.k_i); };
+      // MRE (Gl. 29) and MRS (Gl. 32 = Gl. 29 − Q_Dr·10⁻³ in the numerator; Q_Dr is 0 for the element)
+      : (D: number, r: number) => { const t = D * 60 * s.f_Z; return ((s.A_C + s.A_VA) * 1e-7 * r - s.b_R * s.h_R * s.k_i - s.V_M / t - (facility === 'MRS' ? Q_Dr : 0) * 1e-3) / ((s.b_R * s.h_R * s.s_R) / t + (s.b_R + s.h_R) * s.k_i); };
     const g = iterateGoverningDuration(rows, sizing);
     curve = g.perDuration;
     governingD = g.governingD;

@@ -114,8 +114,9 @@ export function computeSchachtHeadSweep(
  *   schacht → V_S  = π · d_i²/4 · h_S                    (§6.7.2 Gl.36; h_S swept via Gl.37)
  *   becken  → V_B  = Gl.41 governing sweep               (§6.8.2 Gl.41)  [server-provided]
  *   flaeche → none (area device, §6.2.2 Gl.12 A_S is an area)
- *   mrs     → V_MUE — EXCLUDED (blocked on a ratification: source storage = V_MR not
- *             V_MUE, and A138-20 has no V_MR field). Returns null.
+ *   mrs     → V_MR = V_M + V_R                           (§6.6.2: "analog zur Bemessung von
+ *             Mulden-Rigolen-Elementen (siehe 6.5.2)" → Gl.26; V_MÜ (Gl.30) is the swale
+ *             OVERFLOW volume that sizes the overflow outlet Q_MÜ (Gl.31), never the storage)
  *
  * @returns the governing volume, or null when an input is missing / non-finite / the
  *   facility's rule is excluded.
@@ -159,10 +160,13 @@ export function facilityGoverningVolume(
       // Gl.20: V_R = b_R · h_R · L_R · s_R.
       return b_R * h_R * L_R * s_R;
     }
-    case 'mre': {
+    case 'mre':
+    case 'mrs': {
       const { V_M, V_R } = inputs;
       if (!finite(V_M) || !finite(V_R)) return null;
       // Gl.26: V_MR = V_M + V_R (scoped cross-ws sum of persisted component volumes).
+      // MRS (§6.6.2 L2023): designed "analog zur Bemessung von Mulden-Rigolen-Elementen
+      // (siehe 6.5.2)" — same storage identity; only Gl.29 → Gl.32 adds the throttle Q_Dr.
       return V_M + V_R;
     }
     case 'schacht': {
@@ -180,23 +184,21 @@ export function facilityGoverningVolume(
     }
     // area device — no dedicated storage volume.
     case 'flaeche':
-    // MRS excluded — ratification block (V_MR vs V_MUE); never fabricate.
-    case 'mrs':
       return null;
   }
 }
 
 /**
  * Governing storage-volume symbol per facility (the facility worksheet's V field).
- * Source-verified + auto-persisted for mulde/rigole/mre/schacht/becken. flaeche has
- * no storage volume; mrs is EXCLUDED (ratification block) → null so nothing persists.
+ * Source-verified + auto-persisted for mulde/rigole/mre/mrs/schacht/becken. flaeche has
+ * no storage volume → null so nothing persists.
  */
 export const FACILITY_GOVERNING_VOLUME_SYMBOL: Record<SummaryFacilityType, string | null> = {
   flaeche: null,     // area device — no dedicated storage volume
   mulde:   'V_M',    // §6.3.2 Gl.15
   rigole:  'V_R',    // §6.4.2 Gl.20
   mre:     'V_MR',   // §6.5.2 Gl.26
-  mrs:     null,     // EXCLUDED — ratification block (V_MR vs V_MUE)
+  mrs:     'V_MR',   // §6.6.2 L2023 "analog … 6.5.2" → Gl.26 (A138-20 field, staged block 2026-10-01)
   schacht: 'V_S',    // §6.7.2 Gl.36
   becken:  'V_B',    // §6.8.2 Gl.41 (active field is V_B, not V_VA)
 };
@@ -275,4 +277,129 @@ export function materializeAsm(input: AsmMaterializeInput): { A_S_m: number | nu
     A_S_m: value,
     state: { status: 'determined', value, method: input.method, sourceWorksheet },
   };
+}
+
+// ===========================================================================
+// Mulde / Mulden-Rigolen pure sizing rules (readiness follow-up 2026-10-01)
+// ===========================================================================
+
+/**
+ * §5.3.3.6 (L1395) — the design infiltration rate of the VEGETATED SOIL ZONE k_i,BBZ.
+ *
+ *   "Erfüllt der Boden der bewachsenen Bodenzone die Anforderungen nach 5.2.3.2 und liegt die
+ *    Korngrößenverteilung in dem maßgeblichen Bereich nach Bild 1, kann der k_f-Wert für die
+ *    bewachsene Bodenzone mit 1·10⁻⁵ bis 5·10⁻⁵ m/s angesetzt werden; der Korrekturfaktor für
+ *    die Bestimmungsmethode Wasserdurchlässigkeit f_Methode nach Tabelle 11 ist in diesem Fall
+ *    zu vernachlässigen."
+ *
+ * So with the printed range (quelle = 'bild1_bereich') Gl.5/6 collapse to k_i = k_f·f_Ort
+ * (f_Methode neglected); with a MEASURED k_f,BBZ the full f_K = f_Ort·f_Methode applies.
+ * The engineer selects the value inside the range (SR-2) — never auto-picked here.
+ */
+export function computeKiBBZ(inputs: {
+  k_f_BBZ: number | null;
+  quelle: string | null;
+  f_ort: number | null;
+  f_K: number | null;
+}): number | null {
+  const { k_f_BBZ, quelle, f_ort, f_K } = inputs;
+  if (k_f_BBZ == null || !Number.isFinite(k_f_BBZ)) return null;
+  const factor = quelle === 'bild1_bereich' ? f_ort : f_K;
+  if (factor == null || !Number.isFinite(factor)) return null;
+  return k_f_BBZ * factor;
+}
+
+/**
+ * §6.5.2 (L1909, L1925) — which k_i the SWALE of a facility uses:
+ *   "Bei der Muldenbemessung ist die Infiltrationsrate der bewachsenen Bodenzone und bei der
+ *    Bemessung der Rigole die Infiltrationsrate des anstehenden Bodens bemessungsrelevant."
+ *   "Die maßgebliche Bodenschicht der Mulde für die Bestimmung der bemessungsrelevanten
+ *    Infiltrationsrate k_i ist die bewachsene Bodenzone."
+ * For a composite (mre / mrs) the swale takes k_i,BBZ when it is known; a plain swale keeps
+ * the project k_i of the governing layer (§6.3.2 L1698: the vegetated zone is one of the
+ * layers considered on A138-05/-11).
+ */
+export function swaleDesignInfiltrationRate(
+  facilityType: SummaryFacilityType | null,
+  k_i: number | null,
+  k_i_BBZ: number | null,
+): number | null {
+  const composite = facilityType === 'mre' || facilityType === 'mrs';
+  if (composite && k_i_BBZ != null && Number.isFinite(k_i_BBZ)) return k_i_BBZ;
+  return k_i != null && Number.isFinite(k_i) ? k_i : null;
+}
+
+/**
+ * §6.3.2 Gl.14 (L1681) — REQUIRED swale storage volume, governing over the Dauerstufen:
+ *   V_M(D) = [(A_C + A_VA)·10⁻⁷·r_D(n) − A_S,m·k_i]·D·60·f_Z ;  V_M,erf = max_D V_M(D).
+ * The persisted V_M on A138-17 is the AVAILABLE volume Gl.15 = A_S,m·h_M (chosen head); the
+ * check "available ≥ required" is the sizing itself (gate A138-REQ-34, staged 2026-10-01).
+ */
+export function computeMuldeRequiredVolumeSweep(
+  rows: ReadonlyArray<{ D_min: number | null; r_D_n: number | null }>,
+  scalars: { A_C: number; A_VA: number; A_S_m: number; k_i: number; f_Z: number },
+): { V_M_erf: number | null; governingD: number | null; boundaryLimited: boolean } {
+  const { A_C, A_VA, A_S_m, k_i, f_Z } = scalars;
+  const gov = iterateGoverningDuration(rows, (D, r_D) =>
+    ((A_C + A_VA) * 1e-7 * r_D - A_S_m * k_i) * D * 60 * f_Z,
+  );
+  return { V_M_erf: gov.governingValue, governingD: gov.governingD, boundaryLimited: gov.boundaryLimited };
+}
+
+/**
+ * §6.5.2 Gl.30/31 (L1960–L1996) — swale OVERFLOW of a Mulden-Rigolen-Element/-System.
+ *
+ *   Gl.30: V_MÜ(D) = [(A_C + A_VA)·r_D(n_R)·10⁻⁷ − A_S,m·k_i]·D·60·f_Z − V_M
+ *   "Ergibt sich für eine Dauerstufe D ein Wert größer als Null, liegt ein Überlauf vor. Die
+ *    Regenspende r_D(n_R) mit der kleinsten Dauerstufe, für die ein Überlauf vorliegt, ist die
+ *    maßgebliche Regenspende r_MÜ."
+ *   Gl.31: Q_MÜ = A_C·10⁻⁴·r_MÜ − A_VA·k_i·1000   [l/s]
+ *
+ * rows = the column of the TRENCH design frequency n_R; k_i = the SWALE's rate (BBZ, see
+ * swaleDesignInfiltrationRate); V_M = the swale volume designed for n_M (§6.3.2).
+ * No overflow at any D → overflow:false, r_MÜ/Q_MÜ = 0 and V_MÜ = the largest (negative)
+ * value, so the sheet shows the margin honestly instead of a blank.
+ */
+export function computeMuldenUeberlauf(
+  rows: ReadonlyArray<{ D_min: number | null; r_D_n: number | null }>,
+  scalars: { A_C: number; A_VA: number; A_S_m: number; k_i: number; f_Z: number; V_M: number },
+): { overflow: boolean; D: number | null; r_MUE: number; V_MUE: number | null; Q_MUE: number } {
+  const { A_C, A_VA, A_S_m, k_i, f_Z, V_M } = scalars;
+  const complete = rows
+    .filter((r): r is { D_min: number; r_D_n: number } =>
+      typeof r.D_min === 'number' && Number.isFinite(r.D_min) && r.D_min > 0 &&
+      typeof r.r_D_n === 'number' && Number.isFinite(r.r_D_n))
+    .sort((a, b) => a.D_min - b.D_min);
+  let maxV: number | null = null;
+  for (const row of complete) {
+    const V = ((A_C + A_VA) * row.r_D_n * 1e-7 - A_S_m * k_i) * row.D_min * 60 * f_Z - V_M;
+    if (V > 0) {
+      const Q = A_C * 1e-4 * row.r_D_n - A_VA * k_i * 1000;
+      return { overflow: true, D: row.D_min, r_MUE: row.r_D_n, V_MUE: V, Q_MUE: Q };
+    }
+    if (maxV == null || V > maxV) maxV = V;
+  }
+  return { overflow: false, D: null, r_MUE: 0, V_MUE: maxV, Q_MUE: 0 };
+}
+
+/**
+ * §6.6.2 Gl.32 (L2031) — required trench length of a Mulden-Rigolen-SYSTEM (with throttle):
+ *   L_R(D) = [(A_C + A_VA)·10⁻⁷·r_D(n) − b_R·h_R·k_i − V_M/(D·60·f_Z) − Q_Dr·10⁻³]
+ *          / [b_R·h_R·s_R/(D·60·f_Z) + (b_R + h_R)·k_i]
+ * governing = max over the Dauerstufen ("iterative Anwendung … für unterschiedliche
+ * Dauerstufen D", L2055). Q_Dr = the mean throttle outflow of Gl.33 in l/s; k_i = the
+ * SUBSOIL rate (trench side). Q_Dr = 0 reproduces Gl.29 (MRE).
+ */
+export function computeMrsTrenchLengthSweep(
+  rows: ReadonlyArray<{ D_min: number | null; r_D_n: number | null }>,
+  scalars: { A_C: number; A_VA: number; V_M: number; k_i: number; f_Z: number; b_R: number; h_R: number; s_R: number; Q_Dr: number },
+): { L_R: number | null; governingD: number | null; r_D_at_governing: number | null } {
+  const { A_C, A_VA, V_M, k_i, f_Z, b_R, h_R, s_R, Q_Dr } = scalars;
+  const gov = iterateGoverningDuration(rows, (D, r_D) => {
+    const t = D * 60 * f_Z;
+    const num = (A_C + A_VA) * 1e-7 * r_D - b_R * h_R * k_i - V_M / t - Q_Dr * 1e-3;
+    const den = (b_R * h_R * s_R) / t + (b_R + h_R) * k_i;
+    return den === 0 ? null : num / den;
+  });
+  return { L_R: gov.governingValue, governingD: gov.governingD, r_D_at_governing: gov.r_D_at_governing };
 }

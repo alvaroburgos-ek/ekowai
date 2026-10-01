@@ -450,8 +450,11 @@ export function buildSnapshotPayload(args: {
       ? Object.values(rewrite.remap)
       : normalizeSymbols(eq.inputSymbols ?? []);
 
-    const aliasFor = (sym: string): string =>
-      profile?.symbolAliases?.[sym] ?? sym;
+    // 2026-10-01: an alias whose target field is absent falls back to the formula symbol (parity with the hook).
+    const aliasFor = (sym: string): string => {
+      const a = profile?.symbolAliases?.[sym];
+      return a != null && fieldBySymbol.has(a) ? a : sym;
+    };
 
     // Ambiguity guard — parity with the live engine hook. When a consumed
     // symbol has >1 producing worksheet the snapshot must NOT silently pick

@@ -112,10 +112,13 @@ describe('facilityGoverningVolume — Finding F pure rule', () => {
     expect(v).toBeCloseTo(128.4, 9);
   });
 
-  it('flaeche + mrs: no storage volume → null (area device / ratification-excluded)', () => {
+  it('flaeche: no storage volume → null (area device)', () => {
     expect(facilityGoverningVolume('flaeche', { A_S_m: 100, h_M: 0.3 })).toBeNull();
-    // MRS is excluded (V_MR vs V_MUE ratification block) — never fabricated.
-    expect(facilityGoverningVolume('mrs', { A_S_m: 100, h_M: 0.3, V_M: 5, V_R: 3 })).toBeNull();
+  });
+
+  it('mrs: V_MR = V_M + V_R like the element (§6.6.2 L2023 "analog … 6.5.2" → Gl.26)', () => {
+    expect(facilityGoverningVolume('mrs', { A_S_m: 100, h_M: 0.3, V_M: 5, V_R: 3 })).toBe(8);
+    expect(facilityGoverningVolume('mrs', { A_S_m: null, h_M: null, V_M: 5 })).toBeNull();
   });
 
   it('each wired facility returns null when a required input is missing', () => {
@@ -142,8 +145,8 @@ describe('facilityVolumeMaterialize — Finding F persist-set assembly', () => {
     expect(facilityVolumeMaterialize('flaeche', { A_S_m: 200, h_M: null })).toBeNull();
   });
 
-  it('mrs: excluded (ratification block) → no persist row even with inputs', () => {
-    expect(facilityVolumeMaterialize('mrs', { A_S_m: 100, h_M: 0.3, V_M: 5, V_R: 3 })).toBeNull();
+  it('mrs: the governing-volume row V_MR is in the persist set', () => {
+    expect(facilityVolumeMaterialize('mrs', { A_S_m: 100, h_M: 0.3, V_M: 5, V_R: 3 })).toEqual({ volumeSymbol: 'V_MR', value: 8 });
   });
 
   it('rigole/mre/schacht/becken: the governing-volume field IS in the persist set with correct symbol', () => {

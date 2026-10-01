@@ -410,7 +410,11 @@ export function evaluateWorksheetEquations(
       ? Object.values(rewrite.remap)
       : normalizeSymbols(eq.inputSymbols ?? []);
 
-    const aliasFor = (sym: string): string => profile?.symbolAliases?.[sym] ?? sym;
+    // 2026-10-01: an alias whose target field is absent falls back to the formula symbol (parity with the hook).
+    const aliasFor = (sym: string): string => {
+      const a = profile?.symbolAliases?.[sym];
+      return a != null && fieldBySymbol.has(a) ? a : sym;
+    };
 
     const evalInputs = neededSymbols.map((sym) => {
       const f = fieldBySymbol.get(aliasFor(sym));

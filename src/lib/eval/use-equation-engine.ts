@@ -510,8 +510,12 @@ export function useEquationEngine({
       // `r_D_n_used` for the `r_D_n` formula symbol. The alias affects field
       // lookup but NOT the substituted-map key the engineer sees (so the
       // engine card still surfaces `r_D_n` rather than the local alias).
-      const aliasFor = (sym: string): string =>
-        profile?.symbolAliases?.[sym] ?? sym;
+      // 2026-10-01: an alias whose target field is absent in this project's standard (a staged field
+      // not yet applied, e.g. A138-17 k_i_Mulde) falls back to the formula symbol instead of "missing".
+      const aliasFor = (sym: string): string => {
+        const a = profile?.symbolAliases?.[sym];
+        return a != null && fieldBySymbol.has(a) ? a : sym;
+      };
 
       const evalInputs = neededSymbols.map((sym) => {
         const f = fieldBySymbol.get(aliasFor(sym));
