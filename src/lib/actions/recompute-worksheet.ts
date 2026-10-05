@@ -139,7 +139,7 @@ async function recomputePass(instanceId: string): Promise<RecomputeResult> {
   if (!inst) throw new Error('Arbeitsblatt nicht gefunden.');
 
   const tmplEquations = await db.select().from(equations).where(eq(equations.worksheetTemplateId, inst.templateId));
-  if (tmplEquations.length === 0) return { written: [], notComputed: [], warnings: [], derived: [] };
+  // (no early return on "no equations": a sheet may still carry lookup_fill fields — FLLNT-09, D7 re-test 2026-10-05)
 
   // The regulation tables of this standard back `lookup()` in the evaluator (same guard as the report loader).
   await ensureRegulationTablesLoaded(inst.standardCode);

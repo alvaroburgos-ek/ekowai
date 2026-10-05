@@ -47,6 +47,8 @@ export type EvalExtras = {
   registers?: Record<string, PreparedRegister>;
   table?: Scope['table'];
   carriers?: Record<string, unknown>;
+  /** Called for every scalar symbol the evaluator reads (formula.ts: missing-input check for short-circuiting if() formulas). */
+  onSymbolRead?: (sym: string) => void;
 };
 
 export function evalExpression(
@@ -62,7 +64,10 @@ export function evalExpression(
   const registers = extra?.registers;
   const carriers = extra?.carriers;
   const exprScope: Scope = {
-    symbol: (sym) => (values.has(sym) ? values.get(sym) : sym in CONSTANTS ? CONSTANTS[sym] : undefined),
+    symbol: (sym) => {
+      extra?.onSymbolRead?.(sym);
+      return values.has(sym) ? values.get(sym) : sym in CONSTANTS ? CONSTANTS[sym] : undefined;
+    },
     register: registers ? (sym) => registers[sym] : undefined,
     table: extra?.table,
     carrier: carriers ? (sym) => carriers[sym] : undefined,

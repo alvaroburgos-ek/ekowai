@@ -73,7 +73,10 @@ describe('FLL-GAR-2023 Plan-3 equations', () => {
     expect(r('moeglich', 1.0, 0.5)).toBe(3);      // L3688
     expect(r('moeglich', 1.0, 0.6)).toBe(9);      // Versatz over 0,5 mm → outside Tab. 18 (fll_gar-J-2)
     expect(r('moeglich', 1.2, 0)).toBe(9);
-    expect(run('FLL-GAR-05-D2', { inputs: inp({ neurissbildung: 'moeglich', rissbreite_erwartet_mm: 0.1 }) }).kind).toBe('manual_required'); // every named input is checked before evaluation
+    // GAR D1 (readiness run 2026-10-05): an if() formula evaluates with the inputs the taken branch reads — R1 needs no Versatz
+    // (Tab. 18 names it for R3 only), so a missing rissversatz still yields R1; a missing input the evaluator READS stays manual_required.
+    expect(computed(run('FLL-GAR-05-D2', { inputs: inp({ neurissbildung: 'moeglich', rissbreite_erwartet_mm: 0.1 }) }))).toBe(1);
+    expect(run('FLL-GAR-05-D2', { inputs: inp({ neurissbildung: 'moeglich', rissversatz_erwartet_mm: 0 }) })).toMatchObject({ kind: 'manual_required', missing: ['rissbreite_erwartet_mm'] });
     expect(EQUATIONS.some((e) => e.equation_number === 'FLL-GAR-05-D3')).toBe(false);
   });
 

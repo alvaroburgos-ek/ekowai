@@ -251,7 +251,11 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     substituted[sym] = found.value;
   }
 
-  if (missing.length > 0) {
+  // FLL run 2026-10-05 (GAR D1, FLL-GAR-05-D2 `r_klasse_code = if(neurissbildung == 'ausgeschlossen', 0, …)`): a formula
+  // with an `if(…)` call may legitimately leave the inputs of the untaken branch empty — the evaluator short-circuits.
+  // Such a formula is evaluated with the inputs that exist; a missing symbol the evaluator actually reads surfaces
+  // as manual_required from the catch below ("Unbekanntes Symbol" / "Fehlende Eingabe").
+  if (missing.length > 0 && !/\bif\s*\(/i.test(formulaInUse)) {
     return {
       kind: 'manual_required',
       reason: `Fehlende oder leere Eingaben: ${missing.join(', ')}`,
@@ -311,11 +315,24 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     : substituted;
 
   try {
+    const read = new Set<string>();
     const result = evalExpression(expression, scope, {
       registers: req.registers,
       table: req.tableLookup,
       carriers: req.carriers,
+      onSymbolRead: (sym) => read.add(sym),
     });
+    // if() leniency (GAR D1): the formula was evaluated although inputs were missing. That is only legitimate when the
+    // evaluator never READ a missing symbol (it sat in the untaken branch). A missing symbol that was read — e.g. inside
+    // the if() test, where conditions are evaluated leniently and may fold the gap into `false` — is still a missing input.
+    if (missing.some((m) => read.has(m))) {
+      return {
+        kind: 'manual_required',
+        reason: `Fehlende oder leere Eingaben: ${missing.join(', ')}`,
+        missing,
+        rewrite: rewrite ?? undefined,
+      };
+    }
     return {
       kind: 'computed',
       value: result,
@@ -325,6 +342,16 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Formel-Auswertung fehlgeschlagen';
+    // Declared inputs were missing and the evaluator did read one of them (no short-circuit rescued the formula):
+    // report the legacy missing-input state, so callers that name the missing symbols keep working.
+    if (missing.length > 0) {
+      return {
+        kind: 'manual_required',
+        reason: `Fehlende oder leere Eingaben: ${missing.join(', ')}`,
+        missing,
+        rewrite: rewrite ?? undefined,
+      };
+    }
     // Engineer-recoverable conditions (the formula is sound, the inputs land
     // it in an undefined-numeric corner) become manual_required so the
     // engineer sees an actionable badge instead of a red "error" pill:

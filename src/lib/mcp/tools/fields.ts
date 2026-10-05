@@ -8,6 +8,7 @@ import { recomputeWorksheetEquations, type RecomputeResult } from '@/lib/actions
 import { addCitation } from '@/lib/actions/citations';
 import { setClientSupplied } from '@/lib/actions/client-supplied';
 import { defineTool, unwrap } from '../define-tool';
+import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { assertInternalAccess } from './projects';
 
 /**
@@ -104,12 +105,17 @@ export function registerFieldTools(server: McpServer) {
           id: worksheetInstances.id,
           projectId: worksheetInstances.projectId,
           templateId: worksheetInstances.worksheetTemplateId,
+          status: worksheetInstances.status,
         })
         .from(worksheetInstances)
         .where(eq(worksheetInstances.id, instanceId))
         .limit(1);
       if (!instance) throw new Error('Arbeitsblatt nicht gefunden.');
       await assertInternalAccess(user.id, instance.projectId);
+      // FLL run 2026-10-05 (GAR D11): the API accepted writes on submitted / approved sheets that the form locks.
+      if (!isWorksheetEditable(instance.status as WorksheetStatus)) {
+        throw new Error(`Arbeitsblatt ist im Status "${instance.status}" nicht bearbeitbar — erst mit transition_worksheet (reopen / engineer_reject) öffnen.`);
+      }
 
       // Resolve each field's declared dataType before coercing — writing a
       // string into a numeric field would silently break the equations.
