@@ -7,6 +7,7 @@ import { evaluateCondition, type EvalResult } from '@/lib/compliance/evaluate';
 import { makeCarrierLookup, makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { explainCondition } from '@/lib/compliance/explain';
 import { isAttestationCondition } from '@/lib/eval/attestation';
+import { hintText } from '@/lib/eval/hint-text';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
 
@@ -171,7 +172,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                 </span>
               </div>
               {cr.description && (
-                <p className="text-xs text-subtext ml-8 sm:ml-[140px]">{cr.description}</p>
+                <p className="text-xs text-subtext ml-8 sm:ml-[140px]">{hintText(cr.description, locale)}</p>
               )}
               <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-8 sm:ml-[140px] flex gap-3 flex-wrap">
                 <code className="break-all">{cr.condition}</code>
