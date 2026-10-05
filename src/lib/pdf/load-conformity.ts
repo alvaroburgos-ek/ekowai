@@ -183,7 +183,8 @@ export async function loadConformityData(
     let failingBlockCodes: string[] = [];
     if (inst && APPROVED_STATUSES.has(inst.status)) {
       const gate = await checkApprovalGate(inst.id);
-      failingBlockCodes = gate.failingBlockConditions.map((c) => c.code);
+      // Owner ruling 2026-10-05: a block gate waiting for inputs blocks the declaration like a failing one.
+      failingBlockCodes = [...gate.failingBlockConditions, ...gate.pendingBlockConditions].map((c) => c.code);
     }
     rows.push({
       code: t.code,

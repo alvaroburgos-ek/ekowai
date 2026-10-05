@@ -8,6 +8,7 @@ import {
   worksheetSections,
   worksheetTemplates,
   standards,
+  equations,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { evaluateCondition, jsonConditionValue } from '@/lib/compliance/evaluate';
@@ -22,7 +23,23 @@ import { inheritedSymbolSet, missingRequiredFields as missingRequiredFieldsShare
 export type ApprovalGateResult = {
   ok: boolean;
   failingBlockConditions: Array<{ code: string; titleDe: string; condition: string }>;
+  /**
+   * Owner ruling 2026-10-05 (FLL readiness run, GAR D4): a block gate whose inputs are not all entered is NOT satisfied — it
+   * blocks the approval like a failing one, and the refusal says what to enter and why (the gate's own hint). Supersedes the
+   * 2026-09-30 reading that a pending block gate never blocks. Hidden inputs (visible_when) stay not_applicable, never pending.
+   */
+  pendingBlockConditions: PendingBlockCondition[];
   missingRequiredFields: Array<{ symbol: string; labelDe: string }>;
+};
+
+export type PendingBlockCondition = {
+  code: string;
+  titleDe: string;
+  condition: string;
+  /** The gate's description — the bilingual hint ("<de>\n[EN] <en>") the encoding carries; null when none. */
+  hint: string | null;
+  /** The inputs the gate still waits for, resolved to labels: own sheet, another sheet of the standard (originCode), or a derived value. */
+  missingInputs: Array<{ symbol: string; labelDe: string; originCode: string | null; derived: boolean }>;
 };
 
 export type GateValue = number | string | boolean | null;
@@ -167,6 +184,7 @@ export async function checkApprovalGate(
       projectId: worksheetInstances.projectId,
       worksheetTemplateId: worksheetInstances.worksheetTemplateId,
       standardCode: standards.code,
+      standardId: standards.id,
     })
     .from(worksheetInstances)
     .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
@@ -177,6 +195,7 @@ export async function checkApprovalGate(
     return {
       ok: false,
       failingBlockConditions: [],
+      pendingBlockConditions: [],
       missingRequiredFields: [{ symbol: '__instance__', labelDe: 'Worksheet not found' }],
     };
   }
@@ -201,6 +220,7 @@ export async function checkApprovalGate(
       // Plan 2a (Task 10): visible_when inputs.
       sectionId: fields.sectionId,
       visibleWhen: fields.visibleWhen,
+      widget: fields.widget,
     })
     .from(fields)
     .where(
@@ -297,6 +317,7 @@ export async function checkApprovalGate(
       titleDe: complianceRequirements.titleDe,
       condition: complianceRequirements.condition,
       severity: complianceRequirements.severity,
+      description: complianceRequirements.description,
     })
     .from(complianceRequirements)
     .where(
@@ -307,6 +328,7 @@ export async function checkApprovalGate(
     );
 
   const failingBlockConditions: ApprovalGateResult['failingBlockConditions'] = [];
+  const pendingRaw: Array<{ code: string; titleDe: string; condition: string; hint: string | null; missingSymbols: string[] }> = [];
   for (const r of rows) {
     const result = evaluateCondition(r.condition, lookup, { hiddenSymbols, carrier: gateCarrier });
     if (result.kind === 'fail') {
@@ -315,11 +337,64 @@ export async function checkApprovalGate(
         titleDe: r.titleDe,
         condition: r.condition,
       });
+    } else if (result.kind === 'pending') {
+      // Owner ruling 2026-10-05 (GAR D4): a block gate without its inputs is not satisfied — it blocks, and the refusal names the
+      // inputs (labels, origin sheet, derived or typed) and carries the gate's hint so the engineer knows how to pass it.
+      pendingRaw.push({ code: r.code, titleDe: r.titleDe, condition: r.condition, hint: r.description ?? null, missingSymbols: result.missingSymbols });
     }
   }
 
-  const ok = failingBlockConditions.length === 0 && missingRequiredFields.length === 0;
-  return { ok, failingBlockConditions, missingRequiredFields };
+  const pendingBlockConditions: PendingBlockCondition[] = [];
+  if (pendingRaw.length > 0) {
+    const wanted = new Set(pendingRaw.flatMap((p) => p.missingSymbols));
+    const localBySymbol = new Map(tmplFields.map((f) => [f.symbol, f]));
+    const foreign = [...wanted].filter((s) => !localBySymbol.has(s));
+    // Labels for inputs that live on another sheet of the same standard (inherited through the project-wide lookup).
+    const foreignRows = foreign.length === 0
+      ? []
+      : await db
+        .select({ symbol: fields.symbol, labelDe: fields.labelDe, widget: fields.widget, code: worksheetTemplates.code })
+        .from(fields)
+        .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+        .where(and(eq(worksheetTemplates.standardId, instance.standardId), inArray(fields.symbol, foreign), eq(fields.active, true)));
+    const foreignBySymbol = new Map<string, { labelDe: string; widget: string | null; code: string }>();
+    for (const r of foreignRows) if (!foreignBySymbol.has(r.symbol)) foreignBySymbol.set(r.symbol, r);
+    // A symbol an equation of this sheet produces cannot be typed — its inputs must be filled instead.
+    const eqRows = await db
+      .select({ outputSymbol: equations.outputSymbol })
+      .from(equations)
+      .where(eq(equations.worksheetTemplateId, instance.worksheetTemplateId));
+    const producedHere = new Set(eqRows.map((e) => e.outputSymbol).filter((s): s is string => s != null));
+    for (const p of pendingRaw) {
+      pendingBlockConditions.push({
+        code: p.code,
+        titleDe: p.titleDe,
+        condition: p.condition,
+        hint: p.hint,
+        missingInputs: p.missingSymbols.map((sym) => {
+          const local = localBySymbol.get(sym);
+          if (local) return { symbol: sym, labelDe: local.labelDe, originCode: null, derived: local.widget === 'derived' || producedHere.has(sym) };
+          const f = foreignBySymbol.get(sym);
+          if (f) return { symbol: sym, labelDe: f.labelDe, originCode: f.code, derived: f.widget === 'derived' };
+          return { symbol: sym, labelDe: sym, originCode: null, derived: false };
+        }),
+      });
+    }
+  }
+
+  const ok = failingBlockConditions.length === 0 && pendingBlockConditions.length === 0 && missingRequiredFields.length === 0;
+  return { ok, failingBlockConditions, pendingBlockConditions, missingRequiredFields };
+}
+
+/** One refusal line for a block gate that waits for inputs: what to enter (labels, where, typed or computed) and the gate's hint. */
+export function formatPendingBlockCondition(p: PendingBlockCondition): string {
+  const inputs = p.missingInputs.map((m) => {
+    const where = m.originCode ? ` — aus ${m.originCode}` : '';
+    const how = m.derived ? ' — berechneter Wert: die Eingaben seiner Gleichung ausfüllen' : '';
+    return `${m.labelDe} (${m.symbol}${where}${how})`;
+  }).join('; ');
+  const hint = p.hint ? ` · Hinweis: ${p.hint.replace(/\s*\n\s*/g, ' ').trim()}` : '';
+  return `${p.code} (${p.titleDe}) — fehlende Eingaben: ${inputs} · Bedingung: ${p.condition}${hint}`;
 }
 
 /** Format the gate result as a single error string for transition refusal. */
@@ -330,6 +405,10 @@ export function formatApprovalGateError(result: ApprovalGateResult): string {
       .map((c) => `${c.code} (${c.titleDe})`)
       .join(', ');
     parts.push(`Blockierende Compliance-Verstöße offen: ${list}`);
+  }
+  if (result.pendingBlockConditions.length > 0) {
+    const list = result.pendingBlockConditions.map(formatPendingBlockCondition).join(' | ');
+    parts.push(`Blockierende Prüfungen ohne Eingabe — erst eingeben, dann erneut einreichen: ${list}`);
   }
   if (result.missingRequiredFields.length > 0) {
     const list = result.missingRequiredFields

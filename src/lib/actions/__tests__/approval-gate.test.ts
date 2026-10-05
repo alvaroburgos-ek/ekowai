@@ -13,6 +13,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatApprovalGateError,
+  formatPendingBlockCondition,
   buildFallbackValues,
   makeGateLookup,
   type ApprovalGateResult,
@@ -22,6 +23,7 @@ describe('formatApprovalGateError', () => {
   it('flags both block-condition failures and missing required fields', () => {
     const r: ApprovalGateResult = {
       ok: false,
+      pendingBlockConditions: [],
       failingBlockConditions: [
         { code: 'A138-REQ-COV-01', titleDe: 'Zone I unzulässig', condition: 'water_protection_zone != zone_I' },
       ],
@@ -40,6 +42,7 @@ describe('formatApprovalGateError', () => {
   it('handles compliance-only failure (no missing required)', () => {
     const r: ApprovalGateResult = {
       ok: false,
+      pendingBlockConditions: [],
       failingBlockConditions: [
         { code: 'A138-REQ-COV-02', titleDe: 'Brunnen-Verbot', condition: 'direct_gw_injection == false' },
       ],
@@ -53,6 +56,7 @@ describe('formatApprovalGateError', () => {
   it('handles missing-required-only failure (no failing block)', () => {
     const r: ApprovalGateResult = {
       ok: false,
+      pendingBlockConditions: [],
       failingBlockConditions: [],
       missingRequiredFields: [
         { symbol: 'belastungskategorie', labelDe: 'Belastungskategorie (BK)' },
@@ -66,6 +70,7 @@ describe('formatApprovalGateError', () => {
   it('multiple failures of each kind are all listed', () => {
     const r: ApprovalGateResult = {
       ok: false,
+      pendingBlockConditions: [],
       failingBlockConditions: [
         { code: 'A138-REQ-01', titleDe: 'Scope', condition: 'a138_applicable == TRUE' },
         { code: 'A138-REQ-04', titleDe: 'GW clearance', condition: 'gw_clearance >= 1.0' },
@@ -79,6 +84,40 @@ describe('formatApprovalGateError', () => {
     for (const c of ['A138-REQ-01', 'A138-REQ-04', 'project_type', 'water_protection_zone']) {
       expect(msg).toContain(c);
     }
+  });
+});
+
+describe('pending block gates block the approval and say how to pass (owner ruling 2026-10-05, GAR D4)', () => {
+  const pending = {
+    code: 'REQ-24',
+    titleDe: 'Schutzlage unten nach Tab. 26',
+    condition: 'sl_baugrund_groesstkorn_mm <= 2 OR sl_schutzlage_unten_dicke_cm >= sl_schutzlage_unten_sand_min_cm',
+    hint: 'Tab. 26: Schutzlage unten nach dem Größtkorn des Baugrunds.\n[EN] Tab. 26: lower protective layer by the largest grain of the subsoil.',
+    missingInputs: [
+      { symbol: 'sl_baugrund_groesstkorn_mm', labelDe: 'Größtkorn d des Baugrundes', originCode: null, derived: false },
+      { symbol: 'sl_schutzlage_unten_sand_min_cm', labelDe: 'Mindestdicke Sand nach Tab. 26', originCode: null, derived: true },
+      { symbol: 'abdichtungs_art', labelDe: 'Abdichtungsart', originCode: 'FLL-GAR-09', derived: false },
+    ],
+  };
+  it('one line names every input with its label, origin sheet and typed/computed nature, the condition and the hint', () => {
+    const line = formatPendingBlockCondition(pending);
+    expect(line).toMatch(/^REQ-24 \(Schutzlage unten nach Tab\. 26\) — fehlende Eingaben: /);
+    expect(line).toMatch(/Größtkorn d des Baugrundes \(sl_baugrund_groesstkorn_mm\)/);
+    expect(line).toMatch(/Mindestdicke Sand nach Tab\. 26 \(sl_schutzlage_unten_sand_min_cm — berechneter Wert: die Eingaben seiner Gleichung ausfüllen\)/);
+    expect(line).toMatch(/Abdichtungsart \(abdichtungs_art — aus FLL-GAR-09\)/);
+    expect(line).toMatch(/Bedingung: sl_baugrund_groesstkorn_mm <= 2 OR/);
+    expect(line).toMatch(/Hinweis: Tab\. 26: Schutzlage unten nach dem Größtkorn des Baugrunds\. \[EN\] Tab\. 26: lower protective layer/);
+  });
+  it('the refusal carries the pending block gates as their own part', () => {
+    const r: ApprovalGateResult = { ok: false, failingBlockConditions: [], pendingBlockConditions: [pending], missingRequiredFields: [] };
+    const msg = formatApprovalGateError(r);
+    expect(msg).toMatch(/Genehmigung abgelehnt/);
+    expect(msg).toMatch(/Blockierende Prüfungen ohne Eingabe — erst eingeben, dann erneut einreichen: REQ-24/);
+    expect(msg).not.toMatch(/Blockierende Compliance-Verstöße/);
+    expect(msg).not.toMatch(/Pflichteingaben fehlen/);
+  });
+  it('a gate without a hint prints no Hinweis part', () => {
+    expect(formatPendingBlockCondition({ ...pending, hint: null })).not.toMatch(/Hinweis/);
   });
 });
 

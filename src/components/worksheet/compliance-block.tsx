@@ -179,8 +179,18 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                   <ClauseChip clauseReference={cr.clauseReference} />
                 )}
                 {result.kind === 'pending' && result.missingSymbols.length > 0 && (
-                  <span className="text-subtext">
-                    fehlend: {result.missingSymbols.join(', ')}
+                  <span
+                    className={cr.severity === 'block' ? 'text-error' : 'text-subtext'}
+                    title={cr.severity === 'block'
+                      ? (locale === 'de'
+                        ? 'Blockierende Prüfung ohne Eingabe: die Freigabe wird abgelehnt, bis diese Eingaben vorliegen (Ruling 2026-10-05).'
+                        : 'Block check without its inputs: approval is refused until these inputs are entered (ruling 2026-10-05).')
+                      : undefined}
+                  >
+                    {cr.severity === 'block'
+                      ? (locale === 'de' ? 'blockiert die Freigabe — fehlend: ' : 'blocks approval — missing: ')
+                      : (locale === 'de' ? 'fehlend: ' : 'missing: ')}
+                    {result.missingSymbols.join(', ')}
                   </span>
                 )}
               </div>
