@@ -12,8 +12,12 @@
  * - Every list / detail is labelled "Referenz (nicht normativ)". An aggressive hit shows a red badge.
  * - Catalogue unavailable (migration not applied → 503) or network failure: a quiet notice; the cell keeps working as
  *   a plain text input — the catalogue is a convenience layer, never a dependency.
+ * - The suggestion list is rendered through a PORTAL on document.body with fixed coordinates taken from the input
+ *   (review M-2): the register table lives in an `overflow-x-auto` wrapper, which would clip an absolutely positioned
+ *   list and turn it into an inner scroll. Position is re-measured on scroll / resize while open.
  */
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { CatalogHit } from '@/lib/plant-catalog/filter';
 import { aggressiveBadge, buildCatalogUrl, contextLine, hitProperties, proposeGroupKey, S10_4_3_LABELS, type CatalogPickContext } from '@/lib/plant-catalog/picker';
 
@@ -45,6 +49,21 @@ export function CatalogPickCell({ value, onChange, readOnly, ariaLabel, placehol
   const [proposal, setProposal] = useState<{ species: string; key: string } | null>(null);
   const listId = useId();
   const seq = useRef(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  // M-2: fixed coordinates from the input, re-measured on scroll / resize while the list is open.
+  useLayoutEffect(() => {
+    if (!open) { setPos(null); return; }
+    const measure = () => {
+      const r = inputRef.current?.getBoundingClientRect();
+      if (r) setPos({ top: r.bottom + 4, left: r.left });
+    };
+    measure();
+    window.addEventListener('scroll', measure, true);
+    window.addEventListener('resize', measure);
+    return () => { window.removeEventListener('scroll', measure, true); window.removeEventListener('resize', measure); };
+  }, [open]);
   const ctxKey = `${context.group ?? ''}|${context.maxDepthCm ?? ''}`;
 
   useEffect(() => {
@@ -94,6 +113,7 @@ export function CatalogPickCell({ value, onChange, readOnly, ariaLabel, placehol
   return (
     <div className="relative" data-testid="catalog-pick">
       <input
+        ref={inputRef}
         type="text"
         value={value}
         disabled={readOnly}
@@ -115,12 +135,14 @@ export function CatalogPickCell({ value, onChange, readOnly, ariaLabel, placehol
           Vorschlag {proposeForLabel}: {S10_4_3_LABELS[proposal.key] ?? proposal.key} — nicht übernommen, bitte selbst wählen
         </div>
       )}
-      {open && !readOnly && (
+      {open && !readOnly && typeof document !== 'undefined' && createPortal(
         <div
           id={listId}
           role="listbox"
           data-testid="catalog-pick-list"
-          className="absolute left-0 top-full z-10 mt-1 w-[26rem] max-w-[90vw] rounded border border-hairline-strong bg-paper shadow-lg text-xs"
+          data-portal="catalog-pick"
+          style={{ position: 'fixed', top: pos?.top ?? 0, left: pos?.left ?? 0, visibility: pos ? 'visible' : 'hidden' }}
+          className="z-50 w-[26rem] max-w-[90vw] rounded border border-hairline-strong bg-paper shadow-lg text-xs"
           onMouseDown={(e) => e.preventDefault()}
         >
           <div className="px-2 pt-1.5 text-[10px] uppercase tracking-[0.18em] text-subtext">Referenz (nicht normativ)</div>
@@ -170,7 +192,8 @@ export function CatalogPickCell({ value, onChange, readOnly, ariaLabel, placehol
               </div>
             </div>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

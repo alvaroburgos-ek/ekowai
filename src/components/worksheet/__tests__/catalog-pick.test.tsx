@@ -91,6 +91,12 @@ describe('catalog_pick column — picker behaviour inside the RegisterEditor', (
     expect(lastUrl).toBe('/api/plant-catalog?q=My&group=submerged&maxDepthCm=60');
     const list = await screen.findByTestId('catalog-pick-list');
     expect(within(list).getByText('Referenz (nicht normativ)')).toBeInTheDocument();
+    // M-2: the list is portalled to document.body with fixed positioning — never a descendant of the register's
+    // overflow-x-auto scroll wrapper or of the cell, so that wrapper cannot clip it.
+    expect(screen.getByTestId('register-scroll').contains(list)).toBe(false);
+    expect(screen.getByTestId('catalog-pick').contains(list)).toBe(false);
+    expect(list.parentElement).toBe(document.body);
+    expect(list.style.position).toBe('fixed');
     expect(screen.getByTestId('catalog-context')).toHaveTextContent('Kontext: Zone „Regeneration Ost“ · Wassertiefe 60 cm · Gruppe Unterwasserpflanzen · Teichtyp type_III (nur Anzeige)');
     const options = await screen.findAllByTestId('catalog-option');
     expect(options).toHaveLength(2);
