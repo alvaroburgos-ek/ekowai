@@ -1014,3 +1014,57 @@ export const leads = pgTable(
     statusCreatedIdx: index('leads_status_created_idx').on(t.status, t.createdAt),
   }),
 );
+
+// =============================================================================
+// PLANT REFERENCE CATALOGUE (non-normative reference layer; 2026-10-05)
+// =============================================================================
+// Species picker behind the FLL plant registers (FLLNT-12 `plant_species_list`,
+// FLL-GAR-24 `pflanzenarten`). Every row carries its provenance: `source_kind`
+// 'guideline' rows are transcribed from a printed FLL page (FLL-GAR-2023 Tab. 29,
+// FLL-TP-Rhizom-2023 § 1) and are always visible; 'reference_book' rows (Kircher)
+// stay `licence_status = 'pending'` — invisible to the API — until the owner
+// clears the licence. The catalogue never changes a gate, never fills an FLL
+// field by itself; the picker only writes the scientific name into the
+// register's own text cell and may PROPOSE a § 10.4.3 group as visible text.
+// Migration: supabase/migrations/20261005180000_plant_catalog.sql (STAGED).
+export const plantCatalog = pgTable(
+  'plant_catalog',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    scientificName: text('scientific_name').notNull(),
+    commonNameDe: text('common_name_de'),
+    commonNameEn: text('common_name_en'),
+    /** submerged | floating_leaved | marsh_small | marsh_medium_high | bank_terrestrial | other */
+    plantGroup: text('plant_group').notNull().default('other'),
+    /** The book's depth-zone code as printed (e.g. "3-4", "(1) 2 3"); min/max stay null until the legend is supplied. */
+    depthZoneCode: text('depth_zone_code'),
+    depthMinCm: integer('depth_min_cm'),
+    depthMaxCm: integer('depth_max_cm'),
+    /** sun | partial | shade | unknown — the darkest light level the source marks as tolerated. */
+    light: text('light').notNull().default('unknown'),
+    heightCm: integer('height_cm'),
+    bloom: text('bloom'),
+    hardinessZones: text('hardiness_zones'),
+    waterHardness: text('water_hardness'),
+    nitrogenDemand: text('nitrogen_demand'),
+    originRegions: text('origin_regions'),
+    plantingCodes: text('planting_codes').array(),
+    notes: text('notes'),
+    aggressiveRhizome: boolean('aggressive_rhizome').notNull().default(false),
+    /** Verbatim sentence / table title that justifies `aggressive_rhizome` (with the printed page). */
+    aggressiveSource: text('aggressive_source'),
+    /** guideline | reference_book */
+    sourceKind: text('source_kind').notNull(),
+    /** e.g. "FLL-GAR-2023 Tab. 29 (printed p. 125)" or "Kircher, <title>, <edition>". */
+    sourceRef: text('source_ref').notNull(),
+    /** guideline | cleared | pending — the API serves guideline + cleared only. */
+    licenceStatus: text('licence_status').notNull().default('pending'),
+    active: boolean('active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniqNameSource: unique('plant_catalog_name_source_unique').on(t.scientificName, t.sourceKind),
+    groupIdx: index('plant_catalog_group_idx').on(t.plantGroup),
+  }),
+);
+export type PlantCatalogRow = typeof plantCatalog.$inferSelect;
