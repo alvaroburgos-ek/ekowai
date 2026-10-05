@@ -4,6 +4,7 @@ import { ClauseChip } from '@/components/norm-text/clause-chip';
 import { KatexFormula } from '@/components/math/katex-formula';
 import { VerifyButton } from './verify-button';
 import { verificationStatusLabel, verificationStatusTitle } from '@/lib/verification-status';
+import { hintText } from '@/lib/eval/hint-text';
 
 type Equation = {
   id: string;
@@ -22,9 +23,12 @@ type Equation = {
 export function EquationsBlock({
   equations,
   isPlatformEngineer = false,
+  locale = 'de',
 }: {
   equations: Equation[];
   isPlatformEngineer?: boolean;
+  /** Hint language: equations.description holds German + an `[EN] ` part (hint-text.ts). */
+  locale?: 'de' | 'en';
 }) {
   if (equations.length === 0) return null;
   return (
@@ -67,8 +71,10 @@ export function EquationsBlock({
                 />
               )}
             </div>
-            {eq.description && (
-              <p className="text-xs text-subtext ml-[68px]">{eq.description}</p>
+            {hintText(eq.description, locale) && (
+              <p className="text-xs text-subtext ml-[68px] leading-snug max-w-prose" data-testid={`equation-hint-${eq.equationNumber}`}>
+                {hintText(eq.description, locale)}
+              </p>
             )}
           </li>
         ))}

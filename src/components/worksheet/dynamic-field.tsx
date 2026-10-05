@@ -12,6 +12,7 @@ import { ClauseChip } from '@/components/norm-text/clause-chip';
 import { VerifyButton } from './verify-button';
 import { verificationStatusLabel, verificationStatusTitle } from '@/lib/verification-status';
 import { AcAsRatioCheckStatus } from './ac-as-ratio-check-status';
+import { hintText } from '@/lib/eval/hint-text';
 import { AsmMethodStatus, type AsmMethodBadgeState } from './asm-method-status';
 
 type FieldDef = {
@@ -285,8 +286,8 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           )}
           {overridePill}
         </div>
-        {field.description && (
-          <p className="text-xs text-subtext mt-1.5 leading-snug">{field.description}</p>
+        {hintText(field.description, locale) && (
+          <p className="text-xs text-subtext mt-1.5 leading-snug max-w-prose" data-testid="field-hint">{hintText(field.description, locale)}</p>
         )}
         {rangeHintDe && (
           <p className="text-[11px] text-subtext mt-0.5 tabular-nums">{rangeHintDe}</p>
