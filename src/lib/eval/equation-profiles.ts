@@ -229,6 +229,10 @@ export const equationProfiles: Record<string, EquationProfile> = {
       // After normalize-formula, `r_D(n_R)` becomes `r_D_n_R`. Alias it
       // to the generic A138-10 `r_D_n` field via inheritance.
       r_D_n_R: 'r_D_n',
+      // §6.5.2 L1909: the swale overflow infiltrates through the vegetated zone → k_i,BBZ (own A138-20
+      // field, server-written); falls back to k_i while absent (A7 run 2026-10-05: the card showed the
+      // subsoil-k_i value next to the server's k_i,BBZ field value).
+      k_i: 'k_i_BBZ',
     },
     // 2026-10-01: Gl. 30 is ITERATED over D ("iterativ ermittelt, für welche Regenspende r_D(nR) ein
     // Überlauf auftritt", L1960) on the n_R column — a server sweep (worksheet.ts facility_volume
@@ -241,6 +245,9 @@ export const equationProfiles: Record<string, EquationProfile> = {
   // A138-20 · Gl. (31) · §6.5.2/§6.6.2 — Q_MUE Muldenüberlauf-Abfluss
   '71af6131-12d3-4294-b192-256878ce7ecf': {
     expectedUnits: { A_C: 'm²', r_MUE: 'l/(s·ha)', A_VA: 'm²', k_i: 'm/s' },
+    // §6.5.2 L1909: swale side → k_i,BBZ (fallback k_i while the field is absent). A7 run 2026-10-05:
+    // the card computed 1,396 l/s with the subsoil k_i while the field held the server's 1,129 l/s.
+    symbolAliases: { k_i: 'k_i_BBZ' },
     // 2026-10-01: Q_MÜ is persisted by the same server sweep as Gl. 30 (with the SWALE's k_i,BBZ,
     // §6.5.2 L1909); displayOnly so the client never overwrites it with the subsoil k_i.
     displayOnly: true,
