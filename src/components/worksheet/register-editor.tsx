@@ -45,8 +45,12 @@ import type { RegisterColumn, RegisterUiConfig } from '@/lib/eval/field-config';
 import type { EvalState } from '@/lib/eval/formula';
 import { printedAlternatives } from '@/lib/eval/regulation-tables';
 import type { RegulationRow, RegulationTable, ValueColumn } from '@/lib/eval/regulation-tables';
+import { CatalogPickCell } from './catalog-pick-cell';
+import type { CatalogPickContext } from '@/lib/plant-catalog/picker';
 
 export type FooterState = { label: string; unit: string | null; state: EvalState | undefined };
+/** Per-row context for a `catalog_pick` column (built by widgets.tsx from the worksheet: zone depth / group / pond type). */
+export type CatalogContextFn = (row: PreparedRow, col: RegisterColumn) => CatalogPickContext;
 export type RegisterEditorProps = {
   fieldId: string;
   /** data-symbol attribute + `registerFlagKeys` fallback key. */
@@ -62,9 +66,12 @@ export type RegisterEditorProps = {
   /** Project id for the per-row override REASON (`recordManualOverride`, I-4). Without it the reason form is not rendered
    * (no audit path) — the "Begründung fehlt" marker still shows. */
   projectId?: string;
+  /** `catalog_pick` columns: worksheet context per row (2026-10-05). Without it the picker runs without filters. */
+  catalogContext?: CatalogContextFn;
 };
 
 type OverridePolicy = RegulationTable['override_policy'];
+const NO_CATALOG_CONTEXT: CatalogContextFn = () => ({});
 
 const NUM = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 });
 const SUM_NUM = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 });
@@ -139,7 +146,7 @@ const NO_SYMBOL: NonNullable<Scope['symbol']> = () => undefined;
  */
 export function withDefaultRequired(columns: readonly RegisterColumn[]): readonly RegisterColumn[] {
   if (columns.some((c) => c.required)) return columns;
-  const i = columns.findIndex((c) => c.type === 'text');
+  const i = columns.findIndex((c) => c.type === 'text' || c.type === 'catalog_pick');
   if (i < 0) return columns;
   return columns.map((c, j) => (j === i ? { ...c, required: true } : c));
 }
@@ -148,7 +155,7 @@ function cellMinWidth(c: RegisterColumn): string {
   switch (c.type) {
     case 'number': case 'lookup_value': return NUM_CELL_MIN;
     case 'enum': case 'lookup_key': return SELECT_CELL_MIN;
-    case 'text': case 'date': return TEXT_CELL_MIN;
+    case 'text': case 'date': case 'catalog_pick': return TEXT_CELL_MIN;
     default: return '';
   }
 }
@@ -158,7 +165,7 @@ function genId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 function isStored(c: RegisterColumn): boolean { return c.type !== 'derived'; }
-function emptyCell(c: RegisterColumn): Value { return c.type === 'text' ? '' : c.type === 'boolean' ? false : null; }
+function emptyCell(c: RegisterColumn): Value { return c.type === 'text' || c.type === 'catalog_pick' ? '' : c.type === 'boolean' ? false : null; }
 function isRightAligned(c: RegisterColumn): boolean {
   return c.type === 'number' || c.type === 'lookup_value' || (c.type === 'derived' && c.display !== 'badge');
 }
@@ -177,7 +184,7 @@ export function storedRows(
     const out: { id: string } & Record<string, Value> = { id: r.id };
     for (const c of columns) {
       if (!isStored(c)) continue;
-      if (hiddenCells(r.id, c.key)) { out[c.key] = c.type === 'text' ? '' : null; continue; }
+      if (hiddenCells(r.id, c.key)) { out[c.key] = c.type === 'text' || c.type === 'catalog_pick' ? '' : null; continue; }
       const v = r.values[c.key];
       out[c.key] = v === undefined ? emptyCell(c) : v;
     }
@@ -220,7 +227,7 @@ function useTables(standardCode: string) {
   return { table, tableRows };
 }
 
-export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly = false, footerStates, symbolLookup, projectId }: RegisterEditorProps) {
+export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly = false, footerStates, symbolLookup, projectId, catalogContext = NO_CATALOG_CONTEXT }: RegisterEditorProps) {
   const raw = useWorksheetStore((s) => s.values[fieldId]);
   const setField = useWorksheetStore((s) => s.setField);
   const instanceId = useWorksheetStore((s) => s.instanceId);
@@ -443,6 +450,8 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
                           isApplies={!!override?.applies_to.includes(c.key)}
                           onChange={(v) => patchRow(r.id, { [c.key]: v })}
                           onSelectKey={(v) => selectKey(r.id, c, v)}
+                          catalogContext={c.type === 'catalog_pick' ? catalogContext(r, c) : undefined}
+                          proposeForLabel={c.type === 'catalog_pick' && c.pick?.propose_group_column ? colByKey.get(c.pick.propose_group_column)?.label : undefined}
                         />
                       )}
                       {c.type === 'lookup_key' && override && canToggle && keyCol?.key === c.key && r.values[c.key] != null && c.lookup && (
@@ -550,7 +559,7 @@ function numberOrNull(s: string): number | null {
 }
 
 /** One branch per column type; aria-label = `col.aria_label ?? col.label`. */
-function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn, policy, tableRows, isApplies, onChange, onSelectKey }: {
+function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn, policy, tableRows, isApplies, onChange, onSelectKey, catalogContext, proposeForLabel }: {
   col: RegisterColumn;
   row: PreparedRow;
   readOnly: boolean;
@@ -564,10 +573,28 @@ function Cell({ col, row, readOnly, listId, overridden, tableValue, valueColumn,
   isApplies: boolean;
   onChange: (v: Value) => void;
   onSelectKey: (v: string) => void;
+  /** catalog_pick only: worksheet context for the reference-catalogue autocomplete. */
+  catalogContext?: CatalogPickContext;
+  /** catalog_pick only: label of the row column a group PROPOSAL refers to (never written). */
+  proposeForLabel?: string;
 }) {
   const v = row.values[col.key];
   const aria = col.aria_label ?? col.label;
   switch (col.type) {
+    case 'catalog_pick':
+      // The register's own text cell + a reference-catalogue autocomplete (non-normative). Writes only the species name.
+      return (
+        <CatalogPickCell
+          value={typeof v === 'string' ? v : ''}
+          onChange={(s) => onChange(s)}
+          readOnly={readOnly}
+          ariaLabel={aria}
+          placeholder={col.placeholder}
+          className={`${cellInput} ${TEXT_CELL_MIN}`}
+          context={catalogContext ?? {}}
+          proposeForLabel={proposeForLabel}
+        />
+      );
     case 'boolean':
       return <input type="checkbox" checked={v === true} disabled={readOnly} aria-label={aria} onChange={(e) => onChange(e.target.checked)} className="mt-1" />;
     case 'number':

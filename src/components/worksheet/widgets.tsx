@@ -47,7 +47,8 @@ import { resolveLookupFillBinding } from '@/lib/eval/lookup-fill';
 import type { EvalState } from '@/lib/eval/formula';
 import type { Value } from '@/lib/expr';
 import type { DynamicField } from './dynamic-field';
-import { RegisterEditor, registerPlacement, type FooterState } from './register-editor';
+import { RegisterEditor, registerPlacement, type CatalogContextFn, type FooterState } from './register-editor';
+import { carrierRows, contextFromZone } from '@/lib/plant-catalog/picker';
 import { ChecklistEditor } from './checklist-editor';
 import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { ReferenceField } from './reference-field';
@@ -169,6 +170,23 @@ export function widgetPlacement(f: WorksheetFormField): { placement: Placement; 
 }
 
 /** Footer symbol → engine state of the equation producing it (+ label/unit from the field list). */
+/**
+ * `catalog_pick` context (2026-10-05): per row, the zone text of `pick.zone_column` is matched against the rows of the
+ * `pick.zones_symbol` register carrier IF that field is on this worksheet (own or inherited — FLLNT-06 `zonen` is only
+ * present where it is inherited), giving the zone's water depth and, for a submerged hydrobotanical zone, the group;
+ * the inherited `natural_pool_type` is carried for display only. Pure logic in src/lib/plant-catalog/picker.ts.
+ */
+export function catalogContextFor(ctx: WidgetContext): CatalogContextFn {
+  return (row, col) => {
+    const pick = col.pick ?? {};
+    const zoneText = pick.zone_column ? row.values[pick.zone_column] : undefined;
+    const zonesField = pick.zones_symbol ? ctx.fieldBySymbol.get(pick.zones_symbol) : undefined;
+    const carrier = zonesField ? ctx.values[zonesField.id] : undefined;
+    const zones = carrier?.type === 'json' ? carrierRows(carrier.value) : [];
+    return contextFromZone(zoneText, zones, ctx.symbolLookup('natural_pool_type'));
+  };
+}
+
 export function footerStatesFor(cfg: RegisterUiConfig, ctx: WidgetContext): Record<string, FooterState> {
   const out: Record<string, FooterState> = {};
   for (const sym of cfg.footer ?? []) {
@@ -265,6 +283,7 @@ export const WIDGETS: Record<Widget, (f: WorksheetFormField, ctx: WidgetContext)
           footerStates={footerStatesFor(cfg, ctx)}
           symbolLookup={ctx.symbolLookup}
           projectId={ctx.projectId}
+          catalogContext={cfg.columns.some((c) => c.type === 'catalog_pick') ? catalogContextFor(ctx) : undefined}
         />
       </EditorErrorBoundary>
     );

@@ -57,7 +57,7 @@ function coerce(raw: unknown, c: RegisterColumn): Value {
     // has no object member; the cast is deliberate — the evaluator never
     // reads a grid cell as a scalar, `cell()` reads the carrier).
     case 'grid': return isPlainObject(raw) ? (raw as unknown as Value) : null;
-    default: return typeof raw === 'string' ? raw : '';  // text
+    default: return typeof raw === 'string' ? raw : '';  // text, catalog_pick (stored exactly like text)
   }
 }
 

@@ -20,9 +20,25 @@ const gridSpec = z.object({
 });
 export type GridSpec = z.infer<typeof gridSpec>;
 const labelMap = z.record(z.string(), z.string());
+/**
+ * `catalog_pick` (2026-10-05): a TEXT cell with an autocomplete over the plant reference catalogue
+ * (GET /api/plant-catalog, non-normative). Stored exactly like `text`; the picker writes only the
+ * scientific name and may PROPOSE a group as visible text next to `propose_group_column` — never writes it.
+ */
+const catalogPick = z.object({
+  /** Row column holding the zone text that is matched against the zones register (FLLNT-12: `zone`). */
+  zone_column: z.string().min(1).optional(),
+  /** Worksheet symbol of the zones register (`label` / `depth_m` / `technique` rows; FLLNT-06: `zonen`). */
+  zones_symbol: z.string().min(1).optional(),
+  /** Row column (lookup_key) the proposal is displayed next to (FLLNT-12: `plant_group`). */
+  propose_group_column: z.string().min(1).optional(),
+});
+export type CatalogPickColumnConfig = z.infer<typeof catalogPick>;
 const registerColumn = z.object({
   key: z.string().min(1), label: z.string().min(1),
-  type: z.enum(['text','number','boolean','enum','date','lookup_key','lookup_value','derived','grid']),
+  type: z.enum(['text','number','boolean','enum','date','lookup_key','lookup_value','derived','grid','catalog_pick']),
+  /** catalog_pick: worksheet context + proposal target (all optional). */
+  pick: catalogPick.optional(),
   required: z.boolean().optional(), options: z.array(z.string()).optional(), datalist: z.array(z.string()).optional(),
   unit: z.string().optional(), min: z.number().optional(), max: z.number().optional(), placeholder: z.string().optional(), width: z.string().optional(),
   discriminator: z.boolean().optional(), visible_when: z.string().optional(), lookup: columnLookup.optional(), expr: z.string().optional(),
