@@ -13,6 +13,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ExcelJS from 'exceljs';
 import {
   COLUMN_NAMES, buildSeedSql, dedupeRecords, histogram, mapRow,
@@ -27,8 +28,12 @@ const title = opt('--title', '<BOOK TITLE — owner input>');
 const edition = opt('--edition', '<EDITION — owner input>');
 const sourceRef = `Kircher, ${title}, ${edition}`;
 
-if (path.resolve(outDir).toLowerCase().startsWith(path.resolve(process.cwd()).toLowerCase())) {
-  console.error(`refusing to write the book data inside the repo (${outDir}) — the Kircher rows stay outside git`);
+// The repo root is resolved from THIS file (scripts/verification/ → ../..), never from cwd (review L-4): run from anywhere,
+// an `--out` inside the repo is refused — the Kircher rows stay outside git.
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const rel = path.relative(repoRoot, path.resolve(outDir));
+if (rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))) {
+  console.error(`refusing to write the book data inside the repo (${path.resolve(outDir)} is under ${repoRoot}) — the Kircher rows stay outside git`);
   process.exit(2);
 }
 const legend = legendPath ? JSON.parse(fs.readFileSync(legendPath, 'utf8')) : null;
