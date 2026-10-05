@@ -11,9 +11,10 @@
 --            lights) + counter: reports. Not required.
 --   820-2-21 Bauänderungen / Nachträge   · the existing change_orders register gains two columns, "Auslöser / Verursacher"
 --            and "Kostenübernahme" (existing columns and stored rows untouched) + counter of rows missing either + NEW block
---            gate REQ-09-2 (counter == 0). No change rows = counter 0 = met.
+--            gate REQ-09-2 (no change rows, or the counter == 0). No change rows = met.
 --   820-2-10 Risikomanagement            · risk_register keeps its Tab. A.1 editor (3 assessors, M-Wert / S-Abw.); it gets a
 --            DB register config (ui_config.editor = 'risk_register'), section C, and a counter of named risks. No gate.
+--            NEW field risk_mitigation_plan = the DWA-M 820-1 Tab. A.2 measure plan (same editor as 820-1 M820-07). Not required.
 --
 -- SOURCES (re-read 2026-10-05 on the RENDERED PDFs with scoop pdftotext -layout; printed page = PDF page − 2;
 --   L### = line of Desktop\Guidelines\DWA-M-820-2\DWA-M_820-2.md; T1-L### = line of ...\DWA-M-820-1\DWA-M_820-1.md):
@@ -47,8 +48,13 @@
 --        already stores: group, risk, description, ratings{bauherr,planer,betrieb}{probability,impact}).
 --   [R3] DWA-M 820-1 Anhang A, T1-L1084, PDF p. 45 (820-1): "Die Risikoanalyse muss in der Praxis um eine Spalte „Präventions- und Korrekturmaßnahmen“ ergänzt werden, in der die projektspezifischen Maßnahmenpläne festgehalten werden (siehe Tabelle A.2)." — EN "In practice the risk analysis must be
 --        supplemented by a column 'prevention and corrective measures' holding the project-specific measure plans (Tab. A.2)."
---        NOT encoded here (residue): the bespoke editor has no such column and drops unknown row keys on save — adding it is a
---        code change to the shared Tab. A.1 editor (820-1 M820-06 uses it too), staged as a follow-up, not this data block.
+--        The column holds the Tab. A.2 measure plans — encoded here as the separate field risk_mitigation_plan (review M-3),
+--        the same field / bespoke MitigationPlanEditor as DWA-M 820-1 M820-07 (not as a column of the Tab. A.1 editor).
+--   [R4] DWA-M 820-1 Anhang A, T1-L1214 / T1-L1216, PDF p. 48 (820-1): "Zumindest sollten für diejenigen Risiken, welche einen hohen Schaden und eine hohe Eintrittswahrscheinlichkeit aufweisen, Maßnahmenpläne entwickelt werden." "Diese können ähnlich dem in Tabelle A.2 dargestelltem Muster aufgebaut sein." — EN "At least for
+--        the risks with high damage and high probability, measure plans should be developed. These can be structured like the
+--        pattern shown in Table A.2." Tab. A.2 (PDF p. 48) prints Risiko, Wert, Risikokategorie/-bereich, Schäden,
+--        Gefährdungsbilder, Bemerkung, Maßnahmen T / O / P with the columns Verantwortung, Durchführen, Überwachung.
+--        (Transcript T1-L1216 reads "Tabelle A. 2" with a space; the PDF reads "Tabelle A.2" — PDF wins, SR-3.)
 --
 -- PER COLUMN — "printed requirement" (quote above) or "EKOWAI workflow" (why):
 --   korrespondenz (820-2-03): the register itself = printed [K1] (communication documented) + [K3]/[K4] (document management,
@@ -74,6 +80,9 @@
 --     filterRows), so a required-but-empty column would hide the row from every counter; the counter below sees it instead.
 --   risk_register (820-2-10): group / risk / description = the keys the bespoke Tab. A.1 editor stores [R2] (printed groups as
 --     datalist, T1 PDF p. 46–47); ratings stay in the editor's own nested object (not a register column; never touched here).
+--   risk_mitigation_plan (820-2-10, review M-3): printed [R3]/[R4] — the whole Tab. A.2 structure lives in the bespoke editor
+--     (risk, category, value, damages, hazards, remark, measures T/O/P with responsibility / execution / monitoring); json,
+--     not required, widget / ui_config NULL exactly like 820-1 M820-07 (live 2026-10-05 dump), section C.
 --
 -- COUNTERS (derived equations, count_rows over COMPLETE rows; materialised on save by src/lib/eval/materialize-derived.ts):
 --   820-2-03-D1 korrespondenz_count = count_rows(korrespondenz)
@@ -97,7 +106,7 @@
 --   engine reads group/risk/description only and never writes the carrier. Existing stored values are not modified by this
 --   block (no project_parameters statement); the read-back R0 counts them before the apply.
 -- SAFETY: 3 new json registers + 7 derived fields + 7 equations + 1 new block gate + 2 appended text columns on change_orders
---   + risk_register widget/ui_config/section. No severity, value, existing equation or existing gate change. Idempotent
+--   + risk_register widget/ui_config/section + 1 new json field risk_mitigation_plan (M-3). No severity, value, existing equation or existing gate change. Idempotent
 --   (NOT EXISTS / ON CONFLICT / guarded UPDATEs); the two edited rows are archived in-transaction.
 -- STAGED — not applied. Apply (from C:\Users\Ekowai\_wt-g2t, which holds .env.local):
 --   node scripts/apply-migration.mjs C:\Users\Ekowai\_wt-m820\scripts\migrations\20261005200000_m820_2_registers.sql
@@ -252,5 +261,15 @@ INSERT INTO equations (worksheet_template_id, equation_number, formula, input_sy
 SELECT w.id, '820-2-10-D1', 'risiken_count = count_rows(risk_register)', ARRAY['risk_register']::text[], 'risiken_count', NULL, '§ 4.8.2', 'Anzahl der Zeilen der Risikoanalyse mit benanntem Risiko (Tab.-A.1-Editor). Kein Gate — REQ-20 liest weiterhin risk_register_present. [EN] Number of risk rows with a named risk; no gate (REQ-20 still reads risk_register_present).', 'imported_unverified', 'Fundierte Risikoanalysen (Hinweise gibt Merkblatt DWA-M 820-1:2020 in Anhang A) für die verschiedenen Risikogruppen werden durchgeführt.'
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-10'
 ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
+
+-- 7. 820-2-10 risk_mitigation_plan (review M-3) — the 820-1 Tab. A.2 measure plan ([R3]/[R4]); widget / ui_config NULL like
+--    820-1 M820-07, so the bespoke MitigationPlanEditor renders it (widgets.tsx BESPOKE_BY_SYMBOL); not required, section C
+INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, clause_reference, description, verification_status, verification_quote, source_anchor, widget, ui_config, lookup, visible_when, enum_values, consumer_worksheets, order_index, active)
+SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'C'), 'risk_mitigation_plan', 'Risiko-Maßnahmenplan', 'Risk Mitigation Plan', 'json', NULL, false, 'DWA-M 820-1 Anh. A, Tab. A.2 (über § 4.8.2)',
+       'Strukturierter Risiko-Maßnahmenplan je Risiko nach DWA-M 820-1 Anhang A, Tab. A.2 (auf die § 4.8.2 verweist: „Fundierte Risikoanalysen (Hinweise gibt Merkblatt DWA-M 820-1:2020 in Anhang A) für die verschiedenen Risikogruppen werden durchgeführt.“): Risiko, Risikokategorie, Wert, Schäden, Gefährdungsbilder, Bemerkung; Maßnahmen je Typ Technische (T) / Organisatorische (O) / Personelle (P) mit Verantwortung, Durchführung und Überwachung — derselbe Editor wie DWA-M 820-1 M820-07. DWA-M 820-1 Anhang A: „Zumindest sollten für diejenigen Risiken, welche einen hohen Schaden und eine hohe Eintrittswahrscheinlichkeit aufweisen, Maßnahmenpläne entwickelt werden.“ „Diese können ähnlich dem in Tabelle A.2 dargestelltem Muster aufgebaut sein.“ Nicht verpflichtend.
+[EN] Structured risk measure plan per risk following DWA-M 820-1 Annex A, Table A.2 (referenced by § 4.8.2): risk, category, value, damages, hazard scenarios, remark; measures by type technical / organisational / personnel with responsibility, execution and monitoring — the same editor as DWA-M 820-1 M820-07. Annex A: "At least for risks with high damage and high probability, measure plans should be developed. These can be structured like the pattern in Table A.2." Not required.',
+       'imported_unverified', 'Zumindest sollten für diejenigen Risiken, welche einen hohen Schaden und eine hohe Eintrittswahrscheinlichkeit aufweisen, Maßnahmenpläne entwickelt werden. — Diese können ähnlich dem in Tabelle A.2 dargestelltem Muster aufgebaut sein.', 'DWA-M 820-1 Anhang A Z.1214/1216 + Tab. A.2 (PDF S. 48)', NULL, NULL, NULL, NULL, NULL, NULL, (SELECT COALESCE(MAX(f3.order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = w.id), true
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-10'
+   AND NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = w.id AND f2.symbol = 'risk_mitigation_plan');
 
 COMMIT;

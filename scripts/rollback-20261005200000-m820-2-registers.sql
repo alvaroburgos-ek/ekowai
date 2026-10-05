@@ -20,19 +20,19 @@ DELETE FROM equations e USING worksheet_templates w, standards s
    AND (w.code, e.equation_number) IN (('820-2-03','820-2-03-D1'),('820-2-03','820-2-03-D2'),('820-2-05','820-2-05-D1'),
         ('820-2-05','820-2-05-D2'),('820-2-06','820-2-06-D3'),('820-2-10','820-2-10-D1'),('820-2-21','820-2-21-D4'));
 
--- saved values of the new fields, then the fields (three registers + seven counters)
+-- saved values of the new fields, then the fields (three registers + seven counters + risk_mitigation_plan)
 DELETE FROM project_parameters p USING fields f, worksheet_templates w, standards s
  WHERE p.field_id = f.id AND f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-820-2'
    AND (w.code, f.symbol) IN (('820-2-03','korrespondenz'),('820-2-03','korrespondenz_count'),('820-2-03','korrespondenz_nachverfolgung_offen'),
         ('820-2-05','projektschritte'),('820-2-05','projektschritte_count'),('820-2-05','projektschritte_offen'),
         ('820-2-06','statusberichte'),('820-2-06','statusberichte_count'),('820-2-10','risiken_count'),
-        ('820-2-21','change_orders_ohne_ausloeser_kosten'));
+        ('820-2-21','change_orders_ohne_ausloeser_kosten'),('820-2-10','risk_mitigation_plan'));
 DELETE FROM fields f USING worksheet_templates w, standards s
  WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DWA-M-820-2'
    AND (w.code, f.symbol) IN (('820-2-03','korrespondenz'),('820-2-03','korrespondenz_count'),('820-2-03','korrespondenz_nachverfolgung_offen'),
         ('820-2-05','projektschritte'),('820-2-05','projektschritte_count'),('820-2-05','projektschritte_offen'),
         ('820-2-06','statusberichte'),('820-2-06','statusberichte_count'),('820-2-10','risiken_count'),
-        ('820-2-21','change_orders_ohne_ausloeser_kosten'));
+        ('820-2-21','change_orders_ohne_ausloeser_kosten'),('820-2-10','risk_mitigation_plan'));
 
 -- change_orders ui_config back to the archived one where it still equals archive + the two appended columns + footer symbol
 UPDATE fields f

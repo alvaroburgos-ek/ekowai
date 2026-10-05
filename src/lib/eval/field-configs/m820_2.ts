@@ -53,6 +53,7 @@
  *     rule would contradict the cue (J-1; the fields are consumed / gate-read anyway).
  */
 import type { FieldConfigEntry, FieldConfigModule, SectionVisibilityEntry } from './types';
+import type { RegisterUiConfig } from '../field-config';
 import type { FieldConfigEnumValue } from './types';
 import { ANHANGA_ROWS, ANHANGB_ROWS, outlineOption, Q_L663, Q_L681, Q_L2525 } from '../regulation-tables-seed-m820_2';
 
@@ -115,6 +116,22 @@ export const CHANGE_ORDER_STATUS = ['offen', 'genehmigt', 'abgelehnt', 'umgesetz
 export const OFFEN_TOKEN = 'offen';
 /** `offene_punkte.status` — the two states of a LOP entry (tokens created here). */
 export const LOP_STATUS = ['offen', 'erledigt'] as const;
+
+/**
+ * Review M-6 (2026-10-05): what scripts/migrations/20261005200000_m820_2_registers.sql APPENDS to change_orders — § 4.3.7 L706
+ * (PDF p. 28) "Der Auslöser bzw. Verursacher für die Projektänderung und die Kostenübernahmen werden geklärt und müssen in
+ * Textform dokumentiert werden." Carried in FIELD_CONFIGS so a future re-emit never drops them. NOT required at column level:
+ * count_rows counts complete rows only; the counter change_orders_ohne_ausloeser_kosten / gate REQ-09-2 catch an empty cell.
+ * The committed Plan-3 file 20260917101910 (applied 2026-09-17) predates the block: its freshness pin emits against
+ * FIELD_CONFIGS_AT_20260917101910 (this block stripped), so history is never rewritten.
+ */
+export const REGISTERS_BLOCK_CHANGE_ORDERS = {
+  columns: [
+    { key: 'ausloeser', type: 'text', label: 'Auslöser / Verursacher · Trigger / originator' },
+    { key: 'kostenuebernahme', type: 'text', label: 'Kostenübernahme · Cost borne by' },
+  ],
+  footer: ['change_orders_ohne_ausloeser_kosten'],
+} as const satisfies { columns: ReadonlyArray<RegisterUiConfig['columns'][number]>; footer: readonly string[] };
 
 export const FIELD_CONFIGS: FieldConfigEntry[] = [
   // ---- 820-2-05: the Projekthandbuch outline (Anhang B) as a checklist beside the boolean project_handbook_complete ----
@@ -290,8 +307,9 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'terminwirkung', label: 'Terminwirkung', type: 'text' },
         { key: 'entscheidung', label: 'Entscheidung / Begründung', type: 'text' },
         { key: 'status', label: 'Status', type: 'enum', required: true, options: [...CHANGE_ORDER_STATUS] },
+        ...REGISTERS_BLOCK_CHANGE_ORDERS.columns,
       ],
-      footer: ['change_orders_count', 'change_orders_sum', 'change_orders_open'],
+      footer: ['change_orders_count', 'change_orders_sum', 'change_orders_open', ...REGISTERS_BLOCK_CHANGE_ORDERS.footer],
       note: `${L702} ${L706} ${L708} ${L1571} Eine Änderung ohne Kostenwirkung zählt mit 0 € (Kostenwirkung darf leer bleiben).`,
     },
     verification_quote: `${L702} — ${L706} — ${L1571}`,
@@ -357,3 +375,16 @@ export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [];
 
 /** Type-level pin that this module has the shape the emitter's index expects. */
 export const MODULE: FieldConfigModule = { FIELD_CONFIGS, SECTION_VISIBILITY };
+
+/**
+ * Review M-6: FIELD_CONFIGS as committed in scripts/migrations/20260917101910_field_configs_m820_2.sql
+ * (Plan 3, applied 2026-09-17) — the change_orders entry WITHOUT REGISTERS_BLOCK_CHANGE_ORDERS. Used only by that file's
+ * freshness pin, so the historical migration is never rewritten.
+ */
+export const FIELD_CONFIGS_AT_20260917101910: FieldConfigEntry[] = FIELD_CONFIGS.map((e) => {
+  if (e.worksheet !== '820-2-21' || e.symbol !== 'change_orders') return e;
+  const ui = e.ui_config as RegisterUiConfig;
+  const blockKeys = new Set<string>(REGISTERS_BLOCK_CHANGE_ORDERS.columns.map((c) => c.key));
+  const blockFooter = new Set<string>(REGISTERS_BLOCK_CHANGE_ORDERS.footer);
+  return { ...e, ui_config: { ...ui, columns: ui.columns.filter((c) => !blockKeys.has(c.key)), footer: (ui.footer ?? []).filter((s) => !blockFooter.has(s)) } };
+});

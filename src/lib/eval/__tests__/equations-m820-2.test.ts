@@ -11,7 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { EQUATIONS, sumOptional } from '../equations/m820_2';
-import { FIELD_CONFIGS } from '../field-configs/m820_2';
+import { FIELD_CONFIGS, FIELD_CONFIGS_AT_20260917101910 } from '../field-configs/m820_2';
 import { evaluateFormula, type EvalState } from '../formula';
 import { prepareRegisterRows } from '../register-rows';
 import { parseFieldConfig, type RegisterUiConfig } from '../field-config';
@@ -58,7 +58,8 @@ describe('DWA-M-820-2 Plan-3 equations', () => {
     const newOutputs = new Set(EQUATIONS.map((e) => e.output_symbol));
     for (const e of EQUATIONS) for (const s of e.input_symbols) expect(newOutputs.has(s), `${e.equation_number} reads new output ${s}`).toBe(false);
     // every footer symbol of every register is an equation output of that worksheet
-    for (const f of FIELD_CONFIGS.filter((x) => x.widget === 'register')) {
+    // (Plan-3 set: the 20261005200000 registers block adds change_orders_ohne_ausloeser_kosten = its own equation 820-2-21-D4 — review M-6)
+    for (const f of FIELD_CONFIGS_AT_20260917101910.filter((x) => x.widget === 'register')) {
       for (const s of (f.ui_config as RegisterUiConfig).footer ?? []) expect(EQUATIONS.find((e) => e.output_symbol === s)?.worksheet, `${f.symbol} footer ${s}`).toBe(f.worksheet);
     }
     expect(sumOptional('r', 'x')).toBe('sum_rows(r, if(x IS NULL, 0, x))');

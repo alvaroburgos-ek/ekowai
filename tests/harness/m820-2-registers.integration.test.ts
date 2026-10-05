@@ -41,6 +41,7 @@ import { startHarness, type Harness } from './embedded-pg';
 import type { saveWorksheet as SaveWorksheet } from '@/lib/actions/worksheet';
 import type { checkApprovalGate as CheckApprovalGate } from '@/lib/actions/approval-gate';
 import { splitOnUnquotedSemicolons } from '@/lib/compliance/__tests__/m820-1/sql-condition';
+import { normalizeMitigationCarrier } from '@/lib/eval/mitigation-plan';
 
 const ROOT = resolve(__dirname, '../..');
 const USER_ID = '00000000-0000-4000-8000-0000000008a2';
@@ -68,7 +69,7 @@ type Dump = {
 const readJson = <T>(p: string): T => JSON.parse(readFileSync(resolve(ROOT, p), 'utf8').replace(/^﻿/, '')) as T;
 
 const NEW_SYMBOLS = ['korrespondenz', 'korrespondenz_count', 'korrespondenz_nachverfolgung_offen', 'projektschritte', 'projektschritte_count',
-  'projektschritte_offen', 'statusberichte', 'statusberichte_count', 'risiken_count', 'change_orders_ohne_ausloeser_kosten'];
+  'projektschritte_offen', 'statusberichte', 'statusberichte_count', 'risiken_count', 'change_orders_ohne_ausloeser_kosten', 'risk_mitigation_plan'];
 const NEW_EQS = ['820-2-03-D1', '820-2-03-D2', '820-2-05-D1', '820-2-05-D2', '820-2-06-D3', '820-2-10-D1', '820-2-21-D4'];
 
 let harness: Harness;
@@ -290,7 +291,7 @@ describe('DWA-M 820-2 registers — staged block on embedded Postgres', () => {
       SELECT f.symbol, f.widget, s.code AS section FROM fields f JOIN worksheet_sections s ON s.id = f.section_id
       WHERE f.symbol IN ${harness.sql(NEW_SYMBOLS)} AND f.data_type = 'number' ORDER BY 1`;
     log('derived fields', derived);
-    expect(derived.map((d) => `${d.symbol}:${d.widget}:${d.section}`)).toEqual(NEW_SYMBOLS.filter((s) => !['korrespondenz', 'projektschritte', 'statusberichte'].includes(s)).sort().map((s) => `${s}:derived:D`));
+    expect(derived.map((d) => `${d.symbol}:${d.widget}:${d.section}`)).toEqual(NEW_SYMBOLS.filter((s) => !['korrespondenz', 'projektschritte', 'statusberichte', 'risk_mitigation_plan'].includes(s)).sort().map((s) => `${s}:derived:D`));
     const eqs = await harness.sql<{ equation_number: string }[]>`SELECT equation_number FROM equations WHERE equation_number IN ${harness.sql(NEW_EQS)} ORDER BY 1`;
     expect(eqs.map((e) => e.equation_number)).toEqual([...NEW_EQS].sort());
     const [g] = await harness.sql<{ code: string; severity: string; condition: string; ws: string }[]>`
@@ -341,7 +342,7 @@ describe('DWA-M 820-2 registers — staged block on embedded Postgres', () => {
     const res: unknown[][] = [];
     for (const st of stmts) res.push([...(await harness.sql.unsafe(st))]);
     log('read-back R0..R7 (after)', res.map((r) => r.map((row) => JSON.stringify(row).slice(0, 220))));
-    expect(res[3]).toHaveLength(10);
+    expect(res[3]).toHaveLength(11);
     expect(res[4]).toHaveLength(7);
     expect(res[5][0]).toMatchObject({ code: 'REQ-09-2', severity: 'block' });
     expect((res[6][0] as { column_keys: string }).column_keys).toBe('aenderung,datum,kosten_eur,terminwirkung,entscheidung,status,ausloeser,kostenuebernahme');
@@ -385,6 +386,21 @@ describe('DWA-M 820-2 registers — staged block on embedded Postgres', () => {
     const rc = await num(p, '820-2-10', 'risiken_count');
     log('risiken_count', rc);
     expect(rc).toBe(3);
+    // review M-3: the Tab. A.2 measure plan for R-S2 (C1 v1.6 row R-S2: mitigation, residual, monitoring, plan — responsibility
+    // not stated per row in C1, left blank) — stored byte-equal and read back by the editor's own parser unchanged
+    const PLAN = { plans: [{ id: 'p-RS2', risiko: 'R-S2 Concentrated rainfall event exceeding 5-yr KOSTRA design depth', risikokategorie: 'R-S Site-condition risks (C1)', wert: 9,
+      schaeden: 'over-spill beyond the design event; armoring displacement', gefaehrdungsbilder: 'concentrated rainfall beyond the 5-yr KOSTRA-DWD-2020 depth', bemerkung: 'C1 v1.6 risk register R-S2',
+      measures: [
+        { id: 'm1', type: 'T', text: 'Overflow dimensioned per KOSTRA-DWD-2020; FLL GA-RL §4.10 on-property infiltration pathway', verantwortung: '', durchfuehren: '', ueberwachung: '' },
+        { id: 'm2', type: 'O', text: 'Post-event visual inspection of notch lip + overflow zone for >= 20 mm/day events; re-bed displaced stones', verantwortung: '', durchfuehren: '', ueberwachung: '' },
+      ] }] };
+    await save(p, '820-2-10', { risk_mitigation_plan: { type: 'json', value: PLAN } });
+    const mpv = (await param(p, '820-2-10', 'risk_mitigation_plan'))?.value_json;
+    expect(mpv).toEqual(PLAN);
+    expect(normalizeMitigationCarrier(mpv)).toEqual(PLAN);
+    const g10 = await gate(p, '820-2-10');
+    log('820-2-10 gate after risk + measure plan', g10);
+    expect(g10.missing).not.toContain('risk_mitigation_plan');
     // the project that held a full 3-assessor analysis before the apply. FINDING (saveWorksheet: the register materialiser
     // runs only when a register value is IN the save batch): saving another field leaves the counter unwritten (null);
     // the first save of the register itself (what the editor sends on any edit) writes it — the stored value unchanged.
@@ -427,5 +443,23 @@ describe('DWA-M 820-2 registers — staged block on embedded Postgres', () => {
     const og = await gate(old, '820-2-21');
     log('rows stored, counter not yet written', og);
     expect(og.pending).toContain('REQ-09-2<change_orders_ohne_ausloeser_kosten>');
+    // review I-1 / I-2: the post-apply step — recompute (the code behind the MCP tool recompute_worksheet) writes the counter
+    // from the STORED rows without re-saving the register; a pre-existing row has no Auslöser / Kostenübernahme ('' = missing),
+    // so REQ-09-2 then FAILS (approval refused) until both columns are filled — correct per § 4.3.7 "müssen".
+    const { recomputeWorksheetEquations } = await import('@/lib/actions/recompute-worksheet');
+    const rc21 = await recomputeWorksheetEquations(old.inst.get('820-2-21')!);
+    log('recompute 820-2-21 (rows-before-block)', { written: rc21.written.map((w) => `${w.symbol}=${w.value}`), notComputed: rc21.notComputed.map((n) => n.equationNumber) });
+    expect(await num(old, '820-2-21', 'change_orders_ohne_ausloeser_kosten')).toBe(1);
+    const og2 = await gate(old, '820-2-21');
+    log('rows stored, after recompute', og2);
+    expect(og2.failing).toContain('REQ-09-2');
+    // and the legacy 3-assessor risk project: recompute writes its counter too (no register save needed)
+    const leg2 = await makeProject('legacy-risk-recompute');
+    await save(leg2, '820-2-10', { risk_register: { type: 'json', value: (await param(legacy, '820-2-10', 'risk_register'))!.value_json } });
+    await harness.sql`DELETE FROM project_parameters pp USING fields f WHERE pp.field_id = f.id AND pp.project_id = ${leg2.id} AND f.symbol = 'risiken_count'`; // = a value stored before the block
+    expect(await num(leg2, '820-2-10', 'risiken_count')).toBeNull();
+    await recomputeWorksheetEquations(leg2.inst.get('820-2-10')!);
+    log('legacy risk recompute', { risiken_count: await num(leg2, '820-2-10', 'risiken_count') });
+    expect(await num(leg2, '820-2-10', 'risiken_count')).toBe(1);
   });
 });

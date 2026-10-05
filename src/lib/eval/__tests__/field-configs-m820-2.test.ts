@@ -10,7 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { FIELD_CONFIGS, SECTION_VISIBILITY, PROJEKTHANDBUCH_KAPITEL, STATUSBERICHT_ABSCHNITTE, CHANGE_ORDER_STATUS, LOP_STATUS, OFFEN_TOKEN } from '../field-configs/m820_2';
+import { FIELD_CONFIGS, FIELD_CONFIGS_AT_20260917101910, REGISTERS_BLOCK_CHANGE_ORDERS, SECTION_VISIBILITY, PROJEKTHANDBUCH_KAPITEL, STATUSBERICHT_ABSCHNITTE, CHANGE_ORDER_STATUS, LOP_STATUS, OFFEN_TOKEN } from '../field-configs/m820_2';
 import type { PriorSnapshot } from '../field-configs/types';
 import { parseFieldConfig, type RegisterUiConfig, type SelectManyUiConfig } from '../field-config';
 import { parseCondition, parseNumeric } from '@/lib/expr';
@@ -95,7 +95,8 @@ describe('DWA-M-820-2 field configs (Plan 3 Task 19)', () => {
   it('change_orders is upgraded in place: Plan-1 column KEYS kept in order, aenderung / status required (0 stored rows in prod), datum typed date, sum_column retired for the equation footer', () => {
     const plan1 = (SELECTION_CONFIGS.change_orders as RegisterConfig).columns;
     const cfg = registerCfg('820-2-21', 'change_orders');
-    expect(cfg.columns.map((c) => c.key)).toEqual(plan1.map((c) => c.key));
+    expect(cfg.columns.slice(0, plan1.length).map((c) => c.key)).toEqual(plan1.map((c) => c.key));
+    expect(cfg.columns.slice(plan1.length)).toEqual(REGISTERS_BLOCK_CHANGE_ORDERS.columns); // review M-6: appended by 20261005200000
     expect(plan1.map((c) => c.key)).toEqual(['aenderung', 'datum', 'kosten_eur', 'terminwirkung', 'entscheidung', 'status']);
     expect(cfg.columns.find((c) => c.key === 'aenderung')?.required).toBe(true);
     expect(cfg.columns.find((c) => c.key === 'status')?.required).toBe(true); // an unset status makes count_rows(…, status == 'offen') undecidable (probed)
@@ -105,7 +106,7 @@ describe('DWA-M-820-2 field configs (Plan 3 Task 19)', () => {
     expect(cfg.columns.find((c) => c.key === 'status')?.options).toEqual([...CHANGE_ORDER_STATUS]);
     expect((plan1.find((c) => c.key === 'status') as { options?: readonly string[] }).options).toEqual([...CHANGE_ORDER_STATUS]);
     expect(OFFEN_TOKEN).toBe('offen');
-    expect(cfg.footer).toEqual(['change_orders_count', 'change_orders_sum', 'change_orders_open']);
+    expect(cfg.footer).toEqual(['change_orders_count', 'change_orders_sum', 'change_orders_open', 'change_orders_ohne_ausloeser_kosten']);
     expect(cfg.sum_column).toBeUndefined(); // D-2b-5
     expect(cfg.placement).toBe('bottom');
     expect(priorRow('820-2-21 change_orders').consumer_worksheets).toBeNull();
@@ -189,7 +190,8 @@ describe('DWA-M-820-2 field configs (Plan 3 Task 19)', () => {
   });
 
   it('the committed migration + rollback equal a fresh emit against the committed prior (freshness pin, default refuse mode, no warnings)', () => {
-    const { up, down, warnings } = emitFieldConfigSql('m820_2', FIELD_CONFIGS, SECTION_VISIBILITY, prior);
+    // review M-6: the 2026-09-17 file predates the registers block (20261005200000) — pin it against the historical view
+    const { up, down, warnings } = emitFieldConfigSql('m820_2', FIELD_CONFIGS_AT_20260917101910, SECTION_VISIBILITY, prior);
     expect(warnings).toEqual([]);
     const files = fieldConfigFilesFor('m820_2', '20260917101910');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));

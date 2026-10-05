@@ -22,20 +22,20 @@ SELECT f.symbol, count(p.*) AS saved_values,
  WHERE s.code = 'DWA-M-820-2' AND f.symbol IN ('change_orders','risk_register')
  GROUP BY 1 ORDER BY 1;
 
--- R0c · step 0: nothing of the block exists yet — expect 0 fields, 0 equations, 0 gates
+-- R0c · step 0: nothing of the block exists yet — expect 0 fields, 0 equations, 0 gates (after the apply: 11 / 7 / 1)
 SELECT (SELECT count(*) FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
-         WHERE s.code = 'DWA-M-820-2' AND f.symbol IN ('korrespondenz','korrespondenz_count','korrespondenz_nachverfolgung_offen','projektschritte','projektschritte_count','projektschritte_offen','statusberichte','statusberichte_count','risiken_count','change_orders_ohne_ausloeser_kosten')) AS new_fields,
+         WHERE s.code = 'DWA-M-820-2' AND f.symbol IN ('korrespondenz','korrespondenz_count','korrespondenz_nachverfolgung_offen','projektschritte','projektschritte_count','projektschritte_offen','statusberichte','statusberichte_count','risiken_count','change_orders_ohne_ausloeser_kosten','risk_mitigation_plan')) AS new_fields,
        (SELECT count(*) FROM equations e JOIN worksheet_templates w ON w.id = e.worksheet_template_id JOIN standards s ON s.id = w.standard_id
          WHERE s.code = 'DWA-M-820-2' AND e.equation_number IN ('820-2-03-D1','820-2-03-D2','820-2-05-D1','820-2-05-D2','820-2-06-D3','820-2-10-D1','820-2-21-D4')) AS new_equations,
        (SELECT count(*) FROM compliance_requirements cr JOIN worksheet_templates w ON w.id = cr.worksheet_template_id JOIN standards s ON s.id = w.standard_id
          WHERE s.code = 'DWA-M-820-2' AND cr.code = 'REQ-09-2') AS new_gates;
 
--- R1 · after: the three new registers + seven counters (10 rows: registers json/register/section C, counters number/derived/section D)
+-- R1 · after: 11 rows — three registers (json, register, section C), seven counters (number, derived, section D), risk_mitigation_plan (json, widget NULL, section C)
 SELECT w.code AS ws, f.symbol, f.data_type, f.widget, f.is_required, f.active, ws.code AS section,
        (SELECT string_agg(c->>'key', ',') FROM jsonb_array_elements(f.ui_config->'columns') c) AS column_keys
   FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
   LEFT JOIN worksheet_sections ws ON ws.id = f.section_id
- WHERE s.code = 'DWA-M-820-2' AND f.symbol IN ('korrespondenz','korrespondenz_count','korrespondenz_nachverfolgung_offen','projektschritte','projektschritte_count','projektschritte_offen','statusberichte','statusberichte_count','risiken_count','change_orders_ohne_ausloeser_kosten')
+ WHERE s.code = 'DWA-M-820-2' AND f.symbol IN ('korrespondenz','korrespondenz_count','korrespondenz_nachverfolgung_offen','projektschritte','projektschritte_count','projektschritte_offen','statusberichte','statusberichte_count','risiken_count','change_orders_ohne_ausloeser_kosten','risk_mitigation_plan')
  ORDER BY 1, 2;
 
 -- R2 · after: the seven equations (formula as listed in the migration header)
@@ -69,5 +69,5 @@ SELECT 'fields' AS archive, count(*) AS n FROM fields_archive_m820_2_registers;
 SELECT f.symbol, count(*) AS n
   FROM project_parameters p JOIN fields f ON f.id = p.field_id JOIN worksheet_templates w ON w.id = f.worksheet_template_id
   JOIN standards s ON s.id = w.standard_id
- WHERE s.code = 'DWA-M-820-2' AND f.symbol IN ('korrespondenz','korrespondenz_count','korrespondenz_nachverfolgung_offen','projektschritte','projektschritte_count','projektschritte_offen','statusberichte','statusberichte_count','risiken_count','change_orders_ohne_ausloeser_kosten')
+ WHERE s.code = 'DWA-M-820-2' AND f.symbol IN ('korrespondenz','korrespondenz_count','korrespondenz_nachverfolgung_offen','projektschritte','projektschritte_count','projektschritte_offen','statusberichte','statusberichte_count','risiken_count','change_orders_ohne_ausloeser_kosten','risk_mitigation_plan')
  GROUP BY 1 ORDER BY 1;

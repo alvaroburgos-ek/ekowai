@@ -14,6 +14,7 @@ import { resolveRegisterConfig } from '@/lib/eval/register-configs';
 import { materializeDerivedOutputs, type FieldValue } from '@/lib/eval/materialize-derived';
 import { normalizeRiskCarrier } from '@/lib/eval/risk-register';
 import { resolveBespokeEditor, type WorksheetFormField } from '@/components/worksheet/widgets';
+import { FIELD_CONFIGS as M820_2_FIELD_CONFIGS } from '@/lib/eval/field-configs/m820_2';
 import { evaluateCondition } from '../../evaluate';
 import { formulaOf, insertedFieldStatement, insertedGateCondition, insertedUiConfig, jsonbLiterals, literals, updateStatement } from './sql-extract';
 
@@ -68,6 +69,13 @@ describe('configs validate with the app parser (parseFieldConfig, register schem
     expect(after.columns.slice(6).map((c) => [c.type, c.required ?? false])).toEqual([['text', false], ['text', false]]);
     expect(after.footer).toEqual(['change_orders_count', 'change_orders_sum', 'change_orders_open', 'change_orders_ohne_ausloeser_kosten']);
   });
+  it('review M-6: the TS generator entry (field-configs/m820_2.ts) carries the same 8 change_orders columns + footer as the migration, so a re-emit cannot drop them', () => {
+    const entry = M820_2_FIELD_CONFIGS.find((e) => e.worksheet === '820-2-21' && e.symbol === 'change_orders')!;
+    const ts = asRegister(entry.ui_config);
+    const after = changeOrdersAfter();
+    expect(ts.columns).toEqual(after.columns);
+    expect(ts.footer).toEqual(after.footer);
+  });
   it('risk_register (820-2-10): today the TS editor table claims it (widget NULL); after the block the DB config keeps the SAME bespoke Tab. A.1 editor', () => {
     const f = (widget: string | null, uiConfig: unknown) => ({ id: 'x', symbol: 'risk_register', dataType: 'json', widget, uiConfig, enumValues: null }) as unknown as WorksheetFormField;
     expect(live('820-2-10', 'risk_register').widget).toBeNull();
@@ -79,6 +87,24 @@ describe('configs validate with the app parser (parseFieldConfig, register schem
     const cfg = resolveRegisterConfig({ symbol: 'risk_register', dataType: 'json', widget: 'register', uiConfig: ui });
     expect(cfg?.editor).toBe('risk_register');
     expect(resolveBespokeEditor(f('register', ui), cfg)).toBe('risk_register');
+  });
+});
+
+describe('review M-3: risk_mitigation_plan on 820-2-10 = the 820-1 Tab. A.2 field (same config, same editor)', () => {
+  const dump1 = JSON.parse(readFileSync(resolve(ROOT, 'tests/harness/m820-1-client-route.dump.json'), 'utf8').replace(/^﻿/, '')) as { fields: Array<DumpField & { data_type: string; label_de: string; label_en: string | null }> };
+  const live1 = dump1.fields.find((f) => f.worksheet === 'M820-07' && f.symbol === 'risk_mitigation_plan')!;
+  it('inserted as json, not required, widget / ui_config NULL like 820-1 M820-07, same labels, section C', () => {
+    const st = insertedFieldStatement(FILE, 'risk_mitigation_plan');
+    const l = literals(st);
+    expect(live1).toMatchObject({ widget: null, ui_config: null, data_type: 'json' });
+    expect(l).toEqual(expect.arrayContaining(['C', 'risk_mitigation_plan', live1.label_de, live1.label_en!, 'json']));
+    expect(st).toMatch(/'json', NULL, false,/);
+    expect(st).toMatch(/'imported_unverified', '[^']*', '[^']*', NULL, NULL, NULL, NULL, NULL, NULL,/); // widget, ui_config, lookup, visible_when, enum_values, consumers
+    expect(l.some((x) => x.includes('Zumindest sollten für diejenigen Risiken, welche einen hohen Schaden und eine hohe Eintrittswahrscheinlichkeit aufweisen, Maßnahmenpläne entwickelt werden.'))).toBe(true);
+  });
+  it('dispatches to the bespoke MitigationPlanEditor (widgets.tsx BESPOKE_BY_SYMBOL while widget IS NULL)', () => {
+    const f = { id: 'm', symbol: 'risk_mitigation_plan', dataType: 'json', widget: null, uiConfig: null, enumValues: null } as unknown as WorksheetFormField;
+    expect(resolveBespokeEditor(f, null)).toBe('risk_mitigation_plan');
   });
 });
 
