@@ -191,3 +191,11 @@ describe('V-2 geometry ≥ A_S_max cross-check (§6.3.2)', () => {
     expect(validateGeometryAgainstMax(null, 45).reason).toBeNull();
   });
 });
+
+describe('resolveAsmProducer — composite facilities (2026-10-05)', () => {
+  it('mre / mrs take the swale sweep Gl. 16 on A138-17 (§6.5.2: A_S,m is the swale area)', () => {
+    for (const t of ['mre', 'mrs'] as const) {
+      expect(resolveAsmProducer('geometry', t)).toEqual({ kind: 'geometry', worksheetCode: 'A138-17', equationId: ASM_GL16_EQUATION_ID });
+    }
+  });
+});

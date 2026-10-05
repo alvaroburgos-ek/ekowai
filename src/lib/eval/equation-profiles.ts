@@ -128,9 +128,10 @@ export const equationProfiles: Record<string, EquationProfile> = {
       k_i: 'm/s',
     },
     symbolAliases: {
-      // The Mulde worksheet doesn't carry its own r_D field; the generic
-      // A138-10 `r_D_n` flows in via cross-worksheet inheritance.
-      r_D_n: 'r_D_n',
+      // Iteration fields (block 20261005100000): the swale's own governing pair written by the
+      // server sweep (r_D_n_used_M / D_used_M); fall back to the formula symbols while absent.
+      r_D_n: 'r_D_n_used_M',
+      D: 'D_used_M',
       // §6.5.2 L1925: inside a Mulden-Rigolen-Element/-System the swale's governing layer is the
       // vegetated soil zone → the A138-17 field k_i_Mulde (server-materialised: k_i,BBZ for a
       // composite, the project k_i otherwise). Falls back to k_i while the field is absent.
@@ -200,6 +201,7 @@ export const equationProfiles: Record<string, EquationProfile> = {
       A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm', L_R: 'm',
       k_i: 'm/s', D: 'min', f_Z: null,
     },
+    symbolAliases: { r_D_n: 'r_D_n_used_R', D: 'D_used_R' },
     // Fan-out (MRE): the "required" V_MR eq needs the server-swept governing D; the
     // client cannot resolve D → its write-back enqueues V_MR=null, clobbering the
     // server materialize (V_MR = persisted V_M + persisted V_R, Gl.26). Mark
@@ -215,6 +217,7 @@ export const equationProfiles: Record<string, EquationProfile> = {
       A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm',
       k_i: 'm/s', V_M: 'm³', s_R: null, D: 'min', f_Z: null,
     },
+    symbolAliases: { r_D_n: 'r_D_n_used_R', D: 'D_used_R' },
     displayOnly: true,
     notes: '§6.5.2 Gl. (29): erforderliche L_R für MRE. displayOnly — L_R ist Engineer-Iterationsgröße.',
   },
@@ -281,6 +284,7 @@ export const equationProfiles: Record<string, EquationProfile> = {
       A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm',
       k_i: 'm/s', V_M: 'm³', Q_Dr: 'l/s', s_R: null, D: 'min', f_Z: null,
     },
+    symbolAliases: { r_D_n: 'r_D_n_used_R', D: 'D_used_R' },
     displayOnly: true,
     notes: '§6.6.2 Gl. (32): L_R für MRS (Mulde-Rigolen-System mit Drossel). displayOnly.',
   },
@@ -400,7 +404,7 @@ export const equationProfiles: Record<string, EquationProfile> = {
     },
     // §6.5.2 L1925: the swale of a Mulden-Rigolen facility uses k_i,BBZ → A138-17 k_i_Mulde
     // (server-materialised; falls back to k_i while the field is absent).
-    symbolAliases: { k_i: 'k_i_Mulde' },
+    symbolAliases: { k_i: 'k_i_Mulde', r_D_n: 'r_D_n_used_M', D: 'D_used_M' },
     // Finding H (§6.3.2): Gl.14 needs D — the GOVERNING Dauerstufe from the
     // server-only Mulde geometry sweep (worksheet.ts computeMuldeGeometrySweep).
     // The CLIENT engine cannot resolve D → client-side Gl.14 can't compute → its
@@ -436,6 +440,9 @@ export const equationProfiles: Record<string, EquationProfile> = {
       D: 'min',
       f_Z: null,
     },
+    // Iteration fields (block 20261005100000): the trench's own governing pair (server sweep of
+    // Gl. 23, or Gl. 29/32 for a Mulden-Rigolen facility) — fall back while absent.
+    symbolAliases: { r_D_n: 'r_D_n_used_R', D: 'D_used_R' },
     // Fan-out (Rigole): the "required" V_R eq needs the server-swept governing D →
     // the client write-back enqueues V_R=null, clobbering the server materialize
     // (V_R = b_R·h_R·L_R·s_R, Gl.20, with s_R computed server-side via Gl.21/22).
@@ -482,6 +489,7 @@ export const equationProfiles: Record<string, EquationProfile> = {
       D: 'min',
       f_Z: null,
     },
+    symbolAliases: { r_D_n: 'r_D_n_used_R', D: 'D_used_R' },
     displayOnly: true,
     notes:
       '§6.4.2 Gl. (23): erforderliche Rigolen-Länge L_R. displayOnly — der Engineer trägt L_R als Iterationsgröße ein.',

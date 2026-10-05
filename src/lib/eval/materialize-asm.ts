@@ -338,12 +338,31 @@ export function swaleDesignInfiltrationRate(
 export function computeMuldeRequiredVolumeSweep(
   rows: ReadonlyArray<{ D_min: number | null; r_D_n: number | null }>,
   scalars: { A_C: number; A_VA: number; A_S_m: number; k_i: number; f_Z: number },
-): { V_M_erf: number | null; governingD: number | null; boundaryLimited: boolean } {
+): { V_M_erf: number | null; governingD: number | null; r_D_at_governing: number | null; boundaryLimited: boolean } {
   const { A_C, A_VA, A_S_m, k_i, f_Z } = scalars;
   const gov = iterateGoverningDuration(rows, (D, r_D) =>
     ((A_C + A_VA) * 1e-7 * r_D - A_S_m * k_i) * D * 60 * f_Z,
   );
-  return { V_M_erf: gov.governingValue, governingD: gov.governingD, boundaryLimited: gov.boundaryLimited };
+  return { V_M_erf: gov.governingValue, governingD: gov.governingD, r_D_at_governing: gov.r_D_at_governing, boundaryLimited: gov.boundaryLimited };
+}
+
+/**
+ * §6.4.2 Gl.23 (L1846) — required length of a PLAIN trench, governing over the Dauerstufen:
+ *   L_R(D) = [A_C·10⁻⁷·r_D(n) − b_R·h_R·k_i − Q_Dr·10⁻³] / [b_R·h_R·s_R/(D·60·f_Z) + (b_R + h_R)·k_i]
+ * (no A_VA / V_M terms: the trench is underground). The governing (D, r_D) pair is persisted as
+ * D_used_R / r_D_n_used_R on A138-18 so the Gl. 19/23 cards read the sheet's own values.
+ */
+export function computeRigoleLengthSweep(
+  rows: ReadonlyArray<{ D_min: number | null; r_D_n: number | null }>,
+  scalars: { A_C: number; k_i: number; f_Z: number; b_R: number; h_R: number; s_R: number; Q_Dr: number },
+): { L_R: number | null; governingD: number | null; r_D_at_governing: number | null } {
+  const { A_C, k_i, f_Z, b_R, h_R, s_R, Q_Dr } = scalars;
+  const gov = iterateGoverningDuration(rows, (D, r_D) => {
+    const num = A_C * 1e-7 * r_D - b_R * h_R * k_i - Q_Dr * 1e-3;
+    const den = (b_R * h_R * s_R) / (D * 60 * f_Z) + (b_R + h_R) * k_i;
+    return den === 0 ? null : num / den;
+  });
+  return { L_R: gov.governingValue, governingD: gov.governingD, r_D_at_governing: gov.r_D_at_governing };
 }
 
 /**

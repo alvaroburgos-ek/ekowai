@@ -11,7 +11,7 @@
  */
 
 export type AsmMethod = 'direct' | 'geometry' | 'soil_estimate' | 'manual';
-export type FacilityType = 'flaeche' | 'mulde' | 'rigole' | 'schacht' | 'becken';
+export type FacilityType = 'flaeche' | 'mulde' | 'rigole' | 'mre' | 'mrs' | 'schacht' | 'becken';
 /** Tab.13 Bodenart rows (verbatim, A-1). */
 export type Tab13Bodenart = 'mittel_feinsand' | 'schluffig';
 
@@ -25,6 +25,8 @@ export const FACILITY_TYPE_TO_WORKSHEET: Record<FacilityType, string> = {
   flaeche: 'A138-16',
   mulde:   'A138-17',
   rigole:  'A138-18',
+  mre:     'A138-19',
+  mrs:     'A138-20',
   schacht: 'A138-21',
   becken:  'A138-22',
 };
@@ -55,7 +57,12 @@ export function resolveAsmProducer(method: AsmMethod, facilityType: FacilityType
     case 'soil_estimate': return { kind: 'soil_estimate' };
     case 'manual':        return { kind: 'manual' };
     case 'geometry':
-      if (facilityType === 'mulde')  return { kind: 'geometry', worksheetCode: 'A138-17', equationId: ASM_GL16_EQUATION_ID };
+      // The mean infiltration area of a Mulden-Rigolen-Element/-System is its SWALE's (§6.5.2: A_S,m in
+      // Gl. 30 and the Tab.-6 ratio A_C/A_S,m refer to the swale; the trench has its own Gl. 17 area
+      // inside Gl. 28/29/32). So the composites take the swale sweep Gl. 16 on A138-17, with the
+      // swale's k_i_Mulde (= k_i,BBZ, §6.5.2 L1925) — 2026-10-05.
+      if (facilityType === 'mulde' || facilityType === 'mre' || facilityType === 'mrs')
+        return { kind: 'geometry', worksheetCode: 'A138-17', equationId: ASM_GL16_EQUATION_ID };
       if (facilityType === 'rigole') return { kind: 'geometry', worksheetCode: 'A138-18', equationId: ASM_GL17_EQUATION_ID };
       return { kind: 'unresolved', reason: `geometry-Methode nur für Mulde/Rigole; Typ=${facilityType ?? 'nicht gewählt'}.` };
   }

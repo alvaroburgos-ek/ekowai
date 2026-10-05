@@ -4,6 +4,7 @@ import type { McpServer } from '@modelcontextprotocol/server';
 import { db } from '@/lib/db';
 import { fields, worksheetInstances } from '@/lib/db/schema';
 import { saveWorksheet } from '@/lib/actions/worksheet';
+import { recomputeWorksheetEquations, type RecomputeResult } from '@/lib/actions/recompute-worksheet';
 import { addCitation } from '@/lib/actions/citations';
 import { setClientSupplied } from '@/lib/actions/client-supplied';
 import { defineTool, unwrap } from '../define-tool';
@@ -128,6 +129,16 @@ export function registerFieldTools(server: McpServer) {
 
       const saved = unwrap(await saveWorksheet({ instanceId, values: payload }));
 
+      // 2026-10-05 (readiness run, API-path gap): evaluate the sheet's own engine equations server-side
+      // and persist the computed outputs as `derived` — what the browser's write-back did and an
+      // API-only project never got (f_K, k_i, Q_S, q_S,AC, V_VA, Q_zu, q_VS stayed empty).
+      let recomputed: RecomputeResult = { written: [], notComputed: [], warnings: [], derived: [] };
+      try {
+        recomputed = await recomputeWorksheetEquations(instanceId);
+      } catch (e) {
+        recomputed.warnings.push(`Nachrechnung der Gleichungen fehlgeschlagen: ${e instanceof Error ? e.message : String(e)}`);
+      }
+
       // Attach provenance after the values land. A failure here must not be
       // reported as a failed write — the value IS saved — so each citation is
       // reported individually instead of aborting.
@@ -155,10 +166,36 @@ export function registerFieldTools(server: McpServer) {
 
       return {
         saved: saved.saved,
-        warnings: saved.warnings,
-        derived: saved.derived,
+        warnings: [...saved.warnings, ...recomputed.warnings],
+        derived: [...saved.derived, ...recomputed.derived],
+        recomputed: recomputed.written,
+        notComputed: recomputed.notComputed,
         provenance,
       };
+    },
+  );
+
+  defineTool(
+    server,
+    'recompute_worksheet',
+    {
+      title: 'Gleichungen eines Arbeitsblatts serverseitig nachrechnen',
+      description:
+        'Rechnet alle Gleichungen des Arbeitsblatts aus den gespeicherten Werten nach und speichert die Ergebnisse als abgeleitete Werte — so wie es der Browser beim Öffnen des Blatts tut. Nutze dies nach set_field_values auf einem VORGELAGERTEN Blatt, wenn ein nachgelagertes Blatt (z. B. A138-13) noch alte oder leere Ergebnisse zeigt; set_field_values rechnet nur das gespeicherte Blatt selbst nach.',
+      inputSchema: z.object({
+        instanceId: z.string().uuid().describe('Arbeitsblatt aus list_worksheets'),
+      }),
+    },
+    async ({ instanceId }, user) => {
+      const [instance] = await db
+        .select({ projectId: worksheetInstances.projectId })
+        .from(worksheetInstances)
+        .where(eq(worksheetInstances.id, instanceId))
+        .limit(1);
+      if (!instance) throw new Error('Arbeitsblatt nicht gefunden.');
+      await assertInternalAccess(user.id, instance.projectId);
+      const r = await recomputeWorksheetEquations(instanceId);
+      return { recomputed: r.written, notComputed: r.notComputed, warnings: r.warnings, derived: r.derived };
     },
   );
 

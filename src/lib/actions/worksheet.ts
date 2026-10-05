@@ -31,6 +31,7 @@ import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
 import {
   materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize, computeRigoleStorageCoefficient, computeSchachtHeadSweep,
   computeKiBBZ, swaleDesignInfiltrationRate, computeMuldeRequiredVolumeSweep, computeMuldenUeberlauf, computeMrsTrenchLengthSweep,
+  computeRigoleLengthSweep,
 } from '@/lib/eval/materialize-asm';
 import { GOVERNING_PROFILES } from '@/lib/eval/governing-duration';
 import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange, resolveManualAsmReject } from '@/lib/eval/asm-source';
@@ -1758,8 +1759,10 @@ export async function saveWorksheet(
                 inArray(projectParameters.fieldId, crossFtFieldIdsP),
               ))
               .limit(1);
-            const rawFt = ftRowP?.valueEnum ?? ftRowP?.valueText ?? null;
+            // A138-15 stores the composites as 'MRE' / 'MRS' (uppercase tokens) — normalise (2026-10-05).
+            const rawFt = (ftRowP?.valueEnum ?? ftRowP?.valueText ?? null)?.toLowerCase() ?? null;
             if (rawFt === 'flaeche' || rawFt === 'mulde' || rawFt === 'rigole' ||
+                rawFt === 'mre' || rawFt === 'mrs' ||
                 rawFt === 'schacht' || rawFt === 'becken') {
               facilityTypeP = rawFt;
             }
@@ -1778,8 +1781,9 @@ export async function saveWorksheet(
           } | null = null;
 
           if (asmMethodP === 'geometry') {
-            if (facilityTypeP === 'mulde') {
-              // ── Mulde Gl.16 Dauerstufen sweep (A-2) ──────────────────────
+            if (facilityTypeP === 'mulde' || facilityTypeP === 'mre' || facilityTypeP === 'mrs') {
+              // ── Mulde Gl.16 Dauerstufen sweep (A-2) — also the SWALE of a Mulden-Rigolen facility
+              //    (§6.5.2: the composite's A_S,m is the swale's; k_i = k_i_Mulde, see below) ──
               // Read the r_D_n_table carrier the SAME WAY the isBasinSave block does:
               // global symbol lookup (carrier lives on A138-04, not the facility ws).
               const [muldeCarrierField] = await tx
@@ -1837,7 +1841,7 @@ export async function saveWorksheet(
               // These are read cross-worksheet by symbol (A_C from A138-07; h_M/f_Z/k_i from A138-17).
               // n_M_Bemessung is A138-17's local return-period selector (FACILITY_FREQUENCY_SYMBOL).
               const muldeFreqSym = FACILITY_FREQUENCY_SYMBOL['A138-17'];
-              const MULDE_SCALAR_SYMS = ['A_C', 'h_M', 'f_Z', 'k_i', muldeFreqSym!, 'n', 'T_n'] as const;
+              const MULDE_SCALAR_SYMS = ['A_C', 'h_M', 'f_Z', 'k_i', 'k_i_Mulde', muldeFreqSym!, 'n', 'T_n'] as const;
               const mScalarCrossFields = await tx
                 .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
                 .from(fields)
@@ -1893,7 +1897,9 @@ export async function saveWorksheet(
                   const mAC = mNumBySymbol.get('A_C') ?? null;
                   const mhM = mNumBySymbol.get('h_M') ?? null;
                   const mfZ = mNumBySymbol.get('f_Z') ?? null;
-                  const mki = mNumBySymbol.get('k_i') ?? null;
+                  // §6.5.2 L1925: the swale's own design rate (k_i_Mulde = k_i,BBZ inside a Mulden-Rigolen
+                  // facility, the project k_i otherwise); the project k_i while the staged field is absent.
+                  const mki = mNumBySymbol.get('k_i_Mulde') ?? mNumBySymbol.get('k_i') ?? null;
                   if (mAC != null && mhM != null && mfZ != null && mki != null) {
                     const muldeSwept = computeMuldeGeometrySweep(muldeCol.rows, {
                       A_C: mAC, h_M: mhM, f_Z: mfZ, k_i: mki,
@@ -2291,7 +2297,9 @@ export async function saveWorksheet(
                       d_a: rigoleVolInputs.d_a,
                     })
                   : null;
-              const volumeWrite = facilityVolumeMaterialize(facilityTypeP, {
+              // The composites' geometry path produces the SWALE's volume (Gl. 15) on A138-17; their
+              // own V_MR is summed by the facility_volume branch (Gl. 26).
+              const volumeWrite = facilityVolumeMaterialize(facilityTypeP === 'mre' || facilityTypeP === 'mrs' ? 'mulde' : facilityTypeP, {
                 A_S_m: asmOutP.A_S_m,
                 h_M: muldeHmForVolume,
                 b_R: rigoleVolInputs?.b_R ?? null,
@@ -2914,6 +2922,10 @@ export async function saveWorksheet(
             const rows = await fvResolveRows('A138-17');
             const req = computeMuldeRequiredVolumeSweep(rows, { A_C, A_VA, A_S_m, k_i: k_i_M, f_Z });
             if (req.V_M_erf != null && Number.isFinite(req.V_M_erf)) out.push({ symbol: 'V_M_erf', value: req.V_M_erf, worksheetCode: 'A138-17' });
+            // Iteration fields (block 20261005100000): the governing pair of the Gl. 14 sweep, read by the
+            // Gl. 14/16 cards (equation-profiles aliases) — skipped while the fields are absent.
+            if (req.governingD != null) out.push({ symbol: 'D_used_M', value: req.governingD, worksheetCode: 'A138-17' });
+            if (req.r_D_at_governing != null) out.push({ symbol: 'r_D_n_used_M', value: req.r_D_at_governing, worksheetCode: 'A138-17' });
             return out;
           };
 
@@ -2943,6 +2955,29 @@ export async function saveWorksheet(
             // computed with, so the API save path leaves no "missing required" behind
             // (readiness run 2026-09-30, case A5; the browser path writes it via Gl. 21).
             if (s_R != null && Number.isFinite(s_R)) fvExtraWrites.push({ symbol: 's_R', value: s_R });
+            // Iteration fields (block 20261005100000): the governing (D, r_D(n)) of the trench length —
+            // Gl. 23 for a plain trench, Gl. 29 / 32 for the trench of a Mulden-Rigolen facility (on the
+            // trench frequency of that facility) — persisted as D_used_R / r_D_n_used_R so the Gl. 19/23
+            // cards read the sheet's own values. Skipped while the fields are absent.
+            const A_C_R = await fvReadNum('A_C');
+            const k_i_R = await fvReadNum('k_i');
+            const f_Z_R = await fvReadNum('f_Z');
+            const Q_Dr_R = (await fvReadNum('Q_Dr')) ?? 0;
+            if (A_C_R != null && k_i_R != null && f_Z_R != null && b_R != null && h_R != null && s_R != null) {
+              const rowsR = await fvResolveRows(compositeFv === 'mre' ? 'A138-19' : compositeFv === 'mrs' ? 'A138-20' : 'A138-18');
+              let gov: { governingD: number | null; r_D_at_governing: number | null } | null = null;
+              if (compositeFv) {
+                const V_M_R = await fvReadNum('V_M');
+                const A_VA_R = (await fvReadNum('A_VA_MRE')) ?? (await fvReadNum('A_VA'));
+                if (V_M_R != null && A_VA_R != null) {
+                  gov = computeMrsTrenchLengthSweep(rowsR, { A_C: A_C_R, A_VA: A_VA_R, V_M: V_M_R, k_i: k_i_R, f_Z: f_Z_R, b_R, h_R, s_R, Q_Dr: compositeFv === 'mrs' ? Q_Dr_R : 0 });
+                }
+              } else {
+                gov = computeRigoleLengthSweep(rowsR, { A_C: A_C_R, k_i: k_i_R, f_Z: f_Z_R, b_R, h_R, s_R, Q_Dr: Q_Dr_R });
+              }
+              if (gov?.governingD != null) fvExtraWrites.push({ symbol: 'D_used_R', value: gov.governingD });
+              if (gov?.r_D_at_governing != null) fvExtraWrites.push({ symbol: 'r_D_n_used_R', value: gov.r_D_at_governing });
+            }
           } else if (fvFacility === 'mre' || fvFacility === 'mrs') {
             // Gl.26: V_MR = persisted V_M (A138-17) + persisted V_R (A138-18), scoped. The MRS is
             // designed "analog zur Bemessung von Mulden-Rigolen-Elementen" (§6.6.2 L2023).
