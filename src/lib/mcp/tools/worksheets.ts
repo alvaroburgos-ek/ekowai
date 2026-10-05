@@ -12,6 +12,10 @@ import {
 } from '@/lib/db/schema';
 import { defineTool } from '../define-tool';
 import { paramHasValue } from '@/lib/projects/required-fields';
+import { computeVisibility } from '@/lib/compliance/visibility';
+import { loadInheritedFields } from '@/lib/db/queries/worksheet';
+import { parametersToFieldValues } from '@/lib/eval/materialize-derived';
+import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { assertInternalAccess } from './projects';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 
@@ -102,8 +106,11 @@ export function registerWorksheetTools(server: McpServer) {
           projectId: worksheetInstances.projectId,
           templateId: worksheetInstances.worksheetTemplateId,
           status: worksheetInstances.status,
+          templateCode: worksheetTemplates.code,
+          standardId: worksheetTemplates.standardId,
         })
         .from(worksheetInstances)
+        .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
         .where(eq(worksheetInstances.id, instanceId))
         .limit(1);
       if (!instance) throw new Error('Arbeitsblatt nicht gefunden.');
@@ -122,6 +129,8 @@ export function registerWorksheetTools(server: McpServer) {
           clauseReference: fields.clauseReference,
           sectionTitle: worksheetSections.titleDe,
           orderIndex: fields.orderIndex,
+          sectionId: fields.sectionId,
+          visibleWhen: fields.visibleWhen,
         })
         .from(fields)
         .leftJoin(worksheetSections, eq(fields.sectionId, worksheetSections.id))
@@ -139,10 +148,31 @@ export function registerWorksheetTools(server: McpServer) {
         .where(eq(projectParameters.projectId, instance.projectId));
       const byField = new Map(params.map((p) => [p.fieldId, p]));
 
+      // FLL re-drive 2026-10-05 (TP OBS-6): a required field hidden by visible_when is not missing — the approval gate and
+      // the form skip it, so the API must too. Same pure helper, same lookup (own + inherited values) as the gate.
+      const sectionRows = await db
+        .select({ id: worksheetSections.id, parentSectionId: worksheetSections.parentSectionId, visibleWhen: worksheetSections.visibleWhen })
+        .from(worksheetSections)
+        .where(eq(worksheetSections.worksheetTemplateId, instance.templateId));
+      const inherited = await loadInheritedFields(instance.templateId, instance.standardId, instance.templateCode);
+      const ownSymbols = new Set(fieldRows.map((f) => f.symbol));
+      const readable = [
+        ...fieldRows.map((f) => ({ id: f.fieldId, symbol: f.symbol, dataType: f.dataType })),
+        ...inherited.filter((i) => !ownSymbols.has(i.symbol)).map((i) => ({ id: i.id, symbol: i.symbol, dataType: i.dataType })),
+      ];
+      const visLookup = makeSymbolLookup(readable, parametersToFieldValues(params, readable));
+      const { hiddenFieldIds } = computeVisibility(
+        fieldRows.map((f) => ({ id: f.fieldId, symbol: f.symbol, sectionId: f.sectionId, visibleWhen: f.visibleWhen })),
+        sectionRows,
+        visLookup,
+      );
+
       const merged = fieldRows.map((f) => {
         const param = byField.get(f.fieldId);
+        const { sectionId: _sectionId, visibleWhen: _visibleWhen, ...rest } = f;
         return {
-          ...f,
+          ...rest,
+          hidden: hiddenFieldIds.has(f.fieldId),
           value: readValue(param),
           sourceType: param?.sourceType ?? null,
           clientSupplied: param?.clientSupplied ?? false,
@@ -153,8 +183,8 @@ export function registerWorksheetTools(server: McpServer) {
         };
       });
 
-      const visible = onlyEmpty ? merged.filter((f) => !f.isFilled) : merged;
-      const missingRequired = merged.filter((f) => f.isRequired && !f.isFilled);
+      const visible = onlyEmpty ? merged.filter((f) => !f.isFilled && !f.hidden) : merged;
+      const missingRequired = merged.filter((f) => f.isRequired && !f.isFilled && !f.hidden);
 
       return {
         instanceId,
