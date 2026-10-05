@@ -1,4 +1,4 @@
--- Read-back for scripts/migrations/20261005120000_m820_1_client_route.sql (DWA-M 820-1 client route). READ ONLY.
+-- Read-back for scripts/migrations/20261005193000_m820_1_client_route.sql (DWA-M 820-1 client route). READ ONLY.
 -- Run BEFORE the apply (step 0: R0 must show the baseline md5s) and AFTER (R1–R7 must show the expected values below).
 -- Expected values were produced by the embedded-Postgres harness tests/harness/m820-1-client-route.integration.test.ts.
 
@@ -14,6 +14,16 @@ SELECT w.code AS ws, cr.code, cr.severity, md5(cr.condition) AS md5
  WHERE s.code = 'DWA-M-820-1' AND cr.code IN ('REQ-07','REQ-08','REQ-10','REQ-22','REQ-26')
  ORDER BY 1, 2;
 
+-- R0b · step 0 (before apply): M820-1 projects whose client type is still blank — after the apply every guarded gate on
+--   those projects reads pending (asks for the client type) until it is entered. Expect a count; list them to the owner.
+SELECT count(DISTINCT wi.project_id) AS projects_with_m820_01,
+       count(DISTINCT wi.project_id) FILTER (WHERE p.value_enum IS NULL) AS client_type_blank
+  FROM worksheet_instances wi
+  JOIN worksheet_templates w ON w.id = wi.worksheet_template_id AND w.code = 'M820-01'
+  JOIN standards s ON s.id = w.standard_id AND s.code = 'DWA-M-820-1'
+  JOIN fields f ON f.worksheet_template_id = w.id AND f.symbol = 'client_organization_type'
+  LEFT JOIN project_parameters p ON p.project_id = wi.project_id AND p.field_id = f.id;
+
 -- R1 · client tokens on M820-01 — before: 6 (municipality … other); after: 8, the last two privat_ohne_foerderung, privat_mit_foerderung
 SELECT f.symbol, jsonb_array_length(f.enum_values) AS n, (SELECT string_agg(e->>'value', ',' ORDER BY (e->>'order_index')::int) FROM jsonb_array_elements(f.enum_values) e) AS tokens
   FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
@@ -28,7 +38,7 @@ SELECT f.symbol, f.data_type, f.is_required, f.active, f.visible_when, f.consume
  WHERE s.code = 'DWA-M-820-1' AND w.code = 'M820-01' AND f.symbol = 'vergaberecht_freiwillig_angewendet';
 
 -- R3 · consumer reach (after: each array contains the listed codes; existing entries kept in their order)
---   client_organization_type ⊇ {M820-04,M820-10,M820-12,M820-17,M820-23}; procurement_procedure ⊇ {M820-12,M820-17,M820-23};
+--   client_organization_type ⊇ {M820-04,M820-10,M820-12,M820-17,M820-23} · procurement_procedure ⊇ {M820-12,M820-17} ·
 --   threshold_status ⊇ {M820-04,M820-23}
 SELECT w.code AS ws, f.symbol, f.consumer_worksheets
   FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
@@ -42,7 +52,9 @@ SELECT w.code AS ws, cr.code, cr.condition
  WHERE s.code = 'DWA-M-820-1' AND cr.code IN ('REQ-07','REQ-08','REQ-10','REQ-22','REQ-26')
  ORDER BY 1, 2;
 
--- R5 · VgV-F-only fields — before: visible_when NULL (3 rows); after: md5(visible_when) = a89b0fa9514a3df2ffa9e1e69d71bbde on all 3
+-- R5 · hidden-when fields — before: visible_when NULL (3 rows); after: md5(visible_when) =
+--   publication_date a89b0fa9514a3df2ffa9e1e69d71bbde (G AND procurement_procedure == 'vgv_f') ·
+--   required_standstill_days, standstill_period_days 11d2d717f0a9371acb4b922a8187551a (G AND threshold_status == 'oberschwellig')
 SELECT w.code AS ws, f.symbol, f.is_required, f.visible_when, md5(f.visible_when) AS md5
   FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
  WHERE s.code = 'DWA-M-820-1' AND ((w.code = 'M820-17' AND f.symbol = 'publication_date')
@@ -58,7 +70,7 @@ SELECT f.symbol, coalesce(p.value_enum, p.value_boolean::text) AS value, count(*
      OR f.symbol = 'vergaberecht_freiwillig_angewendet')
  GROUP BY 1, 2 ORDER BY 1, 2;
 
--- R7 · archives (exist only once the block has run) — after the apply: 5 gate rows, 6 field rows (fewer only if a row was already in its target state);
+-- R7 · archives (exist only once the block has run) — after the apply: 5 gate rows, 6 field rows (fewer only if a row was already in its target state),
 --   after a rollback: 0 / 0
 SELECT 'gates' AS archive, count(*) AS n FROM compliance_requirements_archive_m820_1_client_route
 UNION ALL SELECT 'fields', count(*) FROM fields_archive_m820_1_client_route;

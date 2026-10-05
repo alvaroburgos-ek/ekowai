@@ -1,6 +1,6 @@
 /**
  * DWA-M 820-1 client route — the SHIPPED gate conditions and visible_when rules of the staged migration
- * scripts/migrations/20261005120000_m820_1_client_route.sql, read out of the file and evaluated with the REAL engine
+ * scripts/migrations/20261005193000_m820_1_client_route.sql, read out of the file and evaluated with the REAL engine
  * (`evaluateCondition`, `computeVisibility`). Nothing is applied anywhere.
  *
  * Client cases (owner 2026-10-05 + amendment): public client · private client WITH public funding · private client WITHOUT
@@ -16,7 +16,7 @@ import { evaluateCondition } from '../../evaluate';
 import { computeVisibility } from '../../visibility';
 import { conditionFromSql, insertedFieldVisibleWhen, visibleWhenFromSql } from './sql-condition';
 
-const FILE = resolve(__dirname, '../../../../../scripts/migrations/20261005120000_m820_1_client_route.sql');
+const FILE = resolve(__dirname, '../../../../../scripts/migrations/20261005193000_m820_1_client_route.sql');
 const md5 = (s: string) => createHash('md5').update(s).digest('hex');
 
 type V = string | number | boolean;
@@ -64,9 +64,10 @@ describe('M820-1 client route — the file ships exactly the guarded bodies', ()
   it('the new field is visible only for a private client without funding', () => {
     expect(insertedFieldVisibleWhen(FILE, 'vergaberecht_freiwillig_angewendet')).toBe("client_organization_type == 'privat_ohne_foerderung'");
   });
-  it('the three VgV-F-only fields carry G AND procurement_procedure == vgv_f', () => {
-    for (const s of ['publication_date', 'required_standstill_days', 'standstill_period_days']) {
-      expect(visibleWhenFromSql(FILE, s), s).toBe(`${G} AND procurement_procedure == 'vgv_f'`);
+  it('publication_date carries G AND vgv_f (L965); the two § 134 GWB standstill fields carry the REQ-22 guard (L1325, review I-1)', () => {
+    expect(visibleWhenFromSql(FILE, 'publication_date')).toBe(`${G} AND procurement_procedure == 'vgv_f'`);
+    for (const s of ['required_standstill_days', 'standstill_period_days']) {
+      expect(visibleWhenFromSql(FILE, s), s).toBe(`${G} AND threshold_status == 'oberschwellig'`);
     }
   });
 });
@@ -163,14 +164,15 @@ describe('visible_when — the decision field and the VgV-F-only fields (real co
   const hidden = (rule: string, vals: Record<string, V>) =>
     computeVisibility([field('f', 'x', rule)], [], lk(vals)).hiddenFieldIds.has('f');
   const decision = insertedFieldVisibleWhen(FILE, 'vergaberecht_freiwillig_angewendet');
-  const vgvf = visibleWhenFromSql(FILE, 'standstill_period_days');
+  const vgvf = visibleWhenFromSql(FILE, 'publication_date');
+  const standstill = visibleWhenFromSql(FILE, 'standstill_period_days');
 
   it('the decision field shows only for privat_ohne_foerderung', () => {
     expect(hidden(decision, { client_organization_type: 'privat_ohne_foerderung' })).toBe(false);
     expect(hidden(decision, { client_organization_type: 'privat_mit_foerderung' })).toBe(true);
     expect(hidden(decision, { client_organization_type: 'municipality' })).toBe(true);
   });
-  it('VgV-F-only fields: shown for a bound / voluntary client in VgV-F, hidden otherwise', () => {
+  it('publication_date: shown for a bound / voluntary client in VgV-F, hidden otherwise', () => {
     const rows: Array<[string, Record<string, V>, boolean]> = [
       ['public vgv_f', { client_organization_type: 'municipality', procurement_procedure: 'vgv_f' }, false],
       ['public suchverfahren', { client_organization_type: 'municipality', procurement_procedure: 'suchverfahren' }, true],
@@ -187,15 +189,39 @@ describe('visible_when — the decision field and the VgV-F-only fields (real co
       expect(h, label).toBe(expectHidden);
     }
   });
-  it('gate effect of the hiding: REQ-22 loses only the standstill atoms; REQ-18 loses only publication_date (no gate wholly n.a.)', () => {
-    // public client, above the threshold, Direktvergabe (§ 8.8 L916) — standstill_period_days is hidden on M820-23
-    const base = { client_organization_type: 'municipality', threshold_status: 'oberschwellig', electronic_transmission: true };
-    const opts = { hiddenSymbols: new Set(['standstill_period_days']) };
-    const ok = evaluateCondition(shipped('REQ-22'), lk({ ...base, information_letters_sent: true }), opts).kind;
-    const bad = evaluateCondition(shipped('REQ-22'), lk({ ...base, information_letters_sent: false }), opts).kind;
+  it('standstill fields: shown exactly when REQ-22 is switched on (bound / voluntary client above the threshold, ANY procedure)', () => {
+    const clients: Record<string, Record<string, V>> = {
+      public: { client_organization_type: 'municipality' },
+      private_funded: { client_organization_type: 'privat_mit_foerderung' },
+      private_yes: { client_organization_type: 'privat_ohne_foerderung', vergaberecht_freiwillig_angewendet: true },
+      private_no: { client_organization_type: 'privat_ohne_foerderung', vergaberecht_freiwillig_angewendet: false },
+    };
+    for (const [name, c] of Object.entries(clients)) {
+      for (const threshold_status of ['oberschwellig', 'unterschwellig']) {
+        for (const procurement_procedure of ['vgv_f', 'suchverfahren', 'direktvergabe']) {
+          const vals = { ...c, threshold_status, procurement_procedure };
+          const h = hidden(standstill, vals);
+          // REQ-22 guard true ⇔ the fields must be visible (a probe body that only the guard can make non-pass)
+          const guardOn = evaluateCondition(shipped('REQ-22'), lk({ ...vals, information_letters_sent: false, electronic_transmission: true, standstill_period_days: 0 })).kind === 'fail';
+          expect(h, `${name} ${threshold_status} ${procurement_procedure}`).toBe(!guardOn);
+        }
+      }
+      console.log(`[M820-1 unit] standstill visible_when ${name}: ober → ${hidden(standstill, { ...c, threshold_status: 'oberschwellig', procurement_procedure: 'direktvergabe' }) ? 'hidden' : 'visible'}, unter → ${hidden(standstill, { ...c, threshold_status: 'unterschwellig', procurement_procedure: 'vgv_f' }) ? 'hidden' : 'visible'}`);
+    }
+  });
+  it('review I-1: public client above the threshold with Direktvergabe — REQ-22 judges the standstill (no shrinking to the letters only)', () => {
+    const base = { client_organization_type: 'municipality', threshold_status: 'oberschwellig', procurement_procedure: 'direktvergabe', electronic_transmission: true, information_letters_sent: true };
+    expect(hidden(standstill, base)).toBe(false);
+    const noDays = evaluateCondition(shipped('REQ-22'), lk(base));
+    const short = evaluateCondition(shipped('REQ-22'), lk({ ...base, standstill_period_days: 5 })).kind;
+    const enough = evaluateCondition(shipped('REQ-22'), lk({ ...base, standstill_period_days: 10 })).kind;
+    console.log(`[M820-1 unit] I-1 public ober direktvergabe letters sent: no days=${JSON.stringify(noDays)} 5 d=${short} 10 d=${enough}`);
+    expect(noDays).toEqual({ kind: 'pending', missingSymbols: ['standstill_period_days'] });
+    expect([short, enough]).toEqual(['fail', 'pass']);
+  });
+  it('REQ-18 with publication_date hidden loses only that atom (no gate wholly n.a.)', () => {
     const req18 = "IF procurement_procedure == 'vgv_f' THEN (publication_date IS NOT NULL AND ted_notice_id IS NOT NULL)";
     const r18 = evaluateCondition(req18, lk({ procurement_procedure: 'vgv_f', ted_notice_id: 'TED-1' }), { hiddenSymbols: new Set(['publication_date']) }).kind;
-    console.log(`[M820-1 unit] REQ-22 with standstill hidden: letters sent=${ok}, not sent=${bad} · REQ-18 with publication_date hidden, TED id given=${r18}`);
-    expect([ok, bad, r18]).toEqual(['pass', 'fail', 'pass']);
+    expect(r18).toBe('pass');
   });
 });

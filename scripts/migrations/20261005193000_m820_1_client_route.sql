@@ -1,4 +1,4 @@
--- 20261005120000_m820_1_client_route.sql · DWA-M 820-1 "client route" (owner requests 2026-10-05, verbatim:
+-- 20261005193000_m820_1_client_route.sql · DWA-M 820-1 "client route" (owner requests 2026-10-05, verbatim:
 --   "can we have or add something as private client which would make this not mandatory then? and for us to use it as a
 --    standard anyway private or public so is fine" — and the amendment "we can also contact and follow the normal protocols
 --    for private? would this be still okay? i guess will also be for the safe side?").
@@ -9,8 +9,9 @@
 --   2. Private client WITHOUT public funding who answers "Yes, apply the procurement procedure voluntarily (safe side)":
 --      every procurement check works exactly as for a public client (same gates, same blocking).
 --   3. Private client WITHOUT public funding who answers "No": the procurement-law checks REQ-07, REQ-08, REQ-10, REQ-22,
---      REQ-26 read "met" (their guard is false), and the EU-notice date and the § 134 GWB standstill fields are hidden.
---      The decision itself is recorded on M820-01 (a required Yes/No field). Everything else — needs assessment, risk,
+--      REQ-26 are NOT REQUIRED — the decision is documented in M820-01 (a required Yes/No field); in the gate list they
+--      appear as met/passed (the engine reports a gate whose guard is false as passed). The EU-notice date and the
+--      § 134 GWB standstill fields are hidden. Everything else — needs assessment, risk,
 --      quality requirements, contract checklist, insurance, documentation — still applies to every client.
 --   A private client without funding who has NOT answered yet gets no silent pass: the guarded gates wait for the answer
 --   (pending → the approval of the gated sheet is refused with "enter: vergaberecht_freiwillig_angewendet (from M820-01)"),
@@ -49,7 +50,8 @@
 --        "Der Auftraggeber darf den Vertrag frühestens 15 Kalendertage (bei Versendung auf elektronischem Weg 10 Kalendertage)
 --         nach Absendung dieser Informationen schließen (§ 134 Abs. 2 GWB)."
 --        EN: "The client may conclude the contract at the earliest 15 calendar days (10 calendar days when sent electronically)
---        after sending this information (§ 134(2) GWB)." — printed only inside § 8.10 (VgV-F procedure).
+--        after sending this information (§ 134(2) GWB)." — § 134 GWB belongs to the GWB, which [Q4] applies to every award
+--        above the EU threshold whatever the procedure (review I-1): the two fields follow REQ-22's own guard.
 --
 -- WHAT THIS BLOCK DOES (idempotent; md5-guarded gate edits with an in-transaction archive; nothing else):
 --   1. M820-01 client_organization_type: two enum values appended (same JSON shape, regulation_reference '§7.2'):
@@ -58,8 +60,13 @@
 --      NOT done (not in this block): ANHB23 has no row for the two tokens, so eu_threshold_value_anhb23 (M820-09) stays empty
 --      for them — which printed threshold row applies to a funded private client is a ruling (m820_1-J-3 class).
 --   2. M820-01 new required boolean vergaberecht_freiwillig_angewendet, visible only for privat_ohne_foerderung.
---   3. Consumer reach (append-only, order kept): client_organization_type and the new field → M820-04 -08 -09 -10 -12 -17 -23;
---      procurement_procedure (+ M820-12, -17, -23); threshold_status (+ M820-04, -23) — every sheet whose gate or visible_when
+--      order_index = client_organization_type's + 1: every M820-01 field carries order_index 0 (2026-10-05 dump) and the
+--      form orders by order_index only (worksheet.ts .orderBy(fields.orderIndex), no tie-breaker), so the field shows
+--      deterministically LAST in section B "Input Parameters"; "right after the client type" is not expressible without
+--      renumbering the 16 sibling fields (not in this block).
+--   3. Consumer reach (append-only, order kept): client_organization_type gets + M820-04 -10 -12 -17 -23 (the 2026-09-18
+--      capture shows -08 -09 already there); the new field is created with the full list -04 -08 -09 -10 -12 -17 -23;
+--      procurement_procedure (+ M820-12, -17); threshold_status (+ M820-04, -23) — every sheet whose gate or visible_when
 --      reads them (the approval gate resolves them project-wide anyway; the reach makes the form show the same verdict).
 --   4. Gate guards (bodies unchanged; SET condition first, cr.code first; md5 of the live condition from the 2026-10-05 dump):
 --      G := (client_organization_type != 'privat_ohne_foerderung' OR vergaberecht_freiwillig_angewendet == true)
@@ -69,11 +76,12 @@
 --      M820-23 REQ-22  md5 7dedd983ac1ee5c379da759d5fbab75c → IF G AND threshold_status == 'oberschwellig' THEN (<body>)   [Q4]
 --      M820-23 REQ-26  md5 dda8ecb39354511117b4341ff7f427ce → IF G AND threshold_status == 'oberschwellig' THEN (<body>)   [Q4]
 --      A changed live text makes the UPDATE a no-op and archives nothing (re-check step 0 of the APPLY-ORDER note).
---   5. visible_when = G AND procurement_procedure == 'vgv_f' on M820-17 publication_date [Q5] and M820-23
---      required_standstill_days, standstill_period_days [Q6] (composed as (<existing>) AND (<new>) if a rule exists; the
---      2026-10-05 dump has none). Producer guard: none of the three is an equation output or an input of an equation (M820-17
---      and M820-23 carry no equation). Gate effect of the hiding: REQ-18 (M820-17) and REQ-22 (M820-23) lose the hidden
---      atoms only (AND/OR identity) — no gate becomes wholly not applicable.
+--   5. visible_when = G AND procurement_procedure == 'vgv_f' on M820-17 publication_date [Q5]; visible_when = G AND
+--      threshold_status == 'oberschwellig' (= REQ-22's guard, review I-1) on M820-23 required_standstill_days,
+--      standstill_period_days [Q4][Q6] (composed as (<existing>) AND (<new>) if a rule exists; the 2026-10-05 dump has
+--      none). Producer guard: none of the three is an equation output or an input of an equation (M820-17 and M820-23
+--      carry no equation). Gate effect of the hiding: REQ-18 (M820-17) loses the publication_date atom only; the standstill
+--      fields are hidden exactly when REQ-22 is switched off, so REQ-22 never judges a bound award without them.
 --      NOT hidden, because the printed text does NOT tie them to VgV-F (S-04 residue, ruling): M820-13 eligibility fields
 --      (§ 8.9 L932–L934 lists "Nachweis der geforderten Berufshaftpflichtversicherung", "Einhaltung des vorgegebenen
 --      Verhältnisses von Auftragswert zu Umsatzzahlen", "Referenzen" as Suchverfahren criteria, PDF p. 39); M820-14 award
@@ -85,9 +93,10 @@
 --      every procedure).
 -- SAFETY: one new required field (visible only for a private client without funding), 2 enum values, consumer reach,
 --   5 guarded gates (bodies byte-identical inside the guard), 3 visible_when. No severity, value, equation or table change.
--- STAGED — not applied. Apply: node scripts/apply-migration.mjs scripts/migrations/20261005120000_m820_1_client_route.sql
--- Rollback: scripts/rollback-20261005120000-m820-1-client-route.sql
--- Read-back: scripts/verification/apply/readback-20261005120000-m820-1-client-route.sql
+-- STAGED — not applied. Apply (from C:\Users\Ekowai\_wt-g2t, which holds .env.local):
+--   node scripts/apply-migration.mjs C:\Users\Ekowai\_wt-m820\scripts\migrations\20261005193000_m820_1_client_route.sql
+-- Rollback: scripts/rollback-20261005193000-m820-1-client-route.sql
+-- Read-back: scripts/verification/apply/readback-20261005193000-m820-1-client-route.sql
 BEGIN;
 
 -- 0. in-transaction archives of every row this block changes (pre-state only; a re-run archives nothing)
@@ -115,11 +124,13 @@ SELECT f.* FROM fields f
          AND (NOT (f.enum_values @> '[{"value":"privat_ohne_foerderung"}]'::jsonb OR f.enum_values @> '[{"value":"privat_mit_foerderung"}]'::jsonb)
            OR NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['M820-04','M820-10','M820-12','M820-17','M820-23']::text[])))
      OR (w.code = 'M820-10' AND f.symbol = 'procurement_procedure'
-         AND NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['M820-12','M820-17','M820-23']::text[]))
+         AND NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['M820-12','M820-17']::text[]))
      OR (w.code = 'M820-09' AND f.symbol = 'threshold_status'
          AND NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['M820-04','M820-23']::text[]))
-     OR (((w.code = 'M820-17' AND f.symbol = 'publication_date') OR (w.code = 'M820-23' AND f.symbol IN ('required_standstill_days','standstill_period_days')))
-         AND (f.visible_when IS NULL OR position('(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure == ''vgv_f''' IN f.visible_when) = 0)))
+     OR (w.code = 'M820-17' AND f.symbol = 'publication_date'
+         AND (f.visible_when IS NULL OR position('(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure == ''vgv_f''' IN f.visible_when) = 0))
+     OR (w.code = 'M820-23' AND f.symbol IN ('required_standstill_days','standstill_period_days')
+         AND (f.visible_when IS NULL OR position('(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND threshold_status == ''oberschwellig''' IN f.visible_when) = 0)))
    AND NOT EXISTS (SELECT 1 FROM fields_archive_m820_1_client_route a WHERE a.id = f.id);
 
 -- 1. two client tokens on M820-01 client_organization_type ([Q1] § 7.2)
@@ -138,8 +149,8 @@ SELECT w.id,
        'Vergabeverfahren freiwillig angewendet (empfohlen, sichere Seite)',
        'Procurement procedure applied voluntarily (recommended, safe side)',
        'boolean', NULL, true, '§7.2',
-       'Ein privater Auftraggeber ohne Fördermittel ist nicht an das Vergaberecht gebunden (§ 7.2: „An das Vergaberecht sind Auftraggeber oder private Auftraggeber, die Fördermittel erhalten, gebunden.“), kann das Vergabeverfahren aber freiwillig anwenden („Jeder Person steht die Anwendung des Merkblatts frei.“). Ja = alle Vergabeprüfungen gelten wie für einen öffentlichen Auftraggeber (empfohlen, sichere Seite). Nein = die Vergabeprüfungen REQ-07, REQ-08, REQ-10, REQ-22, REQ-26 sind nicht anwendbar, Bekanntmachungsdatum und Wartefrist nach § 134 GWB werden ausgeblendet; diese Entscheidung ist hiermit dokumentiert.
-[EN] A private client without public funding is not bound by procurement law (§ 7.2: "Procurement law binds clients, or private clients who receive public funding."), but may follow the procedure voluntarily ("Anyone is free to apply the Merkblatt."). Yes = every procurement check applies as for a public client (recommended, safe side). No = the procurement checks REQ-07, REQ-08, REQ-10, REQ-22, REQ-26 are not applicable, the EU-notice date and the § 134 GWB standstill fields are hidden; this decision is recorded here.',
+       'Ein privater Auftraggeber ohne Fördermittel ist nicht an das Vergaberecht gebunden (§ 7.2: „An das Vergaberecht sind Auftraggeber oder private Auftraggeber, die Fördermittel erhalten, gebunden.“), kann das Vergabeverfahren aber freiwillig anwenden („Jeder Person steht die Anwendung des Merkblatts frei.“). Ja = alle Vergabeprüfungen gelten wie für einen öffentlichen Auftraggeber (empfohlen, sichere Seite). Nein = die Vergabeprüfungen REQ-07, REQ-08, REQ-10, REQ-22, REQ-26 sind nicht erforderlich — Entscheidung in M820-01 dokumentiert (in der Prüfliste erscheinen sie als erfüllt); Bekanntmachungsdatum und Wartefrist nach § 134 GWB werden ausgeblendet.
+[EN] A private client without public funding is not bound by procurement law (§ 7.2: "Procurement law binds clients, or private clients who receive public funding."), but may follow the procedure voluntarily ("Anyone is free to apply the Merkblatt."). Yes = every procurement check applies as for a public client (recommended, safe side). No = the procurement checks REQ-07, REQ-08, REQ-10, REQ-22, REQ-26 are not required — decision documented in M820-01 (they appear as met/passed in the gate list); the EU-notice date and the § 134 GWB standstill fields are hidden.',
        'imported_unverified',
        '§ 7.2 (PDF p. 31, printed 29): "An das Vergaberecht sind Auftraggeber oder private Auftraggeber, die Fördermittel erhalten, gebunden." — Hinweis für die Benutzung (PDF p. 12): "Jeder Person steht die Anwendung des Merkblatts frei. Eine Pflicht zur Anwendung kann sich aber aus Rechts- oder Verwaltungsvorschriften, Vertrag oder sonstigem Rechtsgrund ergeben."',
        'DWA-M 820-1 §7.2 Z.766 (PDF S. 31) + Hinweis für die Benutzung Z.273 (PDF S. 12)',
@@ -164,11 +175,11 @@ UPDATE fields f
 
 UPDATE fields f
    SET consumer_worksheets = COALESCE(f.consumer_worksheets, '{}'::text[])
-       || ARRAY(SELECT u.c FROM unnest(ARRAY['M820-12','M820-17','M820-23']::text[]) WITH ORDINALITY AS u(c, o)
+       || ARRAY(SELECT u.c FROM unnest(ARRAY['M820-12','M820-17']::text[]) WITH ORDINALITY AS u(c, o)
                  WHERE NOT (u.c = ANY (COALESCE(f.consumer_worksheets, '{}'::text[]))) ORDER BY u.o)
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND w.code = 'M820-10' AND f.symbol = 'procurement_procedure'
-   AND NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['M820-12','M820-17','M820-23']::text[]);
+   AND NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['M820-12','M820-17']::text[]);
 
 UPDATE fields f
    SET consumer_worksheets = COALESCE(f.consumer_worksheets, '{}'::text[])
@@ -214,21 +225,33 @@ UPDATE compliance_requirements cr
  WHERE cr.code = 'REQ-26' AND w.id = cr.worksheet_template_id AND w.code = 'M820-23' AND s.code = 'DWA-M-820-1'
    AND md5(cr.condition) = 'dda8ecb39354511117b4341ff7f427ce';
 
--- 5. VgV-F-only fields ([Q5] EU notice § 37 VgV; [Q6] § 134 Abs. 2 GWB standstill) — new rule where none exists …
+-- 5a. EU notice date only in a VgV-F procedure ([Q5] § 37 VgV) of a bound or voluntary client — plain rule where none
+--     exists, composed (<existing>) AND (<new>) onto an existing one (none in the 2026-10-05 dump)
 UPDATE fields f
    SET visible_when = '(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure == ''vgv_f'''
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND f.visible_when IS NULL
-   AND ((w.code = 'M820-17' AND f.symbol = 'publication_date')
-     OR (w.code = 'M820-23' AND f.symbol IN ('required_standstill_days','standstill_period_days')));
+   AND w.code = 'M820-17' AND f.symbol = 'publication_date';
 
--- … and composed onto an existing rule (none in the 2026-10-05 dump; kept for a live text that differs)
 UPDATE fields f
    SET visible_when = '(' || f.visible_when || ') AND ((client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure == ''vgv_f'')'
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND f.visible_when IS NOT NULL
    AND position('(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure == ''vgv_f''' IN f.visible_when) = 0
-   AND ((w.code = 'M820-17' AND f.symbol = 'publication_date')
-     OR (w.code = 'M820-23' AND f.symbol IN ('required_standstill_days','standstill_period_days')));
+   AND w.code = 'M820-17' AND f.symbol = 'publication_date';
+
+-- 5b. § 134 GWB standstill fields exactly when REQ-22 is switched on ([Q4] above the threshold, any procedure; [Q6])
+UPDATE fields f
+   SET visible_when = '(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND threshold_status == ''oberschwellig'''
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+ WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND f.visible_when IS NULL
+   AND w.code = 'M820-23' AND f.symbol IN ('required_standstill_days','standstill_period_days');
+
+UPDATE fields f
+   SET visible_when = '(' || f.visible_when || ') AND ((client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND threshold_status == ''oberschwellig'')'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+ WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-1' AND f.visible_when IS NOT NULL
+   AND position('(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND threshold_status == ''oberschwellig''' IN f.visible_when) = 0
+   AND w.code = 'M820-23' AND f.symbol IN ('required_standstill_days','standstill_period_days');
 
 COMMIT;

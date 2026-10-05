@@ -1,7 +1,7 @@
 /**
  * DWA-M 820-1 client route — embedded-Postgres proof of the staged block
- *   scripts/migrations/20261005120000_m820_1_client_route.sql
- *   scripts/rollback-20261005120000-m820-1-client-route.sql
+ *   scripts/migrations/20261005193000_m820_1_client_route.sql
+ *   scripts/rollback-20261005193000-m820-1-client-route.sql
  * (apply order + read-back: vault 01-Projects/ekowai-wizard/m820-wizard-test/15_APPLY-ORDER-m820-1-client-route.md).
  *
  * Disposable embedded Postgres only (embedded-pg.ts, schema from the Drizzle model) — no prod, no .env.local.
@@ -34,9 +34,9 @@ import { conditionFromSql, splitOnUnquotedSemicolons } from '@/lib/compliance/__
 
 const ROOT = resolve(__dirname, '../..');
 const USER_ID = '00000000-0000-4000-8000-0000000008a1';
-const MIGRATION = resolve(ROOT, 'scripts/migrations/20261005120000_m820_1_client_route.sql');
-const ROLLBACK = resolve(ROOT, 'scripts/rollback-20261005120000-m820-1-client-route.sql');
-const READBACK = resolve(ROOT, 'scripts/verification/apply/readback-20261005120000-m820-1-client-route.sql');
+const MIGRATION = resolve(ROOT, 'scripts/migrations/20261005193000_m820_1_client_route.sql');
+const ROLLBACK = resolve(ROOT, 'scripts/rollback-20261005193000-m820-1-client-route.sql');
+const READBACK = resolve(ROOT, 'scripts/verification/apply/readback-20261005193000-m820-1-client-route.sql');
 const log = (label: string, v: unknown) => console.log(`[M820-1 CLIENT-ROUTE] ${label}: ${JSON.stringify(v)}`);
 const md5 = (s: string) => createHash('md5').update(s).digest('hex');
 
@@ -63,7 +63,9 @@ const GUARDED: Record<string, string> = {
   'M820-23 REQ-22': '7dedd983ac1ee5c379da759d5fbab75c',
   'M820-23 REQ-26': 'dda8ecb39354511117b4341ff7f427ce',
 };
-const NEW_VW = "(client_organization_type != 'privat_ohne_foerderung' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure == 'vgv_f'";
+const G = "(client_organization_type != 'privat_ohne_foerderung' OR vergaberecht_freiwillig_angewendet == true)";
+const VW_PUB = `${G} AND procurement_procedure == 'vgv_f'`;
+const VW_STANDSTILL = `${G} AND threshold_status == 'oberschwellig'`;
 
 let harness: Harness;
 let saveWorksheet: typeof SaveWorksheet;
@@ -258,10 +260,11 @@ describe('DWA-M 820-1 client route — staged block on embedded Postgres', () =>
     log('decision field', v);
     expect(v).toMatchObject({ is_required: true, visible_when: "client_organization_type == 'privat_ohne_foerderung'", section_id: cot?.section_id,
       consumer_worksheets: ['M820-04', 'M820-08', 'M820-09', 'M820-10', 'M820-12', 'M820-17', 'M820-23'] });
-    expect((await fieldRow('M820-10', 'procurement_procedure'))?.consumer_worksheets).toEqual(['M820-11', 'M820-16', 'M820-17', 'M820-18', 'M820-19', 'M820-12', 'M820-23']);
+    expect((await fieldRow('M820-10', 'procurement_procedure'))?.consumer_worksheets).toEqual(['M820-11', 'M820-16', 'M820-17', 'M820-18', 'M820-19', 'M820-12']);
     expect((await fieldRow('M820-09', 'threshold_status'))?.consumer_worksheets).toEqual(['M820-10', 'M820-11', 'M820-12', 'M820-17', 'M820-04', 'M820-23']);
-    for (const [ws, s] of [['M820-17', 'publication_date'], ['M820-23', 'required_standstill_days'], ['M820-23', 'standstill_period_days']]) {
-      expect((await fieldRow(ws, s))?.visible_when, s).toBe(NEW_VW);
+    expect((await fieldRow('M820-17', 'publication_date'))?.visible_when).toBe(VW_PUB);
+    for (const s of ['required_standstill_days', 'standstill_period_days']) {
+      expect((await fieldRow('M820-23', s))?.visible_when, s).toBe(VW_STANDSTILL);
     }
     const conds = await harness.sql<{ code: string; condition: string }[]>`
       SELECT cr.code, cr.condition FROM compliance_requirements cr WHERE cr.code IN ${harness.sql(GUARDED_CODES)} ORDER BY 1`;
@@ -304,14 +307,17 @@ describe('DWA-M 820-1 client route — staged block on embedded Postgres', () =>
   it('d2. the read-back file runs after an apply and shows the expected values (R0 … R7)', async () => {
     await runFile(MIGRATION);
     const stmts = splitOnUnquotedSemicolons(readFileSync(READBACK, 'utf8')).filter((s) => s.trim());
-    expect(stmts).toHaveLength(8);
+    expect(stmts).toHaveLength(9);
     const res: unknown[][] = [];
     for (const st of stmts) res.push([...(await harness.sql.unsafe(st))]);
     log('read-back R0..R7', res.map((r) => r.map((row) => JSON.stringify(row).slice(0, 260))));
-    expect((res[1][0] as { tokens: string }).tokens).toBe('municipality,utility,association,bundesbehoerde,sonstige_auftraggeber,other,privat_ohne_foerderung,privat_mit_foerderung');
-    expect(res[2][0]).toMatchObject({ data_type: 'boolean', is_required: true, active: true, same_section: true });
-    expect(res[5].map((r) => (r as { md5: string }).md5)).toEqual(Array(3).fill('a89b0fa9514a3df2ffa9e1e69d71bbde'));
-    expect(res[7].map((r) => Number((r as { n: string }).n))).toEqual([5, 6]);
+    log('R0b blank client type (seeded projects: none)', res[1]);
+    expect((res[2][0] as { tokens: string }).tokens).toBe('municipality,utility,association,bundesbehoerde,sonstige_auftraggeber,other,privat_ohne_foerderung,privat_mit_foerderung');
+    expect(res[3][0]).toMatchObject({ data_type: 'boolean', is_required: true, active: true, same_section: true });
+    expect(res[6].map((r) => `${(r as { symbol: string }).symbol} ${(r as { md5: string }).md5}`)).toEqual([
+      'publication_date a89b0fa9514a3df2ffa9e1e69d71bbde', 'required_standstill_days 11d2d717f0a9371acb4b922a8187551a',
+      'standstill_period_days 11d2d717f0a9371acb4b922a8187551a']);
+    expect(res[8].map((r) => Number((r as { n: string }).n))).toEqual([5, 6]);
     await runFile(ROLLBACK);
     expect(dumpDiff(PRE, await dump())).toEqual([]);
   });
@@ -381,5 +387,25 @@ describe('DWA-M 820-1 client route — staged block on embedded Postgres', () =>
     log('public above threshold, compliant', { 'M820-12': ok12, 'M820-23': ok23 });
     expect(touchesGuarded(ok12)).toEqual([]);
     expect(touchesGuarded(ok23)).toEqual([]);
+  });
+
+  it('f. review I-1: public client above the threshold with Direktvergabe, letters sent, no standstill days → BLOCKED by REQ-22', async () => {
+    const p = await makeProject('public-direktvergabe-above');
+    await save(p, 'M820-01', { client_organization_type: en('municipality'), estimated_engineering_fee: nu(250000) });
+    await save(p, 'M820-09', { threshold_status: en('oberschwellig'), oberschwellig_check: bo(true), eu_threshold_value: nu(214000) });
+    await save(p, 'M820-10', { procurement_procedure: en('direktvergabe') });
+    await save(p, 'M820-23', { information_letters_sent: bo(true), contract_invalidity_135_gwb_risk: bo(false), electronic_transmission: bo(true) });
+    const noDays = await gate(p, 'M820-23');
+    log('I-1 public ober direktvergabe, no standstill days', noDays);
+    expect(noDays.pending).toContain('REQ-22<standstill_period_days>');
+    expect(noDays.missing).toEqual(expect.arrayContaining(['required_standstill_days', 'standstill_period_days']));
+    await save(p, 'M820-23', { standstill_period_days: nu(5) });
+    const short = await gate(p, 'M820-23');
+    log('I-1 public ober direktvergabe, 5 days', short);
+    expect(short.failing).toContain('REQ-22');
+    await save(p, 'M820-23', { standstill_period_days: nu(10) });
+    const enough = await gate(p, 'M820-23');
+    log('I-1 public ober direktvergabe, 10 days', enough);
+    expect(touchesGuarded(enough)).toEqual([]);
   });
 });

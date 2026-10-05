@@ -1,10 +1,11 @@
--- Rollback of scripts/migrations/20261005120000_m820_1_client_route.sql (DWA-M 820-1 client route).
+-- Rollback of scripts/migrations/20261005193000_m820_1_client_route.sql (DWA-M 820-1 client route).
 -- Scoped: every statement restores ONLY a row that still carries exactly what the block wrote (from the in-transaction
 -- archives fields_archive_m820_1_client_route / compliance_requirements_archive_m820_1_client_route); a row edited since
 -- the apply is left alone and shows up in the read-back. Restored archive rows are deleted; the archive tables stay.
 -- BEFORE running: read-back query R6 counts saved project values that use the two new client tokens — after the rollback
 -- those values are no longer in the enum (they stay stored; the owner decides whether to re-select them).
--- Run: node scripts/apply-migration.mjs scripts/rollback-20261005120000-m820-1-client-route.sql
+-- Run (from C:\Users\Ekowai\_wt-g2t, which holds .env.local):
+--   node scripts/apply-migration.mjs C:\Users\Ekowai\_wt-m820\scripts\rollback-20261005193000-m820-1-client-route.sql
 BEGIN;
 
 -- 4⁻¹. gate conditions back to the archived text where the guarded text is still live
@@ -27,9 +28,10 @@ UPDATE fields f
    SET visible_when = a.visible_when
   FROM fields_archive_m820_1_client_route a
  WHERE a.id = f.id AND f.symbol IN ('publication_date','required_standstill_days','standstill_period_days')
-   AND f.visible_when = CASE WHEN a.visible_when IS NULL
-         THEN '(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure == ''vgv_f'''
-         ELSE '(' || a.visible_when || ') AND ((client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure == ''vgv_f'')' END;
+   AND f.visible_when = (WITH r(rule) AS (SELECT CASE WHEN f.symbol = 'publication_date'
+                                             THEN '(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure == ''vgv_f'''
+                                             ELSE '(client_organization_type != ''privat_ohne_foerderung'' OR vergaberecht_freiwillig_angewendet == true) AND threshold_status == ''oberschwellig''' END)
+                         SELECT CASE WHEN a.visible_when IS NULL THEN r.rule ELSE '(' || a.visible_when || ') AND (' || r.rule || ')' END FROM r);
 
 -- 3⁻¹. consumer reach back to the archived array where it still equals archive || the codes the block appended
 UPDATE fields f
@@ -39,7 +41,7 @@ UPDATE fields f
    AND f.consumer_worksheets = COALESCE(a.consumer_worksheets, '{}'::text[])
        || ARRAY(SELECT u.c FROM unnest(CASE f.symbol
                    WHEN 'client_organization_type' THEN ARRAY['M820-04','M820-10','M820-12','M820-17','M820-23']::text[]
-                   WHEN 'procurement_procedure'    THEN ARRAY['M820-12','M820-17','M820-23']::text[]
+                   WHEN 'procurement_procedure'    THEN ARRAY['M820-12','M820-17']::text[]
                    ELSE                                 ARRAY['M820-04','M820-23']::text[] END) WITH ORDINALITY AS u(c, o)
                  WHERE NOT (u.c = ANY (COALESCE(a.consumer_worksheets, '{}'::text[]))) ORDER BY u.o);
 
