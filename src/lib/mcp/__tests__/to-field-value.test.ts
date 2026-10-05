@@ -105,3 +105,12 @@ describe('toFieldValue — JSON carriers (readiness run 2026-09-30)', () => {
     expect(() => toFieldValue('json', 'rows: 5')).toThrow(/kein gültiges JSON/);
   });
 });
+
+
+describe('json carrier: bare row arrays are wrapped (FLL run 2026-10-05, D8)', () => {
+  it('wraps a bare array (string or value) into { rows }', () => {
+    expect(toFieldValue('json', '[{"id":"r1"}]')).toEqual({ type: 'json', value: { rows: [{ id: 'r1' }] } });
+    expect(toFieldValue('json', [{ id: 'r1' }])).toEqual({ type: 'json', value: { rows: [{ id: 'r1' }] } });
+    expect(toFieldValue('json', '{"rows":[]}')).toEqual({ type: 'json', value: { rows: [] } });
+  });
+});

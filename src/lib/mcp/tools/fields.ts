@@ -53,14 +53,17 @@ export function toFieldValue(dataType: string, raw: unknown) {
       // STRING. Postgres accepted the raw text as jsonb, but the same-batch derivation
       // (surface inventory → A_C, C_m, sums) saw a string and wrote nulls (readiness run
       // 2026-09-30, TEST-A138-Rigole). Parse it here so the save path sees the object.
+      // FLL run 2026-10-05 (Naturteich D8): a bare array of rows is a register carrier the model forgot to wrap —
+      // saved as-is the register reads "Keine vollständigen Zeilen". Wrap it into the canonical { rows: [...] }.
+      const wrapRows = (v: unknown): unknown => (Array.isArray(v) ? { rows: v } : v);
       if (typeof raw === 'string') {
         try {
-          return { type: 'json' as const, value: JSON.parse(raw) as unknown };
+          return { type: 'json' as const, value: wrapRows(JSON.parse(raw)) };
         } catch {
           throw new Error('Wert ist kein gültiges JSON, das Feld erwartet aber einen JSON-Träger (z. B. {"rows":[…]}).');
         }
       }
-      return { type: 'json' as const, value: raw };
+      return { type: 'json' as const, value: wrapRows(raw) };
     }
     default:
       return { type: 'text' as const, value: String(raw) };

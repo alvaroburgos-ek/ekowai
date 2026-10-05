@@ -31,10 +31,14 @@ import {
 } from '@/lib/eval/evaluate-for-report';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
 import { asmEngineSuppressedSymbols } from '@/lib/eval/asm-source';
+import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
+import { parametersToFieldValues } from '@/lib/eval/materialize-derived';
+import { resolveLookupFill, resolveLookupFillConfig } from '@/lib/eval/lookup-fill';
+import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import type { FieldValue } from '@/lib/state/worksheet-store';
 import { saveWorksheet, type SavedDerivedRow } from './worksheet';
 
-export type RecomputeWrite = { fieldId: string; symbol: string; equationNumber: string; value: number };
+export type RecomputeWrite = { fieldId: string; symbol: string; equationNumber: string; value: number | string | boolean };
 
 export type RecomputeResult = {
   /** Outputs persisted by this pass (only values that changed). */
@@ -177,10 +181,52 @@ async function recomputePass(instanceId: string): Promise<RecomputeResult> {
   }
 
   const { writes, notComputed } = selectRecomputeWrites({ results, ownFields, currentNumberByFieldId, asmMethod });
+
+  // FLL run 2026-10-05 (Naturteich D7): `lookup_fill` fields (Tab. 1 / 9 / 10 values keyed by other symbols) were filled only by
+  // the browser widget; through the API they stayed empty. Resolve every EMPTY own lookup_fill field against the same state the
+  // widget sees (own + inherited values) and write the bound cell; saveWorksheet's lookup block then stamps it `derived` because
+  // the value equals the bound cell. An existing value (typed override or earlier fill) is never touched here.
+  const equationOutputs = derivedOutputSymbols(tmplEquations.map((e) => ({ id: e.id, outputSymbol: e.outputSymbol })));
+  const ownSymbols = new Set(ownFields.map((o) => o.symbol));
+  const readable = [
+    ...ownFields.map((o) => ({ id: o.id, symbol: o.symbol, dataType: o.dataType })),
+    ...inherited.filter((i) => !ownSymbols.has(i.symbol)).map((i) => ({ id: i.id, symbol: i.symbol, dataType: i.dataType })),
+  ];
+  const persistedValues = parametersToFieldValues(params, readable);
+  const fillLookup = makeSymbolLookup(readable, persistedValues);
+  const fillWrites: RecomputeWrite[] = [];
+  for (const o of ownFields) {
+    if (o.widget !== 'lookup_fill' || equationOutputs.has(o.symbol)) continue;
+    const current = persistedValues[o.id];
+    const hasValue = current != null && current.type !== 'json' && current.value != null && current.value !== '';
+    if (hasValue) continue;
+    const cfg = resolveLookupFillConfig(o);
+    if (!cfg) continue;
+    const state = resolveLookupFill(cfg.binding, inst.standardCode, fillLookup);
+    if (state.kind !== 'resolved' || state.tableValue == null) continue;
+    const tv = state.tableValue;
+    if (o.dataType === 'number') {
+      const n = typeof tv === 'number' ? tv : Number(tv);
+      if (Number.isFinite(n)) fillWrites.push({ fieldId: o.id, symbol: o.symbol, equationNumber: `lookup:${cfg.binding.table_code}`, value: n });
+    } else if (o.dataType === 'boolean') {
+      if (typeof tv === 'boolean') fillWrites.push({ fieldId: o.id, symbol: o.symbol, equationNumber: `lookup:${cfg.binding.table_code}`, value: tv });
+    } else if (o.dataType === 'enum' || o.dataType === 'text') {
+      fillWrites.push({ fieldId: o.id, symbol: o.symbol, equationNumber: `lookup:${cfg.binding.table_code}`, value: String(tv) });
+    }
+  }
+  writes.push(...fillWrites);
   if (writes.length === 0) return { written: [], notComputed, warnings: [], derived: [] };
 
   const values: Record<string, FieldValue> = {};
-  for (const w of writes) values[w.fieldId] = { type: 'number', value: w.value };
+  for (const w of writes) {
+    const target = ownFields.find((o) => o.id === w.fieldId);
+    const dt = target?.dataType ?? 'number';
+    values[w.fieldId] =
+      dt === 'boolean' ? { type: 'boolean', value: typeof w.value === 'boolean' ? w.value : w.value === 'true' }
+      : dt === 'enum' ? { type: 'enum', value: String(w.value) }
+      : dt === 'text' ? { type: 'text', value: String(w.value) }
+      : { type: 'number', value: typeof w.value === 'number' ? w.value : Number(w.value) };
+  }
   const saved = await saveWorksheet({ instanceId, values });
   if (!saved.ok) return { written: [], notComputed, warnings: [`Nachrechnung nicht gespeichert: ${saved.error}`], derived: [] };
   return { written: writes, notComputed, warnings: saved.warnings, derived: saved.derived };
