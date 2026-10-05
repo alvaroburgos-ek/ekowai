@@ -97,7 +97,7 @@ export function evaluateNode(
   n: Node,
   lookup: (sym: string) => Value | undefined,
   opts?: Pick<ConditionOptions, 'existsOnAbsent'>,
-): 'true' | 'false' | 'missing' {
+): 'true' | 'false' | 'missing' | 'na' {
   return evaluateNodeLenient(n, { symbol: lookup }, opts);
 }
 

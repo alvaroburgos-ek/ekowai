@@ -60,8 +60,11 @@ describe('evalCondition — lenient mode reproduces compliance/evaluate.ts', () 
   it('a call with an unknown function name is manual, not fail', () => {
     expect(evalCondition('SUM(a) > 1', sc({ a: 1 }))).toEqual({ kind: 'manual' });
   });
-  it('a hidden symbol makes the gate not_applicable before evaluation', () => {
-    expect(evalCondition('x >= 1 AND y == 2', sc({ x: 5, y: 2 }), { hiddenSymbols: new Set(['y']) }))
+  it('a hidden term is the identity of its AND (2026-10-05); a fully hidden gate is not_applicable', () => {
+    // y hidden by visible_when: the visible term x >= 1 decides (was: whole gate not_applicable — defect D-4, FLL run)
+    expect(evalCondition('x >= 1 AND y == 2', sc({ x: 5, y: 2 }), { hiddenSymbols: new Set(['y']) })).toEqual({ kind: 'pass' });
+    expect(evalCondition('x >= 1 AND y == 2', sc({ x: 0, y: 2 }), { hiddenSymbols: new Set(['y']) })).toEqual({ kind: 'fail' });
+    expect(evalCondition('y == 2', sc({ y: 2 }), { hiddenSymbols: new Set(['y']) }))
       .toEqual({ kind: 'not_applicable', hiddenSymbols: ['y'] });
     expect(evalCondition('x >= 1', sc({ x: 5 }), { hiddenSymbols: new Set(['y']) })).toEqual({ kind: 'pass' });
   });

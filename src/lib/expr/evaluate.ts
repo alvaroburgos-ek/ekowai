@@ -54,9 +54,20 @@ import {
  * and reset inside a guard antecedent (`IF cond THEN …`), an `if()` test and
  * row scope — those keep the legacy definite semantics.
  */
-type Ctx = { scope: Scope; strict: boolean; missing: Set<string>; row?: RowValues; diagnostics?: string[]; existsPending?: boolean };
+type Ctx = {
+  scope: Scope; strict: boolean; missing: Set<string>; row?: RowValues; diagnostics?: string[]; existsPending?: boolean;
+  /**
+   * FLL readiness run 2026-10-05 (defect D-4, FLLTP-RHZ-05 REQ-06): symbols hidden by `visible_when`.
+   * An atom over a hidden symbol evaluates to `'na'` — the IDENTITY of the connective it sits in
+   * (dropped from an AND / OR), so the remaining hard terms still decide. Before, ANY hidden symbol in
+   * a condition made the WHOLE gate not_applicable: `h >= 250 AND (abutment == false OR (t >= 9 AND
+   * t <= 11))` with the abutment thickness hidden let a 240 mm vessel through. A condition whose every
+   * atom is hidden still reports not_applicable (`'na'` reaches the top).
+   */
+  hidden?: ReadonlySet<string>;
+};
 
-type Ternary = 'true' | 'false' | 'missing';
+type Ternary = 'true' | 'false' | 'missing' | 'na';
 
 type CallNode = Extract<ArithNode, { kind: 'call' }>;
 
@@ -179,7 +190,7 @@ function evalValueCore(n: ArithNode, ctx: Ctx): Value {
 function evalExpr(e: Expr, ctx: Ctx): Value {
   if (isConditionNode(e)) {
     const t = evalNodeCore(e, ctx);
-    if (t === 'missing') return fail(ctx, `Fehlende Eingabe: ${[...ctx.missing].join(', ')}`);
+    if (t === 'missing' || t === 'na') return fail(ctx, `Fehlende Eingabe: ${[...ctx.missing].join(', ')}`);
     return t === 'true';
   }
   return evalValueCore(e, ctx);
@@ -244,7 +255,7 @@ function rowMatches(cond: Expr, row: PreparedRow, ctx: Ctx): boolean | null {
   let matched: boolean | null;
   if (isConditionNode(cond)) {
     const t = evalNodeCore(cond, rowCtx);
-    matched = t === 'missing' ? null : t === 'true';
+    matched = t === 'missing' || t === 'na' ? null : t === 'true';
   } else {
     const v = evalValueCore(cond, rowCtx);
     matched = v === null ? null : truthy(v);
@@ -412,7 +423,7 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
       if (isConditionNode(test)) {
         // An `if()` test keeps the legacy existence semantics (A1: `existsPending` off).
         const t = evalNodeCore(test, ctx.existsPending ? { ...ctx, existsPending: false } : ctx);
-        if (t === 'missing') return fail(ctx, `Fehlende Eingabe für if(): ${[...ctx.missing].join(', ')}`);
+        if (t === 'missing' || t === 'na') return fail(ctx, `Fehlende Eingabe für if(): ${[...ctx.missing].join(', ')}`);
         taken = t === 'true';
       } else {
         const v = evalValueCore(test, ctx);
@@ -599,12 +610,14 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
       if (typeof n.value === 'boolean') return n.value ? 'true' : 'false';
       return 'missing'; // a bare literal as a condition isn't meaningful
     case 'truthy': {
+      if (c.hidden?.has(n.symbol)) return 'na';
       const v = readSymbol(c, n.symbol);
       if (isMissing(v)) { c.missing.add(n.symbol); return 'missing'; }
       if (typeof v === 'boolean') return v ? 'true' : 'false';
       return 'true';
     }
     case 'exists': {
+      if (c.hidden?.has(n.symbol)) return 'na';
       const v = readSymbol(c, n.symbol);
       // A1: never-entered (`undefined`) + IS NOT NULL / IS NOT EMPTY ⇒ pending
       // on the top-level condition path (see `Ctx.existsPending`). `null`/`''`
@@ -615,6 +628,9 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
       return result ? 'true' : 'false';
     }
     case 'compare': {
+      if (c.hidden?.has(n.symbol)) return 'na';
+      // A bare-ident RHS that names a hidden symbol is hidden too (it would resolve as that symbol).
+      if (c.hidden && typeof n.rhs.value === 'string' && !n.rhs.quoted && (n.op === '==' || n.op === '!=') && c.hidden.has(n.rhs.value)) return 'na';
       const v = readSymbol(c, n.symbol);
       if (isMissing(v)) { c.missing.add(n.symbol); return 'missing'; }
       let r = n.rhs.value;
@@ -632,6 +648,7 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
       return compare(v, n.op, r) ? 'true' : 'false';
     }
     case 'acompare': {
+      if (c.hidden && hiddenReferences(n, c.hidden).length > 0) return 'na';
       const l = evalValueCore(n.left, c);
       let r: Value;
       if (isEnumRhs(n)) {
@@ -651,6 +668,7 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
       return compare(ln, n.op, rn) ? 'true' : 'false';
     }
     case 'in': {
+      if (c.hidden?.has(n.symbol)) return 'na';
       const v = readSymbol(c, n.symbol);
       if (isMissing(v)) { c.missing.add(n.symbol); return 'missing'; }
       return n.members.some((m) => equals(v, m.value)) ? 'true' : 'false';
@@ -658,6 +676,9 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
     case 'and': {
       const l = evalNodeCore(n.left, c);
       const r = evalNodeCore(n.right, c);
+      // a hidden term is the identity of the AND: the other side decides
+      if (l === 'na') return r;
+      if (r === 'na') return l;
       if (l === 'false' || r === 'false') return 'false';
       if (l === 'missing' || r === 'missing') return 'missing';
       return 'true';
@@ -665,13 +686,16 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
     case 'or': {
       const l = evalNodeCore(n.left, c);
       const r = evalNodeCore(n.right, c);
+      // a hidden term is the identity of the OR: the other side decides
+      if (l === 'na') return r;
+      if (r === 'na') return l;
       if (l === 'true' || r === 'true') return 'true';
       if (l === 'missing' || r === 'missing') return 'missing';
       return 'false';
     }
     case 'not': {
       const v = evalNodeCore(n.inner, c);
-      if (v === 'missing') return 'missing';
+      if (v === 'missing' || v === 'na') return v;
       return v === 'true' ? 'false' : 'true';
     }
     case 'guard': {
@@ -684,6 +708,7 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
         for (const m of guardMissing) c.missing.add(m);
         return 'missing';
       }
+      if (g === 'na') return 'na'; // a guard over a hidden symbol: the rule does not apply
       if (g === 'false') return 'true';
       return evalNodeCore(n.body, c);
     }
@@ -763,18 +788,20 @@ export function evalCondition(src: string, scope: Scope, opts?: ConditionOptions
   if (!ast) return { kind: 'manual' };
   if (unknownFunctionNames(ast).length > 0) return { kind: 'manual' };
   const hiddenSet = opts?.hiddenSymbols;
-  if (hiddenSet && hiddenSet.size > 0) {
-    const hidden = hiddenReferences(ast, hiddenSet);
-    if (hidden.length > 0) return { kind: 'not_applicable', hiddenSymbols: hidden };
-  }
+  const hidden = hiddenSet && hiddenSet.size > 0 ? hiddenReferences(ast, hiddenSet) : [];
   // Plan 3 final wave A (defect 4): a carrier accessor supplied through the
   // options folds into the scope, so a gate `contains(checklist, 'token')`
   // reads the raw json. An explicit `scope.carrier` always wins.
   const withCarrier: Scope = scope.carrier === undefined && opts?.carrier !== undefined
     ? { ...scope, carrier: opts.carrier }
     : scope;
-  const ctx: Ctx = { scope: withCarrier, strict: false, missing: new Set(), existsPending: opts?.existsOnAbsent !== 'definite' };
+  const ctx: Ctx = {
+    scope: withCarrier, strict: false, missing: new Set(), existsPending: opts?.existsOnAbsent !== 'definite',
+    hidden: hidden.length > 0 ? hiddenSet : undefined,
+  };
   const r = evalNodeCore(ast, ctx);
+  // Every atom hidden → the rule does not apply to this project (unchanged outcome for fully hidden gates).
+  if (r === 'na') return { kind: 'not_applicable', hiddenSymbols: hidden };
   if (r === 'missing') return { kind: 'pending', missingSymbols: [...ctx.missing] };
   return r === 'true' ? { kind: 'pass' } : { kind: 'fail' };
 }
