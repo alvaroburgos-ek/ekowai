@@ -92,12 +92,32 @@ function toReportParameter(p: typeof projectParameters.$inferSelect): ReportPara
   };
 }
 
+/** Chained equations on one sheet (Gl. 6 f_K → Gl. 5 k_i): the browser re-evaluates reactively, the
+ * server evaluates stored values, so a pass is repeated while it still produces new writes. */
+const MAX_PASSES = 4;
+
 /**
  * Evaluate the worksheet's own equations against the stored values and persist the computed
  * outputs (as `derived`, via saveWorksheet). Access control is the caller's (the MCP tools check
  * project access before calling; saveWorksheet re-checks on write).
  */
 export async function recomputeWorksheetEquations(instanceId: string): Promise<RecomputeResult> {
+  const written: RecomputeWrite[] = [];
+  const warnings: string[] = [];
+  const derived: SavedDerivedRow[] = [];
+  let notComputed: RecomputeResult['notComputed'] = [];
+  for (let pass = 0; pass < MAX_PASSES; pass++) {
+    const r = await recomputePass(instanceId);
+    written.push(...r.written);
+    warnings.push(...r.warnings);
+    derived.push(...r.derived);
+    notComputed = r.notComputed;
+    if (r.written.length === 0 || r.warnings.length > 0) break;
+  }
+  return { written, notComputed, warnings, derived };
+}
+
+async function recomputePass(instanceId: string): Promise<RecomputeResult> {
   const [inst] = await db
     .select({
       id: worksheetInstances.id,
