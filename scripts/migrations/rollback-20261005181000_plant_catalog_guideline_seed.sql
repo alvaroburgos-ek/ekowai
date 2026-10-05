@@ -1,4 +1,4 @@
--- ROLLBACK for 20261005181000_plant_catalog_guideline_seed.sql — removes exactly the 36 guideline rows it inserted. STAGED — not applied.
+-- ROLLBACK for 20261005181000_plant_catalog_guideline_seed.sql — removes exactly the 34 guideline rows it inserted. STAGED — not applied.
 BEGIN;
 DELETE FROM plant_catalog WHERE source_kind = 'guideline' AND scientific_name IN (
   'Phragmites australis',
@@ -31,10 +31,8 @@ DELETE FROM plant_catalog WHERE source_kind = 'guideline' AND scientific_name IN
   'Spiraea douglasii',
   'Hydrangea arborescens',
   'Ammophila arenaria',
-  'Schoenoplectus lacustris',
   'Alnus glutinosa',
   'Populus tremula',
-  'Pyracantha coccinea ''Orange Charmer''',
   'Elymus (=Agropyron) repens',
   'Pleioblastus distichus'
 );

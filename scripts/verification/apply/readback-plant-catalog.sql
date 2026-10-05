@@ -1,5 +1,5 @@
--- Read-back after applying 20261005180000_plant_catalog.sql + 20261005181000_plant_catalog_guideline_seed.sql
--- Expected: table present with RLS on + 1 SELECT policy; 36 guideline rows (33 aggressive true / 3 false); 0 reference_book rows until the Kircher block is applied.
+-- Read-back after applying _STAGED_20261005180000_plant_catalog.sql + 20261005181000_plant_catalog_guideline_seed.sql
+-- Expected: table present with RLS on + 1 SELECT policy; 34 guideline rows (31 aggressive true / 3 false); 0 reference_book rows until the Kircher block is applied.
 -- Run: node scripts/verification/prod-query.mjs scripts/verification/apply/readback-plant-catalog.sql
 select relrowsecurity as rls_on from pg_class where relname = 'plant_catalog';
 select policyname, cmd, roles from pg_policies where tablename = 'plant_catalog';
