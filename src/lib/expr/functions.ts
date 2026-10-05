@@ -19,6 +19,13 @@ export const MATH_FUNCTIONS_1: Record<string, (x: number) => number> = {
   round: Math.round,
   ceil: Math.ceil,
   floor: Math.floor,
+  // FLL run 2026-10-05 (GAR D9): FLL-GAR-2023 Anhang 2 prints `… / cos ß` with "β Böschungswinkel [°]". Trigonometry takes
+  // RADIANS (the JavaScript convention); a printed angle in degrees is converted with `rad(β)` — `cos(rad(beta))`.
+  sin: Math.sin,
+  cos: Math.cos,
+  tan: Math.tan,
+  rad: (deg: number) => (deg * Math.PI) / 180,
+  deg: (rad: number) => (rad * 180) / Math.PI,
 };
 
 export const MATH_FUNCTIONS_2: Record<string, (a: number, b: number) => number> = {
