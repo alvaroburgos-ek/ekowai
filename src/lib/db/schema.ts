@@ -1026,7 +1026,7 @@ export const leads = pgTable(
 // clears the licence. The catalogue never changes a gate, never fills an FLL
 // field by itself; the picker only writes the scientific name into the
 // register's own text cell and may PROPOSE a § 10.4.3 group as visible text.
-// Migration: supabase/migrations/20261005180000_plant_catalog.sql (STAGED).
+// Migration: supabase/migrations/_STAGED_20261005180000_plant_catalog.sql (STAGED).
 export const plantCatalog = pgTable(
   'plant_catalog',
   {

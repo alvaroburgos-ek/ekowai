@@ -5,8 +5,8 @@
 -- Reference-book rows (Kircher) stay licence_status = 'pending' and are invisible to the API until the owner clears them.
 -- Drizzle model: src/lib/db/schema.ts `plantCatalog`.
 -- RLS mirrors the other reference tables (regulation_tables, emission_factors): read for authenticated, writes only service role.
--- STAGED — not applied. Apply: node scripts/apply-migration.mjs supabase/migrations/20261005180000_plant_catalog.sql
--- Rollback: supabase/migrations/rollback-20261005180000_plant_catalog.sql
+-- STAGED — not applied (the _STAGED_ prefix keeps `supabase db push` / drizzle away from it; rename on the owner's go). Apply: node scripts/apply-migration.mjs supabase/migrations/_STAGED_20261005180000_plant_catalog.sql
+-- Rollback: supabase/migrations/_STAGED_rollback-20261005180000_plant_catalog.sql
 -- Read-back: node scripts/verification/prod-query.mjs scripts/verification/apply/readback-plant-catalog.sql
 CREATE TABLE IF NOT EXISTS plant_catalog (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

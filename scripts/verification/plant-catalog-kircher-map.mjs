@@ -222,7 +222,7 @@ export function buildSeedSql(records, { sourceRef, generatedAt, xlsxName, legend
 -- LICENCE GATE: rows stay invisible to the API (licence_status 'pending') until the owner changes them to 'cleared' AFTER the reuse
 -- of the book data is licence-cleared. This file lives OUTSIDE the repo and is NOT committed. Nothing here changes a gate or an FLL value.
 -- Rows: ${records.length}. Idempotent (ON CONFLICT (scientific_name, source_kind) DO UPDATE).
--- ORDER: apply AFTER supabase/migrations/20261005180000_plant_catalog.sql. Apply (owner, after licence): node scripts/apply-migration.mjs <this file>
+-- ORDER: apply AFTER supabase/migrations/_STAGED_20261005180000_plant_catalog.sql. Apply (owner, after licence): node scripts/apply-migration.mjs <this file>
 -- Rollback: DELETE FROM plant_catalog WHERE source_kind = 'reference_book' AND source_ref = ${q(sourceRef)};
 BEGIN;
 INSERT INTO plant_catalog (${KIRCHER_COLUMNS.join(', ')}) VALUES
