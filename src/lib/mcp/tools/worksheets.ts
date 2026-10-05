@@ -13,6 +13,7 @@ import {
 import { defineTool } from '../define-tool';
 import { paramHasValue } from '@/lib/projects/required-fields';
 import { assertInternalAccess } from './projects';
+import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 
 /** Renders a project_parameters row as the plain value the model should see. */
 function readValue(row: {
@@ -158,7 +159,8 @@ export function registerWorksheetTools(server: McpServer) {
       return {
         instanceId,
         status: instance.status,
-        editable: instance.status === 'draft',
+        // Same rule as set_field_values and the form: draft AND submitted_for_review accept edits (state-machine EDITABLE_STATUSES).
+        editable: isWorksheetEditable(instance.status as WorksheetStatus),
         fieldCount: visible.length,
         missingRequiredCount: missingRequired.length,
         missingRequired: missingRequired.map((f) => ({
