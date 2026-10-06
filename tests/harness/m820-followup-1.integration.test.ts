@@ -417,7 +417,8 @@ describe('M820 follow-up 1 — staged block on embedded Postgres (after blocks 1
     expect(a01.missing).toContain('vergaberecht_freiwillig_angewendet');
   });
 
-  it('g. F2 / item 4 (code fix) — absent register: no invented 0 on the save path, "not computed" on every path; empty {rows: []}: 0 on every path', async () => {
+  // HELD 2026-10-06: 8e77075 reverted in e35d449 pending owner ruling FU1-4 — re-enable with the fix.
+  it.skip('g. F2 / item 4 (code fix) — absent register: no invented 0 on the save path, "not computed" on every path; empty {rows: []}: 0 on every path', async () => {
     const p = await makeProject('f2-registers');
     // 820-2-06: the save batch carries offene_punkte (2 complete rows); statusberichte is never saved (absent)
     const s06 = await save(p, '820-2-06', { offene_punkte: jv({ rows: [{ id: 'a', punkt: 'Pumpe', status: 'offen' }, { id: 'b', punkt: 'Folie', status: 'erledigt' }] }) });
@@ -459,7 +460,7 @@ describe('M820 follow-up 1 — staged block on embedded Postgres (after blocks 1
     expect(empty24.notComputed.some((x) => x.startsWith('warranty_count'))).toBe(false);
   });
 
-  it('h. the pre-deploy read-only query lists a counter the old save path invented (stored 0, register never saved) — and nothing for a saved empty register', async () => {
+  it.skip('h. the pre-deploy read-only query lists a counter the old save path invented (stored 0, register never saved) — and nothing for a saved empty register', async () => {
     const text = readFileSync(resolve(ROOT, 'scripts/verification/apply/predeploy-absent-register-counters.sql'), 'utf8');
     const stmts = text.split(/;\s*(?:\n|$)/).filter((s) => s.replace(/--.*$/gm, '').trim());
     expect(stmts).toHaveLength(1);
