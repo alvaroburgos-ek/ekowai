@@ -14,7 +14,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { evaluateCondition, jsonConditionValue } from '@/lib/compliance/evaluate';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
-import { inheritedSymbolSet, missingRequiredFields as missingRequiredFieldsShared } from '@/lib/projects/required-fields';
+import { inheritedSymbolSet, missingRequiredFields as missingRequiredFieldsShared, scopeForInheritance, scopeToOwnStandard } from '@/lib/projects/required-fields';
 
 /**
  * Result of the engineer-approve readiness check. The transition is
@@ -91,7 +91,36 @@ export async function loadProjectWideEntries(projectId: string): Promise<Project
 /** A4: symbols a conflict-free project-wide value resolves for, from worksheets OTHER than `ownTemplateId`. */
 export async function loadInheritedSymbolsForTemplate(projectId: string, ownTemplateId: string): Promise<Set<string>> {
   const entries = await loadProjectWideEntries(projectId);
-  return inheritedSymbolSet(entries.filter((e) => e.templateId !== ownTemplateId));
+  // DWA-M 820-3 review fix I-e: own-standard-first — a symbol of the own standard counts only from that standard.
+  const [tmpl] = await db
+    .select({ standardId: worksheetTemplates.standardId })
+    .from(worksheetTemplates)
+    .where(eq(worksheetTemplates.id, ownTemplateId))
+    .limit(1);
+  const scope = tmpl ? await loadOwnStandardScope(tmpl.standardId) : { templateIds: new Set<string>(), symbols: new Set<string>(), tokens: new Map<string, Set<string> | null>() };
+  return inheritedSymbolSet(scopeForInheritance(entries, scope.templateIds, scope.tokens).filter((e) => e.templateId !== ownTemplateId));
+}
+
+/**
+ * The own standard's active fields: template ids + symbols (the scope of `scopeToOwnStandard`) + per symbol the allowed enum
+ * tokens (null = not an enum with an option list; the scope of `scopeForInheritance`).
+ */
+export async function loadOwnStandardScope(standardId: string): Promise<{ templateIds: Set<string>; symbols: Set<string>; tokens: Map<string, Set<string> | null> }> {
+  const rows = await db
+    .select({ symbol: fields.symbol, templateId: fields.worksheetTemplateId, dataType: fields.dataType, enumValues: fields.enumValues })
+    .from(fields)
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+    .where(and(eq(worksheetTemplates.standardId, standardId), eq(fields.active, true)));
+  const tokens = new Map<string, Set<string> | null>();
+  for (const r of rows) {
+    const opts = r.dataType === 'enum' && Array.isArray(r.enumValues)
+      ? (r.enumValues as Array<{ value?: unknown }>).map((o) => String(o?.value ?? '')).filter((v) => v !== '')
+      : [];
+    const prev = tokens.get(r.symbol);
+    if (opts.length === 0) { if (!tokens.has(r.symbol)) tokens.set(r.symbol, null); continue; }
+    tokens.set(r.symbol, new Set([...(prev ?? []), ...opts]));
+  }
+  return { templateIds: new Set(rows.map((r) => r.templateId)), symbols: new Set(rows.map((r) => r.symbol)), tokens };
 }
 
 /** Extract the typed value from a project_parameters row for a field's data type. */
@@ -158,10 +187,7 @@ export function buildStandardScopedFallback(
   ownTemplateIds: ReadonlySet<string>,
   ownStandardSymbols: ReadonlySet<string>,
 ): Map<string, GateValue> {
-  const result = buildFallbackValues(entries.filter((e) => !ownStandardSymbols.has(e.symbol)));
-  const own = buildFallbackValues(entries.filter((e) => ownStandardSymbols.has(e.symbol) && ownTemplateIds.has(e.templateId)));
-  for (const [s, v] of own) result.set(s, v);
-  return result;
+  return buildFallbackValues(scopeToOwnStandard(entries, ownTemplateIds, ownStandardSymbols));
 }
 
 /**
@@ -296,21 +322,15 @@ export async function checkApprovalGate(
   const projectEntries = await loadProjectWideEntries(instance.projectId);
   // DWA-M 820-3 structure block: a symbol of the gate's own standard resolves from that standard only (see
   // buildStandardScopedFallback — a same-named field of another standard never decides, never blanks it out).
-  const ownStandardFields = await db
-    .select({ symbol: fields.symbol, templateId: fields.worksheetTemplateId })
-    .from(fields)
-    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
-    .where(and(eq(worksheetTemplates.standardId, instance.standardId), eq(fields.active, true)));
-  const fallback = buildStandardScopedFallback(
-    projectEntries,
-    new Set(ownStandardFields.map((f) => f.templateId)),
-    new Set(ownStandardFields.map((f) => f.symbol)),
-  );
+  const ownScope = await loadOwnStandardScope(instance.standardId);
+  const fallback = buildStandardScopedFallback(projectEntries, ownScope.templateIds, ownScope.symbols);
   // A4: the symbols an inherited project-wide value resolves for (OTHER
   // worksheets only, conflict-free) — a required field the sheet offers as
   // "aus <WS> … oder überschreiben" is satisfied without re-typing.
+  // DWA-M 820-3 review fix I-e: own-standard-first (scopeForInheritance) — a foreign occurrence of an own symbol counts only
+  // when the own standard has none and, for an enum, the token is one of the field's own (what the page may prefill).
   const inheritedSymbols = inheritedSymbolSet(
-    projectEntries.filter((e) => e.templateId !== instance.worksheetTemplateId),
+    scopeForInheritance(projectEntries, ownScope.templateIds, ownScope.tokens).filter((e) => e.templateId !== instance.worksheetTemplateId),
   );
 
   const lookup = makeGateLookup(localSymbols, bySymbol, fallback);

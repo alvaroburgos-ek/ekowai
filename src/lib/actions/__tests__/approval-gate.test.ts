@@ -19,6 +19,7 @@ import {
   makeGateLookup,
   type ApprovalGateResult,
 } from '../approval-gate';
+import { evaluateCondition } from '@/lib/compliance/evaluate';
 
 describe('formatApprovalGateError', () => {
   it('flags both block-condition failures and missing required fields', () => {
@@ -206,5 +207,20 @@ describe('buildStandardScopedFallback (DWA-M 820-3 structure block: a symbol of 
       { symbol: 'project_type', value: 'both', templateId: 't3b' },
     ];
     expect(buildStandardScopedFallback(entries, own, ownSymbols).has('project_type')).toBe(false);
+  });
+});
+
+describe('cross-standard regression (SB-8 pair): DWA-A 138 REQ-03 reads k_f, which DIN 18130-1 also defines', () => {
+  // A138-REQ-03 on A138-04 (prod capture 2026-09-18): k_f lives on A138-05; DIN-18130-1-05 has its own k_f.
+  const cond = 'k_f IS NOT NULL AND permeability_test_method IS NOT NULL';
+  const ownTemplates = new Set(['a138-04', 'a138-05']);
+  const ownSymbols = new Set(['k_f', 'permeability_test_method']);
+  const entries = [{ symbol: 'k_f', value: 0.0001, templateId: 'din18130-05' }];
+  it('A138 k_f blank, DIN 18130-1 k_f filled → pending (before: the DIN value let the gate pass)', () => {
+    const local = new Map<string, number | string | boolean | null>([['permeability_test_method', 'lab']]);
+    const before = makeGateLookup(new Set(['permeability_test_method']), local, buildFallbackValues(entries));
+    const after = makeGateLookup(new Set(['permeability_test_method']), local, buildStandardScopedFallback(entries, ownTemplates, ownSymbols));
+    expect(evaluateCondition(cond, before).kind).toBe('pass');
+    expect(evaluateCondition(cond, after)).toEqual({ kind: 'pending', missingSymbols: ['k_f'] });
   });
 });

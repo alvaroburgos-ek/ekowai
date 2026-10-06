@@ -24,6 +24,7 @@ import { BackLink } from '@/components/ui/back-link';
 import { NormTextProvider } from '@/components/norm-text/norm-text-context';
 import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profile/symbol-map';
 import { twinSourcesFor, twinSourceSymbols } from '@/lib/eval/twin-symbols';
+import { coerceSameSymbolValue, type EnumOption } from '@/lib/eval/same-symbol-prefill';
 
 export default async function WorksheetPage({
   params,
@@ -233,7 +234,7 @@ export default async function WorksheetPage({
       const ambiguous = upstreams.length > 1 && !upstreams.every((u) => sameSymbolValueEqual(u.value, upstreams[0].value));
       if (!ambiguous) {
         const upstream = upstreams[0];
-        const coerced = coerceSameSymbolValue(f.dataType, upstream.value);
+        const coerced = coerceSameSymbolValue(f.dataType, upstream.value, f.enumValues as EnumOption[] | null);
         if (coerced) {
           initialValues[f.id] = coerced;
           inheritedFromBySymbol[f.symbol] = upstream.worksheetCode;
@@ -254,7 +255,7 @@ export default async function WorksheetPage({
       if (!ups || ups.length === 0) continue;
       const ambiguousTwin = ups.length > 1 && !ups.every((u) => sameSymbolValueEqual(u.value, ups[0].value));
       if (ambiguousTwin) continue;
-      const coerced = coerceSameSymbolValue(f.dataType, ups[0].value);
+      const coerced = coerceSameSymbolValue(f.dataType, ups[0].value, f.enumValues as EnumOption[] | null);
       if (!coerced) continue;
       initialValues[f.id] = coerced;
       prefillSourceByFieldId[f.id] = 'twin';
@@ -512,28 +513,3 @@ function sameSymbolValueEqual(a: unknown, b: unknown): boolean {
   return false;
 }
 
-function coerceSameSymbolValue(
-  dataType: string,
-  v: unknown,
-): FieldValue | null {
-  switch (dataType) {
-    case 'number': {
-      const n = typeof v === 'number' ? v : Number(v as string);
-      return Number.isFinite(n) ? { type: 'number', value: n } : null;
-    }
-    case 'text':
-      return typeof v === 'string' || typeof v === 'number'
-        ? { type: 'text', value: String(v) }
-        : null;
-    case 'enum':
-      return typeof v === 'string' ? { type: 'enum', value: v } : null;
-    case 'date':
-      return typeof v === 'string' ? { type: 'date', value: v } : null;
-    case 'boolean':
-      return typeof v === 'boolean' ? { type: 'boolean', value: v } : null;
-    case 'json':
-      return { type: 'json', value: v };
-    default:
-      return null;
-  }
-}

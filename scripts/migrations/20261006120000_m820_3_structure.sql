@@ -20,6 +20,8 @@
 --      REQ-06-2 … REQ-14-2: as soon as a goal of the sheet is "nicht erreicht" or "teilweise erreicht", that review must be
 --      recorded (§ 3: "ist die Prüfung eines Projektstopps erforderlich … muss bewertet werden"). REQ-31 (empty) now reads the
 --      overall Projektstopp code on M8203-24 (warning).
+--   3b. (review fix round 1, I-n) NEW warning on every Phasenziel sheet, REQ-06-3 … REQ-14-3: as soon as a goal of the sheet is
+--      "Phase noch nicht erreicht", the sheet warns "confirm the phase is really still ahead; a closed phase must be rated".
 --   4. NEW required question on M8203-19 "Projekt wird mit digitaler Planung nach der BIM-Methodik abgewickelt". No → the five BIM
 --      questions of M8203-19 and the two BIM communication questions of M8203-21 are hidden, REQ-25 / REQ-26 / REQ-29 off.
 --      Data quality (§ 7.3), data rights (§ 7.4) and public information (§ 7.5.3) stay for every project.
@@ -92,6 +94,7 @@
 --      IF projektstopp_code == 1 THEN (projektstopp_review_triggered == true) (Plan-3 m820_3-G-4 main option).
 --   4. 9 NEW block gates REQ-06-2 … REQ-14-2 (one per Phasenziel sheet): IF <a goal of the sheet> IN {'nicht_erreicht',
 --      'teilweise_erreicht'} OR … THEN (pz_<nn>_projektstopp_risikoanalyse == true) [P1] — sign-off (new-gate ruling).
+--      + 9 NEW warn gates REQ-06-3 … REQ-14-3 (review fix I-n): NOT (<goal> == 'noch_nicht_erreicht' OR …) [N1] — sign-off.
 --   5. worksheet_sections.visible_when on all 9 sections of the 17 path sheets (153 rows; Plan-3 m820_3-C-2 / -C-3 text).
 --   6. project_type.consumer_worksheets '{ALL}' → the 17 path sheets (supersedes m820_3-C-1 option a).
 --   7. visible_when on 8 existing fields: grundsatz_two_step_followed; aia_available, bap_defined, bim_project_definition_complete,
@@ -107,6 +110,10 @@
 --   resolves only from that standard's saved values (buildStandardScopedFallback). Without it, a project that also carries DWA-M 820-1
 --   (project_type konzept / projekt), DWA-A 138 or DIN 276 (both have a project_type with other tokens) makes the approval gate drop
 --   project_type as a conflict → every routed Phasenziel check of 820-3 would wait for good, or read the other standard's token.
+--   Review fix round 1 (same commit series): the A4 required-field inheritance (approval + finalize gate) is scoped the same way
+--   (I-e: M8203-01 project_type is no longer "filled" by the 820-1 token), and the worksheet page never prefills an enum with a
+--   token outside its own option list (I-c, src/lib/eval/same-symbol-prefill.ts). The cross-standard verdict changes of these
+--   code changes take effect at the DEPLOY, independent of this migration (19_APPLY-ORDER, 20_SIGN-OFF SB-8).
 -- STAGED — not applied. Apply (from C:\Users\Ekowai\_wt-g2t, which holds .env.local), after the code deploy:
 --   node scripts/apply-migration.mjs C:\Users\Ekowai\_wt-m820\scripts\migrations\20261006120000_m820_3_structure.sql
 -- Rollback:  C:\Users\Ekowai\_wt-m820\scripts\rollback-20261006120000-m820-3-structure.sql
@@ -466,7 +473,8 @@ UPDATE compliance_requirements cr
    AND wt.standard_id = s.id AND wt.code = 'M8203-24'
    AND md5(cr.condition) = 'd41d8cd98f00b204e9800998ecf8427e';
 
--- 4. NEW block gates REQ-06-2 … REQ-14-2 (S-03, sign-off: new-gate ruling)
+-- 4. NEW gates (sign-off: new-gate rulings): block REQ-06-2 … REQ-14-2 (S-03 Projektstopp review); warn REQ-06-3 … REQ-14-3
+--    (review fix I-n: a goal marked "noch_nicht_erreicht" — confirm the phase is still ahead)
 -- REQ-06-2 (M8203-04, NEW block gate — sign-off)
 INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
 SELECT w.id, 'REQ-06-2', 'Projektstopp-Prüfung und Risikoanalyse bei nicht oder nur teilweise erreichten Phasenzielen (§ 5.2 Bedarfsplanung Konzept)', 'Projektstopp review and risk analysis when phase goals are not or only partially met (§ 5.2 needs planning (concept))', 'IF pz_52_1_status IN {''nicht_erreicht'', ''teilweise_erreicht''} OR pz_52_2_status IN {''nicht_erreicht'', ''teilweise_erreicht''} OR pz_52_3_status IN {''nicht_erreicht'', ''teilweise_erreicht''} OR pz_52_4_status IN {''nicht_erreicht'', ''teilweise_erreicht''} OR pz_52_5_status IN {''nicht_erreicht'', ''teilweise_erreicht''} THEN (pz_52_projektstopp_risikoanalyse == true)',
@@ -547,6 +555,87 @@ SELECT w.id, 'REQ-14-2', 'Projektstopp-Prüfung und Risikoanalyse bei nicht oder
        '§3', 'block'
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-18'
    AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-14-2');
+
+-- REQ-06-3 (M8203-04, NEW warn gate — sign-off)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-06-3', 'Phase als „noch nicht erreicht“ markiert — bestätigen, dass die Phase (§ 5.2 Bedarfsplanung Konzept) noch bevorsteht', 'Phase marked as not reached yet — confirm that the phase (§ 5.2 needs planning (concept)) is really still ahead', 'NOT (pz_52_1_status == ''noch_nicht_erreicht'' OR pz_52_2_status == ''noch_nicht_erreicht'' OR pz_52_3_status == ''noch_nicht_erreicht'' OR pz_52_4_status == ''noch_nicht_erreicht'' OR pz_52_5_status == ''noch_nicht_erreicht'')',
+       'Mindestens ein Phasenziel dieses Blatts ist „Phase noch nicht erreicht“. Bitte bestätigen, dass die Phase wirklich noch bevorsteht; eine abgeschlossene Phase muss bewertet werden (Erreicht / Teilweise erreicht / Nicht erreicht / Nicht zutreffend). § 2.1 (PDF S. 10): Phasenziele sind „Ergebnisse, die nach Abschluss der jeweiligen Leistungsphase zu erreichen sind“. Warnung, keine Blockade (Entscheidung Sign-off).
+[EN] At least one phase goal of this sheet is "phase not reached yet". Please confirm that the phase really is still ahead; a closed phase must be rated (met / partially met / not met / not applicable). § 2.1: phase goals are "results to be achieved after completion of the respective service phase". Warning, not a block (sign-off ruling).',
+       '§2.1', 'warn'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-04'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-06-3');
+
+-- REQ-07-3 (M8203-05, NEW warn gate — sign-off)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-07-3', 'Phase als „noch nicht erreicht“ markiert — bestätigen, dass die Phase (§ 5.3 Konzept (Gesamtsystem)) noch bevorsteht', 'Phase marked as not reached yet — confirm that the phase (§ 5.3 concept (overall system)) is really still ahead', 'NOT (pz_53_1_status == ''noch_nicht_erreicht'' OR pz_53_2_status == ''noch_nicht_erreicht'' OR pz_53_3_status == ''noch_nicht_erreicht'' OR pz_53_4_status == ''noch_nicht_erreicht'' OR pz_53_5_status == ''noch_nicht_erreicht'')',
+       'Mindestens ein Phasenziel dieses Blatts ist „Phase noch nicht erreicht“. Bitte bestätigen, dass die Phase wirklich noch bevorsteht; eine abgeschlossene Phase muss bewertet werden (Erreicht / Teilweise erreicht / Nicht erreicht / Nicht zutreffend). § 2.1 (PDF S. 10): Phasenziele sind „Ergebnisse, die nach Abschluss der jeweiligen Leistungsphase zu erreichen sind“. Warnung, keine Blockade (Entscheidung Sign-off).
+[EN] At least one phase goal of this sheet is "phase not reached yet". Please confirm that the phase really is still ahead; a closed phase must be rated (met / partially met / not met / not applicable). § 2.1: phase goals are "results to be achieved after completion of the respective service phase". Warning, not a block (sign-off ruling).',
+       '§2.1', 'warn'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-05'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-07-3');
+
+-- REQ-08-3 (M8203-06, NEW warn gate — sign-off)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-08-3', 'Phase als „noch nicht erreicht“ markiert — bestätigen, dass die Phase (§ 5.4 Identifikation von Projekten) noch bevorsteht', 'Phase marked as not reached yet — confirm that the phase (§ 5.4 identification of projects) is really still ahead', 'NOT (pz_54_1_status == ''noch_nicht_erreicht'' OR pz_54_2_status == ''noch_nicht_erreicht'' OR pz_54_3_status == ''noch_nicht_erreicht'')',
+       'Mindestens ein Phasenziel dieses Blatts ist „Phase noch nicht erreicht“. Bitte bestätigen, dass die Phase wirklich noch bevorsteht; eine abgeschlossene Phase muss bewertet werden (Erreicht / Teilweise erreicht / Nicht erreicht / Nicht zutreffend). § 2.1 (PDF S. 10): Phasenziele sind „Ergebnisse, die nach Abschluss der jeweiligen Leistungsphase zu erreichen sind“. Warnung, keine Blockade (Entscheidung Sign-off).
+[EN] At least one phase goal of this sheet is "phase not reached yet". Please confirm that the phase really is still ahead; a closed phase must be rated (met / partially met / not met / not applicable). § 2.1: phase goals are "results to be achieved after completion of the respective service phase". Warning, not a block (sign-off ruling).',
+       '§2.1', 'warn'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-06'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-08-3');
+
+-- REQ-09-3 (M8203-11, NEW warn gate — sign-off)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-09-3', 'Phase als „noch nicht erreicht“ markiert — bestätigen, dass die Phase (§ 6.2 Bedarfsplanung Projekt) noch bevorsteht', 'Phase marked as not reached yet — confirm that the phase (§ 6.2 needs planning (project)) is really still ahead', 'NOT (pz_62_1_status == ''noch_nicht_erreicht'' OR pz_62_2_status == ''noch_nicht_erreicht'' OR pz_62_3_status == ''noch_nicht_erreicht'' OR pz_62_4_status == ''noch_nicht_erreicht'' OR pz_62_5_status == ''noch_nicht_erreicht'')',
+       'Mindestens ein Phasenziel dieses Blatts ist „Phase noch nicht erreicht“. Bitte bestätigen, dass die Phase wirklich noch bevorsteht; eine abgeschlossene Phase muss bewertet werden (Erreicht / Teilweise erreicht / Nicht erreicht / Nicht zutreffend). § 2.1 (PDF S. 10): Phasenziele sind „Ergebnisse, die nach Abschluss der jeweiligen Leistungsphase zu erreichen sind“. Warnung, keine Blockade (Entscheidung Sign-off).
+[EN] At least one phase goal of this sheet is "phase not reached yet". Please confirm that the phase really is still ahead; a closed phase must be rated (met / partially met / not met / not applicable). § 2.1: phase goals are "results to be achieved after completion of the respective service phase". Warning, not a block (sign-off ruling).',
+       '§2.1', 'warn'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-11'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-09-3');
+
+-- REQ-10-3 (M8203-12, NEW warn gate — sign-off)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-10-3', 'Phase als „noch nicht erreicht“ markiert — bestätigen, dass die Phase (§ 6.3 Planung) noch bevorsteht', 'Phase marked as not reached yet — confirm that the phase (§ 6.3 planning) is really still ahead', 'NOT (pz_63_1_status == ''noch_nicht_erreicht'' OR pz_63_2_status == ''noch_nicht_erreicht'' OR pz_63_3_status == ''noch_nicht_erreicht'' OR pz_63_4_status == ''noch_nicht_erreicht'' OR pz_63_5_status == ''noch_nicht_erreicht'' OR pz_63_6_status == ''noch_nicht_erreicht'' OR pz_63_7_status == ''noch_nicht_erreicht'' OR pz_63_8_status == ''noch_nicht_erreicht'')',
+       'Mindestens ein Phasenziel dieses Blatts ist „Phase noch nicht erreicht“. Bitte bestätigen, dass die Phase wirklich noch bevorsteht; eine abgeschlossene Phase muss bewertet werden (Erreicht / Teilweise erreicht / Nicht erreicht / Nicht zutreffend). § 2.1 (PDF S. 10): Phasenziele sind „Ergebnisse, die nach Abschluss der jeweiligen Leistungsphase zu erreichen sind“. Warnung, keine Blockade (Entscheidung Sign-off).
+[EN] At least one phase goal of this sheet is "phase not reached yet". Please confirm that the phase really is still ahead; a closed phase must be rated (met / partially met / not met / not applicable). § 2.1: phase goals are "results to be achieved after completion of the respective service phase". Warning, not a block (sign-off ruling).',
+       '§2.1', 'warn'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-12'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-10-3');
+
+-- REQ-11-3 (M8203-14, NEW warn gate — sign-off)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-11-3', 'Phase als „noch nicht erreicht“ markiert — bestätigen, dass die Phase (§ 6.4 Ausführungsvorbereitung) noch bevorsteht', 'Phase marked as not reached yet — confirm that the phase (§ 6.4 preparation of execution) is really still ahead', 'NOT (pz_64_1_status == ''noch_nicht_erreicht'' OR pz_64_2_status == ''noch_nicht_erreicht'' OR pz_64_3_status == ''noch_nicht_erreicht'' OR pz_64_4_status == ''noch_nicht_erreicht'' OR pz_64_5_status == ''noch_nicht_erreicht'' OR pz_64_6_status == ''noch_nicht_erreicht'' OR pz_64_7_status == ''noch_nicht_erreicht'' OR pz_64_8_status == ''noch_nicht_erreicht'' OR pz_64_9_status == ''noch_nicht_erreicht'' OR pz_64_10_status == ''noch_nicht_erreicht'' OR pz_64_11_status == ''noch_nicht_erreicht'' OR pz_64_12_status == ''noch_nicht_erreicht'')',
+       'Mindestens ein Phasenziel dieses Blatts ist „Phase noch nicht erreicht“. Bitte bestätigen, dass die Phase wirklich noch bevorsteht; eine abgeschlossene Phase muss bewertet werden (Erreicht / Teilweise erreicht / Nicht erreicht / Nicht zutreffend). § 2.1 (PDF S. 10): Phasenziele sind „Ergebnisse, die nach Abschluss der jeweiligen Leistungsphase zu erreichen sind“. Warnung, keine Blockade (Entscheidung Sign-off).
+[EN] At least one phase goal of this sheet is "phase not reached yet". Please confirm that the phase really is still ahead; a closed phase must be rated (met / partially met / not met / not applicable). § 2.1: phase goals are "results to be achieved after completion of the respective service phase". Warning, not a block (sign-off ruling).',
+       '§2.1', 'warn'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-14'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-11-3');
+
+-- REQ-12-3 (M8203-16, NEW warn gate — sign-off)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-12-3', 'Phase als „noch nicht erreicht“ markiert — bestätigen, dass die Phase (§ 6.5 Ausführung) noch bevorsteht', 'Phase marked as not reached yet — confirm that the phase (§ 6.5 execution) is really still ahead', 'NOT (pz_65_1_status == ''noch_nicht_erreicht'' OR pz_65_2_status == ''noch_nicht_erreicht'' OR pz_65_3_status == ''noch_nicht_erreicht'' OR pz_65_4_status == ''noch_nicht_erreicht'' OR pz_65_5_status == ''noch_nicht_erreicht'' OR pz_65_6_status == ''noch_nicht_erreicht'' OR pz_65_7_status == ''noch_nicht_erreicht'' OR pz_65_8_status == ''noch_nicht_erreicht'' OR pz_65_9_status == ''noch_nicht_erreicht'' OR pz_65_10_status == ''noch_nicht_erreicht'' OR pz_65_11_status == ''noch_nicht_erreicht'' OR pz_65_12_status == ''noch_nicht_erreicht'')',
+       'Mindestens ein Phasenziel dieses Blatts ist „Phase noch nicht erreicht“. Bitte bestätigen, dass die Phase wirklich noch bevorsteht; eine abgeschlossene Phase muss bewertet werden (Erreicht / Teilweise erreicht / Nicht erreicht / Nicht zutreffend). § 2.1 (PDF S. 10): Phasenziele sind „Ergebnisse, die nach Abschluss der jeweiligen Leistungsphase zu erreichen sind“. Warnung, keine Blockade (Entscheidung Sign-off).
+[EN] At least one phase goal of this sheet is "phase not reached yet". Please confirm that the phase really is still ahead; a closed phase must be rated (met / partially met / not met / not applicable). § 2.1: phase goals are "results to be achieved after completion of the respective service phase". Warning, not a block (sign-off ruling).',
+       '§2.1', 'warn'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-16'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-12-3');
+
+-- REQ-13-3 (M8203-17, NEW warn gate — sign-off)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-13-3', 'Phase als „noch nicht erreicht“ markiert — bestätigen, dass die Phase (§ 6.6 Inbetriebnahme, Testbetrieb, Abnahme) noch bevorsteht', 'Phase marked as not reached yet — confirm that the phase (§ 6.6 commissioning, test operation, acceptance) is really still ahead', 'NOT (pz_66_1_status == ''noch_nicht_erreicht'' OR pz_66_2_status == ''noch_nicht_erreicht'' OR pz_66_3_status == ''noch_nicht_erreicht'' OR pz_66_4_status == ''noch_nicht_erreicht'' OR pz_66_5_status == ''noch_nicht_erreicht'' OR pz_66_6_status == ''noch_nicht_erreicht'' OR pz_66_7_status == ''noch_nicht_erreicht'' OR pz_66_8_status == ''noch_nicht_erreicht'' OR pz_66_9_status == ''noch_nicht_erreicht'' OR pz_66_10_status == ''noch_nicht_erreicht'' OR pz_66_11_status == ''noch_nicht_erreicht'')',
+       'Mindestens ein Phasenziel dieses Blatts ist „Phase noch nicht erreicht“. Bitte bestätigen, dass die Phase wirklich noch bevorsteht; eine abgeschlossene Phase muss bewertet werden (Erreicht / Teilweise erreicht / Nicht erreicht / Nicht zutreffend). § 2.1 (PDF S. 10): Phasenziele sind „Ergebnisse, die nach Abschluss der jeweiligen Leistungsphase zu erreichen sind“. Warnung, keine Blockade (Entscheidung Sign-off).
+[EN] At least one phase goal of this sheet is "phase not reached yet". Please confirm that the phase really is still ahead; a closed phase must be rated (met / partially met / not met / not applicable). § 2.1: phase goals are "results to be achieved after completion of the respective service phase". Warning, not a block (sign-off ruling).',
+       '§2.1', 'warn'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-17'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-13-3');
+
+-- REQ-14-3 (M8203-18, NEW warn gate — sign-off)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-14-3', 'Phase als „noch nicht erreicht“ markiert — bestätigen, dass die Phase (§ 6.7 Projektabschluss) noch bevorsteht', 'Phase marked as not reached yet — confirm that the phase (§ 6.7 project close-out) is really still ahead', 'NOT (pz_67_1_status == ''noch_nicht_erreicht'' OR pz_67_2_status == ''noch_nicht_erreicht'' OR pz_67_3_status == ''noch_nicht_erreicht'' OR pz_67_4_status == ''noch_nicht_erreicht'' OR pz_67_5_status == ''noch_nicht_erreicht'' OR pz_67_6_status == ''noch_nicht_erreicht'')',
+       'Mindestens ein Phasenziel dieses Blatts ist „Phase noch nicht erreicht“. Bitte bestätigen, dass die Phase wirklich noch bevorsteht; eine abgeschlossene Phase muss bewertet werden (Erreicht / Teilweise erreicht / Nicht erreicht / Nicht zutreffend). § 2.1 (PDF S. 10): Phasenziele sind „Ergebnisse, die nach Abschluss der jeweiligen Leistungsphase zu erreichen sind“. Warnung, keine Blockade (Entscheidung Sign-off).
+[EN] At least one phase goal of this sheet is "phase not reached yet". Please confirm that the phase really is still ahead; a closed phase must be rated (met / partially met / not met / not applicable). § 2.1: phase goals are "results to be achieved after completion of the respective service phase". Warning, not a block (sign-off ruling).',
+       '§2.1', 'warn'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-18'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-14-3');
 
 -- 5. S-02 path routing: every section of the Gesamtsystem sheets (M8203-04 … -10, -22) and of the Projekt sheets (M8203-11 … -18, -23)
 --    (only where no rule exists — the 2026-10-05 dump has none; the Plan-3 staged blocks m820_3-C-2 / C-3, same text)

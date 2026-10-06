@@ -83,8 +83,9 @@ describe('the file ships exactly the guarded live bodies (md5 of the live text i
       expect(insertedGateCondition(FILE, `${ph.req}-2`), ph.req).toBe(`IF ${trig} THEN (pz_${ph.p}_projektstopp_risikoanalyse == true)`);
     }
     const inserts = splitOnUnquotedSemicolons(sql).filter((s) => /^\s*INSERT\s+INTO\s+compliance_requirements\s*\(/i.test(s));
-    expect(inserts).toHaveLength(9);
-    for (const st of inserts) expect(st, 'severity').toContain("'§3', 'block'");
+    expect(inserts).toHaveLength(18);
+    expect(inserts.filter((st) => st.includes("'§3', 'block'"))).toHaveLength(9); // REQ-06-2 … REQ-14-2
+    expect(inserts.filter((st) => st.includes("'§2.1', 'warn'"))).toHaveLength(9); // REQ-06-3 … REQ-14-3 (review fix I-n)
   });
   it('the other edited gates: guards, fills, re-points (all warn — severity untouched)', () => {
     const BIM = 'digitale_methoden_bim_angewendet';
@@ -278,5 +279,31 @@ describe('S-07 / S-06 / S-08 / S-14 — drivers and filled gates, both ways', ()
       expect([kind(shipped(code), yes), kind(shipped(code), { ...yes, [syms[0]]: false })], code).toEqual(['pass', 'fail']);
     }
     expect(kind(shipped('REQ-30'), { digital_twin_after_project: true, public_info_via_digital_media: false, communication_concept_adaptive: true })).toBe('fail'); // the digital twin no longer satisfies § 7.5.3
+  });
+});
+
+describe('review fix I-n — REQ-06-3 … REQ-14-3 (NEW warn): a goal marked "noch_nicht_erreicht" warns (confirm the phase is still ahead)', () => {
+  it('shipped: NOT (<every goal of the sheet> == noch_nicht_erreicht OR …)', () => {
+    for (const ph of PHASES) {
+      expect(insertedGateCondition(FILE, `${ph.req}-3`), ph.req).toBe(`NOT (${pzOf(ph.ws).map((s) => `${s} == '${TOKEN}'`).join(' OR ')})`);
+    }
+  });
+  it('both ways per sheet: one goal not reached → fail (= warning); all rated → pass; other path (hidden) → not applicable', () => {
+    for (const ph of PHASES) {
+      const g = insertedGateCondition(FILE, `${ph.req}-3`);
+      const first = pzOf(ph.ws)[0];
+      expect([
+        kind(g, { ...all(ph.ws, 'erreicht'), [first]: TOKEN }),
+        kind(g, all(ph.ws, TOKEN)),
+        kind(g, all(ph.ws, 'erreicht')),
+        kind(g, { ...all(ph.ws, 'nicht_zutreffend'), [first]: 'teilweise_erreicht' }),
+        kind(g, {}, new Set(pzOf(ph.ws))),
+      ], ph.req).toEqual(['fail', 'fail', 'pass', 'pass', 'not_applicable']);
+    }
+  });
+  it('Forscheln: § 6.6 / § 6.7 warn (the engineer confirms the phases are still ahead), § 6.2 … § 6.5 do not', () => {
+    const got = Object.fromEntries(PHASES.filter((p) => p.annex === 'B').map((ph) => [`${ph.req}-3`, kind(insertedGateCondition(FILE, `${ph.req}-3`), FORSCHELN)]));
+    console.log(`[M820-3 STRUCTURE unit] Forscheln token warnings: ${JSON.stringify(got)}`);
+    expect(got).toEqual({ 'REQ-09-3': 'pass', 'REQ-10-3': 'pass', 'REQ-11-3': 'pass', 'REQ-12-3': 'pass', 'REQ-13-3': 'fail', 'REQ-14-3': 'fail' });
   });
 });

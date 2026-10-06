@@ -41,6 +41,7 @@ const USER_ID = '00000000-0000-4000-8000-0000000008a4';
 const MIGRATION = resolve(ROOT, 'scripts/migrations/20261006120000_m820_3_structure.sql');
 const ROLLBACK = resolve(ROOT, 'scripts/rollback-20261006120000-m820-3-structure.sql');
 const READBACK = resolve(ROOT, 'scripts/verification/apply/readback-20261006120000-m820-3-structure.sql');
+const PREDEPLOY = resolve(ROOT, 'scripts/verification/apply/predeploy-own-standard-scoping.sql');
 const log = (label: string, v: unknown) => console.log(`[M820-3 STRUCTURE] ${label}: ${JSON.stringify(v)}`);
 const md5 = (s: string) => createHash('md5').update(s).digest('hex');
 const TOKEN = 'noch_nicht_erreicht';
@@ -66,7 +67,9 @@ const DUMP = readJson<Dump>('tests/harness/m820-3-structure.dump.json');
 const PHASE_SHEETS = { 'M8203-04': '52', 'M8203-05': '53', 'M8203-06': '54', 'M8203-11': '62', 'M8203-12': '63', 'M8203-14': '64', 'M8203-16': '65', 'M8203-17': '66', 'M8203-18': '67' } as const;
 const NEW_SYMBOLS = [...Object.values(PHASE_SHEETS).map((p) => `pz_${p}_projektstopp_risikoanalyse`), 'kleiner_kommunaler_betrieb', 'digitale_methoden_bim_angewendet'];
 const EDITED = ['REQ-02', 'REQ-03', 'REQ-05', 'REQ-06', 'REQ-07', 'REQ-08', 'REQ-09', 'REQ-10', 'REQ-11', 'REQ-12', 'REQ-13', 'REQ-14', 'REQ-25', 'REQ-26', 'REQ-27', 'REQ-29', 'REQ-30', 'REQ-31'];
-const NEW_GATES = ['REQ-06-2', 'REQ-07-2', 'REQ-08-2', 'REQ-09-2', 'REQ-10-2', 'REQ-11-2', 'REQ-12-2', 'REQ-13-2', 'REQ-14-2'];
+const REVIEW_GATES = ['REQ-06-2', 'REQ-07-2', 'REQ-08-2', 'REQ-09-2', 'REQ-10-2', 'REQ-11-2', 'REQ-12-2', 'REQ-13-2', 'REQ-14-2'];
+const TOKEN_GATES = REVIEW_GATES.map((c) => c.replace(/-2$/, '-3')); // review fix I-n (warn)
+const NEW_GATES = [...REVIEW_GATES, ...TOKEN_GATES];
 const SHEETS_A = ['M8203-04', 'M8203-05', 'M8203-06', 'M8203-07', 'M8203-08', 'M8203-09', 'M8203-10', 'M8203-22'];
 const SHEETS_B = ['M8203-11', 'M8203-12', 'M8203-13', 'M8203-14', 'M8203-15', 'M8203-16', 'M8203-17', 'M8203-18', 'M8203-23'];
 const pzOf = (ws: string) => DUMP.fields.filter((f) => f.worksheet === ws && /^pz_\d+_\d+_status$/.test(f.symbol)).map((f) => f.symbol);
@@ -290,10 +293,11 @@ describe('DWA-M 820-3 structure block — staged block on embedded Postgres', ()
       SELECT cr.code, w.code AS ws, cr.severity FROM compliance_requirements cr JOIN worksheet_templates w ON w.id = cr.worksheet_template_id
       WHERE cr.code IN ${harness.sql([...EDITED, ...NEW_GATES])} ORDER BY cr.code`;
     log('gates after apply', gates.map((g) => `${g.code}@${g.ws}/${g.severity}`));
-    expect(gates).toHaveLength(27);
+    expect(gates).toHaveLength(36);
     const preGates = new Map(PRE.compliance_requirements.map((r) => JSON.parse(r) as { code: string; severity: string; condition: string }).map((g) => [g.code, g]));
     for (const g of gates.filter((x) => EDITED.includes(x.code))) expect(g.severity, g.code).toBe(preGates.get(g.code)!.severity);
-    expect(gates.filter((g) => NEW_GATES.includes(g.code)).every((g) => g.severity === 'block')).toBe(true);
+    expect(gates.filter((g) => REVIEW_GATES.includes(g.code)).every((g) => g.severity === 'block')).toBe(true);
+    expect(gates.filter((g) => TOKEN_GATES.includes(g.code)).every((g) => g.severity === 'warn')).toBe(true);
     expect(Object.fromEntries(gates.filter((g) => ['REQ-02', 'REQ-03', 'REQ-05', 'REQ-27', 'REQ-29', 'REQ-30', 'REQ-31'].includes(g.code)).map((g) => [g.code, g.ws])))
       .toEqual({ 'REQ-02': 'M8203-02', 'REQ-03': 'M8203-03', 'REQ-05': 'M8203-02', 'REQ-27': 'M8203-20', 'REQ-29': 'M8203-21', 'REQ-30': 'M8203-21', 'REQ-31': 'M8203-24' });
     const nf = await harness.sql<{ ws: string; symbol: string; req: boolean; section: string }[]>`
@@ -351,8 +355,8 @@ describe('DWA-M 820-3 structure block — staged block on embedded Postgres', ()
     const res: unknown[][] = [];
     for (const st of stmts) res.push([...(await harness.sql.unsafe(st))]);
     log('read-back R0..R8 (after)', res.map((r) => r.map((row) => JSON.stringify(row).slice(0, 200))));
-    expect(res[2][0]).toEqual({ new_fields: '11', new_gates: '9', token_enums: '67', section_rules: '153', pt_all: '0' });
-    expect(res[3]).toHaveLength(27);
+    expect(res[2][0]).toEqual({ new_fields: '11', new_gates: '18', token_enums: '67', section_rules: '153', pt_all: '0' });
+    expect(res[3]).toHaveLength(36);
     expect((res[3] as Array<{ cond_ok: boolean }>).every((r) => r.cond_ok)).toBe(true);
     expect((res[3] as Array<{ severity: string }>).filter((r) => r.severity === 'block')).toHaveLength(18);
     expect(res[4]).toHaveLength(11);
@@ -443,6 +447,10 @@ describe('DWA-M 820-3 structure block — staged block on embedded Postgres', ()
     log('project type blank: -04 / -11 routed gates', { u04: routedOnly(u04), u11: routedOnly(u11) });
     expect(routedOnly(u04)).toEqual(['REQ-06<project_type@M8203-01>']);
     expect(routedOnly(u11)).toEqual(['REQ-09<project_type@M8203-01>']);
+    // review fix I-e: M8203-01's required project_type is NOT "filled" by the 820-1 token (A4 scoped to the own standard)
+    const u01 = await gate(u, 'M8203-01');
+    log('project type blank: M8203-01 missing (820-1 project_type = konzept saved)', u01.missing);
+    expect(u01.missing).toContain('project_type');
 
     // ── S-14 / S-07 drivers on Forscheln: private client, no BIM → the hidden required questions are not demanded
     const g02a = await gate(f, 'M8203-02');
@@ -455,5 +463,17 @@ describe('DWA-M 820-3 structure block — staged block on embedded Postgres', ()
     expect(g19.missing.filter((s) => ['aia_available', 'bap_defined', 'bim_project_definition_complete', 'cde_platform_defined', 'digital_twin_after_project'].includes(s))).toEqual([]);
     expect(g21.missing.filter((s) => ['bim_communication_interfaces', 'cde_used_for_communication'].includes(s))).toEqual([]);
     expect(g21.missing).toEqual(expect.arrayContaining(['communication_concept_adaptive', 'public_info_via_digital_media']));
+  });
+
+  it('f. the pre-deploy read-only query runs (prod-query split) and lists the projects where another standard holds a same-named value', async () => {
+    const text = readFileSync(PREDEPLOY, 'utf8');
+    const stmts = text.split(/;\s*(?:\n|$)/).filter((x) => x.replace(/--.*$/gm, '').trim());
+    expect(stmts).toHaveLength(2);
+    const p1 = [...(await harness.sql.unsafe(stmts[0]))] as unknown as Array<{ project: string; symbol: string; own_std: string; own_has_value: boolean; other_has_value: boolean; other_values: string }>;
+    const p2 = [...(await harness.sql.unsafe(stmts[1]))];
+    log('pre-deploy P1 (project, symbol, own std, own value?, other values)', p1.map((r) => `${r.project} · ${r.symbol} · ${r.own_std} · own=${r.own_has_value} · other=${r.other_values}`));
+    log('pre-deploy P2 rows (the harness keeps no project_standards rows)', p2.length);
+    expect(p1.find((r) => r.project === 'project-type-blank' && r.own_std === 'DWA-M-820-3')).toMatchObject({ symbol: 'project_type', own_has_value: false, other_has_value: true });
+    expect(p1.find((r) => r.project === 'forscheln-c1' && r.own_std === 'DWA-M-820-3')).toMatchObject({ symbol: 'project_type', own_has_value: true, other_has_value: true });
   });
 });

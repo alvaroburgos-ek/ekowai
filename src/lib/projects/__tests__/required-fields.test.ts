@@ -9,6 +9,8 @@ import { describe, it, expect } from 'vitest';
 import {
   countRequiredFields,
   inheritedSymbolSet,
+  scopeForInheritance,
+  scopeToOwnStandard,
   missingRequiredFields,
   paramHasValue,
   requiredFieldSatisfied,
@@ -101,5 +103,41 @@ describe('progress counts share the rule', () => {
     // Old behaviour: next = { reason: 'fill', missingRequired: 1 } — "1 Pflichtfeld offen".
     expect(summarizeStandardProgress([{ code: 'FLL-GAR-01', ...base }]).next).toMatchObject({ code: 'FLL-GAR-01', reason: 'fill', missingRequired: 1 });
     expect(summarizeStandardProgress([{ code: 'FLL-GAR-01', ...base, inheritedRequired: 1 }]).next).toEqual({ code: 'FLL-GAR-01', titleDe: 'FLL-GAR-01', reason: 'submit' });
+  });
+});
+
+describe('scopeForInheritance + inheritedSymbolSet (DWA-M 820-3 review fix I-e: A4 own standard first)', () => {
+  // own standard DWA-M 820-3: templates m01 (owner of project_type) and m04; foreign DWA-M 820-1: template t1, FLL-NT: tnt
+  const ownTemplates = new Set(['m01', 'm04']);
+  const ownTokens = new Map<string, Set<string> | null>([
+    ['project_type', new Set(['gesamtsystem', 'einzelprojekt', 'both'])],
+    ['project_name', null], // a text field of the own standard
+  ]);
+  const a4 = (entries: Array<{ symbol: string; value: string; templateId: string }>, own = 'm01') =>
+    inheritedSymbolSet(scopeForInheritance(entries, ownTemplates, ownTokens).filter((e) => e.templateId !== own));
+  it('M8203-01 project_type is NOT filled by the DWA-M 820-1 token "projekt" (before: the unscoped A4 rule counted it as filled)', () => {
+    const entries = [{ symbol: 'project_type', value: 'projekt', templateId: 't1' }];
+    expect(inheritedSymbolSet(entries).has('project_type')).toBe(true);
+    expect(a4(entries).has('project_type')).toBe(false);
+  });
+  it('A4 regression (FLL-GAR-01 project_name "aus FLLNT-01"): a TEXT value of another standard still fills the own field', () => {
+    expect(a4([{ symbol: 'project_name', value: 'Forscheln', templateId: 'tnt' }]).has('project_name')).toBe(true);
+  });
+  it('the own standard decides when it has a value: an own occurrence fills it, a disagreeing foreign one no longer blanks it out', () => {
+    const entries = [
+      { symbol: 'project_type', value: 'einzelprojekt', templateId: 'm04' },
+      { symbol: 'project_type', value: 'projekt', templateId: 't1' },
+    ];
+    expect(inheritedSymbolSet(entries).has('project_type')).toBe(false); // unscoped: conflict
+    expect(a4(entries).has('project_type')).toBe(true);
+  });
+  it('negative: a symbol the own standard does not define still pools across standards exactly as before', () => {
+    const entries = [{ symbol: 'quality_category', value: 'C2', templateId: 't1' }];
+    expect(scopeForInheritance(entries, ownTemplates, ownTokens)).toEqual(entries);
+    expect(a4(entries).has('quality_category')).toBe(true);
+  });
+  it('scopeToOwnStandard (the gate fallback form): a foreign occurrence of an own symbol is dropped, other symbols pool', () => {
+    const entries = [{ symbol: 'project_type', value: 'projekt', templateId: 't1' }, { symbol: 'quality_category', value: 'C2', templateId: 't1' }];
+    expect(scopeToOwnStandard(entries, ownTemplates, new Set(['project_type'])).map((e) => e.symbol)).toEqual(['quality_category']);
   });
 });
