@@ -1,7 +1,7 @@
--- Pre-DEPLOY read-only check for the approval-gate change of the DWA-M 820-3 structure block (commit series ef8e4bc + review fix 1):
---   (a) gate fallback / visibility: a symbol that is a field of the gate's own standard is read only from that standard;
---   (b) A4 required-field inheritance: a foreign occurrence of an own symbol counts only when the own standard has no value and,
---       for an enum, the token is one of the own field's tokens;
+-- Pre-DEPLOY read-only check for the approval-gate change of the DWA-M 820-3 structure block (commit series ef8e4bc + review fixes 1, 2)
+--   (a) gate fallback / visibility: a symbol that is a field of the gate's own standard is read only from that standard
+--   (b) A4 required-field inheritance: a foreign occurrence of an own symbol counts only when the own standard has no value AND
+--       the own field is of type text or date (fix round 2 ruling)
 --   (c) page prefill: an enum is never prefilled with a token outside its own option list.
 -- These take effect at the DEPLOY, independent of the 820-3 migration. READ ONLY. Run from C:\Users\Ekowai\_wt-g2t:
 --   node scripts/verification/prod-query.mjs C:\Users\Ekowai\_wt-m820\scripts\verification\apply\predeploy-own-standard-scoping.sql
@@ -10,7 +10,7 @@
 -- P1 · every live project where one standard defines a symbol that ANOTHER standard of the same project has a saved value for.
 --   own_has_value = false, other_has_value = true → after the deploy the foreign value no longer decides: a gate of own_std that
 --     reads the symbol from another sheet waits (pending) instead of using it, and a REQUIRED own field (required_in_own) is no
---     longer counted as filled if the foreign value is an enum token outside the own option list (text / number values still count)
+--     longer counted as filled unless the own field is text or date (number / boolean / json / enum now need an own value)
 --   own_has_value = true, other_has_value = true, values differ → before: conflict (gate pending / A4 nothing); after: the own value decides
 SELECT pr.name AS project, a.symbol, a.std AS own_std, string_agg(DISTINCT b.std, ', ') AS other_stds,
        bool_or(a.is_required) AS required_in_own, bool_or(a.data_type = 'enum') AS enum_in_own,

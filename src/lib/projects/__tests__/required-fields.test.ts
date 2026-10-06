@@ -106,22 +106,34 @@ describe('progress counts share the rule', () => {
   });
 });
 
-describe('scopeForInheritance + inheritedSymbolSet (DWA-M 820-3 review fix I-e: A4 own standard first)', () => {
+describe('scopeForInheritance + inheritedSymbolSet (DWA-M 820-3 review fix I-e, round 2: only text / date from another standard)', () => {
   // own standard DWA-M 820-3: templates m01 (owner of project_type) and m04; foreign DWA-M 820-1: template t1, FLL-NT: tnt
   const ownTemplates = new Set(['m01', 'm04']);
-  const ownTokens = new Map<string, Set<string> | null>([
-    ['project_type', new Set(['gesamtsystem', 'einzelprojekt', 'both'])],
-    ['project_name', null], // a text field of the own standard
+  const ownTypes = new Map<string, Set<string>>([
+    ['project_type', new Set(['enum'])],
+    ['project_name', new Set(['text'])],
+    ['registration_date', new Set(['date'])],
+    ['area_m2', new Set(['number'])],
+    ['bim_used', new Set(['boolean'])],
+    ['risk_register', new Set(['json'])],
   ]);
-  const a4 = (entries: Array<{ symbol: string; value: string; templateId: string }>, own = 'm01') =>
-    inheritedSymbolSet(scopeForInheritance(entries, ownTemplates, ownTokens).filter((e) => e.templateId !== own));
-  it('M8203-01 project_type is NOT filled by the DWA-M 820-1 token "projekt" (before: the unscoped A4 rule counted it as filled)', () => {
-    const entries = [{ symbol: 'project_type', value: 'projekt', templateId: 't1' }];
-    expect(inheritedSymbolSet(entries).has('project_type')).toBe(true);
-    expect(a4(entries).has('project_type')).toBe(false);
-  });
-  it('A4 regression (FLL-GAR-01 project_name "aus FLLNT-01"): a TEXT value of another standard still fills the own field', () => {
+  const a4 = (entries: Array<{ symbol: string; value: unknown; templateId: string }>, own = 'm01') =>
+    inheritedSymbolSet(scopeForInheritance(entries, ownTemplates, ownTypes).filter((e) => e.templateId !== own) as Array<{ symbol: string; value: string }>);
+  it('A4 regression (FLL-GAR-01 project_name "aus FLLNT-01"): a TEXT value of another standard still fills the own field; a DATE too', () => {
     expect(a4([{ symbol: 'project_name', value: 'Forscheln', templateId: 'tnt' }]).has('project_name')).toBe(true);
+    expect(a4([{ symbol: 'registration_date', value: '2026-10-06', templateId: 't1' }]).has('registration_date')).toBe(true);
+  });
+  it('ENUM: M8203-01 project_type is NOT filled by the DWA-M 820-1 token "konzept" — nor by a token that happens to be an own one', () => {
+    expect(inheritedSymbolSet([{ symbol: 'project_type', value: 'konzept' }]).has('project_type')).toBe(true); // the unscoped A4 rule
+    expect(a4([{ symbol: 'project_type', value: 'konzept', templateId: 't1' }]).has('project_type')).toBe(false);
+    expect(a4([{ symbol: 'project_type', value: 'both', templateId: 't1' }]).has('project_type')).toBe(false); // RED with round 1
+  });
+  it('NUMBER: a foreign numeric value with the own field blank → missing (RED with round 1)', () => {
+    expect(a4([{ symbol: 'area_m2', value: 120, templateId: 't1' }]).has('area_m2')).toBe(false);
+  });
+  it('BOOLEAN and JSON: a foreign value with the own field blank → missing (RED with round 1)', () => {
+    expect(a4([{ symbol: 'bim_used', value: true, templateId: 't1' }]).has('bim_used')).toBe(false);
+    expect(a4([{ symbol: 'risk_register', value: 'present', templateId: 't1' }]).has('risk_register')).toBe(false);
   });
   it('the own standard decides when it has a value: an own occurrence fills it, a disagreeing foreign one no longer blanks it out', () => {
     const entries = [
@@ -133,7 +145,7 @@ describe('scopeForInheritance + inheritedSymbolSet (DWA-M 820-3 review fix I-e: 
   });
   it('negative: a symbol the own standard does not define still pools across standards exactly as before', () => {
     const entries = [{ symbol: 'quality_category', value: 'C2', templateId: 't1' }];
-    expect(scopeForInheritance(entries, ownTemplates, ownTokens)).toEqual(entries);
+    expect(scopeForInheritance(entries, ownTemplates, ownTypes)).toEqual(entries);
     expect(a4(entries).has('quality_category')).toBe(true);
   });
   it('scopeToOwnStandard (the gate fallback form): a foreign occurrence of an own symbol is dropped, other symbols pool', () => {

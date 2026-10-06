@@ -136,29 +136,30 @@ export function scopeToOwnStandard<T extends { symbol: string; templateId: strin
 }
 
 /**
- * DWA-M 820-3 review fix I-e — the A4 (required-field inheritance) form of the own-standard scoping.
- *
- * A4 exists so that a value the worksheet page OFFERS from another worksheet (same symbol, any standard — e.g. FLL-GAR-01
- * `project_name` "aus FLLNT-01 … oder überschreiben") counts as filled. It must count exactly what the page may offer:
+ * DWA-M 820-3 review fix I-e, fix round 2 (controller ruling) — the A4 (required-field inheritance) form of the own-standard
+ * scoping. A4 exists so that an identity / metadata value the worksheet page OFFERS from another worksheet (same symbol, any
+ * standard — e.g. FLL-GAR-01 `project_name` "aus FLLNT-01 … oder überschreiben") counts as filled. It may count only that class:
  *   - a symbol that is NOT a field of the own standard: every occurrence counts, as before;
  *   - an occurrence on the own standard's worksheets: counts;
- *   - an occurrence of an OWN symbol on ANOTHER standard's worksheet counts only when the own standard holds no
- *     occurrence of it (the own standard decides when it has a value) AND, for an enum field, the value is one of the
- *     field's own tokens — the page never prefills a foreign token (I-c, `coerceSameSymbolValue`). So DWA-M 820-1
- *     `project_type` = `projekt` never fills DWA-M 820-3 `project_type`, while a text such as `project_name` / `project_number`
- *     keeps being shared.
- * `ownTokens`: one entry per own symbol; the set of allowed tokens for an enum field with an option list, else null.
+ *   - an occurrence of an OWN symbol on ANOTHER standard's worksheet counts only when (a) the own standard holds no occurrence of
+ *     it AND (b) every own field carrying the symbol is of data type `text` or `date` (project_name, project_number,
+ *     project_location …). Number, boolean, json and enum fields always need an own value — the same token or number can mean
+ *     something else in another standard (DWA-M 820-1 `project_type` = `konzept` beside DWA-M 820-3 `project_type`), and
+ *     the own-standard gate fallback (`scopeToOwnStandard`) refuses the foreign value too, so the sheet can never say
+ *     "0 Pflichtfelder offen" while a gate waits for the same input.
+ * `ownTypes`: per own symbol the data types of the own fields carrying it.
  */
-export function scopeForInheritance<T extends { symbol: string; templateId: string; value: unknown }>(
+export const A4_FOREIGN_TYPES: ReadonlySet<string> = new Set(['text', 'date']);
+export function scopeForInheritance<T extends { symbol: string; templateId: string }>(
   entries: ReadonlyArray<T>,
   ownTemplateIds: ReadonlySet<string>,
-  ownTokens: ReadonlyMap<string, ReadonlySet<string> | null>,
+  ownTypes: ReadonlyMap<string, ReadonlySet<string>>,
 ): T[] {
-  const ownHas = new Set(entries.filter((e) => ownTokens.has(e.symbol) && ownTemplateIds.has(e.templateId)).map((e) => e.symbol));
+  const ownHas = new Set(entries.filter((e) => ownTypes.has(e.symbol) && ownTemplateIds.has(e.templateId)).map((e) => e.symbol));
   return entries.filter((e) => {
-    if (!ownTokens.has(e.symbol) || ownTemplateIds.has(e.templateId)) return true;
+    if (!ownTypes.has(e.symbol) || ownTemplateIds.has(e.templateId)) return true;
     if (ownHas.has(e.symbol)) return false;
-    const tokens = ownTokens.get(e.symbol);
-    return !tokens || tokens.size === 0 || tokens.has(String(e.value));
+    const types = ownTypes.get(e.symbol)!;
+    return types.size > 0 && [...types].every((t) => A4_FOREIGN_TYPES.has(t));
   });
 }
