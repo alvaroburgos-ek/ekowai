@@ -379,11 +379,12 @@ describe('M820 flow block 3 (data) — staged block on embedded Postgres (seed =
         JOIN standards s ON s.id = w.standard_id WHERE s.code = ${std} AND w.code = ${ws} AND f.symbol = ${newS}`;
       const p = preF.get(f.id as string)!;
       expect(p.symbol).toBe(oldS);
-      // only symbol + the note changed: label, type, required, section, order, consumers identical
+      // only the symbol changed: label, type, required, section, order, consumers, description identical
       for (const k of ['label_de', 'label_en', 'data_type', 'is_required', 'section_id', 'order_index', 'consumer_worksheets', 'active', 'worksheet_template_id']) {
         expect(JSON.stringify(f[k]), `${ws} ${newS} ${k}`).toBe(JSON.stringify(p[k]));
       }
-      expect(String(f.description).startsWith(`${p.description ?? ''}\n[Flow 3, 2026-10-06] Symbol ${newS} (vorher / was ${oldS})`)).toBe(true);
+      // fields.description is the user-visible hint: untouched (review 2026-10-06)
+      expect(f.description, `${ws} ${newS} description`).toBe(p.description);
     }
     const [g] = await harness.sql<{ condition: string }[]>`SELECT cr.condition FROM compliance_requirements cr JOIN worksheet_templates w ON w.id = cr.worksheet_template_id WHERE w.code = 'M8203-01' AND cr.code = 'REQ-01'`;
     log('REQ-01 condition (after)', { condition: g.condition, md5: md5(g.condition) });

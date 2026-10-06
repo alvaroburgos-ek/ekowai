@@ -35,7 +35,8 @@
 --   equation M820-18-D4 — left as written (sign-off 38). Saved values: 1 project, 8 rows on these 8 fields (they keep their ids).
 --
 -- WHAT THIS BLOCK DOES (idempotent; every write guarded on the live value; in-transaction archive of each pre-state row):
---   A. 8 field rows: symbol old → new (+ one "renamed" note on the description). Guard: standard + sheet + old symbol + data type +
+--   A. 8 field rows: symbol old → new, nothing else (fields.description is the user-visible hint, so it gets NO note; the old
+--      symbol stays in the archive row, the apply order and the sign-off). Guard: standard + sheet + old symbol + data type +
 --      active, and no active field of the new symbol on that sheet.
 --   B. 1 gate row (820-3 REQ-01): condition client_auftraggeber → client_name (word match). Guard: condition md5.
 --   Nothing is deactivated or re-activated; project_parameters untouched.
@@ -74,11 +75,9 @@ SELECT cr.* FROM compliance_requirements cr JOIN worksheet_templates w ON w.id =
  WHERE s.code = 'DWA-M-820-3' AND w.code = 'M8203-01' AND cr.code = 'REQ-01' AND md5(cr.condition) = '0e0883c979c586e8b1f4e9ecd76c8d1c'
    AND NOT EXISTS (SELECT 1 FROM compliance_requirements_archive_m820_flow_3 a WHERE a.id = cr.id);
 
--- A. the renames (the row keeps its id → saved values stay)
+-- A. the renames (the row keeps its id → saved values stay; only the symbol column changes)
 UPDATE fields f
-   SET symbol = o.new_symbol,
-       description = COALESCE(f.description, '') || E'\n' || '[Flow 3, 2026-10-06] Symbol ' || o.new_symbol || ' (vorher / was ' || o.old_symbol
-         || '): dasselbe Symbol in DWA-M 820-1 / -2 / -3, damit ein in einem Teil gespeicherter Wert in den anderen angeboten wird (Regel A4: Text / Datum desselben Symbols). [EN] Same symbol in the three parts so a value saved in one part is offered in the others (rule A4: text / date of the same symbol).'
+   SET symbol = o.new_symbol
   FROM m820f3_ren_old o
  WHERE f.id = o.id;
 

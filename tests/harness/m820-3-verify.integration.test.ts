@@ -158,6 +158,7 @@ describe('DWA-M-820-3 — block-gate coverage', () => {
 // ─── M8203-01 Projektregistrierung (§1 Anwendungsbereich) ────────────────────────
 describe('DWA-M-820-3 — M8203-01 Projektregistrierung (§1 Anwendungsbereich)', () => {
   it('REQ-01  (sector-OR) AND client IS NOT EMPTY AND contractor IS NOT EMPTY', async () => {
+    // Mirrors the PRE-flow-3 symbols (prod 2026-10-06): staged block 20261006210000_m820_flow_3 renames client_auftraggeber → client_name.
     await proveBothWays('M8203-01', 'REQ-01',
       [{ ws: 'M8203-01', values: { sector_abwasser: true, client_auftraggeber: 'AG GmbH', contractor_auftragnehmer: 'Ingenieurbüro AN' } }],
       // clear the client text → IS NOT EMPTY false (exists path, definite) → AND fails

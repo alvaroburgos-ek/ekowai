@@ -70,6 +70,7 @@ const SINGLETONS: ReadonlyArray<{ symbol: string; ws: string; dataType: DType }>
   { symbol: 'sector_wasserbau', ws: 'M8203-01', dataType: 'boolean' },
   { symbol: 'sector_abwasser', ws: 'M8203-01', dataType: 'boolean' },
   { symbol: 'sector_abfall', ws: 'M8203-01', dataType: 'boolean' },
+  // PRE-flow-3 symbol (prod 2026-10-06); staged block 20261006210000_m820_flow_3 renames it to client_name.
   { symbol: 'client_auftraggeber', ws: 'M8203-01', dataType: 'text' },
   { symbol: 'contractor_auftragnehmer', ws: 'M8203-01', dataType: 'text' },
   // M8203-03 Begriffe/Rahmenbedingungen (REQ-04 §4 Bild 1)
