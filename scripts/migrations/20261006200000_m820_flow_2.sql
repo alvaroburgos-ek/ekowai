@@ -54,7 +54,7 @@
 --   {M8203-15,M8203-23,M8203-24}, both projektstopp fields NULL; section B of M8203-13 / -15 exists (same visible_when) with 0 fields;
 --   gate conditions md5 REQ-10 179cbd016843c9a978922a1f8938031b, REQ-10-2 de928cafb161348fce101a8a0f0e27f7, REQ-10-3
 --   90526a541774bb75a5e4ff117cb83866, REQ-11 c90bc125c86d72d2981080223b487aa9, REQ-11-2 98b5acb5860fd369d7212a0faba82a04,
---   REQ-11-3 2b5c3fd599db7e1d751010aad78e4a36; 43 saved pz_63 / pz_64 values in 1 project; all affected instances draft.
+--   REQ-11-3 2b5c3fd599db7e1d751010aad78e4a36; 20 saved pz_63 / pz_64 values (8 + 12) in 1 project; all affected instances draft.
 --
 -- WHAT THIS BLOCK DOES (idempotent; each family all-or-nothing on the live values; in-transaction archive of each pre-state row):
 --   A. worksheet_templates: phase / order_index of 6 (820-1) + 2 (820-2) rows, per standard only when every row of that standard is
