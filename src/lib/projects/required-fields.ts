@@ -18,6 +18,8 @@
  * Pure: no DB, no React. Callers load the rows and build the inherited map.
  */
 
+import { isCrossStandardCarry } from './cross-standard-carry';
+
 /** The value columns of a `project_parameters` row (any driver's row shape). */
 export type ParameterValueColumns = {
   valueNumber: unknown;
@@ -150,16 +152,24 @@ export function scopeToOwnStandard<T extends { symbol: string; templateId: strin
  * `ownTypes`: per own symbol the data types of the own fields carrying it.
  */
 export const A4_FOREIGN_TYPES: ReadonlySet<string> = new Set(['text', 'date']);
-export function scopeForInheritance<T extends { symbol: string; templateId: string }>(
+/**
+ * M820 flow block 3 item 2 (X10): with `carry.ownStandardCode`, a foreign occurrence of an own symbol of ANY type also counts when
+ * the pair (symbol, the occurrence's `standardCode` → own standard) is on the cross-standard carry-over allow-list
+ * (src/lib/projects/cross-standard-carry.ts — today the DWA-M 820-1 risk register / measure plan into DWA-M 820-2). The own
+ * standard still wins when it has an occurrence. Without `carry` (or without a `standardCode` on the entry) the rule is unchanged.
+ */
+export function scopeForInheritance<T extends { symbol: string; templateId: string; standardCode?: string | null }>(
   entries: ReadonlyArray<T>,
   ownTemplateIds: ReadonlySet<string>,
   ownTypes: ReadonlyMap<string, ReadonlySet<string>>,
+  carry?: { ownStandardCode: string },
 ): T[] {
   const ownHas = new Set(entries.filter((e) => ownTypes.has(e.symbol) && ownTemplateIds.has(e.templateId)).map((e) => e.symbol));
   return entries.filter((e) => {
     if (!ownTypes.has(e.symbol) || ownTemplateIds.has(e.templateId)) return true;
     if (ownHas.has(e.symbol)) return false;
     const types = ownTypes.get(e.symbol)!;
-    return types.size > 0 && [...types].every((t) => A4_FOREIGN_TYPES.has(t));
+    if (types.size > 0 && [...types].every((t) => A4_FOREIGN_TYPES.has(t))) return true;
+    return carry != null && isCrossStandardCarry(e.symbol, e.standardCode, carry.ownStandardCode);
   });
 }

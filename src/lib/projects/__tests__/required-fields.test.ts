@@ -153,3 +153,53 @@ describe('scopeForInheritance + inheritedSymbolSet (DWA-M 820-3 review fix I-e, 
     expect(scopeToOwnStandard(entries, ownTemplates, new Set(['project_type'])).map((e) => e.symbol)).toEqual(['quality_category']);
   });
 });
+
+// M820 flow block 3 item 2 (X10, owner ruling 2026-10-06): the cross-standard carry-over allow-list (src/lib/projects/cross-standard-carry.ts)
+describe('A4 (scopeForInheritance) with the allow-list — the required-field check', () => {
+  // own standard DWA-M 820-2: template s10; foreign DWA-M 820-1: m06 / m07; another foreign standard: x1
+  const ownTemplates = new Set(['s10', 's01']);
+  const ownTypes = new Map<string, Set<string>>([
+    ['risk_register', new Set(['json'])],
+    ['risk_mitigation_plan', new Set(['json'])],
+    ['change_orders', new Set(['json'])],
+    ['project_name', new Set(['text'])],
+  ]);
+  const a4 = (entries: Array<{ symbol: string; value: unknown; templateId: string; standardCode?: string }>, ownStandardCode?: string) =>
+    inheritedSymbolSet(
+      scopeForInheritance(entries, ownTemplates, ownTypes, ownStandardCode ? { ownStandardCode } : undefined)
+        .filter((e) => e.templateId !== 's10') as Array<{ symbol: string; value: string }>,
+    );
+  it('RED before: the 820-1 register (json) on M820-06 counts for an empty 820-2-10 register', () => {
+    const e = [
+      { symbol: 'risk_register', value: 'present', templateId: 'm06', standardCode: 'DWA-M-820-1' },
+      { symbol: 'risk_mitigation_plan', value: 'present', templateId: 'm07', standardCode: 'DWA-M-820-1' },
+    ];
+    expect([...a4(e, 'DWA-M-820-2')].sort()).toEqual(['risk_mitigation_plan', 'risk_register']);
+  });
+  it('without the own standard code (old callers) nothing changes: json from another standard never counts', () => {
+    expect(a4([{ symbol: 'risk_register', value: 'present', templateId: 'm06', standardCode: 'DWA-M-820-1' }]).has('risk_register')).toBe(false);
+  });
+  it('a json symbol NOT on the list, or the list symbol from another standard, still needs its own value', () => {
+    expect(a4([{ symbol: 'change_orders', value: 'present', templateId: 'm06', standardCode: 'DWA-M-820-1' }], 'DWA-M-820-2').has('change_orders')).toBe(false);
+    expect(a4([{ symbol: 'risk_register', value: 'present', templateId: 'x1', standardCode: 'DWA-M-820-3' }], 'DWA-M-820-2').has('risk_register')).toBe(false);
+    expect(a4([{ symbol: 'risk_register', value: 'present', templateId: 'x1' }], 'DWA-M-820-2').has('risk_register')).toBe(false);
+  });
+  it('the reverse direction does not count (820-2 → 820-1)', () => {
+    const types = new Map<string, Set<string>>([['risk_register', new Set(['json'])]]);
+    const set = inheritedSymbolSet(
+      scopeForInheritance([{ symbol: 'risk_register', value: 'present', templateId: 's10', standardCode: 'DWA-M-820-2' }], new Set(['m06']), types, { ownStandardCode: 'DWA-M-820-1' }) as Array<{ symbol: string; value: string }>,
+    );
+    expect(set.has('risk_register')).toBe(false);
+  });
+  it('an own 820-2 value still wins (own occurrences first, as before)', () => {
+    const e = [
+      { symbol: 'risk_register', value: 'present', templateId: 'm06', standardCode: 'DWA-M-820-1' },
+      { symbol: 'risk_register', value: 'present', templateId: 's01', standardCode: 'DWA-M-820-2' },
+    ];
+    const scoped = scopeForInheritance(e, ownTemplates, ownTypes, { ownStandardCode: 'DWA-M-820-2' });
+    expect(scoped.map((x) => x.templateId)).toEqual(['s01']);
+  });
+  it('text / date keep the A4 behaviour (allow-list adds, never removes)', () => {
+    expect(a4([{ symbol: 'project_name', value: 'X', templateId: 'm06', standardCode: 'DWA-M-820-1' }], 'DWA-M-820-2').has('project_name')).toBe(true);
+  });
+});

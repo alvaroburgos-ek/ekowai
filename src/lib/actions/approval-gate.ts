@@ -45,7 +45,13 @@ export type PendingBlockCondition = {
 export type GateValue = number | string | boolean | null;
 
 /** One saved, typed occurrence of a symbol somewhere in the project (any worksheet template). */
-export type ProjectWideEntry = { symbol: string; value: GateValue; templateId: string };
+export type ProjectWideEntry = {
+  symbol: string;
+  value: GateValue;
+  templateId: string;
+  /** Code of the standard the occurrence's template belongs to — read only by the cross-standard carry-over allow-list (A4). */
+  standardCode?: string | null;
+};
 
 /**
  * Every saved, typed occurrence of every active field symbol across the
@@ -62,8 +68,10 @@ export async function loadProjectWideEntries(projectId: string): Promise<Project
   const projFields = projWtids.length === 0
     ? []
     : await db
-      .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, templateId: fields.worksheetTemplateId })
+      .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, templateId: fields.worksheetTemplateId, standardCode: standards.code })
       .from(fields)
+      .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+      .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
       .where(and(inArray(fields.worksheetTemplateId, projWtids), eq(fields.active, true)));
   const projFieldIds = projFields.map((f) => f.id);
   const projParams = projFieldIds.length === 0
@@ -83,7 +91,7 @@ export async function loadProjectWideEntries(projectId: string): Promise<Project
     const p = projParamByFieldId.get(f.id);
     if (!p) continue;
     const v = extractValue(f.dataType, p);
-    if (v !== undefined) entries.push({ symbol: f.symbol, value: v, templateId: f.templateId });
+    if (v !== undefined) entries.push({ symbol: f.symbol, value: v, templateId: f.templateId, standardCode: f.standardCode });
   }
   return entries;
 }
@@ -97,26 +105,33 @@ export async function loadInheritedSymbolsForTemplate(projectId: string, ownTemp
     .from(worksheetTemplates)
     .where(eq(worksheetTemplates.id, ownTemplateId))
     .limit(1);
-  const scope = tmpl ? await loadOwnStandardScope(tmpl.standardId) : { templateIds: new Set<string>(), symbols: new Set<string>(), types: new Map<string, Set<string>>() };
-  return inheritedSymbolSet(scopeForInheritance(entries, scope.templateIds, scope.types).filter((e) => e.templateId !== ownTemplateId));
+  const scope = tmpl
+    ? await loadOwnStandardScope(tmpl.standardId)
+    : { templateIds: new Set<string>(), symbols: new Set<string>(), types: new Map<string, Set<string>>(), standardCode: null };
+  // M820 flow block 3 (X10): the cross-standard carry-over allow-list adds its listed carriers (src/lib/projects/cross-standard-carry.ts).
+  const carry = scope.standardCode ? { ownStandardCode: scope.standardCode } : undefined;
+  return inheritedSymbolSet(scopeForInheritance(entries, scope.templateIds, scope.types, carry).filter((e) => e.templateId !== ownTemplateId));
 }
 
 /**
  * The own standard's active fields: template ids + symbols (the scope of `scopeToOwnStandard`) + per symbol the data types of
  * the own fields carrying it (the scope of `scopeForInheritance`, fix round 2: only text / date may be filled from another standard).
  */
-export async function loadOwnStandardScope(standardId: string): Promise<{ templateIds: Set<string>; symbols: Set<string>; types: Map<string, Set<string>> }> {
+export async function loadOwnStandardScope(
+  standardId: string,
+): Promise<{ templateIds: Set<string>; symbols: Set<string>; types: Map<string, Set<string>>; standardCode: string | null }> {
   const rows = await db
     .select({ symbol: fields.symbol, templateId: fields.worksheetTemplateId, dataType: fields.dataType })
     .from(fields)
     .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
     .where(and(eq(worksheetTemplates.standardId, standardId), eq(fields.active, true)));
+  const [std] = await db.select({ code: standards.code }).from(standards).where(eq(standards.id, standardId)).limit(1);
   const types = new Map<string, Set<string>>();
   for (const r of rows) {
     if (!types.has(r.symbol)) types.set(r.symbol, new Set());
     types.get(r.symbol)!.add(r.dataType);
   }
-  return { templateIds: new Set(rows.map((r) => r.templateId)), symbols: new Set(rows.map((r) => r.symbol)), types };
+  return { templateIds: new Set(rows.map((r) => r.templateId)), symbols: new Set(rows.map((r) => r.symbol)), types, standardCode: std?.code ?? null };
 }
 
 /** Extract the typed value from a project_parameters row for a field's data type. */
@@ -326,7 +341,9 @@ export async function checkApprovalGate(
   // DWA-M 820-3 review fix I-e (round 2): own-standard-first (scopeForInheritance) — a foreign occurrence of an own symbol counts
   // only when the own standard has none and the own field is text or date (identity / metadata class).
   const inheritedSymbols = inheritedSymbolSet(
-    scopeForInheritance(projectEntries, ownScope.templateIds, ownScope.types).filter((e) => e.templateId !== instance.worksheetTemplateId),
+    // M820 flow block 3 (X10): + the cross-standard carry-over allow-list (A4 only — the gate `fallback` above stays own-standard).
+    scopeForInheritance(projectEntries, ownScope.templateIds, ownScope.types, ownScope.standardCode ? { ownStandardCode: ownScope.standardCode } : undefined)
+      .filter((e) => e.templateId !== instance.worksheetTemplateId),
   );
 
   const lookup = makeGateLookup(localSymbols, bySymbol, fallback);

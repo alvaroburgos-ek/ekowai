@@ -270,6 +270,10 @@ type Props = {
    * quantity under another symbol, TWIN_SYMBOLS). Drives the badge and the
    * "Alle Vorbefüllungen übernehmen" bar. */
   twinSourceByFieldId?: Record<string, { worksheetCode: string; symbol: string }>;
+  /** field_id → note for a value carried over the cross-standard allow-list (src/lib/projects/cross-standard-carry.ts), e.g.
+   * "taken from DWA-M 820-1 (M820-06 / M820-07)". Shown under the field's editor while the carried value is untouched; the
+   * first edit overwrites it with an own value. */
+  carriedNoteByFieldId?: Record<string, string>;
   /** field_id → site-profile JSON key that supplied the pre-fill. Only set
    * for fields where prefillSourceByFieldId is 'site_profile'. Shown in the
    * field's tooltip so the engineer can find the source entry. */
@@ -341,6 +345,7 @@ export function WorksheetForm({
   prefillSourceByFieldId,
   siteProfileKeyByFieldId,
   twinSourceByFieldId,
+  carriedNoteByFieldId,
   clientSuppliedByFieldId,
   standardCode,
   docs,
@@ -1182,6 +1187,9 @@ export function WorksheetForm({
         return (
           <section key={f.id} className="border-t border-hairline pt-6 mt-8 space-y-4" data-testid={`bottom-${f.symbol}`}>
             {title && <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">{title}</h2>}
+            {carriedNoteByFieldId?.[f.id] && values[f.id] === initialValues[f.id] && (
+              <p className="text-xs text-subtext" data-testid={`carried-${f.symbol}`}>{carriedNoteByFieldId[f.id]}</p>
+            )}
             {renderWidget(f, widgetCtx)}
           </section>
         );

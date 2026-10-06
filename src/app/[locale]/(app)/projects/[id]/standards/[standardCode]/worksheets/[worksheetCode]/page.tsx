@@ -25,6 +25,7 @@ import { NormTextProvider } from '@/components/norm-text/norm-text-context';
 import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profile/symbol-map';
 import { twinSourcesFor, twinSourceSymbols } from '@/lib/eval/twin-symbols';
 import { coerceSameSymbolValue, type EnumOption } from '@/lib/eval/same-symbol-prefill';
+import { crossStandardCarryNote, selectPrefillUpstreams } from '@/lib/projects/cross-standard-carry';
 
 export default async function WorksheetPage({
   params,
@@ -199,6 +200,8 @@ export default async function WorksheetPage({
   const prefillSourceByFieldId: Record<string, 'standard_default' | 'site_profile' | 'twin'> = {};
   const siteProfileKeyByFieldId: Record<string, string> = {};
   const twinSourceByFieldId: Record<string, { worksheetCode: string; symbol: string }> = {};
+  // field_id → "taken from DWA-M 820-1 (M820-06 / M820-07)" note for a value carried over the cross-standard allow-list.
+  const carriedNoteByFieldId: Record<string, string> = {};
   // Twin hints (same quantity, other symbol) merged into the same-symbol hint list
   // of the TARGET symbol so the field shows "Bereits in A138-07 (als A_C)" + Übernehmen.
   const twinHintsBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol: string }>> = {};
@@ -229,8 +232,10 @@ export default async function WorksheetPage({
     }
 
     // 2. Try same-symbol upstream — unambiguous only.
-    const upstreams = sameSymbol.get(f.symbol);
-    if (upstreams && upstreams.length > 0) {
+    //    M820 flow block 3 (X10): for a symbol on the cross-standard carry-over allow-list only own-standard and listed-source
+    //    occurrences are candidates (selectPrefillUpstreams); a carried value gets the editor note "taken from …" while untouched.
+    const upstreams = selectPrefillUpstreams(f.symbol, standardCode, sameSymbol.get(f.symbol) ?? []);
+    if (upstreams.length > 0) {
       const ambiguous = upstreams.length > 1 && !upstreams.every((u) => sameSymbolValueEqual(u.value, upstreams[0].value));
       if (!ambiguous) {
         const upstream = upstreams[0];
@@ -238,6 +243,8 @@ export default async function WorksheetPage({
         if (coerced) {
           initialValues[f.id] = coerced;
           inheritedFromBySymbol[f.symbol] = upstream.worksheetCode;
+          const note = upstream.isFromCurrentStandard ? null : crossStandardCarryNote(f.symbol, upstream.sourceStandardCode, standardCode);
+          if (note) carriedNoteByFieldId[f.id] = note;
           continue;
         }
       }
@@ -481,6 +488,7 @@ export default async function WorksheetPage({
           prefillSourceByFieldId={prefillSourceByFieldId}
           siteProfileKeyByFieldId={siteProfileKeyByFieldId}
           twinSourceByFieldId={twinSourceByFieldId}
+          carriedNoteByFieldId={carriedNoteByFieldId}
           clientSuppliedByFieldId={clientSuppliedByFieldId}
           standardCode={standardCode}
           docs={docs}

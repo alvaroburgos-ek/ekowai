@@ -222,6 +222,8 @@ export type SameSymbolEntry = {
    * stage_order could leak its value. (No-op for single-standard projects: all
    * candidates are from the current standard, so this key doesn't reorder them.) */
   isFromCurrentStandard: boolean;
+  /** Code of the source standard — read by the cross-standard carry-over allow-list (src/lib/projects/cross-standard-carry.ts). */
+  sourceStandardCode?: string | null;
 };
 
 /**
@@ -270,12 +272,14 @@ export async function loadSameSymbolValues(
       dataType: fields.dataType,
       worksheetCode: worksheetTemplates.code,
       sourceStandardId: worksheetTemplates.standardId,
+      sourceStandardCode: standards.code,
     })
     .from(fields)
     .innerJoin(
       worksheetTemplates,
       eq(worksheetTemplates.id, fields.worksheetTemplateId),
     )
+    .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
     .where(
       and(
         inArray(fields.symbol, symbols),
@@ -359,6 +363,7 @@ export async function loadSameSymbolValues(
       sourceStageOrder: stageByStandardId.get(meta.sourceStandardId) ?? null,
       isFromAncestor: ancestorStandardIds.has(meta.sourceStandardId),
       isFromCurrentStandard: currentStandardId != null && meta.sourceStandardId === currentStandardId,
+      sourceStandardCode: meta.sourceStandardCode,
     });
     out.set(meta.symbol, arr);
   }
