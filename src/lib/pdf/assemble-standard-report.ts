@@ -755,7 +755,12 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
       // above deliberately hands the gate only scalars.
       const gateCarrier = (sym: string): unknown => {
         const f = tplFields.find((x) => x.symbol === sym);
-        return f && f.dataType === 'json' ? paramForEngine(f.id)?.valueJson ?? undefined : undefined;
+        if (f) return f.dataType === 'json' ? paramForEngine(f.id)?.valueJson ?? undefined : undefined;
+        // DWA-M 820-2 structure block (2026-10-06): a carrier entered on another worksheet of the standard (e.g. the
+        // contracted-phase checklist on 820-2-01 read by a phase guard on 820-2-20) — the same standard-wide value
+        // `gateLookup` already resolves scalars from, so the dossier verdict matches the approval gate.
+        const r = resolvedBySymbol.get(sym);
+        return r && r.dataType === 'json' && r.value != null ? r.value : undefined;
       };
       const evaluatedCompliance: ReportCompliance[] = tplCReqs.map((c) => {
         const result = evaluateCondition(c.condition, gateLookup, { hiddenSymbols, carrier: gateCarrier });

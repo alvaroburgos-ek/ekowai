@@ -156,6 +156,45 @@ export function makeGateLookup(
 }
 
 /**
+ * The RAW json of the carriers a worksheet inherits — json fields of OTHER worksheets of the same standard whose
+ * `consumer_worksheets` names this worksheet (the declared reach the form already uses for its inherited panel and
+ * whose values sit in the form store, so the form badge and this gate read the same carrier). Only loaded when a
+ * block condition calls `contains(` (no extra query otherwise). A symbol two inherited fields share is ambiguous and
+ * left out (→ the gate stays pending, never a wrong verdict). Local fields are never shadowed.
+ */
+async function loadInheritedJsonCarriers(
+  instance: { projectId: string; worksheetTemplateId: string; standardId: string; worksheetCode: string },
+  localSymbols: ReadonlySet<string>,
+  rows: ReadonlyArray<{ condition: string }>,
+): Promise<Map<string, unknown>> {
+  const out = new Map<string, unknown>();
+  if (!rows.some((r) => /\bcontains\s*\(/.test(r.condition ?? ''))) return out;
+  const candidates = await db
+    .select({ id: fields.id, symbol: fields.symbol, consumerWorksheets: fields.consumerWorksheets, templateId: fields.worksheetTemplateId })
+    .from(fields)
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+    .where(and(eq(worksheetTemplates.standardId, instance.standardId), eq(fields.dataType, 'json'), eq(fields.active, true)));
+  const inherited = candidates.filter((f) =>
+    f.templateId !== instance.worksheetTemplateId
+    && !localSymbols.has(f.symbol)
+    && Array.isArray(f.consumerWorksheets) && f.consumerWorksheets.includes(instance.worksheetCode));
+  const seen = new Map<string, number>();
+  for (const f of inherited) seen.set(f.symbol, (seen.get(f.symbol) ?? 0) + 1);
+  const unique = inherited.filter((f) => seen.get(f.symbol) === 1);
+  if (unique.length === 0) return out;
+  const params = await db
+    .select({ fieldId: projectParameters.fieldId, valueJson: projectParameters.valueJson })
+    .from(projectParameters)
+    .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, unique.map((f) => f.id))));
+  const byField = new Map(params.map((p) => [p.fieldId, p.valueJson]));
+  for (const f of unique) {
+    const v = byField.get(f.id);
+    if (v !== null && v !== undefined) out.set(f.symbol, v);
+  }
+  return out;
+}
+
+/**
  * Re-validate a worksheet instance against its compliance + required-field
  * invariants. Used as the gate on the `engineer_approve` state-machine
  * transition: the transition is refused when this returns ok=false.
@@ -185,6 +224,7 @@ export async function checkApprovalGate(
       worksheetTemplateId: worksheetInstances.worksheetTemplateId,
       standardCode: standards.code,
       standardId: standards.id,
+      worksheetCode: worksheetTemplates.code,
     })
     .from(worksheetInstances)
     .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
@@ -286,9 +326,15 @@ export async function checkApprovalGate(
   // (the project-wide fallback resolves scalars; a structured carrier is never
   // merged across worksheets).
   const carrierByFieldId = new Map(tmplFields.map((f) => [f.symbol, f]));
+  // DWA-M 820-2 structure block (2026-10-06): a json carrier this worksheet INHERITS through the origin field's
+  // `consumer_worksheets` (the same declared reach the form shows in its inherited panel) — e.g. the contracted-phase
+  // checklist `included_hoai_phases` on 820-2-01 read by `contains()` in a phase guard on 820-2-20. Filled after the
+  // gate rows are loaded, and only when a block condition calls contains() on a symbol that is not a local field.
+  let inheritedCarriers = new Map<string, unknown>();
   const gateCarrier = (sym: string): unknown => {
     const f = carrierByFieldId.get(sym);
-    if (!f || f.dataType !== 'json') return undefined;
+    if (!f) return inheritedCarriers.get(sym);
+    if (f.dataType !== 'json') return undefined;
     return paramByFieldId.get(f.id)?.valueJson ?? undefined;
   };
 
@@ -326,6 +372,7 @@ export async function checkApprovalGate(
         eq(complianceRequirements.severity, 'block'),
       ),
     );
+  inheritedCarriers = await loadInheritedJsonCarriers(instance, localSymbols, rows);
 
   const failingBlockConditions: ApprovalGateResult['failingBlockConditions'] = [];
   const pendingRaw: Array<{ code: string; titleDe: string; condition: string; hint: string | null; missingSymbols: string[] }> = [];
