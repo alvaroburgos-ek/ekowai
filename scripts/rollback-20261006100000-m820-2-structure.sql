@@ -4,7 +4,7 @@
 -- alone and shows up in the read-back. Restored archive rows are deleted; the archive tables stay.
 -- BEFORE running: read-back R7 counts saved project values on the ten new fields — this rollback DELETES them (the fields are
 -- removed). Values typed into fields that were hidden (820-2-18 / 820-2-19) or moved into section C are not touched.
--- Code: the rollback needs no code change (the inherited-carrier read in approval-gate.ts is inert without a contains() gate).
+-- Code: none. The inherited-carrier read drafted in 0e97bdf was reverted in 5b6334f; this block is data-only.
 -- Run (from C:\Users\Ekowai\_wt-g2t, which holds .env.local):
 --   node scripts/apply-migration.mjs C:\Users\Ekowai\_wt-m820\scripts\rollback-20261006100000-m820-2-structure.sql
 BEGIN;
