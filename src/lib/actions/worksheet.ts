@@ -381,15 +381,20 @@ export async function saveWorksheet(
         // m820 API-path finding (2026-10-06): a register value whose rows carry unknown keys,
         // are incomplete under the count_rows rule, or name no catalogue row is stored as sent
         // (never rejected) — but the caller is told, so counters reading 0 are no longer silent.
-        const meta = metaById.get(fieldId);
-        const regCfg = meta ? resolveRegisterConfig(meta) : null;
-        if (meta && regCfg) {
-          const w = registerRowWarnings(meta.symbol, incoming.value, regCfg, {
-            table: regTable,
-            tableRows: regTableRows,
-            symbol: batchSymbol,
-          });
-          if (w) warnings.push(w);
+        // Advisory only: a failure while building the warning must never fail the save.
+        try {
+          const meta = metaById.get(fieldId);
+          const regCfg = meta ? resolveRegisterConfig(meta) : null;
+          if (meta && regCfg) {
+            const w = registerRowWarnings(meta.symbol, incoming.value, regCfg, {
+              table: regTable,
+              tableRows: regTableRows,
+              symbol: batchSymbol,
+            });
+            if (w) warnings.push(w);
+          }
+        } catch (e) {
+          warnings.push(`Registerprüfung nicht möglich [EN] register check failed: ${e instanceof Error ? e.message : String(e)}`);
         }
         break;
       }
