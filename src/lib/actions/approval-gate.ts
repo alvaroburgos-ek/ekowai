@@ -140,6 +140,31 @@ export function buildFallbackValues(entries: Array<{ symbol: string; value: Gate
 }
 
 /**
+ * DWA-M 820-3 structure block (2026-10-06): the project-wide fallback, scoped to the gate's OWN standard first.
+ *
+ * A project usually carries several standards, and two standards can define the SAME symbol with different meanings and
+ * tokens (`project_type`: DWA-M 820-1 `konzept` / `projekt`, DWA-M 820-3 `gesamtsystem` / `einzelprojekt` / `both`, DWA-A 138
+ * `neuerschliessung` …, DIN 276 `building` …). The plain project-wide map drops such a symbol as a conflict (→ every routed gate
+ * of the standard stays pending for good) or, when the own field is still blank, silently takes the FOREIGN value (→ a guard
+ * `project_type IN {…}` decides on another standard's token: a silent pass, the opposite of "an unanswered driver waits").
+ *
+ * Rule: a symbol that is an active field of the gate's own standard (`ownStandardSymbols`) resolves ONLY from saved
+ * occurrences on that standard's worksheets (`ownTemplateIds`) — conflict-free as before, blank → absent → pending; any other
+ * symbol resolves from the whole project exactly as `buildFallbackValues` did. Same-standard reads are what the form's
+ * inheritance (`loadInheritedFields`, same standard only) already shows the engineer.
+ */
+export function buildStandardScopedFallback(
+  entries: ReadonlyArray<ProjectWideEntry>,
+  ownTemplateIds: ReadonlySet<string>,
+  ownStandardSymbols: ReadonlySet<string>,
+): Map<string, GateValue> {
+  const result = buildFallbackValues(entries.filter((e) => !ownStandardSymbols.has(e.symbol)));
+  const own = buildFallbackValues(entries.filter((e) => ownStandardSymbols.has(e.symbol) && ownTemplateIds.has(e.templateId)));
+  for (const [s, v] of own) result.set(s, v);
+  return result;
+}
+
+/**
  * Scoped lookup for gate evaluation: a symbol that IS a field on the gate's
  * worksheet resolves locally (blank → undefined → pending, unchanged from the
  * original behaviour); a symbol that is NOT a local field resolves from the
@@ -269,7 +294,18 @@ export async function checkApprovalGate(
   // resolve from the project's value wherever it is entered (e.g. a config
   // selector like quality_category on another worksheet). Conflict-free only.
   const projectEntries = await loadProjectWideEntries(instance.projectId);
-  const fallback = buildFallbackValues(projectEntries);
+  // DWA-M 820-3 structure block: a symbol of the gate's own standard resolves from that standard only (see
+  // buildStandardScopedFallback — a same-named field of another standard never decides, never blanks it out).
+  const ownStandardFields = await db
+    .select({ symbol: fields.symbol, templateId: fields.worksheetTemplateId })
+    .from(fields)
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+    .where(and(eq(worksheetTemplates.standardId, instance.standardId), eq(fields.active, true)));
+  const fallback = buildStandardScopedFallback(
+    projectEntries,
+    new Set(ownStandardFields.map((f) => f.templateId)),
+    new Set(ownStandardFields.map((f) => f.symbol)),
+  );
   // A4: the symbols an inherited project-wide value resolves for (OTHER
   // worksheets only, conflict-free) — a required field the sheet offers as
   // "aus <WS> … oder überschreiben" is satisfied without re-typing.

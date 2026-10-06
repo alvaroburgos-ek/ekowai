@@ -15,6 +15,7 @@ import {
   formatApprovalGateError,
   formatPendingBlockCondition,
   buildFallbackValues,
+  buildStandardScopedFallback,
   makeGateLookup,
   type ApprovalGateResult,
 } from '../approval-gate';
@@ -167,5 +168,43 @@ describe('makeGateLookup (local-first, project-wide fallback)', () => {
   });
   it('an unknown symbol is undefined', () => {
     expect(lookup('nonexistent')).toBeUndefined();
+  });
+});
+
+describe('buildStandardScopedFallback (DWA-M 820-3 structure block: a symbol of the own standard resolves from that standard only)', () => {
+  // own standard = DWA-M 820-3 (templates t3a / t3b); foreign = DWA-M 820-1 (t1) and DWA-A 138 (t138)
+  const own = new Set(['t3a', 't3b']);
+  const ownSymbols = new Set(['project_type', 'pz_66_1_status']);
+  it('the own value wins over a same-named field of another standard with other tokens (before: conflict → dropped → pending for good)', () => {
+    const entries = [
+      { symbol: 'project_type', value: 'einzelprojekt', templateId: 't3a' },
+      { symbol: 'project_type', value: 'projekt', templateId: 't1' },
+      { symbol: 'project_type', value: 'neuerschliessung', templateId: 't138' },
+    ];
+    expect(buildFallbackValues(entries).has('project_type')).toBe(false); // the old map: conflict
+    expect(buildStandardScopedFallback(entries, own, ownSymbols).get('project_type')).toBe('einzelprojekt');
+  });
+  it('own field still blank: absent (→ pending) — a foreign value never decides (before: the 820-1 token was read)', () => {
+    const entries = [{ symbol: 'project_type', value: 'projekt', templateId: 't1' }];
+    expect(buildFallbackValues(entries).get('project_type')).toBe('projekt');
+    expect(buildStandardScopedFallback(entries, own, ownSymbols).has('project_type')).toBe(false);
+  });
+  it('a symbol the own standard does not define resolves project-wide exactly as before (conflict-free)', () => {
+    const entries = [
+      { symbol: 'quality_category', value: 'C2', templateId: 't1' },
+      { symbol: 'quality_category', value: 'C2', templateId: 't138' },
+      { symbol: 'k_f', value: 1, templateId: 't1' },
+      { symbol: 'k_f', value: 2, templateId: 't138' },
+    ];
+    const m = buildStandardScopedFallback(entries, own, ownSymbols);
+    expect(m.get('quality_category')).toBe('C2');
+    expect(m.has('k_f')).toBe(false);
+  });
+  it('conflicting values INSIDE the own standard stay omitted (never a wrong gate)', () => {
+    const entries = [
+      { symbol: 'project_type', value: 'einzelprojekt', templateId: 't3a' },
+      { symbol: 'project_type', value: 'both', templateId: 't3b' },
+    ];
+    expect(buildStandardScopedFallback(entries, own, ownSymbols).has('project_type')).toBe(false);
   });
 });
