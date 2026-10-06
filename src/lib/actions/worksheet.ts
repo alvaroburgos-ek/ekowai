@@ -20,7 +20,9 @@ import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/a
 import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
-import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
+import { withFallbackRegisterEquations, resolveRegisterConfig } from '@/lib/eval/register-configs';
+import { registerRowWarnings } from '@/lib/eval/register-rows';
+import { makeTableLookup, makeTableRows } from '@/lib/eval/regulation-tables-fallback';
 import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { materializeBasinGoverning, explainBasinGoverningGap } from '@/lib/eval/materialize-basin-governing';
@@ -250,7 +252,7 @@ export async function saveWorksheet(
   // Guard against empty fieldIds: inArray with [] is a SQL error in some drivers.
   const fieldMetas = fieldIds.length > 0
     ? await db
-        .select({ id: fields.id, dataType: fields.dataType, symbol: fields.symbol })
+        .select({ id: fields.id, dataType: fields.dataType, symbol: fields.symbol, widget: fields.widget, uiConfig: fields.uiConfig })
         .from(fields)
         .where(
           and(
@@ -261,6 +263,18 @@ export async function saveWorksheet(
     : [];
   const dataTypeById = new Map(fieldMetas.map((f) => [f.id, f.dataType]));
   const symbolById = new Map(fieldMetas.map((f) => [f.id, f.symbol]));
+  const metaById = new Map(fieldMetas.map((f) => [f.id, f]));
+  // Register-row warning context (registerRowWarnings): the standard's regulation tables
+  // (registered above by ensureRegulationTablesLoaded) and the batch's scalar values for a
+  // column `visible_when` that reads a worksheet symbol (absent ⇒ undefined, conservative).
+  const regTable = makeTableLookup(savedTemplateRow?.standardCode ?? undefined);
+  const regTableRows = makeTableRows(savedTemplateRow?.standardCode ?? undefined);
+  const batchScalarBySymbol = new Map<string, Value>();
+  for (const f of fieldMetas) {
+    const v = input.values[f.id];
+    if (v && v.type !== 'json' && v.value !== undefined) batchScalarBySymbol.set(f.symbol, v.value as Value);
+  }
+  const batchSymbol = (s: string): Value | undefined => batchScalarBySymbol.get(s);
 
   // Load existing parameters for diff (skip if no fields to diff).
   const existing = fieldIds.length > 0
@@ -362,9 +376,23 @@ export async function saveWorksheet(
       case 'boolean':
         valueColumns.valueBoolean = incoming.value;
         break;
-      case 'json':
+      case 'json': {
         valueColumns.valueJson = incoming.value;
+        // m820 API-path finding (2026-10-06): a register value whose rows carry unknown keys,
+        // are incomplete under the count_rows rule, or name no catalogue row is stored as sent
+        // (never rejected) — but the caller is told, so counters reading 0 are no longer silent.
+        const meta = metaById.get(fieldId);
+        const regCfg = meta ? resolveRegisterConfig(meta) : null;
+        if (meta && regCfg) {
+          const w = registerRowWarnings(meta.symbol, incoming.value, regCfg, {
+            table: regTable,
+            tableRows: regTableRows,
+            symbol: batchSymbol,
+          });
+          if (w) warnings.push(w);
+        }
         break;
+      }
     }
 
     const prev = existingById.get(fieldId);

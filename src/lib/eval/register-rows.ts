@@ -50,7 +50,9 @@ function coerce(raw: unknown, c: RegisterColumn): Value {
     case 'boolean': return raw === true;
     case 'enum': { const s = str(raw); return s !== null && (!c.options || c.options.includes(s)) ? s : null; }
     case 'date': return str(raw);
-    case 'lookup_key': return str(raw);
+    // m820 API path (2026-10-06): a key cell sent as a finite NUMBER (`"nr": 1`, MCP/API) is the same key as its
+    // string form — `makeTableLookup` compares `String(key)` anyway. NaN/±Infinity/'' stay null.
+    case 'lookup_key': return typeof raw === 'number' ? (Number.isFinite(raw) ? String(raw) : null) : str(raw);
     case 'lookup_value': { const n = num(raw); return n !== null ? n : str(raw); }
     case 'derived': return null;                         // never stored; computed below
     // A3: a grid cell keeps its plain-object carrier as-is (the `Value` union
@@ -126,22 +128,30 @@ function columnHiddenInRow(c: RegisterColumn, values: RowValues, ctx: RegisterRo
   return r.kind === 'fail';
 }
 
-function isComplete(values: RowValues, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx): boolean {
+/** Why a row is incomplete — one entry per failing column, in column order. Empty ⇔ complete. */
+export type RowIncompleteReason = { key: string; kind: 'missing' | 'below_min' | 'above_max' };
+
+function incompleteReasons(values: RowValues, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx): RowIncompleteReason[] {
+  const out: RowIncompleteReason[] = [];
   for (const c of columns) {
     if (c.type === 'derived') continue;
     if (columnHiddenInRow(c, values, ctx)) continue;
     const v = values[c.key];
     if (c.type === 'grid') {
-      if (c.required && gridCellCount(v) < 1) return false;
+      if (c.required && gridCellCount(v) < 1) out.push({ key: c.key, kind: 'missing' });
       continue;
     }
-    if (c.required && (v === null || v === undefined || v === '')) return false;
+    if (c.required && (v === null || v === undefined || v === '')) { out.push({ key: c.key, kind: 'missing' }); continue; }
     if (c.type === 'number' && typeof v === 'number') {
-      if (c.min !== undefined && v < c.min) return false;
-      if (c.max !== undefined && v > c.max) return false;
+      if (c.min !== undefined && v < c.min) out.push({ key: c.key, kind: 'below_min' });
+      else if (c.max !== undefined && v > c.max) out.push({ key: c.key, kind: 'above_max' });
     }
   }
-  return true;
+  return out;
+}
+
+function isComplete(values: RowValues, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx): boolean {
+  return incompleteReasons(values, columns, ctx).length === 0;
 }
 
 export function prepareRegisterRows(carrierRaw: unknown, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx, opts: RegisterRowsOpts = {}): PreparedRegister {
@@ -315,4 +325,99 @@ export function buildRegisters(
     });
   }
   return out;
+}
+
+/** "1, 2, 4–7" — 1-based row numbers, consecutive runs collapsed, capped so a 200-row register stays one line. */
+function rowList(nums: readonly number[]): string {
+  const runs: string[] = [];
+  for (let i = 0; i < nums.length; ) {
+    let j = i;
+    while (j + 1 < nums.length && nums[j + 1] === nums[j] + 1) j++;
+    runs.push(j === i ? String(nums[i]) : `${nums[i]}–${nums[j]}`);
+    i = j + 1;
+  }
+  return runs.length > 8 ? `${runs.slice(0, 8).join(', ')}, …` : runs.join(', ');
+}
+
+export type RegisterWarningConfig = {
+  columns: readonly RegisterColumn[];
+  override?: { flag_key: string; applies_to: readonly string[] };
+  legacy_map?: Record<string, Record<string, string>>;
+};
+
+/**
+ * m820 API-path finding (2026-10-06): register rows written through the API/MCP with a wrong shape
+ * were stored silently and every `count_rows` over them read 0. This builds ONE save-time WARNING
+ * line per register (never an error — the save is not rejected, the stored value is not changed):
+ *   (i)   row keys that are neither `id`, a declared column, the override flag nor a `legacy_map`
+ *         source key (the only keys the editor / legacy replay read — everything else is ignored;
+ *         register-level flags live on the carrier, not on a row);
+ *   (ii)  rows that are incomplete under the SAME rule `count_rows` uses (`PreparedRow.complete`,
+ *         via `prepareRegisterRows`) — they are not counted;
+ *   (iii) a lookup_key value that names no row of its regulation table (only when the table is
+ *         known in this context) — the editor never stores such a key; its lookup columns stay blank;
+ *   plus a carrier that is not `{ rows: [...] }` at all.
+ * Returns null when there is nothing to say. German first, then `[EN]`.
+ */
+export function registerRowWarnings(symbol: string, carrierRaw: unknown, cfg: RegisterWarningConfig, ctx: RegisterRowsCtx): string | null {
+  if (carrierRaw === null || carrierRaw === undefined) return null;
+  if (!isPlainObject(carrierRaw) || !Array.isArray(carrierRaw.rows)) {
+    return `Register ${symbol}: Wert hat nicht die Form { rows: [...] } — keine Zeile wird gezählt [EN] value is not of the form { rows: [...] } — no row is counted`;
+  }
+  const columns = cfg.columns;
+  const known = new Set<string>(['id', ...columns.map((c) => c.key), ...Object.keys(cfg.legacy_map ?? {})]);
+  if (cfg.override) known.add(cfg.override.flag_key);
+  const opts: RegisterRowsOpts = { legacyMap: cfg.legacy_map, overrideFlagKey: cfg.override?.flag_key, overrideAppliesTo: cfg.override?.applies_to };
+
+  const notObject: number[] = [];
+  const unknownCols = new Map<string, number[]>();
+  const incompleteBy = new Map<string, { de: string; en: string; rows: number[] }>();
+  const badKeys = new Map<string, { col: string; table: string; value: string; rows: number[] }>();
+
+  carrierRaw.rows.forEach((raw: unknown, i: number) => {
+    const n = i + 1;
+    if (!isPlainObject(raw)) { notObject.push(n); return; }
+    for (const k of Object.keys(raw)) {
+      if (known.has(k)) continue;
+      const l = unknownCols.get(k) ?? [];
+      l.push(n);
+      unknownCols.set(k, l);
+    }
+    // Same preparation as count_rows (typed cells, legacy replay, refill, derived cells, completeness).
+    const prepared = prepareRegisterRows({ rows: [raw] }, columns, ctx, opts).rows[0];
+    if (!prepared) return;
+    if (!prepared.complete) {
+      const reasons = incompleteReasons(prepared.values, columns, ctx);
+      const de = reasons.length === 0 ? 'unvollständig'
+        : reasons.map((r) => (r.kind === 'missing' ? `Pflichtspalte ${r.key} fehlt` : r.kind === 'below_min' ? `${r.key} unter Minimum` : `${r.key} über Maximum`)).join(', ');
+      const en = reasons.length === 0 ? 'incomplete'
+        : reasons.map((r) => (r.kind === 'missing' ? `required column ${r.key} missing` : r.kind === 'below_min' ? `${r.key} below minimum` : `${r.key} above maximum`)).join(', ');
+      const e = incompleteBy.get(de) ?? { de, en, rows: [] };
+      e.rows.push(n);
+      incompleteBy.set(de, e);
+    }
+    for (const c of columns) {
+      if (c.type !== 'lookup_key' || !c.lookup) continue;
+      const v = prepared.values[c.key];
+      if (v === null || v === undefined || v === '') continue;
+      const tableRows = ctx.tableRows?.(c.lookup.table_code);
+      if (!tableRows || tableRows.length === 0) continue;   // table unknown here ⇒ say nothing
+      if (tableRows.some((tr) => tr.row_key === String(v))) continue;
+      const id = `${c.key}|${String(v)}`;
+      const e = badKeys.get(id) ?? { col: c.key, table: c.lookup.table_code, value: String(v), rows: [] };
+      e.rows.push(n);
+      badKeys.set(id, e);
+    }
+  });
+
+  const de: string[] = [];
+  const en: string[] = [];
+  const zeile = (rows: number[]) => `${rows.length === 1 ? 'Zeile' : 'Zeilen'} ${rowList(rows)}`;
+  const row = (rows: number[]) => `${rows.length === 1 ? 'row' : 'rows'} ${rowList(rows)}`;
+  if (notObject.length) { de.push(`${zeile(notObject)} kein Objekt — wird nicht gezählt`); en.push(`${row(notObject)} not an object — not counted`); }
+  for (const e of incompleteBy.values()) { de.push(`${zeile(e.rows)} unvollständig (${e.de}) — wird nicht gezählt`); en.push(`${row(e.rows)} incomplete (${e.en}) — not counted`); }
+  for (const [k, rows] of unknownCols) { de.push(`unbekannte Spalte ${k} (${zeile(rows)}) — wird ignoriert`); en.push(`unknown column ${k} (${row(rows)}) — ignored`); }
+  for (const e of badKeys.values()) { de.push(`${e.col} = ${e.value} ist kein Schlüssel der Tabelle ${e.table} (${zeile(e.rows)})`); en.push(`${e.col} = ${e.value} is not a key of table ${e.table} (${row(e.rows)})`); }
+  if (de.length === 0) return null;
+  return `Register ${symbol}: ${de.join('; ')} [EN] ${en.join('; ')}`;
 }
