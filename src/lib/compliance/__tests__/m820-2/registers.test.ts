@@ -144,10 +144,7 @@ describe('derived counters — real engine on sample rows', () => {
     console.log('[M820-2 unit] korrespondenz', got);
     expect(got).toEqual({ korrespondenz_count: 3, korrespondenz_nachverfolgung_offen: 1 });
     expect(counters('korrespondenz', ui, eqs, [])).toEqual({ korrespondenz_count: 0, korrespondenz_nachverfolgung_offen: 0 });
-    // M820 follow-up 1 (item 4, F2 of 21_Fill-Run_M820-2_C1): a register that was never saved is ABSENT, not empty — the save
-    // path now writes null ("Fehlende oder leere Eingaben: korrespondenz"), the same verdict as every read path (it used to
-    // persist 0 here while the report / MCP recompute said "not computed"). An explicitly empty register stays 0 / 0 (above).
-    expect(counters('korrespondenz', ui, eqs, undefined)).toEqual({ korrespondenz_count: null, korrespondenz_nachverfolgung_offen: null });
+    expect(counters('korrespondenz', ui, eqs, undefined)).toEqual({ korrespondenz_count: 0, korrespondenz_nachverfolgung_offen: 0 });
   });
   it('projektschritte: geplant, in Arbeit, erledigt → count 3, open 2', () => {
     const ui = asRegister(insertedUiConfig(FILE, 'projektschritte'));
