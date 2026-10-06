@@ -1,14 +1,17 @@
 /**
  * DWA-M 820-2 structure block — the SHIPPED gate conditions and visible_when rules of the staged migration
  * scripts/migrations/20261006100000_m820_2_structure.sql, read out of the file and evaluated with the REAL engine
- * (`evaluateCondition` with the json carrier accessor, `computeVisibility`). Nothing is applied anywhere.
+ * (`evaluateCondition`, `computeVisibility`). Nothing is applied anywhere.
  *
- * Cases: Forscheln (no HOAI contract — the phases EKOWAI actually delivers mapped to LPH 0–5, construction by the client in
- * Eigenleistung, acceptance without a long test operation) — the routed gates do not block; a full public LPH 0–9 project
- * with violating inputs — every routed gate blocks; unanswered drivers — pending, never a silent pass.
- * Sources ([P0] L338 PDF p. 14, [P8a] L955 p. 36, [P8b] L1514 p. 53, [P8c] L1535 p. 54, [P9] L1828/L1836 p. 64, [V1] L1384 p. 49 /
- * L1442 p. 51 / L517 p. 21, [T1] L1621 p. 57, [T2] L1625 p. 57, [T3] L1641 p. 58, [E1] L1313 p. 47, [F06]…[F59]) are quoted in
- * the migration header.
+ * Review round 1 (C-1 / I-1 / I-2): the phase checks are routed by WHO PERFORMS the phase (verantwortung_lph8 / _lph9 on
+ * 820-2-01: auftragnehmer / auftraggeber / dritter / entfaellt), not by the engineer's contracted phases.
+ * Cases: Forscheln — LPH 8 performed by the client himself (self-build), LPH 9 responsibility not in the records (GAP → the
+ * gates wait), construction in Eigenleistung, acceptance without a long test operation; a public project with an external
+ * supervisor and violating inputs — every routed gate blocks; a concept-only project (entfaellt) — the phase checks are off;
+ * unanswered drivers — pending, never a silent pass.
+ * Sources ([P1] L336/L338 p. 14, [P8a] L955/L967 p. 36, [P8b] L534 p. 22 / L1514 p. 53 / L1531 p. 54, [P8c] L1535/L1545 p. 54,
+ * [P9] L1816/L1836/L1844 p. 64, [V1] L1384 p. 49 / L1442 p. 51 / L517 p. 21, [T1] L1621 p. 57, [T2] L1625 p. 57, [T3] L1641 p. 58,
+ * [E1] L1313 p. 47, [F06]…[F59]) are quoted in the migration header.
  */
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
@@ -17,29 +20,19 @@ import { resolve } from 'node:path';
 import { evaluateCondition } from '../../evaluate';
 import { computeVisibility } from '../../visibility';
 import { conditionFromSql, visibleWhenFromSql } from '../m820-1/sql-condition';
-import { insertedFieldStatement, literals } from './sql-extract';
+import { insertedFieldStatement, insertedGateCondition, jsonbLiterals, literals } from './sql-extract';
 
 const FILE = resolve(__dirname, '../../../../../scripts/migrations/20261006100000_m820_2_structure.sql');
 const md5 = (s: string) => createHash('md5').update(s).digest('hex');
 type V = string | number | boolean;
 type Vals = Record<string, V | undefined>;
 
-const LPH = ['LPH 0 – Bedarfsplanung', 'LPH 1 – Grundlagenermittlung', 'LPH 2 – Vorplanung', 'LPH 3 – Entwurfsplanung', 'LPH 4 – Genehmigungsplanung',
-  'LPH 5 – Ausführungsplanung', 'LPH 6 – Vorbereitung der Vergabe', 'LPH 7 – Mitwirkung bei der Vergabe', 'LPH 8 – Objektüberwachung (Bauüberwachung)', 'LPH 9 – Objektbetreuung'];
-const FORSCHELN_PHASES = { selected: LPH.slice(0, 6) }; // the select_many carrier shape the checklist editor writes
-const PUBLIC_PHASES = { selected: LPH };
-
-/** Evaluate like the approval gate: scalar lookup + raw json carrier for `included_hoai_phases`. */
-const ev = (cond: string, vals: Vals, phases?: unknown) =>
-  evaluateCondition(cond, (s) => vals[s], { carrier: (s) => (s === 'included_hoai_phases' ? phases : undefined) });
-const kind = (cond: string, vals: Vals, phases?: unknown) => ev(cond, vals, phases).kind;
+const ev = (cond: string, vals: Vals) => evaluateCondition(cond, (s) => vals[s]);
+const kind = (cond: string, vals: Vals) => ev(cond, vals).kind;
 const shipped = (code: string) => conditionFromSql(FILE, code);
 
 // Live conditions of the 2026-10-05 prod dump (vault _baseline/2026-10-05_prod_DWA-M-820-2.encoding.json), verbatim.
 const BASELINE: Record<string, string> = {
-  'REQ-21': 'framework_conditions_clarified == true',
-  'REQ-22': 'forward_planning_done == true',
-  'REQ-23': 'changed_needs_recognised == true',
   'REQ-19': 'qs_plan_lph8_present == true',
   'REQ-43': 'quality_supervision_active == true',
   'REQ-44': 'bauueberwachung_competencies == true',
@@ -59,11 +52,12 @@ const BASELINE: Record<string, string> = {
   'REQ-55': '',
   'REQ-59': '',
 };
-const PH = (i: number) => `contains(included_hoai_phases, '${LPH[i]}')`;
+const R8_ON = "verantwortung_lph8 != 'entfaellt'";
+const R8_EXT = "verantwortung_lph8 == 'auftragnehmer' OR verantwortung_lph8 == 'dritter'";
+const R9_ON = "verantwortung_lph9 != 'entfaellt'";
 const GUARD: Record<string, string> = {
-  'REQ-21': PH(0), 'REQ-22': PH(0), 'REQ-23': PH(0),
-  'REQ-19': PH(8), 'REQ-43': PH(8), 'REQ-44': PH(8),
-  'REQ-51': PH(9), 'REQ-52': PH(9),
+  'REQ-19': R8_ON, 'REQ-43': R8_ON, 'REQ-44': R8_EXT,
+  'REQ-51': R9_ON, 'REQ-52': R9_ON,
   'REQ-38': 'bauleistungen_vergeben == true', 'REQ-39': 'bauleistungen_vergeben == true', 'REQ-40': 'bauleistungen_vergeben == true', 'REQ-41': 'bauleistungen_vergeben == true',
   'REQ-46': "testbetrieb_vs_abnahme_choice == 'testbetrieb' OR testbetrieb_vs_abnahme_choice == 'mischform'",
   'REQ-35': 'einleitung_vorhanden == true',
@@ -77,17 +71,19 @@ const FILLED: Record<string, string> = {
   'REQ-55': 'liability_clarified == true',
   'REQ-59': 'IF bim_methode_angewendet == true THEN (bim_basics_established == true)',
 };
+const REQ_52_2 = `IF ${R9_ON} THEN (verantwortlich_lph9_name IS NOT NULL)`;
 
-/** Every routed body violated (false / dates missing). */
+/** Every routed body violated (false / dates missing / no LPH 9 name). */
 const VIOLATING: Vals = {
-  framework_conditions_clarified: false, forward_planning_done: false, changed_needs_recognised: false,
   qs_plan_lph8_present: false, quality_supervision_active: false, bauueberwachung_competencies: false,
   defect_tracking_active: false, warranty_start_date: '2027-05-01', // end date missing
   nebenangebote_conditions: false, eignungskriterien_set: false, rahmenterminplan_attached: false,
   testbetrieb_planned: false, discharge_permit_extension: 'pending',
 };
+const MET: Vals = { qs_plan_lph8_present: true, quality_supervision_active: true, bauueberwachung_competencies: true, defect_tracking_active: true,
+  warranty_start_date: '2027-05-01', warranty_end_date: '2032-05-01', verantwortlich_lph9_name: 'Betrieb der Anlage (Leitung)' };
 
-describe('the file ships exactly the guarded live bodies (md5 of the live text in the guard) and the filled conditions', () => {
+describe('the file ships exactly the guarded live bodies (md5 of the live text in the guard), the filled conditions and REQ-52-2', () => {
   const sql = readFileSync(FILE, 'utf8');
   it('guards: IF <guard> THEN (<live body>)', () => {
     for (const code of Object.keys(GUARD)) {
@@ -101,8 +97,23 @@ describe('the file ships exactly the guarded live bodies (md5 of the live text i
       expect(sql.includes(`cr.code = '${code}'`) && sql.includes(`md5(cr.condition) = '${md5(BASELINE[code])}'`), `${code} md5`).toBe(true);
     }
   });
-  it('the phase tokens are the stored select_many values (long labels, en dash)', () => {
-    for (const i of [0, 8, 9]) expect(sql.includes(`''${LPH[i]}''`), LPH[i]).toBe(true);
+  it('NEW gate REQ-52-2 (§ 5.8.3 remedy) and NO contracted-phase guard left (REQ-21/-22/-23 untouched, included_hoai_phases not read)', () => {
+    expect(insertedGateCondition(FILE, 'REQ-52-2')).toBe(REQ_52_2);
+    for (const c of ['REQ-21', 'REQ-22', 'REQ-23']) expect(sql.includes(`cr.code = '${c}'`), c).toBe(false);
+    expect(sql.replace(/^--.*$/gm, '')).not.toMatch(/contains\(|included_hoai_phases/);
+  });
+  it('the drivers: REQUIRED enums on 820-2-01 section B — LPH 0 without "entfaellt", LPH 8 / 9 with it; reach to the guarded sheets', () => {
+    const tokens = (sym: string) => (jsonbLiterals(insertedFieldStatement(FILE, sym))[0] as Array<{ value: string }>).map((t) => t.value);
+    expect(tokens('verantwortung_lph0')).toEqual(['auftragnehmer', 'auftraggeber', 'dritter']);
+    expect(tokens('verantwortung_lph8')).toEqual(['auftragnehmer', 'auftraggeber', 'dritter', 'entfaellt']);
+    expect(tokens('verantwortung_lph9')).toEqual(['auftragnehmer', 'auftraggeber', 'dritter', 'entfaellt']);
+    const reach: Record<string, string> = { verantwortung_lph0: "ARRAY['820-2-11']", verantwortung_lph8: "ARRAY['820-2-09','820-2-20']", verantwortung_lph9: "ARRAY['820-2-24']" };
+    for (const [sym, arr] of Object.entries(reach)) {
+      const st = insertedFieldStatement(FILE, sym);
+      expect(st, sym).toMatch(/'enum', NULL, true,/);
+      expect(st, sym).toContain("w.code = '820-2-01'");
+      expect(st, sym).toContain(arr);
+    }
   });
   it('the driver bauleistungen_vergeben is a REQUIRED boolean on 820-2-17 with reach -18 / -19', () => {
     const st = insertedFieldStatement(FILE, 'bauleistungen_vergeben');
@@ -113,43 +124,63 @@ describe('the file ships exactly the guarded live bodies (md5 of the live text i
   });
 });
 
-describe('BROKEN BEFORE — the live gates block the Forscheln route (S-01 / S-02 / S-03)', () => {
-  it('every routed body fails on the truthful Forscheln answers (no LPH 8 / 9, Eigenleistung, acceptance test only)', () => {
-    const got = ['REQ-19', 'REQ-43', 'REQ-44', 'REQ-52', 'REQ-38', 'REQ-39', 'REQ-41', 'REQ-46'].map((c) => [c, kind(BASELINE[c], VIOLATING)]);
+describe('BROKEN BEFORE — the live gates block the Forscheln route (S-02 / S-03)', () => {
+  it('the award and acceptance bodies fail on the truthful Forscheln answers (Eigenleistung, acceptance test only)', () => {
+    const got = ['REQ-38', 'REQ-39', 'REQ-41', 'REQ-46'].map((c) => [c, kind(BASELINE[c], VIOLATING)]);
     console.log(`[M820-2 STRUCTURE unit] before: ${JSON.stringify(got)}`);
     expect(got.every(([, k]) => k === 'fail')).toBe(true);
   });
 });
 
-describe('S-01 phase routing (contains() on the contracted-phase checklist)', () => {
-  const phaseGates = ['REQ-21', 'REQ-22', 'REQ-23', 'REQ-19', 'REQ-43', 'REQ-44', 'REQ-51', 'REQ-52'];
-  it('Forscheln (LPH 0–5): LPH 8 / 9 gates pass with violating bodies; LPH 0 gates are judged by their body', () => {
-    const got = Object.fromEntries(phaseGates.map((c) => [c, kind(shipped(c), VIOLATING, FORSCHELN_PHASES)]));
-    console.log(`[M820-2 STRUCTURE unit] Forscheln phases violating: ${JSON.stringify(got)}`);
-    expect(got).toEqual({ 'REQ-21': 'fail', 'REQ-22': 'fail', 'REQ-23': 'fail', 'REQ-19': 'pass', 'REQ-43': 'pass', 'REQ-44': 'pass', 'REQ-51': 'pass', 'REQ-52': 'pass' });
+describe('S-01 phase routing by responsibility (verantwortung_lph8 / _lph9)', () => {
+  const lph8 = ['REQ-19', 'REQ-43', 'REQ-44'];
+  const lph9 = ['REQ-51', 'REQ-52'];
+  const run = (codes: string[], vals: Vals) => codes.map((c) => kind(shipped(c), vals));
+  it('LPH 8 performed by the CLIENT himself (Forscheln self-build): REQ-19 / REQ-43 judged on the client documentation, REQ-44 (external supervisor only) off', () => {
+    const viol = run(lph8, { ...VIOLATING, verantwortung_lph8: 'auftraggeber' });
+    const met = run(lph8, { ...MET, verantwortung_lph8: 'auftraggeber' });
+    console.log(`[M820-2 STRUCTURE unit] LPH 8 = auftraggeber violating=${JSON.stringify(viol)} met=${JSON.stringify(met)}`);
+    expect(viol).toEqual(['fail', 'fail', 'pass']);
+    expect(met).toEqual(['pass', 'pass', 'pass']);
   });
-  it('public LPH 0–9: every phase gate blocks when violated and passes when met', () => {
-    const met: Vals = { framework_conditions_clarified: true, forward_planning_done: true, changed_needs_recognised: true, qs_plan_lph8_present: true,
-      quality_supervision_active: true, bauueberwachung_competencies: true, defect_tracking_active: true, warranty_start_date: '2027-05-01', warranty_end_date: '2032-05-01' };
-    const viol = phaseGates.map((c) => kind(shipped(c), VIOLATING, PUBLIC_PHASES));
-    const ok = phaseGates.map((c) => kind(shipped(c), met, PUBLIC_PHASES));
-    console.log(`[M820-2 STRUCTURE unit] public LPH 0–9 violating=${JSON.stringify(viol)} met=${JSON.stringify(ok)}`);
-    // REQ-51 with the end date blank is pending (A1: never-entered + IS NOT NULL ⇒ missing — as before the block); a pending
-    // block gate refuses approval like a failing one (owner ruling 2026-10-05, approval-gate.ts).
-    expect(viol).toEqual(['fail', 'fail', 'fail', 'fail', 'fail', 'fail', 'pending', 'fail']);
-    expect(ok.every((k) => k === 'pass')).toBe(true);
-  });
-  it('contracted phases not entered: pending on included_hoai_phases (no silent pass); an empty selection switches every phase gate off', () => {
-    for (const c of phaseGates) {
-      expect(ev(shipped(c), VIOLATING, undefined), c).toEqual({ kind: 'pending', missingSymbols: ['included_hoai_phases'] });
-      expect(kind(shipped(c), VIOLATING, { selected: [] }), c).toBe('pass');
+  it('LPH 8 by a contractor or a third party: all three judged', () => {
+    for (const who of ['auftragnehmer', 'dritter']) {
+      expect(run(lph8, { ...VIOLATING, verantwortung_lph8: who }), who).toEqual(['fail', 'fail', 'fail']);
+      expect(run(lph8, { ...MET, verantwortung_lph8: who }), who).toEqual(['pass', 'pass', 'pass']);
     }
   });
-  it('a bare-array carrier reads the same; a short token ("LPH 8") does NOT match the stored long label', () => {
-    expect(kind(shipped('REQ-19'), VIOLATING, LPH)).toBe('fail');
-    expect(kind(shipped('REQ-19'), VIOLATING, ['LPH 8'])).toBe('pass');
+  it('LPH 9 by anyone — the client included (the uncontracted LPH 9 is the printed PROBLEM, L1816): REQ-51 / REQ-52 / REQ-52-2 judged', () => {
+    for (const who of ['auftragnehmer', 'auftraggeber', 'dritter']) {
+      const viol = [...run(lph9, { ...VIOLATING, verantwortung_lph9: who }), kind(REQ_52_2, { verantwortung_lph9: who })];
+      const met = [...run(lph9, { ...MET, verantwortung_lph9: who }), kind(REQ_52_2, { ...MET, verantwortung_lph9: who })];
+      console.log(`[M820-2 STRUCTURE unit] LPH 9 = ${who} violating=${JSON.stringify(viol)} met=${JSON.stringify(met)}`);
+      expect(viol, who).toEqual(['pending', 'fail', 'pending']); // REQ-51 end date blank / REQ-52-2 name blank = pending (A1) → approval refused
+      expect(met, who).toEqual(['pass', 'pass', 'pass']);
+    }
+  });
+  it('concept-only project (entfaellt): every LPH 8 / LPH 9 check is off', () => {
+    expect(run(lph8, { ...VIOLATING, verantwortung_lph8: 'entfaellt' })).toEqual(['pass', 'pass', 'pass']);
+    expect([...run(lph9, { ...VIOLATING, verantwortung_lph9: 'entfaellt' }), kind(REQ_52_2, { verantwortung_lph9: 'entfaellt' })]).toEqual(['pass', 'pass', 'pass']);
+  });
+  it('I-2: driver not answered → every routed check is pending on it (no silent pass)', () => {
+    for (const c of lph8) expect(ev(shipped(c), VIOLATING), c).toEqual({ kind: 'pending', missingSymbols: ['verantwortung_lph8'] });
+    for (const c of lph9) expect(ev(shipped(c), VIOLATING), c).toEqual({ kind: 'pending', missingSymbols: ['verantwortung_lph9'] });
+    expect(ev(REQ_52_2, {})).toEqual({ kind: 'pending', missingSymbols: ['verantwortung_lph9'] });
+    // also with every body MET: still pending on the driver
+    for (const c of [...lph8, ...lph9]) expect(kind(shipped(c), MET), c).toBe('pending');
+  });
+  it('visible_when: LPH 8 / 9 inputs hide only on a definite "entfaellt" (and the competence question only for an external supervisor)', () => {
+    const hidden = (rule: string, vals: Vals) => computeVisibility([{ id: 'f', symbol: 'x', sectionId: null, visibleWhen: rule }], [], (s) => vals[s]).hiddenFieldIds.has('f');
+    const r8 = visibleWhenFromSql(FILE, 'qs_plan_lph8_present');
+    const r8ext = visibleWhenFromSql(FILE, 'bauueberwachung_competencies');
+    const r9 = visibleWhenFromSql(FILE, 'warranty_start_date');
+    expect([r8, r8ext, r9]).toEqual([R8_ON, R8_EXT, R9_ON]);
+    expect(['auftragnehmer', 'auftraggeber', 'dritter', 'entfaellt', undefined].map((v) => hidden(r8, { verantwortung_lph8: v }))).toEqual([false, false, false, true, false]);
+    expect(['auftragnehmer', 'auftraggeber', 'dritter', 'entfaellt', undefined].map((v) => hidden(r8ext, { verantwortung_lph8: v }))).toEqual([false, true, false, true, false]);
+    expect(['auftraggeber', 'entfaellt', undefined].map((v) => hidden(r9, { verantwortung_lph9: v }))).toEqual([false, true, false]);
   });
 });
+
 
 describe('S-02 construction award (bauleistungen_vergeben)', () => {
   const tender = ['REQ-38', 'REQ-39', 'REQ-40', 'REQ-41'];

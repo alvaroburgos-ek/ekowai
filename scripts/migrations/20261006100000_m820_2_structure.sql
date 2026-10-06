@@ -3,20 +3,21 @@
 -- Brief: vault 01-Projects/ekowai-wizard/m820-wizard-test/_briefs/structure-2-brief.md (findings S-01, S-02, S-03, S-07, S-08 of
 -- 10_Inventory_M820-2.md). Composes with the registers block 20261005200000_m820_2_registers.sql (apply that one FIRST).
 --
--- !! CODE PREREQUISITE — deploy the branch code BEFORE applying this block !!
---   The phase guards call contains(included_hoai_phases, '…') on sheets other than 820-2-01. The approval gate on the live
---   build reads json carriers of the gate's OWN sheet only, so on the live build every phase-guarded block gate would wait
---   (pending → approval refused). This branch adds the inherited-carrier read (src/lib/actions/approval-gate.ts
---   loadInheritedJsonCarriers: json fields of the same standard whose consumer_worksheets name the sheet) and the same read in
---   the standard dossier (src/lib/pdf/assemble-standard-report.ts gateCarrier). The form already sees the inherited value
---   (step 6 below gives the reach).
+-- REVIEW ROUND 1 (controller rulings C-1 / I-1 / I-2, 2026-10-06): the phase checks are routed by WHO PERFORMS the phase, not by
+--   "phase contracted to the engineer" — § 5.8.3 prints the uncontracted LPH 9 as the problem, § 4.1 lets the client supervise
+--   himself, § 1 covers "aller Projektbeteiligten". The contains(included_hoai_phases, …) guards of round 0 are gone; nothing in this
+--   block reads included_hoai_phases any more, so the approval-gate / dossier code change of round 0 is reverted (data only).
 --
 -- WHAT THE PROJECT TEAM SEES (plain English):
---   1. Contracted phases (820-2-01 "Beauftragte LPH") now route the phase checks:
---        LPH 0 not ticked → REQ-21, REQ-22 (block), REQ-23 (warn) on 820-2-11 are not required (shown as met);
---        LPH 8 not ticked → REQ-19 (820-2-09), REQ-43, REQ-44 (820-2-20) are not required;
---        LPH 9 not ticked → REQ-51, REQ-52 (820-2-24) are not required.
---      Ticked → the check works exactly as before. Not answered → the check waits for 820-2-01 (no silent pass).
+--   1. Three NEW required questions on 820-2-01 "who performs the phase": LPH 0 (Bedarfsplanung), LPH 8 (Bauüberwachung), LPH 9
+--      (Objektbetreuung / Gewährleistung) — Auftragnehmer / Auftraggeber selbst / Dritter, and for LPH 8 and LPH 9 also "entfällt —
+--      keine Bauausführung" (concept work only). LPH 0 has no "entfällt" (§ 1: every concept and project needs needs planning).
+--        LPH 8: REQ-19 (820-2-09) and REQ-43 (820-2-20) apply whoever supervises, the client included; REQ-44 only for an external
+--               supervisor (Auftragnehmer / Dritter); "entfällt" → not required and their inputs hidden.
+--        LPH 9: REQ-51, REQ-52 and NEW REQ-52-2 (820-2-24, the responsible party must be named) apply whoever is responsible;
+--               "entfällt" → not required and the warranty inputs hidden.
+--        LPH 0: documents who performs the needs planning; REQ-21/-22/-23 are NOT touched (they apply in every project).
+--      Not answered → every routed check waits for the answer on 820-2-01 (no silent pass).
 --   2. NEW required question on 820-2-17 "Bauleistungen werden an ausführende Firmen vergeben" (Yes/No). No = the client builds
 --      in Eigenleistung: REQ-38, REQ-39 (820-2-17), REQ-40 (warn), REQ-41 (820-2-18) are not required; "Art der
 --      Leistungsbeschreibung" (820-2-18) and the five award-summary entries of 820-2-19 are hidden. Yes = everything as before.
@@ -30,27 +31,35 @@
 -- SOURCES (every quote re-read 2026-10-06 on the RENDERED PDF, scoop pdftotext of
 --   C:\Users\Ekowai\Desktop\Guidelines\DWA-M-820-2\DWA-M_820-2.pdf, machine match per page; printed page = PDF page − 2;
 --   L### = line of Desktop\Guidelines\DWA-M-820-2\DWA-M_820-2.md):
---   [P0]  § 1, L338, PDF p. 14: "Teil 2 umfasst die Leistungserbringung aller Projektbeteiligten über alle Phasen hinweg, d. h. von der
---         Bedarfsplanung (LPH 0) bis zur Objektbetreuung (LPH 9), inklusive Inbetriebnahme und Übergabe an den Betrieb." — EN "Part 2
---         covers the services of all parties across all phases, i.e. from needs planning (LPH 0) to object support (LPH 9) …"
---         → § 5.2 "Phase „Bedarfsplanung“" (L1028, PDF p. 39) = LPH 0: guard of REQ-21 (§ 5.2.2), REQ-22 (§ 5.2.3), REQ-23 (§ 5.2.4).
---   [P8a] § 4.7.2 heading, L955, PDF p. 36: "Qualitätssicherungsplan bzw. -überwachungsplan (LPH 8) wird nicht geführt" — EN "QA /
---         supervision plan (LPH 8) is not kept" → guard of REQ-19.
---   [P8b] § 5.6.2, L1514, PDF p. 53: "Die Bauüberwachung muss die geschlossenen Verträge, inklusive der Leistungsverzeichnisse, kennen und
---         sicherstellen …" with § 4.1, L534, PDF p. 22: "Die örtliche Bauüberwachung und Bauoberleitung werden vergeben oder durch den
---         Auftraggeber erbracht." — EN "Site supervision must know the contracts …"; "Local site supervision and construction
---         management are awarded or performed by the client." → REQ-43 guarded by the LPH 8 token, whose stored label is
---         "LPH 8 – Objektüberwachung (Bauüberwachung)". RESIDUE (sign-off): § 5.6.2 L1531, PDF p. 54 "Werden Bauüberwachungsleistungen
---         vom Auftraggeber selbst erbracht, sind die erforderlichen, fachlichen und personellen Ressourcen in ausreichendem Umfang
---         bereitzustellen." — a client who supervises himself is not checked by any gate (no field), before or after this block.
---   [P8c] § 5.6.3, L1535, PDF p. 54: "Wird in einem Projekt die Bauüberwachung durch einen Auftragnehmer wahrgenommen …" — EN "If site
---         supervision is performed by a contractor …" → REQ-44 guarded by LPH 8.
---   [P9]  § 5.8.3, L1828 / L1836, PDF p. 64: "Die Zuständigkeit für die LPH 9 ist festgelegt …" / "Es ist festgelegt, wer für die Phase LPH 9
---         verantwortlich ist." and the printed situation L1816 "Dem Auftragnehmer ist die LPH 9 nicht beauftragt worden." — EN "Responsibility
---         for LPH 9 is defined"; "the contractor was not commissioned with LPH 9" → § 5.8 "Phase „Gewährleistung“" (L1784, PDF p. 63)
---         = LPH 9: guard of REQ-51, REQ-52.
---   NOT phase-guarded (the print names no LPH for the phase; mapping is a ruling, see 18_SIGN-OFF): § 5.3 Planung, § 5.4 Genehmigungen
---         (REQ-34/-36/-37), § 5.6.1 / § 5.6.4 (REQ-42/-45), § 5.7 Inbetriebnahme (REQ-47/-48/-49).
+--   [P1]  § 1, L336 / L338, PDF p. 14: "Der Anwendungsbereich des vorliegenden Merkblatts umfasst alle Phasen der Konzepterstellung und
+--         Projektabwicklung bis hin zur Inbetriebnahme und Übergabe." · "Er erstreckt sich auch auf die zugehörigen Bedarfsplanungen, da
+--         sowohl die Konzepte als auch alle Projekte einer umfangreichen Vorbereitung durch den Auftraggeber bedürfen." · "Teil 2 umfasst die
+--         Leistungserbringung aller Projektbeteiligten über alle Phasen hinweg, d. h. von der Bedarfsplanung (LPH 0) bis zur Objektbetreuung
+--         (LPH 9) …" — EN "The scope covers all phases of concept work and project execution up to commissioning and handover." · "It also
+--         extends to the related needs planning, since concepts as well as all projects need extensive preparation by the client." ·
+--         "Part 2 covers the services of ALL parties across all phases …" → the drivers ask who performs the phase; "entfaellt" only for
+--         a project without construction (concept work) and only for LPH 8 / LPH 9; LPH 0 never "entfaellt".
+--   [P8a] § 4.7.2 heading, L955, PDF p. 36: "Qualitätssicherungsplan bzw. -überwachungsplan (LPH 8) wird nicht geführt" and L967 "Für alle
+--         wichtigen Gewerke ist festgelegt, wo und wie die einzelnen Qualitätsaspekte kontrolliert und dokumentiert werden." → REQ-19
+--         applies whenever LPH 8 is performed (verantwortung_lph8 != 'entfaellt').
+--   [P8b] § 4.1, L534, PDF p. 22: "Die örtliche Bauüberwachung und Bauoberleitung werden vergeben oder durch den Auftraggeber erbracht." ·
+--         § 5.6.2, L1514, PDF p. 53: "Die Bauüberwachung muss die geschlossenen Verträge, inklusive der Leistungsverzeichnisse, kennen und
+--         sicherstellen …" · § 5.6.2, L1531, PDF p. 54: "Werden Bauüberwachungsleistungen vom Auftraggeber selbst erbracht, sind die
+--         erforderlichen, fachlichen und personellen Ressourcen in ausreichendem Umfang bereitzustellen." — EN "Site supervision is awarded
+--         or performed by the client."; "If the client performs site supervision himself, the required technical and staff resources are to
+--         be provided." → REQ-43 applies for every performer, the client included.
+--   [P8c] § 5.6.3, L1535, PDF p. 54: "Wird in einem Projekt die Bauüberwachung durch einen Auftragnehmer wahrgenommen …"; L1545 "Der
+--         Auftraggeber muss eindeutig festlegen, welche Kompetenzen einer externen Bauüberwachung zugebilligt werden sollen." — EN "If site
+--         supervision is performed by a contractor …"; "competences granted to an EXTERNAL site supervision" → REQ-44 only for
+--         verantwortung_lph8 = auftragnehmer / dritter.
+--   [P9]  § 5.8.3, L1816 / L1836 / L1844, PDF p. 64: problem "Dem Auftragnehmer ist die LPH 9 nicht beauftragt worden."; remedy "Es ist
+--         festgelegt, wer für die Phase LPH 9 verantwortlich ist." and "Es besteht auch die Möglichkeit, über einen Rahmenvertrag für mehrere
+--         Anlagen die Leistungen der LPH 9 auszuschreiben und zu beauftragen." — EN "The contractor was not commissioned with LPH 9." (the
+--         PROBLEM, so an uncommissioned LPH 9 must not switch the checks off); "It is laid down who is responsible for phase LPH 9." →
+--         REQ-51, REQ-52 apply whenever LPH 9 takes place; NEW gate REQ-52-2 = the remedy (a responsible party is named).
+--   NOT phase-guarded (the print names no LPH for the phase; mapping is a ruling, see 18_SIGN-OFF): § 5.2 Bedarfsplanung (REQ-21/-22/-23
+--         stay as they are — every project has it, [P1]), § 5.3 Planung, § 5.4 Genehmigungen (REQ-34/-36/-37), § 5.6.1 / § 5.6.4
+--         (REQ-42/-45), § 5.7 Inbetriebnahme (REQ-47/-48/-49).
 --   [V1]  § 5.5 heading, L1384, PDF p. 49: "Phase „Vorbereitung und Durchführen der Vergabe“ (Bauleistungen)"; § 5.5.3, L1442, PDF p. 51:
 --         "In der Phase der Ausführungsplanung bzw. der Vorbereitung der Vergabe ist die Art der Vergabeverfahren für die Bauleistungen im
 --         konkreten Projekt zu definieren."; § 4.1, L517, PDF p. 21: "Auch der Auftraggeber selbst bringt neben seinen (nicht delegierbaren)
@@ -74,14 +83,15 @@
 --   [F06] § 4.3.4, L638, PDF p. 26 · [F13] § 4.5.3, L840, PDF p. 33 · [F15] § 4.5.5, L885 / L887, PDF p. 34 · [F45] § 5.6.4, L1571, PDF p. 55 ·
 --   [F50] § 5.7.6, L1766 / L1774, PDF p. 62 · [F55] § 7.5, L2136, PDF p. 74 · [F59] § 8.3.2, L2311 / L2313, PDF p. 79 — each quoted
 --         verbatim (German + EN) in the gate description and the field description below.
---
 -- WHAT THIS BLOCK DOES (idempotent; md5-guarded gate edits and guarded field edits with in-transaction archives):
---   1. 6 new boolean fields: bauleistungen_vergeben (820-2-17, B, REQUIRED, reach -18 -19) [V1]; optional, section C:
+--   1. 10 new fields: verantwortung_lph0 / _lph8 / _lph9 (820-2-01, B, REQUIRED enums; reach -11 / -09 -20 / -24) [P1][P8b][P9];
+--      verantwortlich_lph9_name (820-2-24, B, text, gate-required through REQ-52-2, hidden when LPH 9 entfaellt) [P9];
+--      bauleistungen_vergeben (820-2-17, B, REQUIRED boolean, reach -18 -19) [V1]; optional booleans, section C:
 --      betrieb_frueh_eingebunden (-05) [F06], kostenhinweise_auftragnehmer (-08) [F13], kostenziele_aenderungsprozess (-08) [F15],
 --      aenderungsmanagement_gefuehrt (-21) [F45], inbetriebnahme_organisiert (-22) [F50].
---   2. 14 guarded gates: IF <guard> THEN (<live body>) — REQ-21/-22/-23 (LPH 0), REQ-19/-43/-44 (LPH 8), REQ-51/-52 (LPH 9),
---      REQ-38/-39/-40/-41 (bauleistungen_vergeben == true), REQ-46 (choice testbetrieb / mischform), REQ-35 (einleitung_vorhanden).
---      Tokens exactly as stored in the select_many (long labels with an en dash, S-16).
+--   2. 11 guarded gates: IF <guard> THEN (<live body>) — REQ-19, REQ-43 (verantwortung_lph8 != 'entfaellt'), REQ-44
+--      (verantwortung_lph8 = auftragnehmer / dritter), REQ-51, REQ-52 (verantwortung_lph9 != 'entfaellt'), REQ-38/-39/-40/-41
+--      (bauleistungen_vergeben == true), REQ-46 (choice testbetrieb / mischform), REQ-35 (einleitung_vorhanden).
 --   3. 7 warn gates re-pointed (severity kept): REQ-06 (stays -05), REQ-13 (-05 → -08), REQ-15 (-06 → -08), REQ-45 (-09 → -21),
 --      REQ-50 (-20 → -22), REQ-55 (-25 → -26, title corrected to its clause), REQ-59 (-25 → -27); clause_reference + description.
 --   4. section_id = C for 15 active fields that had none (only WHERE section_id IS NULL):
@@ -89,14 +99,19 @@
 --      planning_summary_date · -19 vergabeverfahren_used, auswahlentscheidung_dokumentiert, zuschlag_erteilt_datum, final_contract_value,
 --      vergabesumme_summary_date · -21 change_orders, oeffentlichkeitsarbeit_durchgefuehrt, kommunikations_plan_dokumentiert,
 --      changes_record_date. (-10 risk_register got its section from the registers block.)
---   5. visible_when = bauleistungen_vergeben == true on -18 leistungsbeschreibung_type and the five -19 summary fields (none is an
---      equation output; an unanswered driver keeps them visible — a hidden field only hides on a definite No).
---   6. consumer reach: included_hoai_phases + -09 -11 -20 -24; testbetrieb_vs_abnahme_choice + -22 (if missing).
--- SAFETY: no severity change, no new gate, no value / equation / table change. 21 existing gate rows edited (11 block, 10 warn; archived),
---   6 new fields, 17 existing field rows edited (archived: 15 sections, 5 of them + leistungsbeschreibung_type visible_when,
---   included_hoai_phases reach; testbetrieb_vs_abnahme_choice only if its reach lacks 820-2-22). A changed live gate text makes its
---   UPDATE a no-op and archives nothing.
--- STAGED — not applied. Apply (from C:\Users\Ekowai\_wt-g2t, which holds .env.local), AFTER the registers block and AFTER the code deploy:
+--   5. visible_when (an unanswered driver keeps the field visible — a field only hides on a definite answer; none is an equation
+--      output): bauleistungen_vergeben == true on -18 leistungsbeschreibung_type and the five -19 summary fields;
+--      verantwortung_lph8 != 'entfaellt' on -09 qs_plan_lph8_present, -20 quality_supervision_active; verantwortung_lph8 =
+--      auftragnehmer / dritter on -20 bauueberwachung_competencies; verantwortung_lph9 != 'entfaellt' on -24 warranty_start_date,
+--      warranty_end_date, defect_tracking_active.
+--   6. consumer reach: testbetrieb_vs_abnahme_choice + -22 (if missing). (The new drivers carry their reach from the INSERT.)
+--   7. NEW block gate REQ-52-2 (820-2-24): IF verantwortung_lph9 != 'entfaellt' THEN (verantwortlich_lph9_name IS NOT NULL) [P9] —
+--      sign-off item (new gate).
+-- SAFETY: no severity change, no value / equation / table change; ONE new gate (REQ-52-2, sign-off). 18 existing gate rows edited
+--   (9 block, 9 warn; archived), 10 new fields, 22 existing field rows edited (archived: 15 sections, 12 visible_when of which 5
+--   overlap; testbetrieb_vs_abnahme_choice only if its reach lacks 820-2-22). A changed live gate text makes its UPDATE a no-op.
+-- STAGED — not applied. NO code prerequisite (data only; the cross-sheet drivers are scalars the live approval gate already
+--   resolves project-wide). Apply (from C:\Users\Ekowai\_wt-g2t, which holds .env.local), AFTER the registers block:
 --   node scripts/apply-migration.mjs C:\Users\Ekowai\_wt-m820\scripts\migrations\20261006100000_m820_2_structure.sql
 -- Rollback:  C:\Users\Ekowai\_wt-m820\scripts\rollback-20261006100000-m820-2-structure.sql
 -- Read-back: C:\Users\Ekowai\_wt-m820\scripts\verification\apply\readback-20261006100000-m820-2-structure.sql
@@ -111,10 +126,7 @@ SELECT cr.* FROM compliance_requirements cr
   JOIN worksheet_templates w ON w.id = cr.worksheet_template_id
   JOIN standards s ON s.id = w.standard_id
  WHERE s.code = 'DWA-M-820-2'
-   AND ((cr.code = 'REQ-21' AND w.code = '820-2-11' AND md5(cr.condition) = '2ba2c857cc940f0b3a22a84ca471e3b8')
-     OR (cr.code = 'REQ-22' AND w.code = '820-2-11' AND md5(cr.condition) = '83f45f4cb407540bac4a7e18a975e6df')
-     OR (cr.code = 'REQ-23' AND w.code = '820-2-11' AND md5(cr.condition) = 'b1731a08be3aa3689fedc52d29271e5a')
-     OR (cr.code = 'REQ-19' AND w.code = '820-2-09' AND md5(cr.condition) = 'c387849e3a2530250c45899da8fe1a2a')
+   AND ((cr.code = 'REQ-19' AND w.code = '820-2-09' AND md5(cr.condition) = 'c387849e3a2530250c45899da8fe1a2a')
      OR (cr.code = 'REQ-43' AND w.code = '820-2-20' AND md5(cr.condition) = '0dc27b122a711062b3a39cee51c21d1d')
      OR (cr.code = 'REQ-44' AND w.code = '820-2-20' AND md5(cr.condition) = '50e840f5c37437c90f7bd827c855cfe7')
      OR (cr.code = 'REQ-51' AND w.code = '820-2-24' AND md5(cr.condition) = '113c7ddde973cd282d3bc727d2ddc50e')
@@ -140,12 +152,58 @@ SELECT f.* FROM fields f
   JOIN standards s ON s.id = w.standard_id
  WHERE s.code = 'DWA-M-820-2'
    AND (((w.code, f.symbol) IN (('820-2-11','changed_needs_recognised'),('820-2-15','lph_completed'),('820-2-15','planning_milestones_met'),('820-2-15','cost_estimation_phase_done'),('820-2-15','permitting_complete'),('820-2-15','planning_summary_date'),('820-2-19','vergabeverfahren_used'),('820-2-19','auswahlentscheidung_dokumentiert'),('820-2-19','zuschlag_erteilt_datum'),('820-2-19','final_contract_value'),('820-2-19','vergabesumme_summary_date'),('820-2-21','change_orders'),('820-2-21','oeffentlichkeitsarbeit_durchgefuehrt'),('820-2-21','kommunikations_plan_dokumentiert'),('820-2-21','changes_record_date')) AND f.section_id IS NULL)
-     OR ((w.code, f.symbol) IN (('820-2-18','leistungsbeschreibung_type'),('820-2-19','vergabeverfahren_used'),('820-2-19','auswahlentscheidung_dokumentiert'),('820-2-19','zuschlag_erteilt_datum'),('820-2-19','final_contract_value'),('820-2-19','vergabesumme_summary_date')) AND (f.visible_when IS NULL OR position('bauleistungen_vergeben == true' IN f.visible_when) = 0))
-     OR (w.code = '820-2-01' AND f.symbol = 'included_hoai_phases' AND NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['820-2-09','820-2-11','820-2-20','820-2-24']::text[]))
+     OR (w.code = '820-2-18' AND f.symbol = 'leistungsbeschreibung_type' AND (f.visible_when IS NULL OR position('bauleistungen_vergeben == true' IN f.visible_when) = 0))
+     OR (w.code = '820-2-19' AND f.symbol = 'vergabeverfahren_used' AND (f.visible_when IS NULL OR position('bauleistungen_vergeben == true' IN f.visible_when) = 0))
+     OR (w.code = '820-2-19' AND f.symbol = 'auswahlentscheidung_dokumentiert' AND (f.visible_when IS NULL OR position('bauleistungen_vergeben == true' IN f.visible_when) = 0))
+     OR (w.code = '820-2-19' AND f.symbol = 'zuschlag_erteilt_datum' AND (f.visible_when IS NULL OR position('bauleistungen_vergeben == true' IN f.visible_when) = 0))
+     OR (w.code = '820-2-19' AND f.symbol = 'final_contract_value' AND (f.visible_when IS NULL OR position('bauleistungen_vergeben == true' IN f.visible_when) = 0))
+     OR (w.code = '820-2-19' AND f.symbol = 'vergabesumme_summary_date' AND (f.visible_when IS NULL OR position('bauleistungen_vergeben == true' IN f.visible_when) = 0))
+     OR (w.code = '820-2-09' AND f.symbol = 'qs_plan_lph8_present' AND (f.visible_when IS NULL OR position('verantwortung_lph8 != ''entfaellt''' IN f.visible_when) = 0))
+     OR (w.code = '820-2-20' AND f.symbol = 'quality_supervision_active' AND (f.visible_when IS NULL OR position('verantwortung_lph8 != ''entfaellt''' IN f.visible_when) = 0))
+     OR (w.code = '820-2-20' AND f.symbol = 'bauueberwachung_competencies' AND (f.visible_when IS NULL OR position('verantwortung_lph8 == ''auftragnehmer'' OR verantwortung_lph8 == ''dritter''' IN f.visible_when) = 0))
+     OR (w.code = '820-2-24' AND f.symbol = 'warranty_start_date' AND (f.visible_when IS NULL OR position('verantwortung_lph9 != ''entfaellt''' IN f.visible_when) = 0))
+     OR (w.code = '820-2-24' AND f.symbol = 'warranty_end_date' AND (f.visible_when IS NULL OR position('verantwortung_lph9 != ''entfaellt''' IN f.visible_when) = 0))
+     OR (w.code = '820-2-24' AND f.symbol = 'defect_tracking_active' AND (f.visible_when IS NULL OR position('verantwortung_lph9 != ''entfaellt''' IN f.visible_when) = 0))
      OR (w.code = '820-2-18' AND f.symbol = 'testbetrieb_vs_abnahme_choice' AND NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['820-2-22']::text[])))
    AND NOT EXISTS (SELECT 1 FROM fields_archive_m820_2_structure a WHERE a.id = f.id);
 
 -- 1. new fields (one required driver on 820-2-17, five optional booleans that carry the printed sentence a warn gate checks)
+-- 820-2-01 verantwortung_lph0 (required, section B)
+INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, clause_reference, description, verification_status, verification_quote, source_anchor, widget, ui_config, lookup, visible_when, enum_values, consumer_worksheets, order_index, active)
+SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'B'), 'verantwortung_lph0', 'Verantwortung LPH 0 – Bedarfsplanung: wer erbringt die Phase?', 'Responsibility LPH 0 – needs planning: who performs the phase?', 'enum', NULL, true, '§1; §5.2',
+       'Wer erbringt die Bedarfsplanung (LPH 0)? § 1 (PDF S. 14): „Teil 2 umfasst die Leistungserbringung aller Projektbeteiligten über alle Phasen hinweg, d. h. von der Bedarfsplanung (LPH 0) bis zur Objektbetreuung (LPH 9), inklusive Inbetriebnahme und Übergabe an den Betrieb.“ und „Er erstreckt sich auch auf die zugehörigen Bedarfsplanungen, da sowohl die Konzepte als auch alle Projekte einer umfangreichen Vorbereitung durch den Auftraggeber bedürfen.“ Deshalb gibt es hier KEIN „entfällt“: jedes Konzept und jedes Projekt braucht eine Bedarfsplanung. Die Prüfungen von 820-2-11 (REQ-21, REQ-22, REQ-23) gelten unabhängig davon, wer die Phase erbringt.
+[EN] Who performs needs planning (LPH 0)? § 1: "Part 2 covers the services of all parties across all phases, from needs planning (LPH 0) to object support (LPH 9) …" and "It also extends to the related needs planning, since concepts as well as all projects need extensive preparation by the client." Hence NO "does not occur" option: every concept and every project needs needs planning. The 820-2-11 checks apply whoever performs the phase.',
+       'imported_unverified', 'Teil 2 umfasst die Leistungserbringung aller Projektbeteiligten über alle Phasen hinweg, d. h. von der Bedarfsplanung (LPH 0) bis zur Objektbetreuung (LPH 9), inklusive Inbetriebnahme und Übergabe an den Betrieb. — Er erstreckt sich auch auf die zugehörigen Bedarfsplanungen, da sowohl die Konzepte als auch alle Projekte einer umfangreichen Vorbereitung durch den Auftraggeber bedürfen.', 'DWA-M 820-2 §1 Z.336/338 (PDF S. 14)', NULL, NULL, NULL, NULL, '[{"value":"auftragnehmer","label_de":"Auftragnehmer (das in diesem Projekt beauftragte Büro)","label_en":"Contractor (the firm commissioned in this project)","order_index":1,"regulation_reference":"§1"},{"value":"auftraggeber","label_de":"Auftraggeber selbst (Eigenleistung)","label_en":"Client himself (own performance)","order_index":2,"regulation_reference":"§1"},{"value":"dritter","label_de":"Dritter (weiterer Beauftragter)","label_en":"Third party (another commissioned party)","order_index":3,"regulation_reference":"§1"}]'::jsonb, ARRAY['820-2-11']::text[], (SELECT COALESCE(MAX(f3.order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = w.id), true
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-01'
+   AND NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = w.id AND f2.symbol = 'verantwortung_lph0');
+
+-- 820-2-01 verantwortung_lph8 (required, section B)
+INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, clause_reference, description, verification_status, verification_quote, source_anchor, widget, ui_config, lookup, visible_when, enum_values, consumer_worksheets, order_index, active)
+SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'B'), 'verantwortung_lph8', 'Verantwortung LPH 8 – Objektüberwachung (Bauüberwachung): wer erbringt die Phase?', 'Responsibility LPH 8 – site supervision: who performs the phase?', 'enum', NULL, true, '§1; §4.1; §5.6',
+       'Wer erbringt die Bauüberwachung (LPH 8)? § 4.1 (PDF S. 22): „Die örtliche Bauüberwachung und Bauoberleitung werden vergeben oder durch den Auftraggeber erbracht.“ § 1 (PDF S. 14): „Teil 2 umfasst die Leistungserbringung aller Projektbeteiligten über alle Phasen hinweg, d. h. von der Bedarfsplanung (LPH 0) bis zur Objektbetreuung (LPH 9), inklusive Inbetriebnahme und Übergabe an den Betrieb.“ Auftragnehmer / Auftraggeber selbst / Dritter: REQ-19 (820-2-09) und REQ-43 (820-2-20) gelten in jedem Fall, auch wenn der Auftraggeber selbst überwacht (§ 5.6.2, PDF S. 54: „Werden Bauüberwachungsleistungen vom Auftraggeber selbst erbracht, sind die erforderlichen, fachlichen und personellen Ressourcen in ausreichendem Umfang bereitzustellen.“); REQ-44 nur bei einer Bauüberwachung durch einen Auftragnehmer oder Dritten (§ 5.6.3: „Wird in einem Projekt die Bauüberwachung durch einen Auftragnehmer wahrgenommen …“). „Entfällt“ nur, wenn das Projekt keine Bauausführung hat (§ 1: „Der Anwendungsbereich des vorliegenden Merkblatts umfasst alle Phasen der Konzepterstellung und Projektabwicklung bis hin zur Inbetriebnahme und Übergabe.“ — reine Konzepterstellung); dann sind die LPH-8-Prüfungen nicht erforderlich und ihre Eingaben ausgeblendet.
+[EN] Who performs site supervision (LPH 8)? § 4.1: "Local site supervision and construction management are awarded or performed by the client."; § 1: "Part 2 covers the services of all parties across all phases …". Contractor / client himself / third party: REQ-19 and REQ-43 apply in every case, also when the client supervises himself (§ 5.6.2: the required technical and staff resources must then be provided); REQ-44 only for supervision by a contractor or third party (§ 5.6.3). "Does not occur" only when the project has no construction (§ 1: the scope covers "all phases of concept work and project execution" — concept work only); then the LPH 8 checks are not required and their inputs are hidden.',
+       'imported_unverified', 'Die örtliche Bauüberwachung und Bauoberleitung werden vergeben oder durch den Auftraggeber erbracht. — Der Anwendungsbereich des vorliegenden Merkblatts umfasst alle Phasen der Konzepterstellung und Projektabwicklung bis hin zur Inbetriebnahme und Übergabe.', 'DWA-M 820-2 §4.1 Z.534 (PDF S. 22) + §1 Z.336/338 (PDF S. 14) + §5.6.2 Z.1531, §5.6.3 Z.1535 (PDF S. 54)', NULL, NULL, NULL, NULL, '[{"value":"auftragnehmer","label_de":"Auftragnehmer (das in diesem Projekt beauftragte Büro)","label_en":"Contractor (the firm commissioned in this project)","order_index":1,"regulation_reference":"§4.1"},{"value":"auftraggeber","label_de":"Auftraggeber selbst (Eigenleistung)","label_en":"Client himself (own performance)","order_index":2,"regulation_reference":"§4.1"},{"value":"dritter","label_de":"Dritter (weiterer Beauftragter)","label_en":"Third party (another commissioned party)","order_index":3,"regulation_reference":"§4.1"},{"value":"entfaellt","label_de":"Entfällt — keine Bauausführung in diesem Projekt (z. B. reine Konzepterstellung)","label_en":"Does not occur — no construction in this project (e.g. concept work only)","order_index":4,"regulation_reference":"§1"}]'::jsonb, ARRAY['820-2-09','820-2-20']::text[], (SELECT COALESCE(MAX(f3.order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = w.id), true
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-01'
+   AND NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = w.id AND f2.symbol = 'verantwortung_lph8');
+
+-- 820-2-01 verantwortung_lph9 (required, section B)
+INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, clause_reference, description, verification_status, verification_quote, source_anchor, widget, ui_config, lookup, visible_when, enum_values, consumer_worksheets, order_index, active)
+SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'B'), 'verantwortung_lph9', 'Verantwortung LPH 9 – Objektbetreuung (Gewährleistung): wer erbringt die Phase?', 'Responsibility LPH 9 – object support (warranty): who performs the phase?', 'enum', NULL, true, '§1; §5.8.3',
+       'Wer ist für die Objektbetreuung / Gewährleistungsphase (LPH 9) verantwortlich? § 5.8.3 (PDF S. 64): „Es ist festgelegt, wer für die Phase LPH 9 verantwortlich ist.“ und „Es besteht auch die Möglichkeit, über einen Rahmenvertrag für mehrere Anlagen die Leistungen der LPH 9 auszuschreiben und zu beauftragen.“ Das gedruckte Problem ist gerade „Dem Auftragnehmer ist die LPH 9 nicht beauftragt worden.“ — deshalb gelten REQ-51, REQ-52 und REQ-52-2 (820-2-24) für jeden Verantwortlichen, auch für den Auftraggeber selbst. „Entfällt“ nur ohne Bauausführung (§ 1: „Der Anwendungsbereich des vorliegenden Merkblatts umfasst alle Phasen der Konzepterstellung und Projektabwicklung bis hin zur Inbetriebnahme und Übergabe.“); dann sind die Gewährleistungs-Prüfungen nicht erforderlich und die Gewährleistungsangaben ausgeblendet.
+[EN] Who is responsible for object support / the warranty phase (LPH 9)? § 5.8.3: "It is laid down who is responsible for phase LPH 9." and "LPH 9 services can also be tendered and commissioned through a framework contract for several plants." The printed problem is exactly "The contractor was not commissioned with LPH 9." — so REQ-51, REQ-52 and REQ-52-2 apply to whoever is responsible, the client included. "Does not occur" only without construction (§ 1, concept work only); then the warranty checks are not required and the warranty entries hidden.',
+       'imported_unverified', 'Es ist festgelegt, wer für die Phase LPH 9 verantwortlich ist. — Es besteht auch die Möglichkeit, über einen Rahmenvertrag für mehrere Anlagen die Leistungen der LPH 9 auszuschreiben und zu beauftragen.', 'DWA-M 820-2 §5.8.3 Z.1816/1836/1844 (PDF S. 64) + §1 Z.336 (PDF S. 14)', NULL, NULL, NULL, NULL, '[{"value":"auftragnehmer","label_de":"Auftragnehmer (das in diesem Projekt beauftragte Büro)","label_en":"Contractor (the firm commissioned in this project)","order_index":1,"regulation_reference":"§5.8.3"},{"value":"auftraggeber","label_de":"Auftraggeber selbst (Eigenleistung)","label_en":"Client himself (own performance)","order_index":2,"regulation_reference":"§5.8.3"},{"value":"dritter","label_de":"Dritter (weiterer Beauftragter)","label_en":"Third party (another commissioned party)","order_index":3,"regulation_reference":"§5.8.3"},{"value":"entfaellt","label_de":"Entfällt — keine Bauausführung in diesem Projekt (z. B. reine Konzepterstellung)","label_en":"Does not occur — no construction in this project (e.g. concept work only)","order_index":4,"regulation_reference":"§1"}]'::jsonb, ARRAY['820-2-24']::text[], (SELECT COALESCE(MAX(f3.order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = w.id), true
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-01'
+   AND NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = w.id AND f2.symbol = 'verantwortung_lph9');
+
+-- 820-2-24 verantwortlich_lph9_name (optional, section B)
+INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, clause_reference, description, verification_status, verification_quote, source_anchor, widget, ui_config, lookup, visible_when, enum_values, consumer_worksheets, order_index, active)
+SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'B'), 'verantwortlich_lph9_name', 'Für die Phase LPH 9 verantwortliche Stelle (Name / Funktion)', 'Party responsible for phase LPH 9 (name / role)', 'text', NULL, false, '§5.8.3',
+       '§ 5.8.3 (PDF S. 64): „Es ist festgelegt, wer für die Phase LPH 9 verantwortlich ist.“ Gelesen von REQ-52-2 (Pflicht über das Gate, solange die Phase stattfindet). Ausgeblendet, wenn die Phase LPH 9 entfällt (820-2-01).
+[EN] § 5.8.3: "It is laid down who is responsible for phase LPH 9." Read by REQ-52-2 (required through the gate while the phase takes place). Hidden when phase LPH 9 does not occur (820-2-01).',
+       'imported_unverified', 'Es ist festgelegt, wer für die Phase LPH 9 verantwortlich ist.', 'DWA-M 820-2 §5.8.3 Z.1836 (PDF S. 64)', NULL, NULL, NULL, 'verantwortung_lph9 != ''entfaellt''', NULL, NULL, (SELECT COALESCE(MAX(f3.order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = w.id), true
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-24'
+   AND NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = w.id AND f2.symbol = 'verantwortlich_lph9_name');
+
 -- 820-2-17 bauleistungen_vergeben (required, section B)
 INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, clause_reference, description, verification_status, verification_quote, source_anchor, widget, ui_config, lookup, visible_when, enum_values, consumer_worksheets, order_index, active)
 SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'B'), 'bauleistungen_vergeben', 'Bauleistungen werden an ausführende Firmen vergeben (Ausschreibung / Vergabe durch den Auftraggeber)', 'Construction works are awarded to executing firms (tender / award by the client)', 'boolean', NULL, true, '§5.5; §4.1',
@@ -201,58 +259,37 @@ SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_templat
    AND NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = w.id AND f2.symbol = 'inbetriebnahme_organisiert');
 
 -- 2. gate guards (bodies byte-identical inside the guard; SET condition first, cr.code first; md5 guard on the live text)
--- REQ-21 (820-2-11) [P0]
-UPDATE compliance_requirements cr
-   SET condition = 'IF contains(included_hoai_phases, ''LPH 0 – Bedarfsplanung'') THEN (framework_conditions_clarified == true)'
-  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
- WHERE cr.code = 'REQ-21' AND w.id = cr.worksheet_template_id AND w.code = '820-2-11' AND s.code = 'DWA-M-820-2'
-   AND md5(cr.condition) = '2ba2c857cc940f0b3a22a84ca471e3b8';
-
--- REQ-22 (820-2-11) [P0]
-UPDATE compliance_requirements cr
-   SET condition = 'IF contains(included_hoai_phases, ''LPH 0 – Bedarfsplanung'') THEN (forward_planning_done == true)'
-  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
- WHERE cr.code = 'REQ-22' AND w.id = cr.worksheet_template_id AND w.code = '820-2-11' AND s.code = 'DWA-M-820-2'
-   AND md5(cr.condition) = '83f45f4cb407540bac4a7e18a975e6df';
-
--- REQ-23 (820-2-11) [P0]
-UPDATE compliance_requirements cr
-   SET condition = 'IF contains(included_hoai_phases, ''LPH 0 – Bedarfsplanung'') THEN (changed_needs_recognised == true)'
-  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
- WHERE cr.code = 'REQ-23' AND w.id = cr.worksheet_template_id AND w.code = '820-2-11' AND s.code = 'DWA-M-820-2'
-   AND md5(cr.condition) = 'b1731a08be3aa3689fedc52d29271e5a';
-
 -- REQ-19 (820-2-09) [P8a]
 UPDATE compliance_requirements cr
-   SET condition = 'IF contains(included_hoai_phases, ''LPH 8 – Objektüberwachung (Bauüberwachung)'') THEN (qs_plan_lph8_present == true)'
+   SET condition = 'IF verantwortung_lph8 != ''entfaellt'' THEN (qs_plan_lph8_present == true)'
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
  WHERE cr.code = 'REQ-19' AND w.id = cr.worksheet_template_id AND w.code = '820-2-09' AND s.code = 'DWA-M-820-2'
    AND md5(cr.condition) = 'c387849e3a2530250c45899da8fe1a2a';
 
 -- REQ-43 (820-2-20) [P8b]
 UPDATE compliance_requirements cr
-   SET condition = 'IF contains(included_hoai_phases, ''LPH 8 – Objektüberwachung (Bauüberwachung)'') THEN (quality_supervision_active == true)'
+   SET condition = 'IF verantwortung_lph8 != ''entfaellt'' THEN (quality_supervision_active == true)'
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
  WHERE cr.code = 'REQ-43' AND w.id = cr.worksheet_template_id AND w.code = '820-2-20' AND s.code = 'DWA-M-820-2'
    AND md5(cr.condition) = '0dc27b122a711062b3a39cee51c21d1d';
 
 -- REQ-44 (820-2-20) [P8c]
 UPDATE compliance_requirements cr
-   SET condition = 'IF contains(included_hoai_phases, ''LPH 8 – Objektüberwachung (Bauüberwachung)'') THEN (bauueberwachung_competencies == true)'
+   SET condition = 'IF verantwortung_lph8 == ''auftragnehmer'' OR verantwortung_lph8 == ''dritter'' THEN (bauueberwachung_competencies == true)'
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
  WHERE cr.code = 'REQ-44' AND w.id = cr.worksheet_template_id AND w.code = '820-2-20' AND s.code = 'DWA-M-820-2'
    AND md5(cr.condition) = '50e840f5c37437c90f7bd827c855cfe7';
 
 -- REQ-51 (820-2-24) [P9]
 UPDATE compliance_requirements cr
-   SET condition = 'IF contains(included_hoai_phases, ''LPH 9 – Objektbetreuung'') THEN (warranty_start_date IS NOT NULL AND warranty_end_date IS NOT NULL)'
+   SET condition = 'IF verantwortung_lph9 != ''entfaellt'' THEN (warranty_start_date IS NOT NULL AND warranty_end_date IS NOT NULL)'
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
  WHERE cr.code = 'REQ-51' AND w.id = cr.worksheet_template_id AND w.code = '820-2-24' AND s.code = 'DWA-M-820-2'
    AND md5(cr.condition) = '113c7ddde973cd282d3bc727d2ddc50e';
 
 -- REQ-52 (820-2-24) [P9]
 UPDATE compliance_requirements cr
-   SET condition = 'IF contains(included_hoai_phases, ''LPH 9 – Objektbetreuung'') THEN (defect_tracking_active == true)'
+   SET condition = 'IF verantwortung_lph9 != ''entfaellt'' THEN (defect_tracking_active == true)'
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
  WHERE cr.code = 'REQ-52' AND w.id = cr.worksheet_template_id AND w.code = '820-2-24' AND s.code = 'DWA-M-820-2'
    AND md5(cr.condition) = '91f722c371adecf920ba417dc4f87002';
@@ -392,8 +429,9 @@ UPDATE fields f
  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND f.section_id IS NULL
    AND (w.code, f.symbol) IN (('820-2-11','changed_needs_recognised'),('820-2-15','lph_completed'),('820-2-15','planning_milestones_met'),('820-2-15','cost_estimation_phase_done'),('820-2-15','permitting_complete'),('820-2-15','planning_summary_date'),('820-2-19','vergabeverfahren_used'),('820-2-19','auswahlentscheidung_dokumentiert'),('820-2-19','zuschlag_erteilt_datum'),('820-2-19','final_contract_value'),('820-2-19','vergabesumme_summary_date'),('820-2-21','change_orders'),('820-2-21','oeffentlichkeitsarbeit_durchgefuehrt'),('820-2-21','kommunikations_plan_dokumentiert'),('820-2-21','changes_record_date'));
 
--- 5. S-02: entries that only exist with a construction award are hidden when bauleistungen_vergeben = false (plain rule where none
---    exists, composed (<existing>) AND (<new>) otherwise — the 2026-10-05 dump has none). Producer guard: none is an equation output.
+-- 5. visible_when (plain rule where none exists, composed (<existing>) AND (<new>) otherwise — the 2026-10-05 dump has none;
+--    producer guard: none is an equation output). S-02: award-only entries hidden on bauleistungen_vergeben = false. S-01: LPH 8 /
+--    LPH 9 inputs hidden when the phase does not occur (entfaellt); bauueberwachung_competencies only for an external supervisor.
 UPDATE fields f
    SET visible_when = 'bauleistungen_vergeben == true'
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
@@ -405,16 +443,41 @@ UPDATE fields f
  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND f.visible_when IS NOT NULL
    AND position('bauleistungen_vergeben == true' IN f.visible_when) = 0
    AND (w.code, f.symbol) IN (('820-2-18','leistungsbeschreibung_type'),('820-2-19','vergabeverfahren_used'),('820-2-19','auswahlentscheidung_dokumentiert'),('820-2-19','zuschlag_erteilt_datum'),('820-2-19','final_contract_value'),('820-2-19','vergabesumme_summary_date'));
+UPDATE fields f
+   SET visible_when = 'verantwortung_lph8 != ''entfaellt'''
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+ WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND f.visible_when IS NULL
+   AND (w.code, f.symbol) IN (('820-2-09','qs_plan_lph8_present'),('820-2-20','quality_supervision_active'));
+UPDATE fields f
+   SET visible_when = '(' || f.visible_when || ') AND (verantwortung_lph8 != ''entfaellt'')'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+ WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND f.visible_when IS NOT NULL
+   AND position('verantwortung_lph8 != ''entfaellt''' IN f.visible_when) = 0
+   AND (w.code, f.symbol) IN (('820-2-09','qs_plan_lph8_present'),('820-2-20','quality_supervision_active'));
+UPDATE fields f
+   SET visible_when = 'verantwortung_lph8 == ''auftragnehmer'' OR verantwortung_lph8 == ''dritter'''
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+ WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND f.visible_when IS NULL
+   AND (w.code, f.symbol) IN (('820-2-20','bauueberwachung_competencies'));
+UPDATE fields f
+   SET visible_when = '(' || f.visible_when || ') AND (verantwortung_lph8 == ''auftragnehmer'' OR verantwortung_lph8 == ''dritter'')'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+ WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND f.visible_when IS NOT NULL
+   AND position('verantwortung_lph8 == ''auftragnehmer'' OR verantwortung_lph8 == ''dritter''' IN f.visible_when) = 0
+   AND (w.code, f.symbol) IN (('820-2-20','bauueberwachung_competencies'));
+UPDATE fields f
+   SET visible_when = 'verantwortung_lph9 != ''entfaellt'''
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+ WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND f.visible_when IS NULL
+   AND (w.code, f.symbol) IN (('820-2-24','warranty_start_date'),('820-2-24','warranty_end_date'),('820-2-24','defect_tracking_active'));
+UPDATE fields f
+   SET visible_when = '(' || f.visible_when || ') AND (verantwortung_lph9 != ''entfaellt'')'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+ WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND f.visible_when IS NOT NULL
+   AND position('verantwortung_lph9 != ''entfaellt''' IN f.visible_when) = 0
+   AND (w.code, f.symbol) IN (('820-2-24','warranty_start_date'),('820-2-24','warranty_end_date'),('820-2-24','defect_tracking_active'));
 
 -- 6. consumer reach (append only the missing codes, existing order kept): the guarded sheets see the driver in their form
-UPDATE fields f
-   SET consumer_worksheets = COALESCE(f.consumer_worksheets, '{}'::text[])
-       || ARRAY(SELECT u.c FROM unnest(ARRAY['820-2-09','820-2-11','820-2-20','820-2-24']::text[]) WITH ORDINALITY AS u(c, o)
-                 WHERE NOT (u.c = ANY (COALESCE(f.consumer_worksheets, '{}'::text[]))) ORDER BY u.o)
-  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
- WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND w.code = '820-2-01' AND f.symbol = 'included_hoai_phases'
-   AND NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['820-2-09','820-2-11','820-2-20','820-2-24']::text[]);
-
 UPDATE fields f
    SET consumer_worksheets = COALESCE(f.consumer_worksheets, '{}'::text[])
        || ARRAY(SELECT u.c FROM unnest(ARRAY['820-2-22']::text[]) WITH ORDINALITY AS u(c, o)
@@ -422,5 +485,14 @@ UPDATE fields f
   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-820-2' AND w.code = '820-2-18' AND f.symbol = 'testbetrieb_vs_abnahme_choice'
    AND NOT (COALESCE(f.consumer_worksheets, '{}'::text[]) @> ARRAY['820-2-22']::text[]);
+
+-- 7. NEW gate (sign-off: new-gate ruling)
+INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, title_en, condition, description, clause_reference, severity)
+SELECT w.id, 'REQ-52-2', 'Verantwortliche Stelle für die Phase LPH 9 festgelegt', 'Party responsible for phase LPH 9 laid down', 'IF verantwortung_lph9 != ''entfaellt'' THEN (verantwortlich_lph9_name IS NOT NULL)',
+       '§ 5.8.3 (PDF S. 64): „Es ist festgelegt, wer für die Phase LPH 9 verantwortlich ist.“ (Problem L1816: „Es fühlt sich niemand für die Begleitung der Gewährleistungsfrist zuständig. Dem Auftragnehmer ist die LPH 9 nicht beauftragt worden.“) Gilt, sobald die Phase LPH 9 stattfindet (820-2-01 „Verantwortung LPH 9“ ≠ entfällt); verlangt den Namen der verantwortlichen Stelle (820-2-24).
+[EN] § 5.8.3: "It is laid down who is responsible for phase LPH 9." (Printed problem: "Nobody feels responsible for following the warranty period. The contractor was not commissioned with LPH 9.") Applies whenever phase LPH 9 takes place (820-2-01 "responsibility LPH 9" ≠ does not occur); requires the name of the responsible party (820-2-24).',
+       '§5.8.3', 'block'
+  FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = '820-2-24'
+   AND NOT EXISTS (SELECT 1 FROM compliance_requirements c2 WHERE c2.worksheet_template_id = w.id AND c2.code = 'REQ-52-2');
 
 COMMIT;
