@@ -205,8 +205,9 @@ export function materializeDerivedOutputs(args: {
   valuesByFieldId: Record<string, FieldValue>;
   /** Plan 2a (Task 10, fix round 1): symbols hidden by `visible_when` (caller computes them from
    * the template fields + sections over the same overlaid values). A hidden scalar input resolves
-   * to null and a hidden REGISTER to an absent carrier (rows=[]) — so every affected equation is
-   * manual_required and its output is still WRITTEN, as null (clears stale values; ruling). */
+   * to null and a hidden REGISTER to an absent carrier (no register — M820 follow-up 1: no longer
+   * rows=[], which made `count_rows` 0) — so every affected equation is manual_required and its
+   * output is still WRITTEN, as null (clears stale values; ruling). */
   hiddenSymbols?: ReadonlySet<string>;
 }): MaterializeDerivedResult {
   const { standardCode, worksheetCode, fields, valuesByFieldId } = args;
@@ -241,18 +242,22 @@ export function materializeDerivedOutputs(args: {
       return v?.type === 'json' && v.value != null;
     });
 
-  // Registers: every field that resolves to a register config AND holds a json value.
-  // A carrier with an absent value is still a register (empty rows) so its equations
-  // evaluate to manual_required → null, clearing stale downstream values.
+  // Registers: every field that resolves to a register config AND holds a json value — the SAME rule as every read
+  // path (report / PDF / snapshot / client hook / MCP recompute: `buildRegisters` skips an absent or null carrier).
+  //
+  // M820 follow-up 1 (2026-10-06, item 4 — finding F2 of 21_Fill-Run_M820-2_C1): this used to hand an absent / null / hidden
+  // carrier to buildRegisters as `{}` (= rows []). For `sum_rows` that is manual_required → null as intended, but
+  // `count_rows` of no rows is 0, so the save path PERSISTED 0 for a register the engineer never filled (and only when another
+  // register of the same sheet was in the save batch), while every read path said "Fehlende oder leere Eingaben". An absent
+  // register is now no register here either; it stays a register CANDIDATE (`registerCandidates`), so its equations still run
+  // and write null (clears a stale value) with the read path's reason. An explicitly empty register `{rows: []}` is present
+  // and counts 0 on every path.
   const registers = buildRegisters(
     carrierSourceFields,
-    // `{}` (not undefined) for an absent/null carrier: buildRegisters skips fields whose json is
-    // absent, but an absent register must still yield rows=[] so its equations resolve to
-    // manual_required → null (clears stale outputs). Non-register fields are filtered by
-    // buildRegisters itself (resolveRegisterConfig).
-    (fieldId) => { const v = valueOf(fieldId); return v?.type === 'json' ? (v.value ?? {}) : {}; },
+    (fieldId) => { const v = valueOf(fieldId); return v?.type === 'json' ? (v.value ?? undefined) : undefined; },
     { standardCode, symbol },
   );
+  const registerCandidates = new Set(carrierSourceFields.filter((f) => resolveRegisterConfig(f) !== null).map((f) => f.symbol));
   // Plan 3 final wave A (defect 2): raw json carriers for `contains()` /
   // `cell()`. Same hidden-aware accessor; a hidden or absent checklist yields
   // NO carrier, so its equation is manual_required and its output is written
@@ -280,7 +285,7 @@ export function materializeDerivedOutputs(args: {
     // `cell()`), not merely names a json symbol — see `readsCarrier`. Naming
     // one is how DWA-M-1200-2's `median(log10_reduktionen)` slipped in and
     // would have written NULL over an engineer's typed value.
-    const registerFed = [...consumed].some((s) => registerSymbols.has(s));
+    const registerFed = [...consumed].some((s) => registerSymbols.has(s) || registerCandidates.has(s));
     const carrierFed = registerFed
       || readsCarrier(eq.formula, carrierSymbols)
       || (rewriteRules[eq.id] ? readsCarrier(rewriteRules[eq.id].to, carrierSymbols) : false);
