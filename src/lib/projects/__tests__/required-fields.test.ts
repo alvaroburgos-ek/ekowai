@@ -203,3 +203,25 @@ describe('A4 (scopeForInheritance) with the allow-list — the required-field ch
     expect(a4([{ symbol: 'project_name', value: 'X', templateId: 'm06', standardCode: 'DWA-M-820-1' }], 'DWA-M-820-2').has('project_name')).toBe(true);
   });
 });
+
+// Vault 51_ / 50_ PS-2 (controller decision 2026-10-07): the DWA-M 820-2 project-size answer (820-2-01, enum klein / mittel / gross)
+// carries into the optional copies on M820-01 (820-1) and M8203-01 (820-3) — identical symbol, tokens and labels.
+describe('A4 (scopeForInheritance) — project_size 820-2 → 820-1 / 820-3 (enum)', () => {
+  const enumTypes = new Map<string, Set<string>>([['project_size', new Set(['enum'])]]);
+  const a4 = (entries: Array<{ symbol: string; value: unknown; templateId: string; standardCode?: string }>, own: Set<string>, ownStandardCode: string) =>
+    inheritedSymbolSet(scopeForInheritance(entries, own, enumTypes, { ownStandardCode }) as Array<{ symbol: string; value: string }>);
+  const from820_2 = { symbol: 'project_size', value: 'mittel', templateId: 's01', standardCode: 'DWA-M-820-2' };
+  it('RED before: the 820-2-01 answer counts for the copy on M820-01 and on M8203-01', () => {
+    expect(a4([from820_2], new Set(['m01']), 'DWA-M-820-1').has('project_size')).toBe(true);
+    expect(a4([from820_2], new Set(['c01']), 'DWA-M-820-3').has('project_size')).toBe(true);
+  });
+  it('not the other way round, and not 820-1 → 820-3 (an enum of an unlisted pair still needs its own value)', () => {
+    const from820_1 = { symbol: 'project_size', value: 'klein', templateId: 'm01', standardCode: 'DWA-M-820-1' };
+    expect(a4([from820_1], new Set(['s01']), 'DWA-M-820-2').has('project_size')).toBe(false);
+    expect(a4([from820_1], new Set(['c01']), 'DWA-M-820-3').has('project_size')).toBe(false);
+  });
+  it('an own answer on the copy still wins', () => {
+    const own = { symbol: 'project_size', value: 'klein', templateId: 'm01', standardCode: 'DWA-M-820-1' };
+    expect(scopeForInheritance([from820_2, own], new Set(['m01']), enumTypes, { ownStandardCode: 'DWA-M-820-1' }).map((x) => x.value)).toEqual(['klein']);
+  });
+});

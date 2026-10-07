@@ -5,7 +5,8 @@
  * an own field of the same symbol only when that field is `text` or `date` (identity / metadata). Number, boolean, enum and json
  * fields need their own value in each standard, because the same symbol can mean something else in another guideline.
  *
- * This list is the explicit, documented exception: a json carrier that one standard tells the user to take from another.
+ * This list is the explicit, documented exception: a value that one standard tells the user to take from another (json carriers,
+ * and since 2026-10-07 the DWA-M 820 project-size enum copies — see the entries).
  *   DWA-M 820-2 § 4.8.2 (PDF p. 37): "Fundierte Risikoanalysen (Hinweise gibt Merkblatt DWA-M 820-1:2020 in Anhang A) für die
  *   verschiedenen Risikogruppen werden durchgeführt." → the 820-1 Tab. A.1 risk register (M820-06) and Tab. A.2 measure plan
  *   (M820-07) carry into 820-2 sheet 820-2-10 (same symbols, same bespoke editors → identical stored shape, json, optional there).
@@ -35,6 +36,11 @@ export type CrossStandardCarry = {
 export const CROSS_STANDARD_CARRY: readonly CrossStandardCarry[] = [
   { symbol: 'risk_register', from: 'DWA-M-820-1', to: 'DWA-M-820-2', fromSheets: ['M820-06'] },
   { symbol: 'risk_mitigation_plan', from: 'DWA-M-820-1', to: 'DWA-M-820-2', fromSheets: ['M820-07'] },
+  // Vault 51_ / 50_ PS-2 (controller decision 2026-10-07): the required 820-2-01 project size carries into the optional copies on
+  // M820-01 and M8203-01 (block 20261007100000). An enum, but symbol, tokens (klein / mittel / gross) and labels are identical, so the
+  // own-value rule's reason does not apply; the copy's own token check (coerceSameSymbolValue) still runs and passes.
+  { symbol: 'project_size', from: 'DWA-M-820-2', to: 'DWA-M-820-1', fromSheets: ['820-2-01'] },
+  { symbol: 'project_size', from: 'DWA-M-820-2', to: 'DWA-M-820-3', fromSheets: ['820-2-01'] },
 ];
 
 /** True when `symbol` saved in `fromStandardCode` may count for / prefill the same symbol in `toStandardCode`. */

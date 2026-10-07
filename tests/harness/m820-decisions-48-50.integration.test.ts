@@ -18,7 +18,10 @@ import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { startHarness, type Harness } from './embedded-pg';
 import type { saveWorksheet as SaveWorksheet } from '@/lib/actions/worksheet';
-import type { checkApprovalGate as CheckApprovalGate } from '@/lib/actions/approval-gate';
+import type { checkApprovalGate as CheckApprovalGate, loadInheritedSymbolsForTemplate as LoadInheritedSymbolsForTemplate } from '@/lib/actions/approval-gate';
+import type { loadSameSymbolValues as LoadSameSymbolValues } from '@/lib/db/queries/worksheet';
+import { coerceSameSymbolValue, type EnumOption } from '@/lib/eval/same-symbol-prefill';
+import { crossStandardCarryNote, selectPrefillUpstreams } from '@/lib/projects/cross-standard-carry';
 import type { recomputeWorksheetEquations as RecomputeWorksheetEquations } from '@/lib/actions/recompute-worksheet';
 import { splitOnUnquotedSemicolons } from '@/lib/compliance/__tests__/m820-1/sql-condition';
 
@@ -80,6 +83,8 @@ let harness: Harness;
 let saveWorksheet: typeof SaveWorksheet;
 let checkApprovalGate: typeof CheckApprovalGate;
 let recompute: typeof RecomputeWorksheetEquations;
+let loadInheritedSymbolsForTemplate: typeof LoadInheritedSymbolsForTemplate;
+let loadSameSymbolValues: typeof LoadSameSymbolValues;
 
 async function seedDump(dumpPath: string, priorPath: string, edition: string): Promise<void> {
   const sql = harness.sql;
@@ -258,7 +263,8 @@ beforeAll(async () => {
   }
   for (const blk of PRIOR_BLOCKS) await runFile(blk); // = prod 2026-10-07
   ({ saveWorksheet } = await import('@/lib/actions/worksheet'));
-  ({ checkApprovalGate } = await import('@/lib/actions/approval-gate'));
+  ({ checkApprovalGate, loadInheritedSymbolsForTemplate } = await import('@/lib/actions/approval-gate'));
+  ({ loadSameSymbolValues } = await import('@/lib/db/queries/worksheet'));
   ({ recomputeWorksheetEquations: recompute } = await import('@/lib/actions/recompute-worksheet'));
 
   // ── 820-2: the same base answers in three projects; they differ only in the three driver answers (typed after the apply) ──
@@ -506,4 +512,51 @@ describe('DWA-M 820 decisions on 48_ / 50_ — staged block on embedded Postgres
     await runFile(ROLLBACK);
     expect(dumpDiff(PRE, await dump())).toEqual([]);
   });
+
+  // 50_ PS-2 is CODE (src/lib/projects/cross-standard-carry.ts, second commit); data-independent of this block.
+  it('h. 50_ PS-2: the copies on M820-01 / M8203-01 take only the 820-2-01 answer, show "taken from DWA-M 820-2" and count under A4', async () => {
+    const p = await makeProject('size on 820-2-01 = mittel, then a different answer on M820-01');
+    expect(await pagePrefill(p, 'M8203-01')).toEqual({ candidates: [], prefill: null, from: null, note: null }); // nothing saved → nothing offered
+    await save(p, '820-2-01', { project_size: e('mittel') });
+    const NOTE = 'Übernommen aus DWA-M 820-2 (820-2-01) — hier überschreibbar. [EN] taken from DWA-M 820-2 (820-2-01) — can be overwritten here.';
+    const on1 = await pagePrefill(p, 'M820-01');
+    const on3 = await pagePrefill(p, 'M8203-01');
+    log('PS-2 prefill with 820-2-01 = mittel', { on1, on3 });
+    expect(on1).toEqual({ candidates: ['820-2-01:mittel'], prefill: { type: 'enum', value: 'mittel' }, from: '820-2-01', note: NOTE });
+    expect(on3).toEqual({ candidates: ['820-2-01:mittel'], prefill: { type: 'enum', value: 'mittel' }, from: '820-2-01', note: NOTE });
+    // A4: the 820-2 value counts as answered for both copies
+    const a4 = { m1: (await loadInheritedSymbolsForTemplate(p.id, (await tmplOf('M820-01')).id)).has('project_size'), m3: (await loadInheritedSymbolsForTemplate(p.id, (await tmplOf('M8203-01')).id)).has('project_size') };
+    log('PS-2 A4 counts project_size on the copies', a4);
+    expect(a4).toEqual({ m1: true, m3: true });
+    // a different 820-1 answer no longer makes M8203-01 ambiguous: only own + 820-2 occurrences are candidates
+    await save(p, 'M820-01', { project_size: e('klein') });
+    const amb = await pagePrefill(p, 'M8203-01');
+    log('PS-2 prefill on M8203-01 when 820-2-01 = mittel and M820-01 = klein', amb);
+    expect(amb).toEqual({ candidates: ['820-2-01:mittel'], prefill: { type: 'enum', value: 'mittel' }, from: '820-2-01', note: NOTE });
+    // the 820-2 sheet itself is never filled from a copy (no reverse entry)
+    const p2 = await makeProject('size only on M820-01');
+    await save(p2, 'M820-01', { project_size: e('klein') });
+    expect((await loadInheritedSymbolsForTemplate(p2.id, (await tmplOf('820-2-01')).id)).has('project_size')).toBe(false);
+    expect(dumpDiff(PRE, await dump())).toEqual([]);
+  });
 });
+
+async function tmplOf(ws: string): Promise<{ id: string; std: string }> {
+  const [r] = await harness.sql<{ id: string; std: string }[]>`SELECT w.id, s.code AS std FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = ${ws}`;
+  return r;
+}
+/** Worksheet page step 2 for `project_size` on `ws` (page.tsx: same-symbol upstreams → allow-list filter → unambiguous → coerce → note). */
+async function pagePrefill(p: Proj, ws: string): Promise<{ candidates: string[]; prefill: unknown; from: string | null; note: string | null }> {
+  const { id, std } = await tmplOf(ws);
+  const [f] = await harness.sql<{ data_type: string; enum_values: EnumOption[] | null }[]>`
+    SELECT data_type, enum_values FROM fields WHERE worksheet_template_id = ${id} AND symbol = 'project_size'`;
+  const same = await loadSameSymbolValues(p.id, id, ['project_size']);
+  const ups = selectPrefillUpstreams('project_size', std, same.get('project_size') ?? []);
+  const candidates = ups.map((u) => `${u.worksheetCode}:${String(u.value)}`).sort();
+  if (ups.length === 0) return { candidates, prefill: null, from: null, note: null };
+  const ambiguous = ups.length > 1 && !ups.every((u) => u.value === ups[0].value); // string tokens: the page's sameSymbolValueEqual reduces to ===
+  if (ambiguous) return { candidates, prefill: null, from: null, note: null };
+  const coerced = coerceSameSymbolValue(f.data_type, ups[0].value, f.enum_values);
+  const note = ups[0].isFromCurrentStandard ? null : crossStandardCarryNote('project_size', ups[0].sourceStandardCode, std);
+  return { candidates, prefill: coerced, from: coerced ? ups[0].worksheetCode : null, note };
+}

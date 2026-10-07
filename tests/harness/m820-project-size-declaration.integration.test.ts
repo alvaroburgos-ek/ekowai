@@ -349,24 +349,24 @@ describe('DWA-M 820 project-size declaration — staged block on embedded Postgr
     expect(missing).toEqual({ '820-2-01': ['project_size'], 'M820-01': [], 'M8203-01': [] });
   });
 
-  it('f. prefill of the copies (page step 2): the 820-2-01 answer is offered while agreed; no carry note (not on the allow-list); A4 does not count it', async () => {
+  it('f. prefill of the copies (page step 2): since the PS-2 allow-list entries (51_, code commit after 20261007110000) only the 820-2-01 answer is offered, with the carry note, and A4 counts it', async () => {
     const p = await makeProject('size only on 820-2-01');
     expect(await pagePrefill(p, 'M8203-01')).toEqual({ candidates: [], prefill: null, from: null, note: null }); // nothing saved → nothing offered
     await save(p, '820-2-01', { project_size: e('mittel') });
     const on1 = await pagePrefill(p, 'M820-01');
     const on3 = await pagePrefill(p, 'M8203-01');
     log('prefill with only 820-2-01 = mittel', { on1, on3 });
-    expect(on1).toEqual({ candidates: ['820-2-01:mittel'], prefill: { type: 'enum', value: 'mittel' }, from: '820-2-01', note: null });
-    expect(on3).toEqual({ candidates: ['820-2-01:mittel'], prefill: { type: 'enum', value: 'mittel' }, from: '820-2-01', note: null });
-    // own-value rule A4: an enum of another standard never counts for the copy (it is optional anyway)
+    expect(on1).toEqual({ candidates: ['820-2-01:mittel'], prefill: { type: 'enum', value: 'mittel' }, from: '820-2-01', note: 'Übernommen aus DWA-M 820-2 (820-2-01) — hier überschreibbar. [EN] taken from DWA-M 820-2 (820-2-01) — can be overwritten here.' });
+    expect(on3).toEqual({ candidates: ['820-2-01:mittel'], prefill: { type: 'enum', value: 'mittel' }, from: '820-2-01', note: 'Übernommen aus DWA-M 820-2 (820-2-01) — hier überschreibbar. [EN] taken from DWA-M 820-2 (820-2-01) — can be overwritten here.' });
+    // own-value rule A4: the allow-listed 820-2 value counts for the copy (50_ PS-2)
     const a4 = [...(await loadInheritedSymbolsForTemplate(p.id, (await tmpl('M8203-01')).id))];
     log('A4 set on M8203-01 contains project_size?', a4.includes('project_size'));
-    expect(a4).not.toContain('project_size');
-    // the answers disagree → ambiguous → no prefill on the third sheet
+    expect(a4).toContain('project_size');
+    // the answers disagree → the 820-1 answer is no candidate on the third sheet (only own + 820-2 occurrences), the 820-2-01 answer is offered
     await save(p, 'M820-01', { project_size: e('klein') });
     const amb = await pagePrefill(p, 'M8203-01');
     log('prefill on M8203-01 when 820-2-01 = mittel and M820-01 = klein', amb);
-    expect(amb).toEqual({ candidates: ['820-2-01:mittel', 'M820-01:klein'], prefill: null, from: null, note: null });
+    expect(amb).toEqual({ candidates: ['820-2-01:mittel'], prefill: { type: 'enum', value: 'mittel' }, from: '820-2-01', note: 'Übernommen aus DWA-M 820-2 (820-2-01) — hier überschreibbar. [EN] taken from DWA-M 820-2 (820-2-01) — can be overwritten here.' });
     // agreement again → offered again
     await save(p, 'M820-01', { project_size: e('mittel') });
     expect((await pagePrefill(p, 'M8203-01')).prefill).toEqual({ type: 'enum', value: 'mittel' });
