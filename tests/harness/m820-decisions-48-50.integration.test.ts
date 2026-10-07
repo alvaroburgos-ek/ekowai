@@ -282,6 +282,8 @@ beforeAll(async () => {
   await base820_2(P.yes);
   P.open = await makeProject('820-2: driver questions left unanswered');
   await base820_2(P.open);
+  P.nobau = await makeProject('820-2: no construction award (client builds itself)');
+  await save(P.nobau, '820-2-17', { bauleistungen_vergeben: b(false), nebenangebote_conditions: b(false) });
   // ── 820-1: VgV-F, municipal client, no award criteria, risk register without a measure plan ──
   P.vgv = await makeProject('820-1: municipality, VgV-F, no award criteria yet, risk register but empty measure plan');
   await save(P.vgv, 'M820-01', { client_organization_type: e('municipality') });
@@ -312,12 +314,16 @@ beforeAll(async () => {
     { ws: '820-2-26', code: 'REQ-56', p: () => P.yes, before: true, after: true, why: 'innovation required, rights not discussed → § 7.2 „muss immer“' },
     { ws: '820-2-09', code: 'REQ-17', p: () => P.no, before: true, after: false, why: 'block → warn (indicative § 4.6.2)' },
     { ws: '820-2-24', code: 'REQ-51', p: () => P.no, before: true, after: false, why: 'block → warn + re-bound to the warranty calendar' },
-    { ws: '820-2-27', code: 'REQ-57', p: () => P.no, before: false, after: true, why: 'warn → block (§ 8.2.1 „Grundsätzlich müssen sie“), register never filled' },
+    { ws: '820-2-27', code: 'REQ-57', p: () => P.no, before: false, after: false, why: 'stays warn (fix round 1: „sollten nur in Einzelfällen“), register never filled' },
     { ws: 'M820-14', code: 'REQ-14', p: () => P.vgv, before: false, after: true, why: 'empty condition → refuses without award criteria (§ 8.10.3.3)' },
     { ws: 'M820-14', code: 'REQ-14', p: () => P.direct, before: false, after: false, why: 'direct award → VgV-F guard, does not apply' },
     { ws: 'M820-07', code: 'REQ-05', p: () => P.vgv, before: false, after: true, why: 'warn → block: measure plan empty (Anh. A „muss … ergänzt werden“)' },
     { ws: 'M820-24', code: 'REQ-23', p: () => P.direct, before: false, after: false, why: 'stays VgV-F only' },
-    { ws: 'M8203-20', code: 'REQ-27', p: () => P.kritis, before: false, after: true, why: 'warn → block (§ 7.3 „sind … im Vorfeld zu berücksichtigen“)' },
+    { ws: 'M8203-20', code: 'REQ-27', p: () => P.kritis, before: false, after: false, why: 'stays warn (fix round 1: conditional duty)' },
+    { ws: '820-2-17', code: 'REQ-38', p: () => P.nobau, before: false, after: false, why: 'no construction award → driver hidden, REQ-38 not applicable' },
+    { ws: '820-2-17', code: 'REQ-38', p: () => P.open, before: true, after: true, why: 'driver unanswered → waits (named)' },
+    { ws: '820-2-26', code: 'REQ-55', p: () => P.open, before: false, after: true, why: 'driver unanswered → waits (named)' },
+    { ws: '820-2-26', code: 'REQ-56', p: () => P.open, before: true, after: true, why: 'driver unanswered → waits (named)' },
   ];
 }, 900_000);
 
@@ -369,7 +375,7 @@ describe('DWA-M 820 decisions on 48_ / 50_ — staged block on embedded Postgres
     const sev = await harness.sql<{ std: string; block: number; warn: number }[]>`SELECT s.code AS std, sum((cr.severity = 'block')::int)::int AS block, sum((cr.severity = 'warn')::int)::int AS warn
       FROM compliance_requirements cr JOIN worksheet_templates w ON w.id = cr.worksheet_template_id JOIN standards s ON s.id = w.standard_id GROUP BY 1 ORDER BY 1`;
     log('severity after', sev);
-    expect(sev).toEqual([{ std: 'DWA-M-820-1', block: 18, warn: 9 }, { std: 'DWA-M-820-2', block: 41, warn: 20 }, { std: 'DWA-M-820-3', block: 21, warn: 29 }]);
+    expect(sev).toEqual([{ std: 'DWA-M-820-1', block: 18, warn: 9 }, { std: 'DWA-M-820-2', block: 40, warn: 21 }, { std: 'DWA-M-820-3', block: 20, warn: 30 }]);
     // guards in REQ-10's form / the driver form; every touched hint is bilingual
     expect((await gateRow('820-2-25', 'REQ-54'))!.condition).toBe('IF eigene_regelwerke_vorhanden == true THEN (approval_release_process == true)');
     expect((await gateRow('M820-24', 'REQ-23-2'))!.condition).toBe("IF (client_organization_type != 'privat_ohne_foerderung' OR vergaberecht_freiwillig_angewendet == true) AND procurement_procedure IN {suchverfahren, direktvergabe} THEN (vergabevermerk_complete == true)");
@@ -421,13 +427,13 @@ describe('DWA-M 820 decisions on 48_ / 50_ — staged block on embedded Postgres
     expect(post[0]).toEqual([{ gates: '22', gates_pre: '0', gates_post: '22', fields: '23', fields_pre: '0', fields_post: '23', gates_neither: null, fields_neither: null, new_gate: '1', new_fields: '3' }]);
     expect(post[1]).toEqual([
       { std: 'DWA-M-820-1', block: '18', warn: '9', other: '0' },
-      { std: 'DWA-M-820-2', block: '41', warn: '20', other: '0' },
-      { std: 'DWA-M-820-3', block: '21', warn: '29', other: '0' },
+      { std: 'DWA-M-820-2', block: '40', warn: '21', other: '0' },
+      { std: 'DWA-M-820-3', block: '20', warn: '30', other: '0' },
     ]);
     expect(post[2]).toEqual([
-      { ws: '820-2-04', symbol: 'eigene_regelwerke_vorhanden', section: 'B', data_type: 'boolean', is_required: false, active: true, visible_when: null, consumers: '820-2-25', order_index: 0 },
-      { ws: '820-2-17', symbol: 'nebenangebote_zugelassen', section: 'B', data_type: 'boolean', is_required: false, active: true, visible_when: 'bauleistungen_vergeben == true', consumers: null, order_index: 2 },
-      { ws: '820-2-26', symbol: 'innovation_verlangt', section: 'B', data_type: 'boolean', is_required: false, active: true, visible_when: null, consumers: null, order_index: 0 },
+      { ws: '820-2-04', symbol: 'eigene_regelwerke_vorhanden', section: 'B', data_type: 'boolean', is_required: true, active: true, visible_when: null, consumers: '820-2-25', order_index: 0 },
+      { ws: '820-2-17', symbol: 'nebenangebote_zugelassen', section: 'B', data_type: 'boolean', is_required: true, active: true, visible_when: 'bauleistungen_vergeben == true', consumers: null, order_index: 2 },
+      { ws: '820-2-26', symbol: 'innovation_verlangt', section: 'B', data_type: 'boolean', is_required: true, active: true, visible_when: null, consumers: null, order_index: 0 },
     ]);
     expect(post[3]).toEqual([{ b_fields: '17', distinct_orders: '17', gap: 1 }]);
     expect(post[4]).toEqual([]);
@@ -443,6 +449,15 @@ describe('DWA-M 820 decisions on 48_ / 50_ — staged block on embedded Postgres
     for (const c of CASES) after[`${c.ws} ${c.code} (${c.why})`] = await refuses(c.p(), c.ws, c.code);
     log('AFTER: approval refused by the gate', after);
     expect(Object.values(after)).toEqual(CASES.map((c) => c.after));
+
+    // unanswered drivers: the waiting gate names the question, and the question is on the missing-required list; a hidden driver is not
+    const named = async (p: Proj, ws: string, code: string) => (await checkApprovalGate(p.inst.get(ws)!)).pendingBlockConditions.find((c) => c.code === code)?.missingInputs.map((i) => i.symbol) ?? null;
+    const missingReq = async (p: Proj, ws: string) => (await checkApprovalGate(p.inst.get(ws)!)).missingRequiredFields.map((f) => f.symbol);
+    const open = { REQ38: await named(P.open, '820-2-17', 'REQ-38'), REQ55: await named(P.open, '820-2-26', 'REQ-55'), REQ56: await named(P.open, '820-2-26', 'REQ-56'), REQ54: await named(P.open, '820-2-25', 'REQ-54'),
+      req17: (await missingReq(P.open, '820-2-17')).includes('nebenangebote_zugelassen'), req26: (await missingReq(P.open, '820-2-26')).includes('innovation_verlangt'), req04: (await missingReq(P.open, '820-2-04')).includes('eigene_regelwerke_vorhanden'),
+      nobau17: (await missingReq(P.nobau, '820-2-17')).includes('nebenangebote_zugelassen'), no26: (await missingReq(P.no, '820-2-26')).includes('innovation_verlangt') };
+    log('unanswered drivers: pending inputs named / on the missing-required list', open);
+    expect(open).toEqual({ REQ38: ['nebenangebote_zugelassen'], REQ55: ['innovation_verlangt'], REQ56: ['innovation_verlangt'], REQ54: ['eigene_regelwerke_vorhanden'], req17: true, req26: true, req04: true, nobau17: false, no26: false });
 
     // REQ-14 passes once the award criteria and their weighting are entered (recompute fills award_weight_sum_pct)
     await save(P.vgv, 'M820-14', { award_criteria_list: jv({ rows: [

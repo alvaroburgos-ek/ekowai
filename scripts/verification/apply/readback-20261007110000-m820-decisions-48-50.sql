@@ -25,8 +25,8 @@ WITH g(std, ws, code, mc0, sev0, md0, cl0, mc1, sev1, md1, cl1) AS (VALUES
     ('DWA-M-820-2','820-2-25','REQ-54','215c32b968d77da39ef562abcccb2cc5','block','0610e86bc1cbf112c8e998f6ee17df8f','§6.3.1, §6.3.3','d7ed892a9847e3d9190eac714944fe03','block','224a533807e3975281c829fe3984d200','§6.3.1, §6.3.3'),
     ('DWA-M-820-2','820-2-26','REQ-55','43e7f68918642d7be0104cf2399b1ad2','warn','8a1676beaf7617710606b17e56add2cb','§7.5','51f6317a3089c4ec60a094a052661576','block','baddcd67221203e6862a5f57368f024b','§7.3.4, §7.5'),
     ('DWA-M-820-2','820-2-26','REQ-56','143165ae017ac5504f4c18dd0948d8da','block','eebb2d38e53efb0e6b5e2904d5818452','§7.2, §7.6.2','6c942aa3fe67df4437d612e3405d95d1','block','d661f2153a3c84ac92d6a6aa1699ff8c','§7.2, §7.6.2'),
-    ('DWA-M-820-2','820-2-27','REQ-57','3f2e24f1b98fd17e62e795b7ffc17552','warn','095af5619688a5d798bb3a9b430522aa','§8.2.1','3f2e24f1b98fd17e62e795b7ffc17552','block','137c8781a15ce58a4f79ffe981b54c56','§8.2.1'),
-    ('DWA-M-820-3','M8203-20','REQ-27','a5c13b367bfa60edb50edd5d3fc51fa0','warn','d4bf852c5f416ab136a14d9c6364d49b','§7.3','a5c13b367bfa60edb50edd5d3fc51fa0','block','d377f4d7b84bdfe80b3c59521431c0ad','§7.3')),
+    ('DWA-M-820-2','820-2-27','REQ-57','3f2e24f1b98fd17e62e795b7ffc17552','warn','095af5619688a5d798bb3a9b430522aa','§8.2.1','3f2e24f1b98fd17e62e795b7ffc17552','warn','41028cb1dbcf169bac5144274a33617f','§8.2.1'),
+    ('DWA-M-820-3','M8203-20','REQ-27','a5c13b367bfa60edb50edd5d3fc51fa0','warn','d4bf852c5f416ab136a14d9c6364d49b','§7.3','a5c13b367bfa60edb50edd5d3fc51fa0','warn','3835f7365974d0f3d3766c3332800ca6','§7.3')),
 f0(std, ws, symbol, k_desc, k_enum, k_cw, k_ord, sig0, sig1) AS (VALUES
     ('DWA-M-820-2','820-2-24','warranty_count',true,false,false,false,'5f645a2b3361bb07eee92680f300261a','6b377a3d3e8fa353ed8678209088f07e'),
     ('DWA-M-820-2','820-2-24','gewaehrleistungen',true,false,false,false,'5b4366812682f1d6e72415110082e0ef','7bb604397c331f9b6db8d4d074e6e3b0'),
@@ -70,12 +70,12 @@ SELECT (SELECT count(*) FROM gl) AS gates,
        (SELECT count(*) FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
          WHERE (s.code, w.code, f.symbol) IN (('DWA-M-820-2','820-2-17','nebenangebote_zugelassen'),('DWA-M-820-2','820-2-04','eigene_regelwerke_vorhanden'),('DWA-M-820-2','820-2-26','innovation_verlangt'))) AS new_fields;
 
--- R1 · gate severities per standard (before 17/9 · 51/10 · 20/30 · after 18/9 · 41/20 · 21/29)
+-- R1 · gate severities per standard (before 17/9 · 51/10 · 20/30 · after 18/9 · 40/21 · 20/30)
 SELECT s.code AS std, sum((cr.severity = 'block')::int) AS block, sum((cr.severity = 'warn')::int) AS warn, sum((cr.severity NOT IN ('block', 'warn'))::int) AS other
   FROM compliance_requirements cr JOIN worksheet_templates w ON w.id = cr.worksheet_template_id JOIN standards s ON s.id = w.standard_id
  WHERE s.code IN ('DWA-M-820-1', 'DWA-M-820-2', 'DWA-M-820-3') GROUP BY 1 ORDER BY 1;
 
--- R2 · after: the three driver fields (section B, optional boolean, visibility, consumers)
+-- R2 · after: the three driver fields (section B, required boolean, visibility, consumers)
 SELECT w.code AS ws, f.symbol, ws.code AS section, f.data_type, f.is_required, f.active, f.visible_when, array_to_string(f.consumer_worksheets, ',') AS consumers, f.order_index
   FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN standards s ON s.id = w.standard_id
   LEFT JOIN worksheet_sections ws ON ws.id = f.section_id
