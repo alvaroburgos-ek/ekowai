@@ -14,6 +14,7 @@ import { defineTool } from '../define-tool';
 import { paramHasValue } from '@/lib/projects/required-fields';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { loadInheritedFields } from '@/lib/db/queries/worksheet';
+import { loadHiddenAtSourceFieldIds } from '@/lib/actions/approval-gate';
 import { parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { assertInternalAccess } from './projects';
@@ -90,7 +91,7 @@ export function registerWorksheetTools(server: McpServer) {
       title: 'Arbeitsblatt mit Feldern lesen',
       readOnly: true,
       description:
-        'Liefert alle Felder eines Arbeitsblatts mit Symbol, Bezeichnung, Einheit, Datentyp, erlaubten Auswahlwerten und dem aktuell erfassten Wert. Rufe dies IMMER auf, bevor du mit set_field_values schreibst — nur so kennst du die gültigen fieldIds, Einheiten und Enum-Werte. Zeigt außerdem, welche Pflichtfelder noch leer sind.',
+        'Liefert alle Felder eines Arbeitsblatts mit Symbol, Bezeichnung, Einheit, Datentyp, erlaubten Auswahlwerten und dem aktuell erfassten Wert. Rufe dies IMMER auf, bevor du mit set_field_values schreibst — nur so kennst du die gültigen fieldIds, Einheiten und Enum-Werte. Zeigt außerdem, welche Pflichtfelder noch leer sind (missingRequired, wie die Freigabeprüfung) und welche sichtbaren Pflichtfelder nur eine veraltete Antwort tragen (staleRequired: gespeichert, als die Frage ausgeblendet war — der Fortschritt zählt sie als offen; mit set_field_values erneut speichern, um sie zu bestätigen).',
       inputSchema: z.object({
         instanceId: z.string().uuid().describe('Aus list_worksheets'),
         onlyEmpty: z
@@ -154,7 +155,9 @@ export function registerWorksheetTools(server: McpServer) {
         .select({ id: worksheetSections.id, parentSectionId: worksheetSections.parentSectionId, visibleWhen: worksheetSections.visibleWhen })
         .from(worksheetSections)
         .where(eq(worksheetSections.worksheetTemplateId, instance.templateId));
-      const inherited = await loadInheritedFields(instance.templateId, instance.standardId, instance.templateCode);
+      // R-14: an inherited field hidden on its own source sheet is no value here either (same set the page drops).
+      const hiddenAtSource = await loadHiddenAtSourceFieldIds(instance.projectId, instance.standardId);
+      const inherited = (await loadInheritedFields(instance.templateId, instance.standardId, instance.templateCode)).filter((i) => !hiddenAtSource.has(i.id));
       const ownSymbols = new Set(fieldRows.map((f) => f.symbol));
       const readable = [
         ...fieldRows.map((f) => ({ id: f.fieldId, symbol: f.symbol, dataType: f.dataType })),
@@ -169,6 +172,7 @@ export function registerWorksheetTools(server: McpServer) {
 
       const merged = fieldRows.map((f) => {
         const param = byField.get(f.fieldId);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omitted from the response on purpose
         const { sectionId: _sectionId, visibleWhen: _visibleWhen, ...rest } = f;
         return {
           ...rest,
@@ -188,6 +192,9 @@ export function registerWorksheetTools(server: McpServer) {
 
       const visible = onlyEmpty ? merged.filter((f) => !f.isFilled && !f.hidden) : merged;
       const missingRequired = merged.filter((f) => f.isRequired && !f.isFilled && !f.hidden);
+      // L-2: the approval gate counts a stale answer as filled (missingRequired); the progress counts
+      // (get_standard_progress) count it as open (U-1). Both are reported so the two numbers are explainable.
+      const staleRequired = merged.filter((f) => f.isRequired && f.isFilled && !f.hidden && f.stale);
 
       return {
         instanceId,
@@ -202,6 +209,8 @@ export function registerWorksheetTools(server: McpServer) {
           labelDe: f.labelDe,
           unit: f.unit,
         })),
+        staleRequiredCount: staleRequired.length,
+        staleRequired: staleRequired.map((f) => ({ fieldId: f.fieldId, symbol: f.symbol, labelDe: f.labelDe })),
         fields: visible,
       };
     },

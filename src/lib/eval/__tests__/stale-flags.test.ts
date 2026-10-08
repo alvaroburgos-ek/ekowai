@@ -56,6 +56,16 @@ describe('staleFlagSets', () => {
     expect(r.setStale).toEqual(['f-abn']);
   });
 
+  it('L-5: a JSON carrier (register / checklist) is never flagged — no badge, no confirm', () => {
+    const r = staleFlagSets(
+      [{ id: 'f-reg', symbol: 'risk_register', dataType: 'json' }],
+      new Set(['risk_register']),
+      new Set(),
+      [row('f-reg', { valueJson: { rows: [{ a: 1 }] } })],
+    );
+    expect(r).toEqual({ setStale: [], clearStale: [] });
+  });
+
   it('already-flagged rows are not re-written; derived/computed rows and foreign fields are never flagged', () => {
     const r = staleFlagSets(
       own,

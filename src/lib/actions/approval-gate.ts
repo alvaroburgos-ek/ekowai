@@ -17,7 +17,13 @@ import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables
 import { inheritedSymbolSet, missingRequiredFields as missingRequiredFieldsShared, scopeForInheritance, scopeToOwnStandard } from '@/lib/projects/required-fields';
 // C-7 (2026-10-08): the typed-value reading and the conflict-free fallback live in the pure counts module, so the
 // sidebar / progress / MCP counts (`countRequiredFieldsByTemplate`) and this gate cannot drift apart.
-import { buildFallbackValues as buildFallbackValuesShared, extractGateValue } from '@/lib/projects/required-field-counts';
+import {
+  buildFallbackValues as buildFallbackValuesShared,
+  dropHiddenAtSource,
+  extractGateValue,
+  hiddenAtSourceFieldIds,
+  type RequiredFieldCountArgs,
+} from '@/lib/projects/required-field-counts';
 
 /**
  * Result of the engineer-approve readiness check. The transition is
@@ -54,6 +60,8 @@ export type ProjectWideEntry = {
   templateId: string;
   /** Code of the standard the occurrence's template belongs to — read only by the cross-standard carry-over allow-list (A4). */
   standardCode?: string | null;
+  /** Id of the field the occurrence was saved on (R-14: drops an occurrence hidden by `visible_when` on its source sheet). */
+  fieldId?: string;
 };
 
 /**
@@ -62,15 +70,15 @@ export type ProjectWideEntry = {
  * (`buildFallbackValues`) and the A4 inherited-required rule
  * (`inheritedSymbolSet`, other templates only) — shared with the finalize gate.
  */
-export async function loadProjectWideEntries(projectId: string): Promise<ProjectWideEntry[]> {
-  const projInstances = await db
+export async function loadProjectWideEntries(projectId: string, client: Pick<typeof db, 'select'> = db): Promise<ProjectWideEntry[]> {
+  const projInstances = await client
     .select({ wtid: worksheetInstances.worksheetTemplateId })
     .from(worksheetInstances)
     .where(eq(worksheetInstances.projectId, projectId));
   const projWtids = [...new Set(projInstances.map((r) => r.wtid))];
   const projFields = projWtids.length === 0
     ? []
-    : await db
+    : await client
       .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, templateId: fields.worksheetTemplateId, standardCode: standards.code })
       .from(fields)
       .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
@@ -79,7 +87,7 @@ export async function loadProjectWideEntries(projectId: string): Promise<Project
   const projFieldIds = projFields.map((f) => f.id);
   const projParams = projFieldIds.length === 0
     ? []
-    : await db
+    : await client
       .select()
       .from(projectParameters)
       .where(
@@ -94,14 +102,14 @@ export async function loadProjectWideEntries(projectId: string): Promise<Project
     const p = projParamByFieldId.get(f.id);
     if (!p) continue;
     const v = extractValue(f.dataType, p);
-    if (v !== undefined) entries.push({ symbol: f.symbol, value: v, templateId: f.templateId, standardCode: f.standardCode });
+    if (v !== undefined) entries.push({ symbol: f.symbol, value: v, templateId: f.templateId, standardCode: f.standardCode, fieldId: f.id });
   }
   return entries;
 }
 
 /** A4: symbols a conflict-free project-wide value resolves for, from worksheets OTHER than `ownTemplateId`. */
 export async function loadInheritedSymbolsForTemplate(projectId: string, ownTemplateId: string): Promise<Set<string>> {
-  const entries = await loadProjectWideEntries(projectId);
+  const entriesAll = await loadProjectWideEntries(projectId);
   // DWA-M 820-3 review fix I-e: own-standard-first — a symbol of the own standard counts only from that standard.
   const [tmpl] = await db
     .select({ standardId: worksheetTemplates.standardId })
@@ -113,6 +121,10 @@ export async function loadInheritedSymbolsForTemplate(projectId: string, ownTemp
     : { templateIds: new Set<string>(), symbols: new Set<string>(), types: new Map<string, Set<string>>(), standardCode: null };
   // M820 flow block 3 (X10): the cross-standard carry-over allow-list adds its listed carriers (src/lib/projects/cross-standard-carry.ts).
   const carry = scope.standardCode ? { ownStandardCode: scope.standardCode } : undefined;
+  // R-14: an occurrence hidden on its own source sheet of this standard is no inherited value.
+  const entries = tmpl
+    ? dropHiddenAtSource(entriesAll, await loadHiddenAtSourceFieldIds(projectId, tmpl.standardId, db, { projectEntries: entriesAll, ownScope: scope }))
+    : entriesAll;
   return inheritedSymbolSet(scopeForInheritance(entries, scope.templateIds, scope.types, carry).filter((e) => e.templateId !== ownTemplateId));
 }
 
@@ -122,19 +134,97 @@ export async function loadInheritedSymbolsForTemplate(projectId: string, ownTemp
  */
 export async function loadOwnStandardScope(
   standardId: string,
+  client: Pick<typeof db, 'select'> = db,
 ): Promise<{ templateIds: Set<string>; symbols: Set<string>; types: Map<string, Set<string>>; standardCode: string | null }> {
-  const rows = await db
+  const rows = await client
     .select({ symbol: fields.symbol, templateId: fields.worksheetTemplateId, dataType: fields.dataType })
     .from(fields)
     .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
     .where(and(eq(worksheetTemplates.standardId, standardId), eq(fields.active, true)));
-  const [std] = await db.select({ code: standards.code }).from(standards).where(eq(standards.id, standardId)).limit(1);
+  const [std] = await client.select({ code: standards.code }).from(standards).where(eq(standards.id, standardId)).limit(1);
   const types = new Map<string, Set<string>>();
   for (const r of rows) {
     if (!types.has(r.symbol)) types.set(r.symbol, new Set());
     types.get(r.symbol)!.add(r.dataType);
   }
   return { templateIds: new Set(rows.map((r) => r.templateId)), symbols: new Set(rows.map((r) => r.symbol)), types, standardCode: std?.code ?? null };
+}
+
+type OwnScope = Awaited<ReturnType<typeof loadOwnStandardScope>>;
+
+/**
+ * The rows of ONE standard in a project that the per-template visibility pass reads (`required-field-counts.ts`): the
+ * standard's templates, active fields, sections, the project's rows for those fields, every project-wide occurrence and
+ * the own-standard scope. ONE loader for the counts (C-7), the hidden-at-source sets (U-2 / R-14) and the save path's
+ * cross-sheet stale pass (R-13). `client` = a tx handle when called inside `db.transaction` (a global-pool query from an
+ * open tx deadlocks, Task 10b). `pre` = rows the caller already holds (the gate loads entries + scope itself).
+ */
+export async function loadStandardVisibilityArgs(
+  projectId: string,
+  standardId: string,
+  client: Pick<typeof db, 'select'> = db,
+  pre: { projectEntries?: ProjectWideEntry[]; ownScope?: OwnScope } = {},
+): Promise<RequiredFieldCountArgs | null> {
+  const templates = await client
+    .select({ id: worksheetTemplates.id })
+    .from(worksheetTemplates)
+    .where(eq(worksheetTemplates.standardId, standardId));
+  const templateIds = templates.map((t) => t.id);
+  if (templateIds.length === 0) return null;
+
+  const loadFields = () => client
+      .select({
+        id: fields.id,
+        symbol: fields.symbol,
+        labelDe: fields.labelDe,
+        dataType: fields.dataType,
+        isRequired: fields.isRequired,
+        templateId: fields.worksheetTemplateId,
+        sectionId: fields.sectionId,
+        visibleWhen: fields.visibleWhen,
+      })
+      .from(fields)
+      .where(and(inArray(fields.worksheetTemplateId, templateIds), eq(fields.active, true)));
+  const loadSections = () => client
+      .select({
+        id: worksheetSections.id,
+        parentSectionId: worksheetSections.parentSectionId,
+        visibleWhen: worksheetSections.visibleWhen,
+        templateId: worksheetSections.worksheetTemplateId,
+      })
+      .from(worksheetSections)
+      .where(inArray(worksheetSections.worksheetTemplateId, templateIds));
+  const loadEntries = () => (pre.projectEntries ? Promise.resolve(pre.projectEntries) : loadProjectWideEntries(projectId, client));
+  const loadScope = () => (pre.ownScope ? Promise.resolve(pre.ownScope) : loadOwnStandardScope(standardId, client));
+  // Parallel on the global pool; sequential on a tx handle (one connection — no concurrent statements inside a tx).
+  const [tmplFields, tmplSections, projectEntries, ownScope] = client === db
+    ? await Promise.all([loadFields(), loadSections(), loadEntries(), loadScope()])
+    : [await loadFields(), await loadSections(), await loadEntries(), await loadScope()];
+
+  const fieldIds = tmplFields.map((f) => f.id);
+  const params = fieldIds.length === 0
+    ? []
+    : await client
+      .select()
+      .from(projectParameters)
+      .where(and(eq(projectParameters.projectId, projectId), inArray(projectParameters.fieldId, fieldIds)));
+  const paramByFieldId = new Map(params.map((p) => [p.fieldId, p]));
+
+  return { templateIds, fields: tmplFields, sections: tmplSections, paramByFieldId, projectEntries, ownScope };
+}
+
+/**
+ * R-14: the field ids of ONE standard hidden by `visible_when` on their own (source) template under the project's saved
+ * values — the set the gate, the counts, the worksheet page and the save path drop (`dropHiddenAtSource`).
+ */
+export async function loadHiddenAtSourceFieldIds(
+  projectId: string,
+  standardId: string,
+  client: Pick<typeof db, 'select'> = db,
+  pre: { projectEntries?: ProjectWideEntry[]; ownScope?: OwnScope } = {},
+): Promise<Set<string>> {
+  const args = await loadStandardVisibilityArgs(projectId, standardId, client, pre);
+  return args ? hiddenAtSourceFieldIds(args) : new Set();
 }
 
 /** Extract the typed value from a project_parameters row for a field's data type (shared with the counts, C-7). */
@@ -300,10 +390,15 @@ export async function checkApprovalGate(
   // Project-wide fallback: for symbols that are NOT fields on THIS worksheet,
   // resolve from the project's value wherever it is entered (e.g. a config
   // selector like quality_category on another worksheet). Conflict-free only.
-  const projectEntries = await loadProjectWideEntries(instance.projectId);
+  const projectEntriesAll = await loadProjectWideEntries(instance.projectId);
   // DWA-M 820-3 structure block: a symbol of the gate's own standard resolves from that standard only (see
   // buildStandardScopedFallback — a same-named field of another standard never decides, never blanks it out).
   const ownScope = await loadOwnStandardScope(instance.standardId);
+  // R-14 (2026-10-08, „hidden ⇒ absent"): an occurrence hidden by `visible_when` on its own source sheet of this standard
+  // is no value — e.g. 820-2-18 `testbetrieb_vs_abnahme_choice` while `bauleistungen_vergeben` is not true: REQ-46 on
+  // 820-2-22 must not decide on that leftover. Same set the worksheet page drops from its upstream panel and seeding.
+  const hiddenAtSource = await loadHiddenAtSourceFieldIds(instance.projectId, instance.standardId, db, { projectEntries: projectEntriesAll, ownScope });
+  const projectEntries = dropHiddenAtSource(projectEntriesAll, hiddenAtSource);
   const fallback = buildStandardScopedFallback(projectEntries, ownScope.templateIds, ownScope.symbols);
   // A4: the symbols an inherited project-wide value resolves for (OTHER
   // worksheets only, conflict-free) — a required field the sheet offers as

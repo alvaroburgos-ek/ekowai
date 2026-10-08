@@ -10,7 +10,7 @@ import {
   standards,
   worksheetSections,
 } from '@/lib/db/schema';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, or, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import { loadInheritedFields } from '@/lib/db/queries/worksheet';
@@ -20,7 +20,8 @@ import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/a
 import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
-import { staleFlagSets } from '@/lib/eval/stale-flags';
+import { consumerTemplatesReferencing, LEGACY_RULE_SYMBOLS, planStaleFlags, templateHasVisibilityRules } from '@/lib/eval/stale-flags';
+import { loadHiddenAtSourceFieldIds, loadStandardVisibilityArgs } from '@/lib/actions/approval-gate';
 import { withFallbackRegisterEquations, resolveRegisterConfig } from '@/lib/eval/register-configs';
 import { registerRowWarnings } from '@/lib/eval/register-rows';
 import { makeTableLookup, makeTableRows } from '@/lib/eval/regulation-tables-fallback';
@@ -606,7 +607,10 @@ export async function saveWorksheet(
       });
     if (boundFills.length > 0) {
       const inheritedRows = savedStandardId && savedTemplateCode
-        ? await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode)
+        ? await dropInheritedHiddenAtSource(
+            await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode),
+            instance.projectId, savedStandardId, db,
+          )
         : [];
       const ownSymbols = new Set(ownFieldRows.map((f) => f.symbol));
       const readable = [
@@ -837,8 +841,13 @@ export async function saveWorksheet(
         // inherited scalar persisted `null` (while the form/report/snapshot computed it).
         // The tx client is passed on purpose: `loadInheritedFields` on the GLOBAL pool from
         // inside an open transaction deadlocks once the pool is exhausted (Task 10b).
+        // R-14 („hidden ⇒ absent"): an inherited field hidden by `visible_when` on its own source sheet is dropped —
+        // the same set the worksheet page drops from its panel / initialValues (dropInheritedHiddenAtSource).
         const inheritedRows = savedStandardId
-          ? await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode, tx)
+          ? await dropInheritedHiddenAtSource(
+              await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode, tx),
+              instance.projectId, savedStandardId, tx,
+            )
           : [];
         const ownSymbols = new Set(templateFields.map((f) => f.symbol));
         const inheritedFields = inheritedRows
@@ -3162,69 +3171,77 @@ export async function saveWorksheet(
       }
       // ── End Option A ─────────────────────────────────────────────────────
 
-      // ── U-1 (ruling R-12, 2026-10-08): stale flags on hidden answers ─────
-      // A value saved while its question is hidden by `visible_when` (or not re-saved since) is
-      // flagged `is_stale = true`, so the form badges it and the counts treat it as open when the
-      // question reappears; a save while the field is visible clears it. Visibility is evaluated
-      // over the POST-save values (this tx sees its own writes, incl. the materialised rows) with
-      // the form's lookup pair (own fields hideable; own + inherited symbols readable). Only the
-      // saved template's own fields; derived/computed rows excluded (see staleFlagSets). No value
-      // is deleted or nulled — one UPDATE per set.
+      // ── U-1 (R-12) + M-1 (R-13) + R-14: stale flags on hidden answers ────
+      // A value saved while its question is hidden by `visible_when` (or not re-saved since) is flagged
+      // `is_stale = true`, so the form badges it and the counts treat it as open when the question reappears.
+      //   OWN sheet: visibility over the POST-save values (this tx sees its own writes, incl. the materialised rows)
+      //     with the form's lookup pair — own fields hideable; own + inherited symbols readable, inherited fields
+      //     hidden at their source dropped (R-14, the same set the page drops) — so a „Bestätigen" re-save of a field
+      //     the page shows can never re-flag it. Flags set on hidden valued rows, cleared on visible rows written here.
+      //   CONSUMER sheets (R-13): other templates of the standard whose field/section `visible_when` reads a symbol
+      //     written here are re-evaluated with the counts' (gate) lookup; newly hidden valued rows are flagged. A flag
+      //     on another sheet is NEVER cleared here — only a save of that sheet with the field visible clears it.
+      // Derived/computed rows are never flagged (staleFlagSets). No value is deleted or nulled; one UPDATE per set.
+      // L-3: the standard's rule rows are read first; with no rule that could hide anything only the clear runs.
       if (parameterValues.length > 0) {
-        const staleOwnFields = await tx
-          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, sectionId: fields.sectionId, visibleWhen: fields.visibleWhen })
-          .from(fields)
-          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
-        const staleSections = await tx
-          .select({ id: worksheetSections.id, parentSectionId: worksheetSections.parentSectionId, visibleWhen: worksheetSections.visibleWhen })
-          .from(worksheetSections)
-          .where(eq(worksheetSections.worksheetTemplateId, instance.worksheetTemplateId));
-        const staleInherited = savedStandardId && savedTemplateCode
-          ? await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode, tx)
-          : [];
-        const staleOwnSymbols = new Set(staleOwnFields.map((f) => f.symbol));
-        const staleReadable = [
-          ...staleOwnFields.map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType })),
-          ...staleInherited.filter((f) => !staleOwnSymbols.has(f.symbol)).map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType })),
-        ];
-        const staleRows = staleReadable.length > 0
+        const writtenIds = parameterValues.map((r) => r.fieldId);
+        const writtenSymbols = new Set(writtenIds.map((id) => symbolById.get(id)).filter((s): s is string => s != null));
+        const ruleFields = savedStandardId
           ? await tx
-              .select({
-                fieldId: projectParameters.fieldId,
-                valueNumber: projectParameters.valueNumber,
-                valueText: projectParameters.valueText,
-                valueEnum: projectParameters.valueEnum,
-                valueDate: projectParameters.valueDate,
-                valueBoolean: projectParameters.valueBoolean,
-                valueJson: projectParameters.valueJson,
-                sourceType: projectParameters.sourceType,
-                isStale: projectParameters.isStale,
-              })
-              .from(projectParameters)
-              .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, staleReadable.map((f) => f.id))))
+              .select({ templateId: fields.worksheetTemplateId, symbol: fields.symbol, visibleWhen: fields.visibleWhen })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(worksheetTemplates.standardId, savedStandardId),
+                eq(fields.active, true),
+                or(isNotNull(fields.visibleWhen), inArray(fields.symbol, [...LEGACY_RULE_SYMBOLS])),
+              ))
           : [];
-        const { hiddenSymbols: staleHidden } = computeVisibility(
-          staleOwnFields,
-          staleSections,
-          makeSymbolLookup(staleReadable, parametersToFieldValues(staleRows, staleReadable)),
-        );
-        const { setStale, clearStale } = staleFlagSets(
-          staleOwnFields,
-          staleHidden,
-          new Set(parameterValues.map((r) => r.fieldId)),
-          staleRows,
-        );
-        if (setStale.length > 0) {
-          await tx
-            .update(projectParameters)
-            .set({ isStale: true })
-            .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, setStale)));
-        }
-        if (clearStale.length > 0) {
+        const ruleSections = savedStandardId
+          ? await tx
+              .select({ templateId: worksheetSections.worksheetTemplateId, visibleWhen: worksheetSections.visibleWhen })
+              .from(worksheetSections)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetSections.worksheetTemplateId))
+              .where(and(eq(worksheetTemplates.standardId, savedStandardId), isNotNull(worksheetSections.visibleWhen)))
+          : [];
+        const ownHasRules = templateHasVisibilityRules(instance.worksheetTemplateId, ruleFields, ruleSections);
+        const consumers = consumerTemplatesReferencing(writtenSymbols, ruleFields, ruleSections, instance.worksheetTemplateId);
+        const visArgs = savedStandardId && (ownHasRules || consumers.size > 0)
+          ? await loadStandardVisibilityArgs(instance.projectId, savedStandardId, tx)
+          : null;
+        if (!visArgs) {
+          // Nothing on this sheet can be hidden and no other sheet reads what was written: only clear flags here.
           await tx
             .update(projectParameters)
             .set({ isStale: false })
-            .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, clearStale)));
+            .where(and(
+              eq(projectParameters.projectId, instance.projectId),
+              inArray(projectParameters.fieldId, writtenIds),
+              eq(projectParameters.isStale, true),
+            ));
+        } else {
+          const { setStale, clearStale } = planStaleFlags({
+            visArgs,
+            ownTemplateId: instance.worksheetTemplateId,
+            inheritedFields: savedTemplateCode
+              ? (await loadInheritedFields(instance.worksheetTemplateId, savedStandardId!, savedTemplateCode, tx))
+                  .map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType }))
+              : [],
+            writtenFieldIds: new Set(writtenIds),
+            consumerTemplateIds: consumers,
+          });
+          if (setStale.length > 0) {
+            await tx
+              .update(projectParameters)
+              .set({ isStale: true })
+              .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, setStale)));
+          }
+          if (clearStale.length > 0) {
+            await tx
+              .update(projectParameters)
+              .set({ isStale: false })
+              .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, clearStale)));
+          }
         }
       }
       // ── End U-1 ──────────────────────────────────────────────────────────
@@ -3266,4 +3283,20 @@ function extractValue(
     default:
       return null;
   }
+}
+
+/**
+ * R-14 („hidden ⇒ absent"): drop the inherited fields hidden by `visible_when` on their own (source) template of the
+ * standard — the set the worksheet page drops from its upstream panel and initialValues. No query when nothing is
+ * inherited. `client` = the tx handle inside a transaction.
+ */
+async function dropInheritedHiddenAtSource<T extends { id: string }>(
+  rows: T[],
+  projectId: string,
+  standardId: string,
+  client: Pick<typeof db, 'select'>,
+): Promise<T[]> {
+  if (rows.length === 0) return rows;
+  const hidden = await loadHiddenAtSourceFieldIds(projectId, standardId, client);
+  return hidden.size === 0 ? rows : rows.filter((r) => !hidden.has(r.id));
 }
