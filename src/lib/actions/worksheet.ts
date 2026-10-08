@@ -10,18 +10,26 @@ import {
   standards,
   worksheetSections,
 } from '@/lib/db/schema';
-import { and, eq, inArray, isNotNull, or, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
-import { loadInheritedFields } from '@/lib/db/queries/worksheet';
 import { lookupFillWriteDecision, resolveLookupFill, resolveLookupFillConfig } from '@/lib/eval/lookup-fill';
 import type { Value } from '@/lib/expr';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
 import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
-import { consumerTemplatesReferencing, LEGACY_RULE_SYMBOLS, planStaleFlags, templateHasVisibilityRules } from '@/lib/eval/stale-flags';
-import { loadHiddenAtSourceFieldIds, loadStandardVisibilityArgs } from '@/lib/actions/approval-gate';
+import { consumerTemplatesReferencing, planStaleFlags, templateHasVisibilityRules } from '@/lib/eval/stale-flags';
+import {
+  buildVisibilityArgs,
+  inheritedFieldsFromMeta,
+  loadProjectFieldRows,
+  loadProjectParameterRows,
+  loadStandardVisibilityMeta,
+  type ProjectFieldRow,
+  type StandardVisibilityMeta,
+} from '@/lib/actions/approval-gate';
+import { hiddenAtSourceFieldIds } from '@/lib/projects/required-field-counts';
 import { withFallbackRegisterEquations, resolveRegisterConfig } from '@/lib/eval/register-configs';
 import { registerRowWarnings } from '@/lib/eval/register-rows';
 import { makeTableLookup, makeTableRows } from '@/lib/eval/regulation-tables-fallback';
@@ -185,6 +193,33 @@ export async function saveWorksheet(
     .limit(1);
   const savedStandardId = savedTemplateRow?.standardId ?? null;
   const savedTemplateCode = savedTemplateRow?.code ?? null;
+
+  // Fix round 2 (re-review 5442259, save-path cost): ONE metadata load per save. The standard's fields/sections
+  // (`loadStandardVisibilityMeta`, 2 reads) and the project's field rows (`loadProjectFieldRows`, 1 read) do not change
+  // during a save, so they are loaded once (on whichever client first needs them) and shared by the lookup_fill pass,
+  // the register materialiser, the stale pass and the R-13 consumer pass. Only the parameter rows (1 read) are re-read at
+  // each pass, because this save's own writes change them (pre-write for lookup_fill, post-upsert for the materialiser,
+  // post-everything for the stale pass — the same moments the passes read before).
+  let visMeta: StandardVisibilityMeta | null = null;
+  let visProjectFields: ProjectFieldRow[] | null = null;
+  const getVisMeta = async (client: Pick<typeof db, 'select'>): Promise<StandardVisibilityMeta | null> => {
+    if (!visMeta && savedStandardId) visMeta = await loadStandardVisibilityMeta(savedStandardId, client);
+    return visMeta;
+  };
+  /** Visibility args + the raw parameter rows as of NOW (parameters re-read; metadata shared). */
+  const loadVisNow = async (client: Pick<typeof db, 'select'>) => {
+    const meta = await getVisMeta(client);
+    if (!meta) return null;
+    if (!visProjectFields) visProjectFields = await loadProjectFieldRows(instance.projectId, client);
+    const params = await loadProjectParameterRows(instance.projectId, client);
+    const args = buildVisibilityArgs(meta, visProjectFields, params);
+    return args ? { meta, args, params, hiddenAtSource: hiddenAtSourceFieldIds(args) } : null;
+  };
+  /** Inherited fields of the saved sheet (pure `loadInheritedFields` over the shared meta), minus those hidden at source (R-14). */
+  const inheritedVisible = (meta: StandardVisibilityMeta, hiddenAtSource: ReadonlySet<string>) =>
+    savedTemplateCode
+      ? inheritedFieldsFromMeta(meta, instance.worksheetTemplateId, savedTemplateCode).filter((f) => !hiddenAtSource.has(f.id))
+      : [];
 
   // r_D_n / D_min are governing-iteration outputs (never hand-entered) — inherited
   // onto consumers like A138-10 where no equation produces them. Stamp them
@@ -606,29 +641,16 @@ export async function saveWorksheet(
         return cfg ? [{ field: f, binding: cfg.binding }] : [];
       });
     if (boundFills.length > 0) {
-      const inheritedRows = savedStandardId && savedTemplateCode
-        ? await dropInheritedHiddenAtSource(
-            await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode),
-            instance.projectId, savedStandardId, db,
-          )
-        : [];
+      // Pre-write view (global pool, before the tx). R-14: inherited fields hidden at their source are dropped.
+      const lfVis = await loadVisNow(db);
+      const inheritedRows = lfVis ? inheritedVisible(lfVis.meta, lfVis.hiddenAtSource) : [];
       const ownSymbols = new Set(ownFieldRows.map((f) => f.symbol));
       const readable = [
         ...ownFieldRows.map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType })),
         ...inheritedRows.filter((f) => !ownSymbols.has(f.symbol)).map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType })),
       ];
-      const persistedRows = await db
-        .select({
-          fieldId: projectParameters.fieldId,
-          valueNumber: projectParameters.valueNumber,
-          valueText: projectParameters.valueText,
-          valueEnum: projectParameters.valueEnum,
-          valueDate: projectParameters.valueDate,
-          valueBoolean: projectParameters.valueBoolean,
-          valueJson: projectParameters.valueJson,
-        })
-        .from(projectParameters)
-        .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, readable.map((f) => f.id))));
+      // rows of fields outside `readable` are ignored by parametersToFieldValues (unknown field id ⇒ no value)
+      const persistedRows = lfVis?.params ?? [];
       const persistedValues = parametersToFieldValues(persistedRows, readable);
       const acceptedBatch = Object.fromEntries(Object.entries(input.values).filter(([id]) => !rejectedFieldIds.has(id)));
       const mergedValues = { ...persistedValues, ...acceptedBatch };
@@ -825,12 +847,18 @@ export async function saveWorksheet(
       // Batch values overlay the persisted rows so a scalar input an equation also reads (G-13) is current;
       // values a validation strip rejected (rejectedFieldIds) are NOT overlaid — they will not persist.
       // An empty batch (topology-triggered recompute) can never carry a register → skip the field load.
-      const templateFields = fieldIds.length > 0
-        ? await tx
-            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, unit: fields.unit, widget: fields.widget, uiConfig: fields.uiConfig, sectionId: fields.sectionId, visibleWhen: fields.visibleWhen })
-            .from(fields)
-            .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)))
-        : [];
+      // Fix round 2: the own fields come from the shared per-save metadata (no separate SELECT).
+      const regMeta = fieldIds.length > 0 ? await getVisMeta(tx) : null;
+      const templateFields = fieldIds.length === 0
+        ? []
+        : regMeta
+          ? regMeta.fields
+              .filter((f) => f.templateId === instance.worksheetTemplateId)
+              .map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType, unit: f.unit, widget: f.widget, uiConfig: f.uiConfig, sectionId: f.sectionId, visibleWhen: f.visibleWhen }))
+          : await tx
+              .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, unit: fields.unit, widget: fields.widget, uiConfig: fields.uiConfig, sectionId: fields.sectionId, visibleWhen: fields.visibleWhen })
+              .from(fields)
+              .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
       const batchValues = Object.fromEntries(Object.entries(input.values).filter(([id]) => !rejectedFieldIds.has(id)));
       const batchRegisterIds = registerFieldIds(templateFields, batchValues).filter((id) => fieldIds.includes(id));
       if (batchRegisterIds.length > 0 && savedTemplateRow?.standardCode && savedTemplateCode) {
@@ -839,33 +867,17 @@ export async function saveWorksheet(
         // `visible_when` whose driver is inherited resolved to `pending` (⇒ nothing hid
         // server-side, while the form hid it) and a register-fed equation naming an
         // inherited scalar persisted `null` (while the form/report/snapshot computed it).
-        // The tx client is passed on purpose: `loadInheritedFields` on the GLOBAL pool from
-        // inside an open transaction deadlocks once the pool is exhausted (Task 10b).
-        // R-14 („hidden ⇒ absent"): an inherited field hidden by `visible_when` on its own source sheet is dropped —
-        // the same set the worksheet page drops from its panel / initialValues (dropInheritedHiddenAtSource).
-        const inheritedRows = savedStandardId
-          ? await dropInheritedHiddenAtSource(
-              await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode, tx),
-              instance.projectId, savedStandardId, tx,
-            )
-          : [];
+        // All reads run on `tx`: a global-pool query from inside an open transaction deadlocks (Task 10b).
+        // R-14 (hidden ⇒ absent): an inherited field hidden by `visible_when` on its own source sheet is dropped — the
+        // same set the worksheet page drops. Post-upsert view: parameters re-read here, metadata shared (fix round 2).
+        const regVis = await loadVisNow(tx);
+        const inheritedRows = regVis ? inheritedVisible(regVis.meta, regVis.hiddenAtSource) : [];
         const ownSymbols = new Set(templateFields.map((f) => f.symbol));
         const inheritedFields = inheritedRows
           .filter((f) => !ownSymbols.has(f.symbol)) // an own field always wins (single-owner rule)
           .map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType, unit: f.unit, widget: f.widget, uiConfig: f.uiConfig }));
         const readableFields = [...templateFields, ...inheritedFields];
-        const persisted = await tx
-          .select({
-            fieldId: projectParameters.fieldId,
-            valueNumber: projectParameters.valueNumber,
-            valueText: projectParameters.valueText,
-            valueEnum: projectParameters.valueEnum,
-            valueDate: projectParameters.valueDate,
-            valueBoolean: projectParameters.valueBoolean,
-            valueJson: projectParameters.valueJson,
-          })
-          .from(projectParameters)
-          .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, readableFields.map((f) => f.id))));
+        const persisted = regVis?.params ?? [];
         const valuesByFieldId = { ...parametersToFieldValues(persisted, readableFields), ...batchValues };
         // Plan 2a (Task 10, fix round 1): fields/sections hidden by `visible_when` under the
         // overlaid values (persisted + batch) — same pure helper + lookup as the form, so the
@@ -874,10 +886,12 @@ export async function saveWorksheet(
         // Single-pass: visibility is evaluated against the PRE-save values (before this save's
         // derived writes), so a `visible_when` that references a derived output sees the
         // previous save's value, not the one materialised below (sign-off D-6/D-11).
-        const templateSections = await tx
-          .select({ id: worksheetSections.id, parentSectionId: worksheetSections.parentSectionId, visibleWhen: worksheetSections.visibleWhen })
-          .from(worksheetSections)
-          .where(eq(worksheetSections.worksheetTemplateId, instance.worksheetTemplateId));
+        const templateSections = regVis
+          ? regVis.meta.sections.filter((s) => s.templateId === instance.worksheetTemplateId)
+          : await tx
+              .select({ id: worksheetSections.id, parentSectionId: worksheetSections.parentSectionId, visibleWhen: worksheetSections.visibleWhen })
+              .from(worksheetSections)
+              .where(eq(worksheetSections.worksheetTemplateId, instance.worksheetTemplateId));
         // The HIDEABLE set stays this worksheet's own fields (an inherited field is governed
         // by its origin worksheet); the LOOKUP covers own + inherited — the same pair the
         // form makes (`worksheet-form.tsx`: computeVisibility(ownFields, …, makeSymbolLookup(fields, …))).
@@ -3186,30 +3200,15 @@ export async function saveWorksheet(
       if (parameterValues.length > 0) {
         const writtenIds = parameterValues.map((r) => r.fieldId);
         const writtenSymbols = new Set(writtenIds.map((id) => symbolById.get(id)).filter((s): s is string => s != null));
-        const ruleFields = savedStandardId
-          ? await tx
-              .select({ templateId: fields.worksheetTemplateId, symbol: fields.symbol, visibleWhen: fields.visibleWhen })
-              .from(fields)
-              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
-              .where(and(
-                eq(worksheetTemplates.standardId, savedStandardId),
-                eq(fields.active, true),
-                or(isNotNull(fields.visibleWhen), inArray(fields.symbol, [...LEGACY_RULE_SYMBOLS])),
-              ))
-          : [];
-        const ruleSections = savedStandardId
-          ? await tx
-              .select({ templateId: worksheetSections.worksheetTemplateId, visibleWhen: worksheetSections.visibleWhen })
-              .from(worksheetSections)
-              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetSections.worksheetTemplateId))
-              .where(and(eq(worksheetTemplates.standardId, savedStandardId), isNotNull(worksheetSections.visibleWhen)))
-          : [];
-        const ownHasRules = templateHasVisibilityRules(instance.worksheetTemplateId, ruleFields, ruleSections);
-        const consumers = consumerTemplatesReferencing(writtenSymbols, ruleFields, ruleSections, instance.worksheetTemplateId);
-        const visArgs = savedStandardId && (ownHasRules || consumers.size > 0)
-          ? await loadStandardVisibilityArgs(instance.projectId, savedStandardId, tx)
-          : null;
-        if (!visArgs) {
+        // The rule rows come from the shared per-save metadata (fix round 2: no separate rule SELECTs).
+        const stMeta = await getVisMeta(tx);
+        const ownHasRules = stMeta ? templateHasVisibilityRules(instance.worksheetTemplateId, stMeta.fields, stMeta.sections) : false;
+        const consumers = stMeta
+          ? consumerTemplatesReferencing(writtenSymbols, stMeta.fields, stMeta.sections, instance.worksheetTemplateId)
+          : new Set<string>();
+        // Post-everything view: parameters re-read (this tx sees its own writes and the materialised rows).
+        const stVis = ownHasRules || consumers.size > 0 ? await loadVisNow(tx) : null;
+        if (!stVis) {
           // Nothing on this sheet can be hidden and no other sheet reads what was written: only clear flags here.
           await tx
             .update(projectParameters)
@@ -3221,10 +3220,10 @@ export async function saveWorksheet(
             ));
         } else {
           const { setStale, clearStale } = planStaleFlags({
-            visArgs,
+            visArgs: stVis.args,
             ownTemplateId: instance.worksheetTemplateId,
             inheritedFields: savedTemplateCode
-              ? (await loadInheritedFields(instance.worksheetTemplateId, savedStandardId!, savedTemplateCode, tx))
+              ? inheritedFieldsFromMeta(stVis.meta, instance.worksheetTemplateId, savedTemplateCode)
                   .map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType }))
               : [],
             writtenFieldIds: new Set(writtenIds),
@@ -3283,20 +3282,4 @@ function extractValue(
     default:
       return null;
   }
-}
-
-/**
- * R-14 („hidden ⇒ absent"): drop the inherited fields hidden by `visible_when` on their own (source) template of the
- * standard — the set the worksheet page drops from its upstream panel and initialValues. No query when nothing is
- * inherited. `client` = the tx handle inside a transaction.
- */
-async function dropInheritedHiddenAtSource<T extends { id: string }>(
-  rows: T[],
-  projectId: string,
-  standardId: string,
-  client: Pick<typeof db, 'select'>,
-): Promise<T[]> {
-  if (rows.length === 0) return rows;
-  const hidden = await loadHiddenAtSourceFieldIds(projectId, standardId, client);
-  return hidden.size === 0 ? rows : rows.filter((r) => !hidden.has(r.id));
 }

@@ -10,6 +10,7 @@ import {
   countRequiredFieldsByTemplate,
   dropHiddenAtSource,
   hiddenAtSourceFieldIds,
+  hiddenAtSourceSymbols,
   requiredFieldState,
   type CountField,
   type CountParam,
@@ -61,15 +62,17 @@ function run46(vergeben: boolean) {
   // scoped lookup on 820-2-22 (local symbol testbetrieb_planned = false, everything else from the fallback).
   const fallback = buildFallbackValues(scopeToOwnStandard(dropHiddenAtSource(entries, hidden), scope.templateIds, scope.symbols));
   const lookup = (s: string) => (s === 'testbetrieb_planned' ? false : fallback.get(s));
-  return { hidden, verdict: evaluateCondition(REQ_46, lookup).kind };
+  // R-15 (fix round 2): the hidden-at-source symbols (not a field of 820-2-22) are hidden for the gate ⇒ not_applicable.
+  const hiddenSymbols = hiddenAtSourceSymbols(fields, hidden, T22);
+  return { hidden, verdict: evaluateCondition(REQ_46, lookup, { hiddenSymbols }).kind };
 }
 
 describe('R-14: 820-2-22 REQ-46 and the hidden leftover on 820-2-18', () => {
-  it('bauleistungen_vergeben = false: the leftover choice is hidden at source and dropped — REQ-46 does not fail on it', () => {
+  it('bauleistungen_vergeben = false: the leftover choice is hidden at source and dropped — REQ-46 is not_applicable (R-14 + R-15)', () => {
     const { hidden, verdict } = run46(false);
     expect([...hidden]).toEqual(['f-choice']);
     expect(verdict).not.toBe('fail');
-    expect(['pending', 'not_applicable']).toContain(verdict);
+    expect(verdict).toBe('not_applicable');
   });
 
   it('bauleistungen_vergeben = true: the choice is a real answer — REQ-46 fails on testbetrieb_planned = false', () => {

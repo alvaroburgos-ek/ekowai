@@ -19,13 +19,10 @@
  */
 import { paramHasValue, type ParameterValueColumns } from '@/lib/projects/required-fields';
 import { extractConditionSymbols } from '@/lib/compliance/evaluate';
-import { computeVisibility, effectiveVisibleWhen, LEGACY_VISIBLE_WHEN } from '@/lib/compliance/visibility';
+import { computeVisibility, effectiveVisibleWhen } from '@/lib/compliance/visibility';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { gateHiddenFieldIdsByTemplate, hiddenAtSourceFieldIds, type RequiredFieldCountArgs } from '@/lib/projects/required-field-counts';
-
-/** Symbols whose visibility rule may come from the legacy TS table while `fields.visible_when` is NULL. */
-export const LEGACY_RULE_SYMBOLS: readonly string[] = Object.keys(LEGACY_VISIBLE_WHEN);
 
 export type StaleFlagField = { id: string; symbol: string; dataType: string };
 

@@ -234,3 +234,23 @@ export function requiredFieldState(args: RequiredFieldCountArgs): {
   const counts = countsFromPasses(args, gatePasses(args, flatten(hiddenByTemplate)));
   return { counts, hiddenByTemplate };
 }
+
+/**
+ * R-15 (2026-10-08): the symbols hidden at their source for a consumer sheet (`excludeTemplateId`): every field of the
+ * standard carrying the symbol outside that sheet is hidden on its own template. A symbol with at least one visible
+ * occurrence elsewhere is not hidden (that occurrence still answers it, or is pending while blank).
+ */
+export function hiddenAtSourceSymbols(
+  fields: ReadonlyArray<{ id: string; symbol: string; templateId: string }>,
+  hiddenFieldIds: ReadonlySet<string>,
+  excludeTemplateId: string,
+): Set<string> {
+  const hidden = new Set<string>();
+  const visible = new Set<string>();
+  for (const f of fields) {
+    if (f.templateId === excludeTemplateId) continue;
+    (hiddenFieldIds.has(f.id) ? hidden : visible).add(f.symbol);
+  }
+  for (const s of visible) hidden.delete(s);
+  return hidden;
+}

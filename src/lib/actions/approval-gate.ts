@@ -22,6 +22,10 @@ import {
   dropHiddenAtSource,
   extractGateValue,
   hiddenAtSourceFieldIds,
+  hiddenAtSourceSymbols,
+  type CountField,
+  type CountParam,
+  type CountSection,
   type RequiredFieldCountArgs,
 } from '@/lib/projects/required-field-counts';
 
@@ -109,22 +113,23 @@ export async function loadProjectWideEntries(projectId: string, client: Pick<typ
 
 /** A4: symbols a conflict-free project-wide value resolves for, from worksheets OTHER than `ownTemplateId`. */
 export async function loadInheritedSymbolsForTemplate(projectId: string, ownTemplateId: string): Promise<Set<string>> {
-  const entriesAll = await loadProjectWideEntries(projectId);
-  // DWA-M 820-3 review fix I-e: own-standard-first — a symbol of the own standard counts only from that standard.
+  // DWA-M 820-3 review fix I-e: own-standard-first - a symbol of the own standard counts only from that standard.
   const [tmpl] = await db
     .select({ standardId: worksheetTemplates.standardId })
     .from(worksheetTemplates)
     .where(eq(worksheetTemplates.id, ownTemplateId))
     .limit(1);
-  const scope = tmpl
-    ? await loadOwnStandardScope(tmpl.standardId)
-    : { templateIds: new Set<string>(), symbols: new Set<string>(), types: new Map<string, Set<string>>(), standardCode: null };
+  // One load (4 reads) for the occurrences, the scope and the R-14 hidden-at-source set.
+  const visArgs = tmpl ? await loadStandardVisibilityArgs(projectId, tmpl.standardId) : null;
+  const entriesAll = visArgs?.projectEntries ?? await loadProjectWideEntries(projectId);
+  const scope = visArgs?.ownScope
+    ?? (tmpl
+      ? await loadOwnStandardScope(tmpl.standardId)
+      : { templateIds: new Set<string>(), symbols: new Set<string>(), types: new Map<string, Set<string>>(), standardCode: null });
   // M820 flow block 3 (X10): the cross-standard carry-over allow-list adds its listed carriers (src/lib/projects/cross-standard-carry.ts).
   const carry = scope.standardCode ? { ownStandardCode: scope.standardCode } : undefined;
   // R-14: an occurrence hidden on its own source sheet of this standard is no inherited value.
-  const entries = tmpl
-    ? dropHiddenAtSource(entriesAll, await loadHiddenAtSourceFieldIds(projectId, tmpl.standardId, db, { projectEntries: entriesAll, ownScope: scope }))
-    : entriesAll;
+  const entries = visArgs ? dropHiddenAtSource(entriesAll, hiddenAtSourceFieldIds(visArgs)) : entriesAll;
   return inheritedSymbolSet(scopeForInheritance(entries, scope.templateIds, scope.types, carry).filter((e) => e.templateId !== ownTemplateId));
 }
 
@@ -150,67 +155,146 @@ export async function loadOwnStandardScope(
   return { templateIds: new Set(rows.map((r) => r.templateId)), symbols: new Set(rows.map((r) => r.symbol)), types, standardCode: std?.code ?? null };
 }
 
-type OwnScope = Awaited<ReturnType<typeof loadOwnStandardScope>>;
+/** One active field of the standard as the visibility passes, the save path and the inheritance rule read it. */
+export type StandardVisibilityField = CountField & {
+  templateCode: string;
+  unit: string | null;
+  widget: string | null;
+  uiConfig: unknown;
+  consumerWorksheets: string[] | null;
+};
 
 /**
- * The rows of ONE standard in a project that the per-template visibility pass reads (`required-field-counts.ts`): the
- * standard's templates, active fields, sections, the project's rows for those fields, every project-wide occurrence and
- * the own-standard scope. ONE loader for the counts (C-7), the hidden-at-source sets (U-2 / R-14) and the save path's
- * cross-sheet stale pass (R-13). `client` = a tx handle when called inside `db.transaction` (a global-pool query from an
- * open tx deadlocks, Task 10b). `pre` = rows the caller already holds (the gate loads entries + scope itself).
+ * Field/section metadata of ONE standard (2 reads). It does not change during a save, so the save path loads it once and
+ * shares it between the lookup_fill pass, the register materialiser, the stale pass and the R-13 consumer pass.
+ */
+export type StandardVisibilityMeta = {
+  standardCode: string | null;
+  templateIds: string[];
+  fields: StandardVisibilityField[];
+  sections: CountSection[];
+};
+
+/** The project's saved occurrences context: every active field of every template the project has an instance of. */
+export type ProjectFieldRow = { id: string; symbol: string; dataType: string; templateId: string; standardCode: string | null };
+
+export async function loadStandardVisibilityMeta(
+  standardId: string,
+  client: Pick<typeof db, 'select'> = db,
+): Promise<StandardVisibilityMeta> {
+  const fieldRows = await client
+    .select({
+      id: fields.id,
+      symbol: fields.symbol,
+      labelDe: fields.labelDe,
+      dataType: fields.dataType,
+      isRequired: fields.isRequired,
+      templateId: fields.worksheetTemplateId,
+      templateCode: worksheetTemplates.code,
+      sectionId: fields.sectionId,
+      visibleWhen: fields.visibleWhen,
+      unit: fields.unit,
+      widget: fields.widget,
+      uiConfig: fields.uiConfig,
+      consumerWorksheets: fields.consumerWorksheets,
+      standardCode: standards.code,
+    })
+    .from(fields)
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+    .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
+    .where(and(eq(worksheetTemplates.standardId, standardId), eq(fields.active, true)));
+  const sectionRows = await client
+    .select({
+      id: worksheetSections.id,
+      parentSectionId: worksheetSections.parentSectionId,
+      visibleWhen: worksheetSections.visibleWhen,
+      templateId: worksheetSections.worksheetTemplateId,
+    })
+    .from(worksheetSections)
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetSections.worksheetTemplateId))
+    .where(eq(worksheetTemplates.standardId, standardId));
+  const fieldsOut: StandardVisibilityField[] = fieldRows.map((r) => ({
+    id: r.id, symbol: r.symbol, labelDe: r.labelDe, dataType: r.dataType, isRequired: r.isRequired,
+    templateId: r.templateId, templateCode: r.templateCode, sectionId: r.sectionId, visibleWhen: r.visibleWhen,
+    unit: r.unit, widget: r.widget, uiConfig: r.uiConfig,
+    consumerWorksheets: (r.consumerWorksheets as string[] | null) ?? null,
+  }));
+  return {
+    standardCode: fieldRows[0]?.standardCode ?? null,
+    templateIds: [...new Set([...fieldRows.map((f) => f.templateId), ...sectionRows.map((s) => s.templateId)])],
+    fields: fieldsOut,
+    sections: sectionRows,
+  };
+}
+
+/** Active fields of every template the project has an instance of (1 read) — the occurrence side of the fallback / A4. */
+export async function loadProjectFieldRows(projectId: string, client: Pick<typeof db, 'select'> = db): Promise<ProjectFieldRow[]> {
+  return client
+    .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, templateId: fields.worksheetTemplateId, standardCode: standards.code })
+    .from(fields)
+    .innerJoin(worksheetInstances, and(eq(worksheetInstances.worksheetTemplateId, fields.worksheetTemplateId), eq(worksheetInstances.projectId, projectId)))
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+    .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
+    .where(eq(fields.active, true));
+}
+
+/** Every saved parameter row of the project (1 read). */
+export async function loadProjectParameterRows(projectId: string, client: Pick<typeof db, 'select'> = db) {
+  return client.select().from(projectParameters).where(eq(projectParameters.projectId, projectId));
+}
+
+/**
+ * Pure: the visibility-pass args from the loaded rows — the same shape (and the same content) the former 9-read loader
+ * produced: `ownScope` from the standard's active fields, `projectEntries` = typed occurrences on the project's templates.
+ */
+export function buildVisibilityArgs(
+  meta: StandardVisibilityMeta,
+  projectFields: ReadonlyArray<ProjectFieldRow>,
+  params: ReadonlyArray<CountParam & { fieldId: string }>,
+): RequiredFieldCountArgs | null {
+  if (meta.templateIds.length === 0) return null;
+  const paramByFieldId = new Map(params.map((p) => [p.fieldId, p]));
+  const projectEntries: ProjectWideEntry[] = [];
+  for (const f of projectFields) {
+    const p = paramByFieldId.get(f.id);
+    if (!p) continue;
+    const v = extractGateValue(f.dataType, p);
+    if (v !== undefined) projectEntries.push({ symbol: f.symbol, value: v, templateId: f.templateId, standardCode: f.standardCode, fieldId: f.id });
+  }
+  const types = new Map<string, Set<string>>();
+  for (const f of meta.fields) {
+    if (!types.has(f.symbol)) types.set(f.symbol, new Set());
+    types.get(f.symbol)!.add(f.dataType);
+  }
+  const ownScope = {
+    templateIds: new Set(meta.fields.map((f) => f.templateId)),
+    symbols: new Set(meta.fields.map((f) => f.symbol)),
+    types,
+    standardCode: meta.standardCode,
+  };
+  return { templateIds: meta.templateIds, fields: meta.fields, sections: meta.sections, paramByFieldId, projectEntries, ownScope };
+}
+
+/** Pure form of `loadInheritedFields` over the loaded meta: fields of OTHER templates of the standard naming `code` as consumer. */
+export function inheritedFieldsFromMeta(meta: StandardVisibilityMeta, templateId: string, code: string): StandardVisibilityField[] {
+  return meta.fields.filter((f) => f.templateId !== templateId && (f.consumerWorksheets ?? []).includes(code));
+}
+
+/**
+ * The rows of ONE standard in a project that the per-template visibility pass reads (`required-field-counts.ts`) — 4 reads
+ * (fields, sections, project fields, project parameters). ONE loader for the counts (C-7), the hidden-at-source sets
+ * (U-2 / R-14 / R-15), the gate, MCP and the save path. `client` = a tx handle inside `db.transaction`.
  */
 export async function loadStandardVisibilityArgs(
   projectId: string,
   standardId: string,
   client: Pick<typeof db, 'select'> = db,
-  pre: { projectEntries?: ProjectWideEntry[]; ownScope?: OwnScope } = {},
 ): Promise<RequiredFieldCountArgs | null> {
-  const templates = await client
-    .select({ id: worksheetTemplates.id })
-    .from(worksheetTemplates)
-    .where(eq(worksheetTemplates.standardId, standardId));
-  const templateIds = templates.map((t) => t.id);
-  if (templateIds.length === 0) return null;
-
-  const loadFields = () => client
-      .select({
-        id: fields.id,
-        symbol: fields.symbol,
-        labelDe: fields.labelDe,
-        dataType: fields.dataType,
-        isRequired: fields.isRequired,
-        templateId: fields.worksheetTemplateId,
-        sectionId: fields.sectionId,
-        visibleWhen: fields.visibleWhen,
-      })
-      .from(fields)
-      .where(and(inArray(fields.worksheetTemplateId, templateIds), eq(fields.active, true)));
-  const loadSections = () => client
-      .select({
-        id: worksheetSections.id,
-        parentSectionId: worksheetSections.parentSectionId,
-        visibleWhen: worksheetSections.visibleWhen,
-        templateId: worksheetSections.worksheetTemplateId,
-      })
-      .from(worksheetSections)
-      .where(inArray(worksheetSections.worksheetTemplateId, templateIds));
-  const loadEntries = () => (pre.projectEntries ? Promise.resolve(pre.projectEntries) : loadProjectWideEntries(projectId, client));
-  const loadScope = () => (pre.ownScope ? Promise.resolve(pre.ownScope) : loadOwnStandardScope(standardId, client));
-  // Parallel on the global pool; sequential on a tx handle (one connection — no concurrent statements inside a tx).
-  const [tmplFields, tmplSections, projectEntries, ownScope] = client === db
-    ? await Promise.all([loadFields(), loadSections(), loadEntries(), loadScope()])
-    : [await loadFields(), await loadSections(), await loadEntries(), await loadScope()];
-
-  const fieldIds = tmplFields.map((f) => f.id);
-  const params = fieldIds.length === 0
-    ? []
-    : await client
-      .select()
-      .from(projectParameters)
-      .where(and(eq(projectParameters.projectId, projectId), inArray(projectParameters.fieldId, fieldIds)));
-  const paramByFieldId = new Map(params.map((p) => [p.fieldId, p]));
-
-  return { templateIds, fields: tmplFields, sections: tmplSections, paramByFieldId, projectEntries, ownScope };
+  const parallel = client === db;
+  const [meta, projectFields, params] = parallel
+    ? await Promise.all([loadStandardVisibilityMeta(standardId, client), loadProjectFieldRows(projectId, client), loadProjectParameterRows(projectId, client)])
+    : [await loadStandardVisibilityMeta(standardId, client), await loadProjectFieldRows(projectId, client), await loadProjectParameterRows(projectId, client)];
+  return buildVisibilityArgs(meta, projectFields, params);
 }
 
 /**
@@ -221,9 +305,8 @@ export async function loadHiddenAtSourceFieldIds(
   projectId: string,
   standardId: string,
   client: Pick<typeof db, 'select'> = db,
-  pre: { projectEntries?: ProjectWideEntry[]; ownScope?: OwnScope } = {},
 ): Promise<Set<string>> {
-  const args = await loadStandardVisibilityArgs(projectId, standardId, client, pre);
+  const args = await loadStandardVisibilityArgs(projectId, standardId, client);
   return args ? hiddenAtSourceFieldIds(args) : new Set();
 }
 
@@ -390,14 +473,17 @@ export async function checkApprovalGate(
   // Project-wide fallback: for symbols that are NOT fields on THIS worksheet,
   // resolve from the project's value wherever it is entered (e.g. a config
   // selector like quality_category on another worksheet). Conflict-free only.
-  const projectEntriesAll = await loadProjectWideEntries(instance.projectId);
+  // ONE load (4 reads) for the occurrences, the own-standard scope and the hidden-at-source set.
+  const visArgs = await loadStandardVisibilityArgs(instance.projectId, instance.standardId);
+  const projectEntriesAll = visArgs?.projectEntries ?? await loadProjectWideEntries(instance.projectId);
   // DWA-M 820-3 structure block: a symbol of the gate's own standard resolves from that standard only (see
-  // buildStandardScopedFallback — a same-named field of another standard never decides, never blanks it out).
-  const ownScope = await loadOwnStandardScope(instance.standardId);
-  // R-14 (2026-10-08, „hidden ⇒ absent"): an occurrence hidden by `visible_when` on its own source sheet of this standard
-  // is no value — e.g. 820-2-18 `testbetrieb_vs_abnahme_choice` while `bauleistungen_vergeben` is not true: REQ-46 on
-  // 820-2-22 must not decide on that leftover. Same set the worksheet page drops from its upstream panel and seeding.
-  const hiddenAtSource = await loadHiddenAtSourceFieldIds(instance.projectId, instance.standardId, db, { projectEntries: projectEntriesAll, ownScope });
+  // buildStandardScopedFallback - a same-named field of another standard never decides, never blanks it out).
+  const ownScope = visArgs?.ownScope ?? await loadOwnStandardScope(instance.standardId);
+  // R-14 (hidden => absent): an occurrence hidden by `visible_when` on its own source sheet of this standard is no value -
+  // e.g. 820-2-18 `testbetrieb_vs_abnahme_choice` while `bauleistungen_vergeben` is not true. Same set the worksheet page
+  // drops from its upstream panel and seeding. R-15: its symbol is also HIDDEN for the conditions below (not_applicable).
+  const hiddenAtSource = visArgs ? hiddenAtSourceFieldIds(visArgs) : new Set<string>();
+  const sourceHiddenSymbols = visArgs ? hiddenAtSourceSymbols(visArgs.fields, hiddenAtSource, instance.worksheetTemplateId) : new Set<string>();
   const projectEntries = dropHiddenAtSource(projectEntriesAll, hiddenAtSource);
   const fallback = buildStandardScopedFallback(projectEntries, ownScope.templateIds, ownScope.symbols);
   // A4: the symbols an inherited project-wide value resolves for (OTHER
@@ -433,7 +519,11 @@ export async function checkApprovalGate(
   // (only `kind === 'fail'` below blocks; Task 11 pins the same rule in the
   // form badge, PDF, Prüfmemo and snapshot verdict); a hidden required field
   // is not "missing" (it cannot be filled in).
-  const { hiddenFieldIds, hiddenSymbols } = computeVisibility(tmplFields, tmplSections, lookup);
+  const { hiddenFieldIds, hiddenSymbols: ownHiddenSymbols } = computeVisibility(tmplFields, tmplSections, lookup);
+  // R-15 (2026-10-08): a symbol whose field is hidden on its SOURCE sheet is hidden for this gate too - a condition reading
+  // it reports `not_applicable`, never `pending` (a pending block gate blocks and would name a question nobody can see).
+  // Only symbols that are not a field of this sheet: a local field is decided by this sheet's own visibility above.
+  const hiddenSymbols = gateHiddenSymbols(ownHiddenSymbols, sourceHiddenSymbols, localSymbols);
 
   // Missing required-field check: a field with is_required=true must have a
   // non-null value of its declared type (JSON: valueJson non-null) — OR an
@@ -554,4 +644,19 @@ export function formatApprovalGateError(result: ApprovalGateResult): string {
     'Genehmigung abgelehnt — Eingaben prüfen und korrigieren, dann erneut einreichen. '
     + parts.join(' · ')
   );
+}
+
+/**
+ * R-15 (2026-10-08): the gate's hidden symbols = this sheet's own hidden symbols plus the symbols hidden at their source
+ * sheet that are NOT a field of this sheet (a local field is decided by this sheet's own visibility). A condition reading
+ * one of them reports `not_applicable`, never `pending`.
+ */
+export function gateHiddenSymbols(
+  ownHidden: ReadonlySet<string>,
+  sourceHidden: ReadonlySet<string>,
+  localSymbols: ReadonlySet<string>,
+): Set<string> {
+  const out = new Set(ownHidden);
+  for (const s of sourceHidden) if (!localSymbols.has(s)) out.add(s);
+  return out;
 }
