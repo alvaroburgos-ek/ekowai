@@ -184,7 +184,7 @@ export default async function WorksheetPage({
   const inheritedFromBySymbol: Record<string, string> = {};
   const prefillSourceByFieldId: Record<string, 'standard_default' | 'site_profile' | 'twin'> = {};
   const siteProfileKeyByFieldId: Record<string, string> = {};
-  const twinSourceByFieldId: Record<string, { worksheetCode: string; symbol: string }> = {};
+  const twinSourceByFieldId: Record<string, { worksheetCode: string; symbol: string; standardCode?: string }> = {};
   // field_id → "taken from DWA-M 820-1 (M820-06 / M820-07)" note for a value carried over the cross-standard allow-list.
   const carriedNoteByFieldId: Record<string, string> = {};
   // Twin hints (same quantity, other symbol) merged into the same-symbol hint list
@@ -251,7 +251,9 @@ export default async function WorksheetPage({
       if (!coerced) continue;
       initialValues[f.id] = coerced;
       prefillSourceByFieldId[f.id] = 'twin';
-      twinSourceByFieldId[f.id] = { worksheetCode: ups[0].worksheetCode, symbol: src };
+      // U-10: the twin source may sit on another standard's sheet (DWA-M 820-2 ← 820-1 M820-05) — keep its standard
+      // so the badge links to the right worksheet URL.
+      twinSourceByFieldId[f.id] = { worksheetCode: ups[0].worksheetCode, symbol: src, standardCode: ups[0].sourceStandardCode ?? undefined };
       twinHintsBySymbol[f.symbol] = ups.map((u) => ({ worksheetCode: u.worksheetCode, value: u.value, viaSymbol: src }));
       twinDone = true;
       break;

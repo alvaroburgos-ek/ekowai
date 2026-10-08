@@ -99,7 +99,10 @@ describe('ComplianceBlock — guard not triggered (vacuous pass)', () => {
 
   it('English locale wording', () => {
     renderGuarded('en');
-    expect(screen.getByLabelText('Not applicable — the precondition of this check is not met').textContent).toBe('–');
+    expect(screen.getByLabelText('Not triggered — the precondition of this check is not met').textContent).toBe('–');
+    // cluster-B review: the EN header chip reads "not triggered", distinct from the hidden-symbol "n.a." chip
+    expect(screen.getByText(/1 not triggered/)).toBeTruthy();
+    expect(screen.queryByText(/not applicable/)).toBeNull();
   });
 
   it('guard triggered and satisfied (x = 15) ⇒ a real ✓', () => {

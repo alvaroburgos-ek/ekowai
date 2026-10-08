@@ -67,6 +67,17 @@ export const TWIN_SYMBOLS: Record<string, TwinRule[]> = {
     // Flood-proof trigger — decided on A138-07, re-asked on A138-24.
     { target: 'flood_check_required_final', worksheet: 'A138-24', sources: ['flood_check_trigger'], note: 'Überflutungsnachweis erforderlich (A138-07, §5.3.4.1)' },
   ],
+  // U-10 (UX pass 820, 2026-10-08): ask once. The source lives on ANOTHER standard's sheet (DWA-M 820-1 M820-05);
+  // `loadSameSymbolValues` is project-wide (any standard on the project), so the twin step on the page reaches it.
+  // Both fields are booleans (coerceSameSymbolValue keeps `false` as an answer).
+  'DWA-M-820-2': [
+    {
+      target: 'framework_conditions_clarified',
+      worksheet: '820-2-11',
+      sources: ['bedarfsplanung_projekt_complete'],
+      note: 'Bedarfsplanung Projekt abgeschlossen (DWA-M 820-1 M820-05, § 6.4) — 820-2 § 5.2.2 fragt dieselbe Tatsache',
+    },
+  ],
 };
 
 /** Twin sources (priority order) for `symbol` under `standardCode`, or []. */

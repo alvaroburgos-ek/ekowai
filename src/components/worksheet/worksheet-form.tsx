@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { isValidElement, memo, useEffect, useMemo, useRef } from 'react';
+import { isValidElement, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useWorksheetStore, type FieldValue } from '@/lib/state/worksheet-store';
 import { saveWorksheet } from '@/lib/actions/worksheet';
 import { DynamicField } from './dynamic-field';
@@ -30,6 +30,7 @@ import { withFallbackRegisterEquations, resolveRegisterConfig, registerFlagKeys 
 import { renderWidget, widgetPlacement, type WorksheetFormField, type WidgetContext } from './widgets';
 import { ReadOnlyRegisterTable, registerPlacement } from './register-editor';
 import { visibleFields } from './visible-fields';
+import { splitInheritedForPanel, upstreamPanelStorageKey } from './inherited-panel';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { allOwnFieldsHidden, hiddenSheetDrivers } from '@/lib/compliance/hidden-drivers';
@@ -234,11 +235,11 @@ function SaveWarningsBanner() {
 export type { WorksheetFormField };
 type FieldDef = WorksheetFormField;
 
-/** Display value of a field as the upstream panel shows it (number de-DE, enum label, Ja/Nein, text, "(Tabelle)",
+/** Display value of a field as the upstream panel shows it (number de-DE, enum label, Ja/Nein (EN Yes/No), text, "(Tabelle)" (EN "(table)"),
  * "—" when empty). Shared by the inherited-values panel and the U-5 all-hidden notice. */
 function formatPanelValue(f: FieldDef, v: FieldValue | undefined, locale: 'de' | 'en'): string {
   if (v?.type === 'number' && v.value != null && Number.isFinite(v.value)) return formatNumberDe(v.value);
-  if (v?.type === 'json' && v.value && typeof v.value === 'object') return '(Tabelle)';
+  if (v?.type === 'json' && v.value && typeof v.value === 'object') return locale === 'en' ? '(table)' : '(Tabelle)';
   if (v?.type === 'enum' && v.value != null) {
     if (f.enumValues) {
       const entry = f.enumValues.find((e) => e.value === v.value);
@@ -247,7 +248,7 @@ function formatPanelValue(f: FieldDef, v: FieldValue | undefined, locale: 'de' |
     }
     return String(v.value);
   }
-  if (v?.type === 'boolean' && v.value != null) return v.value ? 'Ja' : 'Nein';
+  if (v?.type === 'boolean' && v.value != null) return locale === 'en' ? (v.value ? 'Yes' : 'No') : v.value ? 'Ja' : 'Nein';
   if (v?.type === 'text' && v.value) return v.value;
   return '—';
 }
@@ -288,7 +289,7 @@ type Props = {
   /** field_id → upstream worksheet + symbol that supplied a TWIN pre-fill (same
    * quantity under another symbol, TWIN_SYMBOLS). Drives the badge and the
    * "Alle Vorbefüllungen übernehmen" bar. */
-  twinSourceByFieldId?: Record<string, { worksheetCode: string; symbol: string }>;
+  twinSourceByFieldId?: Record<string, { worksheetCode: string; symbol: string; standardCode?: string }>;
   /** field_id → note for a value carried over the cross-standard allow-list (src/lib/projects/cross-standard-carry.ts), e.g.
    * "taken from DWA-M 820-1 (M820-06 / M820-07)". Shown under the field's editor while the carried value is untouched; the
    * first edit overwrites it with an own value. */
@@ -913,6 +914,40 @@ export function WorksheetForm({
     () => fields.filter((f) => f.inheritedFromWorksheet && f.active),
     [fields],
   );
+  // U-3 (UX pass 820): sheet-specific upstream values first, project identity/metadata last under „Projektdaten".
+  const inheritedPanelGroups = useMemo(() => splitInheritedForPanel(inheritedFieldsForPanel), [inheritedFieldsForPanel]);
+  // U-3: the panel is collapsed by default; the open state is remembered per worksheet (localStorage, best effort).
+  // A sheet without visible own questions (U-5 notice) always starts collapsed — the notice carries the drivers.
+  const upstreamPanelKey = upstreamPanelStorageKey(standardCode, worksheet.template.code);
+  const [upstreamPanelOpen, setUpstreamPanelOpen] = useState(false);
+  const startCollapsed = allHiddenNotice != null;
+  // Restore once per worksheet, and only after the store holds THIS instance's values — before that the visibility
+  // (and so the U-5 all-hidden decision) is computed on empty values.
+  const storeReady = useWorksheetStore((s) => s.instanceId) === instance.id;
+  const restoredPanelKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (!storeReady || restoredPanelKey.current === upstreamPanelKey) return;
+    restoredPanelKey.current = upstreamPanelKey;
+    let open = false;
+    if (!startCollapsed) {
+      try {
+        open = window.localStorage.getItem(upstreamPanelKey) === 'open';
+      } catch {
+        /* storage unavailable — stay collapsed */
+      }
+    }
+    setUpstreamPanelOpen(open);
+  }, [storeReady, upstreamPanelKey, startCollapsed]);
+  const toggleUpstreamPanel = () => {
+    const next = !upstreamPanelOpen;
+    setUpstreamPanelOpen(next);
+    try {
+      if (next) window.localStorage.setItem(upstreamPanelKey, 'open');
+      else window.localStorage.removeItem(upstreamPanelKey);
+    } catch {
+      /* storage unavailable — the toggle still works for this view */
+    }
+  };
 
   // Sections worth rendering: those holding at least one visible field
   // directly, plus every ancestor on the path up to such a section. DWA
@@ -1049,6 +1084,40 @@ export function WorksheetForm({
   const renderField = (sectionId: string | null) =>
     (fieldsBySectionId.map.get(sectionId) ?? []).map((f) => renderWidget(f, widgetCtx));
 
+  // One row of the „Vorgelagerte Werte" panel (U-3: rendered in two groups — sheet-specific, then „Projektdaten").
+  const renderInheritedRow = (f: FieldDef) => {
+    const display = formatPanelValue(f, values[f.id], locale);
+    const label = locale === 'de' ? f.labelDe : (f.labelEn ?? f.labelDe);
+    return (
+      <li
+        key={f.id}
+        data-symbol={f.symbol}
+        data-inherited-from={f.inheritedFromWorksheet}
+        className="border-b border-hairline last:border-b-0 py-1 flex items-start justify-between gap-2 min-w-0"
+      >
+        <div className="min-w-0">
+          <div className="text-ink break-words">
+            <code className="font-mono text-xs mr-2">{f.symbol}</code>
+            {label}
+          </div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-subtext">
+            {f.inheritedFromWorksheet ? (
+              <Link
+                href={`/${locale}/projects/${projectId}/standards/${standardCode}/worksheets/${f.inheritedFromWorksheet}`}
+                className="hover:text-accent transition-colors underline-offset-2 hover:underline"
+                title={`Arbeitsblatt ${f.inheritedFromWorksheet} öffnen`}
+              >
+                ← {f.inheritedFromWorksheet}
+              </Link>
+            ) : null}
+            {f.unit && <span className="ml-2 text-ink-2">{f.unit}</span>}
+          </div>
+        </div>
+        <div className="font-mono tabular-nums text-ink text-right min-w-0 break-words">{display}</div>
+      </li>
+    );
+  };
+
   return (
     <article className="space-y-8 max-w-3xl">
       <header className="border-b border-hairline pb-6">
@@ -1119,46 +1188,45 @@ export function WorksheetForm({
           data-testid="inherited-values-panel"
         >
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Vorgelagerte Werte (aus anderen Arbeitsblättern)
+            <button
+              type="button"
+              onClick={toggleUpstreamPanel}
+              aria-expanded={upstreamPanelOpen}
+              aria-controls="inherited-values-panel-body"
+              className="flex items-center gap-2 text-left uppercase tracking-[0.25em] hover:text-ink transition-colors"
+              data-testid="inherited-values-toggle"
+            >
+              <span aria-hidden="true">{upstreamPanelOpen ? '▾' : '▸'}</span>
+              <span>
+                {locale === 'de'
+                  ? `${inheritedFieldsForPanel.length} vorgelagerte Werte (aus anderen Arbeitsblättern) — ${upstreamPanelOpen ? 'ausblenden' : 'anzeigen'}`
+                  : `${inheritedFieldsForPanel.length} upstream values (from other worksheets) — ${upstreamPanelOpen ? 'hide' : 'show'}`}
+              </span>
+            </button>
           </h2>
-          <p className="text-[11px] text-subtext">
-            Diese Werte stammen aus vorgelagerten Arbeitsblättern desselben
-            Projekts. Zum Bearbeiten das angegebene Arbeitsblatt öffnen.
-          </p>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-            {inheritedFieldsForPanel.map((f) => {
-              const display = formatPanelValue(f, values[f.id], locale);
-              const label = locale === 'de' ? f.labelDe : (f.labelEn ?? f.labelDe);
-              return (
-                <li
-                  key={f.id}
-                  data-symbol={f.symbol}
-                  data-inherited-from={f.inheritedFromWorksheet}
-                  className="border-b border-hairline last:border-b-0 py-1 flex items-start justify-between gap-2 min-w-0"
-                >
-                  <div className="min-w-0">
-                    <div className="text-ink break-words">
-                      <code className="font-mono text-xs mr-2">{f.symbol}</code>
-                      {label}
-                    </div>
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-subtext">
-                      {f.inheritedFromWorksheet ? (
-                        <Link
-                          href={`/${locale}/projects/${projectId}/standards/${standardCode}/worksheets/${f.inheritedFromWorksheet}`}
-                          className="hover:text-accent transition-colors underline-offset-2 hover:underline"
-                          title={`Arbeitsblatt ${f.inheritedFromWorksheet} öffnen`}
-                        >
-                          ← {f.inheritedFromWorksheet}
-                        </Link>
-                      ) : null}
-                      {f.unit && <span className="ml-2 text-ink-2">{f.unit}</span>}
-                    </div>
-                  </div>
-                  <div className="font-mono tabular-nums text-ink text-right min-w-0 break-words">{display}</div>
-                </li>
-              );
-            })}
-          </ul>
+          {/* Collapsed ⇒ `hidden` (kept in the DOM, so engine-facing tests and anchors still find the rows). */}
+          <div id="inherited-values-panel-body" hidden={!upstreamPanelOpen} className="space-y-2" data-testid="inherited-values-body">
+            <p className="text-[11px] text-subtext">
+              {locale === 'de'
+                ? 'Diese Werte stammen aus vorgelagerten Arbeitsblättern desselben Projekts. Zum Bearbeiten das angegebene Arbeitsblatt öffnen.'
+                : 'These values come from upstream worksheets of the same project. Open the named worksheet to edit them.'}
+            </p>
+            {inheritedPanelGroups.specific.length > 0 && (
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                {inheritedPanelGroups.specific.map(renderInheritedRow)}
+              </ul>
+            )}
+            {inheritedPanelGroups.identity.length > 0 && (
+              <>
+                <h3 className="text-[10px] uppercase tracking-[0.2em] text-subtext pt-2" data-testid="inherited-values-identity-heading">
+                  {locale === 'de' ? 'Projektdaten' : 'Project data'}
+                </h3>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm" data-testid="inherited-values-identity">
+                  {inheritedPanelGroups.identity.map(renderInheritedRow)}
+                </ul>
+              </>
+            )}
+          </div>
         </section>
       )}
 

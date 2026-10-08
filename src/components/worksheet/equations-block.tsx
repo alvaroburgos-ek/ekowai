@@ -21,6 +21,12 @@ type Equation = {
   verificationNote?: string | null;
 };
 
+/** U-8: hover text carrying the verification status for viewers who do not see the badge (non-platform engineers). */
+function verificationHoverTitle(status: string, isPlatformEngineer: boolean): string | undefined {
+  if (isPlatformEngineer || status === 'engineer_verified') return undefined;
+  return `${verificationStatusLabel(status)} — ${verificationStatusTitle(status)}`;
+}
+
 export function EquationsBlock({
   equations: allEquations,
   isPlatformEngineer = false,
@@ -46,7 +52,10 @@ export function EquationsBlock({
         {equations.map((eq) => (
           <li key={eq.id} className="text-sm text-ink space-y-1">
             <div className="flex items-baseline gap-3">
-              <span className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0">
+              <span
+                className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0"
+                title={eq.clauseReference ? undefined : verificationHoverTitle(eq.verificationStatus, isPlatformEngineer)}
+              >
                 Gl. {eq.equationNumber}
               </span>
               <KatexFormula
@@ -56,9 +65,10 @@ export function EquationsBlock({
             </div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[68px] flex flex-wrap gap-3 items-baseline">
               {eq.clauseReference && (
-                <ClauseChip clauseReference={eq.clauseReference} />
+                <ClauseChip clauseReference={eq.clauseReference} title={verificationHoverTitle(eq.verificationStatus, isPlatformEngineer)} />
               )}
-              {eq.verificationStatus !== 'engineer_verified' && (
+              {/* U-8: the verification badge is a platform-engineer tool; others see the status as the chip's title. */}
+              {isPlatformEngineer && eq.verificationStatus !== 'engineer_verified' && (
                 <span
                   className="text-accent-2 normal-case tracking-normal"
                   title={verificationStatusTitle(eq.verificationStatus)}

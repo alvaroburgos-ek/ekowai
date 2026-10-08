@@ -8,6 +8,7 @@ import { makeCarrierLookup, makeSymbolLookup } from '@/lib/compliance/symbol-loo
 import { explainCondition } from '@/lib/compliance/explain';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { hintText } from '@/lib/eval/hint-text';
+import { HintText } from './hint-text';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
 
@@ -142,7 +143,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
           )}
           {counts.guardSkipped > 0 && (
             <span className="text-subtext" title={guardSkippedTitle(locale)}>
-              – {counts.guardSkipped} {locale === 'de' ? 'nicht einschlägig' : 'not applicable'}
+              – {counts.guardSkipped} {locale === 'de' ? 'nicht einschlägig' : 'not triggered'}
             </span>
           )}
           {counts.attestation > 0 && (
@@ -181,8 +182,14 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                   {locale === 'de' ? cr.titleDe : cr.titleEn ?? cr.titleDe}
                 </span>
               </div>
-              {cr.description && (
-                <p className="text-xs text-subtext ml-8 sm:ml-[140px]">{hintText(cr.description, locale)}</p>
+              {hintText(cr.description, locale) && (
+                // U-7: first sentence, the rest behind „mehr" (the PDF / MCP keep the full description).
+                <HintText
+                  text={hintText(cr.description, locale) as string}
+                  locale={locale}
+                  className="text-xs text-subtext ml-8 sm:ml-[140px]"
+                  testId={`cr-hint-${cr.code}`}
+                />
               )}
               <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-8 sm:ml-[140px] flex gap-3 flex-wrap">
                 <code className="break-all">{cr.condition}</code>
@@ -377,7 +384,7 @@ const TYPE_LABELS: Record<
 function guardSkippedTitle(locale: 'de' | 'en'): string {
   return locale === 'de'
     ? 'Nicht einschlägig — die Vorbedingung dieser Prüfung trifft nicht zu'
-    : 'Not applicable — the precondition of this check is not met';
+    : 'Not triggered — the precondition of this check is not met';
 }
 
 function StatusBadge({

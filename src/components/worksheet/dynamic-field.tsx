@@ -13,6 +13,7 @@ import { VerifyButton } from './verify-button';
 import { verificationStatusLabel, verificationStatusTitle } from '@/lib/verification-status';
 import { AcAsRatioCheckStatus } from './ac-as-ratio-check-status';
 import { hintText } from '@/lib/eval/hint-text';
+import { HintText } from './hint-text';
 import { AsmMethodStatus, type AsmMethodBadgeState } from './asm-method-status';
 
 type FieldDef = {
@@ -76,7 +77,8 @@ type Props = {
    * badge that tells the engineer where the pre-fill came from. */
   prefillSource?: 'standard_default' | 'site_profile' | 'twin';
   /** Upstream worksheet + symbol of a twin pre-fill (prefillSource === 'twin'). */
-  twinSource?: { worksheetCode: string; symbol: string };
+  /** `standardCode`: the source sheet's standard when it differs from this one (cross-standard twin, U-10). */
+  twinSource?: { worksheetCode: string; symbol: string; standardCode?: string };
   /** Site-profile JSON key that supplied the pre-fill (when prefillSource ===
    * 'site_profile'). Shown in the tooltip so the engineer can find the source
    * entry in the project's Standortprofil. */
@@ -153,6 +155,14 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   const inputId = useId();
 
   const label = locale === 'de' ? field.labelDe : field.labelEn ?? field.labelDe;
+  const hintLocalized = hintText(field.description, locale);
+  // U-8 (UX pass 820): the source-verification badge is a platform-engineer tool; everyone else gets the same status
+  // as a hover title on the clause chip (or the label when the field has no clause reference).
+  const showVerificationBadge = isPlatformEngineer && field.verificationStatus !== 'engineer_verified';
+  const verificationHoverTitle =
+    !isPlatformEngineer && field.verificationStatus !== 'engineer_verified'
+      ? `${verificationStatusLabel(field.verificationStatus)} — ${verificationStatusTitle(field.verificationStatus)}`
+      : undefined;
   const docLookup = useMemo(() => {
     const m: Record<string, { title: string; citationLabel: string }> = {};
     for (const d of docs) m[d.id] = { title: d.title, citationLabel: d.citationLabel };
@@ -231,6 +241,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           id={`${inputId}-label`}
           htmlFor={inputId}
           className={`text-sm ${isSubTotal ? 'font-semibold' : 'font-medium'} text-ink leading-snug block`}
+          title={field.clauseReference ? undefined : verificationHoverTitle}
         >
           {isSubTotal && <span className="mr-1.5">Σ</span>}
           {label}
@@ -238,10 +249,10 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         </label>
         <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5 flex items-baseline gap-1.5 flex-wrap">
           {field.clauseReference && (
-            <ClauseChip clauseReference={field.clauseReference} />
+            <ClauseChip clauseReference={field.clauseReference} title={verificationHoverTitle} />
           )}
           {field.unit && !isCurrency && <span className="text-ink-2">{field.unit}</span>}
-          {field.verificationStatus !== 'engineer_verified' && (
+          {showVerificationBadge && (
             <span
               className="text-accent-2 normal-case tracking-normal"
               title={verificationStatusTitle(field.verificationStatus)}
@@ -278,7 +289,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           )}
           {prefillSource === 'twin' && twinSource && !isDirty && (
             <Link
-              href={`/${locale}/projects/${projectId}/standards/${standardCode}/worksheets/${twinSource.worksheetCode}`}
+              href={`/${locale}/projects/${projectId}/standards/${twinSource.standardCode ?? standardCode}/worksheets/${twinSource.worksheetCode}`}
               className="text-accent normal-case tracking-normal underline-offset-2 hover:underline"
               title={`${field.symbol} = ${formatProvenanceValue(value, field.unit)} vorbefüllt aus ${twinSource.worksheetCode} (${twinSource.symbol}) — bestätigen (Übernehmen) oder überschreiben.`}
               data-testid="twin-prefill-badge"
@@ -321,8 +332,8 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           )}
           {overridePill}
         </div>
-        {hintText(field.description, locale) && (
-          <p className="text-xs text-subtext mt-1.5 leading-snug max-w-prose" data-testid="field-hint">{hintText(field.description, locale)}</p>
+        {hintLocalized && (
+          <HintText text={hintLocalized} locale={locale} className="text-xs text-subtext mt-1.5 leading-snug max-w-prose" testId="field-hint" />
         )}
         {rangeHintDe && (
           <p className="text-[11px] text-subtext mt-0.5 tabular-nums">{rangeHintDe}</p>

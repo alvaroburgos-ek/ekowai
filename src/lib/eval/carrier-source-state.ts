@@ -148,11 +148,20 @@ export function groupSourceBanners(inputs: readonly SourceBannerInput[], locale:
   const out: GroupedSourceBanner[] = [];
   for (const [ownerCode, items] of groups) {
     const states = items.map((i) => i.state);
+    const withholds = items.some((i) => i.input.withholds);
     if (items.length === 1) {
-      out.push({ ownerCode, states, message: items[0].state.message as string });
+      // DE: `carrierSourceState`'s own message verbatim. EN (cluster-B review): the same sentence in English, built
+      // from the state (`carrierSourceState` itself has no locale and other callers keep its German text).
+      const st = items[0].state;
+      const enSuffix = withholds ? ' — derived values hidden.' : '.';
+      const message = de
+        ? (st.message as string)
+        : st.state === 'missing'
+          ? `Source ${ownerCode} not recorded${enSuffix}`
+          : `Source ${ownerCode} not yet approved (${st.complete}/${st.total} rows complete)${enSuffix}`;
+      out.push({ ownerCode, states, message });
       continue;
     }
-    const withholds = items.some((i) => i.input.withholds);
     const suffix = withholds ? (de ? ' — abgeleitete Werte ausgeblendet.' : ' — derived values hidden.') : '.';
     const allMissing = items.every((i) => i.state.state === 'missing');
     if (allMissing) {

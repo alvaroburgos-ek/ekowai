@@ -20,9 +20,11 @@ type Props = {
   clauseReference: string | null | undefined;
   /** Optional extra classes (e.g. to tweak spacing in unusual contexts). */
   className?: string;
+  /** Optional hover text (U-8: the field's source-verification status for non-platform engineers). */
+  title?: string;
 };
 
-export function ClauseChip({ clauseReference, className }: Props) {
+export function ClauseChip({ clauseReference, className, title }: Props) {
   const open = useOpenNormText();
 
   if (!clauseReference) return null;
@@ -34,7 +36,7 @@ export function ClauseChip({ clauseReference, className }: Props) {
 
   if (!open) {
     return (
-      <span className={`${base} ${staticClasses} ${className ?? ''}`}>
+      <span className={`${base} ${staticClasses} ${className ?? ''}`} title={title}>
         {clauseReference}
       </span>
     );
@@ -48,6 +50,7 @@ export function ClauseChip({ clauseReference, className }: Props) {
       // tweak the colour to signal "interactive".
       className={`${base} ${linkClasses} ${className ?? ''}`}
       aria-label={`Normtext zu ${clauseReference} öffnen`}
+      title={title}
       data-testid={`clause-chip-${clauseReference}`}
     >
       {clauseReference}

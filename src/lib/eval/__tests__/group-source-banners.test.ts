@@ -67,4 +67,16 @@ describe('suppressOptionalMissing', () => {
     expect(suppressOptionalMissing({ ownerCode: 'X', label: 'A', state: missing('X'), withholds: true })?.state).toBe('missing');
     expect(suppressOptionalMissing({ ownerCode: 'X', label: 'A', state: incomplete('X', 0, 1), isRequired: false })?.state).toBe('incomplete');
   });
+
+  it('single register under locale en ⇒ the English sentence (DE keeps carrierSourceState verbatim)', () => {
+    expect(groupSourceBanners([{ ownerCode: 'B', label: 'R1', state: incomplete('B', 1, 2), isRequired: true }], 'en')[0].message).toBe(
+      'Source B not yet approved (1/2 rows complete).',
+    );
+    expect(groupSourceBanners([{ ownerCode: 'M820-01', label: 'R', state: missing('M820-01'), isRequired: true, withholds: true }], 'en')[0].message).toBe(
+      'Source M820-01 not recorded — derived values hidden.',
+    );
+    expect(groupSourceBanners([{ ownerCode: 'B', label: 'R1', state: incomplete('B', 1, 2), isRequired: true }], 'de')[0].message).toBe(
+      'Quelle B noch nicht freigegeben (1/2 Zeilen vollständig).',
+    );
+  });
 });

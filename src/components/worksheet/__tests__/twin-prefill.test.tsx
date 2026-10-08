@@ -113,3 +113,24 @@ describe('"Alle Vorbefüllungen übernehmen" derivation', () => {
     expect((after.values[FIELD_ID] as { value: number }).value).toBe(162.2);
   });
 });
+
+describe('twin pre-fill badge — cross-standard source (U-10)', () => {
+  it('links to the SOURCE standard when the twin sits on another standard (820-2-11 ← DWA-M 820-1 M820-05)', () => {
+    const f = { ...FIELD, id: 'fld-fcc', symbol: 'framework_conditions_clarified', labelDe: 'Rahmenbedingungen geklärt', unit: null, dataType: 'boolean' as const };
+    initStore({ 'fld-fcc': { type: 'boolean', value: true } });
+    render(
+      <DynamicField
+        field={f}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-M-820-2"
+        docs={[]}
+        prefillSource="twin"
+        twinSource={{ worksheetCode: 'M820-05', symbol: 'bedarfsplanung_projekt_complete', standardCode: 'DWA-M-820-1' }}
+      />,
+    );
+    const badge = screen.getByTestId('twin-prefill-badge');
+    expect(badge).toHaveTextContent('Vorbefüllt ← M820-05 · bedarfsplanung_projekt_complete');
+    expect(badge.getAttribute('href')).toBe('/de/projects/p1/standards/DWA-M-820-1/worksheets/M820-05');
+  });
+});
