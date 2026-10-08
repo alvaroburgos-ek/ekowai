@@ -118,6 +118,10 @@ export function planStaleFlags(args: {
   inheritedFields: ReadonlyArray<{ id: string; symbol: string; dataType: string }>;
   writtenFieldIds: ReadonlySet<string>;
   consumerTemplateIds: ReadonlySet<string>;
+  /** M-4 (branch review 2026-10-08): consumer templates whose instance in this project is not editable
+   * (`engineer_approved`, `final`, `deactivated`) — never flagged behind the engineer's back; a locked sheet is re-opened
+   * explicitly. The own sheet is not affected (a locked sheet cannot be saved: saveWorksheet refuses it first). */
+  lockedTemplateIds?: ReadonlySet<string>;
 }): { setStale: string[]; clearStale: string[] } {
   const { visArgs, ownTemplateId } = args;
   const hiddenAtSource = hiddenAtSourceFieldIds(visArgs);
@@ -138,7 +142,7 @@ export function planStaleFlags(args: {
   const own = staleFlagSets(ownFields, hiddenSymbols, args.writtenFieldIds, rowsOf(ownFields.map((f) => f.id)));
   const setStale = [...own.setStale];
 
-  const consumers = [...args.consumerTemplateIds].filter((t) => t !== ownTemplateId);
+  const consumers = [...args.consumerTemplateIds].filter((t) => t !== ownTemplateId && !args.lockedTemplateIds?.has(t));
   if (consumers.length > 0) {
     for (const [templateId, hiddenIds] of gateHiddenFieldIdsByTemplate({ ...visArgs, templateIds: consumers }, hiddenAtSource)) {
       const cFields = visArgs.fields.filter((f) => f.templateId === templateId);

@@ -34,6 +34,7 @@ import { splitInheritedForPanel, upstreamPanelStorageKey } from './inherited-pan
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { gateHiddenSymbols } from '@/lib/projects/required-field-counts';
+import { staleConfirmCandidates } from './stale-confirm';
 import { allOwnFieldsHidden, hiddenSheetDrivers } from '@/lib/compliance/hidden-drivers';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
@@ -999,6 +1000,28 @@ export function WorksheetForm({
     }
   };
 
+  // M-3 (fix round 4): bulk confirm of stale answers. A stale field the engineer touched in this mount (pending now or
+  // before — the per-field „Bestätigen", typing, or the bar) leaves the candidate list for good: its save clears the
+  // flag server-side and the prop is not refreshed after an autosave. Tracked with the render-time state-adjust
+  // pattern (no effect).
+  const [touchedStale, setTouchedStale] = useState<ReadonlySet<string>>(() => new Set());
+  if (staleByFieldId) {
+    const newlyTouched = [...pendingFieldIds].filter((id) => staleByFieldId[id] && !touchedStale.has(id));
+    if (newlyTouched.length > 0) setTouchedStale(new Set([...touchedStale, ...newlyTouched]));
+  }
+  const staleConfirmIds = useMemo(
+    () => staleConfirmCandidates({ fields, hiddenFieldIds: visibility.hiddenFieldIds, staleByFieldId, values, pendingFieldIds, touched: touchedStale }),
+    [fields, visibility.hiddenFieldIds, staleByFieldId, values, pendingFieldIds, touchedStale],
+  );
+  // Same path as the per-field „Bestätigen": mark the current values pending → ONE autosave re-saves them visible.
+  const confirmAllStale = () => {
+    if (locked) return;
+    for (const id of staleConfirmIds) {
+      const v = values[id];
+      if (v) setField(id, v);
+    }
+  };
+
   const topSections = sections.filter((s) => s.parentSectionId === null);
   const orphanFields = fieldsBySectionId.map.get(null) ?? [];
   // ComplianceBlock's field-ref list — one array per `fields`, not per render.
@@ -1172,6 +1195,27 @@ export function WorksheetForm({
             className="text-xs px-3 py-1 rounded border border-hairline-strong hover:bg-paper-2 text-ink"
           >
             Alle Vorbefüllungen übernehmen
+          </button>
+        </div>
+      )}
+
+      {staleConfirmIds.length >= 2 && !locked && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 rounded border border-warning/40 bg-warning-soft px-3 py-2 text-sm"
+          data-testid="stale-confirm-bar"
+        >
+          <span className="text-warning">
+            {locale === 'de'
+              ? `${staleConfirmIds.length} Antworten sind älter als die aktuelle Auswahl`
+              : `${staleConfirmIds.length} answers predate the current selection`}
+          </span>
+          <button
+            type="button"
+            onClick={confirmAllStale}
+            className="text-xs px-3 py-1 rounded border border-hairline-strong hover:bg-paper-2 text-ink"
+            data-testid="stale-confirm-all"
+          >
+            {locale === 'de' ? 'alle bestätigen' : 'confirm all'}
           </button>
         </div>
       )}

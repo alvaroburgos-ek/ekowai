@@ -82,6 +82,30 @@ describe('planStaleFlags — the save-path decision (R-12 + R-13 + R-14)', () =>
     expect(r).toEqual({ setStale: ['f-lw'], clearStale: [] });
   });
 
+  it('M-4: an approved/final/deactivated consumer (locked) is never flagged', () => {
+    const r = planStaleFlags({
+      visArgs: mk('direktvergabe', { ...empty, valueBoolean: true }),
+      ownTemplateId: 'T10',
+      inheritedFields: [],
+      writtenFieldIds: new Set(['f-proc']),
+      consumerTemplateIds: new Set(['T11']),
+      lockedTemplateIds: new Set(['T11']),
+    });
+    expect(r).toEqual({ setStale: [], clearStale: [] });
+  });
+
+  it('M-4: a draft consumer (not locked) is still flagged', () => {
+    const r = planStaleFlags({
+      visArgs: mk('direktvergabe', { ...empty, valueBoolean: true }),
+      ownTemplateId: 'T10',
+      inheritedFields: [],
+      writtenFieldIds: new Set(['f-proc']),
+      consumerTemplateIds: new Set(['T11']),
+      lockedTemplateIds: new Set(['T99']),
+    });
+    expect(r.setStale).toEqual(['f-lw']);
+  });
+
   it('M-1: switching back never CLEARS the flag on the other sheet', () => {
     const r = planStaleFlags({
       visArgs: mk('vgv_f', { ...empty, valueBoolean: true, isStale: true }),
