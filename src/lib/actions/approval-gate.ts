@@ -11,10 +11,13 @@ import {
   equations,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
-import { evaluateCondition, jsonConditionValue } from '@/lib/compliance/evaluate';
+import { evaluateCondition } from '@/lib/compliance/evaluate';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import { inheritedSymbolSet, missingRequiredFields as missingRequiredFieldsShared, scopeForInheritance, scopeToOwnStandard } from '@/lib/projects/required-fields';
+// C-7 (2026-10-08): the typed-value reading and the conflict-free fallback live in the pure counts module, so the
+// sidebar / progress / MCP counts (`countRequiredFieldsByTemplate`) and this gate cannot drift apart.
+import { buildFallbackValues as buildFallbackValuesShared, extractGateValue } from '@/lib/projects/required-field-counts';
 
 /**
  * Result of the engineer-approve readiness check. The transition is
@@ -134,50 +137,17 @@ export async function loadOwnStandardScope(
   return { templateIds: new Set(rows.map((r) => r.templateId)), symbols: new Set(rows.map((r) => r.symbol)), types, standardCode: std?.code ?? null };
 }
 
-/** Extract the typed value from a project_parameters row for a field's data type. */
-function extractValue(
-  dataType: string,
-  p: {
-    valueNumber: unknown; valueText: string | null; valueEnum: string | null;
-    valueBoolean: boolean | null; valueDate: string | null; valueJson: unknown;
-  },
-): GateValue | undefined {
-  switch (dataType) {
-    case 'number': return p.valueNumber != null ? Number(p.valueNumber) : undefined;
-    case 'text': return p.valueText != null ? p.valueText : undefined;
-    case 'enum': return p.valueEnum != null ? p.valueEnum : undefined;
-    case 'boolean': return p.valueBoolean != null ? p.valueBoolean : undefined;
-    case 'date': return p.valueDate != null ? p.valueDate : undefined;
-    // JSON carriers: presence marker so `symbol IS NOT NULL`/`IS NOT EMPTY`
-    // gates work (a populated carrier ⇒ 'present'; empty/null ⇒ undefined).
-    case 'json': return jsonConditionValue(p.valueJson) ?? undefined;
-    default: return undefined;
-  }
-}
-
-function gateValueEq(a: GateValue, b: GateValue): boolean {
-  if (a === b) return true;
-  // treat e.g. number 4 and string "4" as agreeing across worksheets
-  if (typeof a !== typeof b) return String(a) === String(b);
-  return false;
-}
+/** Extract the typed value from a project_parameters row for a field's data type (shared with the counts, C-7). */
+const extractValue = extractGateValue;
 
 /**
  * Build the project-wide fallback map for symbols that are NOT fields on the
  * gate's own worksheet. A symbol is included only when every saved occurrence
  * across the project agrees; conflicting values are omitted (→ the gate stays
  * `pending`, never producing a wrong verdict from an ambiguous selector).
+ * Implementation shared with the required-field counts (C-7).
  */
-export function buildFallbackValues(entries: Array<{ symbol: string; value: GateValue }>): Map<string, GateValue> {
-  const seen = new Map<string, GateValue>();
-  const conflict = new Set<string>();
-  for (const e of entries) {
-    if (conflict.has(e.symbol)) continue;
-    if (!seen.has(e.symbol)) seen.set(e.symbol, e.value);
-    else if (!gateValueEq(seen.get(e.symbol) as GateValue, e.value)) { conflict.add(e.symbol); seen.delete(e.symbol); }
-  }
-  return seen;
-}
+export const buildFallbackValues = buildFallbackValuesShared;
 
 /**
  * DWA-M 820-3 structure block (2026-10-06): the project-wide fallback, scoped to the gate's OWN standard first.

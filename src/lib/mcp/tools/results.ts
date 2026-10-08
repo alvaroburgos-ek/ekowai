@@ -1,15 +1,14 @@
 import { z } from 'zod';
-import { and, asc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type { McpServer } from '@modelcontextprotocol/server';
 import { db } from '@/lib/db';
 import {
-  fields,
-  projectParameters,
   standards,
   worksheetInstances,
   worksheetTemplates,
 } from '@/lib/db/schema';
 import { summarizeStandardProgress } from '@/lib/projects/standard-progress';
+import { loadRequiredFieldCounts } from '@/lib/projects/load-required-field-counts';
 import { transitionWorksheet } from '@/lib/actions/worksheet-transition';
 import { env } from '@/env';
 import { defineTool, unwrap } from '../define-tool';
@@ -39,6 +38,7 @@ export function registerResultTools(server: McpServer) {
           titleDe: worksheetTemplates.titleDe,
           status: worksheetInstances.status,
           templateId: worksheetTemplates.id,
+          standardId: standards.id,
         })
         .from(worksheetInstances)
         .innerJoin(
@@ -60,77 +60,18 @@ export function registerResultTools(server: McpServer) {
         );
       }
 
-      // Required-field counts per template, and how many of them carry a value
-      // in this project. Two grouped queries rather than one per worksheet.
-      const templateIds = worksheets.map((w) => w.templateId);
-      const requiredCounts = await db
-        .select({
-          templateId: fields.worksheetTemplateId,
-          total: sql<number>`count(*)::int`,
-        })
-        .from(fields)
-        .where(
-          and(
-            inArray(fields.worksheetTemplateId, templateIds),
-            eq(fields.isRequired, true),
-            eq(fields.active, true),
-          ),
-        )
-        .groupBy(fields.worksheetTemplateId);
-
-      const filledCounts = await db
-        .select({
-          templateId: fields.worksheetTemplateId,
-          filled: sql<number>`count(*)::int`,
-        })
-        .from(projectParameters)
-        .innerJoin(fields, eq(projectParameters.fieldId, fields.id))
-        .where(
-          and(
-            eq(projectParameters.projectId, projectId),
-            inArray(fields.worksheetTemplateId, templateIds),
-            eq(fields.isRequired, true),
-            eq(fields.active, true),
-          ),
-        )
-        .groupBy(fields.worksheetTemplateId);
-
-      // Required fields with NO value on their own sheet but exactly one conflict-free value for the
-      // same symbol on another template of the project count as filled (the inherited project-wide
-      // fallback the sheet itself offers — fix wave 2026-09-30, F-2 class; mirrors the sidebar SQL).
-      const inheritedCounts = await db.execute<{ template_id: string; inherited: number }>(sql`
-        SELECT f.worksheet_template_id AS template_id, COUNT(*)::int AS inherited
-        FROM fields f
-        LEFT JOIN project_parameters pp ON pp.field_id = f.id AND pp.project_id = ${projectId}
-        WHERE f.worksheet_template_id IN (${sql.join(templateIds.map((id) => sql`${id}`), sql`, `)}) AND f.is_required AND f.active
-          AND pp.id IS NULL
-          AND (
-            SELECT COUNT(DISTINCT COALESCE(pp2.value_number::text, NULLIF(pp2.value_text, ''), NULLIF(pp2.value_enum, ''),
-                                           pp2.value_date::text, pp2.value_boolean::text, pp2.value_json::text))
-            FROM fields f2
-            JOIN project_parameters pp2 ON pp2.field_id = f2.id AND pp2.project_id = ${projectId}
-            WHERE f2.symbol = f.symbol AND f2.active AND f2.worksheet_template_id <> f.worksheet_template_id
-              AND COALESCE(pp2.value_number::text, NULLIF(pp2.value_text, ''), NULLIF(pp2.value_enum, ''),
-                           pp2.value_date::text, pp2.value_boolean::text, pp2.value_json::text) IS NOT NULL
-          ) = 1
-        GROUP BY f.worksheet_template_id
-      `);
-      const inheritedRows: { template_id: string; inherited: number }[] = Array.isArray(inheritedCounts)
-        ? (inheritedCounts as unknown as { template_id: string; inherited: number }[])
-        : ((inheritedCounts as unknown as { rows?: { template_id: string; inherited: number }[] }).rows ?? []);
-      const inheritedBy = new Map(inheritedRows.map((r) => [r.template_id, r.inherited]));
-
-      const totalBy = new Map(requiredCounts.map((r) => [r.templateId, r.total]));
-      const filledBy = new Map(filledCounts.map((r) => [r.templateId, (r.filled ?? 0)]));
-      for (const [t, n] of inheritedBy) filledBy.set(t, (filledBy.get(t) ?? 0) + n);
+      // Required-field counts per template by the approval gate's rule (C-7, 2026-10-08): a required field
+      // hidden by `visible_when` under the saved values is neither total nor open; an inherited conflict-free
+      // project-wide value satisfies (A4). Same loader as the worksheet sidebar.
+      const counts = await loadRequiredFieldCounts(projectId, worksheets[0].standardId);
 
       const progress = summarizeStandardProgress(
         worksheets.map((w) => ({
           code: w.code,
           titleDe: w.titleDe,
           status: w.status,
-          totalRequired: totalBy.get(w.templateId) ?? 0,
-          filledRequired: filledBy.get(w.templateId) ?? 0,
+          totalRequired: counts.get(w.templateId)?.totalRequired ?? 0,
+          filledRequired: counts.get(w.templateId)?.filledRequired ?? 0,
         })),
       );
 

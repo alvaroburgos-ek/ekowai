@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { projects, worksheetTemplates, worksheetInstances, projectDocuments, profiles } from '@/lib/db/schema';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { currentUserIsPlatformEngineer } from '@/lib/auth/platform-engineer';
 import {
   loadWorksheet,
@@ -26,6 +26,7 @@ import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profi
 import { twinSourcesFor, twinSourceSymbols } from '@/lib/eval/twin-symbols';
 import { coerceSameSymbolValue, type EnumOption } from '@/lib/eval/same-symbol-prefill';
 import { crossStandardCarryNote, selectPrefillUpstreams } from '@/lib/projects/cross-standard-carry';
+import { loadRequiredFieldCounts } from '@/lib/projects/load-required-field-counts';
 
 export default async function WorksheetPage({
   params,
@@ -98,46 +99,11 @@ export default async function WorksheetPage({
       })
       .from(projectDocuments)
       .where(eq(projectDocuments.projectId, projectId)),
-    // Per-worksheet required-field totals and filled-count for the sidebar.
-    // Single SQL avoids round-tripping fields-per-template through Drizzle.
-    db.execute<{
-      worksheet_template_id: string;
-      total_required: number;
-      filled_required: number;
-    }>(sql`
-      SELECT
-        wt.id AS worksheet_template_id,
-        COUNT(*) FILTER (WHERE f.is_required AND f.active)::int AS total_required,
-        -- A required field counts as filled when it carries a value on this sheet OR when exactly one
-        -- conflict-free value for the same symbol exists on another template of the project (the
-        -- inherited project-wide fallback the sheet itself offers — fix wave 2026-09-30, F-2 class).
-        COUNT(*) FILTER (
-          WHERE f.is_required AND f.active
-          AND (
-            pp.value_number  IS NOT NULL OR
-            pp.value_text    IS NOT NULL OR
-            pp.value_enum    IS NOT NULL OR
-            pp.value_date    IS NOT NULL OR
-            pp.value_boolean IS NOT NULL OR
-            pp.value_json    IS NOT NULL OR
-            (
-              SELECT COUNT(DISTINCT COALESCE(pp2.value_number::text, NULLIF(pp2.value_text, ''), NULLIF(pp2.value_enum, ''),
-                                             pp2.value_date::text, pp2.value_boolean::text, pp2.value_json::text))
-              FROM fields f2
-              JOIN project_parameters pp2 ON pp2.field_id = f2.id AND pp2.project_id = ${projectId}
-              WHERE f2.symbol = f.symbol AND f2.active AND f2.worksheet_template_id <> f.worksheet_template_id
-                AND COALESCE(pp2.value_number::text, NULLIF(pp2.value_text, ''), NULLIF(pp2.value_enum, ''),
-                             pp2.value_date::text, pp2.value_boolean::text, pp2.value_json::text) IS NOT NULL
-            ) = 1
-          )
-        )::int AS filled_required
-      FROM worksheet_templates wt
-      LEFT JOIN fields f ON f.worksheet_template_id = wt.id
-      LEFT JOIN project_parameters pp
-        ON pp.field_id = f.id AND pp.project_id = ${projectId}
-      WHERE wt.standard_id = ${ws.template.standard.id}
-      GROUP BY wt.id
-    `),
+    // Per-worksheet required-field totals and filled-count for the sidebar — the approval gate's rule
+    // (C-7, 2026-10-08): a required field hidden by `visible_when` under the saved values is neither total nor
+    // open; an inherited conflict-free project-wide value satisfies (A4). Replaces the former plain-SQL count,
+    // which showed „offen 21" on DWA-M 820-1 M820-14 while the sheet rendered no input on a direct award.
+    loadRequiredFieldCounts(projectId, ws.template.standard.id),
   ]);
 
   // Count prior snapshots — drives the "Änderungen seit letzter Version"
@@ -319,18 +285,6 @@ export default async function WorksheetPage({
     }
   }
 
-  const countsByTemplateId = new Map<string, { total_required: number; filled_required: number }>();
-  // db.execute returns either Array or { rows: Array }; cover both shapes.
-  type FcRow = { worksheet_template_id: string; total_required: number; filled_required: number };
-  const fcRaw = fieldCounts as { rows?: FcRow[] } | FcRow[];
-  const fcRows: FcRow[] = Array.isArray(fcRaw) ? fcRaw : fcRaw.rows ?? [];
-  for (const r of fcRows) {
-    countsByTemplateId.set(r.worksheet_template_id, {
-      total_required: Number(r.total_required),
-      filled_required: Number(r.filled_required),
-    });
-  }
-
   const sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol?: string }>> = {};
   for (const [symbol, arr] of sameSymbol) {
     sameSymbolValuesBySymbol[symbol] = arr.map(({ worksheetCode, value }) => ({ worksheetCode, value }));
@@ -403,12 +357,12 @@ export default async function WorksheetPage({
           projectId={projectId}
           standardCode={standardCode}
           worksheets={sidebarWorksheets.map((w) => {
-            const counts = countsByTemplateId.get(w.id);
+            const counts = fieldCounts.get(w.id);
             return {
               ...w,
               status: (w.status ?? null) as 'draft' | 'submitted_for_review' | 'engineer_approved' | 'final' | 'deactivated' | null,
-              totalRequired: counts?.total_required ?? 0,
-              filledRequired: counts?.filled_required ?? 0,
+              totalRequired: counts?.totalRequired ?? 0,
+              filledRequired: counts?.filledRequired ?? 0,
             };
           })}
           locale={localeTyped}
