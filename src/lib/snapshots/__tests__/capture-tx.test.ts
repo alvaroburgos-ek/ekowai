@@ -165,7 +165,9 @@ function expectCaptureQueries(started: readonly string[], client: 'TX' | 'GLOBAL
       `${client}:insert:calculation_snapshots`,
     ]),
   );
-  expect(started).toHaveLength(8);
+  // 8 own loads + the R-16 shared loader on the same client (fix round 3): standard fields, sections, project fields,
+  // project parameters — same tables, so the set above is unchanged.
+  expect(started).toHaveLength(12);
 }
 
 beforeEach(() => {

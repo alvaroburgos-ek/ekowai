@@ -3,6 +3,7 @@ import { engineInputValue } from '@/lib/eval/engine-input';
 import { buildCarriers, buildRegisters } from '@/lib/eval/register-rows';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
+import { gateHiddenSymbols } from '@/lib/projects/required-field-counts';
 import { deriveSignoffs, SELF_APPROVAL_NOTE_DE, type WorksheetSignoff } from '@/lib/approval/signoff';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
 import { computeVisibility, hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
@@ -396,6 +397,9 @@ export type AssemblerInput = {
     note: string | null;
     documentTitle: string | null;
   }>;
+  /** R-16: per template id, the symbols hidden on their SOURCE sheet for that sheet (the approval gate's set, from the
+   * shared loader). Unioned into each sheet's hiddenSymbols minus its own fields. Optional — fixtures may omit. */
+  sourceHiddenSymbolsByTemplate?: ReadonlyMap<string, Iterable<string>>;
   /** Clock for `generatedAt`. Defaults to Date.now(). */
   now?: Date;
 };
@@ -657,10 +661,16 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         if (!r || r.value == null) return undefined;
         return r.value as number | string | boolean;
       };
-      const { hiddenSymbols } = computeVisibility(
+      const { hiddenSymbols: ownHiddenSymbols } = computeVisibility(
         tplFields.map((f) => ({ id: f.id, symbol: f.symbol, sectionId: f.sectionId, visibleWhen: f.visibleWhen ?? null })),
         tplSecs.map((s) => ({ id: s.id, parentSectionId: s.parentSectionId ?? null, visibleWhen: s.visibleWhen ?? null })),
         gateLookup,
+      );
+      // R-16: + the symbols hidden on their source sheet (not a field of this sheet) — the approval gate's rule.
+      const hiddenSymbols = gateHiddenSymbols(
+        ownHiddenSymbols,
+        input.sourceHiddenSymbolsByTemplate?.get(tpl.id) ?? [],
+        new Set(tplFields.map((f) => f.symbol)),
       );
       const resolvedFor = withHidden((sym: string) => resolvedBySymbol.get(sym), hiddenSymbols);
       const paramForEngine = withHidden((fieldId: string) => paramByFieldId.get(fieldId), hiddenFieldIdsOf(tplFields, hiddenSymbols));

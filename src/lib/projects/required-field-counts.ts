@@ -229,10 +229,13 @@ export function countRequiredFieldsByTemplate(args: RequiredFieldCountArgs): Map
 export function requiredFieldState(args: RequiredFieldCountArgs): {
   counts: Map<string, RequiredFieldCounts>;
   hiddenByTemplate: Map<string, Set<string>>;
+  /** R-16: per template, the symbols hidden at their source for that sheet (`sourceHiddenSymbolsByTemplate`). */
+  sourceHiddenByTemplate: Map<string, Set<string>>;
 } {
   const hiddenByTemplate = hiddenFieldIdsByTemplate(args);
-  const counts = countsFromPasses(args, gatePasses(args, flatten(hiddenByTemplate)));
-  return { counts, hiddenByTemplate };
+  const hidden = flatten(hiddenByTemplate);
+  const counts = countsFromPasses(args, gatePasses(args, hidden));
+  return { counts, hiddenByTemplate, sourceHiddenByTemplate: sourceHiddenSymbolsByTemplate(args, hidden) };
 }
 
 /**
@@ -253,4 +256,31 @@ export function hiddenAtSourceSymbols(
   }
   for (const s of visible) hidden.delete(s);
   return hidden;
+}
+
+/**
+ * R-16 (2026-10-08): per template of the standard, the symbols hidden at their source for that sheet — the ONE set every
+ * verdict surface (approval gate, conformity loader, form compliance block, snapshot, PDF, report evaluator, recompute)
+ * unions into its `hiddenSymbols` via `gateHiddenSymbols`. `hidden` = `hiddenAtSourceFieldIds(args)` when already held.
+ */
+export function sourceHiddenSymbolsByTemplate(args: RequiredFieldCountArgs, hidden?: ReadonlySet<string>): Map<string, Set<string>> {
+  const h = hidden ?? hiddenAtSourceFieldIds(args);
+  const out = new Map<string, Set<string>>();
+  for (const t of args.templateIds) out.set(t, hiddenAtSourceSymbols(args.fields, h, t));
+  return out;
+}
+
+/**
+ * R-15 / R-16: a sheet's hidden symbols for its verdicts = its own hidden symbols (`visible_when` on the sheet) plus the
+ * symbols hidden at their source sheet that are NOT a field of this sheet (a local field is decided by the sheet's own
+ * visibility). A condition reading one of them reports `not_applicable`, never `pending`. Pure (client-safe).
+ */
+export function gateHiddenSymbols(
+  ownHidden: ReadonlySet<string>,
+  sourceHidden: Iterable<string>,
+  localSymbols: ReadonlySet<string>,
+): Set<string> {
+  const out = new Set(ownHidden);
+  for (const s of sourceHidden) if (!localSymbols.has(s)) out.add(s);
+  return out;
 }

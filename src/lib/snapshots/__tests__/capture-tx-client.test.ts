@@ -104,8 +104,9 @@ describe('captureSnapshot({ txDb })', () => {
     expect(args.slice(0, 3)).toEqual(['tpl-13', 'std-a138', 'A138-13']);
     expect(args[3]).toBe(tx); // the fix: same client as the sibling selects
     expect(globalSelect).not.toHaveBeenCalled();
-    // instance, template, own fields, equations, CRs, sections — all six on the tx handle.
-    expect(tx.select).toHaveBeenCalledTimes(6);
+    // instance, template, own fields, equations, CRs, sections — all on the tx handle.
+    // + the R-16 shared loader on the same tx (fix round 3): standard fields, sections, project fields, parameters.
+    expect(tx.select).toHaveBeenCalledTimes(10);
     expect(tx.insert).toHaveBeenCalledTimes(1);
   });
 });

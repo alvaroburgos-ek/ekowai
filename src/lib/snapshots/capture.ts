@@ -36,6 +36,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 // shared with the query helper this module hands its client to.
 import { loadInheritedFields, type DrizzleClient } from '@/lib/db/queries/worksheet';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
+import { loadSourceHiddenSymbolsByTemplate } from '@/lib/actions/approval-gate';
 import {
   buildSnapshotPayload,
   type FieldRow,
@@ -76,6 +77,8 @@ export async function loadCaptureInputs(args: {
   ambiguousSymbols: Map<string, string[]>;
   /** Plan 2a (Task 10): this worksheet's sections for computeVisibility. */
   sections: Array<{ id: string; parentSectionId: string | null; visibleWhen: string | null }>;
+  /** R-16: symbols hidden on their source sheet for this sheet — the approval gate's set (shared loader, same client). */
+  sourceHiddenSymbols: string[];
 } | null> {
   const dbi = args.txDb ?? db;
 
@@ -152,6 +155,9 @@ export async function loadCaptureInputs(args: {
             ),
           );
 
+  // R-16: the gate's hidden-at-source symbols for this sheet, on the SAME client (inside the tx on submit/approve).
+  const sourceHiddenSymbols = [...((await loadSourceHiddenSymbolsByTemplate(inst.projectId, tplRow.standardId, dbi)).get(inst.worksheetTemplateId) ?? [])];
+
   return {
     worksheetCode: tplRow.code,
     standardCode: tplRow.standardCode,
@@ -162,6 +168,7 @@ export async function loadCaptureInputs(args: {
     parameters: paramRows,
     ambiguousSymbols: merged.ambiguousSymbols,
     sections: secList,
+    sourceHiddenSymbols,
   };
 }
 
@@ -197,6 +204,7 @@ export async function captureSnapshot(args: {
     standardCode: inputs.standardCode,
     ambiguousSymbols: inputs.ambiguousSymbols,
     sections: inputs.sections,
+    sourceHiddenSymbols: inputs.sourceHiddenSymbols,
   });
 
   const dbi = args.txDb ?? db;

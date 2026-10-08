@@ -18,6 +18,7 @@ import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { buildCarriers, buildRegisters } from '@/lib/eval/register-rows';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
 import type { Value } from '@/lib/expr';
+import { gateHiddenSymbols } from '@/lib/projects/required-field-counts';
 import { withAbsentDefault, defaultForAbsent } from '@/lib/eval/optional-inputs';
 import {
   normalizeRainfallCarrier,
@@ -197,6 +198,10 @@ export function buildSnapshotPayload(args: {
    * symbol `not_applicable` (flattened to `open`). Optional — without it only
    * field-level rules (DB `visible_when` / LEGACY_VISIBLE_WHEN) apply. */
   sections?: readonly VisibilitySection[];
+  /** R-16: symbols hidden on their SOURCE sheet for this sheet (the approval gate's set, from the shared loader). Unioned
+   * into hiddenSymbols minus this sheet's own fields: a condition reading one is not_applicable, an inherited input
+   * carrying one has no value — exactly as the page, the gate and the save path treat it. */
+  sourceHiddenSymbols?: Iterable<string>;
 }): SnapshotPayload {
   const { fields: fieldList, complianceRequirements: crList } = args;
   // Plan 2a: fallback register equations (VSME-B04.100 per-medium sums) are
@@ -240,7 +245,8 @@ export function buildSnapshotPayload(args: {
   const ownFields = (fieldList as Array<FieldRow & { inheritedFromWorksheet?: string }>).filter(
     (f) => !f.inheritedFromWorksheet,
   );
-  const { hiddenSymbols } = computeVisibility(ownFields, args.sections ?? [], rawValueBySymbol);
+  const { hiddenSymbols: ownHiddenSymbols } = computeVisibility(ownFields, args.sections ?? [], rawValueBySymbol);
+  const hiddenSymbols = gateHiddenSymbols(ownHiddenSymbols, args.sourceHiddenSymbols ?? [], new Set(ownFields.map((f) => f.symbol)));
   const paramForEngine = withHidden(
     (fieldId: string) => paramByFieldId.get(fieldId),
     hiddenFieldIdsOf(fieldList, hiddenSymbols),

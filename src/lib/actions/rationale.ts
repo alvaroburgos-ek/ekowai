@@ -68,6 +68,7 @@ export async function draftWorksheetRationale(input: {
     parameters: captured.parameters,
     worksheetCode: captured.worksheetCode,
     ambiguousSymbols: captured.ambiguousSymbols,
+    sourceHiddenSymbols: captured.sourceHiddenSymbols,
   });
 
   // inputs: symbol → entered/derived value (payload.parameters is keyed by

@@ -23,6 +23,8 @@ import {
   extractGateValue,
   hiddenAtSourceFieldIds,
   hiddenAtSourceSymbols,
+  gateHiddenSymbols,
+  sourceHiddenSymbolsByTemplate,
   type CountField,
   type CountParam,
   type CountSection,
@@ -646,17 +648,19 @@ export function formatApprovalGateError(result: ApprovalGateResult): string {
   );
 }
 
+
+/** R-15 / R-16: the union rule lives in the pure counts module (client-safe); re-exported for the gate's callers. */
+export { gateHiddenSymbols };
+
 /**
- * R-15 (2026-10-08): the gate's hidden symbols = this sheet's own hidden symbols plus the symbols hidden at their source
- * sheet that are NOT a field of this sheet (a local field is decided by this sheet's own visibility). A condition reading
- * one of them reports `not_applicable`, never `pending`.
+ * R-16: per template of ONE standard, the symbols hidden at their source for that sheet — from the shared loader
+ * (4 reads; `client` = the tx handle inside a transaction). Every server verdict surface unions it into `hiddenSymbols`.
  */
-export function gateHiddenSymbols(
-  ownHidden: ReadonlySet<string>,
-  sourceHidden: ReadonlySet<string>,
-  localSymbols: ReadonlySet<string>,
-): Set<string> {
-  const out = new Set(ownHidden);
-  for (const s of sourceHidden) if (!localSymbols.has(s)) out.add(s);
-  return out;
+export async function loadSourceHiddenSymbolsByTemplate(
+  projectId: string,
+  standardId: string,
+  client: Pick<typeof db, 'select'> = db,
+): Promise<Map<string, Set<string>>> {
+  const args = await loadStandardVisibilityArgs(projectId, standardId, client);
+  return args ? sourceHiddenSymbolsByTemplate(args) : new Map();
 }

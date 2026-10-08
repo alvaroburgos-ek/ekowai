@@ -7,6 +7,8 @@ export type RequiredFieldState = {
   counts: Map<string, RequiredFieldCounts>;
   /** U-2 / R-14: per template, the active fields hidden by `visible_when` under the saved values (hidden at source). */
   hiddenByTemplate: Map<string, Set<string>>;
+  /** R-16: per template, the symbols hidden at their source for that sheet (unioned into every verdict surface). */
+  sourceHiddenByTemplate: Map<string, Set<string>>;
 };
 
 /**
@@ -25,6 +27,6 @@ export async function loadRequiredFieldCounts(projectId: string, standardId: str
  */
 export async function loadRequiredFieldState(projectId: string, standardId: string): Promise<RequiredFieldState> {
   const args = await loadStandardVisibilityArgs(projectId, standardId);
-  if (!args) return { counts: new Map(), hiddenByTemplate: new Map() };
+  if (!args) return { counts: new Map(), hiddenByTemplate: new Map(), sourceHiddenByTemplate: new Map() };
   return requiredFieldState(args);
 }

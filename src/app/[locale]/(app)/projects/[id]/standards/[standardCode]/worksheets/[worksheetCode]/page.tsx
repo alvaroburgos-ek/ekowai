@@ -357,6 +357,11 @@ export default async function WorksheetPage({
     if (p?.isStale) staleByFieldId[f.id] = true;
   }
 
+  // R-16 (2026-10-08): the symbols hidden on their source sheet for THIS sheet — the same set the approval gate unions
+  // into its hiddenSymbols; the form's compliance block does the same, so a gate reading such a leftover shows „–"
+  // (not_applicable) on screen exactly as the gate decides.
+  const hiddenAtSourceSymbols = [...(requiredState.sourceHiddenByTemplate.get(ws.template.id) ?? [])];
+
   // Server-engine-written parameters render read-only (single-source rule):
   // source_type='computed' is written only by server engines (VSME CO₂), and
   // — scoped to VSME so DWA-A-138 behavior is untouched — 'derived' rows
@@ -474,6 +479,7 @@ export default async function WorksheetPage({
           carriedNoteByFieldId={carriedNoteByFieldId}
           clientSuppliedByFieldId={clientSuppliedByFieldId}
           staleByFieldId={staleByFieldId}
+          hiddenAtSourceSymbols={hiddenAtSourceSymbols}
           standardCode={standardCode}
           docs={docs}
           priorSnapshotCount={priorSnapshotCount}

@@ -21,6 +21,7 @@ import {
 import { and, eq, inArray, desc } from 'drizzle-orm';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import { assembleStandardReport, type StandardReportData } from './assemble-standard-report';
+import { loadSourceHiddenSymbolsByTemplate } from '@/lib/actions/approval-gate';
 
 export type {
   StandardReportData,
@@ -252,7 +253,11 @@ export async function loadStandardReportData(
   // ---------------------------------------------------------------------------
   // Hand everything to the pure assembler.
   // ---------------------------------------------------------------------------
+  // R-16: the approval gate's hidden-at-source symbols per sheet (shared loader, one load per report).
+  const sourceHiddenSymbolsByTemplate = await loadSourceHiddenSymbolsByTemplate(projectId, std.id);
+
   return assembleStandardReport({
+    sourceHiddenSymbolsByTemplate,
     project: {
       id: proj.id,
       name: proj.name,

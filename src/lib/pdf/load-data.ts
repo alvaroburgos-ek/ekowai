@@ -26,6 +26,8 @@ import {
 import { inheritedFieldsFor } from '@/lib/compliance/visibility';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
+import { loadSourceHiddenSymbolsByTemplate } from '@/lib/actions/approval-gate';
+import { gateHiddenSymbols } from '@/lib/projects/required-field-counts';
 
 export type ReportData = {
   project: {
@@ -120,6 +122,10 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
   // lookup_value refills, which otherwise only sees the A138 TS seed in a fresh
   // Node process. Sequential (global pool, no tx); never throws.
   for (const s of stds) await ensureRegulationTablesLoaded(s.code);
+
+  // R-16: the approval gate's hidden-at-source symbols per sheet, one shared-loader pass per active standard.
+  const sourceHiddenByTemplate = new Map<string, Set<string>>();
+  for (const s of stds) for (const [t, syms] of await loadSourceHiddenSymbolsByTemplate(projectId, s.id)) sourceHiddenByTemplate.set(t, syms);
 
   const instances = await db
     .select({
@@ -313,12 +319,14 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
         valueDate: p.valueDate,
         valueJson: p.valueJson,
       }));
-    const { hiddenSymbols } = reportVisibility(
+    const { hiddenSymbols: ownHiddenSymbols } = reportVisibility(
       tmplFields,
       sectionsByTemplateId.get(inst.templateId) ?? [],
       tmplParameters,
       { fields: inheritedFields, parameters: inheritedParameters },
     );
+    // R-16: + the symbols hidden on their source sheet (not a field of this sheet) — the approval gate's rule.
+    const hiddenSymbols = gateHiddenSymbols(ownHiddenSymbols, sourceHiddenByTemplate.get(inst.templateId) ?? [], new Set(tmplFields.map((f) => f.symbol)));
 
     const equationResults = evaluateWorksheetEquations(
       inst.code,
@@ -416,6 +424,7 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- placeholder signature kept for callers
 export async function loadCalculationData(_calcId: string): Promise<ReportData> {
   throw new Error('loadCalculationData is no longer supported — use loadProjectReportData');
 }

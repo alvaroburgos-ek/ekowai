@@ -25,6 +25,8 @@ import {
 } from '@/lib/db/schema';
 import { loadInheritedFields } from '@/lib/db/queries/worksheet';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
+import { loadSourceHiddenSymbolsByTemplate } from './approval-gate';
+import { gateHiddenSymbols } from '@/lib/projects/required-field-counts';
 import {
   evaluateWorksheetEquations, reportVisibility,
   type EquationReportResult, type ReportParameter,
@@ -157,7 +159,10 @@ async function recomputePass(instanceId: string): Promise<RecomputeResult> {
   const ownParams = ownFields.map((f) => paramByFieldId.get(f.id)).filter((p): p is NonNullable<typeof p> => p != null).map(toReportParameter);
   const inheritedParams = inherited.map((f) => paramByFieldId.get(f.id)).filter((p): p is NonNullable<typeof p> => p != null).map(toReportParameter);
 
-  const { hiddenSymbols } = reportVisibility(ownFields, sections, ownParams, { fields: inherited, parameters: inheritedParams });
+  const { hiddenSymbols: ownHiddenSymbols } = reportVisibility(ownFields, sections, ownParams, { fields: inherited, parameters: inheritedParams });
+  // R-16: + the symbols hidden on their source sheet (not a field of this sheet) — the approval gate's rule (shared loader).
+  const sourceHidden = (await loadSourceHiddenSymbolsByTemplate(inst.projectId, inst.standardId)).get(inst.templateId) ?? [];
+  const hiddenSymbols = gateHiddenSymbols(ownHiddenSymbols, sourceHidden, new Set(ownFields.map((f) => f.symbol)));
 
   const results = evaluateWorksheetEquations(
     inst.code,

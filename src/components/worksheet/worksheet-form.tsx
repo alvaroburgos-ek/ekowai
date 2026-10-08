@@ -33,6 +33,7 @@ import { visibleFields } from './visible-fields';
 import { splitInheritedForPanel, upstreamPanelStorageKey } from './inherited-panel';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { computeVisibility } from '@/lib/compliance/visibility';
+import { gateHiddenSymbols } from '@/lib/projects/required-field-counts';
 import { allOwnFieldsHidden, hiddenSheetDrivers } from '@/lib/compliance/hidden-drivers';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
@@ -305,6 +306,9 @@ type Props = {
   /** U-1 (ruling R-12): field_id → persisted project_parameters.is_stale — the value was last saved while the
    * question was hidden by `visible_when` (or not re-saved since). Only true entries need to be present. */
   staleByFieldId?: Record<string, boolean>;
+  /** R-16: symbols hidden on their SOURCE sheet for this sheet (the approval gate's set). Unioned into the compliance
+   * block's hiddenSymbols (minus this sheet's own fields) so a gate reading such a leftover shows „–" as the gate decides. */
+  hiddenAtSourceSymbols?: string[];
   /** Standard code (e.g. "DWA-A-138-1"). Forwarded to DynamicField so the
    * inheritance badge can deep-link back to the source worksheet. */
   standardCode: string;
@@ -371,6 +375,7 @@ export function WorksheetForm({
   carriedNoteByFieldId,
   clientSuppliedByFieldId,
   staleByFieldId,
+  hiddenAtSourceSymbols,
   standardCode,
   docs,
   priorSnapshotCount,
@@ -573,6 +578,13 @@ export function WorksheetForm({
   const visibility = useMemo(
     () => computeVisibility(ownFields, sections, symbolLookup),
     [ownFields, sections, symbolLookup],
+  );
+  // R-16: the verdict view of hidden symbols — own hidden + hidden at source (not an own field), the gate's rule. The
+  // engine keeps `visibility.hiddenSymbols`: the page already withholds hidden-at-source inherited values, so the
+  // engine sees them absent (hidden ⇒ no value) either way.
+  const complianceHiddenSymbols = useMemo(
+    () => gateHiddenSymbols(visibility.hiddenSymbols, hiddenAtSourceSymbols ?? [], new Set(ownFields.map((f) => f.symbol))),
+    [visibility.hiddenSymbols, hiddenAtSourceSymbols, ownFields],
   );
 
   // NOTE: `engineStates` is a fresh record (fresh EvalState objects) on every
@@ -1344,7 +1356,7 @@ export function WorksheetForm({
         fields={complianceFields}
         locale={locale}
         projectId={projectId}
-        hiddenSymbols={visibility.hiddenSymbols}
+        hiddenSymbols={complianceHiddenSymbols}
       />
       <MemoRationalePanel instanceId={instance.id} locale={locale} />
       <MemoApprovalBar
