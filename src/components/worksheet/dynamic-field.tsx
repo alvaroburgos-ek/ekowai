@@ -115,9 +115,13 @@ type Props = {
    * input-error carve-out). Drives the amber chip next to the citation
    * controls; toggled via the setClientSupplied server action. */
   clientSupplied?: boolean;
+  /** U-1 (ruling R-12): persisted project_parameters.is_stale — the value was last saved while this question was
+   * hidden by `visible_when` (or not re-saved since). While the field is visible and untouched a warning badge asks
+   * the engineer to confirm it; any save of the visible field clears the flag server-side. */
+  isStale?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, sumOutput = false, computedHint, inheritedFrom, prefillSource, siteProfileKey, twinSource, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, sumOutput = false, computedHint, inheritedFrom, prefillSource, siteProfileKey, twinSource, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false, isStale = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -135,6 +139,12 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   // the field falls through to Tier 1 (local param) and the prop disappears
   // entirely.
   const isDirty = useWorksheetStore((s) => s.pendingFieldIds.has(field.id));
+  // U-1: once the engineer touches the field in this mount, the stale badge stays gone — the autosave persists the
+  // visible field (which clears `is_stale` server-side) and no router refresh follows to update the prop. Set during
+  // render (the "adjust state on prop change" pattern), not in an effect.
+  const [staleConfirmed, setStaleConfirmed] = useState(false);
+  if (isDirty && isStale && !staleConfirmed) setStaleConfirmed(true);
+  const showStale = isStale && !isDirty && !staleConfirmed;
   const [pickerOpen, setPickerOpen] = useState(false);
   // Draft text for the extensible-checklist "Eigener Eintrag…" input (OPTIONS
   // tranche 3). Hoisted to the component top level (hooks cannot live inside
@@ -282,6 +292,31 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
               title={buildPrefillTooltip('site_profile', field, value, siteProfileKey)}
             >
               Projekt-Standort
+            </span>
+          )}
+          {showStale && (
+            <span
+              className="text-warning normal-case tracking-normal"
+              title={
+                locale === 'de'
+                  ? 'Dieser Wert wurde gespeichert, während die Frage unter der damaligen Auswahl ausgeblendet war, und seitdem nicht erneut gespeichert. Er ist keine bewusste Antwort unter der aktuellen Auswahl — prüfen und speichern (oder ändern), um ihn zu bestätigen.'
+                  : 'This value was saved while the question was hidden under the earlier selection and has not been re-saved since. It is not a conscious answer under the current selection — check and save (or change) it to confirm.'
+              }
+              data-testid="stale-answer-badge"
+            >
+              {locale === 'de' ? 'Antwort älter als die Auswahl — bitte bestätigen' : 'Answer predates the current selection — please confirm'}
+              {/* Re-selecting the same radio/checkbox option fires no change event, so an unchanged answer could not be
+                  confirmed otherwise: mark the current value pending → the autosave persists it while visible. */}
+              {!readOnly && value != null && (
+                <button
+                  type="button"
+                  className="ml-1.5 underline underline-offset-2 hover:text-ink"
+                  onClick={() => setField(field.id, value)}
+                  data-testid="stale-answer-confirm"
+                >
+                  {locale === 'de' ? 'Bestätigen' : 'Confirm'}
+                </button>
+              )}
             </span>
           )}
           {overridePill}

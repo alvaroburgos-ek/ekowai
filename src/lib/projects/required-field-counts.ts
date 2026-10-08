@@ -89,27 +89,33 @@ export type CountSection = VisibilitySection & { templateId: string };
 
 export type RequiredFieldCounts = { totalRequired: number; filledRequired: number };
 
-/**
- * Per worksheet template of ONE standard: visible required fields and how many of them are satisfied.
- * `fields` / `sections` are the standard's active fields and sections (any template of the standard — rows of other
- * templates are ignored per template); `paramByFieldId` the project's saved rows for those fields; `projectEntries`
- * every saved typed occurrence in the project (`loadProjectWideEntries`); `ownScope` the standard's own scope.
- */
-export function countRequiredFieldsByTemplate(args: {
+/** A saved `project_parameters` row as the counts read it: value columns + the U-1 stale flag (optional, absent ⇒ false). */
+export type CountParam = ParameterValueColumns & { isStale?: boolean | null };
+
+export type RequiredFieldCountArgs = {
   templateIds: ReadonlyArray<string>;
   fields: ReadonlyArray<CountField>;
   sections: ReadonlyArray<CountSection>;
-  paramByFieldId: ReadonlyMap<string, ParameterValueColumns>;
+  paramByFieldId: ReadonlyMap<string, CountParam>;
   projectEntries: ReadonlyArray<ProjectWideEntry>;
   ownScope: OwnStandardScope;
-}): Map<string, RequiredFieldCounts> {
+};
+
+type TemplatePass = { own: CountField[]; hiddenFieldIds: Set<string>; inheritedSymbols: Set<string> };
+
+/**
+ * The per-template pass shared by the counts and `hiddenFieldIdsByTemplate`: the gate's scoped lookup (a local symbol
+ * resolves locally, blank → undefined; any other from the own-standard-first conflict-free fallback) handed to
+ * `computeVisibility` over the template's own fields and sections, plus the A4 inherited-symbol set.
+ */
+function templatePasses(args: RequiredFieldCountArgs): Map<string, TemplatePass> {
   const { fields, sections, paramByFieldId, projectEntries, ownScope } = args;
   // The gate's project-wide fallback: own-standard symbols from the own standard only, the rest project-wide.
   const fallback = buildFallbackValues(scopeToOwnStandard(projectEntries, ownScope.templateIds, ownScope.symbols));
   const carry = ownScope.standardCode ? { ownStandardCode: ownScope.standardCode } : undefined;
   const inheritable = scopeForInheritance(projectEntries, ownScope.templateIds, ownScope.types, carry);
 
-  const out = new Map<string, RequiredFieldCounts>();
+  const out = new Map<string, TemplatePass>();
   for (const templateId of args.templateIds) {
     const own = fields.filter((f) => f.templateId === templateId);
     const ownSections = sections.filter((s) => s.templateId === templateId);
@@ -125,8 +131,40 @@ export function countRequiredFieldsByTemplate(args: {
     const lookup = (s: string): GateValue | undefined => (localSymbols.has(s) ? bySymbol.get(s) : fallback.get(s));
     const { hiddenFieldIds } = computeVisibility(own, ownSections, lookup);
     const inheritedSymbols = inheritedSymbolSet(inheritable.filter((e) => e.templateId !== templateId));
-    const visibleRequired = own.filter((f) => f.isRequired && !hiddenFieldIds.has(f.id));
-    out.set(templateId, countRequiredFields(visibleRequired, paramByFieldId, { inheritedSymbols }));
+    out.set(templateId, { own, hiddenFieldIds, inheritedSymbols });
   }
+  return out;
+}
+
+/**
+ * Per worksheet template of ONE standard: visible required fields and how many of them are satisfied.
+ * `fields` / `sections` are the standard's active fields and sections (any template of the standard — rows of other
+ * templates are ignored per template); `paramByFieldId` the project's saved rows for those fields; `projectEntries`
+ * every saved typed occurrence in the project (`loadProjectWideEntries`); `ownScope` the standard's own scope.
+ *
+ * U-1 (ruling R-12, 2026-10-08): a visible required field whose OWN row is flagged `isStale` (saved while its question
+ * was hidden, not re-saved since) counts as NOT filled — unless an inherited value satisfies it (A4). The stale value
+ * still drives visibility (it is kept; only its standing as an answer is withheld). The approval gate is not changed.
+ */
+export function countRequiredFieldsByTemplate(args: RequiredFieldCountArgs): Map<string, RequiredFieldCounts> {
+  // A stale own row is no own answer; `requiredFieldSatisfied` then falls through to the inherited set.
+  const answered = new Map<string, ParameterValueColumns>();
+  for (const [id, p] of args.paramByFieldId) if (!p.isStale) answered.set(id, p);
+  const out = new Map<string, RequiredFieldCounts>();
+  for (const [templateId, pass] of templatePasses(args)) {
+    const visibleRequired = pass.own.filter((f) => f.isRequired && !pass.hiddenFieldIds.has(f.id));
+    out.set(templateId, countRequiredFields(visibleRequired, answered, { inheritedSymbols: pass.inheritedSymbols }));
+  }
+  return out;
+}
+
+/**
+ * U-2 (2026-10-08): per template, the active fields hidden by `visible_when` under the saved values — the same pass as
+ * the counts (and the approval gate's lookup). The worksheet page drops an inherited field hidden on its SOURCE sheet
+ * from the „Vorgelagerte Werte" panel and withholds its value (hidden ⇒ null, as the source sheet applies it).
+ */
+export function hiddenFieldIdsByTemplate(args: RequiredFieldCountArgs): Map<string, Set<string>> {
+  const out = new Map<string, Set<string>>();
+  for (const [templateId, pass] of templatePasses(args)) out.set(templateId, pass.hiddenFieldIds);
   return out;
 }

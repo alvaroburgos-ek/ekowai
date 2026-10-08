@@ -26,7 +26,7 @@ import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profi
 import { twinSourcesFor, twinSourceSymbols } from '@/lib/eval/twin-symbols';
 import { coerceSameSymbolValue, type EnumOption } from '@/lib/eval/same-symbol-prefill';
 import { crossStandardCarryNote, selectPrefillUpstreams } from '@/lib/projects/cross-standard-carry';
-import { loadRequiredFieldCounts } from '@/lib/projects/load-required-field-counts';
+import { loadRequiredFieldState } from '@/lib/projects/load-required-field-counts';
 
 export default async function WorksheetPage({
   params,
@@ -50,11 +50,26 @@ export default async function WorksheetPage({
   // recorded in mergeResult.ambiguousSymbols — the engine reads that map and
   // emits manual_required for any equation that consumes such a symbol,
   // rather than silently picking a producer.
-  const inheritedRaw = await loadInheritedFields(
-    ws.template.id,
-    ws.template.standard.id,
-    worksheetCode,
-  );
+  //
+  // The required-field state (C-7 counts for the sidebar + U-2 hidden sets) is loaded alongside: ONE pass over the
+  // standard's rows yields both, so the page does not query twice.
+  const [inheritedAll, requiredState] = await Promise.all([
+    loadInheritedFields(ws.template.id, ws.template.standard.id, worksheetCode),
+    // Per-worksheet required-field totals and filled-count for the sidebar — the approval gate's rule
+    // (C-7, 2026-10-08): a required field hidden by `visible_when` under the saved values is neither total nor
+    // open; an inherited conflict-free project-wide value satisfies (A4); U-1: a stale own answer counts as open.
+    // Replaces the former plain-SQL count, which showed „offen 21" on DWA-M 820-1 M820-14 while the sheet rendered
+    // no input on a direct award.
+    loadRequiredFieldState(projectId, ws.template.standard.id),
+  ]);
+  const fieldCounts = requiredState.counts;
+  // U-2 (2026-10-08): a field hidden by `visible_when` on its SOURCE sheet is no upstream value — e.g. M820-11
+  // `leistungswettbewerb_only` under a direct award. It is dropped before the merge, so it leaves the
+  // „Vorgelagerte Werte" panel, its value never reaches `initialValues` (the engine sees it absent: the same
+  // "hidden ⇒ null" the source sheet applies) and it cannot win an inherited-vs-inherited ambiguity either.
+  const hiddenAtSource = new Set<string>();
+  for (const ids of requiredState.hiddenByTemplate.values()) for (const fid of ids) hiddenAtSource.add(fid);
+  const inheritedRaw = inheritedAll.filter((f) => !hiddenAtSource.has(f.id));
   const mergeResult = mergeInheritedFields(ws.fields, inheritedRaw);
   const mergedFields = mergeResult.fields;
   const ambiguousSymbols = mergeResult.ambiguousSymbols;
@@ -65,7 +80,7 @@ export default async function WorksheetPage({
   const fieldSymbols = Array.from(new Set([...mergedFields.map((f) => f.symbol), ...twinSourceSymbols(standardCode)]));
 
   // Parallelise all queries that depend on ws.template.id but not on each other
-  const [instance, parameters, sameSymbol, sidebarWorksheets, docs, fieldCounts] = await Promise.all([
+  const [instance, parameters, sameSymbolRaw, sidebarWorksheets, docs] = await Promise.all([
     ensureWorksheetInstance(projectId, ws.template.id),
     loadProjectParameters(projectId, fieldIds),
     loadSameSymbolValues(projectId, ws.template.id, fieldSymbols),
@@ -99,12 +114,16 @@ export default async function WorksheetPage({
       })
       .from(projectDocuments)
       .where(eq(projectDocuments.projectId, projectId)),
-    // Per-worksheet required-field totals and filled-count for the sidebar — the approval gate's rule
-    // (C-7, 2026-10-08): a required field hidden by `visible_when` under the saved values is neither total nor
-    // open; an inherited conflict-free project-wide value satisfies (A4). Replaces the former plain-SQL count,
-    // which showed „offen 21" on DWA-M 820-1 M820-14 while the sheet rendered no input on a direct award.
-    loadRequiredFieldCounts(projectId, ws.template.standard.id),
   ]);
+
+  // U-2: the same-symbol occurrences (seeding step 2 → `inheritedFromBySymbol`, and the "Bereits in …" hints) never
+  // offer a value hidden on its source sheet of THIS standard — it is not an answer there, so it is not one here.
+  // (Occurrences on other standards' sheets are not covered: their visibility is not loaded on this page.)
+  const sameSymbol = new Map(
+    [...sameSymbolRaw]
+      .map(([symbol, arr]) => [symbol, arr.filter((u) => !(u.fieldId && hiddenAtSource.has(u.fieldId)))] as const)
+      .filter(([, arr]) => arr.length > 0),
+  );
 
   // Count prior snapshots — drives the "Änderungen seit letzter Version"
   // affordance in the approval bar. Single COUNT-ish query is cheap and the
@@ -328,6 +347,14 @@ export default async function WorksheetPage({
     if (p?.clientSupplied) clientSuppliedByFieldId[f.id] = true;
   }
 
+  // U-1 (ruling R-12): project_parameters.is_stale — the value was last saved while its question was hidden by
+  // `visible_when` (or not re-saved since). Threaded like the Kundenangabe flag; only true entries.
+  const staleByFieldId: Record<string, boolean> = {};
+  for (const f of mergedFields) {
+    const p = parameters.get(f.id);
+    if (p?.isStale) staleByFieldId[f.id] = true;
+  }
+
   // Server-engine-written parameters render read-only (single-source rule):
   // source_type='computed' is written only by server engines (VSME CO₂), and
   // — scoped to VSME so DWA-A-138 behavior is untouched — 'derived' rows
@@ -444,6 +471,7 @@ export default async function WorksheetPage({
           twinSourceByFieldId={twinSourceByFieldId}
           carriedNoteByFieldId={carriedNoteByFieldId}
           clientSuppliedByFieldId={clientSuppliedByFieldId}
+          staleByFieldId={staleByFieldId}
           standardCode={standardCode}
           docs={docs}
           priorSnapshotCount={priorSnapshotCount}

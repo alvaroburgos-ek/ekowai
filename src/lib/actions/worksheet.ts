@@ -20,6 +20,7 @@ import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/a
 import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
+import { staleFlagSets } from '@/lib/eval/stale-flags';
 import { withFallbackRegisterEquations, resolveRegisterConfig } from '@/lib/eval/register-configs';
 import { registerRowWarnings } from '@/lib/eval/register-rows';
 import { makeTableLookup, makeTableRows } from '@/lib/eval/regulation-tables-fallback';
@@ -3160,6 +3161,73 @@ export async function saveWorksheet(
         // but the dispatch here is a no-op for them.
       }
       // ── End Option A ─────────────────────────────────────────────────────
+
+      // ── U-1 (ruling R-12, 2026-10-08): stale flags on hidden answers ─────
+      // A value saved while its question is hidden by `visible_when` (or not re-saved since) is
+      // flagged `is_stale = true`, so the form badges it and the counts treat it as open when the
+      // question reappears; a save while the field is visible clears it. Visibility is evaluated
+      // over the POST-save values (this tx sees its own writes, incl. the materialised rows) with
+      // the form's lookup pair (own fields hideable; own + inherited symbols readable). Only the
+      // saved template's own fields; derived/computed rows excluded (see staleFlagSets). No value
+      // is deleted or nulled — one UPDATE per set.
+      if (parameterValues.length > 0) {
+        const staleOwnFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, sectionId: fields.sectionId, visibleWhen: fields.visibleWhen })
+          .from(fields)
+          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+        const staleSections = await tx
+          .select({ id: worksheetSections.id, parentSectionId: worksheetSections.parentSectionId, visibleWhen: worksheetSections.visibleWhen })
+          .from(worksheetSections)
+          .where(eq(worksheetSections.worksheetTemplateId, instance.worksheetTemplateId));
+        const staleInherited = savedStandardId && savedTemplateCode
+          ? await loadInheritedFields(instance.worksheetTemplateId, savedStandardId, savedTemplateCode, tx)
+          : [];
+        const staleOwnSymbols = new Set(staleOwnFields.map((f) => f.symbol));
+        const staleReadable = [
+          ...staleOwnFields.map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType })),
+          ...staleInherited.filter((f) => !staleOwnSymbols.has(f.symbol)).map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType })),
+        ];
+        const staleRows = staleReadable.length > 0
+          ? await tx
+              .select({
+                fieldId: projectParameters.fieldId,
+                valueNumber: projectParameters.valueNumber,
+                valueText: projectParameters.valueText,
+                valueEnum: projectParameters.valueEnum,
+                valueDate: projectParameters.valueDate,
+                valueBoolean: projectParameters.valueBoolean,
+                valueJson: projectParameters.valueJson,
+                sourceType: projectParameters.sourceType,
+                isStale: projectParameters.isStale,
+              })
+              .from(projectParameters)
+              .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, staleReadable.map((f) => f.id))))
+          : [];
+        const { hiddenSymbols: staleHidden } = computeVisibility(
+          staleOwnFields,
+          staleSections,
+          makeSymbolLookup(staleReadable, parametersToFieldValues(staleRows, staleReadable)),
+        );
+        const { setStale, clearStale } = staleFlagSets(
+          staleOwnFields,
+          staleHidden,
+          new Set(parameterValues.map((r) => r.fieldId)),
+          staleRows,
+        );
+        if (setStale.length > 0) {
+          await tx
+            .update(projectParameters)
+            .set({ isStale: true })
+            .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, setStale)));
+        }
+        if (clearStale.length > 0) {
+          await tx
+            .update(projectParameters)
+            .set({ isStale: false })
+            .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, clearStale)));
+        }
+      }
+      // ── End U-1 ──────────────────────────────────────────────────────────
 
       // ONE batched insert for all audit rows — guarded so an empty-batch
       // topology-triggered save (no local field change) does not attempt to

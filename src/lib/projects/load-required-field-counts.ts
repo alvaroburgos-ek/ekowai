@@ -3,20 +3,27 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { fields, projectParameters, worksheetSections, worksheetTemplates } from '@/lib/db/schema';
 import { loadOwnStandardScope, loadProjectWideEntries } from '@/lib/actions/approval-gate';
-import { countRequiredFieldsByTemplate, type RequiredFieldCounts } from './required-field-counts';
+import {
+  countRequiredFieldsByTemplate,
+  hiddenFieldIdsByTemplate,
+  type RequiredFieldCountArgs,
+  type RequiredFieldCounts,
+} from './required-field-counts';
 
-/**
- * C-7: per-template required-field counts of ONE standard in a project, by the approval gate's rule
- * (`countRequiredFieldsByTemplate`): hidden (`visible_when`) required fields are neither total nor open.
- * Replaces the plain-SQL counts of the worksheet sidebar and `get_standard_progress`.
- */
-export async function loadRequiredFieldCounts(projectId: string, standardId: string): Promise<Map<string, RequiredFieldCounts>> {
+export type RequiredFieldState = {
+  /** C-7 per-template counts (+ U-1: a stale own answer counts as open). */
+  counts: Map<string, RequiredFieldCounts>;
+  /** U-2: per template, the active fields hidden by `visible_when` under the saved values. */
+  hiddenByTemplate: Map<string, Set<string>>;
+};
+
+async function loadCountArgs(projectId: string, standardId: string): Promise<RequiredFieldCountArgs | null> {
   const templates = await db
     .select({ id: worksheetTemplates.id })
     .from(worksheetTemplates)
     .where(eq(worksheetTemplates.standardId, standardId));
   const templateIds = templates.map((t) => t.id);
-  if (templateIds.length === 0) return new Map();
+  if (templateIds.length === 0) return null;
 
   const [tmplFields, tmplSections, projectEntries, ownScope] = await Promise.all([
     db
@@ -54,5 +61,25 @@ export async function loadRequiredFieldCounts(projectId: string, standardId: str
       .where(and(eq(projectParameters.projectId, projectId), inArray(projectParameters.fieldId, fieldIds)));
   const paramByFieldId = new Map(params.map((p) => [p.fieldId, p]));
 
-  return countRequiredFieldsByTemplate({ templateIds, fields: tmplFields, sections: tmplSections, paramByFieldId, projectEntries, ownScope });
+  return { templateIds, fields: tmplFields, sections: tmplSections, paramByFieldId, projectEntries, ownScope };
+}
+
+/**
+ * C-7: per-template required-field counts of ONE standard in a project, by the approval gate's rule
+ * (`countRequiredFieldsByTemplate`): hidden (`visible_when`) required fields are neither total nor open.
+ * Replaces the plain-SQL counts of the worksheet sidebar and `get_standard_progress`.
+ */
+export async function loadRequiredFieldCounts(projectId: string, standardId: string): Promise<Map<string, RequiredFieldCounts>> {
+  const args = await loadCountArgs(projectId, standardId);
+  return args ? countRequiredFieldsByTemplate(args) : new Map();
+}
+
+/**
+ * The counts AND the per-template hidden-field sets from ONE load of the rows (U-2: the worksheet page needs both and
+ * must not query twice).
+ */
+export async function loadRequiredFieldState(projectId: string, standardId: string): Promise<RequiredFieldState> {
+  const args = await loadCountArgs(projectId, standardId);
+  if (!args) return { counts: new Map(), hiddenByTemplate: new Map() };
+  return { counts: countRequiredFieldsByTemplate(args), hiddenByTemplate: hiddenFieldIdsByTemplate(args) };
 }

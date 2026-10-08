@@ -224,6 +224,8 @@ export type SameSymbolEntry = {
   isFromCurrentStandard: boolean;
   /** Code of the source standard — read by the cross-standard carry-over allow-list (src/lib/projects/cross-standard-carry.ts). */
   sourceStandardCode?: string | null;
+  /** Id of the source field (U-2: lets the page drop an occurrence hidden by `visible_when` on its source sheet). */
+  fieldId?: string;
 };
 
 /**
@@ -364,6 +366,7 @@ export async function loadSameSymbolValues(
       isFromAncestor: ancestorStandardIds.has(meta.sourceStandardId),
       isFromCurrentStandard: currentStandardId != null && meta.sourceStandardId === currentStandardId,
       sourceStandardCode: meta.sourceStandardCode,
+      fieldId: p.fieldId,
     });
     out.set(meta.symbol, arr);
   }

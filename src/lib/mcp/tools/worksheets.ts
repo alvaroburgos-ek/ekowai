@@ -173,6 +173,9 @@ export function registerWorksheetTools(server: McpServer) {
         return {
           ...rest,
           hidden: hiddenFieldIds.has(f.fieldId),
+          // U-1 (ruling R-12): the value was last saved while the field was hidden by visible_when (or not re-saved
+          // since) — not a conscious answer under the current selection; re-save it while visible to clear.
+          stale: param?.isStale ?? false,
           value: readValue(param),
           sourceType: param?.sourceType ?? null,
           clientSupplied: param?.clientSupplied ?? false,

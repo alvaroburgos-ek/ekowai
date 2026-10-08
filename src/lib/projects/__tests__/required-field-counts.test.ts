@@ -9,7 +9,9 @@ import {
   buildFallbackValues,
   countRequiredFieldsByTemplate,
   extractGateValue,
+  hiddenFieldIdsByTemplate,
   type CountField,
+  type CountParam,
   type OwnStandardScope,
   type ProjectWideEntry,
 } from '../required-field-counts';
@@ -47,7 +49,7 @@ const scope: OwnStandardScope = {
   standardCode: 'DWA-M-820-1',
 };
 
-function run(params: Array<[string, ParameterValueColumns]>, entries: ProjectWideEntry[]) {
+function run(params: Array<[string, CountParam]>, entries: ProjectWideEntry[]) {
   return countRequiredFieldsByTemplate({
     templateIds: [T10, T14],
     fields: fieldsM820,
@@ -120,5 +122,80 @@ describe('gate value helpers', () => {
     ]);
     expect(m.get('a')).toBe(4);
     expect(m.has('b')).toBe(false);
+  });
+});
+
+describe('U-1 (ruling R-12): a stale own answer counts as open', () => {
+  it('a visible required field whose own row is stale is NOT filled', () => {
+    const counts = run(
+      [['f-proc', en('vgv_f')], ['f-double', { ...bool(false), isStale: true }]],
+      [{ symbol: 'procurement_procedure', value: 'vgv_f', templateId: T10, standardCode: 'DWA-M-820-1' }],
+    );
+    expect(counts.get(T14)).toEqual({ totalRequired: 3, filledRequired: 0 });
+  });
+
+  it('isStale = false (or absent) keeps the answer filled — existing behaviour unchanged', () => {
+    const counts = run(
+      [['f-proc', en('vgv_f')], ['f-double', { ...bool(false), isStale: false }]],
+      [{ symbol: 'procurement_procedure', value: 'vgv_f', templateId: T10, standardCode: 'DWA-M-820-1' }],
+    );
+    expect(counts.get(T14)).toEqual({ totalRequired: 3, filledRequired: 1 });
+  });
+
+  it('a stale own row is still satisfied by an inherited value (A4)', () => {
+    const counts = run(
+      [['f-proc', en('direktvergabe')], ['f-rationale', { ...txt('alt'), isStale: true }]],
+      [{ symbol: 'procurement_procedure', value: 'direktvergabe', templateId: T10, standardCode: 'DWA-M-820-1' },
+       { symbol: 'procedure_rationale', value: 'aus M820-24', templateId: 't-m820-24', standardCode: 'DWA-M-820-1' }],
+    );
+    expect(counts.get(T10)).toEqual({ totalRequired: 2, filledRequired: 2 });
+  });
+
+  it('a stale driver still drives visibility (the value is kept, only its standing as an answer is withheld)', () => {
+    const counts = run(
+      [['f-proc', { ...en('direktvergabe'), isStale: true }]],
+      [{ symbol: 'procurement_procedure', value: 'direktvergabe', templateId: T10, standardCode: 'DWA-M-820-1' }],
+    );
+    expect(counts.get(T14)).toEqual({ totalRequired: 0, filledRequired: 0 });
+    expect(counts.get(T10)).toEqual({ totalRequired: 2, filledRequired: 0 });
+  });
+});
+
+describe('U-2: hiddenFieldIdsByTemplate — fields hidden on their own (source) sheet', () => {
+  // DWA-M 820-1 M820-11: `leistungswettbewerb_only` only asked when the procedure is not a direct award.
+  const T11 = 't-m820-11';
+  const fields11: CountField[] = [
+    ...fieldsM820,
+    f({ id: 'f-lw', symbol: 'leistungswettbewerb_only', templateId: T11, isRequired: false, visibleWhen: "procurement_procedure != 'direktvergabe'" }),
+  ];
+  const scope11: OwnStandardScope = {
+    ...scope,
+    templateIds: new Set([T10, T11, T14]),
+    symbols: new Set(fields11.map((x) => x.symbol)),
+    types: new Map(fields11.map((x) => [x.symbol, new Set([x.dataType])])),
+  };
+  const hidden = (procedure: string) => hiddenFieldIdsByTemplate({
+    templateIds: [T10, T11, T14],
+    fields: fields11,
+    sections: [],
+    paramByFieldId: new Map([['f-proc', en(procedure)], ['f-lw', bool(true)]]),
+    projectEntries: [
+      { symbol: 'procurement_procedure', value: procedure, templateId: T10, standardCode: 'DWA-M-820-1' },
+      { symbol: 'leistungswettbewerb_only', value: true, templateId: T11, standardCode: 'DWA-M-820-1' },
+    ],
+    ownScope: scope11,
+  });
+
+  it('direct award: leistungswettbewerb_only is hidden on M820-11 (and the competition questions on M820-14)', () => {
+    const h = hidden('direktvergabe');
+    expect([...(h.get(T11) ?? [])]).toEqual(['f-lw']);
+    expect([...(h.get(T14) ?? [])].sort()).toEqual(['f-double', 'f-price', 'f-staff']);
+    expect(h.get(T10)?.size).toBe(0);
+  });
+
+  it('open procedure: nothing is hidden', () => {
+    const h = hidden('vgv_f');
+    expect(h.get(T11)?.size).toBe(0);
+    expect(h.get(T14)?.size).toBe(0);
   });
 });

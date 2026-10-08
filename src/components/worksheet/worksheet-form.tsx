@@ -282,6 +282,9 @@ type Props = {
    * ("Kundenangabe" — value delivered by the client, AGB input-error
    * carve-out). Only true entries need to be present. */
   clientSuppliedByFieldId?: Record<string, boolean>;
+  /** U-1 (ruling R-12): field_id → persisted project_parameters.is_stale — the value was last saved while the
+   * question was hidden by `visible_when` (or not re-saved since). Only true entries need to be present. */
+  staleByFieldId?: Record<string, boolean>;
   /** Standard code (e.g. "DWA-A-138-1"). Forwarded to DynamicField so the
    * inheritance badge can deep-link back to the source worksheet. */
   standardCode: string;
@@ -347,6 +350,7 @@ export function WorksheetForm({
   twinSourceByFieldId,
   carriedNoteByFieldId,
   clientSuppliedByFieldId,
+  staleByFieldId,
   standardCode,
   docs,
   priorSnapshotCount,
@@ -962,6 +966,7 @@ export function WorksheetForm({
         siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
         twinSource={twinSourceByFieldId?.[f.id]}
         clientSupplied={clientSuppliedByFieldId?.[f.id] ?? false}
+        isStale={staleByFieldId?.[f.id] ?? false}
         inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
         overridePill={overridePillByOutputFieldId.get(f.id)}
         isPlatformEngineer={isPlatformEngineer}
