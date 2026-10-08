@@ -620,14 +620,29 @@ describe('DWA-M 820 workflow audit — staged block on embedded Postgres (seed =
     // C2: 820-1 unchanged (Suchverfahren + Konzept) · 820-2 −4 (8 phase-bound questions hidden, 4 drivers asked; PR strategy stays)
     expect(COUNT_BEFORE).toEqual({ c1_820_1: 87, c1_820_2: 96, c2_820_1: 96, c2_820_2: 107 });
     expect(after).toEqual({ c1_820_1: 60, c1_820_2: 93, c2_820_1: 96, c2_820_2: 103 });
-    // ask-once: exactly one master hint, three repeating hints
+    // ask-once (fix round 1, H-1): one master (M820-05), two genuine repeats; the task description is a separate check (§ 8.2)
     const h = await harness.sql<{ ws: string; symbol: string; master: boolean; repeat: boolean }[]>`SELECT w.code AS ws, f.symbol,
-        f.description LIKE '%Maßgeblich (Master) ist die Antwort hier%' AS master, f.description LIKE '%diese Antwort wiederholt die Bedarfsplanung%' AS repeat
+        f.description LIKE '%Maßgeblich ist die Antwort hier%' AS master, f.description LIKE '%dort ist die maßgebliche Antwort%' AS repeat
       FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id
       WHERE f.description LIKE '%Einmal beantworten:%' ORDER BY 1`;
     expect(h.map((x) => `${x.ws} ${x.symbol} ${x.master ? 'master' : x.repeat ? 'repeat' : '?'}`)).toEqual([
-      '820-2-11 framework_conditions_clarified repeat', 'M820-04 aufgabenbeschreibung_eindeutig repeat', 'M820-05 bedarfsplanung_projekt_complete master', 'M8203-11 pz_62_1_status repeat',
+      '820-2-11 framework_conditions_clarified repeat', 'M820-05 bedarfsplanung_projekt_complete master', 'M8203-11 pz_62_1_status repeat',
     ]);
+    const [task] = await harness.sql<{ d: string }[]>`SELECT description AS d FROM fields WHERE symbol = 'aufgabenbeschreibung_eindeutig' AND active`;
+    expect(task.d).toContain('Eigene Prüfung, keine Wiederholung der Bedarfsplanung');
+    expect(task.d).toContain('Aus der Bedarfsplanung wird die Aufgabenbeschreibung für den zu vergebenden Auftrag abgeleitet. Der Auftraggeber hat bei allen Vergabeverfahren eine Aufgabenbeschreibung zu erstellen.');
+    expect(task.d).not.toContain('dasselbe');
+    // fix round 1, M-3: no changelog wording in any touched or new hint / label
+    const cl = await harness.sql<{ n: number }[]>`SELECT count(*)::int AS n FROM fields f WHERE (f.id IN (SELECT id FROM fields_archive_m820_wa) OR f.symbol IN ${harness.sql(NEW_FIELDS)})
+        AND (f.description || f.label_de || coalesce(f.label_en, '')) ~ '(bisher|as before|carry-over|Vorbild|modelled|[Ss]ymbol cost)'`;
+    const clg = await harness.sql<{ n: number }[]>`SELECT count(*)::int AS n FROM compliance_requirements cr WHERE cr.id IN (SELECT id FROM compliance_requirements_archive_m820_wa)
+        AND cr.description ~ '(bisher|as before|carry-over|Vorbild|modelled)'`;
+    expect([cl[0].n, clg[0].n]).toEqual([0, 0]);
+    // fix round 1, M-2: every phase driver tells the engineer to set Ja and re-submit, and what the declaration covers
+    const ph = await harness.sql<{ symbol: string; ok: boolean }[]>`SELECT symbol, (description LIKE '%die Antwort auf Ja setzen und das Blatt erneut zur Freigabe einreichen%'
+        AND description LIKE '%Eine Konformitätserklärung deckt nur die Phasen ab%' AND description LIKE '%submit the sheet for approval again%') AS ok
+      FROM fields WHERE symbol LIKE 'phase\\_%\\_erreicht' ORDER BY 1`;
+    expect(ph).toEqual([{ symbol: 'phase_ausfuehrung_erreicht', ok: true }, { symbol: 'phase_gewaehrleistung_erreicht', ok: true }, { symbol: 'phase_inbetriebnahme_erreicht', ok: true }]);
     // sector list: the four printed § 1 fields are all offered
     const [sec] = await harness.sql<{ t: string }[]>`SELECT string_agg(e->>'value', ',' ORDER BY (e->>'order_index')::int) AS t FROM fields f, jsonb_array_elements(f.enum_values) e WHERE f.symbol = 'sector'`;
     expect(sec.t).toBe('wasserwirtschaft,wastewater,water_supply,flood_protection,waste,water_engineering,other');
