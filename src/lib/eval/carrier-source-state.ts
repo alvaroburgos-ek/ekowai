@@ -96,3 +96,77 @@ export function carrierWithholdFieldIds(
     .filter((f) => f.inheritedFromWorksheet === ownerCode && producedSymbols.has(f.symbol))
     .map((f) => f.id);
 }
+
+/** U-4 (UX pass 820, 2026-10-08): one consumed register's banner input — its state from `carrierSourceState`, the
+ * register's display label, whether the OWNER field is required and whether this consumer withholds values for it. */
+export type SourceBannerInput = {
+  ownerCode: string;
+  /** Register label (owner field label in the viewer's locale; caller falls back to config title / symbol). */
+  label: string;
+  state: CarrierSourceState | null;
+  /** Owner field `is_required`; anything but `true` is an OPTIONAL register. */
+  isRequired?: boolean | null;
+  /** Does this consumer withhold derived values while the source is not ok (`carrierSourceState` opts.withholds)? */
+  withholds?: boolean;
+};
+
+export type GroupedSourceBanner = {
+  ownerCode: string;
+  /** The grouped states (not `ok`, not suppressed), in input order. */
+  states: CarrierSourceState[];
+  message: string;
+};
+
+/** U-4 rule 2: an OPTIONAL register (`isRequired !== true`) with state `missing` (no rows, no null-report) is not a
+ * defect — no banner. Exception: when this consumer WITHHOLDS derived values for it, the banner is the only place the
+ * missing values are explained, so it stays. `incomplete` / `ok` are unchanged. */
+export function suppressOptionalMissing(input: SourceBannerInput): CarrierSourceState | null {
+  const st = input.state;
+  if (!st) return null;
+  if (st.state === 'missing' && input.isRequired !== true && !input.withholds) return null;
+  return st;
+}
+
+/**
+ * U-4 rule 3: ONE upstream banner per source sheet (owner code) instead of one per consumed register. A group with a
+ * single register keeps `carrierSourceState`'s own message verbatim; a group with several lists them by label:
+ *   „Quelle 820-2-04 noch nicht freigegeben — Geltende DIN-Normen (5/5 Zeilen vollständig), Geltende DWA-Regelwerke (5/5 Zeilen vollständig)."
+ *   „Quelle X nicht erfasst — A, B." (every grouped register missing)
+ * The „— abgeleitete Werte ausgeblendet" suffix appears once when any grouped register withholds. Groups are returned
+ * in first-appearance order of their owner code. Pure.
+ */
+export function groupSourceBanners(inputs: readonly SourceBannerInput[], locale: string = 'de'): GroupedSourceBanner[] {
+  const de = locale !== 'en';
+  const groups = new Map<string, Array<{ input: SourceBannerInput; state: CarrierSourceState }>>();
+  for (const input of inputs) {
+    const state = suppressOptionalMissing(input);
+    if (!state || state.state === 'ok' || !state.message) continue;
+    const arr = groups.get(input.ownerCode) ?? [];
+    arr.push({ input, state });
+    groups.set(input.ownerCode, arr);
+  }
+  const out: GroupedSourceBanner[] = [];
+  for (const [ownerCode, items] of groups) {
+    const states = items.map((i) => i.state);
+    if (items.length === 1) {
+      out.push({ ownerCode, states, message: items[0].state.message as string });
+      continue;
+    }
+    const withholds = items.some((i) => i.input.withholds);
+    const suffix = withholds ? (de ? ' — abgeleitete Werte ausgeblendet.' : ' — derived values hidden.') : '.';
+    const allMissing = items.every((i) => i.state.state === 'missing');
+    if (allMissing) {
+      const head = de ? `Quelle ${ownerCode} nicht erfasst` : `Source ${ownerCode} not recorded`;
+      out.push({ ownerCode, states, message: `${head} — ${items.map((i) => i.input.label).join(', ')}${suffix}` });
+      continue;
+    }
+    const parts = items.map(({ input, state }) =>
+      state.state === 'missing'
+        ? `${input.label} (${de ? 'nicht erfasst' : 'not recorded'})`
+        : `${input.label} (${state.complete}/${state.total} ${de ? 'Zeilen vollständig' : 'rows complete'})`,
+    );
+    const head = de ? `Quelle ${ownerCode} noch nicht freigegeben` : `Source ${ownerCode} not yet approved`;
+    out.push({ ownerCode, states, message: `${head} — ${parts.join(', ')}${suffix}` });
+  }
+  return out;
+}

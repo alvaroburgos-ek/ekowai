@@ -28,7 +28,7 @@ beforeEach(() => {
   // Fields on OTHER templates of the standard (the query excludes the current template's code).
   ROWS.fields = [
     // (1) DB register, directly consumed by X-10.
-    { id: 'f-x', symbol: 'reg_x', dataType: 'json', widget: 'register', uiConfig: UI_X, consumerWorksheets: ['X-10'], ownerCode: 'X-07', templateId: 'tpl-07' },
+    { id: 'f-x', symbol: 'reg_x', dataType: 'json', widget: 'register', uiConfig: UI_X, consumerWorksheets: ['X-10'], isRequired: true, labelDe: 'Register X', labelEn: 'Register X (en)', ownerCode: 'X-07', templateId: 'tpl-07' },
     // (2) TS-fallback register (widget NULL), NOT directly consumed — but its owner's equation produces A_C, which X-10 consumes.
     { id: 'f-surf', symbol: 'surface_inventory', dataType: 'json', widget: null, uiConfig: null, consumerWorksheets: null, ownerCode: 'X-08', templateId: 'tpl-08' },
     { id: 'f-ac', symbol: 'A_C', dataType: 'number', widget: null, uiConfig: null, consumerWorksheets: ['X-10'], ownerCode: 'X-08', templateId: 'tpl-08' },
@@ -57,8 +57,8 @@ describe('loadRegisterSources(projectId, standardId, currentWorksheetCode)', () 
     const { loadRegisterSources } = await import('../worksheet');
     const out = await loadRegisterSources('proj-1', 'std-1', 'X-10');
     expect(out).toEqual([
-      { symbol: 'reg_x', ownerCode: 'X-07', status: 'final', carrier: { rows: [{ id: '1', a: 'x' }] }, widget: 'register', uiConfig: UI_X, producedSymbols: [] },
-      { symbol: 'surface_inventory', ownerCode: 'X-08', status: 'draft', carrier: { rows: [] }, widget: null, uiConfig: null, producedSymbols: ['A_C'] },
+      { symbol: 'reg_x', ownerCode: 'X-07', status: 'final', carrier: { rows: [{ id: '1', a: 'x' }] }, widget: 'register', uiConfig: UI_X, producedSymbols: [], isRequired: true, labelDe: 'Register X', labelEn: 'Register X (en)' },
+      { symbol: 'surface_inventory', ownerCode: 'X-08', status: 'draft', carrier: { rows: [] }, widget: null, uiConfig: null, producedSymbols: ['A_C'], isRequired: null, labelDe: null, labelEn: null },
     ]);
     // One fields query, one equations query, then instances + params (batched, not per owner).
     expect(fakeDb.log).toEqual(['select:fields', 'select:equations', 'select:worksheet_instances', 'select:project_parameters']);

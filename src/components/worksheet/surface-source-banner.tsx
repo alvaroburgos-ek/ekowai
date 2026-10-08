@@ -8,7 +8,7 @@ export function SurfaceSourceBanner({ state }: { state: CarrierSourceState }) {
     <div
       data-testid="surface-source-banner"
       role="status"
-      className="border border-warning/40 bg-warning/10 text-ink rounded px-3 py-2 text-sm"
+      className="border border-warning/40 bg-warning/10 text-ink rounded px-3 py-2 text-sm break-words"
     >
       {state.message}
     </div>

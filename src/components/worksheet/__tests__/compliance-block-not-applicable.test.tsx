@@ -76,3 +76,37 @@ describe('ComplianceBlock — not_applicable (hidden symbol)', () => {
     expect(screen.queryByText(/n\.a\./)).toBeNull();
   });
 });
+
+// U-6 (UX pass 820, 2026-10-08): a guarded gate whose guard is not triggered is a vacuous pass — displayed „–
+// nicht einschlägig", counted in its own header bucket, never as ✓. The verdict stays pass (no "Warum?" block).
+describe('ComplianceBlock — guard not triggered (vacuous pass)', () => {
+  const guarded = [{ ...requirements[0], id: 'cr-g', code: 'REQ-15', condition: 'IF x > 10 THEN x <= 20' }];
+  const renderGuarded = (locale: 'de' | 'en' = 'de') =>
+    render(<ComplianceBlock requirements={guarded} suggestions={[]} fields={fields} locale={locale} projectId="proj-1" />);
+
+  it('x = 5 ⇒ badge „–" titled „Nicht einschlägig …", chip „– 1 nicht einschlägig", no ✓ count', () => {
+    renderGuarded();
+    const t = 'Nicht einschlägig — die Vorbedingung dieser Prüfung trifft nicht zu';
+    const badge = screen.getByLabelText(t);
+    expect(badge.textContent).toBe('–');
+    expect(badge.getAttribute('title')).toBe(t);
+    expect(screen.getByText(/1 nicht einschlägig/)).toBeTruthy();
+    expect(screen.queryByLabelText('Erfüllt')).toBeNull();
+    expect(screen.queryByText(/✓ 1/)).toBeNull();
+    expect(screen.queryByText(/n\.a\./)).toBeNull();
+    expect(screen.queryByText(/Warum\?/)).toBeNull();
+  });
+
+  it('English locale wording', () => {
+    renderGuarded('en');
+    expect(screen.getByLabelText('Not applicable — the precondition of this check is not met').textContent).toBe('–');
+  });
+
+  it('guard triggered and satisfied (x = 15) ⇒ a real ✓', () => {
+    useWorksheetStore.getState().init('inst-1', { fx: { type: 'number', value: 15 } }, {}, {});
+    renderGuarded();
+    expect(screen.getByLabelText('Erfüllt').textContent).toBe('✓');
+    expect(screen.getByText(/✓ 1/)).toBeTruthy();
+    expect(screen.queryByText(/nicht einschlägig/)).toBeNull();
+  });
+});

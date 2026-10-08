@@ -21,7 +21,7 @@ import { GuidelineTablePanel } from './guideline-table-panel';
 import { designWindowInputs, tab3Inputs, guidelineTableInputs, sitePortalFieldIds } from './panel-inputs';
 import { SitePortalLinks } from './site-portal-links';
 import { SurfaceSourceBanner } from './surface-source-banner';
-import { carrierSourceState } from '@/lib/eval/carrier-source-state';
+import { carrierSourceState, groupSourceBanners } from '@/lib/eval/carrier-source-state';
 import { registerTables, type RegulationTable } from '@/lib/eval/regulation-tables';
 import { SourceFormReferencePanel } from '@/components/form-templates/SourceFormReferencePanel';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
@@ -32,6 +32,7 @@ import { ReadOnlyRegisterTable, registerPlacement } from './register-editor';
 import { visibleFields } from './visible-fields';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { computeVisibility } from '@/lib/compliance/visibility';
+import { allOwnFieldsHidden, hiddenSheetDrivers } from '@/lib/compliance/hidden-drivers';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
 import { computeComputedSymbols } from '@/lib/eval/computed-symbols';
@@ -233,6 +234,24 @@ function SaveWarningsBanner() {
 export type { WorksheetFormField };
 type FieldDef = WorksheetFormField;
 
+/** Display value of a field as the upstream panel shows it (number de-DE, enum label, Ja/Nein, text, "(Tabelle)",
+ * "—" when empty). Shared by the inherited-values panel and the U-5 all-hidden notice. */
+function formatPanelValue(f: FieldDef, v: FieldValue | undefined, locale: 'de' | 'en'): string {
+  if (v?.type === 'number' && v.value != null && Number.isFinite(v.value)) return formatNumberDe(v.value);
+  if (v?.type === 'json' && v.value && typeof v.value === 'object') return '(Tabelle)';
+  if (v?.type === 'enum' && v.value != null) {
+    if (f.enumValues) {
+      const entry = f.enumValues.find((e) => e.value === v.value);
+      const label = locale === 'de' ? entry?.label_de : entry?.label_en;
+      return label ?? String(v.value);
+    }
+    return String(v.value);
+  }
+  if (v?.type === 'boolean' && v.value != null) return v.value ? 'Ja' : 'Nein';
+  if (v?.type === 'text' && v.value) return v.value;
+  return '—';
+}
+
 type Section = Parameters<typeof SectionGroup>[0]['section'];
 
 type Props = {
@@ -305,7 +324,7 @@ type Props = {
    * renders an upstream-cause banner (carrierSourceState under the register's own
    * config) and a read-only mirror table at the bottom. Empty/undefined when this
    * worksheet owns every register. Loaded by `loadRegisterSources` (queries/worksheet.ts). */
-  registerSources?: Array<{ symbol: string; ownerCode: string; status: string; carrier: unknown; widget?: string | null; uiConfig?: unknown; producedSymbols?: string[] }>;
+  registerSources?: Array<{ symbol: string; ownerCode: string; status: string; carrier: unknown; widget?: string | null; uiConfig?: unknown; producedSymbols?: string[]; isRequired?: boolean | null; labelDe?: string | null; labelEn?: string | null }>;
   /** Field ids whose persisted project_parameters row was written by a
    * SERVER-side engine (source_type='computed', e.g. the VSME CO₂ engine;
    * plus VSME 'derived' rows like the B04 per-medium sums). These render
@@ -811,9 +830,25 @@ export function WorksheetForm({
               flags: cfg.flags,
             })
           : null;
-        return { ...src, cfg, state };
+        return { ...src, cfg, state, withholds };
       }),
     [registerSources, fields, standardCode],
+  );
+  // U-4 (UX pass 820): ONE banner per source sheet (owner code) listing its registers by label; an OPTIONAL register
+  // (owner field not is_required) that nobody filled yields no banner (groupSourceBanners / suppressOptionalMissing).
+  const sourceBanners = useMemo(
+    () =>
+      groupSourceBanners(
+        registerSourceStates.map((s) => ({
+          ownerCode: s.ownerCode,
+          label: (locale === 'de' ? s.labelDe : (s.labelEn ?? s.labelDe)) ?? s.cfg?.title ?? s.symbol,
+          state: s.state,
+          isRequired: s.isRequired ?? null,
+          withholds: s.withholds,
+        })),
+        locale,
+      ),
+    [registerSourceStates, locale],
   );
 
   // (Retired) The legacy naive sum-evaluator lived here — it ignored `formula`
@@ -857,6 +892,20 @@ export function WorksheetForm({
     bottom.sort((a, b) => a.orderIndex - b.orderIndex);
     return { map, bottom };
   }, [fields, visibility]);
+
+  // U-5 (UX pass 820): every active own question hidden by `visible_when` ⇒ the sheet says so and names the
+  // selections that hide them (driver label = current value ← origin worksheet), capped at 5 (hiddenSheetDrivers).
+  const allHiddenNotice = useMemo(() => {
+    if (!allOwnFieldsHidden(ownFields, visibility.hiddenFieldIds)) return null;
+    const drivers = hiddenSheetDrivers(ownFields, sections, visibility).map((sym) => {
+      const f = fieldBySymbol.get(sym);
+      const label = f ? (locale === 'de' ? f.labelDe : (f.labelEn ?? f.labelDe)) || sym : sym;
+      const value = f ? formatPanelValue(f, values[f.id], locale) : '—';
+      const origin = f?.inheritedFromWorksheet ?? inheritedHomeBySymbol[sym] ?? null;
+      return { sym, label, value, origin };
+    });
+    return { drivers };
+  }, [ownFields, sections, visibility, fieldBySymbol, values, locale, inheritedHomeBySymbol]);
 
   // The inherited-values panel content. Built once from `fields` + the
   // store's resolved values.
@@ -1046,7 +1095,23 @@ export function WorksheetForm({
         </div>
       )}
 
-      {registerSourceStates.map((s) => s.state && <SurfaceSourceBanner key={s.symbol} state={s.state} />)}
+      {allHiddenNotice && (
+        <div className="rounded border border-hairline bg-paper-2 px-3 py-2 text-sm text-ink space-y-1" data-testid="all-hidden-notice" role="status">
+          <p>{locale === 'de' ? 'Dieses Blatt stellt unter den aktuellen Auswahlen keine Fragen.' : 'Under the current selections this sheet asks no questions.'}</p>
+          {allHiddenNotice.drivers.length > 0 && (
+            <ul className="text-xs text-subtext space-y-0.5">
+              {allHiddenNotice.drivers.map((d) => (
+                <li key={d.sym} data-symbol={d.sym} className="break-words">
+                  {d.label} = {d.value}
+                  {d.origin && <> (← {d.origin})</>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {sourceBanners.map((b) => <SurfaceSourceBanner key={b.ownerCode} state={{ ...b.states[0], message: b.message }} />)}
 
       {inheritedFieldsForPanel.length > 0 && (
         <section
@@ -1062,26 +1127,7 @@ export function WorksheetForm({
           </p>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             {inheritedFieldsForPanel.map((f) => {
-              const v = values[f.id];
-              const display =
-                v?.type === 'number' && v.value != null && Number.isFinite(v.value)
-                  ? formatNumberDe(v.value)
-                  : v?.type === 'json' && v.value && typeof v.value === 'object'
-                  ? '(Tabelle)'
-                  : v?.type === 'enum' && v.value != null
-                  ? (() => {
-                      if (f.enumValues) {
-                        const entry = f.enumValues.find((e) => e.value === v.value);
-                        const label = locale === 'de' ? entry?.label_de : entry?.label_en;
-                        return label ?? String(v.value);
-                      }
-                      return String(v.value);
-                    })()
-                  : v?.type === 'boolean' && v.value != null
-                  ? (v.value ? 'Ja' : 'Nein')
-                  : v?.type === 'text' && v.value
-                  ? v.value
-                  : '—';
+              const display = formatPanelValue(f, values[f.id], locale);
               const label = locale === 'de' ? f.labelDe : (f.labelEn ?? f.labelDe);
               return (
                 <li
@@ -1200,7 +1246,7 @@ export function WorksheetForm({
         );
       })}
 
-      <MemoEquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} locale={locale} />
+      <MemoEquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} locale={locale} hiddenSymbols={visibility.hiddenSymbols} />
 
       {orphanEngineEquations.length > 0 && (
         <section className="border-t border-hairline pt-6 mt-2 space-y-3">

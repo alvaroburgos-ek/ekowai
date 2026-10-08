@@ -80,7 +80,10 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
 
   const counts = results.reduce(
     (acc, r) => {
-      acc[r.result.kind]++;
+      // U-6: a vacuous pass (guard not triggered) is still a pass for the evaluator/approval, but the header counts it
+      // under its own bucket so "✓ n" stays the number of REAL passes.
+      if (r.result.kind === 'pass' && r.result.guardSkipped) acc.guardSkipped++;
+      else acc[r.result.kind]++;
       // Separate failing blockers from failing warnings so the engineer sees
       // gate-relevant fails distinctly from advisory ones.
       if (r.result.kind === 'fail') {
@@ -102,6 +105,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
       pending: 0,
       manual: 0,
       not_applicable: 0, // Plan 2a: gate references a field hidden by `visible_when`
+      guardSkipped: 0, // U-6: IF-guard not triggered ⇒ vacuous pass, displayed „nicht einschlägig"
       failBlock: 0,
       failWarn: 0,
       attestation: 0,
@@ -136,6 +140,11 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
               – {counts.not_applicable} n.a.
             </span>
           )}
+          {counts.guardSkipped > 0 && (
+            <span className="text-subtext" title={guardSkippedTitle(locale)}>
+              – {counts.guardSkipped} {locale === 'de' ? 'nicht einschlägig' : 'not applicable'}
+            </span>
+          )}
           {counts.attestation > 0 && (
             <span className="text-accent" title="Ingenieur-Bestätigung ausstehend">
               § {counts.attestation} sign-off
@@ -163,6 +172,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                   result={result}
                   severity={cr.severity}
                   requiresAttestation={isAttestationCondition(cr.condition)}
+                  locale={locale}
                 />
                 <span className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0">
                   {cr.code}
@@ -363,17 +373,41 @@ const TYPE_LABELS: Record<
   design_change: { de: 'Designänderung', en: 'Design change' },
 };
 
+/** U-6: badge / chip title for a pass whose IF-guard was not triggered (explain.ts words the same case per leaf). */
+function guardSkippedTitle(locale: 'de' | 'en'): string {
+  return locale === 'de'
+    ? 'Nicht einschlägig — die Vorbedingung dieser Prüfung trifft nicht zu'
+    : 'Not applicable — the precondition of this check is not met';
+}
+
 function StatusBadge({
   result,
   severity,
   requiresAttestation,
+  locale = 'de',
 }: {
   result: EvalResult;
   severity?: string;
   requiresAttestation?: boolean;
+  locale?: 'de' | 'en';
 }) {
   switch (result.kind) {
     case 'pass':
+      // U-6: a vacuous pass (`IF <antecedent> THEN …` with a false antecedent) is displayed like a hidden-symbol
+      // not_applicable („–"), never as ✓. Display only — the verdict stays `pass` (approval gate, counts, PDF).
+      if (result.guardSkipped) {
+        const t = guardSkippedTitle(locale);
+        return (
+          <span
+            aria-label={t}
+            title={t}
+            data-guard-skipped="true"
+            className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-paper-2 text-subtext text-xs font-semibold shrink-0"
+          >
+            –
+          </span>
+        );
+      }
       return (
         <span
           aria-label="Erfüllt"

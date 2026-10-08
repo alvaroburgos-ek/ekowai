@@ -34,7 +34,7 @@ describe('C-1: bare-ident RHS of ==/!= on a call LHS (legacy var-vs-var rule ext
 
 describe('legacy condition forms', () => {
   it('IF a THEN b: vacuous pass when a is false, pending on a when a is missing', () => {
-    expect(evalCondition('IF a THEN b', sc({ a: false }))).toEqual({ kind: 'pass' });
+    expect(evalCondition('IF a THEN b', sc({ a: false }))).toEqual({ kind: 'pass', guardSkipped: true });
     expect(evalCondition('IF a THEN b', sc({ b: true }))).toEqual({ kind: 'pending', missingSymbols: ['a'] });
     expect(evalCondition('IF a THEN b', sc({ a: true, b: false }))).toEqual({ kind: 'fail' });
   });

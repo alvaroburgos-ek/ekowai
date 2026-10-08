@@ -53,7 +53,10 @@ export type Scope = {
 };
 
 export type EvalResult =
-  | { kind: 'pass' }
+  /** `guardSkipped` (U-6, UX pass 820 2026-10-08): DISPLAY marker only — the pass is vacuous because an
+   * `IF <antecedent> THEN …` on the condition's top guard chain had a definitely-false antecedent. The verdict
+   * stays `pass` everywhere (approval gate, counts, PDF); only the worksheet badge words it „nicht einschlägig". */
+  | { kind: 'pass'; guardSkipped?: true }
   | { kind: 'fail'; reason?: string }
   | { kind: 'pending'; missingSymbols: string[] }
   | { kind: 'manual' }

@@ -429,6 +429,11 @@ export type RegisterSource = {
    * (the values the page withholds while the source is not `ok` — `carrierWithholdFieldIds`). Empty for a
    * register nothing is derived from (the banner then must not claim withholding). */
   producedSymbols: string[];
+  /** U-4: the OWNER field's `is_required` — an optional register nobody filled yields no upstream banner. */
+  isRequired: boolean | null;
+  /** U-4: the OWNER field's labels — the grouped banner names each register by label, not by symbol. */
+  labelDe: string | null;
+  labelEn: string | null;
 };
 
 /**
@@ -466,6 +471,9 @@ export async function loadRegisterSources(
       widget: fields.widget,
       uiConfig: fields.uiConfig,
       consumerWorksheets: fields.consumerWorksheets,
+      isRequired: fields.isRequired,
+      labelDe: fields.labelDe,
+      labelEn: fields.labelEn,
       ownerCode: worksheetTemplates.code,
       templateId: worksheetTemplates.id,
     })
@@ -528,5 +536,8 @@ export async function loadRegisterSources(
     widget: r.widget ?? null,
     uiConfig: r.uiConfig ?? null,
     producedSymbols: r.producedSymbols,
+    isRequired: r.isRequired ?? null,
+    labelDe: r.labelDe ?? null,
+    labelEn: r.labelEn ?? null,
   }));
 }

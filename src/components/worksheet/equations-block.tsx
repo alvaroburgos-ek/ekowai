@@ -5,6 +5,7 @@ import { KatexFormula } from '@/components/math/katex-formula';
 import { VerifyButton } from './verify-button';
 import { verificationStatusLabel, verificationStatusTitle } from '@/lib/verification-status';
 import { hintText } from '@/lib/eval/hint-text';
+import { visibleEquations } from './visible-equations';
 
 type Equation = {
   id: string;
@@ -21,15 +22,20 @@ type Equation = {
 };
 
 export function EquationsBlock({
-  equations,
+  equations: allEquations,
   isPlatformEngineer = false,
   locale = 'de',
+  hiddenSymbols,
 }: {
   equations: Equation[];
   isPlatformEngineer?: boolean;
   /** Hint language: equations.description holds German + an `[EN] ` part (hint-text.ts). */
   locale?: 'de' | 'en';
+  /** U-5: symbols of own fields hidden by `visible_when` — an equation whose inputs are all hidden (or whose output
+   * field is hidden) is not listed; nothing left ⇒ the block disappears. */
+  hiddenSymbols?: ReadonlySet<string>;
 }) {
+  const equations = visibleEquations(allEquations, hiddenSymbols);
   if (equations.length === 0) return null;
   return (
     <section className="border-t border-hairline pt-6 mt-8 space-y-4">

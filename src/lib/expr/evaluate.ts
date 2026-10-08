@@ -803,7 +803,26 @@ export function evalCondition(src: string, scope: Scope, opts?: ConditionOptions
   // Every atom hidden → the rule does not apply to this project (unchanged outcome for fully hidden gates).
   if (r === 'na') return { kind: 'not_applicable', hiddenSymbols: hidden };
   if (r === 'missing') return { kind: 'pending', missingSymbols: [...ctx.missing] };
-  return r === 'true' ? { kind: 'pass' } : { kind: 'fail' };
+  if (r !== 'true') return { kind: 'fail' };
+  return guardSkippedOnPath(ast, ctx) ? { kind: 'pass', guardSkipped: true } : { kind: 'pass' };
+}
+
+/**
+ * U-6 (UX pass 820, 2026-10-08): did a PASS come from a vacuously satisfied guard? Walks the top guard chain
+ * (`IF a THEN IF b THEN …` — the root and each guard body that is itself a guard): a guard on that chain whose
+ * antecedent is definitely `false` (the evaluator's own guard semantics, existence legacy, hidden set honoured)
+ * marks the pass. A guard nested inside AND / OR / NOT does not — the other terms were still checked. Called only
+ * after the condition evaluated to `'true'`, so it never changes a verdict.
+ */
+function guardSkippedOnPath(ast: Node, base: Ctx): boolean {
+  let n: Node = ast;
+  while (n.kind === 'guard') {
+    const g = evalNodeCore(n.guard, { ...base, missing: new Set(), existsPending: false });
+    if (g === 'false') return true;
+    if (g !== 'true') return false;
+    n = n.body;
+  }
+  return false;
 }
 
 /**

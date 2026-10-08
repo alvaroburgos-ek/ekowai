@@ -12,7 +12,7 @@ const sc = (vals: Record<string, number | string | boolean | null>): Scope => ({
 
 describe('guard body scope', () => {
   it('a false guard makes the whole THEN conjunction vacuous (no pending from the body inputs)', () => {
-    expect(evalCondition('IF t == 3 THEN a > 12 AND b <= 1', sc({ t: 4 }))).toEqual({ kind: 'pass' });
+    expect(evalCondition('IF t == 3 THEN a > 12 AND b <= 1', sc({ t: 4 }))).toEqual({ kind: 'pass', guardSkipped: true });
     expect(evalCondition('(IF t == 3 THEN a > 12 AND b <= 1) AND (IF t == 4 THEN c > 80)', sc({ t: 4, c: 90 }))).toEqual({ kind: 'pass' });
     expect(evalCondition('(IF t == 3 THEN a > 12 AND b <= 1) AND (IF t == 4 THEN c > 80)', sc({ t: 4, c: 70 }))).toEqual({ kind: 'fail' });
   });

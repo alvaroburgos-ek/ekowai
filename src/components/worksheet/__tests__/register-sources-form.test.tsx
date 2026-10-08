@@ -161,8 +161,29 @@ describe('WorksheetForm — multiple registerSources; DB config beats the symbol
     expect(screen.getByTestId('surface-source-banner').textContent).toBe('Quelle M820-01 noch nicht freigegeben (1/1 Zeilen vollständig).');
     expect(screen.getByTestId('source-stakeholder_list')).toBeInTheDocument();
     first.unmount();
-    render(<WorksheetForm {...PROPS} registerSources={[{ ...sel, carrier: null }]} />);
+    // U-4: "nicht erfasst" only for a REQUIRED register (owner field is_required) …
+    const second = render(<WorksheetForm {...PROPS} registerSources={[{ ...sel, carrier: null, isRequired: true }]} />);
     expect(screen.getByTestId('surface-source-banner').textContent).toBe('Quelle M820-01 nicht erfasst.');
+    second.unmount();
+    // … an OPTIONAL register nobody filled is not a defect: no banner.
+    render(<WorksheetForm {...PROPS} registerSources={[{ ...sel, carrier: null, isRequired: false }]} />);
+    expect(screen.queryByTestId('surface-source-banner')).toBeNull();
+  });
+
+  it('U-4: several registers of ONE source sheet ⇒ one banner naming each register by label; optional empty register omitted', () => {
+    const reg = (symbol: string, labelDe: string, carrier: unknown, isRequired: boolean) => ({
+      symbol, ownerCode: '820-2-04', status: 'draft', carrier, widget: 'register', isRequired, labelDe, labelEn: null, producedSymbols: [],
+      uiConfig: { title: labelDe, columns: [{ key: 'name', type: 'text', label: 'Name', required: true }] },
+    });
+    render(<WorksheetForm {...PROPS} registerSources={[
+      reg('din', 'Geltende DIN-Normen', { rows: [{ id: '1', name: 'a' }] }, true),
+      reg('dwa', 'Geltende DWA-Regelwerke', { rows: [{ id: '1', name: 'b' }] }, true),
+      reg('weitere', 'Weitere Regelwerke', null, false),
+    ]} />);
+    const banners = screen.getAllByTestId('surface-source-banner');
+    expect(banners.map((b) => b.textContent)).toEqual([
+      'Quelle 820-2-04 noch nicht freigegeben — Geltende DIN-Normen (1/1 Zeilen vollständig), Geltende DWA-Regelwerke (1/1 Zeilen vollständig).',
+    ]);
   });
 
   it('produced symbols that this consumer does NOT carry ⇒ no withholding claim either', () => {

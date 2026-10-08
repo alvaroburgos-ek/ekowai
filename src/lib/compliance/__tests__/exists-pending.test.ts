@@ -50,7 +50,7 @@ describe('A1 — IS NOT NULL on a never-entered symbol is pending, IS NULL on it
   });
 
   it('guard antecedent keeps the legacy semantics: IF x IS NOT NULL THEN … is vacuous when x is absent', () => {
-    expect(evaluateCondition('IF x IS NOT NULL THEN y > 1', lk({}))).toEqual({ kind: 'pass' });
+    expect(evaluateCondition('IF x IS NOT NULL THEN y > 1', lk({}))).toEqual({ kind: 'pass', guardSkipped: true });
     expect(evaluateCondition('IF x IS NOT NULL THEN y > 1', lk({ x: 'v', y: 0 }))).toEqual({ kind: 'fail' });
     // …but the BODY follows the new rule.
     expect(evaluateCondition('IF a == 1 THEN x IS NOT NULL', lk({ a: 1 }))).toEqual({ kind: 'pending', missingSymbols: ['x'] });

@@ -52,7 +52,7 @@ describe('Pile-7 coverage compliance bounds', () => {
     it('PASS — Bankett not triggered (guard false) ⇒ vacuously pass', () => {
       expect(
         evaluateCondition(COND, lookup({ bankett_versickerung_active: false, bankett_clearance_to_mhgw: 0.5 })),
-      ).toEqual({ kind: 'pass' });
+      ).toEqual({ kind: 'pass', guardSkipped: true });
     });
     it('FAIL — Bankett triggered AND clearance < 1 m', () => {
       expect(
@@ -75,7 +75,7 @@ describe('Pile-7 coverage compliance bounds', () => {
       expect(evaluateCondition(COND_BK2_20, lookup({ belastungskategorie: 'BK_II', bbz_thickness: 0.20, AC_AS_ratio: 35 }))).toEqual({ kind: 'fail' });
     });
     it('VACUOUS PASS — BK II + 30 cm BBZ (different rule applies, this row passes)', () => {
-      expect(evaluateCondition(COND_BK2_20, lookup({ belastungskategorie: 'BK_II', bbz_thickness: 0.30, AC_AS_ratio: 35 }))).toEqual({ kind: 'pass' });
+      expect(evaluateCondition(COND_BK2_20, lookup({ belastungskategorie: 'BK_II', bbz_thickness: 0.30, AC_AS_ratio: 35 }))).toEqual({ kind: 'pass', guardSkipped: true });
     });
 
     it('PASS — BK II + 30 cm BBZ + ratio ≤ 50', () => {
@@ -102,7 +102,7 @@ describe('Pile-7 coverage compliance bounds', () => {
     it('VACUOUS PASS — BK I (no Tab. 6 numeric limit)', () => {
       // All four conditions vacuously pass for BK_I because the guard is false.
       for (const COND of [COND_BK2_20, COND_BK2_30, COND_BK3_20, COND_BK3_30]) {
-        expect(evaluateCondition(COND, lookup({ belastungskategorie: 'BK_I', bbz_thickness: 0.20, AC_AS_ratio: 99 }))).toEqual({ kind: 'pass' });
+        expect(evaluateCondition(COND, lookup({ belastungskategorie: 'BK_I', bbz_thickness: 0.20, AC_AS_ratio: 99 }))).toEqual({ kind: 'pass', guardSkipped: true });
       }
     });
   });
@@ -181,7 +181,7 @@ describe('Pile-7 coverage compliance bounds', () => {
       expect(evaluateCondition(COND_SONDER, lookup({ q_S_AC: 4, f_Z: 1.1 }))).toEqual({ kind: 'fail' });
     });
     it('SONDERFALL VACUOUS PASS — q_S_AC = 10 (Sonderfall not triggered)', () => {
-      expect(evaluateCondition(COND_SONDER, lookup({ q_S_AC: 10, f_Z: 1.1 }))).toEqual({ kind: 'pass' });
+      expect(evaluateCondition(COND_SONDER, lookup({ q_S_AC: 10, f_Z: 1.1 }))).toEqual({ kind: 'pass', guardSkipped: true });
     });
   });
 
