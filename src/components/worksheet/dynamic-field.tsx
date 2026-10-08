@@ -146,7 +146,8 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   // render (the "adjust state on prop change" pattern), not in an effect.
   const [staleConfirmed, setStaleConfirmed] = useState(false);
   if (isDirty && isStale && !staleConfirmed) setStaleConfirmed(true);
-  const showStale = isStale && !isDirty && !staleConfirmed;
+  // L-8 (UX wave review): a locked sheet cannot confirm anything, so it shows no "bitte bestätigen" badge.
+  const showStale = isStale && !isDirty && !staleConfirmed && !readOnly;
   const [pickerOpen, setPickerOpen] = useState(false);
   // Draft text for the extensible-checklist "Eigener Eintrag…" input (OPTIONS
   // tranche 3). Hoisted to the component top level (hooks cannot live inside

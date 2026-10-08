@@ -90,9 +90,9 @@ describe('DynamicField — stale answer badge (U-1)', () => {
     expect(screen.queryByTestId('stale-answer-badge')).toBeNull();
   });
 
-  it('read-only (approved sheet): badge without the confirm button', () => {
+  it('read-only (approved sheet): no badge and no confirm button — a locked sheet cannot confirm (L-8)', () => {
     renderField({ isStale: true, readOnly: true });
-    expect(screen.getByTestId('stale-answer-badge')).toBeInTheDocument();
+    expect(screen.queryByTestId('stale-answer-badge')).toBeNull();
     expect(screen.queryByTestId('stale-answer-confirm')).toBeNull();
   });
 });
