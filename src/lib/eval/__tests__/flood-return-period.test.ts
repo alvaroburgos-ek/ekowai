@@ -61,13 +61,14 @@ const Q_S = 0.0015;
 const Q_Dr = 0;
 const V_VA = 70.00375052159998;
 const hand = (r: number, d: number) => ((r * (AcS + A_VA)) / 10000 - (Q_S + Q_Dr)) * d * 60 / 1000 - V_VA;
-const EXPECT_T100 = hand(3.2, 10080); // 55.3056…
-const EXPECT_T30 = hand(2.6, 10080);  // 31.6401…
+// Literal hand values (pinned, 1e-9): T 100 / T 30 @ D = 10080.
+const EXPECT_T100 = 55.3056807744;
+const EXPECT_T30 = 31.6400624064;
 
 describe('hand values (sanity)', () => {
-  it('T 100 @ D 10080 = 55.3057 m³, T 30 @ D 10080 = 31.6401 m³', () => {
-    expect(EXPECT_T100).toBeCloseTo(55.3057, 4);
-    expect(EXPECT_T30).toBeCloseTo(31.6401, 4);
+  it('T 100 @ D 10080 = 55.3056807744 m³, T 30 @ D 10080 = 31.6400624064 m³', () => {
+    expect(hand(3.2, 10080)).toBeCloseTo(EXPECT_T100, 9);
+    expect(hand(2.6, 10080)).toBeCloseTo(EXPECT_T30, 9);
   });
 });
 
@@ -112,7 +113,7 @@ describe('resolveFloodColumn — flood column = T_n_Ue', () => {
 });
 
 // ── Report / PDF / server-recompute evaluator ─────────────────────────────
-function reportFixture(grid: unknown, T_n_Ue: number | null) {
+function reportFixture(grid: unknown, T_n_Ue: number | null, legacy?: { r_D_30: number; D_min: number }) {
   const sym: Array<[string, string | null, string, number | null, unknown]> = [
     ['A_C_s_flood', 'm²', 'number', AcS, null],
     ['A_VA', 'm²', 'number', A_VA, null],
@@ -121,7 +122,8 @@ function reportFixture(grid: unknown, T_n_Ue: number | null) {
     ['V_VA', 'm³', 'number', V_VA, null],
     ['T_n_Ue', 'a', 'number', T_n_Ue, null],
     ['r_D_n_table', 'l/(s·ha)', 'json', null, grid],
-    ['r_D_30', 'l/(s·ha)', 'number', null, null],
+    ['r_D_30', 'l/(s·ha)', 'number', legacy?.r_D_30 ?? null, null],
+    ['D_min', 'min', 'number', legacy?.D_min ?? null, null],
     ['V_Rueck', 'm³', 'number', null, null],
   ];
   const fields: ReportField[] = sym.map(([s, unit, dataType]) => ({ id: `f-${s}`, symbol: s, unit, dataType }));
@@ -139,8 +141,8 @@ function reportFixture(grid: unknown, T_n_Ue: number | null) {
   return { fields, parameters, equations };
 }
 
-function reportGl10(grid: unknown, T_n_Ue: number | null) {
-  const { fields, parameters, equations } = reportFixture(grid, T_n_Ue);
+function reportGl10(grid: unknown, T_n_Ue: number | null, legacy?: { r_D_30: number; D_min: number }) {
+  const { fields, parameters, equations } = reportFixture(grid, T_n_Ue, legacy);
   const res = evaluateWorksheetEquations('A138-26', equations, fields, parameters);
   return res.find((r) => r.equationId === GL10_ID)!.state;
 }
@@ -176,8 +178,8 @@ type FieldRow = Parameters<typeof buildSnapshotPayload>[0]['fields'][number];
 type EquationRow = Parameters<typeof buildSnapshotPayload>[0]['equations'][number];
 type ParameterRow = Parameters<typeof buildSnapshotPayload>[0]['parameters'][number];
 
-function snapshotGl10(grid: unknown, T_n_Ue: number | null) {
-  const { fields, parameters } = reportFixture(grid, T_n_Ue);
+function snapshotGl10(grid: unknown, T_n_Ue: number | null, legacy?: { r_D_30: number; D_min: number }) {
+  const { fields, parameters } = reportFixture(grid, T_n_Ue, legacy);
   const fRows = fields.map((f) => ({
     id: f.id, worksheetTemplateId: 'tpl-a138-26', sectionId: null, labelDe: f.symbol, labelEn: null,
     unit: f.unit, isRequired: false, enumValues: null, validationRules: null, clauseReference: null,
@@ -222,4 +224,83 @@ describe('buildSnapshotPayload (save/snapshot path) — A138-26 Gl. 10 column', 
     const s = snapshotGl10(GRID_30_ONLY, 100);
     expect(s.kind).toBe('manual_required');
   });
+});
+
+// ── L-1 / L-2 (review round): T_n_Ue = 50 and legacy 1D tables ────────────
+// SYNTHETIC test column: the '50' column below reuses the KOSTRA T 100 values
+// purely as a probe (not a KOSTRA T 50 curve). Using it must give the T 100
+// hand value; reading the 30 column instead would give 31.64….
+const GRID_30_50 = {
+  tables: [{
+    id: 'k-synth-50',
+    name: 'synthetic grid (30 + probe 50)',
+    source: 'KOSTRA-DWD-2020',
+    columns: [30, 50],
+    rows: D.map((d, i) => ({ D_min: d, r: { '30': T30[i], '50': T100[i] } })),
+  }],
+};
+// Legacy 1D carrier (design column only) — pre-F-A7 behaviour must hold for
+// ANY T_n_Ue, including invalid values: the typed r_D_30 + D scalars decide.
+const GRID_LEGACY = { rows: D.map((d, i) => ({ D_min: d, r_D_n: T30[i] })) };
+const LEGACY_SCALARS = { r_D_30: 3.2, D_min: 10080 };
+
+describe('resolveFloodColumn — T_n_Ue = 50 and legacy tables', () => {
+  const t50 = resolveSelectedTable(normalizeRainfallCarrier(GRID_30_50), null)!;
+  const t30_100 = resolveSelectedTable(normalizeRainfallCarrier(GRID_30_100), null)!;
+  const legacy = resolveSelectedTable(normalizeRainfallCarrier(GRID_LEGACY), null)!;
+
+  it('T_n_Ue = 50, column present → that column', () => {
+    const r = resolveFloodColumn(t50, 50);
+    expect(r.status).toBe('ok');
+    if (r.status === 'ok') {
+      expect(r.T_n).toBe(50);
+      expect(r.carrier.rows.find((x) => x.D_min === 10080)?.r_D_n).toBe(3.2);
+    }
+  });
+  it('T_n_Ue = 50, column absent → missing naming T_n = 50 a', () => {
+    const r = resolveFloodColumn(t30_100, 50);
+    expect(r.status).toBe('missing');
+    if (r.status === 'missing') expect(r.reason).toMatch(/T_n = 50 a/);
+  });
+  it('legacy table → legacy for T_n_Ue 100, 30, empty and invalid (0, −5, NaN)', () => {
+    expect(legacy.legacyDesignColumn).toBe(true);
+    for (const t of [100, 30, null, 0, -5, Number.NaN]) {
+      expect(resolveFloodColumn(legacy, t).status).toBe('legacy');
+    }
+  });
+});
+
+describe('T_n_Ue = 50 on every server surface', () => {
+  it('report evaluator: column present → 55.3056807744 m³', () => {
+    const s = reportGl10(GRID_30_50, 50);
+    expect(s.kind).toBe('computed');
+    if (s.kind === 'computed') expect(s.value).toBeCloseTo(EXPECT_T100, 9);
+  });
+  it('report evaluator: column absent → manual_required naming T_n = 50 a', () => {
+    const s = reportGl10(GRID_30_100, 50);
+    expect(s.kind).toBe('manual_required');
+    if (s.kind === 'manual_required') expect(s.reason).toMatch(/T_n = 50 a/);
+  });
+  it('snapshot payload: column present → 55.3056807744 m³; absent → manual_required', () => {
+    const ok = snapshotGl10(GRID_30_50, 50);
+    expect(ok.kind).toBe('computed');
+    if (ok.kind === 'computed') expect(ok.value).toBeCloseTo(EXPECT_T100, 9);
+    expect(snapshotGl10(GRID_30_100, 50).kind).toBe('manual_required');
+  });
+});
+
+describe('legacy 1D table — unchanged typed-scalar path for any T_n_Ue', () => {
+  // Typed r_D_30 = 3.2 @ D_min = 10080 → single eval = 55.3056807744 m³, as before F-A7.
+  for (const t of [100, null, 0, Number.NaN]) {
+    it(`report evaluator, T_n_Ue = ${t} → typed scalar result 55.3056807744 m³`, () => {
+      const s = reportGl10(GRID_LEGACY, t, LEGACY_SCALARS);
+      expect(s.kind).toBe('computed');
+      if (s.kind === 'computed') expect(s.value).toBeCloseTo(EXPECT_T100, 9);
+    });
+    it(`snapshot payload, T_n_Ue = ${t} → typed scalar result 55.3056807744 m³`, () => {
+      const s = snapshotGl10(GRID_LEGACY, t, LEGACY_SCALARS);
+      expect(s.kind).toBe('computed');
+      if (s.kind === 'computed') expect(s.value).toBeCloseTo(EXPECT_T100, 9);
+    });
+  }
 });

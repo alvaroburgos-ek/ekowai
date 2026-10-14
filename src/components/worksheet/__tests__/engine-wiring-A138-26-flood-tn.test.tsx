@@ -31,18 +31,18 @@ const EQUATIONS = [{
 const D = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 360, 540, 720, 1080, 1440, 2880, 4320, 5760, 7200, 8640, 10080];
 const T100 = [630, 413.3, 317.8, 261.7, 198.9, 150.4, 123.1, 92.6, 75.6, 56.7, 46.3, 34.7, 26, 21.2, 15.8, 12.9, 7.9, 5.9, 4.8, 4.1, 3.6, 3.2];
 const T30 = [500, 328.3, 252.2, 208.3, 158.3, 119.6, 97.8, 73.7, 60.1, 45.1, 36.8, 27.5, 20.6, 16.8, 12.6, 10.3, 6.3, 4.7, 3.8, 3.3, 2.9, 2.6];
-const grid = (cols: Array<30 | 100>) => ({
+// 50 = SYNTHETIC probe column (reuses the T 100 values; not a KOSTRA T 50 curve).
+const grid = (cols: Array<30 | 50 | 100>) => ({
   tables: [{
     id: 'k151093', name: 'KOSTRA-DWD-2020 Zelle 151093', source: 'KOSTRA-DWD-2020', columns: cols,
     rows: D.map((d, i) => ({
       D_min: d,
-      r: Object.fromEntries(cols.map((c) => [String(c), c === 100 ? T100[i] : T30[i]])),
+      r: Object.fromEntries(cols.map((c) => [String(c), c === 30 ? T30[i] : T100[i]])),
     })),
   }],
 });
 
 const V_VA = 70.00375052159998;
-const hand = (r: number, d: number) => ((r * (602.161 + 50)) / 10000 - 0.0015) * d * 60 / 1000 - V_VA;
 
 let latest: EvalState | undefined;
 const capture = (s: EvalState | undefined) => { latest = s; };
@@ -60,7 +60,7 @@ function setNum(sym: string, value: number | null) {
 function setJson(sym: string, value: unknown) {
   act(() => { useWorksheetStore.getState().setField(id(sym), { type: 'json', value }); });
 }
-function load(T_n_Ue: number | null, cols: Array<30 | 100>) {
+function load(T_n_Ue: number | null, cols: Array<30 | 50 | 100> | 'legacy') {
   render(<Harness onState={capture} />);
   setNum('A_C_s_flood', 602.161);
   setNum('A_VA', 50);
@@ -68,7 +68,7 @@ function load(T_n_Ue: number | null, cols: Array<30 | 100>) {
   setNum('Q_Dr', 0);
   setNum('V_VA', V_VA);
   setNum('T_n_Ue', T_n_Ue);
-  setJson('r_D_n_table', grid(cols));
+  setJson('r_D_n_table', cols === 'legacy' ? { rows: D.map((d, i) => ({ D_min: d, r_D_n: T30[i] })) } : grid(cols));
 }
 const stored = (sym: string) => {
   const v = useWorksheetStore.getState().values[id(sym)];
@@ -85,23 +85,23 @@ describe('A138-26 Gl. 10 live form — flood column follows T_n_Ue', () => {
     load(100, [30, 100]);
     expect(latest?.kind).toBe('computed');
     if (latest?.kind === 'computed') {
-      expect(latest.value).toBeCloseTo(hand(3.2, 10080), 9);
+      expect(latest.value).toBeCloseTo(55.3056807744, 9);
       expect(latest.substituted?.['Maßgebende Dauerstufe D (min)']).toBe(10080);
       expect(latest.substituted?.['r_D(100) @ maßgebende Dauerstufe (l/(s·ha))']).toBe(3.2);
     }
-    expect(stored('V_Rueck')).toBeCloseTo(55.3057, 4);
+    expect(stored('V_Rueck')).toBeCloseTo(55.3056807744, 9);
   });
 
   it('T_n_Ue = 30 → 31.6401 m³ (unchanged)', () => {
     load(30, [30, 100]);
     expect(latest?.kind).toBe('computed');
-    if (latest?.kind === 'computed') expect(latest.value).toBeCloseTo(hand(2.6, 10080), 9);
+    if (latest?.kind === 'computed') expect(latest.value).toBeCloseTo(31.6400624064, 9);
   });
 
   it('T_n_Ue empty → default T 30 (31.6401 m³)', () => {
     load(null, [30, 100]);
     expect(latest?.kind).toBe('computed');
-    if (latest?.kind === 'computed') expect(latest.value).toBeCloseTo(31.6401, 4);
+    if (latest?.kind === 'computed') expect(latest.value).toBeCloseTo(31.6400624064, 9);
   });
 
   it('T_n_Ue = 100 with grid lacking the 100 column → manual_required naming T_n = 100 a', () => {
@@ -109,4 +109,31 @@ describe('A138-26 Gl. 10 live form — flood column follows T_n_Ue', () => {
     expect(latest?.kind).toBe('manual_required');
     if (latest?.kind === 'manual_required') expect(latest.reason).toMatch(/T_n = 100 a/);
   });
+});
+
+describe('A138-26 Gl. 10 live form — review round L-1 / L-2', () => {
+  beforeEach(() => {
+    latest = undefined;
+    act(() => { useWorksheetStore.getState().init('fx-a138-26-l', {}, {}, {}); });
+  });
+
+  it('T_n_Ue = 50, column present → 55.3056807744 m³ (probe column used)', () => {
+    load(50, [30, 50]);
+    expect(latest?.kind).toBe('computed');
+    if (latest?.kind === 'computed') expect(latest.value).toBeCloseTo(55.3056807744, 9);
+  });
+  it('T_n_Ue = 50, column absent → manual_required naming T_n = 50 a', () => {
+    load(50, [30, 100]);
+    expect(latest?.kind).toBe('manual_required');
+    if (latest?.kind === 'manual_required') expect(latest.reason).toMatch(/T_n = 50 a/);
+  });
+  for (const t of [100, 0]) {
+    it(`legacy 1D table, T_n_Ue = ${t} → unchanged typed-scalar result (r_D_30 3.2 @ D 10080)`, () => {
+      load(t, 'legacy');
+      setNum('r_D_30', 3.2);
+      setNum('D_min', 10080);
+      expect(latest?.kind).toBe('computed');
+      if (latest?.kind === 'computed') expect(latest.value).toBeCloseTo(55.3056807744, 9);
+    });
+  }
 });

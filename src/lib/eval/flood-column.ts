@@ -31,6 +31,9 @@ export function resolveFloodColumn(
   T_n_Ue: number | null | undefined,
 ): FloodColumnResolution {
   if (!selected) return { status: 'none' };
+  // Legacy 1D table: unchanged pre-F-A7 behaviour for ANY T_n_Ue (incl. an
+  // invalid one) — the aggregator keeps the typed-scalar path.
+  if (selected.legacyDesignColumn) return { status: 'legacy' };
 
   const T_n = T_n_Ue == null ? FLOOD_DEFAULT_T_N_UE : T_n_Ue;
   if (!Number.isFinite(T_n) || T_n <= 0) {
