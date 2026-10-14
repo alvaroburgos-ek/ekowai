@@ -5,7 +5,8 @@ import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
 import { gateHiddenSymbols } from '@/lib/projects/required-field-counts';
 import { deriveSignoffs, SELF_APPROVAL_NOTE_DE, type WorksheetSignoff } from '@/lib/approval/signoff';
-import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
+import { conditionSkippedBy, evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
+import { collectPhaseDeferrals, isPhaseDriver, type PhaseDeferral, type PhaseDriverInput, type PhaseGateInput } from '@/lib/compliance/phase-deferral';
 import { computeVisibility, hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
 import { explainCondition, type ExplainLeaf } from '@/lib/compliance/explain';
 import { blocksVerificationGate } from '@/lib/verification-status';
@@ -101,6 +102,8 @@ export type ReportCompliance = {
   result: ComplianceEval;
   /** Per-leaf explanation (actual · required · wouldPass) — present on fail. */
   explanation?: ExplainLeaf[];
+  /** C-9: on a guard-skipped pass, the symbols of the guard that made it vacuous (display only). */
+  skippedBy?: string[];
 };
 
 export type ReportWorksheet = {
@@ -206,6 +209,9 @@ export type StandardReportData = {
     note: string | null;
     documentTitle: string | null;
   }>;
+  /** C-9: phases answered „not reached" (phase drivers = false) and the gates their guards skipped — listed on the
+   * report, the Prüf-Memo, the conformity declaration and the checklist. Optional for fixtures; assembler always sets it. */
+  phaseDeferrals?: PhaseDeferral[];
 };
 
 // =============================================================================
@@ -285,6 +291,8 @@ export type AssemblerField = {
   sectionId: string | null;
   symbol: string;
   labelDe: string;
+  /** C-9: EN label for the phase listing (the loader's select() supplies it; optional for fixtures). */
+  labelEn?: string | null;
   unit: string | null;
   dataType: string;
   isRequired: boolean;
@@ -321,6 +329,8 @@ export type AssemblerCompliance = {
   worksheetTemplateId: string;
   code: string;
   titleDe: string;
+  /** C-9: EN title for the phase listing (optional for fixtures). */
+  titleEn?: string | null;
   condition: string;
   severity: string;
   clauseReference: string | null;
@@ -579,6 +589,9 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
   // ---------------------------------------------------------------------------
   // Build worksheet rows.
   // ---------------------------------------------------------------------------
+  // C-9: phase drivers and guard-skipped gates, collected while the sheets are evaluated (display only).
+  const phaseDrivers: PhaseDriverInput[] = [];
+  const phaseGates: PhaseGateInput[] = [];
   const worksheets: ReportWorksheet[] = [...templates]
     .sort((a, b) => a.orderIndex - b.orderIndex)
     .map((tpl) => {
@@ -776,6 +789,13 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           const ex = explainCondition(c.condition, gateLookup);
           if (ex.kind === 'explained' && ex.leaves.length > 0) explanation = ex.leaves;
         }
+        // C-9: which answer made a guard-skipped pass vacuous (same lookup + options as the verdict; read-only).
+        const skippedBy = result.kind === 'pass' && result.guardSkipped
+          ? conditionSkippedBy(c.condition, gateLookup, { hiddenSymbols, carrier: gateCarrier })
+          : [];
+        if (skippedBy.length > 0) {
+          phaseGates.push({ worksheetCode: tpl.code, code: c.code, titleDe: c.titleDe, titleEn: c.titleEn ?? null, severity: c.severity, skippedBy });
+        }
         return {
           id: c.id,
           code: c.code,
@@ -785,8 +805,21 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           clauseReference: c.clauseReference,
           result,
           ...(explanation ? { explanation } : {}),
+          ...(skippedBy.length > 0 ? { skippedBy } : {}),
         };
       });
+      for (const f of tplFields) {
+        if (!isPhaseDriver(f)) continue;
+        phaseDrivers.push({
+          worksheetCode: tpl.code,
+          symbol: f.symbol,
+          labelDe: f.labelDe,
+          labelEn: f.labelEn ?? null,
+          dataType: f.dataType,
+          value: resolvedBySymbol.get(f.symbol)?.value ?? null,
+          hidden: hiddenSymbols.has(f.symbol),
+        });
+      }
 
       // -----------------------------------------------------------------------
       // A138-12 manual A_S,m provenance line (Task 10).
@@ -974,6 +1007,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
       note: m.note,
       documentTitle: m.documentTitle,
     })),
+    phaseDeferrals: collectPhaseDeferrals(phaseDrivers, phaseGates),
   };
 }
 

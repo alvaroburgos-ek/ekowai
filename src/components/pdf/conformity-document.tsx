@@ -3,6 +3,7 @@ import { formatSignoffDe } from '@/lib/approval/signoff';
 import { styles } from './styles';
 import { LetterheadHeader } from './letterhead-header';
 import { ReportFooter } from './footer';
+import { PhaseDeferralsSection } from './phase-deferrals';
 import type { ConformityData } from '@/lib/pdf/load-conformity';
 
 /**
@@ -75,6 +76,9 @@ ${formatSignoffDe(w.signoff)}` : ''}
             </Text>
           </View>
         ) : null}
+
+        {/* C-9: phases answered „not reached" — the declaration covers only the phases marked reached. */}
+        <PhaseDeferralsSection deferrals={data.phaseDeferrals} marginTop={10} />
 
         {data.clientSuppliedFields.length > 0 ? (
           <View style={{ marginTop: 14 }}>

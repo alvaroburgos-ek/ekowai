@@ -2,6 +2,7 @@ import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { styles } from './styles';
 import { LetterheadHeader } from './letterhead-header';
 import { ReportFooter } from './footer';
+import { PhaseDeferralsSection } from './phase-deferrals';
 import type { StandardReportData } from '@/lib/pdf/load-standard-report';
 
 /**
@@ -108,6 +109,9 @@ export function PruefmemoDocument({ data }: { data: StandardReportData }) {
             ))
           )}
         </View>
+
+        {/* C-9: phases answered „not reached" and the duties not checked because of them. */}
+        <PhaseDeferralsSection deferrals={data.phaseDeferrals} marginTop={8} />
 
         <Text style={[styles.note, { marginTop: 10 }]}>
           Dieses Memo ist eine Plausibilitätsprüfung auf Basis der im Wizard

@@ -8,6 +8,7 @@ import { WorksheetSection } from './worksheet-section';
 import { CitationIndex } from './citation-index';
 import { AuditExcerpt } from './audit-excerpt';
 import { ReportFooter } from './footer';
+import { PhaseDeferralsSection } from './phase-deferrals';
 import type { StandardReportData } from '@/lib/pdf/load-standard-report';
 
 /**
@@ -52,6 +53,8 @@ export function StandardReportDocument({ data }: { data: StandardReportData }) {
             ))
           )}
         </View>
+        {/* C-9: phases answered „not reached" and the duties not checked because of them. */}
+        <PhaseDeferralsSection deferrals={data.phaseDeferrals} marginTop={12} />
         <ReportFooter
           projectCode={data.project.projectCode}
           standardCode={data.standard.code}

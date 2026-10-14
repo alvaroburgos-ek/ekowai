@@ -2,6 +2,7 @@ import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { styles } from './styles';
 import { LetterheadHeader } from './letterhead-header';
 import { ReportFooter } from './footer';
+import { PhaseDeferralsSection } from './phase-deferrals';
 import type { ConformityData } from '@/lib/pdf/load-conformity';
 
 /**
@@ -63,6 +64,9 @@ export function ChecklistDocument({ data }: { data: ConformityData }) {
             ))}
           </View>
         ) : null}
+
+        {/* C-9: phases answered „not reached" — their duties are still ahead and were not checked. */}
+        <PhaseDeferralsSection deferrals={data.phaseDeferrals} marginTop={12} />
 
         <Text style={[styles.note, { marginTop: 14 }]}>
           Diese Checkliste bildet den Live-Zustand im EKOWAI Wizard ab; beizufügende

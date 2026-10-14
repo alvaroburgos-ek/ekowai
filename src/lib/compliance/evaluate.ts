@@ -32,6 +32,7 @@ import {
   evaluateArithLenient,
   extractSymbols,
   parseCondition as parseExprCondition,
+  skippedGuardSymbols,
 } from '@/lib/expr';
 import type { ArithNode, Node } from '@/lib/expr';
 import type {
@@ -139,4 +140,17 @@ export function jsonConditionValue(json: unknown): string | null {
     return Object.keys(o).length > 0 ? 'present' : '';
   }
   return 'present'; // primitive non-null (unusual for a carrier) ⇒ present
+}
+
+/**
+ * C-9 (2026-10-14): the symbols of the definitely-false guard antecedent that made `condition` vacuous ([] = none). Same
+ * options as `evaluateCondition`; read-only — never part of a verdict.
+ */
+export function conditionSkippedBy(
+  condition: string,
+  valuesBySymbol: (sym: string) => Value | undefined,
+  opts?: ConditionOptions,
+): string[] {
+  if (!condition || !condition.trim()) return [];
+  return skippedGuardSymbols(condition, { symbol: valuesBySymbol }, opts);
 }

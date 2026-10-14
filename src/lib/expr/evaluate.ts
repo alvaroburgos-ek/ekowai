@@ -814,6 +814,35 @@ export function evalCondition(src: string, scope: Scope, opts?: ConditionOptions
  * marks the pass. A guard nested inside AND / OR / NOT does not — the other terms were still checked. Called only
  * after the condition evaluated to `'true'`, so it never changes a verdict.
  */
+/**
+ * C-9 (2026-10-14): the free symbols of the guard antecedent that made a condition vacuous — the first guard on the top
+ * guard chain whose antecedent is definitely `false` (the same walk and context as `guardSkippedOnPath`, hidden set and
+ * carrier honoured). [] when no guard on the chain is definitely false (or a guard before it is missing / n/a), and for
+ * an unparseable condition. Read-only: never consulted for a verdict; the documents use it to say WHICH answer left a
+ * duty unchecked (e.g. a phase driver answered „Nein").
+ */
+export function skippedGuardSymbols(src: string, scope: Scope, opts?: ConditionOptions): string[] {
+  const ast = parseCondition(src);
+  if (!ast) return [];
+  const hiddenSet = opts?.hiddenSymbols;
+  const hidden = hiddenSet && hiddenSet.size > 0 ? hiddenReferences(ast, hiddenSet) : [];
+  const withCarrier: Scope = scope.carrier === undefined && opts?.carrier !== undefined
+    ? { ...scope, carrier: opts.carrier }
+    : scope;
+  const base: Ctx = {
+    scope: withCarrier, strict: false, missing: new Set(), existsPending: opts?.existsOnAbsent !== 'definite',
+    hidden: hidden.length > 0 ? hiddenSet : undefined,
+  };
+  let n: Node = ast;
+  while (n.kind === 'guard') {
+    const g = evalNodeCore(n.guard, { ...base, missing: new Set(), existsPending: false });
+    if (g === 'false') return [...extractSymbols(n.guard)];
+    if (g !== 'true') return [];
+    n = n.body;
+  }
+  return [];
+}
+
 function guardSkippedOnPath(ast: Node, base: Ctx): boolean {
   let n: Node = ast;
   while (n.kind === 'guard') {

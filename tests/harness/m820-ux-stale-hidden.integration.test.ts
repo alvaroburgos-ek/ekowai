@@ -522,4 +522,35 @@ describe('DWA-M 820 UX — stale flags + hidden-at-source through the REAL save 
     const r = await row(P, code, symbol);
     expect(r?.value_boolean, `value written ${J(r)}`).toBe(false);
   }, 300_000);
+
+  // ── 6 · C-9 phase deferrals (2026-10-14) ─────────────────────────────────────────────────────────────────────
+  it('probe 6 · C-9: phase driver Nein ⇒ report + declaration list the phase and the gates its guard skipped; Ja ⇒ nothing', async () => {
+    const { loadStandardReportData } = await import('@/lib/pdf/load-standard-report');
+    const { loadConformityData } = await import('@/lib/pdf/load-conformity');
+    const P = await makeProject('probe 6 · C-9 phase deferrals');
+
+    await save(P, '820-2-22', { phase_inbetriebnahme_erreicht: b(false) });
+    const rep = await loadStandardReportData(P.id, 'DWA-M-820-2');
+    const listed = (rep.phaseDeferrals ?? []).map((d) => ({ ws: d.worksheetCode, symbol: d.symbol, gates: d.gates.map((g) => `${g.worksheetCode} ${g.code}`) }));
+    log('P6 step a (phase_inbetriebnahme_erreicht = false) phaseDeferrals', listed);
+    const inb = listed.find((d) => d.symbol === 'phase_inbetriebnahme_erreicht');
+    expect(inb, `listed ${J(listed)}`).toBeDefined();
+    expect(inb!.gates, `gates ${J(inb)}`).toContain('820-2-22 REQ-47');
+    // Verdict unchanged: REQ-47 is the same guard-skipped pass the evaluator gives without C-9.
+    const req47 = rep.worksheets.find((w) => w.code === '820-2-22')!.compliance.find((c) => c.code === 'REQ-47')!;
+    log('P6 REQ-47 verdict', { result: req47.result, skippedBy: req47.skippedBy });
+    expect(req47.result).toEqual({ kind: 'pass', guardSkipped: true });
+    // Unanswered drivers are not listed.
+    expect(listed.map((d) => d.symbol), `only answered drivers ${J(listed)}`).toEqual(['phase_inbetriebnahme_erreicht']);
+    const conf = await loadConformityData(P.id, 'DWA-M-820-2');
+    expect(conf.phaseDeferrals, 'declaration == report').toEqual(rep.phaseDeferrals);
+
+    await save(P, '820-2-22', { phase_inbetriebnahme_erreicht: b(true) });
+    const rep2 = await loadStandardReportData(P.id, 'DWA-M-820-2');
+    log('P6 step b (phase = true) phaseDeferrals', rep2.phaseDeferrals);
+    expect(rep2.phaseDeferrals).toEqual([]);
+    const req47b = rep2.worksheets.find((w) => w.code === '820-2-22')!.compliance.find((c) => c.code === 'REQ-47')!;
+    log('P6 REQ-47 verdict after Ja', req47b.result);
+    expect(req47b.skippedBy).toBeUndefined();
+  }, 300_000);
 });

@@ -16,6 +16,8 @@ import { and, desc, eq, inArray } from 'drizzle-orm';
 import { checkApprovalGate } from '@/lib/actions/approval-gate';
 import type { ReportLetterhead } from './assemble-standard-report';
 import { deriveSignoffs, type WorksheetSignoff } from '@/lib/approval/signoff';
+import type { PhaseDeferral } from '@/lib/compliance/phase-deferral';
+import { loadStandardReportData } from './load-standard-report';
 
 /**
  * Konformitätserklärung data (Stage 4 — deliverable emission).
@@ -96,6 +98,10 @@ export type ConformityData = ConformityDecision & {
   clientSuppliedFields: Array<{ worksheetCode: string; symbol: string; labelDe: string }>;
   letterhead: ReportLetterhead | null;
   generatedAt: string;
+  /** C-9: phases answered „not reached" and the duties not checked because of them — taken from the standard report's
+   * evaluation (same lookup, hidden set and gates), so declaration, checklist and report can never disagree.
+   * Display only: `konform` / `blocking` are decided above without it. Optional for fixtures. */
+  phaseDeferrals?: PhaseDeferral[];
 };
 
 export async function loadConformityData(
@@ -250,6 +256,7 @@ export async function loadConformityData(
       .orderBy(worksheetTemplates.orderIndex, fields.orderIndex);
 
   const decision = decideConformity(rows);
+  const { phaseDeferrals } = await loadStandardReportData(projectId, standardCode);
   return {
     ...decision,
     project: {
@@ -282,5 +289,6 @@ export async function loadConformityData(
       }
       : null,
     generatedAt: new Date().toISOString(),
+    phaseDeferrals: phaseDeferrals ?? [],
   };
 }
