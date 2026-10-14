@@ -22,11 +22,19 @@ import { iterateGoverningDuration } from './governing-duration';
 export function computeMuldeGeometrySweep(
   rows: ReadonlyArray<{ D_min: number | null; r_D_n: number | null }>,
   scalars: { A_C: number; h_M: number; f_Z: number; k_i: number },
-): { A_S_m: number | null; governingD: number | null; boundaryLimited: boolean } {
+): {
+  A_S_m: number | null; governingD: number | null; boundaryLimited: boolean;
+  /** What-if cases (2026-10-14): the per-duration rows of the same sweep, for the iteration chart. */
+  perDuration: Array<{ D: number; r_D: number; value: number }>;
+  r_D_at_governing: number | null;
+} {
   const gov = iterateGoverningDuration(rows, (D, r_D) =>
     (scalars.A_C * 1e-7 * r_D) / (scalars.h_M / (D * 60 * scalars.f_Z) + scalars.k_i),
   );
-  return { A_S_m: gov.governingValue, governingD: gov.governingD, boundaryLimited: gov.boundaryLimited };
+  return {
+    A_S_m: gov.governingValue, governingD: gov.governingD, boundaryLimited: gov.boundaryLimited,
+    perDuration: gov.perDuration, r_D_at_governing: gov.r_D_at_governing,
+  };
 }
 
 /**
