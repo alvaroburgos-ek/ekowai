@@ -81,6 +81,25 @@ describe('Real = record (spec §6)', () => {
     const real = runScenarioChain(b!, [], { caseId: 'real', approvalWithholding: 'bypass' });
     expect(real.mismatches, JSON.stringify(real.mismatches)).toEqual([]);
     expect(real.converged).toBe(true);
+    // The check above is only as strong as the set it covers: pin that set. Every derived row the real save path
+    // stored is recomputed (none carried) and — independently of the runner's own comparison — equals the record.
+    const derivedRows = await sql<{ field_id: string }[]>`
+      SELECT field_id FROM project_parameters WHERE project_id = ${fixture.projectId} AND source_type IN ('derived', 'computed')`;
+    const keyOf = (id: string) => Object.entries(fixture.fieldIds).find(([, v]) => v === id)?.[0] ?? id;
+    const DERIVED = [
+      'A138-11:f_K', 'A138-11:k_i', 'A138-12:A_S_m', 'A138-12:Q_S', 'A138-13:D_min', 'A138-13:V_VA', 'A138-13:q_S_AC',
+      'A138-13:r_D_n', 'A138-17:D_used_M', 'A138-17:V_M', 'A138-17:V_M_erf', 'A138-17:k_i_Mulde', 'A138-17:r_D_n_used_M',
+      'A138-26:V_Rueck',
+    ];
+    expect(derivedRows.map((r) => keyOf(r.field_id)).sort()).toEqual([...DERIVED].sort());
+    expect(Object.values(b!.stored).filter((p) => p.sourceType === 'derived' || p.sourceType === 'computed')).toHaveLength(DERIVED.length);
+    expect(real.notRecomputed).toEqual([]);
+    for (const k of DERIVED) {
+      const s = await stored(k);
+      expect(s, `stored ${k}`).not.toBeNull();
+      expect(real.values[F(k)], `Real run has no value for ${k}`).toBeDefined();
+      close(real.values[F(k)].value, s!);
+    }
     // G-4: V_Rueck follows the aggregator's flood column (T 30 a today; T 100 a once fix/flood-check-t100 lands).
     expect([31.640062406400006, 55.30568077439999].some((x) => Math.abs((Number(real.values[F('A138-26:V_Rueck')]?.value)) - x) < 1e-6)).toBe(true);
     // … and whichever column it is, the Real run equals what the save path stored (never a hard-coded column).
