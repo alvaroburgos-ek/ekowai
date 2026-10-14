@@ -121,3 +121,10 @@ export type ScenarioResultsPayload = {
   cases: Array<{ scenario: ScenarioSummary; run: ScenarioRun }>;
   ignoredScenarioIds: string[];
 };
+
+/** A field a case may override (search hit for the case panel / MCP). */
+export type OverridableFieldHit = {
+  fieldId: string; symbol: string; labelDe: string; labelEn: string | null; unit: string | null; dataType: string;
+  enumValues: Array<{ value: string; label_de: string | null; label_en: string | null }> | null;
+  worksheetCode: string; standardCode: string; realValue: ScenarioValue | null;
+};
