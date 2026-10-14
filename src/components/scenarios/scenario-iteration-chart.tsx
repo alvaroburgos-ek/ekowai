@@ -2,12 +2,14 @@
 /**
  * Iteration chart (spec §4.3): every shown case over the rain duration D (log x 5 min … 7 d), one y-axis, peak marked,
  * „kein eindeutiges Maximum" when the governing D is the last tabulated one, crosshair tooltip with every visible case,
- * legend (also the filter), direct labels at the peaks (≤ 4 series), T = 100 a dashed.
+ * legend (also the filter), a direct label at every visible series' peak (collision-nudged, contrast WARN mitigation
+ * for slots 3-5), T = 100 a dashed.
  */
 import { useMemo, useState } from 'react';
 import { fmtNum } from '@/lib/scenarios/format';
 import {
-  CHART, X_TICKS, xScale, yDomain, yScale, yTicks, labelDuration, nearestIndex, seriesColor, type ChartSeries,
+  CHART, X_TICKS, xScale, yDomain, yScale, yTicks, labelDuration, nearestIndex, seriesColor,
+  estimateLabelWidth, layoutPeakLabels, type ChartSeries, type PeakLabelBox,
 } from './chart-geometry';
 
 const T = {
@@ -26,7 +28,14 @@ export function ScenarioIterationChart({ locale, title, unit, series }: { locale
   const domain = yDomain(visible.flatMap((s) => s.points.map((p) => p.value)));
   const sy = yScale(domain);
   const { W, H, M } = CHART;
-  const direct = visible.length <= 4;
+  const peakBoxes: PeakLabelBox[] = [];
+  visible.forEach((s) => {
+    if (s.governingIndex == null || !s.points[s.governingIndex]) return;
+    const p = s.points[s.governingIndex];
+    const text = `${s.label}: ${fmtNum(p.value, locale)}`;
+    peakBoxes.push({ id: s.id, x: Math.min(sx(p.D) + 8, W - 140), y: sy(p.value) - 8, width: estimateLabelWidth(text) });
+  });
+  const peakLabelY = new Map(layoutPeakLabels(peakBoxes).map((b) => [b.id, b.y]));
 
   const move = (clientX: number, el: Element) => {
     const svg = (el as SVGGraphicsElement).ownerSVGElement ?? el;
@@ -76,12 +85,14 @@ export function ScenarioIterationChart({ locale, title, unit, series }: { locale
             if (s.governingIndex == null || !s.points[s.governingIndex]) return null;
             const p = s.points[s.governingIndex];
             const cx = sx(p.D); const cy = sy(p.value);
+            const labelX = Math.min(cx + 8, W - 140);
+            const labelY = peakLabelY.get(s.id) ?? cy - 8;
             return (
               <g key={`pk-${s.id}`}>
                 <circle data-testid={`peak-${s.id}`} cx={cx} cy={cy} r={5}
                   fill={s.boundaryLimited ? 'var(--paper, #fff)' : seriesColor(s.slot)} stroke={s.boundaryLimited ? seriesColor(s.slot) : 'var(--paper, #fff)'} strokeWidth={2} />
-                {direct && <text x={Math.min(cx + 8, W - 140)} y={cy - 8} fontSize="11" fill="var(--ink)">{`${s.label}: ${fmtNum(p.value, locale)}`}</text>}
-                {s.boundaryLimited && <text data-testid={`boundary-${s.id}`} x={Math.min(cx + 8, W - 140)} y={cy + 14} fontSize="10" fill="var(--subtext, #666)">{t.boundary}</text>}
+                <text data-testid={`peak-label-${s.id}`} x={labelX} y={labelY} fontSize="11" fill="var(--ink)">{`${s.label}: ${fmtNum(p.value, locale)}`}</text>
+                {s.boundaryLimited && <text data-testid={`boundary-${s.id}`} x={labelX} y={cy + 14} fontSize="10" fill="var(--subtext, #666)">{t.boundary}</text>}
               </g>
             );
           })}

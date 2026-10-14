@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ScenarioIterationChart } from '../scenario-iteration-chart';
 import type { ChartSeries } from '../chart-geometry';
-import { xScale } from '../chart-geometry';
+import { xScale, estimateLabelWidth } from '../chart-geometry';
 
 const pts = (vals: number[]) => [5, 180, 10080].map((D, i) => ({ D, r_D: 10, value: vals[i] }));
 const S: ChartSeries[] = [
@@ -41,5 +41,26 @@ describe('ScenarioIterationChart', () => {
     expect(tip.textContent).toContain('K5 · T = 100 a: 8 m³');
     fireEvent.keyDown(screen.getByTestId('chart-hit'), { key: 'ArrowRight' });
     expect(screen.getByTestId('chart-tooltip').textContent).toContain('D = 10080 min');
+  });
+  it('labels every visible peak and nudges overlapping labels apart (7 visible series, contrast WARN mitigation)', () => {
+    // All seven peaks land on the same point — the worst case for collisions, and exactly the
+    // slot-3-5 contrast mitigation this covers (Real + 6 active cases, the maximum visible).
+    const seven: ChartSeries[] = ['real:T30', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6'].map((id, i) => ({
+      id, label: `Case ${i}`, slot: i, dashed: false, points: pts([1, 5, 9]), governingIndex: 1, boundaryLimited: false,
+    }));
+    const { container } = render(<ScenarioIterationChart locale="de" title="Gl. 10" unit="m³" series={seven} />);
+    const labels = Array.from(container.querySelectorAll('[data-testid^="peak-label-"]'));
+    expect(labels).toHaveLength(7);
+    const boxes = labels.map((el) => ({
+      x: Number(el.getAttribute('x')),
+      y: Number(el.getAttribute('y')),
+      width: estimateLabelWidth(el.textContent ?? ''),
+    }));
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const xOverlap = boxes[i].x < boxes[j].x + boxes[j].width && boxes[j].x < boxes[i].x + boxes[i].width;
+        if (xOverlap) expect(Math.abs(boxes[i].y - boxes[j].y)).toBeGreaterThanOrEqual(14);
+      }
+    }
   });
 });

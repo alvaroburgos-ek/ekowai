@@ -237,16 +237,14 @@
   }
 }
 
-/* What-if case series (fixed categorical order; colour follows the case slot, never its rank). */
+/*
+ * What-if case series (fixed categorical order; colour follows the case slot, never its rank).
+ * Light tokens only — the app has no dark-mode mechanism anywhere else (no `data-theme` toggle,
+ * no `--ink`/`--paper`/`--hairline`/`--subtext` dark variant), so a `prefers-color-scheme: dark`
+ * override here would repaint only the chart lines while the rest of the surface stays light.
+ * Re-add dark values once a real dark-mode mechanism exists for the whole app (task-13-review.md I-1).
+ */
 :root {
   --scn-real: var(--ink);
   --scn-1: #2a78d6; --scn-2: #eb6834; --scn-3: #1baf7a; --scn-4: #eda100; --scn-5: #e87ba4; --scn-6: #008300;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --scn-1: #3987e5; --scn-2: #d95926; --scn-3: #199e70; --scn-4: #c98500; --scn-5: #d55181; --scn-6: #008300;
-  }
-}
-:root[data-theme="dark"] {
-  --scn-1: #3987e5; --scn-2: #d95926; --scn-3: #199e70; --scn-4: #c98500; --scn-5: #d55181; --scn-6: #008300;
 }

@@ -53,3 +53,40 @@ export function nearestIndex(ds: readonly number[], x: number, sx: (d: number) =
 export function seriesColor(slot: number): string {
   return slot === 0 ? 'var(--scn-real)' : `var(--scn-${slot})`;
 }
+
+/** Rough glyph-width estimate for a single-line SVG label at the chart's 11 px label font. */
+export function estimateLabelWidth(text: string): number {
+  return text.length * 6;
+}
+
+export type PeakLabelBox = { id: string; x: number; y: number; width: number };
+
+/**
+ * Deterministic peak-label collision avoidance (contrast WARN mitigation, slots 3-5): every
+ * visible series' peak gets a direct label, so with up to 7 visible series (Real + 6 cases)
+ * labels can collide. Processed in input order; a label that would sit within `MIN_GAP` px
+ * vertically of an already-placed label it overlaps in x is nudged straight down by `MIN_GAP`
+ * (repeated until clear of every earlier label) — a simple, reproducible offset, not a layout solver.
+ */
+const MIN_GAP = 14;
+export function layoutPeakLabels(boxes: readonly PeakLabelBox[]): Array<{ id: string; x: number; y: number }> {
+  const placed: Array<{ x: number; y: number; width: number }> = [];
+  const out: Array<{ id: string; x: number; y: number }> = [];
+  for (const b of boxes) {
+    let y = b.y;
+    let moved = true;
+    while (moved) {
+      moved = false;
+      for (const p of placed) {
+        const xOverlap = b.x < p.x + p.width && p.x < b.x + b.width;
+        if (xOverlap && Math.abs(y - p.y) < MIN_GAP) {
+          y = p.y + MIN_GAP;
+          moved = true;
+        }
+      }
+    }
+    placed.push({ x: b.x, y, width: b.width });
+    out.push({ id: b.id, x: b.x, y });
+  }
+  return out;
+}
