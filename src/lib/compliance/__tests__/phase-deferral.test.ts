@@ -16,7 +16,8 @@ const D = (symbol: string, value: unknown, extra: Partial<{ hidden: boolean; dat
   value,
   hidden: extra.hidden ?? false,
 });
-const G = (code: string, skippedBy: string[], worksheetCode = '820-2-20') => ({ worksheetCode, code, titleDe: `Titel ${code}`, severity: 'block', skippedBy });
+const G = (code: string, skippedBy: string[], worksheetCode = '820-2-20', readsSymbols: string[] = skippedBy, severity = 'block') =>
+  ({ worksheetCode, code, titleDe: `Titel ${code}`, severity, skippedBy, readsSymbols });
 
 describe('isPhaseDriver', () => {
   it('boolean + phase_<name>_erreicht only', () => {
@@ -68,8 +69,32 @@ describe('phaseDeferralLines (DE / EN document text)', () => {
     const t = phaseDeferralLines(collectPhaseDeferrals([D('phase_ausfuehrung_erreicht', false)], [G('REQ-43', ['phase_ausfuehrung_erreicht'])]));
     expect(t.headingDe).toBe('Noch nicht erreichte Phasen — nicht geprüft');
     expect(t.headingEn).toBe('Phases not reached yet — not checked');
-    expect(t.items[0].de).toBe('820-2-20 · Phase phase_ausfuehrung_erreicht = Nein — nicht geprüft: 820-2-20 REQ-43 (block) Titel REQ-43');
-    expect(t.items[0].en).toBe('820-2-20 · Phase phase_ausfuehrung_erreicht (EN) = No — not checked: 820-2-20 REQ-43 (block) Titel REQ-43');
+    expect(t.items[0].de).toBe('820-2-20 · Phase phase_ausfuehrung_erreicht = Nein — nicht geprüft: 820-2-20 REQ-43 (blockierend) Titel REQ-43');
+    expect(t.items[0].en).toBe('820-2-20 · Phase phase_ausfuehrung_erreicht (EN) = No — not checked: 820-2-20 REQ-43 (blocking) Titel REQ-43');
+  });
+
+  it('severity labels: warn → Warnung / warning; no raw token in the sentence', () => {
+    const t = phaseDeferralLines(collectPhaseDeferrals([D('phase_ausfuehrung_erreicht', false)], [G('REQ-47', ['phase_ausfuehrung_erreicht'], '820-2-22', undefined, 'warn')]));
+    expect(t.items[0].de).toContain('REQ-47 (Warnung)');
+    expect(t.items[0].en).toContain('REQ-47 (warning)');
+    expect(t.items[0].de).not.toMatch(/((warn|block))/);
+  });
+
+  it('tied gates skipped by an OUTER guard: named with the outer condition, never „keine daran gebundene Prüfung“', () => {
+    const labels = new Map([['bauleistungen_vergeben', { labelDe: 'Bauleistungen vergeben', labelEn: 'Construction works awarded' }]]);
+    const out = collectPhaseDeferrals(
+      [D('phase_gewaehrleistung_erreicht', false, { worksheetCode: '820-2-24' })],
+      [G('REQ-52', ['bauleistungen_vergeben'], '820-2-24', ['verantwortung_lph9', 'bauleistungen_vergeben', 'phase_gewaehrleistung_erreicht', 'defect_tracking_active'])],
+      labels,
+    );
+    expect(out[0].gates).toEqual([]);
+    expect(out[0].skippedElsewhere).toEqual([
+      { worksheetCode: '820-2-24', code: 'REQ-52', titleDe: 'Titel REQ-52', titleEn: null, severity: 'block', by: [{ symbol: 'bauleistungen_vergeben', labelDe: 'Bauleistungen vergeben', labelEn: 'Construction works awarded' }] },
+    ]);
+    const t = phaseDeferralLines(out);
+    expect(t.items[0].de).not.toContain('keine daran gebundene Prüfung');
+    expect(t.items[0].de).toBe('820-2-24 · Phase phase_gewaehrleistung_erreicht = Nein — keine Prüfung durch diese Phase ausgesetzt; 820-2-24 REQ-52 (blockierend) Titel REQ-52 entfällt bereits wegen „Bauleistungen vergeben“ (bauleistungen_vergeben)');
+    expect(t.items[0].en).toBe('820-2-24 · Phase phase_gewaehrleistung_erreicht (EN) = No — no check deferred by this phase; 820-2-24 REQ-52 (blocking) Titel REQ-52 is already skipped because of “Construction works awarded” (bauleistungen_vergeben)');
   });
 
   it('a driver without a tied gate says so', () => {

@@ -175,3 +175,42 @@ describe('mapped twin hint (C-2, ruling R-17) — DWA-M 820-3 PZ 6.2-1 ← DWA-M
     expect(useWorksheetStore.getState().pendingFieldIds.has('fld-pz621')).toBe(false);
   });
 });
+
+describe('C-2 fix round (review L-3, L-5c)', () => {
+  const PZ = {
+    ...FIELD,
+    id: 'fld-pz621b',
+    symbol: 'pz_62_1_status',
+    labelDe: 'PZ 6.2-1',
+    unit: null,
+    dataType: 'enum' as const,
+    enumValues: [
+      { value: 'erreicht', label_de: 'Erreicht', label_en: 'Met' },
+      { value: 'teilweise_erreicht', label_de: 'Teilweise erreicht', label_en: 'Partially met' },
+    ],
+  };
+  const HINT = [{ worksheetCode: 'M820-05', value: 'erreicht', viaSymbol: 'bedarfsplanung_projekt_complete' }];
+
+  it('L-5c: the mapped hint shows the option label „Erreicht“ (EN „Met“), not the token', () => {
+    initStore({ 'fld-pz621b': { type: 'enum', value: 'teilweise_erreicht' } });
+    const { unmount } = render(<DynamicField field={PZ as never} locale="de" projectId="p1" standardCode="DWA-M-820-3" docs={[]} sameSymbolHints={HINT} />);
+    expect(screen.getByTestId('same-symbol-hint')).toHaveTextContent('Bereits in M820-05 (als bedarfsplanung_projekt_complete): Erreicht');
+    unmount();
+    render(<DynamicField field={PZ as never} locale="en" projectId="p1" standardCode="DWA-M-820-3" docs={[]} sameSymbolHints={HINT} />);
+    expect(screen.getByTestId('same-symbol-hint')).toHaveTextContent('(as bedarfsplanung_projekt_complete): Met');
+  });
+
+  it('L-3: a read-only (locked) sheet shows the hint but no Übernehmen', () => {
+    initStore({ 'fld-pz621b': { type: 'enum', value: 'teilweise_erreicht' } });
+    render(<DynamicField field={PZ as never} locale="de" projectId="p1" standardCode="DWA-M-820-3" docs={[]} sameSymbolHints={HINT} readOnly />);
+    expect(screen.getByTestId('same-symbol-hint')).toBeInTheDocument();
+    expect(screen.queryByText('Übernehmen')).not.toBeInTheDocument();
+  });
+
+  it('L-3: „Alle Vorbefüllungen übernehmen“ is offered only on an editable sheet with prefills', async () => {
+    const { offerAcceptAllPrefills } = await import('../same-symbol-hint');
+    expect(offerAcceptAllPrefills(2, false)).toBe(true);
+    expect(offerAcceptAllPrefills(2, true)).toBe(false);
+    expect(offerAcceptAllPrefills(0, false)).toBe(false);
+  });
+});

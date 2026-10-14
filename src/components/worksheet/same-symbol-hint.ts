@@ -28,3 +28,8 @@ export function groupSameSymbolHints(
   }
   return groups;
 }
+
+/** C-2 fix L-3: the „Alle Vorbefüllungen übernehmen" bar is offered only when prefills exist AND the sheet is editable. */
+export function offerAcceptAllPrefills(prefillCount: number, locked: boolean): boolean {
+  return prefillCount > 0 && !locked;
+}

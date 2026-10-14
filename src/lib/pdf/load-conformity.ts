@@ -104,9 +104,18 @@ export type ConformityData = ConformityDecision & {
   phaseDeferrals?: PhaseDeferral[];
 };
 
+/**
+ * C-9 fix L-4: the phase listing needs the full standard-report evaluation. The declaration only renders when eligible
+ * (the route returns 409 otherwise), so by default the report is built only then. The Einreichungs-Checkliste renders in
+ * every state and passes `phaseDeferrals: 'always'`. No catch-to-empty: a failing evaluation fails the document rather
+ * than silently dropping the list (a declaration without it would overstate its coverage).
+ */
+export type LoadConformityOptions = { phaseDeferrals?: 'if-eligible' | 'always' };
+
 export async function loadConformityData(
   projectId: string,
   standardCode: string,
+  opts: LoadConformityOptions = {},
 ): Promise<ConformityData> {
   const [proj] = await db
     .select({
@@ -256,7 +265,8 @@ export async function loadConformityData(
       .orderBy(worksheetTemplates.orderIndex, fields.orderIndex);
 
   const decision = decideConformity(rows);
-  const { phaseDeferrals } = await loadStandardReportData(projectId, standardCode);
+  const wantDeferrals = decision.eligible || opts.phaseDeferrals === 'always';
+  const phaseDeferrals = wantDeferrals ? (await loadStandardReportData(projectId, standardCode)).phaseDeferrals ?? [] : undefined;
   return {
     ...decision,
     project: {
@@ -289,6 +299,7 @@ export async function loadConformityData(
       }
       : null,
     generatedAt: new Date().toISOString(),
-    phaseDeferrals: phaseDeferrals ?? [],
+    // undefined = not evaluated (not eligible, declaration path) — the declaration is not rendered then.
+    ...(phaseDeferrals ? { phaseDeferrals } : {}),
   };
 }

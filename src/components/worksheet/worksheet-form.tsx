@@ -40,7 +40,7 @@ import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
 import { computeComputedSymbols } from '@/lib/eval/computed-symbols';
 import { formatNumberDe } from '@/lib/format-number-de';
-import type { SameSymbolHint } from './same-symbol-hint';
+import { offerAcceptAllPrefills, type SameSymbolHint } from './same-symbol-hint';
 
 // Derived symbols that the materialize pipeline writes on every A138-13 save.
 // They are NOT live formula-engine outputs, but share the same single-source
@@ -1195,7 +1195,7 @@ export function WorksheetForm({
 
       <MemoSourceFormReferencePanel standardCode={standardCode} locale={locale} />
 
-      {twinPrefillIds.length > 0 && !locked && (
+      {offerAcceptAllPrefills(twinPrefillIds.length, locked) && (
         <div
           className="flex flex-wrap items-center justify-between gap-2 rounded border border-accent/40 bg-accent/5 px-3 py-2 text-sm"
           data-testid="twin-prefill-bar"

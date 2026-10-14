@@ -55,3 +55,24 @@ export function resolveTwinPrefill(
   }
   return { prefill: null, hints };
 }
+
+/**
+ * C-2 fix L-1 (review c2-c9): the twin-source occurrences a twin may prefill from. A master answer HIDDEN on its source
+ * sheet (`visible_when`, R-14 — `hiddenFieldIds` covers this standard AND the foreign source standards) or STALE there
+ * (saved while hidden, U-1 / R-12) is no answer, so it neither prefills nor appears in the hint. Only the twin SOURCE
+ * symbols are filtered; every other same-symbol bucket is returned unchanged.
+ */
+export function usableTwinSources<T extends { fieldId?: string; isStale?: boolean }>(
+  sameSymbol: ReadonlyMap<string, ReadonlyArray<T>>,
+  twinSources: readonly string[],
+  hiddenFieldIds: ReadonlySet<string>,
+): Map<string, ReadonlyArray<T>> {
+  const twin = new Set(twinSources);
+  const out = new Map<string, ReadonlyArray<T>>();
+  for (const [symbol, arr] of sameSymbol) {
+    if (!twin.has(symbol)) { out.set(symbol, arr); continue; }
+    const kept = arr.filter((u) => !u.isStale && !(u.fieldId && hiddenFieldIds.has(u.fieldId)));
+    if (kept.length > 0) out.set(symbol, kept);
+  }
+  return out;
+}

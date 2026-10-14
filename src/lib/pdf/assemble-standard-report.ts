@@ -5,7 +5,7 @@ import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
 import { gateHiddenSymbols } from '@/lib/projects/required-field-counts';
 import { deriveSignoffs, SELF_APPROVAL_NOTE_DE, type WorksheetSignoff } from '@/lib/approval/signoff';
-import { conditionSkippedBy, evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
+import { conditionSkippedBy, evaluateCondition, extractConditionSymbols, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
 import { collectPhaseDeferrals, isPhaseDriver, type PhaseDeferral, type PhaseDriverInput, type PhaseGateInput } from '@/lib/compliance/phase-deferral';
 import { computeVisibility, hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
 import { explainCondition, type ExplainLeaf } from '@/lib/compliance/explain';
@@ -794,7 +794,8 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           ? conditionSkippedBy(c.condition, gateLookup, { hiddenSymbols, carrier: gateCarrier })
           : [];
         if (skippedBy.length > 0) {
-          phaseGates.push({ worksheetCode: tpl.code, code: c.code, titleDe: c.titleDe, titleEn: c.titleEn ?? null, severity: c.severity, skippedBy });
+          phaseGates.push({ worksheetCode: tpl.code, code: c.code, titleDe: c.titleDe, titleEn: c.titleEn ?? null, severity: c.severity, skippedBy,
+            readsSymbols: [...(extractConditionSymbols(c.condition) ?? [])] });
         }
         return {
           id: c.id,
@@ -1007,7 +1008,8 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
       note: m.note,
       documentTitle: m.documentTitle,
     })),
-    phaseDeferrals: collectPhaseDeferrals(phaseDrivers, phaseGates),
+    // C-9 (L-5): labels name an outer guard's condition in the listing.
+    phaseDeferrals: collectPhaseDeferrals(phaseDrivers, phaseGates, new Map(fields.map((f) => [f.symbol, { labelDe: f.labelDe, labelEn: f.labelEn ?? null }]))),
   };
 }
 

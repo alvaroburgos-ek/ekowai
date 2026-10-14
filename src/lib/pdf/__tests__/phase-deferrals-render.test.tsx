@@ -20,6 +20,7 @@ const DEFERRALS: PhaseDeferral[] = [
     labelDe: 'Phase Inbetriebnahme erreicht',
     labelEn: 'Phase commissioning reached',
     gates: [{ worksheetCode: '820-2-23', code: 'REQ-48', titleDe: 'Betriebsanweisungen vollstaendig', titleEn: 'Operating manuals complete', severity: 'block' }],
+    skippedElsewhere: [],
   },
 ];
 

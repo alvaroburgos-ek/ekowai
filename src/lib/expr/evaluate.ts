@@ -814,6 +814,17 @@ export function evalCondition(src: string, scope: Scope, opts?: ConditionOptions
  * marks the pass. A guard nested inside AND / OR / NOT does not — the other terms were still checked. Called only
  * after the condition evaluated to `'true'`, so it never changes a verdict.
  */
+function guardSkippedOnPath(ast: Node, base: Ctx): boolean {
+  let n: Node = ast;
+  while (n.kind === 'guard') {
+    const g = evalNodeCore(n.guard, { ...base, missing: new Set(), existsPending: false });
+    if (g === 'false') return true;
+    if (g !== 'true') return false;
+    n = n.body;
+  }
+  return false;
+}
+
 /**
  * C-9 (2026-10-14): the free symbols of the guard antecedent that made a condition vacuous — the first guard on the top
  * guard chain whose antecedent is definitely `false` (the same walk and context as `guardSkippedOnPath`, hidden set and
@@ -841,17 +852,6 @@ export function skippedGuardSymbols(src: string, scope: Scope, opts?: ConditionO
     n = n.body;
   }
   return [];
-}
-
-function guardSkippedOnPath(ast: Node, base: Ctx): boolean {
-  let n: Node = ast;
-  while (n.kind === 'guard') {
-    const g = evalNodeCore(n.guard, { ...base, missing: new Set(), existsPending: false });
-    if (g === 'false') return true;
-    if (g !== 'true') return false;
-    n = n.body;
-  }
-  return false;
 }
 
 /**

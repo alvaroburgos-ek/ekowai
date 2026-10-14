@@ -32,7 +32,8 @@ export async function GET(
   if (!row) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
   try {
-    const data = await loadConformityData(id, standardCode);
+    // C-9 fix L-4: the checklist renders in every state, so it always wants the phase listing.
+    const data = await loadConformityData(id, standardCode, { phaseDeferrals: 'always' });
     const buffer = await buildChecklistPdf(data);
     // Register the emission (AGB §3(2)) — recordDeliverable never throws.
     await recordDeliverable({

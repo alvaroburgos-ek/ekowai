@@ -49,6 +49,7 @@ describe('assembleStandardReport — phaseDeferrals (C-9)', () => {
         labelDe: 'Phase „Ausführung“ erreicht',
         labelEn: 'Phase "execution" reached',
         gates: [{ worksheetCode: '820-2-20', code: 'REQ-43', titleDe: 'Qualitätsüberwachung während der Bauüberwachung', titleEn: 'Quality supervision during site supervision', severity: 'block' }],
+        skippedElsewhere: [],
       },
     ]);
     const req43 = d.worksheets.find((w) => w.code === '820-2-20')!.compliance[0];
@@ -70,5 +71,9 @@ describe('assembleStandardReport — phaseDeferrals (C-9)', () => {
     const d = assembleStandardReport(input(false, 'entfaellt'));
     expect(d.phaseDeferrals).toHaveLength(1);
     expect(d.phaseDeferrals![0].gates).toEqual([]);
+    // L-5: the tied gate is named with the outer condition instead of „keine daran gebundene Prüfung“.
+    expect(d.phaseDeferrals![0].skippedElsewhere.map((g) => ({ code: g.code, by: g.by }))).toEqual([
+      { code: 'REQ-43', by: [{ symbol: 'verantwortung_lph8', labelDe: 'LPH 8', labelEn: null }] },
+    ]);
   });
 });

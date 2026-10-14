@@ -226,6 +226,10 @@ export type SameSymbolEntry = {
   sourceStandardCode?: string | null;
   /** Id of the source field (U-2: lets the page drop an occurrence hidden by `visible_when` on its source sheet). */
   fieldId?: string;
+  /** C-2 fix L-1: id of the source standard and the row's stale flag (U-1) — a twin master hidden or stale on its source
+   * sheet must not prefill. Optional so fixtures stay valid. */
+  sourceStandardId?: string;
+  isStale?: boolean;
 };
 
 /**
@@ -367,6 +371,8 @@ export async function loadSameSymbolValues(
       isFromCurrentStandard: currentStandardId != null && meta.sourceStandardId === currentStandardId,
       sourceStandardCode: meta.sourceStandardCode,
       fieldId: p.fieldId,
+      sourceStandardId: meta.sourceStandardId,
+      isStale: p.isStale ?? false,
     });
     out.set(meta.symbol, arr);
   }

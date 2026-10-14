@@ -542,8 +542,14 @@ describe('DWA-M 820 UX — stale flags + hidden-at-source through the REAL save 
     expect(req47.result).toEqual({ kind: 'pass', guardSkipped: true });
     // Unanswered drivers are not listed.
     expect(listed.map((d) => d.symbol), `only answered drivers ${J(listed)}`).toEqual(['phase_inbetriebnahme_erreicht']);
+    // L-4: the declaration path skips the report load while not eligible (nothing approved here) …
     const conf = await loadConformityData(P.id, 'DWA-M-820-2');
-    expect(conf.phaseDeferrals, 'declaration == report').toEqual(rep.phaseDeferrals);
+    log('P6 declaration (not eligible)', { eligible: conf.eligible, phaseDeferrals: conf.phaseDeferrals ?? 'not evaluated' });
+    expect(conf.eligible).toBe(false);
+    expect(conf.phaseDeferrals, 'not evaluated when not eligible').toBeUndefined();
+    // … the checklist path ('always') gets the same list as the report.
+    const chk = await loadConformityData(P.id, 'DWA-M-820-2', { phaseDeferrals: 'always' });
+    expect(chk.phaseDeferrals, 'checklist == report').toEqual(rep.phaseDeferrals);
 
     await save(P, '820-2-22', { phase_inbetriebnahme_erreicht: b(true) });
     const rep2 = await loadStandardReportData(P.id, 'DWA-M-820-2');

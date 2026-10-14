@@ -877,13 +877,17 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         <div className="text-xs text-subtext" data-testid="same-symbol-hint">
           {/* O-5: one entry per distinct value — „Bereits in M8203-01, M820-01: PLT-HS-01", not the value twice. */}
           {locale === 'en' ? 'Already entered in' : 'Bereits in'}{' '}
-          {groupSameSymbolHints(sameSymbolHints, (v) => formatNumberLocale(v, locale), locale)
+          {/* C-2 fix L-5: an enum token shows its option label („Erreicht“), not the raw token. */}
+          {groupSameSymbolHints(sameSymbolHints, (v) => formatHintValue(field, v, locale), locale)
             .map((g) => `${g.sheets.join(', ')}: ${g.value}`)
             .join('; ')}{' '}
           {/* C-2: a hint flagged `applicable: false` (twin source value without a mapping) is information only. */}
+          {/* C-2 fix L-3: never on a read-only (locked) sheet. */}
           {(() => {
+            // L-2: the first APPLICABLE hint is copied; a mixed mapped/unmapped list cannot arise today (the 820-3 master
+            // symbol lives on M820-05 only), and the old code copied hints[0] regardless of ambiguity as well.
             const first = sameSymbolHints.find((h) => h.applicable !== false);
-            return first ? (
+            return first && !readOnly ? (
               <button
                 type="button"
                 className="text-xs text-accent-2 px-1.5 py-0.5 rounded hover:bg-accent-2/10 transition-colors"
@@ -1031,6 +1035,15 @@ function buildPrefillTooltip(
   }
   const keyPart = siteProfileKey ? ` (Schlüssel: ${siteProfileKey})` : '';
   return `${field.symbol} = ${formatted} aus Projekt-Standortprofil${keyPart} — bestätigen oder überschreiben.`;
+}
+
+/** Display of a „Bereits in …" hint value: an enum token that is one of the field's options shows its label. */
+function formatHintValue(field: FieldDef, v: unknown, locale: 'de' | 'en'): string {
+  if (field.dataType === 'enum' && typeof v === 'string') {
+    const o = (field.enumValues ?? []).find((x) => x.value === v);
+    if (o) return pickEnumLabel(o, locale);
+  }
+  return formatNumberLocale(v, locale);
 }
 
 function pickEnumLabel(

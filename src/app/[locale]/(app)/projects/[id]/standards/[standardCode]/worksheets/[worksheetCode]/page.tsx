@@ -24,7 +24,8 @@ import { BackLink } from '@/components/ui/back-link';
 import { NormTextProvider } from '@/components/norm-text/norm-text-context';
 import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profile/symbol-map';
 import { twinSourceSymbols } from '@/lib/eval/twin-symbols';
-import { resolveTwinPrefill, sameSymbolValueEqual } from '@/lib/eval/twin-prefill';
+import { resolveTwinPrefill, sameSymbolValueEqual, usableTwinSources } from '@/lib/eval/twin-prefill';
+import { loadHiddenAtSourceFieldIds } from '@/lib/actions/approval-gate';
 import type { SameSymbolHint } from '@/components/worksheet/same-symbol-hint';
 import { coerceSameSymbolValue, type EnumOption } from '@/lib/eval/same-symbol-prefill';
 import { crossStandardCarryNote, selectPrefillUpstreams } from '@/lib/projects/cross-standard-carry';
@@ -126,6 +127,14 @@ export default async function WorksheetPage({
       .map(([symbol, arr]) => [symbol, arr.filter((u) => !(u.fieldId && hiddenAtSource.has(u.fieldId)))] as const)
       .filter(([, arr]) => arr.length > 0),
   );
+  // C-2 fix L-1: twin masters may sit on ANOTHER standard (DWA-M 820-1 M820-05 for 820-2-11 / M8203-11). A master
+  // hidden on its own source sheet (that standard's visible_when) or stale there must not prefill — load the foreign
+  // standards' hidden-at-source set (only for standards that actually hold a twin source value) and drop both.
+  const twinSrcSymbols = twinSourceSymbols(standardCode);
+  const foreignTwinStdIds = Array.from(new Set(twinSrcSymbols.flatMap((sym) => (sameSymbol.get(sym) ?? [])
+    .filter((u) => !u.isFromCurrentStandard && u.sourceStandardId).map((u) => u.sourceStandardId as string))));
+  const foreignHidden = await Promise.all(foreignTwinStdIds.map((sid) => loadHiddenAtSourceFieldIds(projectId, sid)));
+  const twinSameSymbol = usableTwinSources(sameSymbol, twinSrcSymbols, new Set([...hiddenAtSource, ...foreignHidden.flatMap((h) => [...h])]));
 
   // Count prior snapshots — drives the "Änderungen seit letzter Version"
   // affordance in the approval bar. Single COUNT-ish query is cheap and the
@@ -245,7 +254,7 @@ export default async function WorksheetPage({
     //     and the twin's symbol differs from the source's.
     //     C-2 (ruling R-17): a rule's value map runs first — DWA-M 820-3 PZ 6.2-1 ← M820-05: true → „erreicht",
     //     false → no prefill (the hint shows the master answer without Übernehmen and names the choice).
-    const twin = resolveTwinPrefill(standardCode, { symbol: f.symbol, dataType: f.dataType, enumValues: f.enumValues as EnumOption[] | null }, sameSymbol, localeTyped);
+    const twin = resolveTwinPrefill(standardCode, { symbol: f.symbol, dataType: f.dataType, enumValues: f.enumValues as EnumOption[] | null }, twinSameSymbol, localeTyped);
     if (twin.hints) twinHintsBySymbol[f.symbol] = twin.hints;
     if (twin.prefill) {
       initialValues[f.id] = twin.prefill.value;
@@ -311,7 +320,7 @@ export default async function WorksheetPage({
   for (const f of mergedFields) {
     if (sameSymbolValuesBySymbol[f.symbol]?.length) continue;
     if (twinHintsBySymbol[f.symbol]) { sameSymbolValuesBySymbol[f.symbol] = twinHintsBySymbol[f.symbol]; continue; }
-    const twin = resolveTwinPrefill(standardCode, { symbol: f.symbol, dataType: f.dataType, enumValues: f.enumValues as EnumOption[] | null }, sameSymbol, localeTyped);
+    const twin = resolveTwinPrefill(standardCode, { symbol: f.symbol, dataType: f.dataType, enumValues: f.enumValues as EnumOption[] | null }, twinSameSymbol, localeTyped);
     if (twin.hints) sameSymbolValuesBySymbol[f.symbol] = twin.hints;
   }
 

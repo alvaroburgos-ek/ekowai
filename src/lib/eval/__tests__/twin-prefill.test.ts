@@ -1,7 +1,7 @@
 /** C-2 (ruling R-17, 2026-10-14): the worksheet page's twin step (2b) as a pure function — mapped boolean → enum twin
  * for DWA-M 820-3 PZ 6.2-1, and the existing twins unchanged. */
 import { describe, it, expect } from 'vitest';
-import { resolveTwinPrefill, sameSymbolValueEqual } from '../twin-prefill';
+import { resolveTwinPrefill, sameSymbolValueEqual, usableTwinSources } from '../twin-prefill';
 
 const PZ = {
   symbol: 'pz_62_1_status',
@@ -62,5 +62,30 @@ describe('resolveTwinPrefill — existing twins unchanged', () => {
     expect(r.prefill?.symbol).toBe('A_C_calculated');
     expect(sameSymbolValueEqual('1', 1.0000000000001)).toBe(false);
     expect(sameSymbolValueEqual('1', '1.0')).toBe(true);
+  });
+});
+
+describe('usableTwinSources (C-2 fix L-1) — hidden or stale twin masters do not prefill', () => {
+  const up = (fieldId: string, value: unknown, isStale = false) => ({ worksheetCode: 'M820-05', value, sourceStandardCode: 'DWA-M-820-1', fieldId, isStale });
+  const PZf = { symbol: 'pz_62_1_status', dataType: 'enum', enumValues: [{ value: 'erreicht' }, { value: 'nicht_erreicht' }] };
+
+  it('master hidden on its (foreign) source sheet ⇒ dropped: no prefill, no hint', () => {
+    const raw = new Map([['bedarfsplanung_projekt_complete', [up('f-m05', true)]]]);
+    const usable = usableTwinSources(raw, ['bedarfsplanung_projekt_complete'], new Set(['f-m05']));
+    expect(usable.has('bedarfsplanung_projekt_complete')).toBe(false);
+    expect(resolveTwinPrefill('DWA-M-820-3', PZf, usable, 'de')).toEqual({ prefill: null, hints: null });
+  });
+
+  it('stale master ⇒ dropped; a fresh one stays and prefills', () => {
+    const raw = new Map([['bedarfsplanung_projekt_complete', [up('f-m05', true, true)]]]);
+    expect(usableTwinSources(raw, ['bedarfsplanung_projekt_complete'], new Set()).size).toBe(0);
+    const fresh = usableTwinSources(new Map([['bedarfsplanung_projekt_complete', [up('f-m05', true)]]]), ['bedarfsplanung_projekt_complete'], new Set());
+    expect(resolveTwinPrefill('DWA-M-820-3', PZf, fresh, 'de').prefill?.value).toEqual({ type: 'enum', value: 'erreicht' });
+  });
+
+  it('non-twin symbols are returned unchanged (even if stale / hidden)', () => {
+    const raw = new Map([['A_C', [up('f-ac', 5, true)]]]);
+    const out = usableTwinSources(raw, ['bedarfsplanung_projekt_complete'], new Set(['f-ac']));
+    expect(out.get('A_C')).toEqual(raw.get('A_C'));
   });
 });
