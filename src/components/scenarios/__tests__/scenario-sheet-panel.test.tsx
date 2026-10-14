@@ -8,7 +8,8 @@ const a = vi.hoisted(() => ({ getScenarioResults: vi.fn() }));
 vi.mock('@/lib/actions/scenarios', () => a);
 import { ScenarioSheetPanel } from '../scenario-sheet-panel';
 
-beforeEach(() => a.getScenarioResults.mockReset());
+// Block body: Vitest 4 runs a function returned from beforeEach as teardown — returning the mock would call it after each test.
+beforeEach(() => { a.getScenarioResults.mockReset(); });
 
 describe('ScenarioSheetPanel', () => {
   it('is off by default — the sheet stays unchanged and nothing is computed', () => {
@@ -32,5 +33,16 @@ describe('ScenarioSheetPanel', () => {
     render(<ScenarioSheetPanel locale="en" projectId="p" standardCode="DWA-A-138-1" worksheetCode="A138-13" />);
     fireEvent.click(screen.getByRole('button', { name: 'Show cases' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Kein Zugriff');
+  });
+  it.each([
+    ['de', 'Fälle anzeigen', 'Die Fälle konnten nicht gerechnet werden', 'Fälle werden gerechnet …'],
+    ['en', 'Show cases', 'The cases could not be computed', 'Computing cases …'],
+  ] as const)('a thrown action (%s) shows an error and never leaves the busy text standing', async (locale, button, error, busy) => {
+    a.getScenarioResults.mockRejectedValue(new Error('connection reset'));
+    render(<ScenarioSheetPanel locale={locale} projectId="p" standardCode="DWA-A-138-1" worksheetCode="A138-13" />);
+    fireEvent.click(screen.getByRole('button', { name: button }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(error);
+    expect(screen.queryByText(busy)).toBeNull();
+    expect(screen.queryByRole('table')).toBeNull();
   });
 });

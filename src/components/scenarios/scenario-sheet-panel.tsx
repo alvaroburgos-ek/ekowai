@@ -9,9 +9,11 @@ import { ScenarioStepThrough } from './scenario-step-through';
 
 const L = {
   de: { show: 'Fälle anzeigen', loading: 'Fälle werden gerechnet …', result: 'Ergebnis', checks: 'Anforderung', inCase: 'im Fall', real: 'Real',
-    disclaimer: 'Fälle beruhen auf angenommenen Eingangswerten. Sie sind nicht Teil des Nachweises und nicht freigegeben.', mismatch: 'gespeicherter Wert weicht ab', carried: 'Realwert übernommen — im Fall nicht nachgerechnet' },
+    disclaimer: 'Fälle beruhen auf angenommenen Eingangswerten. Sie sind nicht Teil des Nachweises und nicht freigegeben.', mismatch: 'gespeicherter Wert weicht ab', carried: 'Realwert übernommen — im Fall nicht nachgerechnet',
+    failed: 'Die Fälle konnten nicht gerechnet werden. Bitte später erneut versuchen.' },
   en: { show: 'Show cases', loading: 'Computing cases …', result: 'Result', checks: 'Requirement', inCase: 'in case', real: 'Real',
-    disclaimer: 'Cases rest on assumed input values. They are not part of the verification and not approved.', mismatch: 'stored value differs', carried: 'real value carried — not recomputed in the case' },
+    disclaimer: 'Cases rest on assumed input values. They are not part of the verification and not approved.', mismatch: 'stored value differs', carried: 'real value carried — not recomputed in the case',
+    failed: 'The cases could not be computed. Please try again later.' },
 } as const;
 const VERDICT = { pass: '✓', fail: '✗', none: '–' } as const;
 
@@ -27,10 +29,15 @@ export function ScenarioSheetPanel({ locale, projectId, standardCode, worksheetC
     setOn(next);
     if (!next) return;
     setBusy(true); setErr(null);
-    const r = await getScenarioResults(projectId, standardCode);
-    setBusy(false);
-    if (!r.ok) { setErr(r.error); return; }
-    setView(buildSheetView(r, worksheetCode, locale));
+    try {
+      const r = await getScenarioResults(projectId, standardCode);
+      if (!r.ok) { setErr(r.error); return; }
+      setView(buildSheetView(r, worksheetCode, locale));
+    } catch {
+      setErr(t.failed);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
