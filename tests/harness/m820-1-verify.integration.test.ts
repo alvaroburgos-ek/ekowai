@@ -98,6 +98,12 @@ async function gateBlocks(ws: string, code: string): Promise<boolean> {
   const result = await checkApprovalGate(fixture.instances[ws]);
   return result.failingBlockConditions.some((c) => c.code === code);
 }
+/** The gate's pending entry (block gate waiting for inputs) for `code` on `ws`, with the approval verdict. */
+async function gatePending(ws: string, code: string): Promise<{ ok: boolean; missing: string[] | null }> {
+  const result = await checkApprovalGate(fixture.instances[ws]);
+  const p = result.pendingBlockConditions.find((c) => c.code === code);
+  return { ok: result.ok, missing: p ? p.missingInputs.map((m) => m.symbol) : null };
+}
 
 /** Prove a gate ENFORCING both ways: persist the passing saves → NOT blocked;
  *  persist the violating saves → blocked (definite fail). */
@@ -106,10 +112,26 @@ async function proveBothWays(
   code: string,
   passSaves: Save[],
   violateSaves: Save[],
+  /**
+   * Set when the violating save CLEARS an input the gate's existence check reads: since engine rule A1 (b170bef, 2026-09-30)
+   * `x IS NOT NULL` / `IS NOT EMPTY` on a never-entered / cleared symbol is pending, not a definite fail, and by the owner
+   * ruling 2026-10-05 (approval-gate.ts ApprovalGateResult.pendingBlockConditions) a pending block gate BLOCKS the approval like a
+   * failing one. The violation is then proven as: NOT in the failing list, in the pending list naming exactly this symbol, and
+   * the approval refused (ok false). Rebaselined 2026-10-14 (harness-rebaseline-m820).
+   */
+  pendingOn?: string,
 ): Promise<void> {
   await applySaves(passSaves);
   expect(await gateBlocks(gateWs, code), `${code}@${gateWs} should NOT block in passing state`).toBe(false);
+  if (pendingOn) expect((await gatePending(gateWs, code)).missing, `${code}@${gateWs} should NOT be pending in passing state`).toBeNull();
   await applySaves(violateSaves);
+  if (pendingOn) {
+    expect(await gateBlocks(gateWs, code), `${code}@${gateWs} cleared input is pending (A1), not a definite fail`).toBe(false);
+    const p = await gatePending(gateWs, code);
+    expect(p.missing, `${code}@${gateWs} SHOULD block (pending) in violating state`).toContain(pendingOn);
+    expect(p.ok, `${code}@${gateWs} approval SHOULD be refused in violating state`).toBe(false);
+    return;
+  }
   expect(await gateBlocks(gateWs, code), `${code}@${gateWs} SHOULD block in violating state`).toBe(true);
 }
 
@@ -261,8 +283,9 @@ describe('DWA-M-820-1 — M820-17 Bekanntmachung (§8.10.2.3)', () => {
         { ws: 'M820-10', values: { procurement_procedure: 'vgv_f' } },
         { ws: 'M820-17', values: { publication_date: '2020-05-01', ted_notice_id: '2020/S 123-456789' } },
       ],
-      // clear publication_date while ted set → body false → blocks
-      [{ ws: 'M820-17', values: { publication_date: null } }]);
+      // clear publication_date while ted set → body pending (A1) → blocks the approval
+      [{ ws: 'M820-17', values: { publication_date: null } }],
+      'publication_date'); // guard vgv_f definite, body cleared → pending (A1) → blocks (owner ruling 2026-10-05)
   });
 });
 

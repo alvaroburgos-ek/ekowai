@@ -358,9 +358,14 @@ describe('DWA-M 820-3 Projektstopp code per path — staged block on embedded Po
     expect(before.c1.b).toEqual({ kind: 'computed', value: 1 });
     expect(before.c1.code).toMatchObject({ kind: 'not_computed', missing: 13, firstMissing: ['pz_52_1_status', 'pz_52_2_status', 'pz_52_3_status'] });
     expect(before.c1.req31).toEqual({ kind: 'pending', missing: ['projektstopp_code'] });
-    // why the live C1 project showed a code: the 13 § 5 goals had been typed "nicht_zutreffend" through the API (a 0 / b 1 / code 1)
-    expect(before.c1live).toEqual({ a: { kind: 'computed', value: 0 }, b: { kind: 'computed', value: 1 }, code: { kind: 'computed', value: 1 } });
-    expect(before.eStale).toEqual({ kind: 'computed', value: 1 });
+    // why the live C1 project showed a code on 2026-10-06: the 13 § 5 goals had been typed "nicht_zutreffend" through the API and
+    // recompute read them (then: a 0 / b 1 / code 1; eStale code 1 from its stale § 5). Rebaselined 2026-10-14: since UX-wave
+    // rulings R-14 („hidden ⇒ absent", 5442259) + R-16 (3a167ff: recompute takes the hidden-at-source symbols as hidden) the § 5
+    // goals on the Gesamtsystem path sheets (hidden for an Einzelprojekt by block 19's visible_when) are absent — API-typed or stale
+    // values are no input any more, so the OLD 67-input formula is "not computed" here too (still BROKEN BEFORE: no code on C1's path).
+    const nc13 = { kind: 'not_computed', missing: 13, firstMissing: ['pz_52_1_status', 'pz_52_2_status', 'pz_52_3_status'] };
+    expect(before.c1live).toMatchObject({ a: nc13, b: { kind: 'computed', value: 1 }, code: nc13 });
+    expect(before.eStale).toMatchObject(nc13);
     expect(before.noType).toEqual({ kind: 'computed', value: 0 });
     PRE = await dump();
     log('PRE digest', digest(PRE));
@@ -462,7 +467,12 @@ describe('DWA-M 820-3 Projektstopp code per path — staged block on embedded Po
     expect(after.c2).toEqual({ a: { kind: 'computed', value: 1 }, totalA: { kind: 'computed', value: 38 }, code: { kind: 'computed', value: 1 } });
     // C1 (Einzelprojekt): code = code_b = 1 (pz_62_3 teilweise_erreicht); Anhang B total 15 + 21 + 19 + 17 + 33 + 34 + 10 + 6 = 155
     expect(after.c1).toEqual({ b: { kind: 'computed', value: 1 }, totalB: { kind: 'computed', value: 155 }, code: { kind: 'computed', value: 1 } });
-    expect(after.c1live).toEqual({ a: { kind: 'computed', value: 0 }, b: { kind: 'computed', value: 1 }, code: { kind: 'computed', value: 1 } });
+    // code = code_b = 1 (hand value unchanged); code_a no longer reads the hidden-at-source § 5 goals (R-14 / R-16, 3a167ff —
+    // rebaselined 2026-10-14; was a 0 from the API-typed "nicht_zutreffend")
+    expect(after.c1live).toMatchObject({
+      a: { kind: 'not_computed', missing: 13, firstMissing: ['pz_52_1_status', 'pz_52_2_status', 'pz_52_3_status'] },
+      b: { kind: 'computed', value: 1 }, code: { kind: 'computed', value: 1 },
+    });
     // both: all 67 as before
     expect(after.both).toEqual({ a: { kind: 'computed', value: 1 }, b: { kind: 'computed', value: 1 }, code: { kind: 'computed', value: 1 } });
     expect(after.bothOk).toEqual({ kind: 'computed', value: 0 });
