@@ -17,8 +17,8 @@ export type SheetView = {
 };
 
 const TXT = {
-  de: { hidden: '– (ausgeblendet)', missing: 'nicht berechnet: fehlt', unstable: 'Rechnung nicht stabil — Ergebnis vorläufig', provisional: '(vorläufig)', mismatch: 'gespeicherter Wert weicht ab', carried: 'Realwert übernommen — im Fall nicht nachgerechnet' },
-  en: { hidden: '– (hidden)', missing: 'not computed: missing', unstable: 'calculation did not settle — result provisional', provisional: '(provisional)', mismatch: 'stored value differs', carried: 'real value carried — not recomputed in the case' },
+  de: { hidden: '– (ausgeblendet)', missing: 'nicht berechnet: fehlt', unstable: 'Rechnung nicht stabil — Ergebnis vorläufig', provisional: '(vorläufig)', mismatch: 'gespeicherter Wert weicht ab', carried: 'Realwert übernommen — im Fall nicht nachgerechnet', skipped: 'Annahme nicht angewendet' },
+  en: { hidden: '– (hidden)', missing: 'not computed: missing', unstable: 'calculation did not settle — result provisional', provisional: '(provisional)', mismatch: 'stored value differs', carried: 'real value carried — not recomputed in the case', skipped: 'assumption not applied' },
 } as const;
 const TITLES: Record<string, string> = { gl8: 'Gl. 8 — V_VA', gl10: 'Gl. 10 — V_Rück', gl16: 'Gl. 16 — A_S,m' };
 
@@ -119,6 +119,14 @@ export function buildSheetView(payload: ScenarioResultsPayload, code: string, lo
     if (!run.converged) warnings.push(`${label}: ${t.unstable}`);
     const carried = run.notRecomputed.filter((n) => n.worksheetCode === code);
     if (carried.length > 0 && id !== 'real') warnings.push(`${label}: ${t.carried} — ${carried.map((n) => n.symbol).join(', ')}`);
+  }
+  // Review Focus 1 / A1-I2: a dropped assumption changes every sheet of the case — list it on each sheet, with its reason.
+  for (const c of payload.cases) {
+    for (const s of c.run.skippedOverrides) {
+      const o = c.scenario.overrides.find((x) => x.fieldId === s.fieldId);
+      const name = o ? `${locale === 'en' ? o.labelEn ?? o.labelDe : o.labelDe} (${o.symbol})` : s.fieldId;
+      warnings.push(`${c.scenario.name}: ${t.skipped} — ${name}: ${locale === 'en' ? s.reasonEn : s.reason}`);
+    }
   }
   for (const m of realRun?.mismatches.filter((x) => x.worksheetCode === code) ?? []) warnings.push(`Real: ${t.mismatch} — ${m.symbol}`);
 

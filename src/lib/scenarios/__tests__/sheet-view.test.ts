@@ -66,6 +66,16 @@ describe('buildSheetView', () => {
     const en = buildSheetView(unsettled, 'A138-17', 'en');
     expect(en.rows.find((r) => r.label === 'Gl. 15 · V_M')!.cells[1].text).toBe('14.5728 (provisional)');
   });
+  it('a skipped override is listed per case with its reason on every sheet (Review Focus 1), DE/EN', () => {
+    const extra = { fieldId: fid('A138-99', 'x'), symbol: 'x', labelDe: 'X-Wert', labelEn: 'X value', unit: null, dataType: 'number', worksheetCode: 'A138-99', standardCode: 'DWA-A-138-1', value: { type: 'number', value: 1 } as never, baseValueAtCreation: null, currentReal: null, drift: false, note: 'n' };
+    const run = runScenarioChain(b, [...overridesFor(K5), { fieldId: extra.fieldId, value: { type: 'number', value: 1 } }], { caseId: 'k5', ...opts });
+    const p: ScenarioResultsPayload = { ...payload, cases: [{ scenario: { ...k5Summary, overrides: [...k5Summary.overrides, extra] }, run }] };
+    for (const code of ['A138-12', 'A138-17', 'A138-26']) {
+      expect(buildSheetView(p, code, 'de').warnings).toContain('K5: Annahme nicht angewendet — X-Wert (x): Feld gehört nicht zu dieser Norm oder ist deaktiviert.');
+    }
+    expect(buildSheetView(p, 'A138-17', 'en').warnings).toContain('K5: assumption not applied — X value (x): field does not belong to this standard or is deactivated.');
+    expect(buildSheetView(payload, 'A138-17', 'de').warnings.some((w) => w.includes('nicht angewendet'))).toBe(false);
+  });
   it('carried values in a case are flagged „Realwert übernommen — im Fall nicht nachgerechnet"', () => {
     const run = payload.cases[0].run;
     const carriedRun = { ...run, notRecomputed: [...run.notRecomputed, { worksheetCode: 'A138-17', symbol: 'X_carried' }] };

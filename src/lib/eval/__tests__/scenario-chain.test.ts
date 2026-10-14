@@ -151,7 +151,7 @@ describe('robustness', () => {
       { fieldId: 'f:OTHER:x', value: { type: 'number', value: 1 } },
       ...overridesFor({ 'A138-05:k_f': { type: 'number', value: 1e-5 } }),
     ], 'mix');
-    expect(r.skippedOverrides).toEqual([{ fieldId: 'f:OTHER:x', reason: expect.stringMatching(/gehört nicht/) }]);
+    expect(r.skippedOverrides).toEqual([{ fieldId: 'f:OTHER:x', reason: expect.stringMatching(/gehört nicht/), reasonEn: expect.stringMatching(/does not belong/) }]);
     close(v(r, 'A138-11', 'k_i'), 3e-7);
   });
   it('skips an override whose value type does not match the field', () => {
@@ -187,7 +187,7 @@ describe('controller rulings R1 / R2 (2026-10-14)', () => {
     const b = buildFixtureBaseline();
     b.sheets = b.sheets.filter((s) => s.code !== 'A138-26');
     const r = run(b, overridesFor({ 'A138-26:T_n_Ue': { type: 'number', value: 30 }, 'A138-05:k_f': { type: 'number', value: 1e-5 } }), 'ni');
-    expect(r.skippedOverrides).toEqual([{ fieldId: fid('A138-26', 'T_n_Ue'), reason: expect.stringMatching(/nicht angelegt/) }]);
+    expect(r.skippedOverrides).toEqual([{ fieldId: fid('A138-26', 'T_n_Ue'), reason: expect.stringMatching(/nicht angelegt/), reasonEn: expect.stringMatching(/not set up/) }]);
     expect(r.values[fid('A138-26', 'T_n_Ue')]?.origin).not.toBe('override');
     close(v(r, 'A138-11', 'k_i'), 3e-7);
   });

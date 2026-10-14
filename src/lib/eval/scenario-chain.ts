@@ -77,10 +77,10 @@ export function runScenarioChain(
   const skippedOverrides: ScenarioRun['skippedOverrides'] = [];
   for (const o of overrides) {
     const f = fieldById.get(o.fieldId);
-    if (!f) { skippedOverrides.push({ fieldId: o.fieldId, reason: 'Feld gehört nicht zu dieser Norm oder ist deaktiviert.' }); continue; }
+    if (!f) { skippedOverrides.push({ fieldId: o.fieldId, reason: 'Feld gehört nicht zu dieser Norm oder ist deaktiviert.', reasonEn: 'field does not belong to this standard or is deactivated.' }); continue; }
     // Review Focus 1 / ruling R1: a field whose worksheet is not instantiated in the project is not part of the chain.
-    if (!instantiated.has(f.templateId)) { skippedOverrides.push({ fieldId: o.fieldId, reason: `Arbeitsblatt ${f.templateCode} ist im Projekt nicht angelegt.` }); continue; }
-    if (f.dataType !== o.value.type) { skippedOverrides.push({ fieldId: o.fieldId, reason: `Datentyp passt nicht (${f.dataType} ≠ ${o.value.type}).` }); continue; }
+    if (!instantiated.has(f.templateId)) { skippedOverrides.push({ fieldId: o.fieldId, reason: `Arbeitsblatt ${f.templateCode} ist im Projekt nicht angelegt.`, reasonEn: `worksheet ${f.templateCode} is not set up in the project.` }); continue; }
+    if (f.dataType !== o.value.type) { skippedOverrides.push({ fieldId: o.fieldId, reason: `Datentyp passt nicht (${f.dataType} ≠ ${o.value.type}).`, reasonEn: `data type does not match (${f.dataType} ≠ ${o.value.type}).` }); continue; }
     values.set(o.fieldId, fieldValueToParameter(o.fieldId, o.value));
     origin.set(o.fieldId, 'override');
   }

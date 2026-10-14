@@ -110,7 +110,8 @@ export type ScenarioRun = {
   mismatches: StoredMismatch[];
   /** Stored derived values no equation/mirror of A1 recomputes — carried from the record (spec gap G-2). */
   notRecomputed: Array<{ worksheetCode: string; symbol: string }>;
-  skippedOverrides: Array<{ fieldId: string; reason: string }>;
+  /** Overrides the run could not apply (Review Focus 1); `reason` German, `reasonEn` English. */
+  skippedOverrides: Array<{ fieldId: string; reason: string; reasonEn: string }>;
 };
 
 export type ScenarioResultsPayload = {
