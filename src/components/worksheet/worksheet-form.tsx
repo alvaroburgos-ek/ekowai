@@ -399,7 +399,13 @@ export function WorksheetForm({
   const init = useWorksheetStore((s) => s.init);
   const flush = useWorksheetStore((s) => s.flush);
   const setField = useWorksheetStore((s) => s.setField);
-  const values = useWorksheetStore((s) => s.values);
+  // O-4: the store is seeded by the init effect below, i.e. AFTER the first render. Until it holds THIS instance
+  // (server HTML, first client paint, the paint right after navigating from another sheet) its values are empty or
+  // belong to the previous sheet — every visible_when driver then reads absent ⇒ pending ⇒ visible, and the hidden
+  // questions flashed up until the effect ran. Read the server's initialValues until the store is ready.
+  const storeValues = useWorksheetStore((s) => s.values);
+  const storeReady = useWorksheetStore((s) => s.instanceId) === instance.id;
+  const values = storeReady ? storeValues : initialValues;
   // saveStatus / lastWarnings are read by <SaveIndicator/> and
   // <SaveWarningsBanner/> through their own selectors — not here, so the
   // three status writes per autosave do not re-render the whole form.
@@ -934,9 +940,8 @@ export function WorksheetForm({
   const upstreamPanelKey = upstreamPanelStorageKey(standardCode, worksheet.template.code);
   const [upstreamPanelOpen, setUpstreamPanelOpen] = useState(false);
   const startCollapsed = allHiddenNotice != null;
-  // Restore once per worksheet, and only after the store holds THIS instance's values — before that the visibility
-  // (and so the U-5 all-hidden decision) is computed on empty values.
-  const storeReady = useWorksheetStore((s) => s.instanceId) === instance.id;
+  // Restore once per worksheet, and only after the store holds THIS instance (storeReady, above); the localStorage
+  // read runs in an effect so the server HTML and the first client render agree (both collapsed).
   const restoredPanelKey = useRef<string | null>(null);
   useEffect(() => {
     if (!storeReady || restoredPanelKey.current === upstreamPanelKey) return;
@@ -1401,6 +1406,7 @@ export function WorksheetForm({
         locale={locale}
         projectId={projectId}
         hiddenSymbols={complianceHiddenSymbols}
+        values={values}
       />
       <MemoRationalePanel instanceId={instance.id} locale={locale} />
       <MemoApprovalBar

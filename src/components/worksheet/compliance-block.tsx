@@ -2,7 +2,7 @@
 import { useMemo, useTransition, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useWorksheetStore } from '@/lib/state/worksheet-store';
+import { useWorksheetStore, type FieldValue } from '@/lib/state/worksheet-store';
 import { evaluateCondition, type EvalResult } from '@/lib/compliance/evaluate';
 import { makeCarrierLookup, makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { explainCondition } from '@/lib/compliance/explain';
@@ -49,10 +49,14 @@ type Props = {
    * `not_applicable` — never a false pass/fail from a value the engineer
    * cannot see. */
   hiddenSymbols?: ReadonlySet<string>;
+  /** O-4: the values the form evaluates (the server's initialValues until the store holds this instance), so the
+   * first paint judges the same values the visibility pass used. Omitted ⇒ the store. */
+  values?: Record<string, FieldValue>;
 };
 
-export function ComplianceBlock({ requirements, suggestions, fields, locale, projectId, hiddenSymbols }: Props) {
-  const values = useWorksheetStore((s) => s.values);
+export function ComplianceBlock({ requirements, suggestions, fields, locale, projectId, hiddenSymbols, values: valuesProp }: Props) {
+  const storeValues = useWorksheetStore((s) => s.values);
+  const values = valuesProp ?? storeValues;
 
   // Plan 2a (Task 10): the same lookup WorksheetForm feeds computeVisibility,
   // so the visibility decision and the gate verdict read one symbol map.
