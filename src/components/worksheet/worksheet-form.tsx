@@ -1375,7 +1375,7 @@ export function WorksheetForm({
         );
       })}
 
-      <MemoEquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} locale={locale} hiddenSymbols={visibility.hiddenSymbols} />
+      <MemoEquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} locale={locale} hiddenSymbols={complianceHiddenSymbols} hiddenFieldSymbols={visibility.hiddenSymbols} />
 
       {orphanEngineEquations.length > 0 && (
         <section className="border-t border-hairline pt-6 mt-2 space-y-3">

@@ -32,16 +32,21 @@ export function EquationsBlock({
   isPlatformEngineer = false,
   locale = 'de',
   hiddenSymbols,
+  hiddenFieldSymbols,
 }: {
   equations: Equation[];
   isPlatformEngineer?: boolean;
   /** Hint language: equations.description holds German + an `[EN] ` part (hint-text.ts). */
   locale?: 'de' | 'en';
-  /** U-5: symbols of own fields hidden by `visible_when` — an equation whose inputs are all hidden (or whose output
-   * field is hidden) is not listed; nothing left ⇒ the block disappears. */
+  /** U-5 / O-7: symbols an equation input cannot have — own fields hidden by `visible_when` plus symbols hidden at
+   * their source sheet (the R-16 set of the compliance block). An equation whose inputs are all hidden is not listed;
+   * nothing left ⇒ the block disappears. */
   hiddenSymbols?: ReadonlySet<string>;
+  /** U-5: own fields hidden by `visible_when` — an equation whose OUTPUT field is one of them is not listed. Defaults
+   * to `hiddenSymbols`. */
+  hiddenFieldSymbols?: ReadonlySet<string>;
 }) {
-  const equations = visibleEquations(allEquations, hiddenSymbols);
+  const equations = visibleEquations(allEquations, hiddenSymbols, hiddenFieldSymbols ?? hiddenSymbols);
   if (equations.length === 0) return null;
   return (
     <section className="border-t border-hairline pt-6 mt-8 space-y-4">
