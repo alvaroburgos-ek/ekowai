@@ -19,7 +19,7 @@ import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/a
 import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
-import { consumerTemplatesReferencing, planStaleFlags, templateHasVisibilityRules } from '@/lib/eval/stale-flags';
+import { runStaleFlagPass } from './stale-pass';
 import {
   buildVisibilityArgs,
   inheritedFieldsFromMeta,
@@ -3202,66 +3202,18 @@ export async function saveWorksheet(
       // engineer's values and materialised rows commit — and becomes a save warning instead of losing the save.
       if (parameterValues.length > 0) {
         try {
-          await tx.transaction(async (sp) => {
-            const writtenIds = parameterValues.map((r) => r.fieldId);
-            const writtenSymbols = new Set(writtenIds.map((id) => symbolById.get(id)).filter((s): s is string => s != null));
-            // The rule rows come from the shared per-save metadata (fix round 2: no separate rule SELECTs).
-            const stMeta = await getVisMeta(sp);
-            const ownHasRules = stMeta ? templateHasVisibilityRules(instance.worksheetTemplateId, stMeta.fields, stMeta.sections) : false;
-            const consumers = stMeta
-              ? consumerTemplatesReferencing(writtenSymbols, stMeta.fields, stMeta.sections, instance.worksheetTemplateId)
-              : new Set<string>();
-            // Post-everything view: parameters re-read (this tx sees its own writes and the materialised rows).
-            const stVis = ownHasRules || consumers.size > 0 ? await loadVisNow(sp) : null;
-            if (!stVis) {
-              // Nothing on this sheet can be hidden and no other sheet reads what was written: only clear flags here.
-              await sp
-                .update(projectParameters)
-                .set({ isStale: false })
-                .where(and(
-                  eq(projectParameters.projectId, instance.projectId),
-                  inArray(projectParameters.fieldId, writtenIds),
-                  eq(projectParameters.isStale, true),
-                ));
-              return;
-            }
-            // M-4 (fix round 4): a consumer sheet whose instance is approved / final / deactivated is never flagged
-            // behind the engineer's back (post-approval immutability; it is re-opened explicitly). One read, only when
-            // there are consumers. The own sheet needs no guard: saveWorksheet refuses a locked sheet before any write.
-            const lockedTemplateIds = new Set<string>();
-            if (consumers.size > 0) {
-              const consumerInstances = await sp
-                .select({ templateId: worksheetInstances.worksheetTemplateId, status: worksheetInstances.status })
-                .from(worksheetInstances)
-                .where(and(eq(worksheetInstances.projectId, instance.projectId), inArray(worksheetInstances.worksheetTemplateId, [...consumers])));
-              for (const ci of consumerInstances) {
-                if (!isWorksheetEditable(ci.status as WorksheetStatus)) lockedTemplateIds.add(ci.templateId);
-              }
-            }
-            const { setStale, clearStale } = planStaleFlags({
-              visArgs: stVis.args,
-              ownTemplateId: instance.worksheetTemplateId,
-              inheritedFields: savedTemplateCode
-                ? inheritedFieldsFromMeta(stVis.meta, instance.worksheetTemplateId, savedTemplateCode)
-                    .map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType }))
-                : [],
-              writtenFieldIds: new Set(writtenIds),
-              consumerTemplateIds: consumers,
-              lockedTemplateIds,
-            });
-            if (setStale.length > 0) {
-              await sp
-                .update(projectParameters)
-                .set({ isStale: true })
-                .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, setStale)));
-            }
-            if (clearStale.length > 0) {
-              await sp
-                .update(projectParameters)
-                .set({ isStale: false })
-                .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, clearStale)));
-            }
-          });
+          // O-9: the pass lives in stale-pass.ts (runStaleFlagPass) so its UPDATE wiring is unit-tested; unchanged behaviour.
+          await tx.transaction(async (sp) =>
+            runStaleFlagPass(sp, {
+              projectId: instance.projectId,
+              worksheetTemplateId: instance.worksheetTemplateId,
+              savedTemplateCode,
+              writtenFieldIds: parameterValues.map((r) => r.fieldId),
+              symbolById,
+              getVisMeta,
+              loadVisNow,
+            }),
+          );
         } catch (e) {
           warnings.push(`Markierung veralteter Antworten fehlgeschlagen: ${e instanceof Error ? e.message : String(e)} [EN] Flagging outdated answers failed — the values were saved.`);
         }
