@@ -2,7 +2,8 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { runScenarioChain } from '@/lib/eval/scenario-chain';
-import { buildFixtureBaseline } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import { buildFixtureBaseline, overridesFor, K5 } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import type { ScenarioSummary } from '@/lib/scenarios/types';
 
 const a = vi.hoisted(() => ({ getScenarioResults: vi.fn() }));
 vi.mock('@/lib/actions/scenarios', () => a);
@@ -44,5 +45,16 @@ describe('ScenarioSheetPanel', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(error);
     expect(screen.queryByText(busy)).toBeNull();
     expect(screen.queryByRole('table')).toBeNull();
+  });
+  it('A138-12 with a geometry case: the case column shows the tool-materialised A_S,m, marked (W)', async () => {
+    const b = buildFixtureBaseline();
+    const k5: ScenarioSummary = { id: 'k5', name: 'K5', reason: null, slot: 2, includeInReport: false, archivedAt: null, createdAt: '2026-10-14T00:00:00.000Z', overrides: [] };
+    a.getScenarioResults.mockResolvedValue({ ok: true, available: true, standardCode: 'DWA-A-138-1', ignoredScenarioIds: [],
+      real: runScenarioChain(b, [], { caseId: 'real', approvalWithholding: 'bypass' }),
+      cases: [{ scenario: k5, run: runScenarioChain(b, overridesFor(K5), { caseId: 'k5', approvalWithholding: 'bypass' }) }] });
+    render(<ScenarioSheetPanel locale="de" projectId="p" standardCode="DWA-A-138-1" worksheetCode="A138-12" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Fälle anzeigen' }));
+    const cell = await screen.findByText('48,576 (W)');
+    expect(cell.getAttribute('title')).toMatch(/vom Werkzeug berechnet/);
   });
 });

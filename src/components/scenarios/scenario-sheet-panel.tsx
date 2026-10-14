@@ -10,9 +10,11 @@ import { ScenarioStepThrough } from './scenario-step-through';
 const L = {
   de: { show: 'Fälle anzeigen', loading: 'Fälle werden gerechnet …', result: 'Ergebnis', checks: 'Anforderung', inCase: 'im Fall', real: 'Real',
     disclaimer: 'Fälle beruhen auf angenommenen Eingangswerten. Sie sind nicht Teil des Nachweises und nicht freigegeben.', mismatch: 'gespeicherter Wert weicht ab', carried: 'Realwert übernommen — im Fall nicht nachgerechnet',
+    materialised: 'vom Werkzeug berechnet (wie beim Speichern) — die Gleichung selbst läuft in diesem Fall nicht', materialisedMark: ' (W)',
     failed: 'Die Fälle konnten nicht gerechnet werden. Bitte später erneut versuchen.' },
   en: { show: 'Show cases', loading: 'Computing cases …', result: 'Result', checks: 'Requirement', inCase: 'in case', real: 'Real',
     disclaimer: 'Cases rest on assumed input values. They are not part of the verification and not approved.', mismatch: 'stored value differs', carried: 'real value carried — not recomputed in the case',
+    materialised: 'computed by the tool (as on save) — the equation itself does not run in this case', materialisedMark: ' (T)',
     failed: 'The cases could not be computed. Please try again later.' },
 } as const;
 const VERDICT = { pass: '✓', fail: '✗', none: '–' } as const;
@@ -76,8 +78,8 @@ export function ScenarioSheetPanel({ locale, projectId, standardCode, worksheetC
                       <td>{r.label}</td>
                       {r.cells.map((c, i) => (
                         <td key={i} className={`text-right ${c.kind !== 'value' ? 'text-subtext' : ''}`}
-                          title={c.mismatch ? t.mismatch : c.carried ? t.carried : undefined}>
-                          {c.text}{c.mismatch ? ' ⚠' : ''}{c.carried ? ' (R)' : ''}
+                          title={c.mismatch ? t.mismatch : c.carried ? t.carried : c.materialised ? t.materialised : undefined}>
+                          {c.text}{c.mismatch ? ' ⚠' : ''}{c.carried ? ' (R)' : ''}{c.materialised ? t.materialisedMark : ''}
                         </td>
                       ))}
                     </tr>

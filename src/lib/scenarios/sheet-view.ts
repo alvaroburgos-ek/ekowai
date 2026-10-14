@@ -4,7 +4,8 @@ import { formatScenarioValue } from './values';
 import type { IterationSeries, ScenarioResultsPayload, ScenarioRun } from './types';
 import type { ChartSeries } from '@/components/scenarios/chart-geometry';
 
-export type SheetCell = { kind: 'value' | 'missing' | 'hidden'; text: string; mismatch?: boolean; carried?: boolean };
+/** `materialised`: the equation did not run in this case, the value is the tool's server materialisation (mirror), e.g. A_S,m by geometry. */
+export type SheetCell = { kind: 'value' | 'missing' | 'hidden'; text: string; mismatch?: boolean; carried?: boolean; materialised?: boolean };
 export type SheetView = {
   columns: Array<{ id: string; label: string; slot: number }>;
   rows: Array<{ key: string; label: string; cells: SheetCell[] }>;
@@ -46,6 +47,10 @@ export function buildSheetView(payload: ScenarioResultsPayload, code: string, lo
         if (sh?.hiddenSymbols.includes(out)) return { kind: 'hidden', text: t.hidden };
         if (!st) return { kind: 'missing', text: '—' };
         if (st.kind === 'computed') return { kind: 'value', text: num(st.value, run) };
+        // The equation is suppressed/not computed here, but the tool materialised the symbol (e.g. A_S,m by geometry/soil):
+        // show the value the case actually uses, never „nicht berechnet" (final review A1-I1).
+        const mat = Object.values(run.values).find((x) => x.worksheetCode === code && x.symbol === out && x.origin === 'computed');
+        if (mat && typeof mat.value === 'number' && Number.isFinite(mat.value)) return { kind: 'value', text: num(mat.value, run), materialised: true };
         if (st.kind === 'manual_required') return { kind: 'missing', text: st.missing?.length ? `${t.missing} ${st.missing.join(', ')}` : st.reason };
         return { kind: 'missing', text: st.message };
       }),

@@ -39,11 +39,14 @@ describe('buildSheetView', () => {
     const v = buildSheetView(payload, 'A138-12', 'de');
     expect(v.badges).toEqual([{ caseLabel: 'K5', slot: 2, label: 'a_s_m_determination_method (a_s_m_determination_method)', caseValue: 'geometry', realValue: 'direct' }]);
   });
-  it('Gl. 7 in K5 reads „ausgeblendet" or „nicht berechnet", never a number', () => {
+  it('Gl. 7 row in K5 (geometry method) shows the A_S,m the case actually uses — the tool value, marked', () => {
     const v = buildSheetView(payload, 'A138-12', 'de');
     const g7 = v.rows.find((r) => r.label.startsWith('Gl. 7'))!;
     expect(g7.cells[0]).toMatchObject({ kind: 'value', text: '45' });
-    expect(g7.cells[1].kind).not.toBe('value');
+    expect(g7.cells[0].materialised).toBeUndefined();
+    expect(g7.cells[1]).toMatchObject({ kind: 'value', text: '48,576', materialised: true });
+    const en = buildSheetView(payload, 'A138-12', 'en');
+    expect(en.rows.find((r) => r.label.startsWith('Gl. 7'))!.cells[1]).toMatchObject({ kind: 'value', text: '48.576', materialised: true });
   });
   it('charts: Gl. 16 with Real + K5; Gl. 10 with T 30 solid and T 100 dashed per run', () => {
     const v17 = buildSheetView(payload, 'A138-17', 'de');
