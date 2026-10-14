@@ -15,6 +15,8 @@ import {
   primaryKey,
   unique,
   index,
+  check,
+  uniqueIndex,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -434,6 +436,61 @@ export const projectParameters = pgTable(
   },
   (t) => ({ uniqProjectField: unique().on(t.projectId, t.fieldId) }),
 );
+
+// =============================================================================
+// WHAT-IF CASES („Fälle") — spec docs/superpowers/specs/2026-10-14-what-if-cases-design.md
+// Overlay values on the same project. Never read by approvals, gates, conformity,
+// progress or the audit of the real record. Migration:
+// supabase/migrations/_STAGED_20261014120000_project_scenarios.sql (staged).
+// =============================================================================
+export const projectScenarios = pgTable(
+  'project_scenarios',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    reason: text('reason'),
+    /** Colour slot 1..6, fixed for the life of the case (colour follows the case, never its rank). */
+    sortOrder: integer('sort_order').notNull(),
+    includeInReport: boolean('include_in_report').notNull().default(false),
+    // references auth.users(id) in DB; plain uuid like project_parameters.entered_by
+    createdBy: uuid('created_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+  },
+  (t) => ({
+    projectIdx: index('project_scenarios_project_idx').on(t.projectId),
+    activeSlotUnique: uniqueIndex('project_scenarios_active_slot_unique')
+      .on(t.projectId, t.sortOrder)
+      .where(sql`archived_at IS NULL`),
+    slotRange: check('project_scenarios_slot_range', sql`sort_order BETWEEN 1 AND 6`),
+  }),
+);
+
+export const projectScenarioOverrides = pgTable(
+  'project_scenario_overrides',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    scenarioId: uuid('scenario_id').notNull().references(() => projectScenarios.id, { onDelete: 'cascade' }),
+    fieldId: uuid('field_id').notNull().references(() => fields.id),
+    /** FieldValue shape `{ type, value }` (src/lib/state/worksheet-store.ts) — the save path's own value representation. */
+    value: jsonb('value').notNull(),
+    /** The real value (FieldValue or null) when the override was created — written once, drives the drift warning. */
+    baseValueAtCreation: jsonb('base_value_at_creation'),
+    note: text('note').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({ uniqScenarioField: unique().on(t.scenarioId, t.fieldId) }),
+);
+
+export const projectScenarioSettings = pgTable('project_scenario_settings', {
+  projectId: uuid('project_id').primaryKey().references(() => projects.id, { onDelete: 'cascade' }),
+  enabled: boolean('enabled').notNull().default(false),
+  updatedBy: uuid('updated_by'),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const approvalEvents = pgTable('approval_events', {
   id: uuid('id').primaryKey().defaultRandom(),
