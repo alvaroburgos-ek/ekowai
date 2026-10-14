@@ -30,6 +30,8 @@ import type { SameSymbolHint } from '@/components/worksheet/same-symbol-hint';
 import { coerceSameSymbolValue, type EnumOption } from '@/lib/eval/same-symbol-prefill';
 import { crossStandardCarryNote, selectPrefillUpstreams } from '@/lib/projects/cross-standard-carry';
 import { loadRequiredFieldState } from '@/lib/projects/load-required-field-counts';
+import { loadScenariosEnabled } from '@/lib/scenarios/load-baseline';
+import { ScenarioSheetPanel } from '@/components/scenarios/scenario-sheet-panel';
 
 export default async function WorksheetPage({
   params,
@@ -42,6 +44,8 @@ export default async function WorksheetPage({
 
   const [project] = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
   if (!project) notFound();
+  // „Fälle aktiv" (spec §7); false while the staged tables are absent ⇒ the switch is not rendered.
+  const scenariosEnabled = await loadScenariosEnabled(projectId);
 
   const ws = await loadWorksheet(standardCode, worksheetCode);
   if (!ws) notFound();
@@ -405,6 +409,9 @@ export default async function WorksheetPage({
         />
       </aside>
       <main>
+        {scenariosEnabled && (
+          <ScenarioSheetPanel locale={localeTyped} projectId={projectId} standardCode={standardCode} worksheetCode={worksheetCode} />
+        )}
         <WorksheetForm
           locale={localeTyped}
           projectId={projectId}
