@@ -3,7 +3,7 @@ import { useState, useId, useMemo, useTransition } from 'react';
 import Link from 'next/link';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { formatNumberLocale } from '@/lib/format-number-de';
-import { groupSameSymbolHints } from './same-symbol-hint';
+import { groupSameSymbolHints, type SameSymbolHint } from './same-symbol-hint';
 import { setClientSupplied } from '@/lib/actions/client-supplied';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Select } from '@/components/ui/select';
@@ -59,7 +59,7 @@ type Props = {
   /** Standard code (e.g. "DWA-A-138-1"). Needed to build the deep-link URL on
    * the inheritance badge so the engineer can jump to the source worksheet. */
   standardCode: string;
-  sameSymbolHints?: Array<{ worksheetCode: string; value: unknown; viaSymbol?: string }>;
+  sameSymbolHints?: SameSymbolHint[];
   docs: Array<{ id: string; title: string; citationLabel: string }>;
   /** True if this field is the output of an equation (auto-computed sub-total or total). */
   isComputed?: boolean;
@@ -880,13 +880,22 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           {groupSameSymbolHints(sameSymbolHints, (v) => formatNumberLocale(v, locale), locale)
             .map((g) => `${g.sheets.join(', ')}: ${g.value}`)
             .join('; ')}{' '}
-          <button
-            type="button"
-            className="text-xs text-accent-2 px-1.5 py-0.5 rounded hover:bg-accent-2/10 transition-colors"
-            onClick={() => copyFirstHint(field, sameSymbolHints[0].value)}
-          >
-            {locale === 'en' ? 'Apply' : 'Übernehmen'}
-          </button>
+          {/* C-2: a hint flagged `applicable: false` (twin source value without a mapping) is information only. */}
+          {(() => {
+            const first = sameSymbolHints.find((h) => h.applicable !== false);
+            return first ? (
+              <button
+                type="button"
+                className="text-xs text-accent-2 px-1.5 py-0.5 rounded hover:bg-accent-2/10 transition-colors"
+                onClick={() => copyFirstHint(field, first.value)}
+              >
+                {locale === 'en' ? 'Apply' : 'Übernehmen'}
+              </button>
+            ) : null;
+          })()}
+          {Array.from(new Set(sameSymbolHints.map((h) => h.note).filter((n): n is string => !!n))).map((n) => (
+            <span key={n} className="block" data-testid="same-symbol-hint-note">{n}</span>
+          ))}
         </div>
       )}
 

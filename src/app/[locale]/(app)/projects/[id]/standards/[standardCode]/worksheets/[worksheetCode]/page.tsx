@@ -23,7 +23,9 @@ import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-side
 import { BackLink } from '@/components/ui/back-link';
 import { NormTextProvider } from '@/components/norm-text/norm-text-context';
 import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profile/symbol-map';
-import { twinSourcesFor, twinSourceSymbols } from '@/lib/eval/twin-symbols';
+import { twinSourceSymbols } from '@/lib/eval/twin-symbols';
+import { resolveTwinPrefill, sameSymbolValueEqual } from '@/lib/eval/twin-prefill';
+import type { SameSymbolHint } from '@/components/worksheet/same-symbol-hint';
 import { coerceSameSymbolValue, type EnumOption } from '@/lib/eval/same-symbol-prefill';
 import { crossStandardCarryNote, selectPrefillUpstreams } from '@/lib/projects/cross-standard-carry';
 import { loadRequiredFieldState } from '@/lib/projects/load-required-field-counts';
@@ -189,7 +191,7 @@ export default async function WorksheetPage({
   const carriedNoteByFieldId: Record<string, string> = {};
   // Twin hints (same quantity, other symbol) merged into the same-symbol hint list
   // of the TARGET symbol so the field shows "Bereits in A138-07 (als A_C)" + Übernehmen.
-  const twinHintsBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol: string }>> = {};
+  const twinHintsBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol: string; applicable?: false; note?: string }>> = {};
   for (const f of mergedFields) {
     const p = parameters.get(f.id);
     if (p) {
@@ -241,24 +243,18 @@ export default async function WorksheetPage({
     //     Übernehmen / "Alle Vorbefüllungen übernehmen". Not routed through
     //     inheritedFromBySymbol on purpose: that map moves a symbol's engine home
     //     and the twin's symbol differs from the source's.
-    let twinDone = false;
-    for (const src of twinSourcesFor(standardCode, f.symbol)) {
-      const ups = sameSymbol.get(src);
-      if (!ups || ups.length === 0) continue;
-      const ambiguousTwin = ups.length > 1 && !ups.every((u) => sameSymbolValueEqual(u.value, ups[0].value));
-      if (ambiguousTwin) continue;
-      const coerced = coerceSameSymbolValue(f.dataType, ups[0].value, f.enumValues as EnumOption[] | null);
-      if (!coerced) continue;
-      initialValues[f.id] = coerced;
+    //     C-2 (ruling R-17): a rule's value map runs first — DWA-M 820-3 PZ 6.2-1 ← M820-05: true → „erreicht",
+    //     false → no prefill (the hint shows the master answer without Übernehmen and names the choice).
+    const twin = resolveTwinPrefill(standardCode, { symbol: f.symbol, dataType: f.dataType, enumValues: f.enumValues as EnumOption[] | null }, sameSymbol, localeTyped);
+    if (twin.hints) twinHintsBySymbol[f.symbol] = twin.hints;
+    if (twin.prefill) {
+      initialValues[f.id] = twin.prefill.value;
       prefillSourceByFieldId[f.id] = 'twin';
       // U-10: the twin source may sit on another standard's sheet (DWA-M 820-2 ← 820-1 M820-05) — keep its standard
       // so the badge links to the right worksheet URL.
-      twinSourceByFieldId[f.id] = { worksheetCode: ups[0].worksheetCode, symbol: src, standardCode: ups[0].sourceStandardCode ?? undefined };
-      twinHintsBySymbol[f.symbol] = ups.map((u) => ({ worksheetCode: u.worksheetCode, value: u.value, viaSymbol: src }));
-      twinDone = true;
-      break;
+      twinSourceByFieldId[f.id] = { worksheetCode: twin.prefill.worksheetCode, symbol: twin.prefill.symbol, standardCode: twin.prefill.standardCode };
+      continue;
     }
-    if (twinDone) continue;
 
     // 3. Site profile — resolved via the symbol map; coerced inside the helper.
     const site = resolveFromSiteProfile(project.siteProfile, f.symbol);
@@ -306,7 +302,7 @@ export default async function WorksheetPage({
     }
   }
 
-  const sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol?: string }>> = {};
+  const sameSymbolValuesBySymbol: Record<string, SameSymbolHint[]> = {};
   for (const [symbol, arr] of sameSymbol) {
     sameSymbolValuesBySymbol[symbol] = arr.map(({ worksheetCode, value }) => ({ worksheetCode, value }));
   }
@@ -315,12 +311,8 @@ export default async function WorksheetPage({
   for (const f of mergedFields) {
     if (sameSymbolValuesBySymbol[f.symbol]?.length) continue;
     if (twinHintsBySymbol[f.symbol]) { sameSymbolValuesBySymbol[f.symbol] = twinHintsBySymbol[f.symbol]; continue; }
-    for (const src of twinSourcesFor(standardCode, f.symbol)) {
-      const ups = sameSymbol.get(src);
-      if (!ups || ups.length === 0) continue;
-      sameSymbolValuesBySymbol[f.symbol] = ups.map((u) => ({ worksheetCode: u.worksheetCode, value: u.value, viaSymbol: src }));
-      break;
-    }
+    const twin = resolveTwinPrefill(standardCode, { symbol: f.symbol, dataType: f.dataType, enumValues: f.enumValues as EnumOption[] | null }, sameSymbol, localeTyped);
+    if (twin.hints) sameSymbolValuesBySymbol[f.symbol] = twin.hints;
   }
 
   // Build citations map: field_id → Citation[] (from project_parameters.citation_sources)
@@ -494,20 +486,5 @@ export default async function WorksheetPage({
     </div>
     </NormTextProvider>
   );
-}
-
-/** True when two same-symbol values agree (loose number equality, exact for
- * the other types). Used to decide whether auto-fill is unambiguous. */
-function sameSymbolValueEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (typeof a === 'number' && typeof b === 'number') {
-    return Math.abs(a - b) < 1e-9;
-  }
-  // Numeric strings from `numeric` columns come through as strings — compare
-  // by Number when both coerce cleanly.
-  const na = typeof a === 'string' ? Number(a) : NaN;
-  const nb = typeof b === 'string' ? Number(b) : NaN;
-  if (Number.isFinite(na) && Number.isFinite(nb)) return Math.abs(na - nb) < 1e-9;
-  return false;
 }
 

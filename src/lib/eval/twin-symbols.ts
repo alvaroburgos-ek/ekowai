@@ -28,7 +28,19 @@ export type TwinRule = {
   sources: string[];
   /** Why they are the same quantity (clause). */
   note: string;
+  /**
+   * C-2 (ruling R-17, 2026-10-14): optional per-pair value map for a twin whose source and target are typed differently
+   * (a boolean master answer feeding an enum phase-goal rating). Pairs [source value, target value], compared with
+   * Object.is (the boolean `true` never matches the string `'true'`). A source value that is NOT listed is NOT
+   * prefilled — the hint shows it without „Übernehmen" plus `unmappedNote`. Rules without a map copy the value as is
+   * (every twin before C-2).
+   */
+  valueMap?: ReadonlyArray<readonly [TwinScalar, TwinScalar]>;
+  /** Shown beside an unmapped source value (DE / EN): what the engineer chooses instead. Required with `valueMap`. */
+  unmappedNote?: { de: string; en: string };
 };
+
+export type TwinScalar = string | number | boolean;
 
 export const TWIN_SYMBOLS: Record<string, TwinRule[]> = {
   'DWA-A-138-1': [
@@ -78,14 +90,72 @@ export const TWIN_SYMBOLS: Record<string, TwinRule[]> = {
       note: 'Bedarfsplanung Projekt abgeschlossen (DWA-M 820-1 M820-05, § 6.4) — 820-2 § 5.2.2 fragt dieselbe Tatsache',
     },
   ],
+  // C-2 (ruling R-17, 2026-10-14): PZ 6.2-1 (820-3 § 6.2, printed p. 14: „Die ‚Bedarfsplanung Projekt' beschreibt die
+  // Anforderungen und Rahmenbedingungen so ausführlich und konkret, dass Bauherr und Planende in die Lage versetzt werden,
+  // ein gleiches Verständnis für die Projektaufgabe zu entwickeln …") rates the same project needs assessment as
+  // DWA-M 820-1 M820-05. Project master only: integrating the concept results is a separate goal (PZ 6.2-2, „Wurde im
+  // Vorfeld ein Konzept für das Gesamtsystem erstellt …"), so M820-04 `bedarfsplanung_konzept_complete` is no source.
+  // Yes → „Erreicht"; No → no prefill: the print does not decide between „Teilweise" and „Nicht erreicht".
+  'DWA-M-820-3': [
+    {
+      target: 'pz_62_1_status',
+      worksheet: 'M8203-11',
+      sources: ['bedarfsplanung_projekt_complete'],
+      note: 'Bedarfsplanung Projekt abgeschlossen (DWA-M 820-1 M820-05) — 820-3 § 6.2 PZ 6.2-1 bewertet dieselbe Tatsache',
+      valueMap: [[true, 'erreicht']],
+      unmappedNote: {
+        de: 'Nein in DWA-M 820-1 M820-05 → hier je nach Stand „Teilweise erreicht“ oder „Nicht erreicht“ wählen (das Merkblatt legt die Stufe nicht fest).',
+        en: 'No on DWA-M 820-1 M820-05 → choose “Partially met” or “Not met” here depending on the state (the guideline does not fix the level).',
+      },
+    },
+  ],
 };
+
+/** The twin rule for `symbol` under `standardCode`, or null. */
+export function twinRuleFor(standardCode: string, symbol: string): TwinRule | null {
+  return TWIN_SYMBOLS[standardCode]?.find((x) => x.target === symbol) ?? null;
+}
+
+export type TwinMapResult = { ok: true; value: unknown } | { ok: false };
+
+/**
+ * The value a twin source contributes to `target`: unchanged for a rule without `valueMap` (and for a symbol without a
+ * rule), the mapped value for a listed source value, `{ ok: false }` (no prefill) for an unlisted one.
+ */
+export function mapTwinValue(standardCode: string, target: string, v: unknown): TwinMapResult {
+  const rule = twinRuleFor(standardCode, target);
+  if (!rule?.valueMap) return { ok: true, value: v };
+  const hit = rule.valueMap.find(([from]) => Object.is(from, v));
+  return hit ? { ok: true, value: hit[1] } : { ok: false };
+}
+
+export type TwinHint = { worksheetCode: string; value: unknown; viaSymbol: string; applicable?: false; note?: string };
+
+/**
+ * The „Bereits in … (als <src>)" hints for a twin target. A mapped value is shown (and copied by „Übernehmen") as the
+ * TARGET value; an unmapped source value is shown as is, flagged `applicable: false` (no „Übernehmen") with the rule's
+ * note. A rule without a map yields the raw entries exactly as before C-2.
+ */
+export function twinHints(
+  standardCode: string,
+  target: string,
+  src: string,
+  ups: ReadonlyArray<{ worksheetCode: string; value: unknown }>,
+  locale: 'de' | 'en',
+): TwinHint[] {
+  const rule = twinRuleFor(standardCode, target);
+  return ups.map((u): TwinHint => {
+    if (!rule?.valueMap) return { worksheetCode: u.worksheetCode, value: u.value, viaSymbol: src };
+    const m = mapTwinValue(standardCode, target, u.value);
+    if (m.ok) return { worksheetCode: u.worksheetCode, value: m.value, viaSymbol: src };
+    const note = rule.unmappedNote?.[locale];
+    return { worksheetCode: u.worksheetCode, value: u.value, viaSymbol: src, applicable: false, ...(note ? { note } : {}) };
+  });
+}
 
 /** Twin sources (priority order) for `symbol` under `standardCode`, or []. */
 export function twinSourcesFor(standardCode: string, symbol: string): string[] {
-  const rules = TWIN_SYMBOLS[standardCode];
-  if (!rules) return [];
-  const r = rules.find((x) => x.target === symbol);
-  return r ? r.sources : [];
+  return twinRuleFor(standardCode, symbol)?.sources ?? [];
 }
 
 /** All source symbols a standard's twin rules can read (for one batched query). */

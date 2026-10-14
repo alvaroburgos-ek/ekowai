@@ -40,6 +40,7 @@ import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
 import { computeComputedSymbols } from '@/lib/eval/computed-symbols';
 import { formatNumberDe } from '@/lib/format-number-de';
+import type { SameSymbolHint } from './same-symbol-hint';
 
 // Derived symbols that the materialize pipeline writes on every A138-13 save.
 // They are NOT live formula-engine outputs, but share the same single-source
@@ -275,7 +276,7 @@ type Props = {
   initialValues: Record<string, FieldValue>;
   initialSources: Record<string, { docId: string; page?: number; note?: string } | null>;
   initialCitations: Record<string, Array<{ id: string; docId: string; page: number | null; note: string | null }>>;
-  sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown; viaSymbol?: string }>>;
+  sameSymbolValuesBySymbol: Record<string, SameSymbolHint[]>;
   /** symbol → worksheet code from which the initial value was inherited (no
    * local saved value existed). Used to render the "← [code]" hint. */
   inheritedFromBySymbol: Record<string, string>;

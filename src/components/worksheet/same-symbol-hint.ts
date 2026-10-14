@@ -3,7 +3,8 @@
  * value carried by several sheets is shown once („Bereits in M8203-01, M820-01: PLT-HS-01"), while different values
  * stay listed, each with the sheets that hold it („Bereits in A: 1; B: 2"). Groups keep first-seen order.
  */
-export type SameSymbolHint = { worksheetCode: string; value: unknown; viaSymbol?: string };
+/** C-2: `applicable: false` = shown for information only (a twin source value without a mapping) — no „Übernehmen"; `note` explains the choice. */
+export type SameSymbolHint = { worksheetCode: string; value: unknown; viaSymbol?: string; applicable?: false; note?: string };
 export type SameSymbolHintGroup = { sheets: string[]; value: string };
 
 export function groupSameSymbolHints(

@@ -134,3 +134,44 @@ describe('twin pre-fill badge — cross-standard source (U-10)', () => {
     expect(badge.getAttribute('href')).toBe('/de/projects/p1/standards/DWA-M-820-1/worksheets/M820-05');
   });
 });
+
+describe('mapped twin hint (C-2, ruling R-17) — DWA-M 820-3 PZ 6.2-1 ← DWA-M 820-1 M820-05', () => {
+  const PZ = {
+    ...FIELD,
+    id: 'fld-pz621',
+    symbol: 'pz_62_1_status',
+    labelDe: 'PZ 6.2-1',
+    unit: null,
+    dataType: 'enum' as const,
+    isRequired: true,
+    enumValues: [
+      { value: 'erreicht', label_de: 'Erreicht', label_en: 'Met' },
+      { value: 'teilweise_erreicht', label_de: 'Teilweise erreicht', label_en: 'Partially met' },
+      { value: 'nicht_erreicht', label_de: 'Nicht erreicht', label_en: 'Not met' },
+    ],
+  };
+
+  it('master Ja + own value differs: hint carries the mapped token and Übernehmen copies „erreicht"', () => {
+    initStore({ 'fld-pz621': { type: 'enum', value: 'nicht_erreicht' } });
+    render(
+      <DynamicField field={PZ as never} locale="de" projectId="p1" standardCode="DWA-M-820-3" docs={[]}
+        sameSymbolHints={[{ worksheetCode: 'M820-05', value: 'erreicht', viaSymbol: 'bedarfsplanung_projekt_complete' }]} />,
+    );
+    fireEvent.click(screen.getByText('Übernehmen'));
+    expect((useWorksheetStore.getState().values['fld-pz621'] as { value: string }).value).toBe('erreicht');
+  });
+
+  it('master Nein: hint shows the answer and the choice note, without Übernehmen', () => {
+    initStore({});
+    const note = 'Nein in DWA-M 820-1 M820-05 → hier je nach Stand „Teilweise erreicht“ oder „Nicht erreicht“ wählen.';
+    render(
+      <DynamicField field={PZ as never} locale="de" projectId="p1" standardCode="DWA-M-820-3" docs={[]}
+        sameSymbolHints={[{ worksheetCode: 'M820-05', value: false, viaSymbol: 'bedarfsplanung_projekt_complete', applicable: false, note }]} />,
+    );
+    const hint = screen.getByTestId('same-symbol-hint');
+    expect(hint).toHaveTextContent('Bereits in M820-05 (als bedarfsplanung_projekt_complete): Nein');
+    expect(hint).toHaveTextContent('Teilweise erreicht');
+    expect(screen.queryByText('Übernehmen')).not.toBeInTheDocument();
+    expect(useWorksheetStore.getState().pendingFieldIds.has('fld-pz621')).toBe(false);
+  });
+});
