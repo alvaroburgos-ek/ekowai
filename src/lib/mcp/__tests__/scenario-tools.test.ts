@@ -42,6 +42,16 @@ describe('scenario MCP tools', () => {
     expect(res.isError).toBeUndefined();
     expect(actions.setScenarioOverrides).toHaveBeenCalledWith('s1', [{ fieldId: '00000000-0000-4000-8000-000000000002', value: '1e-5', note: 'Feldversuch' }]);
   });
+  it('a refused override on create_scenario archives the orphaned case', async () => {
+    actions.createScenario.mockResolvedValue({ ok: true, scenario: { id: 's9', overrides: [] } });
+    actions.setScenarioOverrides.mockResolvedValue({ ok: false, error: 'k_i (k_i) wird berechnet (Gleichungsergebnis)' });
+    actions.archiveScenario.mockResolvedValue({ ok: true });
+    const res = await call('create_scenario', { projectId: '00000000-0000-4000-8000-000000000001', name: 'K9', overrides: [{ fieldId: '00000000-0000-4000-8000-000000000002', value: 1, note: 'x' }] });
+    expect(res.isError).toBe(true);
+    expect(actions.archiveScenario).toHaveBeenCalledWith('s9');
+    expect(res.content[0].text).toMatch(/wird berechnet/);
+    expect(res.content[0].text).toMatch(/s9/);
+  });
   it('a refused override comes back as an MCP error the model acts on', async () => {
     actions.setScenarioOverrides.mockResolvedValue({ ok: false, error: 'k_i (k_i) wird berechnet (Gleichungsergebnis)' });
     const res = await call('set_scenario_overrides', { scenarioId: '00000000-0000-4000-8000-000000000003', overrides: [{ fieldId: '00000000-0000-4000-8000-000000000004', value: 1, note: 'x' }] });

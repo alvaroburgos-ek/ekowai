@@ -29,7 +29,15 @@ export function registerScenarioTools(server: McpServer) {
   }, async ({ projectId, name, reason, overrides }) => {
     const created = unwrap(await createScenario({ projectId, name, reason: reason ?? null }));
     if (!overrides || overrides.length === 0) return created;
-    return unwrap(await setScenarioOverrides(created.scenario.id, overrides));
+    const result = await setScenarioOverrides(created.scenario.id, overrides);
+    if (!result.ok) {
+      // All-or-nothing override write refused: the just-created case is empty and would
+      // otherwise silently occupy one of the 6 active slots with no trace of the failure.
+      // Archive it (never delete) and say so, so the caller doesn't retry into a second slot.
+      await archiveScenario(created.scenario.id);
+      throw new Error(`${result.error} (Fall ${created.scenario.id} wurde angelegt, aber die Werte wurden abgelehnt — der leere Fall wurde archiviert.)`);
+    }
+    return result;
   });
 
   defineTool(server, 'set_scenario_overrides', {
