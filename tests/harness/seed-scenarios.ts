@@ -1,11 +1,11 @@
 /**
- * What-if cases harness fixture: the anonymised C4-shaped A 138 chain (src/lib/scenarios/__fixtures__/hellenthal-a138.ts)
+ * What-if cases harness fixture: the anonymised C4-shaped A 138 chain (src/lib/scenarios/__fixtures__/c4-a138-chain.ts)
  * as real rows — templates in phase order, fields with consumer_worksheets / visible_when / enum_values, equations
  * (prod UUIDs where aggregators / profiles key on them), REQ-15 on A138-10. Values are NOT seeded here: the test saves
  * them through the REAL saveWorksheet so the record's derived values come from the real save path.
  */
 import type postgres from 'postgres';
-import { FIXTURE_SHEETS } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import { FIXTURE_SHEETS } from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 
 export type ScenarioHarnessFixture = {
   projectId: string; userId: string; standardId: string;

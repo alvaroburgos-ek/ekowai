@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { runScenarioChain } from '@/lib/eval/scenario-chain';
-import { buildFixtureBaseline, overridesFor, K5 } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import { buildFixtureBaseline, overridesFor, K5 } from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 import type { ScenarioSummary } from '@/lib/scenarios/types';
 
 const a = vi.hoisted(() => ({ getScenarioResults: vi.fn() }));

@@ -2,7 +2,7 @@
 import './_harness-env-scenarios';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { getScenarioHarness } from './_harness-env-scenarios';
-import { FIXTURE_SHEETS, ENTERED, K5 } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import { FIXTURE_SHEETS, ENTERED, K5 } from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 import type * as Actions from '@/lib/actions/scenarios';
 import type { saveWorksheet as SaveWorksheet } from '@/lib/actions/worksheet';
 import type { recomputeWorksheetEquations as Recompute } from '@/lib/actions/recompute-worksheet';

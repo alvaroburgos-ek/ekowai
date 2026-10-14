@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { runScenarioCases } from '../run-cases';
 import { runScenarioChain } from '@/lib/eval/scenario-chain';
-import { buildFixtureBaseline, K5, fid } from '../__fixtures__/hellenthal-a138';
+import { buildFixtureBaseline, K5, fid } from '../__fixtures__/c4-a138-chain';
 import { buildSheetView } from '../sheet-view';
 import type { OverrideSummary, ScenarioSummary } from '../types';
 import type { ScenarioValue } from '../types';

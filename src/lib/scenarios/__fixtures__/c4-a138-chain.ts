@@ -1,5 +1,5 @@
 /**
- * TEST FIXTURE ONLY — anonymised A 138 chain shaped like case C4 (TEST-M820-C4-Hellenthal, ledger 2026-10-14).
+ * TEST FIXTURE ONLY — anonymised A 138 reference chain „C4" (swale/Mulde; numbers only, no project, place or record identifiers).
  * KOSTRA-DWD-2020 cell 151093, exact DWD rN values (l/(s·ha)), columns T = 5 / 30 / 100 a.
  * Never import from app/UI code.
  */
@@ -147,7 +147,7 @@ export const FIXTURE_SHEETS: FixtureSheet[] = [
   },
 ];
 
-/** Record state of C4 on 2026-10-14 (entered values only; ledger steps 1–6 + A138-26). */
+/** Record state of the reference chain (entered values only). */
 export const ENTERED: Record<string, ScenarioValue> = {
   'A138-03:f_methode': { type: 'number', value: 0.1 },
   'A138-04:r_D_n_table': { type: 'json', value: rainfallCarrier() },

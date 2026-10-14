@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest';
 import { runScenarioChain, MAX_PASSES } from '../scenario-chain';
 import {
   buildFixtureBaseline, overridesFor, fid, ENTERED, K5, K6, K6_GL9, KOSTRA_151093, rainfallCarrier, rows,
-} from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+} from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 import { computeMuldeGeometrySweep } from '../materialize-asm';
 import type { ScenarioBaseline } from '@/lib/scenarios/baseline';
 import type { ScenarioRun, ScenarioValue } from '@/lib/scenarios/types';
@@ -19,7 +19,7 @@ const close = (a: unknown, b: number, rel = 1e-9) => {
 const verdict = (r: ScenarioRun, code: string, req: string) => r.sheets[code].compliance.find((c) => c.code === req)?.result.kind;
 const eqState = (r: ScenarioRun, code: string, number: string) => r.sheets[code].equations.find((e) => e.equationNumber === number)?.state;
 
-describe('Real run (zero overrides) — C4 hand values, spec §6 / ledger 2026-10-14', () => {
+describe('Real run (zero overrides) — C4 hand values, spec §6', () => {
   const r = run(buildFixtureBaseline());
   it('converges', () => {
     expect(r.converged).toBe(true);

@@ -3,7 +3,7 @@ import { gl8Series, gl10Series, gl16Series, displayValue } from '../iteration-se
 import { computeMuldeGeometrySweep } from '@/lib/eval/materialize-asm';
 import { evaluateFormula } from '@/lib/eval/formula';
 import { floodCarrierFromSum } from '@/lib/eval/aggregators';
-import { KOSTRA_151093, rows } from '../__fixtures__/hellenthal-a138';
+import { KOSTRA_151093, rows } from '../__fixtures__/c4-a138-chain';
 
 const close = (a: number | null, b: number, rel = 1e-9) => {
   expect(a).not.toBeNull();

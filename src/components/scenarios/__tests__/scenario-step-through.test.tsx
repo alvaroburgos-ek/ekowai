@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ScenarioStepThrough } from '../scenario-step-through';
 import { gl10Series } from '@/lib/scenarios/iteration-series';
-import { rows } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import { rows } from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 
 const real = gl10Series(rows(30), { AcS_paved: 602.161, A_VA: 50, Q_S: 0.0015, Q_Dr: 0, V_VA: 70.0037505216 }, 30);
 const k5 = gl10Series(rows(30), { AcS_paved: 602.161, A_VA: 48.58, Q_S: 0.4858, Q_Dr: 0, V_VA: 14.57 }, 30);

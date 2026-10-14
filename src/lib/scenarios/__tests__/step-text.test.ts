@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { stepLines } from '../step-text';
 import { gl8Series, gl10Series, gl16Series } from '../iteration-series';
-import { rows } from '../__fixtures__/hellenthal-a138';
+import { rows } from '../__fixtures__/c4-a138-chain';
 
 const K5_T30 = gl10Series(rows(30), { AcS_paved: 602.161, A_VA: 48.58, Q_S: 0.4858, Q_Dr: 0, V_VA: 14.57 }, 30);
 describe('stepLines', () => {

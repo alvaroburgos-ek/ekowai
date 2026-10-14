@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildSheetView } from '../sheet-view';
 import { runScenarioChain } from '@/lib/eval/scenario-chain';
-import { buildFixtureBaseline, overridesFor, K5, fid } from '../__fixtures__/hellenthal-a138';
+import { buildFixtureBaseline, overridesFor, K5, fid } from '../__fixtures__/c4-a138-chain';
 import type { ScenarioResultsPayload, ScenarioSummary } from '../types';
 
 const b = buildFixtureBaseline();

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildFixtureBaseline, FIXTURE_SHEETS, fid, EQ } from '../__fixtures__/hellenthal-a138';
+import { buildFixtureBaseline, FIXTURE_SHEETS, fid, EQ } from '../__fixtures__/c4-a138-chain';
 import { sortSheets } from '../baseline';
 
 describe('C4-shaped fixture', () => {

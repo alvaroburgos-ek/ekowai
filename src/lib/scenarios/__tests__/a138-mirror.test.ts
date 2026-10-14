@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { mirrorA138, facilityRainRows, type MirrorAccessor } from '../a138-mirror';
 import { seriesForSheet } from '../sheet-series';
-import { rainfallCarrier } from '../__fixtures__/hellenthal-a138';
+import { rainfallCarrier } from '../__fixtures__/c4-a138-chain';
 
 function acc(nums: Record<string, number>, strs: Record<string, string> = {}): MirrorAccessor {
   const carrier = rainfallCarrier();
