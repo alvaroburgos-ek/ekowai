@@ -349,6 +349,9 @@ beforeAll(async () => {
   P.open = await makeProject('820-2: award unanswered, choice mischform, test operation not planned');
   await save(P.open, '820-2-18', { testbetrieb_vs_abnahme_choice: e('mischform') });
   await save(P.open, '820-2-22', { testbetrieb_planned: b(false) });
+  P.openAbn = await makeProject('820-2: award unanswered, acceptance tests only, test operation not planned');
+  await save(P.openAbn, '820-2-18', { testbetrieb_vs_abnahme_choice: e('abnahmepruefung') });
+  await save(P.openAbn, '820-2-22', { testbetrieb_planned: b(false) });
 
   // ── O-3 projects (820-3), driver only ──
   P.einzel = await makeProject('820-3: Einzelprojekt');
@@ -362,6 +365,7 @@ beforeAll(async () => {
     { label: 'REQ-46 · awarded, choice testbetrieb, planned=false', run: () => verdict(P.award, '820-2-22', 'REQ-46'), before: 'fail', after: 'fail' },
     { label: 'REQ-46 · awarded, choice abnahmepruefung, planned=false', run: () => verdict(P.abn, '820-2-22', 'REQ-46'), before: 'none', after: 'none' },
     { label: 'REQ-46 · award unanswered, choice mischform, planned=false', run: () => verdict(P.open, '820-2-22', 'REQ-46'), before: 'fail', after: 'wait' },
+    { label: 'REQ-46 · award unanswered, choice abnahmepruefung, planned=false (review L-1: new wait)', run: () => verdict(P.openAbn, '820-2-22', 'REQ-46'), before: 'none', after: 'wait' },
     { label: 'form-hidden 820-2-18 · self-built', run: () => formHidden(P.self, '820-2-18'), before: ['leistungsbeschreibung_type'], after: ['leistungsbeschreibung_type', 'testbetrieb_vs_abnahme_choice'] },
     { label: 'form-hidden 820-2-18 · awarded', run: () => formHidden(P.award, '820-2-18'), before: [], after: [] },
     { label: 'form-hidden 820-2-18 · award unanswered', run: () => formHidden(P.open, '820-2-18'), before: [], after: [] },
@@ -395,7 +399,7 @@ describe('DWA-M 820 follow-up O-2 / O-3 — staged block on embedded Postgres (s
     expect(r[0]).toMatchObject([{ fields: '2', fields_pre: '2', fields_post: '0', gates: '1', gates_pre: '1', gates_post: '0', fields_neither: null, gates_neither: null }]);
     expect(r[1]).toHaveLength(3);
     expect((r[2] as Array<{ project: string; choice: string; bauleistungen_vergeben: string }>).map((x) => `${x.choice} ${x.bauleistungen_vergeben}`).sort())
-      .toEqual(['abnahmepruefung true', 'mischform (unanswered)', 'testbetrieb false', 'testbetrieb true']);
+      .toEqual(['abnahmepruefung (unanswered)', 'abnahmepruefung true', 'mischform (unanswered)', 'testbetrieb false', 'testbetrieb true']);
     expect(r[3]).toEqual([]);
     const before = await probeAll();
     log('BEFORE probes', Object.fromEntries(PROBES.map((p, i) => [p.label, before[i]])));
@@ -472,7 +476,7 @@ describe('DWA-M 820 follow-up O-2 / O-3 — staged block on embedded Postgres (s
       { ws: '820-2-18', kind: 'field', item: 'testbetrieb_vs_abnahme_choice', rule: 'bauleistungen_vergeben == true', consumers: '820-2-22', sev: '' },
       { ws: '820-2-22', kind: 'gate', item: 'REQ-46', rule: "IF bauleistungen_vergeben == true THEN (IF testbetrieb_vs_abnahme_choice == 'testbetrieb' OR testbetrieb_vs_abnahme_choice == 'mischform' THEN (testbetrieb_planned == true))", consumers: '§5.7.1, §5.7.2, Bild 3', sev: 'block' },
     ]);
-    expect(post[2]).toHaveLength(4);
+    expect(post[2]).toHaveLength(5);
     expect(post[3]).toEqual([]);
     expect(post[4]).toEqual([{ gate_archive: '1', field_archive: '2', written: '3' }]);
     await runFile(ROLLBACK);

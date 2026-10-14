@@ -10,7 +10,7 @@ WITH fv(std, ws, sym, sig0, sig1) AS (VALUES
     ('DWA-M-820-2','820-2-18','testbetrieb_vs_abnahme_choice','15772f8168764ee2882c10b61c59f26e','0483b5deae0975bb559f0252e2cc9247'),
     ('DWA-M-820-2','820-2-17','bauleistungen_vergeben','e7c21572715e51bec1f2967d972829ab','17e7c6e64ee9d02ad172e596d65d5c88')),
 gv(std, ws, code, sig0, sig1) AS (VALUES
-    ('DWA-M-820-2','820-2-22','REQ-46','38e3610a38be4c2c2185315e51106408','a3b46171855456c13dd328571c20d2e5')),
+    ('DWA-M-820-2','820-2-22','REQ-46','38e3610a38be4c2c2185315e51106408','2edf0cc9d004bb0abee0dc85ae15b9e3')),
 fl AS (SELECT fv.*, md5(concat_ws('|', md5(coalesce(f.description,'')), coalesce(f.visible_when,''), coalesce(array_to_string(f.consumer_worksheets, ','),''), coalesce(md5(f.enum_values::text),''), f.label_de, coalesce(f.label_en,''), f.is_required::text, f.data_type)) AS sig
          FROM fv JOIN standards s ON s.code = fv.std JOIN worksheet_templates w ON w.standard_id = s.id AND w.code = fv.ws
          JOIN fields f ON f.worksheet_template_id = w.id AND f.symbol = fv.sym AND f.active),
