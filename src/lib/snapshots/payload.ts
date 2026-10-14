@@ -26,6 +26,7 @@ import {
   resolveColumn,
   facilityReturnPeriod,
 } from '@/lib/eval/rainfall-tables';
+import { resolveFloodColumn, type FloodColumnResolution } from '@/lib/eval/flood-column';
 import type {
   SubAreasCarrier,
   KostraCarrier,
@@ -381,30 +382,15 @@ export function buildSnapshotPayload(args: {
       ? floodFromField
       : (floodCarrierFromSum(numberBySymbol('A_C_s_flood')) ?? floodFromField);
 
-  // Task 5 — Flood 30-column resolution (snapshot path).
-  // T_n=30 is FIXED for the flood case (§5.3.4), regardless of facility T_n.
-  type FloodColSnapshotResolution =
-    | { status: 'ok';      carrier: KostraCarrier }
-    | { status: 'missing'; reason: string }
-    | { status: 'legacy' | 'none' };
-
-  const floodColResolution: FloodColSnapshotResolution = (() => {
+  // Task 5 / F-A7 — Flood column resolution (snapshot/save path).
+  // Gl. 10 iterates the column of T_n_Ue (§ 5.3.4.1: in der Regel 30 a;
+  // ggf. T_n = 100 a → r_D(100)); empty ⇒ 30. Shared resolver: flood-column.ts.
+  const floodColResolution: FloodColumnResolution = (() => {
     if (!kostraField) return { status: 'none' };
     const p = paramForEngine(kostraField.id);
     if (!p || p.valueJson == null) return { status: 'none' };
     const selected = resolveSelectedTable(normalizeRainfallCarrier(p.valueJson), rainfallTableRef);
-    if (!selected) return { status: 'none' };
-    const col30 = resolveColumn(selected, 30);
-    if (col30.status === 'ok') {
-      return { status: 'ok', carrier: { rows: col30.rows } };
-    }
-    if (col30.status === 'missing') {
-      return {
-        status: 'missing',
-        reason: 'Regenspende r_D für T_n = 30 a nicht in der Niederschlagstabelle erfasst (Hochwassernachweis Gl. 10)',
-      };
-    }
-    return { status: 'legacy' };
+    return resolveFloodColumn(selected, numberBySymbol('T_n_Ue'));
   })();
 
   const r_D_30_field_snap = fieldList.find((f) => f.symbol === 'r_D_30');
@@ -527,17 +513,14 @@ export function buildSnapshotPayload(args: {
         kostraUnit: kostraField?.unit ?? null,
       };
     } else if (eq.id === A138_26_GL10_ID) {
-      // Task 5: thread the flood 30-column resolution into the aggregator.
-      const flood30Carrier =
-        floodColResolution.status === 'ok' ? floodColResolution.carrier : null;
-      const missingFlood30Reason =
-        floodColResolution.status === 'missing' ? floodColResolution.reason : null;
+      // Task 5 / F-A7: thread the flood column (T_n_Ue) resolution into the aggregator.
       aggregator = {
         floodSubAreas: floodCarrier,
         gl10Scalars,
         kostraUnit: r_D_30_field_snap?.unit ?? null,
-        floodKostra30Col: flood30Carrier,
-        missingFlood30Reason,
+        floodKostraCol: floodColResolution.status === 'ok' ? floodColResolution.carrier : null,
+        floodReturnPeriod: floodColResolution.status === 'ok' ? floodColResolution.T_n : null,
+        missingFloodColReason: floodColResolution.status === 'missing' ? floodColResolution.reason : null,
       };
     }
 

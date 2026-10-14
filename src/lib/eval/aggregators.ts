@@ -122,28 +122,33 @@ export type AggregatorContext = {
   /** Scalar inputs Gl. 10 reads in addition to its sub-area carrier. */
   gl10Scalars?: Gl10Scalars | null;
   /**
-   * Task 5 — Flood 30-column path (native 2D grid).
+   * Task 5 / F-A7 — Flood column path (native 2D grid).
    *
-   * When the inherited rainfall grid has a populated T_n=30 column
-   * (`resolveColumn(grid, 30)` returns `status:'ok'`), the wiring layer
-   * slices those rows and hands them here. The Gl.10 aggregator then
+   * When the inherited rainfall grid has a populated column for the flood
+   * return period T_n_Ue (`resolveFloodColumn(grid, T_n_Ue)` in
+   * flood-column.ts returns `status:'ok'`; T_n_Ue empty ⇒ 30 a), the wiring
+   * layer slices those rows and hands them here. The Gl.10 aggregator then
    * delegates to `iterateGoverningDuration` via the A138-26 flood profile,
-   * sweeping all D in the 30-column and taking the governing one.
+   * sweeping all D in that column and taking the governing one.
    *
    * When null: the aggregator falls back to the legacy single-eval path
    * (reads `gl10Scalars.r_D_T_n_Ue` + `gl10Scalars.D`). Rationale: a
-   * legacy table's single curve is the design-T_n curve, NOT the 30a flood
+   * legacy table's single curve is the design-T_n curve, NOT the flood
    * curve — using it for the flood column would be wrong data.
    */
-  floodKostra30Col?: KostraCarrier | null;
+  floodKostraCol?: KostraCarrier | null;
+  /** F-A7 — the return period (a) of `floodKostraCol` (T_n_Ue, default 30);
+   * labels the substituted map / formula text. Absent ⇒ 30. */
+  floodReturnPeriod?: number | null;
   /**
-   * Task 5 — when the native grid exists but its T_n=30 column is absent
-   * (`resolveColumn(grid, 30)` returns `status:'missing'`), the wiring
-   * layer sets this reason string instead of feeding `floodKostra30Col`.
+   * Task 5 / F-A7 — when the native grid exists but its T_n_Ue column is
+   * absent (`resolveFloodColumn` returns `status:'missing'`), the wiring
+   * layer sets this reason string instead of feeding `floodKostraCol`.
    * The aggregator surfaces a manual_required with this cause, withholding
-   * computation rather than falling through to the legacy scalar path.
+   * computation rather than falling through to the legacy scalar path or a
+   * different column.
    */
-  missingFlood30Reason?: string | null;
+  missingFloodColReason?: string | null;
 };
 
 type Aggregator = {
@@ -580,21 +585,22 @@ const a138_21_gl38_condition = makeConditionAggregator(
  *
  * Two paths:
  *
- * **Native 2D grid path (Task 5)** — `ctx.floodKostra30Col` is present:
+ * **Native 2D grid path (Task 5)** — `ctx.floodKostraCol` is present:
  *   Delegates to `iterateGoverningDuration` via the A138-26 flood profile.
- *   Sweeps all D in the T_n=30 column; takes the governing (max V_Rück) D;
+ *   Sweeps all D in the T_n_Ue column (§ 5.3.4.1: in der Regel 30 a, ggf.
+ *   100 a — F-A7); takes the governing (max V_Rück) D;
  *   floors the result at 0: V_Rück = max(0, governingValue).
  *   `gl10Scalars.r_D_T_n_Ue` and `gl10Scalars.D` are NOT read — they are
  *   derived from the column iteration.
  *
- * **Legacy fallback** — `ctx.floodKostra30Col` is null/absent:
+ * **Legacy fallback** — `ctx.floodKostraCol` is null/absent:
  *   Uses the typed `gl10Scalars.r_D_T_n_Ue` + `gl10Scalars.D` scalars
  *   for a single evaluation (pre-Task-5 behaviour, unchanged).
  *   Rationale: a legacy table's single curve is the design-T_n curve —
- *   using it as the T_n=30 flood column would be wrong data.
+ *   using it as the flood column would be wrong data.
  *
- * **Missing-30-column guard** — `ctx.missingFlood30Reason` is set:
- *   The wiring layer detected a native grid whose T_n=30 column is absent.
+ * **Missing-column guard** — `ctx.missingFloodColReason` is set:
+ *   The wiring layer detected a native grid whose T_n_Ue column is absent.
  *   Returns manual_required with the provided reason string; does NOT fall
  *   through to the legacy scalar path.
  *
@@ -633,11 +639,13 @@ const a138_26_gl10: Aggregator = {
     const carrier = ctx.floodSubAreas;
     const scalars = ctx.gl10Scalars;
     const rD_unit = ctx.kostraUnit; // re-used for r_D_30 unit guard
-    const flood30Col = ctx.floodKostra30Col ?? null;
-    const missingReason = ctx.missingFlood30Reason ?? null;
+    const floodCol = ctx.floodKostraCol ?? null;
+    // F-A7: the column's return period (T_n_Ue; default 30 a) — labels only.
+    const T = ctx.floodReturnPeriod ?? 30;
+    const missingReason = ctx.missingFloodColReason ?? null;
 
-    // ── Missing-30-column guard (Task 5) ───────────────────────────────────
-    // Native grid exists but its T_n=30 column is absent. Withhold with the
+    // ── Missing-column guard (Task 5 / F-A7) ───────────────────────────────
+    // Native grid exists but its T_n_Ue column is absent. Withhold with the
     // reason provided by the wiring layer; do NOT fall through to the legacy
     // scalar path (using the design curve for the flood column is wrong data).
     if (missingReason) {
@@ -693,8 +701,8 @@ const a138_26_gl10: Aggregator = {
     }
     substituted['Σ A_E,b,a · C_S (m²)'] = AcS_paved;
 
-    // ── Path A: Iterate the T_n=30 column (Task 5 native-grid path) ────────
-    if (flood30Col !== null) {
+    // ── Path A: Iterate the T_n_Ue column (Task 5 / F-A7 native-grid path) ─
+    if (floodCol !== null) {
       // Validate the iterate-path scalars (no D or r_D — both come from the column).
       if (
         !scalars ||
@@ -721,14 +729,14 @@ const a138_26_gl10: Aggregator = {
       const scalarBag = { AcS_paved, A_VA, Q_S, Q_Dr, V_VA };
 
       const governing = iterateGoverningDuration(
-        flood30Col.rows,
+        floodCol.rows,
         (D, r_D) => floodProfile.sizing(D, r_D, scalarBag),
       );
 
       if (governing.governingD === null || governing.governingValue === null) {
         return {
           kind: 'manual_required',
-          reason: 'Keine vollständige T_n=30-Spalte für Fl.-Iteration auswertbar.',
+          reason: `Keine vollständige T_n=${T}-Spalte für Fl.-Iteration auswertbar.`,
         };
       }
 
@@ -736,10 +744,10 @@ const a138_26_gl10: Aggregator = {
       const V_Rueck = Math.max(0, governing.governingValue);
 
       governing.perDuration.forEach((p) => {
-        substituted[`D=${p.D} min, r_D(30)=${p.r_D} → V_Rück=${p.value.toFixed(3)} m³`] = p.value;
+        substituted[`D=${p.D} min, r_D(${T})=${p.r_D} → V_Rück=${p.value.toFixed(3)} m³`] = p.value;
       });
       substituted['Maßgebende Dauerstufe D (min)'] = governing.governingD;
-      substituted['r_D(30) @ maßgebende Dauerstufe (l/(s·ha))'] = governing.r_D_at_governing as number;
+      substituted[`r_D(${T}) @ maßgebende Dauerstufe (l/(s·ha))`] = governing.r_D_at_governing as number;
       substituted['V_VA (m³)'] = V_VA;
       substituted['V_Rück (vor Bodengrenze) (m³)'] = governing.governingValue;
       substituted['V_Rück = max(0, V_Rück) (m³)'] = V_Rueck;
@@ -749,14 +757,14 @@ const a138_26_gl10: Aggregator = {
         value: V_Rueck,
         substituted,
         formulaEvaluated:
-          'V_Rück = max(0, max_D [ ((r_D(30)·(Σ(A_E,b,a·C_S)+A_VA)/10000) − (Q_S+Q_Dr))·D·60/1000 − V_VA ])' +
-          `   [maßgebende D = ${governing.governingD} min, r_D(30) = ${governing.r_D_at_governing} l/(s·ha)]` +
-          '   (§5.3.4 Gl. 10, iterated D over T_n=30 column)',
+          `V_Rück = max(0, max_D [ ((r_D(${T})·(Σ(A_E,b,a·C_S)+A_VA)/10000) − (Q_S+Q_Dr))·D·60/1000 − V_VA ])` +
+          `   [maßgebende D = ${governing.governingD} min, r_D(${T}) = ${governing.r_D_at_governing} l/(s·ha)]` +
+          `   (§5.3.4 Gl. 10, iterated D over T_n=${T} column)`,
       };
     }
 
     // ── Path B: Legacy single-eval fallback ────────────────────────────────
-    // floodKostra30Col is null — either a legacy carrier or a project without a
+    // floodKostraCol is null — either a legacy carrier or a project without a
     // 2D grid yet. Use the typed r_D_T_n_Ue + D scalars exactly as before.
     // 1. Scalars first.
     if (
