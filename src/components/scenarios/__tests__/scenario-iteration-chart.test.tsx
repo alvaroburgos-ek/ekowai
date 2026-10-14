@@ -127,4 +127,28 @@ describe('ScenarioIterationChart', () => {
       if (xOverlap) expect(Math.abs(box.y - captionBox.y)).toBeGreaterThanOrEqual(14);
     }
   });
+  it('a peak at D 10080 with a long case name keeps the whole label (number included) inside the plot — end-anchored', () => {
+    const long = 'K5 – Feldversuch k_f 10⁻⁵ · T = 30 a';
+    const edge: ChartSeries[] = [
+      { id: 'k5:T30', label: long, slot: 3, dashed: false, points: pts([1, 5, 94.688612928]), governingIndex: 2, boundaryLimited: true },
+      { id: 'k6:T30', label: long.replace('K5', 'K6'), slot: 4, dashed: false, points: pts([1, 5, 94.5]), governingIndex: 2, boundaryLimited: true },
+    ];
+    render(<ScenarioIterationChart locale="de" title="Gl. 10" unit="m³" series={edge} />);
+    const right = CHART.W - CHART.M.r;
+    for (const id of ['k5:T30', 'k6:T30']) {
+      const label = screen.getByTestId('peak-label-' + id);
+      expect(label.textContent).toContain('94,');
+      expect(label.getAttribute('text-anchor')).toBe('end');
+      const x = Number(label.getAttribute('x'));
+      expect(x).toBeLessThanOrEqual(right);
+      expect(x - estimateLabelWidth(label.textContent!)).toBeGreaterThanOrEqual(0);
+      const cap = screen.getByTestId('boundary-' + id);
+      expect(cap.getAttribute('text-anchor')).toBe('end');
+      expect(Number(cap.getAttribute('x'))).toBeLessThanOrEqual(right);
+    }
+    // collision rules still apply: the two labels do not share a line
+    const y1 = Number(screen.getByTestId('peak-label-k5:T30').getAttribute('y'));
+    const y2 = Number(screen.getByTestId('peak-label-k6:T30').getAttribute('y'));
+    expect(Math.abs(y1 - y2)).toBeGreaterThanOrEqual(14);
+  });
 });

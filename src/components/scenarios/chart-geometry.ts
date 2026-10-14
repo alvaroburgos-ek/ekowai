@@ -59,6 +59,20 @@ export function estimateLabelWidth(text: string): number {
   return text.length * 6;
 }
 
+/**
+ * Horizontal placement of a direct label next to a point at x = cx (final review A1-I3): right of the point,
+ * start-anchored, when the whole label fits before the plot's right edge; otherwise left of the point, end-anchored,
+ * so the value at the end of the label is never clipped (e.g. a boundary-limited peak at D = 10080).
+ * `left` is the label's left edge — the x the collision layout works with.
+ */
+const LABEL_OFFSET = 8;
+export function placeLabelX(cx: number, width: number): { x: number; anchor: 'start' | 'end'; left: number } {
+  const right = CHART.W - CHART.M.r;
+  if (cx + LABEL_OFFSET + width <= right) return { x: cx + LABEL_OFFSET, anchor: 'start', left: cx + LABEL_OFFSET };
+  const x = Math.min(cx - LABEL_OFFSET, right);
+  return { x, anchor: 'end', left: x - width };
+}
+
 export type PeakLabelBox = { id: string; x: number; y: number; width: number };
 export type LabelBounds = { top: number; bottom: number };
 

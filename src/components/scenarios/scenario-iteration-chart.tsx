@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import { fmtNum } from '@/lib/scenarios/format';
 import {
   CHART, X_TICKS, xScale, yDomain, yScale, yTicks, labelDuration, nearestIndex, seriesColor,
-  estimateLabelWidth, layoutPeakLabels, type ChartSeries, type PeakLabelBox,
+  estimateLabelWidth, layoutPeakLabels, placeLabelX, type ChartSeries, type PeakLabelBox,
 } from './chart-geometry';
 
 const T = {
@@ -33,12 +33,13 @@ export function ScenarioIterationChart({ locale, title, unit, series }: { locale
   visible.forEach((s) => {
     if (s.governingIndex == null || !s.points[s.governingIndex]) return;
     const p = s.points[s.governingIndex];
-    const labelX = Math.min(sx(p.D) + 8, W - 140);
     const text = `${s.label}: ${fmtNum(p.value, locale)}`;
-    peakBoxes.push({ id: s.id, x: labelX, y: sy(p.value) - 8, width: estimateLabelWidth(text) });
+    const width = estimateLabelWidth(text);
+    peakBoxes.push({ id: s.id, x: placeLabelX(sx(p.D), width).left, y: sy(p.value) - 8, width });
     // The boundary caption never moves itself, but a nudged peak label must still avoid it.
     if (s.boundaryLimited) {
-      captionObstacles.push({ id: `boundary-${s.id}`, x: labelX, y: sy(p.value) + 14, width: estimateLabelWidth(t.boundary) });
+      const cw = estimateLabelWidth(t.boundary);
+      captionObstacles.push({ id: `boundary-${s.id}`, x: placeLabelX(sx(p.D), cw).left, y: sy(p.value) + 14, width: cw });
     }
   });
   const plotBounds = { top: M.t, bottom: H - M.b };
@@ -92,14 +93,16 @@ export function ScenarioIterationChart({ locale, title, unit, series }: { locale
             if (s.governingIndex == null || !s.points[s.governingIndex]) return null;
             const p = s.points[s.governingIndex];
             const cx = sx(p.D); const cy = sy(p.value);
-            const labelX = Math.min(cx + 8, W - 140);
+            const text = `${s.label}: ${fmtNum(p.value, locale)}`;
+            const lx = placeLabelX(cx, estimateLabelWidth(text));
+            const bx = placeLabelX(cx, estimateLabelWidth(t.boundary));
             const labelY = peakLabelY.get(s.id) ?? cy - 8;
             return (
               <g key={`pk-${s.id}`}>
                 <circle data-testid={`peak-${s.id}`} cx={cx} cy={cy} r={5}
                   fill={s.boundaryLimited ? 'var(--paper, #fff)' : seriesColor(s.slot)} stroke={s.boundaryLimited ? seriesColor(s.slot) : 'var(--paper, #fff)'} strokeWidth={2} />
-                <text data-testid={`peak-label-${s.id}`} x={labelX} y={labelY} fontSize="11" fill="var(--ink)">{`${s.label}: ${fmtNum(p.value, locale)}`}</text>
-                {s.boundaryLimited && <text data-testid={`boundary-${s.id}`} x={labelX} y={cy + 14} fontSize="10" fill="var(--subtext, #666)">{t.boundary}</text>}
+                <text data-testid={`peak-label-${s.id}`} x={lx.x} y={labelY} textAnchor={lx.anchor} fontSize="11" fill="var(--ink)">{text}</text>
+                {s.boundaryLimited && <text data-testid={`boundary-${s.id}`} x={bx.x} y={cy + 14} textAnchor={bx.anchor} fontSize="10" fill="var(--subtext, #666)">{t.boundary}</text>}
               </g>
             );
           })}

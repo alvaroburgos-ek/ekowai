@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CHART, xScale, yDomain, yTicks, labelDuration, nearestIndex, seriesColor } from '../chart-geometry';
+import { CHART, xScale, yDomain, yTicks, labelDuration, nearestIndex, seriesColor, placeLabelX } from '../chart-geometry';
 
 describe('chart geometry', () => {
   it('log x from 5 min to 7 d spans the plot', () => {
@@ -30,5 +30,15 @@ describe('chart geometry', () => {
   it('Real is ink, cases keep their slot colour', () => {
     expect(seriesColor(0)).toBe('var(--scn-real)');
     expect(seriesColor(4)).toBe('var(--scn-4)');
+  });
+  it('placeLabelX: start-anchored right of the point when it fits, end-anchored left of it near the right edge', () => {
+    expect(placeLabelX(200, 120)).toEqual({ x: 208, anchor: 'start', left: 208 });
+    const edge = CHART.W - CHART.M.r;
+    const r = placeLabelX(edge, 250);
+    expect(r).toEqual({ x: edge - 8, anchor: 'end', left: edge - 8 - 250 });
+    expect(r.x).toBeLessThanOrEqual(edge);
+    // just fits: still start-anchored
+    expect(placeLabelX(edge - 8 - 100, 100).anchor).toBe('start');
+    expect(placeLabelX(edge - 8 - 100, 101).anchor).toBe('end');
   });
 });
