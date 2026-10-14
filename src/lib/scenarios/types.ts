@@ -119,7 +119,8 @@ export type ScenarioResultsPayload = {
   available: boolean;
   standardCode: string;
   real: ScenarioRun | null;
-  cases: Array<{ scenario: ScenarioSummary; run: ScenarioRun }>;
+  /** `error` set ⇒ this case's run threw; `run` is then empty (Real and the other cases are unaffected). */
+  cases: Array<{ scenario: ScenarioSummary; run: ScenarioRun; error?: string }>;
   ignoredScenarioIds: string[];
 };
 

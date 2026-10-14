@@ -65,7 +65,7 @@ export function registerScenarioTools(server: McpServer) {
     return {
       available: r.available, standardCode: r.standardCode, ignoredScenarioIds: r.ignoredScenarioIds,
       real: r.real ? compactRun(r.real, per) : null,
-      cases: r.cases.map((c) => ({ id: c.scenario.id, name: c.scenario.name, slot: c.scenario.slot, ...compactRun(c.run, per) })),
+      cases: r.cases.map((c) => ({ id: c.scenario.id, name: c.scenario.name, slot: c.scenario.slot, ...(c.error ? { error: c.error } : {}), ...compactRun(c.run, per) })),
     };
   });
 }

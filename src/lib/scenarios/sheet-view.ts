@@ -17,16 +17,16 @@ export type SheetView = {
 };
 
 const TXT = {
-  de: { hidden: '– (ausgeblendet)', missing: 'nicht berechnet: fehlt', unstable: 'Rechnung nicht stabil — Ergebnis vorläufig', provisional: '(vorläufig)', mismatch: 'gespeicherter Wert weicht ab', carried: 'Realwert übernommen — im Fall nicht nachgerechnet', skipped: 'Annahme nicht angewendet' },
-  en: { hidden: '– (hidden)', missing: 'not computed: missing', unstable: 'calculation did not settle — result provisional', provisional: '(provisional)', mismatch: 'stored value differs', carried: 'real value carried — not recomputed in the case', skipped: 'assumption not applied' },
+  de: { hidden: '– (ausgeblendet)', missing: 'nicht berechnet: fehlt', unstable: 'Rechnung nicht stabil — Ergebnis vorläufig', provisional: '(vorläufig)', mismatch: 'gespeicherter Wert weicht ab', carried: 'Realwert übernommen — im Fall nicht nachgerechnet', skipped: 'Annahme nicht angewendet', failed: 'Fall konnte nicht gerechnet werden — Real und die anderen Fälle sind nicht betroffen', failedCell: 'nicht berechnet: Fehler im Fall' },
+  en: { hidden: '– (hidden)', missing: 'not computed: missing', unstable: 'calculation did not settle — result provisional', provisional: '(provisional)', mismatch: 'stored value differs', carried: 'real value carried — not recomputed in the case', skipped: 'assumption not applied', failed: 'case could not be computed — Real and the other cases are unaffected', failedCell: 'not computed: error in the case' },
 } as const;
 const TITLES: Record<string, string> = { gl8: 'Gl. 8 — V_VA', gl10: 'Gl. 10 — V_Rück', gl16: 'Gl. 16 — A_S,m' };
 
 export function buildSheetView(payload: ScenarioResultsPayload, code: string, locale: 'de' | 'en'): SheetView {
   const t = TXT[locale];
-  const runs: Array<{ id: string; label: string; slot: number; run: ScenarioRun }> = [];
-  if (payload.real) runs.push({ id: 'real', label: 'Real', slot: 0, run: payload.real });
-  for (const c of payload.cases) runs.push({ id: c.scenario.id, label: c.scenario.name, slot: c.scenario.slot, run: c.run });
+  const runs: Array<{ id: string; label: string; slot: number; run: ScenarioRun; failed: boolean }> = [];
+  if (payload.real) runs.push({ id: 'real', label: 'Real', slot: 0, run: payload.real, failed: false });
+  for (const c of payload.cases) runs.push({ id: c.scenario.id, label: c.scenario.name, slot: c.scenario.slot, run: c.run, failed: c.error != null });
   const realRun = payload.real;
   // Spec Review Focus 5: a run that did not settle never shows a number that looks final.
   const num = (x: number, run: ScenarioRun) => run.converged ? fmtNum(x, locale) : `${fmtNum(x, locale)} ${t.provisional}`;
@@ -41,7 +41,8 @@ export function buildSheetView(payload: ScenarioResultsPayload, code: string, lo
     rows.push({
       key: `eq:${e.equationId}`,
       label: `Gl. ${e.equationNumber} · ${out}`,
-      cells: runs.map(({ run }): SheetCell => {
+      cells: runs.map(({ run, failed }): SheetCell => {
+        if (failed) return { kind: 'missing', text: t.failedCell };
         const sh = run.sheets[code];
         const st = sh?.equations.find((x) => x.equationId === e.equationId)?.state;
         if (sh?.hiddenSymbols.includes(out)) return { kind: 'hidden', text: t.hidden };
@@ -64,7 +65,8 @@ export function buildSheetView(payload: ScenarioResultsPayload, code: string, lo
   for (const sym of [...extra].sort()) {
     rows.push({
       key: `field:${sym}`, label: sym,
-      cells: runs.map(({ id, run }): SheetCell => {
+      cells: runs.map(({ id, run, failed }): SheetCell => {
+        if (failed) return { kind: 'missing', text: t.failedCell };
         const c = Object.values(run.values).find((x) => x.worksheetCode === code && x.symbol === sym);
         if (run.sheets[code]?.hiddenSymbols.includes(sym)) return { kind: 'hidden', text: t.hidden };
         if (!c || c.value == null) return { kind: 'missing', text: '—' };
@@ -115,7 +117,8 @@ export function buildSheetView(payload: ScenarioResultsPayload, code: string, lo
   const charts = [...byKind.entries()].map(([kind, series]) => ({ kind, title: TITLES[kind] ?? kind, unit: unitByKind.get(kind) ?? '', series }));
 
   const warnings: string[] = [];
-  for (const { id, label, run } of runs) {
+  for (const { id, label, run, failed } of runs) {
+    if (failed) { warnings.push(`${label}: ${t.failed}`); continue; }
     if (!run.converged) warnings.push(`${label}: ${t.unstable}`);
     const carried = run.notRecomputed.filter((n) => n.worksheetCode === code);
     if (carried.length > 0 && id !== 'real') warnings.push(`${label}: ${t.carried} — ${carried.map((n) => n.symbol).join(', ')}`);

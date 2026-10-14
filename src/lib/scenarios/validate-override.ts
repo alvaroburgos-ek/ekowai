@@ -53,6 +53,9 @@ export function overrideRefusal(
   return null;
 }
 
+/** Final review A2-I1: a case value is at most 64 KB serialized (UTF-8). */
+export const MAX_OVERRIDE_BYTES = 64 * 1024;
+
 type Result = { ok: true; value: ScenarioValue } | { ok: false; error: string };
 
 export function coerceOverrideValue(field: OverrideFieldMeta, raw: unknown): Result {
@@ -63,6 +66,10 @@ export function coerceOverrideValue(field: OverrideFieldMeta, raw: unknown): Res
     v = toFieldValue(field.dataType, raw) as ScenarioValue;
   } catch (e) {
     return { ok: false, error: `${name}: ${e instanceof Error ? e.message : String(e)}` };
+  }
+  const bytes = new TextEncoder().encode(JSON.stringify(v.value ?? null)).length;
+  if (bytes > MAX_OVERRIDE_BYTES) {
+    return { ok: false, error: `${name}: Wert zu groß (${Math.ceil(bytes / 1024)} KB, höchstens 64 KB) / value too large (max 64 KB).` };
   }
   const rules = field.validationRules ?? {};
   switch (v.type) {
@@ -103,8 +110,10 @@ export function coerceOverrideValue(field: OverrideFieldMeta, raw: unknown): Res
             return { ok: false, error: `${name}: Zeile ${i + 1}: unbekannte Spalte(n) ${bad.join(', ')} — erlaubt: ${[...keys].join(', ')}.` };
           }
         }
-      } else if (v.value == null || typeof v.value !== 'object') {
-        return { ok: false, error: `${name}: JSON-Objekt erwartet.` };
+      } else {
+        // Final review A2-I1: other JSON carriers (rainfall tables r_D_n_table, sub_areas_A138_26, …) have no
+        // shape check — a malformed value would break the run. A1 never needs them as case inputs.
+        return { ok: false, error: `${name}: in einem Fall können nur Register-Felder als JSON überschrieben werden / only register fields can be overridden as JSON in a case.` };
       }
       break;
     }

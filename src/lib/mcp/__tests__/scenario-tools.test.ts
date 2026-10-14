@@ -67,4 +67,15 @@ describe('scenario MCP tools', () => {
     expect(body.real.sheets['A138-12'].compliance).toEqual([{ code: 'A138-REQ-15', verdict: 'pass' }]);
     expect(compactRun(RUN, true).iterations[0].perDuration).toHaveLength(1);
   });
+  it('get_scenario_results passes a failed case through as an error entry, Real intact', async () => {
+    const empty: ScenarioRun = { ...RUN, caseId: 'bad', converged: false, passes: 0, sheets: {}, iterations: [] };
+    actions.getScenarioResults.mockResolvedValue({ ok: true, available: true, standardCode: 'DWA-A-138-1', real: RUN, ignoredScenarioIds: [],
+      cases: [{ scenario: { id: 'bad', name: 'BAD', slot: 2 }, run: empty, error: 'Fall konnte nicht gerechnet werden.' }, { scenario: { id: 'k5', name: 'K5', slot: 1 }, run: RUN }] });
+    const res = await call('get_scenario_results', { projectId: '00000000-0000-4000-8000-000000000001', standardCode: 'DWA-A-138-1' });
+    expect(res.isError).toBeUndefined();
+    const body = JSON.parse(res.content[0].text);
+    expect(body.cases[0]).toMatchObject({ id: 'bad', error: 'Fall konnte nicht gerechnet werden.' });
+    expect(body.cases[1].error).toBeUndefined();
+    expect(body.real.sheets['A138-12']).toBeTruthy();
+  });
 });

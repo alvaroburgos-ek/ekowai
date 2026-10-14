@@ -19,7 +19,7 @@ import { overrideRefusal, coerceOverrideValue, type OverrideFieldMeta } from '@/
 import { paramToFieldValue } from '@/lib/scenarios/values';
 import { buildSummaries } from '@/lib/scenarios/summaries';
 import { loadScenarioBaseline } from '@/lib/scenarios/load-baseline';
-import { runScenarioChain } from '@/lib/eval/scenario-chain';
+import { runScenarioCases } from '@/lib/scenarios/run-cases';
 
 type Fail = { ok: false; error: string };
 const LIMIT_MSG = 'Höchstens 6 aktive Fälle je Projekt — zuerst einen Fall archivieren.';
@@ -365,14 +365,7 @@ export async function getScenarioResults(projectId: string, standardCode: string
     available = false;
     if (requested) ignored.push(...requested);
   }
-  const real = runScenarioChain(baseline, [], { caseId: 'real', approvalWithholding: 'bypass' });
-  const cases = summaries.map((scenario) => ({
-    scenario,
-    run: runScenarioChain(
-      baseline,
-      scenario.overrides.filter((o) => o.standardCode === baseline.standardCode).map((o) => ({ fieldId: o.fieldId, value: o.value })),
-      { caseId: scenario.id, approvalWithholding: 'bypass' },
-    ),
-  }));
+  // Per-case containment: a case that throws becomes an error entry; Real and the other cases still render.
+  const { real, cases } = runScenarioCases(baseline, summaries);
   return { ok: true, available, standardCode: baseline.standardCode, real, cases, ignoredScenarioIds: ignored };
 }

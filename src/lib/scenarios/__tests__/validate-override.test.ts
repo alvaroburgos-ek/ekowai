@@ -61,6 +61,32 @@ describe('coerceOverrideValue', () => {
     expect(coerceOverrideValue(f, '[{"label":"x"}]').ok).toBe(true); // bare array wrapped by toFieldValue
     expect(coerceOverrideValue(f, { notRows: 1 }).ok).toBe(false);
   });
+  it('refuses JSON overrides on non-register fields (r_D_n_table, sub_areas_A138_26) with a DE/EN message', () => {
+    for (const symbol of ['r_D_n_table', 'sub_areas_A138_26']) {
+      const r = coerceOverrideValue(base({ symbol, labelDe: symbol, dataType: 'json' }), '{"rows":[null]}');
+      expect(r.ok).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toMatch(/nur Register-Felder/);
+        expect(r.error).toMatch(/only register fields/);
+      }
+    }
+  });
+  it('a register row that is null is refused', () => {
+    const r = coerceOverrideValue(base({ symbol: 'surface_inventory', dataType: 'json' }), { rows: [null] });
+    expect(r.ok).toBe(false);
+  });
+  it('caps the serialized override value at 64 KB (DE/EN)', () => {
+    const f = base({ symbol: 'surface_inventory', dataType: 'json' });
+    const row = (i: number) => ({ id: `r${i}`, label: 'x'.repeat(200), area_m2: 1, c_i: 0.9, kind: 'paved' });
+    const big = { rows: Array.from({ length: 400 }, (_, i) => row(i)) };
+    expect(new TextEncoder().encode(JSON.stringify(big)).length).toBeGreaterThan(64 * 1024);
+    const r = coerceOverrideValue(f, big);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/64 KB/);
+    expect(coerceOverrideValue(f, { rows: Array.from({ length: 10 }, (_, i) => row(i)) }).ok).toBe(true);
+    const t = coerceOverrideValue(base({ dataType: 'text' }), 'ü'.repeat(40 * 1024));
+    expect(t.ok).toBe(false);
+  });
   it('validates dates and text length', () => {
     expect(coerceOverrideValue(base({ dataType: 'date' }), '2026-10-14').ok).toBe(true);
     expect(coerceOverrideValue(base({ dataType: 'date' }), '14.10.2026').ok).toBe(false);
