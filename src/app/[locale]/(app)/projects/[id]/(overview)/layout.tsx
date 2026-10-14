@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { archiveProject } from '@/lib/actions/project';
 import { ProjectTabs } from '@/components/projects/project-tabs';
 import { isVsmeReport } from '@/lib/db/queries/is-vsme-report';
+import { loadScenarioUiGate } from '@/lib/scenarios/ui-gate';
 
 export default async function OverviewLayout({
   children,
@@ -32,6 +33,8 @@ export default async function OverviewLayout({
   if (!project) notFound();
 
   const isVsme = await isVsmeReport(id);
+  // „Fälle" tab only when the case tables exist and the viewer is internal (same rule as the case actions).
+  const scenarioGate = await loadScenarioUiGate(id);
 
   const archiveAction = async () => {
     'use server';
@@ -87,7 +90,7 @@ export default async function OverviewLayout({
         </dl>
       </header>
 
-      <ProjectTabs locale={localeTyped} projectId={id} isVsme={isVsme} showScenarios />
+      <ProjectTabs locale={localeTyped} projectId={id} isVsme={isVsme} showScenarios={scenarioGate.tab} />
 
       <div>{children}</div>
     </article>
