@@ -55,10 +55,47 @@ export const VERIFICATION_LABELS_DE: Record<string, { short: string; title: stri
   },
 };
 
-export function verificationStatusLabel(status: string): string {
-  return VERIFICATION_LABELS_DE[status]?.short ?? status;
+/** O-8 (UX follow-up 2026-10-14): the same labels for the EN locale. Keys mirror VERIFICATION_LABELS_DE. */
+export const VERIFICATION_LABELS_EN: Record<string, { short: string; title: string }> = {
+  imported_unverified: {
+    short: 'Source unverified',
+    title: 'Imported from the Pass3c workbook, not yet checked against the standard.',
+  },
+  engineer_verified: {
+    short: 'Engineer confirmed',
+    title: 'Confirmed against the source standard by an engineer.',
+  },
+  verified_against_standard: {
+    short: 'Source verified',
+    title: 'Content verified against the source standard (pile audit).',
+  },
+  needs_engineer_review: {
+    short: 'Engineer review needed',
+    title: 'Source-level question open — an engineer must check.',
+  },
+  inferred_from_worksheet: {
+    short: 'Wizard-internal',
+    title: 'Derived from wizard logic, not stated in the standard itself.',
+  },
+  disputed: {
+    short: 'Disputed',
+    title: 'Verification challenged — the value/definition presumably deviates from the standard.',
+  },
+  corrected: {
+    short: 'Corrected',
+    title: 'Corrected against the standard after a challenge and verified again.',
+  },
+};
+
+function verificationLabels(locale: 'de' | 'en'): Record<string, { short: string; title: string }> {
+  return locale === 'en' ? VERIFICATION_LABELS_EN : VERIFICATION_LABELS_DE;
 }
 
-export function verificationStatusTitle(status: string): string {
-  return VERIFICATION_LABELS_DE[status]?.title ?? status;
+/** Reader-facing short label; `locale` defaults to German (server / PDF callers unchanged). */
+export function verificationStatusLabel(status: string, locale: 'de' | 'en' = 'de'): string {
+  return verificationLabels(locale)[status]?.short ?? status;
+}
+
+export function verificationStatusTitle(status: string, locale: 'de' | 'en' = 'de'): string {
+  return verificationLabels(locale)[status]?.title ?? status;
 }

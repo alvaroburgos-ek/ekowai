@@ -22,9 +22,9 @@ type Equation = {
 };
 
 /** U-8: hover text carrying the verification status for viewers who do not see the badge (non-platform engineers). */
-function verificationHoverTitle(status: string, isPlatformEngineer: boolean): string | undefined {
+function verificationHoverTitle(status: string, isPlatformEngineer: boolean, locale: 'de' | 'en'): string | undefined {
   if (isPlatformEngineer || status === 'engineer_verified') return undefined;
-  return `${verificationStatusLabel(status)} — ${verificationStatusTitle(status)}`;
+  return `${verificationStatusLabel(status, locale)} — ${verificationStatusTitle(status, locale)}`;
 }
 
 export function EquationsBlock({
@@ -51,7 +51,7 @@ export function EquationsBlock({
   return (
     <section className="border-t border-hairline pt-6 mt-8 space-y-4">
       <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-        Gleichungen dieses Arbeitsblatts
+        {locale === 'en' ? 'Equations for this worksheet' : 'Gleichungen dieses Arbeitsblatts'}
       </h2>
       <ul className="space-y-3">
         {equations.map((eq) => (
@@ -59,9 +59,9 @@ export function EquationsBlock({
             <div className="flex items-baseline gap-3">
               <span
                 className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0"
-                title={eq.clauseReference ? undefined : verificationHoverTitle(eq.verificationStatus, isPlatformEngineer)}
+                title={eq.clauseReference ? undefined : verificationHoverTitle(eq.verificationStatus, isPlatformEngineer, locale)}
               >
-                Gl. {eq.equationNumber}
+                {locale === 'en' ? 'Eq.' : 'Gl.'} {eq.equationNumber}
               </span>
               <KatexFormula
                 source={eq.formula}
@@ -70,15 +70,15 @@ export function EquationsBlock({
             </div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[68px] flex flex-wrap gap-3 items-baseline">
               {eq.clauseReference && (
-                <ClauseChip clauseReference={eq.clauseReference} title={verificationHoverTitle(eq.verificationStatus, isPlatformEngineer)} />
+                <ClauseChip clauseReference={eq.clauseReference} title={verificationHoverTitle(eq.verificationStatus, isPlatformEngineer, locale)} />
               )}
               {/* U-8: the verification badge is a platform-engineer tool; others see the status as the chip's title. */}
               {isPlatformEngineer && eq.verificationStatus !== 'engineer_verified' && (
                 <span
                   className="text-accent-2 normal-case tracking-normal"
-                  title={verificationStatusTitle(eq.verificationStatus)}
+                  title={verificationStatusTitle(eq.verificationStatus, locale)}
                 >
-                  {verificationStatusLabel(eq.verificationStatus)}
+                  {verificationStatusLabel(eq.verificationStatus, locale)}
                 </span>
               )}
               {isPlatformEngineer && (

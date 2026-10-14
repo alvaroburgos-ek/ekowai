@@ -1145,7 +1145,7 @@ export function WorksheetForm({
               <Link
                 href={`/${locale}/projects/${projectId}/standards/${standardCode}/worksheets/${f.inheritedFromWorksheet}`}
                 className="hover:text-accent transition-colors underline-offset-2 hover:underline"
-                title={`Arbeitsblatt ${f.inheritedFromWorksheet} öffnen`}
+                title={locale === 'en' ? `Open worksheet ${f.inheritedFromWorksheet}` : `Arbeitsblatt ${f.inheritedFromWorksheet} öffnen`}
               >
                 ← {f.inheritedFromWorksheet}
               </Link>
@@ -1176,7 +1176,9 @@ export function WorksheetForm({
           data-testid="worksheet-lock-banner"
           className="border border-hairline rounded p-3 text-sm bg-paper-2 text-ink"
         >
-          Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen“.
+          {locale === 'en'
+            ? 'Read-only (approved/final) — use “Reopen” to edit.'
+            : 'Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen“.'}
         </div>
       )}
 
@@ -1190,16 +1192,20 @@ export function WorksheetForm({
           data-testid="twin-prefill-bar"
         >
           <span>
-            {twinPrefillIds.length === 1
-              ? '1 Feld aus vorgelagerten Arbeitsblättern vorbefüllt (noch nicht gespeichert).'
-              : `${twinPrefillIds.length} Felder aus vorgelagerten Arbeitsblättern vorbefüllt (noch nicht gespeichert).`}
+            {locale === 'en'
+              ? twinPrefillIds.length === 1
+                ? '1 field prefilled from upstream worksheets (not saved yet).'
+                : `${twinPrefillIds.length} fields prefilled from upstream worksheets (not saved yet).`
+              : twinPrefillIds.length === 1
+                ? '1 Feld aus vorgelagerten Arbeitsblättern vorbefüllt (noch nicht gespeichert).'
+                : `${twinPrefillIds.length} Felder aus vorgelagerten Arbeitsblättern vorbefüllt (noch nicht gespeichert).`}
           </span>
           <button
             type="button"
             onClick={acceptAllTwinPrefills}
             className="text-xs px-3 py-1 rounded border border-hairline-strong hover:bg-paper-2 text-ink"
           >
-            Alle Vorbefüllungen übernehmen
+            {locale === 'en' ? 'Apply all prefills' : 'Alle Vorbefüllungen übernehmen'}
           </button>
         </div>
       )}

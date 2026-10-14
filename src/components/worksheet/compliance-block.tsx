@@ -55,6 +55,7 @@ type Props = {
 };
 
 export function ComplianceBlock({ requirements, suggestions, fields, locale, projectId, hiddenSymbols, values: valuesProp }: Props) {
+  const tx = COMPLIANCE_TEXT[locale];
   const storeValues = useWorksheetStore((s) => s.values);
   const values = valuesProp ?? storeValues;
 
@@ -122,17 +123,17 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
     <section className="border-t border-hairline pt-6 mt-8 space-y-4">
       <div className="flex items-baseline justify-between gap-4 flex-wrap">
         <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-          Compliance-Anforderungen
+          {tx.heading}
         </h2>
         <div className="text-[10px] uppercase tracking-[0.18em] text-subtext flex gap-3">
           {counts.pass > 0 && <span className="text-success">✓ {counts.pass}</span>}
           {counts.failBlock > 0 && (
-            <span className="text-error" title="Blockierende Verstöße">
+            <span className="text-error" title={tx.blockingViolations}>
               ✗ {counts.failBlock} block
             </span>
           )}
           {counts.failWarn > 0 && (
-            <span className="text-warning" title="Empfehlungs-Verstöße">
+            <span className="text-warning" title={tx.advisoryViolations}>
               ⚠ {counts.failWarn} warn
             </span>
           )}
@@ -140,7 +141,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
           {counts.not_applicable > 0 && (
             <span
               className="text-subtext"
-              title="Nicht anwendbar — Bedingung bezieht sich auf ein ausgeblendetes Feld"
+              title={tx.notApplicableTitle}
             >
               – {counts.not_applicable} n.a.
             </span>
@@ -151,12 +152,12 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
             </span>
           )}
           {counts.attestation > 0 && (
-            <span className="text-accent" title="Ingenieur-Bestätigung ausstehend">
+            <span className="text-accent" title={tx.attestationPending}>
               § {counts.attestation} sign-off
             </span>
           )}
           {counts.broken > 0 && (
-            <span className="text-subtext" title="Bedingung nicht auswertbar">
+            <span className="text-subtext" title={tx.notEvaluable}>
               ! {counts.broken} broken
             </span>
           )}
@@ -220,7 +221,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                   there is no threshold to explain against a value the engineer
                   cannot see. */}
               {(result.kind === 'fail' || result.kind === 'pending') && (
-                <GateExplanationBlock condition={cr.condition} lookup={lookup} />
+                <GateExplanationBlock condition={cr.condition} lookup={lookup} locale={locale} />
               )}
               {result.kind === 'fail' && filteredSuggestions.length > 0 && (
                 <div className="ml-8 sm:ml-[140px] mt-2 space-y-2">
@@ -254,9 +255,11 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
 function GateExplanationBlock({
   condition,
   lookup,
+  locale,
 }: {
   condition: string;
   lookup: (sym: string) => number | string | boolean | null | undefined;
+  locale: 'de' | 'en';
 }) {
   const explanation = useMemo(
     () => explainCondition(condition, lookup),
@@ -266,7 +269,7 @@ function GateExplanationBlock({
   return (
     <details className="ml-8 sm:ml-[140px] mt-1 text-xs">
       <summary className="cursor-pointer text-subtext hover:text-ink select-none">
-        Warum?
+        {COMPLIANCE_TEXT[locale].why}
       </summary>
       <ul className="mt-1.5 space-y-1.5 border-l-2 border-hairline pl-3">
         {explanation.leaves.map((leaf, i) => (
@@ -355,7 +358,7 @@ function SuggestionCard({
               disabled={pending || added}
               className="text-[10px] uppercase tracking-[0.18em] text-accent hover:text-ink underline disabled:opacity-50"
             >
-              {added ? '✓ Hinzugefügt' : pending ? '…' : 'Zu Projekt hinzufügen'}
+              {added ? COMPLIANCE_TEXT[locale].added : pending ? '…' : COMPLIANCE_TEXT[locale].addToProject}
             </button>
           )}
         {wsLink && (
@@ -363,11 +366,11 @@ function SuggestionCard({
             href={wsLink}
             className="text-[10px] uppercase tracking-[0.18em] text-accent hover:text-ink underline"
           >
-            Worksheet öffnen →
+            {COMPLIANCE_TEXT[locale].openWorksheet}
           </Link>
         )}
         {error && (
-          <span className="text-[10px] text-error">Fehler: {error}</span>
+          <span className="text-[10px] text-error">{COMPLIANCE_TEXT[locale].error} {error}</span>
         )}
       </div>
     </div>
@@ -382,6 +385,72 @@ const TYPE_LABELS: Record<
   alternative_standard: { de: 'Alternatives Regelwerk', en: 'Alternative standard' },
   upstream_treatment: { de: 'Vorbehandlung', en: 'Upstream treatment' },
   design_change: { de: 'Designänderung', en: 'Design change' },
+};
+
+/** O-8 (UX follow-up 2026-10-14): the block's fixed texts per locale (DE = the former literals, byte-identical). */
+const COMPLIANCE_TEXT: Record<
+  'de' | 'en',
+  {
+    heading: string;
+    blockingViolations: string;
+    advisoryViolations: string;
+    notApplicable: string;
+    notApplicableTitle: string;
+    attestationPending: string;
+    attestationPendingTitle: string;
+    notEvaluable: string;
+    notEvaluableTitle: string;
+    met: string;
+    notMet: string;
+    warnNotMet: string;
+    inputRequired: string;
+    why: string;
+    added: string;
+    addToProject: string;
+    openWorksheet: string;
+    error: string;
+  }
+> = {
+  de: {
+    heading: 'Compliance-Anforderungen',
+    blockingViolations: 'Blockierende Verstöße',
+    advisoryViolations: 'Empfehlungs-Verstöße',
+    notApplicable: 'Nicht anwendbar',
+    notApplicableTitle: 'Nicht anwendbar — Bedingung bezieht sich auf ein ausgeblendetes Feld',
+    attestationPending: 'Ingenieur-Bestätigung ausstehend',
+    attestationPendingTitle: 'Ingenieur-Bestätigung ausstehend — manuelle Prüfung erforderlich',
+    notEvaluable: 'Bedingung nicht auswertbar',
+    notEvaluableTitle: 'Bedingung nicht auswertbar — Regel reparieren',
+    met: 'Erfüllt',
+    notMet: 'Nicht erfüllt',
+    warnNotMet: 'Empfehlung nicht erfüllt',
+    inputRequired: 'Eingabe erforderlich',
+    why: 'Warum?',
+    added: '✓ Hinzugefügt',
+    addToProject: 'Zu Projekt hinzufügen',
+    openWorksheet: 'Worksheet öffnen →',
+    error: 'Fehler:',
+  },
+  en: {
+    heading: 'Compliance requirements',
+    blockingViolations: 'Blocking violations',
+    advisoryViolations: 'Advisory violations',
+    notApplicable: 'Not applicable',
+    notApplicableTitle: 'Not applicable — the condition refers to a hidden field',
+    attestationPending: 'Engineer sign-off pending',
+    attestationPendingTitle: 'Engineer sign-off pending — manual check required',
+    notEvaluable: 'Condition cannot be evaluated',
+    notEvaluableTitle: 'Condition cannot be evaluated — fix the rule',
+    met: 'Met',
+    notMet: 'Not met',
+    warnNotMet: 'Recommendation not met',
+    inputRequired: 'Input required',
+    why: 'Why?',
+    added: '✓ Added',
+    addToProject: 'Add to project',
+    openWorksheet: 'Open worksheet →',
+    error: 'Error:',
+  },
 };
 
 /** U-6: badge / chip title for a pass whose IF-guard was not triggered (explain.ts words the same case per leaf). */
@@ -402,6 +471,7 @@ function StatusBadge({
   requiresAttestation?: boolean;
   locale?: 'de' | 'en';
 }) {
+  const tx = COMPLIANCE_TEXT[locale];
   switch (result.kind) {
     case 'pass':
       // U-6: a vacuous pass (`IF <antecedent> THEN …` with a false antecedent) is displayed like a hidden-symbol
@@ -421,8 +491,8 @@ function StatusBadge({
       }
       return (
         <span
-          aria-label="Erfüllt"
-          title="Erfüllt"
+          aria-label={tx.met}
+          title={tx.met}
           className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-success/10 text-success text-xs font-semibold shrink-0"
         >
           ✓
@@ -435,8 +505,8 @@ function StatusBadge({
       const isWarn = severity === 'warn';
       return (
         <span
-          aria-label={isWarn ? 'Empfehlung nicht erfüllt' : 'Nicht erfüllt'}
-          title={isWarn ? 'Empfehlung nicht erfüllt (warn)' : 'Nicht erfüllt (block)'}
+          aria-label={isWarn ? tx.warnNotMet : tx.notMet}
+          title={isWarn ? `${tx.warnNotMet} (warn)` : `${tx.notMet} (block)`}
           className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-semibold shrink-0 ${
             isWarn ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'
           }`}
@@ -448,8 +518,8 @@ function StatusBadge({
     case 'pending':
       return (
         <span
-          aria-label="Eingabe erforderlich"
-          title="Eingabe erforderlich"
+          aria-label={tx.inputRequired}
+          title={tx.inputRequired}
           className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-paper-2 text-subtext text-xs font-semibold shrink-0"
         >
           ○
@@ -461,8 +531,8 @@ function StatusBadge({
       // verdict may be derived from it. Never blocks approval.
       return (
         <span
-          aria-label="Nicht anwendbar"
-          title="Nicht anwendbar — Bedingung bezieht sich auf ein ausgeblendetes Feld"
+          aria-label={tx.notApplicable}
+          title={tx.notApplicableTitle}
           className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-paper-2 text-subtext text-xs font-semibold shrink-0"
         >
           –
@@ -477,8 +547,8 @@ function StatusBadge({
       if (requiresAttestation) {
         return (
           <span
-            aria-label="Ingenieur-Bestätigung ausstehend"
-            title="Ingenieur-Bestätigung ausstehend — manuelle Prüfung erforderlich"
+            aria-label={tx.attestationPending}
+            title={tx.attestationPendingTitle}
             className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-accent/10 text-accent text-xs font-semibold shrink-0"
           >
             §
@@ -487,8 +557,8 @@ function StatusBadge({
       }
       return (
         <span
-          aria-label="Bedingung nicht auswertbar"
-          title="Bedingung nicht auswertbar — Regel reparieren"
+          aria-label={tx.notEvaluable}
+          title={tx.notEvaluableTitle}
           className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-paper-2 text-subtext text-xs font-semibold shrink-0"
         >
           !

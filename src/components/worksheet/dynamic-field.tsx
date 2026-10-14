@@ -163,7 +163,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   const showVerificationBadge = isPlatformEngineer && field.verificationStatus !== 'engineer_verified';
   const verificationHoverTitle =
     !isPlatformEngineer && field.verificationStatus !== 'engineer_verified'
-      ? `${verificationStatusLabel(field.verificationStatus)} — ${verificationStatusTitle(field.verificationStatus)}`
+      ? `${verificationStatusLabel(field.verificationStatus, locale)} — ${verificationStatusTitle(field.verificationStatus, locale)}`
       : undefined;
   const docLookup = useMemo(() => {
     const m: Record<string, { title: string; citationLabel: string }> = {};
@@ -257,9 +257,9 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           {showVerificationBadge && (
             <span
               className="text-accent-2 normal-case tracking-normal"
-              title={verificationStatusTitle(field.verificationStatus)}
+              title={verificationStatusTitle(field.verificationStatus, locale)}
             >
-              {verificationStatusLabel(field.verificationStatus)}
+              {verificationStatusLabel(field.verificationStatus, locale)}
             </span>
           )}
           {isPlatformEngineer && (
@@ -293,10 +293,14 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             <Link
               href={`/${locale}/projects/${projectId}/standards/${twinSource.standardCode ?? standardCode}/worksheets/${twinSource.worksheetCode}`}
               className="text-accent normal-case tracking-normal underline-offset-2 hover:underline"
-              title={`${field.symbol} = ${formatProvenanceValue(value, field.unit)} vorbefüllt aus ${twinSource.worksheetCode} (${twinSource.symbol}) — bestätigen (Übernehmen) oder überschreiben.`}
+              title={
+                locale === 'en'
+                  ? `${field.symbol} = ${formatProvenanceValue(value, field.unit)} prefilled from ${twinSource.worksheetCode} (${twinSource.symbol}) — confirm (Apply) or overwrite.`
+                  : `${field.symbol} = ${formatProvenanceValue(value, field.unit)} vorbefüllt aus ${twinSource.worksheetCode} (${twinSource.symbol}) — bestätigen (Übernehmen) oder überschreiben.`
+              }
               data-testid="twin-prefill-badge"
             >
-              Vorbefüllt ← {twinSource.worksheetCode} · {twinSource.symbol}
+              {locale === 'en' ? 'Prefilled' : 'Vorbefüllt'} ← {twinSource.worksheetCode} · {twinSource.symbol}
             </Link>
           )}
           {prefillSource === 'site_profile' && !isDirty && (
@@ -871,8 +875,8 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
       {!inheritedFrom && sameSymbolHints && sameSymbolHints.length > 0 && (
         <div className="text-xs text-subtext" data-testid="same-symbol-hint">
           {/* O-5: one entry per distinct value — „Bereits in M8203-01, M820-01: PLT-HS-01", not the value twice. */}
-          Bereits in{' '}
-          {groupSameSymbolHints(sameSymbolHints, formatNumberDe, 'de')
+          {locale === 'en' ? 'Already entered in' : 'Bereits in'}{' '}
+          {groupSameSymbolHints(sameSymbolHints, formatNumberDe, locale)
             .map((g) => `${g.sheets.join(', ')}: ${g.value}`)
             .join('; ')}{' '}
           <button
@@ -880,7 +884,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             className="text-xs text-accent-2 px-1.5 py-0.5 rounded hover:bg-accent-2/10 transition-colors"
             onClick={() => copyFirstHint(field, sameSymbolHints[0].value)}
           >
-            Übernehmen
+            {locale === 'en' ? 'Apply' : 'Übernehmen'}
           </button>
         </div>
       )}
