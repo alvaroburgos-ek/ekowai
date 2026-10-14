@@ -3,6 +3,7 @@ import { useState, useId, useMemo, useTransition } from 'react';
 import Link from 'next/link';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { formatNumberDe } from '@/lib/format-number-de';
+import { groupSameSymbolHints } from './same-symbol-hint';
 import { setClientSupplied } from '@/lib/actions/client-supplied';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Select } from '@/components/ui/select';
@@ -868,10 +869,12 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           source, and the value already matches upstream, so the Übernehmen
           button would be a no-op. */}
       {!inheritedFrom && sameSymbolHints && sameSymbolHints.length > 0 && (
-        <div className="text-xs text-subtext">
-          Bereits in {sameSymbolHints.map((h) => (h.viaSymbol ? `${h.worksheetCode} (als ${h.viaSymbol})` : h.worksheetCode)).join(', ')}:
-          {' '}
-          {sameSymbolHints.map((h) => formatNumberDe(h.value)).join(', ')}{' '}
+        <div className="text-xs text-subtext" data-testid="same-symbol-hint">
+          {/* O-5: one entry per distinct value — „Bereits in M8203-01, M820-01: PLT-HS-01", not the value twice. */}
+          Bereits in{' '}
+          {groupSameSymbolHints(sameSymbolHints, formatNumberDe, 'de')
+            .map((g) => `${g.sheets.join(', ')}: ${g.value}`)
+            .join('; ')}{' '}
           <button
             type="button"
             className="text-xs text-accent-2 px-1.5 py-0.5 rounded hover:bg-accent-2/10 transition-colors"
