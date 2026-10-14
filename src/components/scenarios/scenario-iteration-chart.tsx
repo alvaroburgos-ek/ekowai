@@ -29,13 +29,20 @@ export function ScenarioIterationChart({ locale, title, unit, series }: { locale
   const sy = yScale(domain);
   const { W, H, M } = CHART;
   const peakBoxes: PeakLabelBox[] = [];
+  const captionObstacles: PeakLabelBox[] = [];
   visible.forEach((s) => {
     if (s.governingIndex == null || !s.points[s.governingIndex]) return;
     const p = s.points[s.governingIndex];
+    const labelX = Math.min(sx(p.D) + 8, W - 140);
     const text = `${s.label}: ${fmtNum(p.value, locale)}`;
-    peakBoxes.push({ id: s.id, x: Math.min(sx(p.D) + 8, W - 140), y: sy(p.value) - 8, width: estimateLabelWidth(text) });
+    peakBoxes.push({ id: s.id, x: labelX, y: sy(p.value) - 8, width: estimateLabelWidth(text) });
+    // The boundary caption never moves itself, but a nudged peak label must still avoid it.
+    if (s.boundaryLimited) {
+      captionObstacles.push({ id: `boundary-${s.id}`, x: labelX, y: sy(p.value) + 14, width: estimateLabelWidth(t.boundary) });
+    }
   });
-  const peakLabelY = new Map(layoutPeakLabels(peakBoxes).map((b) => [b.id, b.y]));
+  const plotBounds = { top: M.t, bottom: H - M.b };
+  const peakLabelY = new Map(layoutPeakLabels(peakBoxes, plotBounds, captionObstacles).map((b) => [b.id, b.y]));
 
   const move = (clientX: number, el: Element) => {
     const svg = (el as SVGGraphicsElement).ownerSVGElement ?? el;

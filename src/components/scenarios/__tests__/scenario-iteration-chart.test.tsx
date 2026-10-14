@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ScenarioIterationChart } from '../scenario-iteration-chart';
 import type { ChartSeries } from '../chart-geometry';
-import { xScale, estimateLabelWidth } from '../chart-geometry';
+import { xScale, estimateLabelWidth, CHART } from '../chart-geometry';
 
 const pts = (vals: number[]) => [5, 180, 10080].map((D, i) => ({ D, r_D: 10, value: vals[i] }));
 const S: ChartSeries[] = [
@@ -61,6 +61,70 @@ describe('ScenarioIterationChart', () => {
         const xOverlap = boxes[i].x < boxes[j].x + boxes[j].width && boxes[j].x < boxes[i].x + boxes[i].width;
         if (xOverlap) expect(Math.abs(boxes[i].y - boxes[j].y)).toBeGreaterThanOrEqual(14);
       }
+    }
+  });
+  it('keeps every nudged peak label inside the plot bounds, even clustered near the bottom (7 visible series)', () => {
+    // All seven peaks pinned near the domain floor (value 0.05 against a ~108 ceiling set by
+    // the other points) — low enough that naive downward-only nudging from a prior fix would
+    // push later labels straight past the plot's bottom edge.
+    const nearBottom = () => [
+      { D: 5, r_D: 10, value: 100 },
+      { D: 180, r_D: 10, value: 0.05 },
+      { D: 10080, r_D: 10, value: 100 },
+    ];
+    const seven: ChartSeries[] = ['real:T30', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6'].map((id, i) => ({
+      id, label: `Case ${i}`, slot: i, dashed: false, points: nearBottom(), governingIndex: 1, boundaryLimited: false,
+    }));
+    const { container } = render(<ScenarioIterationChart locale="de" title="Gl. 10" unit="m³" series={seven} />);
+    const labels = Array.from(container.querySelectorAll('[data-testid^="peak-label-"]'));
+    expect(labels).toHaveLength(7);
+    const boxes = labels.map((el) => ({
+      x: Number(el.getAttribute('x')),
+      y: Number(el.getAttribute('y')),
+      width: estimateLabelWidth(el.textContent ?? ''),
+    }));
+    const top = CHART.M.t;
+    const bottom = CHART.H - CHART.M.b;
+    for (const b of boxes) {
+      expect(b.y).toBeGreaterThanOrEqual(top);
+      expect(b.y).toBeLessThanOrEqual(bottom);
+    }
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const xOverlap = boxes[i].x < boxes[j].x + boxes[j].width && boxes[j].x < boxes[i].x + boxes[i].width;
+        if (xOverlap) expect(Math.abs(boxes[i].y - boxes[j].y)).toBeGreaterThanOrEqual(14);
+      }
+    }
+  });
+  it("does not let a nudged peak label collide with another series' boundary-limited caption", () => {
+    // Two series share the same peak point (forces a nudge); the first is boundary-limited,
+    // so its fixed „kein eindeutiges Maximum" caption must stay clear of both peak labels.
+    const shared = () => [
+      { D: 5, r_D: 10, value: 1 },
+      { D: 180, r_D: 10, value: 5 },
+      { D: 10080, r_D: 10, value: 1 },
+    ];
+    const two: ChartSeries[] = [
+      { id: 'real:T30', label: 'Real · T = 30 a', slot: 0, dashed: false, points: shared(), governingIndex: 1, boundaryLimited: true },
+      { id: 'k1', label: 'K1 · T = 100 a', slot: 1, dashed: true, points: shared(), governingIndex: 1, boundaryLimited: false },
+    ];
+    const { container } = render(<ScenarioIterationChart locale="de" title="Gl. 10" unit="m³" series={two} />);
+    const caption = screen.getByTestId('boundary-real:T30');
+    const captionBox = {
+      x: Number(caption.getAttribute('x')),
+      y: Number(caption.getAttribute('y')),
+      width: estimateLabelWidth(caption.textContent ?? ''),
+    };
+    const labels = Array.from(container.querySelectorAll('[data-testid^="peak-label-"]'));
+    expect(labels).toHaveLength(2);
+    for (const el of labels) {
+      const box = {
+        x: Number(el.getAttribute('x')),
+        y: Number(el.getAttribute('y')),
+        width: estimateLabelWidth(el.textContent ?? ''),
+      };
+      const xOverlap = box.x < captionBox.x + captionBox.width && captionBox.x < box.x + box.width;
+      if (xOverlap) expect(Math.abs(box.y - captionBox.y)).toBeGreaterThanOrEqual(14);
     }
   });
 });

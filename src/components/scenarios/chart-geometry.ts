@@ -60,31 +60,47 @@ export function estimateLabelWidth(text: string): number {
 }
 
 export type PeakLabelBox = { id: string; x: number; y: number; width: number };
+export type LabelBounds = { top: number; bottom: number };
 
 /**
  * Deterministic peak-label collision avoidance (contrast WARN mitigation, slots 3-5): every
  * visible series' peak gets a direct label, so with up to 7 visible series (Real + 6 cases)
- * labels can collide. Processed in input order; a label that would sit within `MIN_GAP` px
- * vertically of an already-placed label it overlaps in x is nudged straight down by `MIN_GAP`
- * (repeated until clear of every earlier label) — a simple, reproducible offset, not a layout solver.
+ * labels can collide. Processed in input order against everything placed so far — including
+ * any fixed `obstacles` (e.g. a „kein eindeutiges Maximum" caption, which never itself moves).
+ * A colliding label is nudged straight down by `MIN_GAP` one step at a time as long as the next
+ * step still fits inside `bounds`; if downward room runs out while a collision remains, the
+ * label is nudged *upward* from its own anchor instead (above the earlier labels), again
+ * bounded. Either way the final position is clamped to `bounds` — a simple, reproducible
+ * offset, not a layout solver, but one that never places a label outside the plot.
  */
 const MIN_GAP = 14;
-export function layoutPeakLabels(boxes: readonly PeakLabelBox[]): Array<{ id: string; x: number; y: number }> {
-  const placed: Array<{ x: number; y: number; width: number }> = [];
+export function layoutPeakLabels(
+  boxes: readonly PeakLabelBox[],
+  bounds: LabelBounds,
+  obstacles: readonly PeakLabelBox[] = [],
+): Array<{ id: string; x: number; y: number }> {
+  const placed: Array<{ x: number; y: number; width: number }> = obstacles.map((o) => ({ x: o.x, y: o.y, width: o.width }));
   const out: Array<{ id: string; x: number; y: number }> = [];
+  const collides = (x: number, y: number, width: number) => placed.some(
+    (p) => x < p.x + p.width && p.x < x + width && Math.abs(y - p.y) < MIN_GAP,
+  );
+
   for (const b of boxes) {
-    let y = b.y;
-    let moved = true;
-    while (moved) {
-      moved = false;
-      for (const p of placed) {
-        const xOverlap = b.x < p.x + p.width && p.x < b.x + b.width;
-        if (xOverlap && Math.abs(y - p.y) < MIN_GAP) {
-          y = p.y + MIN_GAP;
-          moved = true;
-        }
-      }
+    // Prefer nudging down, one MIN_GAP step at a time, only while the next step still fits.
+    let down = b.y;
+    while (collides(b.x, down, b.width) && down + MIN_GAP <= bounds.bottom) down += MIN_GAP;
+
+    let y = down;
+    if (collides(b.x, down, b.width)) {
+      // Downward room ran out with a collision still open — nudge up above the earlier labels.
+      let up = b.y;
+      while (collides(b.x, up, b.width) && up - MIN_GAP >= bounds.top) up -= MIN_GAP;
+      if (!collides(b.x, up, b.width)) y = up;
+      // else: overcrowded — keep the best-effort downward position; the final clamp below
+      // still guarantees it never lands outside the plot.
     }
+
+    y = Math.min(bounds.bottom, Math.max(bounds.top, y));
     placed.push({ x: b.x, y, width: b.width });
     out.push({ id: b.id, x: b.x, y });
   }
