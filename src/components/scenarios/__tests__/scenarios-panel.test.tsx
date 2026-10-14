@@ -67,6 +67,38 @@ describe('ScenariosPanel', () => {
     fireEvent.click(save);
     await waitFor(() => expect(a.setScenarioOverrides).toHaveBeenCalledWith('s1', [{ fieldId: 'f9', value: '1e-5', note: 'Feldversuch' }]));
   });
+  it('archive asks first (in-app, no window.confirm); cancel keeps the case, confirm archives it', async () => {
+    a.archiveScenario.mockResolvedValue({ ok: true });
+    const prev = window.confirm; const wc = vi.fn(() => true); window.confirm = wc;
+    render(<ScenariosPanel locale="de" projectId="p" initial={{ available: true, enabled: true, scenarios: [sc({})] }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Archivieren' }));
+    expect(a.archiveScenario).not.toHaveBeenCalled();
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('„K5" wirklich archivieren?');
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }));
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+    expect(a.archiveScenario).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Archivieren' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, archivieren' }));
+    await waitFor(() => expect(a.archiveScenario).toHaveBeenCalledWith('s1'));
+    expect(wc).not.toHaveBeenCalled();
+    window.confirm = prev;
+  });
+  it('remove override asks first; EN wording', async () => {
+    a.removeScenarioOverride.mockResolvedValue({ ok: true });
+    render(<ScenariosPanel locale="en" projectId="p" initial={{ available: true, enabled: true, scenarios: [sc({})] }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+    expect(a.removeScenarioOverride).not.toHaveBeenCalled();
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('Remove Permeability (k_f) and its note from „K5"?');
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, remove' }));
+    await waitFor(() => expect(a.removeScenarioOverride).toHaveBeenCalledWith('s1', 'f1'));
+  });
+  it('archive confirmation in EN', () => {
+    render(<ScenariosPanel locale="en" projectId="p" initial={{ available: true, enabled: true, scenarios: [sc({})] }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Archive' }));
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('Archive „K5"?');
+    expect(screen.getByRole('button', { name: 'Yes, archive' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy();
+  });
   it('shows a refused override reason', async () => {
     a.searchOverridableFields.mockResolvedValue({ ok: true, fields: [{ fieldId: 'f9', symbol: 'k_f', labelDe: 'Durchlässigkeit', labelEn: null, unit: null, dataType: 'number', enumValues: null, worksheetCode: 'A138-05', standardCode: 'S', realValue: null }] });
     a.setScenarioOverrides.mockResolvedValue({ ok: false, error: 'Durchlässigkeit (k_f): 5 liegt über dem zulässigen Maximum 1.' });

@@ -20,6 +20,9 @@ const L = {
     drift: 'Realwert geändert', edit: 'Wert ändern', search: 'Feld suchen (Bezeichnung oder Symbol)', searchBtn: 'Suchen',
     real: 'Realwert', value: 'Fallwert', note: 'Notiz (Herkunft der Annahme)', apply: 'Übernehmen', remove: 'Entfernen',
     hint: 'Ein Fall ändert nur Eingabewerte. Er wird nie freigegeben und ändert weder Nachweis noch Freigaben.',
+    confirmArchive: (n: string) => `„${n}" wirklich archivieren? Archivierte Fälle lassen sich hier nicht wiederherstellen.`,
+    confirmRemove: (f: string, n: string) => `${f} und die Notiz aus „${n}" entfernen?`,
+    yesArchive: 'Ja, archivieren', yesRemove: 'Ja, entfernen', cancel: 'Abbrechen',
   },
   en: {
     title: 'Cases (assumptions, not verified)', enabled: 'Cases active', name: 'Name', reason: 'Reason', create: 'New case',
@@ -28,8 +31,24 @@ const L = {
     drift: 'Real value changed', edit: 'Change value', search: 'Search field (label or symbol)', searchBtn: 'Search',
     real: 'Real value', value: 'Case value', note: 'Note (origin of the assumption)', apply: 'Apply', remove: 'Remove',
     hint: 'A case only changes input values. It is never approved and changes neither the verification nor approvals.',
+    confirmArchive: (n: string) => `Archive „${n}"? Archived cases cannot be restored here.`,
+    confirmRemove: (f: string, n: string) => `Remove ${f} and its note from „${n}"?`,
+    yesArchive: 'Yes, archive', yesRemove: 'Yes, remove', cancel: 'Cancel',
   },
 } as const;
+
+/** Final review A1-I4: archive and remove cannot be undone in the UI — both ask first (in-app, never window.confirm). */
+type Pending = { kind: 'archive'; scenarioId: string } | { kind: 'remove'; scenarioId: string; fieldId: string };
+
+function ConfirmBar({ text, yes, cancel, onYes, onCancel }: { text: string; yes: string; cancel: string; onYes: () => void; onCancel: () => void }) {
+  return (
+    <div role="alertdialog" aria-label={text} className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm">
+      <span>{text}</span>
+      <button type="button" className="rounded-full border border-hairline px-3 py-0.5 text-xs font-medium" onClick={onYes}>{yes}</button>
+      <button type="button" className="text-xs underline" onClick={onCancel}>{cancel}</button>
+    </div>
+  );
+}
 
 type Initial = { available: boolean; enabled: boolean; scenarios: ScenarioSummary[] };
 
@@ -40,6 +59,7 @@ export function ScenariosPanel({ locale, projectId, initial, error = null }: { l
   const [name, setName] = useState('');
   const [reason, setReason] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
+  const [pending, setPending] = useState<Pending | null>(null);
 
   const reload = async () => {
     const r = await listScenarios(projectId);
@@ -98,9 +118,13 @@ export function ScenariosPanel({ locale, projectId, initial, error = null }: { l
                     {t.report}
                   </label>
                   <button type="button" className="text-xs underline" disabled={atLimit} onClick={() => void run(duplicateScenario(s.id))}>{t.duplicate}</button>
-                  <button type="button" className="text-xs underline" onClick={() => void run(archiveScenario(s.id))}>{t.archive}</button>
+                  <button type="button" className="text-xs underline" onClick={() => setPending({ kind: 'archive', scenarioId: s.id })}>{t.archive}</button>
                   <button type="button" className="text-xs underline" onClick={() => setEditing(editing === s.id ? null : s.id)}>{t.edit}</button>
                 </div>
+                {pending?.kind === 'archive' && pending.scenarioId === s.id && (
+                  <ConfirmBar text={t.confirmArchive(s.name)} yes={t.yesArchive} cancel={t.cancel}
+                    onYes={() => { setPending(null); void run(archiveScenario(s.id)); }} onCancel={() => setPending(null)} />
+                )}
                 <ul className="text-sm space-y-1">
                   {s.overrides.map((o) => (
                     <li key={o.fieldId} className="flex flex-wrap gap-2">
@@ -110,7 +134,11 @@ export function ScenariosPanel({ locale, projectId, initial, error = null }: { l
                       <span className="text-subtext">({t.real} {formatScenarioValue(o.currentReal, locale)})</span>
                       {o.drift && <span className="text-amber-700">{`${t.drift}: ${formatScenarioValue(o.baseValueAtCreation, locale)} → ${formatScenarioValue(o.currentReal, locale)}`}</span>}
                       <span className="text-xs text-subtext">„{o.note}&rdquo;</span>
-                      <button type="button" className="text-xs underline" onClick={() => void run(removeScenarioOverride(s.id, o.fieldId))}>{t.remove}</button>
+                      <button type="button" className="text-xs underline" onClick={() => setPending({ kind: 'remove', scenarioId: s.id, fieldId: o.fieldId })}>{t.remove}</button>
+                      {pending?.kind === 'remove' && pending.scenarioId === s.id && pending.fieldId === o.fieldId && (
+                        <ConfirmBar text={t.confirmRemove(`${locale === 'en' ? o.labelEn ?? o.labelDe : o.labelDe} (${o.symbol})`, s.name)} yes={t.yesRemove} cancel={t.cancel}
+                          onYes={() => { setPending(null); void run(removeScenarioOverride(s.id, o.fieldId)); }} onCancel={() => setPending(null)} />
+                      )}
                     </li>
                   ))}
                 </ul>
