@@ -87,7 +87,7 @@ export default async function OverviewLayout({
         </dl>
       </header>
 
-      <ProjectTabs locale={localeTyped} projectId={id} isVsme={isVsme} />
+      <ProjectTabs locale={localeTyped} projectId={id} isVsme={isVsme} showScenarios />
 
       <div>{children}</div>
     </article>
