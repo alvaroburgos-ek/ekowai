@@ -262,8 +262,8 @@ function GateExplanationBlock({
   locale: 'de' | 'en';
 }) {
   const explanation = useMemo(
-    () => explainCondition(condition, lookup),
-    [condition, lookup],
+    () => explainCondition(condition, lookup, locale),
+    [condition, lookup, locale],
   );
   if (explanation.kind !== 'explained' || explanation.leaves.length === 0) return null;
   return (

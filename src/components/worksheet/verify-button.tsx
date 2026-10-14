@@ -21,6 +21,8 @@ type Props = {
   verifiedByLabel?: string | null;
   verifiedAt?: string | null;
   verificationNote?: string | null;
+  /** O-8: UI language (default German). */
+  locale?: 'de' | 'en';
 };
 
 export function VerifyButton({
@@ -30,7 +32,9 @@ export function VerifyButton({
   verifiedByLabel,
   verifiedAt,
   verificationNote,
+  locale = 'de',
 }: Props) {
+  const en = locale === 'en';
   const [pending, startTransition] = useTransition();
   const [noteOpen, setNoteOpen] = useState(false);
   const [note, setNote] = useState('');
@@ -63,7 +67,7 @@ export function VerifyButton({
         setNote('');
         setQuote('');
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Fehler');
+        setError(e instanceof Error ? e.message : en ? 'Error' : 'Fehler');
       }
     });
   }
@@ -78,7 +82,7 @@ export function VerifyButton({
           await unverifyEquation(id);
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Fehler');
+        setError(e instanceof Error ? e.message : en ? 'Error' : 'Fehler');
       }
     });
   }
@@ -87,9 +91,11 @@ export function VerifyButton({
     return (
       <span className="inline-flex items-center gap-2 flex-wrap text-[10px] uppercase tracking-[0.18em] text-subtext normal-case tracking-normal">
         <span className="text-success">
-          {status === 'verified_against_standard' ? '✓ norm-verifiziert' : status === 'corrected' ? '✓ korrigiert' : '✓ bestätigt'}
-          {verifiedByLabel ? ` von ${verifiedByLabel}` : ''}
-          {verifiedAt ? ` am ${formatDate(verifiedAt)}` : ''}
+          {en
+            ? status === 'verified_against_standard' ? '✓ verified against the standard' : status === 'corrected' ? '✓ corrected' : '✓ confirmed'
+            : status === 'verified_against_standard' ? '✓ norm-verifiziert' : status === 'corrected' ? '✓ korrigiert' : '✓ bestätigt'}
+          {verifiedByLabel ? (en ? ` by ${verifiedByLabel}` : ` von ${verifiedByLabel}`) : ''}
+          {verifiedAt ? (en ? ` on ${formatDate(verifiedAt, 'en')}` : ` am ${formatDate(verifiedAt)}`) : ''}
         </span>
         {verificationNote && (
           <span
@@ -105,7 +111,7 @@ export function VerifyButton({
           disabled={pending}
           className="text-subtext underline-offset-2 hover:text-accent-2 hover:underline disabled:opacity-50"
         >
-          Rückgängig
+          {en ? 'Undo' : 'Rückgängig'}
         </button>
       </span>
     );
@@ -119,7 +125,7 @@ export function VerifyButton({
           autoFocus
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Optionale Notiz (z.B. §5.4 Tab. B.1)"
+          placeholder={en ? 'Optional note (e.g. §5.4 Tab. B.1)' : 'Optionale Notiz (z.B. §5.4 Tab. B.1)'}
           maxLength={500}
           className="text-xs px-1.5 py-0.5 border border-hairline rounded bg-paper text-ink w-full sm:w-64 focus:outline-none focus:border-accent"
           onKeyDown={(e) => {
@@ -134,7 +140,7 @@ export function VerifyButton({
           type="text"
           value={quote}
           onChange={(e) => setQuote(e.target.value)}
-          placeholder="Verbatim-Zitat aus der Norm (SR-1) → norm-verifiziert"
+          placeholder={en ? 'Verbatim quote from the standard (SR-1) → verified against the standard' : 'Verbatim-Zitat aus der Norm (SR-1) → norm-verifiziert'}
           maxLength={2000}
           className="text-xs px-1.5 py-0.5 border border-hairline rounded bg-paper text-ink w-full sm:w-80 focus:outline-none focus:border-accent"
           onKeyDown={(e) => {
@@ -152,7 +158,7 @@ export function VerifyButton({
           disabled={pending}
           className="text-xs px-2 py-0.5 bg-accent text-paper rounded hover:bg-accent/90 disabled:opacity-50"
         >
-          {pending ? '…' : 'Bestätigen'}
+          {pending ? '…' : en ? 'Confirm' : 'Bestätigen'}
         </button>
         <button
           type="button"
@@ -163,7 +169,7 @@ export function VerifyButton({
           disabled={pending}
           className="text-xs text-subtext hover:text-ink"
         >
-          Abbrechen
+          {en ? 'Cancel' : 'Abbrechen'}
         </button>
         {error && <span className="text-xs text-accent-2">{error}</span>}
       </span>
@@ -176,17 +182,17 @@ export function VerifyButton({
       onClick={() => setNoteOpen(true)}
       disabled={pending}
       className="text-[10px] uppercase tracking-[0.18em] text-accent normal-case tracking-normal underline-offset-2 hover:underline disabled:opacity-50"
-      title="Diesen Eintrag gegen die Quellnorm bestätigen"
+      title={en ? 'Confirm this entry against the source standard' : 'Diesen Eintrag gegen die Quellnorm bestätigen'}
     >
-      ✓ Bestätigen
+      {en ? '✓ Confirm' : '✓ Bestätigen'}
     </button>
   );
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, locale: 'de' | 'en' = 'de'): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString('de-DE', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  return d.toLocaleDateString(locale === 'en' ? 'en-GB' : 'de-DE', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
 function truncate(s: string, n: number): string {

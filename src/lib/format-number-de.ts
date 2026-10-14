@@ -30,3 +30,28 @@ export function formatNumberDe(v: unknown): string {
   if (a < 1) return fmtSig.format(v);
   return fmt4.format(v);
 }
+
+const fmt4En = new Intl.NumberFormat('en-US', { maximumFractionDigits: 4 });
+const fmtSigEn = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 4 });
+const fmtMantEn = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 3 });
+
+/**
+ * O-8 (UX follow-up 2026-10-14): the same rules for the viewer's locale. 'de' is `formatNumberDe` unchanged; 'en' uses
+ * en-US separators (1,234.5 · 0.0016 · 6.6·10⁻⁷) and Yes/No for booleans.
+ */
+export function formatNumberLocale(v: unknown, locale: 'de' | 'en'): string {
+  if (locale !== 'en') return formatNumberDe(v);
+  if (v == null || v === '') return '—';
+  if (typeof v === 'string') return v;
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  if (typeof v !== 'number' || !Number.isFinite(v)) return '—';
+  if (v === 0) return '0';
+  const a = Math.abs(v);
+  if (a < 1e-3) {
+    const exp = Math.floor(Math.log10(a));
+    const mant = v / 10 ** exp;
+    return `${fmtMantEn.format(mant)}·10${sup(exp)}`;
+  }
+  if (a < 1) return fmtSigEn.format(v);
+  return fmt4En.format(v);
+}

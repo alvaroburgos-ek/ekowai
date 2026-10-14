@@ -2,7 +2,7 @@
 import { useState, useId, useMemo, useTransition } from 'react';
 import Link from 'next/link';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
-import { formatNumberDe } from '@/lib/format-number-de';
+import { formatNumberLocale } from '@/lib/format-number-de';
 import { groupSameSymbolHints } from './same-symbol-hint';
 import { setClientSupplied } from '@/lib/actions/client-supplied';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -186,7 +186,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   const max = field.validationRules?.max;
   const hasRange = typeof min === 'number' || typeof max === 'number';
   const rangeHintDe = hasRange
-    ? `Bereich: ${typeof min === 'number' ? formatHintNumber(min) : '−∞'} – ${typeof max === 'number' ? formatHintNumber(max) : '∞'}${field.unit ? ` ${field.unit}` : ''}`
+    ? `${locale === 'en' ? 'Range' : 'Bereich'}: ${typeof min === 'number' ? formatHintNumber(min, locale) : '−∞'} – ${typeof max === 'number' ? formatHintNumber(max, locale) : '∞'}${field.unit ? ` ${field.unit}` : ''}`
     : null;
 
   // --- A_S,m determination-method gating -----------------------------------
@@ -270,13 +270,14 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
               verifiedByLabel={field.verifiedByLabel}
               verifiedAt={field.verifiedAt}
               verificationNote={field.verificationNote}
+              locale={locale}
             />
           )}
           {inheritedFrom && !isDirty && (
             <Link
               href={`/${locale}/projects/${projectId}/standards/${standardCode}/worksheets/${inheritedFrom}`}
               className="text-subtext normal-case tracking-normal hover:text-accent transition-colors underline-offset-2 hover:underline"
-              title={buildInheritedTooltip(field, value, inheritedFrom)}
+              title={buildInheritedTooltip(field, value, inheritedFrom, locale)}
             >
               ← {inheritedFrom}
             </Link>
@@ -284,9 +285,9 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           {prefillSource === 'standard_default' && !isDirty && (
             <span
               className="text-accent normal-case tracking-normal"
-              title={buildPrefillTooltip('standard_default', field, value)}
+              title={buildPrefillTooltip('standard_default', field, value, undefined, locale)}
             >
-              Norm-Default
+              {locale === 'en' ? 'Standard default' : 'Norm-Default'}
             </span>
           )}
           {prefillSource === 'twin' && twinSource && !isDirty && (
@@ -295,7 +296,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
               className="text-accent normal-case tracking-normal underline-offset-2 hover:underline"
               title={
                 locale === 'en'
-                  ? `${field.symbol} = ${formatProvenanceValue(value, field.unit)} prefilled from ${twinSource.worksheetCode} (${twinSource.symbol}) — confirm (Apply) or overwrite.`
+                  ? `${field.symbol} = ${formatProvenanceValue(value, field.unit, 'en')} prefilled from ${twinSource.worksheetCode} (${twinSource.symbol}) — confirm (Apply) or overwrite.`
                   : `${field.symbol} = ${formatProvenanceValue(value, field.unit)} vorbefüllt aus ${twinSource.worksheetCode} (${twinSource.symbol}) — bestätigen (Übernehmen) oder überschreiben.`
               }
               data-testid="twin-prefill-badge"
@@ -306,9 +307,9 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           {prefillSource === 'site_profile' && !isDirty && (
             <span
               className="text-accent normal-case tracking-normal"
-              title={buildPrefillTooltip('site_profile', field, value, siteProfileKey)}
+              title={buildPrefillTooltip('site_profile', field, value, siteProfileKey, locale)}
             >
-              Projekt-Standort
+              {locale === 'en' ? 'Project site' : 'Projekt-Standort'}
             </span>
           )}
           {showStale && (
@@ -354,7 +355,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                   href={computedHint.href}
                   className="text-accent hover:underline underline-offset-2"
                 >
-                  {computedHint.hrefLabel ?? '→ öffnen'}
+                  {computedHint.hrefLabel ?? (locale === 'en' ? '→ open' : '→ öffnen')}
                 </Link>
               </>
             )}
@@ -516,7 +517,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         // browser's built-in constraint UI shows the correct text.
         const provenanceRequiredTitle =
           asmProvenanceRequired && !v
-            ? 'Herkunftsangabe erforderlich'
+            ? (locale === 'en' ? 'Source statement required' : 'Herkunftsangabe erforderlich')
             : undefined;
 
         return useTextarea ? (
@@ -568,12 +569,12 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                   data-testid="text-suggestions-hint"
                   className="text-[11px] text-subtext mt-0.5"
                 >
-                  Vorschläge aus dem Regelwerk — eigene Eingabe möglich
+                  {locale === 'en' ? 'Suggestions from the standard — own entry possible' : 'Vorschläge aus dem Regelwerk — eigene Eingabe möglich'}
                 </p>
               </>
             )}
             {asmProvenanceRequired && !v && (
-              <p className="text-xs text-error mt-0.5">Herkunftsangabe erforderlich</p>
+              <p className="text-xs text-error mt-0.5">{locale === 'en' ? 'Source statement required' : 'Herkunftsangabe erforderlich'}</p>
             )}
           </>
         );
@@ -696,8 +697,8 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                 setField(field.id, { type: 'boolean', value: val === 'true' });
               }}
               options={[
-                { value: 'true', label: 'Ja' },
-                { value: 'false', label: 'Nein' },
+                { value: 'true', label: locale === 'en' ? 'Yes' : 'Ja' },
+                { value: 'false', label: locale === 'en' ? 'No' : 'Nein' },
               ]}
               disabled={readOnly}
             />
@@ -720,9 +721,9 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             <div
               aria-disabled="true"
               className="rounded-md border border-hairline-strong bg-paper-2/40 px-3 py-2 text-sm text-subtext italic cursor-not-allowed"
-              title="Mehrzeilige Eingabe — Phase 2"
+              title={locale === 'en' ? 'Multi-line input — Phase 2' : 'Mehrzeilige Eingabe — Phase 2'}
             >
-              Mehrzeilige Eingabe — Phase 2
+              {locale === 'en' ? 'Multi-line input — Phase 2' : 'Mehrzeilige Eingabe — Phase 2'}
             </div>
           );
         }
@@ -827,8 +828,8 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                 {!jsonLocked && (
                   <button
                     type="button"
-                    aria-label={`${entry} entfernen`}
-                    title="Eigenen Eintrag entfernen"
+                    aria-label={locale === 'en' ? `Remove ${entry}` : `${entry} entfernen`}
+                    title={locale === 'en' ? 'Remove own entry' : 'Eigenen Eintrag entfernen'}
                     onClick={() => removeCustom(entry)}
                     className="shrink-0 px-1 text-subtext hover:text-accent-2 transition-colors"
                   >
@@ -842,8 +843,8 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                 <input
                   type="text"
                   value={customDraft}
-                  aria-label="Eigener Eintrag"
-                  placeholder="Eigener Eintrag…"
+                  aria-label={locale === 'en' ? 'Own entry' : 'Eigener Eintrag'}
+                  placeholder={locale === 'en' ? 'Own entry…' : 'Eigener Eintrag…'}
                   onChange={(e) => setCustomDraft(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -859,7 +860,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                   disabled={!customDraft.trim()}
                   className="shrink-0 rounded border border-hairline-strong px-2 py-1 text-xs text-accent-2 hover:bg-accent-2/10 transition-colors disabled:opacity-50"
                 >
-                  Hinzufügen
+                  {locale === 'en' ? 'Add' : 'Hinzufügen'}
                 </button>
               </div>
             )}
@@ -876,7 +877,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         <div className="text-xs text-subtext" data-testid="same-symbol-hint">
           {/* O-5: one entry per distinct value — „Bereits in M8203-01, M820-01: PLT-HS-01", not the value twice. */}
           {locale === 'en' ? 'Already entered in' : 'Bereits in'}{' '}
-          {groupSameSymbolHints(sameSymbolHints, formatNumberDe, locale)
+          {groupSameSymbolHints(sameSymbolHints, (v) => formatNumberLocale(v, locale), locale)
             .map((g) => `${g.sheets.join(', ')}: ${g.value}`)
             .join('; ')}{' '}
           <button
@@ -909,8 +910,12 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             disabled={readOnly || csPending}
             title={
               isClientSupplied
-                ? 'Kundenangabe: Wert wurde vom Kunden beigestellt, nicht von EKOWAI ermittelt — Haftungsausschluss für Eingabefehler gemäß AGB. Klicken zum Entfernen.'
-                : 'Als Kundenangabe markieren (Wert vom Kunden beigestellt, nicht von EKOWAI ermittelt)'
+                ? locale === 'en'
+                  ? 'Client-supplied: the value was provided by the client, not determined by EKOWAI — liability for input errors excluded per the terms (AGB). Click to remove.'
+                  : 'Kundenangabe: Wert wurde vom Kunden beigestellt, nicht von EKOWAI ermittelt — Haftungsausschluss für Eingabefehler gemäß AGB. Klicken zum Entfernen.'
+                : locale === 'en'
+                  ? 'Mark as client-supplied (value provided by the client, not determined by EKOWAI)'
+                  : 'Als Kundenangabe markieren (Wert vom Kunden beigestellt, nicht von EKOWAI ermittelt)'
             }
             onClick={() => {
               if (readOnly || csPending) return;
@@ -929,7 +934,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                 : 'text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-ink underline disabled:opacity-50'
             }
           >
-            {isClientSupplied ? '✓ Kundenangabe' : 'Kundenangabe'}
+            {isClientSupplied ? (locale === 'en' ? '✓ Client-supplied' : '✓ Kundenangabe') : locale === 'en' ? 'Client-supplied' : 'Kundenangabe'}
           </button>
         )}
       </div>
@@ -947,11 +952,11 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   );
 }
 
-function formatHintNumber(n: number): string {
+function formatHintNumber(n: number, locale: 'de' | 'en' = 'de'): string {
   if (Math.abs(n) !== 0 && (Math.abs(n) < 0.01 || Math.abs(n) >= 100000)) {
     return n.toExponential(0);
   }
-  return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(n);
+  return new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'de-DE', { maximumFractionDigits: 4 }).format(n);
 }
 
 /** True when the store holds a non-null value for the field — the gate for
@@ -970,21 +975,22 @@ type StoreValue =
   | { type: 'json'; value: unknown }
   | undefined;
 
-function formatProvenanceValue(value: StoreValue, unit: string | null): string {
+function formatProvenanceValue(value: StoreValue, unit: string | null, locale: 'de' | 'en' = 'de'): string {
   if (!value) return '—';
   switch (value.type) {
     case 'number':
       if (value.value == null) return '—';
-      return `${formatHintNumber(value.value)}${unit ? ` ${unit}` : ''}`;
+      return `${formatHintNumber(value.value, locale)}${unit ? ` ${unit}` : ''}`;
     case 'text':
     case 'enum':
     case 'date':
       return value.value ?? '—';
     case 'boolean':
       if (value.value == null) return '—';
+      if (locale === 'en') return value.value ? 'Yes' : 'No';
       return value.value ? 'Ja' : 'Nein';
     case 'json':
-      return '(Tabelle)';
+      return locale === 'en' ? '(table)' : '(Tabelle)';
   }
 }
 
@@ -992,8 +998,10 @@ function buildInheritedTooltip(
   field: { symbol: string; unit: string | null },
   value: StoreValue,
   fromWorksheetCode: string,
+  locale: 'de' | 'en' = 'de',
 ): string {
-  const formatted = formatProvenanceValue(value, field.unit);
+  const formatted = formatProvenanceValue(value, field.unit, locale);
+  if (locale === 'en') return `${field.symbol} = ${formatted} from ${fromWorksheetCode} — click to jump there, or overwrite by typing`;
   return `${field.symbol} = ${formatted} aus ${fromWorksheetCode} — klicken zum Springen, oder überschreiben durch Eingabe`;
 }
 
@@ -1002,8 +1010,13 @@ function buildPrefillTooltip(
   field: { symbol: string; unit: string | null },
   value: StoreValue,
   siteProfileKey?: string,
+  locale: 'de' | 'en' = 'de',
 ): string {
-  const formatted = formatProvenanceValue(value, field.unit);
+  const formatted = formatProvenanceValue(value, field.unit, locale);
+  if (locale === 'en') {
+    if (source === 'standard_default') return `${field.symbol} = ${formatted} — standard default. Confirm or overwrite.`;
+    return `${field.symbol} = ${formatted} from the project site profile${siteProfileKey ? ` (key: ${siteProfileKey})` : ''} — confirm or overwrite.`;
+  }
   if (source === 'standard_default') {
     return `${field.symbol} = ${formatted} — Norm-Default. Bestätigen oder überschreiben.`;
   }

@@ -174,7 +174,7 @@ const MemoSourceFormReferencePanel = memo(SourceFormReferencePanel);
 /** Reads its own slice of the store so the save-status transitions
  * (idle → saving → saved → idle, three store writes per autosave) re-render
  * this one span and not the whole form. */
-function SaveIndicator() {
+function SaveIndicator({ locale = 'de' }: { locale?: 'de' | 'en' }) {
   const status = useWorksheetStore((s) => s.saveStatus);
   if (status === 'idle') return null;
   if (status === 'saving') {
@@ -184,7 +184,7 @@ function SaveIndicator() {
           aria-hidden="true"
           className="inline-block w-3 h-3 rounded-full border border-subtext border-t-transparent animate-spin"
         />
-        Wird gespeichert…
+        {locale === 'en' ? 'Saving…' : 'Wird gespeichert…'}
       </span>
     );
   }
@@ -194,13 +194,13 @@ function SaveIndicator() {
         className="text-xs text-success inline-flex items-center gap-1"
         style={{ animation: 'fadeOut 3s ease-out forwards' }}
       >
-        Gespeichert ✓
+        {locale === 'en' ? 'Saved ✓' : 'Gespeichert ✓'}
       </span>
     );
   }
   return (
     <span className="text-xs text-error bg-error/10 px-2 py-0.5 rounded">
-      ✗ Speichern fehlgeschlagen
+      {locale === 'en' ? '✗ Save failed' : '✗ Speichern fehlgeschlagen'}
     </span>
   );
 }
@@ -801,20 +801,28 @@ export function WorksheetForm({
       const hint = isVsme && VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
         ? {
             label: isServerComputed
-              ? 'Automatisch berechnet aus den CO₂-Aktivitätslinien.'
-              : 'Dieses Feld berechnet der CO₂-Rechner aus den erfassten Aktivitäten.',
+              ? locale === 'en'
+                ? 'Calculated automatically from the CO₂ activity lines.'
+                : 'Automatisch berechnet aus den CO₂-Aktivitätslinien.'
+              : locale === 'en'
+                ? 'The CO₂ calculator computes this field from the recorded activities.'
+                : 'Dieses Feld berechnet der CO₂-Rechner aus den erfassten Aktivitäten.',
             href: `/${locale}/projects/${projectId}/vsme/emissions`,
-            hrefLabel: '→ CO₂-Rechner öffnen',
+            hrefLabel: locale === 'en' ? '→ open the CO₂ calculator' : '→ CO₂-Rechner öffnen',
           }
         : regHint
           ? {
               label: isServerComputed
                 // Neutral wording: the output may be a sum (VSME B04), a weighted mean (A138-07 C_m) or any register-derived value.
-                ? `Aus dem Register „${regHint.title}“ berechnet (${regHint.placement === 'bottom' ? 'unten auf dieser Seite' : 'in diesem Abschnitt'}).`
-                : `Wird beim Speichern aus dem Register „${regHint.title}“ berechnet.`,
+                ? locale === 'en'
+                  ? `Calculated from the register “${regHint.title}” (${regHint.placement === 'bottom' ? 'at the bottom of this page' : 'in this section'}).`
+                  : `Aus dem Register „${regHint.title}“ berechnet (${regHint.placement === 'bottom' ? 'unten auf dieser Seite' : 'in diesem Abschnitt'}).`
+                : locale === 'en'
+                  ? `Calculated from the register “${regHint.title}” on save.`
+                  : `Wird beim Speichern aus dem Register „${regHint.title}“ berechnet.`,
             }
           : isServerComputed
-            ? { label: 'Serverseitig berechneter Wert.' }
+            ? { label: locale === 'en' ? 'Value calculated on the server.' : 'Serverseitig berechneter Wert.' }
             : undefined;
       if (hint) m.set(f.id, hint);
     }
@@ -1166,7 +1174,7 @@ export function WorksheetForm({
         </div>
         <div className="flex items-baseline gap-3 flex-wrap">
           <h1 className="text-2xl font-semibold text-ink tracking-tight">{title}</h1>
-          <SaveIndicator />
+          <SaveIndicator locale={locale} />
         </div>
       </header>
 
@@ -1321,7 +1329,7 @@ export function WorksheetForm({
         s.cfg && s.state && s.state.state !== 'missing' ? (
           <section key={s.symbol} className="border-t border-hairline pt-6 mt-8 space-y-2" data-testid={`source-${s.symbol}`}>
             <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-              {s.cfg.title} (aus {s.ownerCode} — schreibgeschützt)
+              {s.cfg.title} {locale === 'en' ? `(from ${s.ownerCode} — read-only)` : `(aus ${s.ownerCode} — schreibgeschützt)`}
             </h2>
             <ReadOnlyRegisterTable config={s.cfg} carrier={s.carrier} symbol={s.symbol} standardCode={standardCode} />
           </section>
@@ -1386,7 +1394,7 @@ export function WorksheetForm({
       {orphanEngineEquations.length > 0 && (
         <section className="border-t border-hairline pt-6 mt-2 space-y-3">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Engine-Auswertung (kein Zielfeld)
+            {locale === 'en' ? 'Engine evaluation (no target field)' : 'Engine-Auswertung (kein Zielfeld)'}
           </h2>
           {orphanEngineEquations.map((eq) => {
             const state = engineStates[eq.id];

@@ -89,6 +89,7 @@ export function EquationsBlock({
                   verifiedByLabel={eq.verifiedByLabel}
                   verifiedAt={eq.verifiedAt}
                   verificationNote={eq.verificationNote}
+                  locale={locale}
                 />
               )}
             </div>

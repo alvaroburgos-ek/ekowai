@@ -199,3 +199,15 @@ describe('WorksheetForm — multiple registerSources; DB config beats the symbol
     expect(screen.getByTestId('source-surface_inventory').querySelector('h2')?.textContent).toBe('Flächen (DB) (aus A138-07 — schreibgeschützt)');
   });
 });
+
+// O-8 completion (2026-10-14): the read-only mirror heading's suffix reads English under EN; German unchanged (above).
+describe('WorksheetForm — consumed register mirror heading under EN (O-8)', () => {
+  beforeEach(() => {
+    act(() => { useWorksheetStore.getState().init('reset', {}, {}, {}); });
+  });
+
+  it('„(from A138-07 — read-only)"', () => {
+    render(<WorksheetForm {...PROPS} locale="en" registerSources={source('final', TWO_COMPLETE_ROWS)} />);
+    expect(screen.getByTestId('source-surface_inventory').querySelector('h2')?.textContent).toBe('Flächenverzeichnis (from A138-07 — read-only)');
+  });
+});

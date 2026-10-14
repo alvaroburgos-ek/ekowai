@@ -34,28 +34,33 @@ export type GateExplanation =
 
 type Lookup = (sym: string) => ConditionValue | undefined;
 
-export function explainCondition(condition: string, lookup: Lookup): GateExplanation {
+/** O-8 (UX follow-up 2026-10-14): UI language of the explanation texts. Default German (the PDF report and every
+ * existing caller); the form passes the viewer's locale. The DSL fragment (`text` of a leaf) stays the condition. */
+export type ExplainLocale = 'de' | 'en';
+
+export function explainCondition(condition: string, lookup: Lookup, locale: ExplainLocale = 'de'): GateExplanation {
   const ast = parseCondition(condition);
   if (!ast) return { kind: 'manual' };
   const leaves: ExplainLeaf[] = [];
-  walk(ast, lookup, leaves);
+  walk(ast, lookup, leaves, locale);
   return { kind: 'explained', leaves };
 }
 
-function walk(n: ConditionNode, lookup: Lookup, out: ExplainLeaf[]): void {
+function walk(n: ConditionNode, lookup: Lookup, out: ExplainLeaf[], locale: ExplainLocale): void {
+  const en = locale === 'en';
   switch (n.kind) {
     case 'and':
     case 'or':
-      walk(n.left, lookup, out);
-      walk(n.right, lookup, out);
+      walk(n.left, lookup, out, locale);
+      walk(n.right, lookup, out, locale);
       return;
     case 'not': {
       // Rare in the corpus; report the inner leaf with inverted satisfaction.
       const before = out.length;
-      walk(n.inner, lookup, out);
+      walk(n.inner, lookup, out, locale);
       for (let i = before; i < out.length; i++) {
         const s = out[i].satisfied;
-        out[i] = { ...out[i], text: `NICHT (${out[i].text})`, satisfied: s === null ? null : !s };
+        out[i] = { ...out[i], text: en ? `NOT (${out[i].text})` : `NICHT (${out[i].text})`, satisfied: s === null ? null : !s };
       }
       return;
     }
@@ -64,28 +69,33 @@ function walk(n: ConditionNode, lookup: Lookup, out: ExplainLeaf[]): void {
       const g = evaluateNode(n.guard, lookup, { existsOnAbsent: 'definite' });
       if (g === 'false') {
         out.push({
-          text: `Bedingung nicht anwendbar — Voraussetzung „${nodeToText(n.guard)}“ greift nicht`,
+          text: en
+            ? `Condition not applicable — precondition “${nodeToText(n.guard)}” is not met`
+            : `Bedingung nicht anwendbar — Voraussetzung „${nodeToText(n.guard)}“ greift nicht`,
           satisfied: true,
         });
         return;
       }
       if (g === 'missing') {
         out.push({
-          text: `Voraussetzung „${nodeToText(n.guard)}“ noch unbestimmt`,
+          text: en ? `Precondition “${nodeToText(n.guard)}” not yet determined` : `Voraussetzung „${nodeToText(n.guard)}“ noch unbestimmt`,
           satisfied: null,
-          actual: 'Wert fehlt',
+          actual: en ? 'value missing' : 'Wert fehlt',
         });
         return;
       }
-      walk(n.body, lookup, out);
+      walk(n.body, lookup, out, locale);
       return;
     }
     default:
-      out.push(leaf(n, lookup));
+      out.push(leaf(n, lookup, locale));
   }
 }
 
-function leaf(n: ConditionNode, lookup: Lookup): ExplainLeaf {
+function leaf(n: ConditionNode, lookup: Lookup, locale: ExplainLocale): ExplainLeaf {
+  const en = locale === 'en';
+  const missingTxt = (sym: string) => (en ? `${sym} missing` : `${sym} fehlt`);
+  const req = en ? 'required' : 'erforderlich';
   const verdict = evaluateNode(n, lookup);
   const satisfied = verdict === 'missing' ? null : verdict === 'true';
   const text = nodeToText(n);
@@ -98,9 +108,9 @@ function leaf(n: ConditionNode, lookup: Lookup): ExplainLeaf {
       return {
         text,
         satisfied,
-        actual: missing ? `${n.symbol} fehlt` : `${n.symbol} = ${fmt(v)}`,
-        required: `erforderlich: ${n.op} ${rhs}`,
-        ...(satisfied === false ? { wouldPass: wouldPassText(n.symbol, n.op, rhs) } : {}),
+        actual: missing ? missingTxt(n.symbol) : `${n.symbol} = ${fmt(v)}`,
+        required: `${req}: ${n.op} ${rhs}`,
+        ...(satisfied === false ? { wouldPass: wouldPassText(n.symbol, n.op, rhs, locale) } : {}),
       };
     }
     case 'acompare': {
@@ -113,11 +123,11 @@ function leaf(n: ConditionNode, lookup: Lookup): ExplainLeaf {
       return {
         text,
         satisfied,
-        actual: lv === null ? `${lText} fehlt/unbestimmt` : `${lText} = ${fmt(lv)}`,
+        actual: lv === null ? (en ? `${lText} missing/undetermined` : `${lText} fehlt/unbestimmt`) : `${lText} = ${fmt(lv)}`,
         required:
-          `erforderlich: ${n.op} ${requiredValue}`
+          `${req}: ${n.op} ${requiredValue}`
           + (rv !== null && !isNumericLiteral(n.right) ? ` (= ${rText})` : rhsIsBare ? '' : ` (${rText})`),
-        ...(satisfied === false ? { wouldPass: wouldPassText(lText, n.op, requiredValue) } : {}),
+        ...(satisfied === false ? { wouldPass: wouldPassText(lText, n.op, requiredValue, locale) } : {}),
       };
     }
     case 'exists': {
@@ -128,10 +138,10 @@ function leaf(n: ConditionNode, lookup: Lookup): ExplainLeaf {
       return {
         text,
         satisfied,
-        actual: present ? `${n.symbol} = ${fmt(v as ConditionValue)}` : `${n.symbol} fehlt`,
-        required: n.negate ? 'erforderlich: Wert vorhanden' : 'erforderlich: kein Wert',
+        actual: present ? `${n.symbol} = ${fmt(v as ConditionValue)}` : missingTxt(n.symbol),
+        required: n.negate ? `${req}: ${en ? 'value present' : 'Wert vorhanden'}` : `${req}: ${en ? 'no value' : 'kein Wert'}`,
         ...(satisfied !== true && n.negate
-          ? { wouldPass: `${n.symbol} erfassen/ausfüllen` }
+          ? { wouldPass: en ? `enter/fill in ${n.symbol}` : `${n.symbol} erfassen/ausfüllen` }
           : {}),
       };
     }
@@ -142,9 +152,9 @@ function leaf(n: ConditionNode, lookup: Lookup): ExplainLeaf {
       return {
         text,
         satisfied,
-        actual: missing ? `${n.symbol} fehlt` : `${n.symbol} = ${fmt(v)}`,
-        required: `erforderlich: einer von {${members}}`,
-        ...(satisfied === false ? { wouldPass: `${n.symbol} auf einen zulässigen Wert setzen` } : {}),
+        actual: missing ? missingTxt(n.symbol) : `${n.symbol} = ${fmt(v)}`,
+        required: en ? `${req}: one of {${members}}` : `${req}: einer von {${members}}`,
+        ...(satisfied === false ? { wouldPass: en ? `set ${n.symbol} to a permitted value` : `${n.symbol} auf einen zulässigen Wert setzen` } : {}),
       };
     }
     case 'truthy': {
@@ -153,9 +163,9 @@ function leaf(n: ConditionNode, lookup: Lookup): ExplainLeaf {
       return {
         text,
         satisfied,
-        actual: missing ? `${n.symbol} fehlt` : `${n.symbol} = ${fmt(v)}`,
-        required: 'erforderlich: bestätigt (true)',
-        ...(satisfied === false ? { wouldPass: `${n.symbol} bestätigen` } : {}),
+        actual: missing ? missingTxt(n.symbol) : `${n.symbol} = ${fmt(v)}`,
+        required: en ? `${req}: confirmed (true)` : `${req}: bestätigt (true)`,
+        ...(satisfied === false ? { wouldPass: en ? `confirm ${n.symbol}` : `${n.symbol} bestätigen` } : {}),
       };
     }
     default:
@@ -163,8 +173,19 @@ function leaf(n: ConditionNode, lookup: Lookup): ExplainLeaf {
   }
 }
 
-/** German action phrasing per operator direction. */
-function wouldPassText(lhs: string, op: string, requiredValue: string): string {
+/** Action phrasing per operator direction (German default; O-8 English). */
+function wouldPassText(lhs: string, op: string, requiredValue: string, locale: ExplainLocale = 'de'): string {
+  if (locale === 'en') {
+    switch (op) {
+      case '>=': return `raise ${lhs} to at least ${requiredValue}`;
+      case '>': return `raise ${lhs} above ${requiredValue}`;
+      case '<=': return `lower ${lhs} to at most ${requiredValue}`;
+      case '<': return `lower ${lhs} below ${requiredValue}`;
+      case '==': return `set ${lhs} to ${requiredValue}`;
+      case '!=': return `choose ${lhs} other than ${requiredValue}`;
+      default: return `adjust ${lhs} (${op} ${requiredValue})`;
+    }
+  }
   switch (op) {
     case '>=': return `${lhs} auf mindestens ${requiredValue} bringen`;
     case '>': return `${lhs} auf mehr als ${requiredValue} bringen`;
