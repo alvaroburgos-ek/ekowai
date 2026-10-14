@@ -77,14 +77,22 @@ export async function loadScenarioBaseline(projectId: string, standardCode: stri
   };
 }
 
-/** „Fälle aktiv" (spec §7). Absent table ⇒ false (code tolerates the unapplied migration). */
-export async function loadScenariosEnabled(projectId: string): Promise<boolean> {
+/**
+ * „Fälle aktiv" (spec §7) + whether the staged tables exist. Absent table (42P01) ⇒ not available. Any other error is
+ * logged and fails closed (not available, off): this read sits on the record's worksheet page, and a transient fault in
+ * the case tables must never break that page (final review A2-M8).
+ */
+export async function loadScenarioSettings(projectId: string): Promise<{ available: boolean; enabled: boolean }> {
   try {
     const [row] = await db.select({ enabled: projectScenarioSettings.enabled }).from(projectScenarioSettings)
       .where(eq(projectScenarioSettings.projectId, projectId)).limit(1);
-    return row?.enabled === true;
+    return { available: true, enabled: row?.enabled === true };
   } catch (e) {
-    if (isMissingRelationError(e)) return false;
-    throw e;
+    if (!isMissingRelationError(e)) console.error('[scenarios] loading the case setting failed — cases hidden', e);
+    return { available: false, enabled: false };
   }
+}
+
+export async function loadScenariosEnabled(projectId: string): Promise<boolean> {
+  return (await loadScenarioSettings(projectId)).enabled;
 }
