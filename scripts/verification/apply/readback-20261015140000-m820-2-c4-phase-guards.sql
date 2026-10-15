@@ -8,14 +8,14 @@
 
 -- R0 · touched rows at pre / post state (before: fields_pre 18, gates_pre 5, *_post 0, new_drivers 0 · after: 0 / 18, 0 / 5, new_drivers 3)
 WITH fv(ws, sym, sig0, sig1) AS (VALUES
-    ('820-2-09','contract_amendments_tracked','9d783c15a59e38f12ba6d2b1434c39dc','0935c7a0c38fe0f39f53fb3d3396381f'),
-    ('820-2-09','approval_procedure_defined','5554fc75ce2fde090f6bee301c7cec0d','6ad27bbea70ca19a7ef6323e77d2292c'),
-    ('820-2-09','quality_monitoring_active','384127a88abaafa85c0acef73a19b96c','68699779435a6596eaea39dc61dd4f00'),
-    ('820-2-09','qs_plan_lph8_present','0af92015e1429d6a26032500ef9714c0','8cf16f890a5a901e05248e7eec48ce81'),
+    ('820-2-09','contract_amendments_tracked','9d783c15a59e38f12ba6d2b1434c39dc','18e4e391960fc89a87b4201ddb95b060'),
+    ('820-2-09','approval_procedure_defined','5554fc75ce2fde090f6bee301c7cec0d','c4dde98f6c7bf2b525dab951554df653'),
+    ('820-2-09','quality_monitoring_active','384127a88abaafa85c0acef73a19b96c','0fd4fb1d1b6ddc1287d519f82a664e32'),
+    ('820-2-09','qs_plan_lph8_present','0af92015e1429d6a26032500ef9714c0','1981fc68514b0acb0fd3322cb786400c'),
     ('820-2-15','planning_summary_date','852683a89742373fb462d4d87b71fafa','0044407dfd784401064aa717dee628d1'),
     ('820-2-19','vergabeverfahren_used','ec9ddea1967da1aee4115bf7ef6a501e','e0a03f43ed7a3f0b3bf44ef421d79eea'),
     ('820-2-19','auswahlentscheidung_dokumentiert','d6a67da068118583ed87efb20b2e6b2a','d8d91f4557fbe26b61f1799701fa39d1'),
-    ('820-2-19','zuschlag_erteilt_datum','da2a5e497b6ff4e389243a315bc05bec','38d01549a135f89edcc8859882626167'),
+    ('820-2-19','zuschlag_erteilt_datum','da2a5e497b6ff4e389243a315bc05bec','d429f2cdc2fd0d68442d7d6e2e80e9fa'),
     ('820-2-19','final_contract_value','9f68a3102b8158d21475b41e389e5e46','dcaae7d8650cd4d0edfea4c35fbc9f26'),
     ('820-2-19','vergabesumme_summary_date','a79fc1a1719233964122b8cf4080bf37','7d20bb6f18008a248c75d708835e1b5a'),
     ('820-2-25','approval_release_process','2312157d5674397884af9dc3c0f305ef','d8a4cfc65793cbb08eed78eaa5b84de8'),
@@ -27,10 +27,10 @@ WITH fv(ws, sym, sig0, sig1) AS (VALUES
     ('820-2-14','oeffentlichkeitsbeteiligung_vorgesehen','43bb8c5c24510530886811964e0e65a9','1c616a11dff660904b36f3a4f1eaee72'),
     ('820-2-20','phase_ausfuehrung_erreicht','37ab930379243190d04b8c31a3abeef2','c6f060f6fa44260b8e67db1ed2fe8207')),
 gv(ws, code, sig0, sig1) AS (VALUES
-    ('820-2-09','REQ-16','c878af5ceae882134b77219b67d2ae68','a7e7f3dcb4a4730a60832637e74da802'),
-    ('820-2-09','REQ-17','a8d3d6fa476f1ce55ee3fe71ae0d3317','2c1774dae08ce4f7fd449246e3f53a1c'),
-    ('820-2-09','REQ-18','73a4516f12e5ed3c77c5f3c5f5c48829','9d9be09d6b8571645171cf95df4ac3cd'),
-    ('820-2-09','REQ-19','6b52ba4903bb1f997ce4ab1bc5b799bc','5fdbc24553253e7e350448c2cf7250f6'),
+    ('820-2-09','REQ-16','c878af5ceae882134b77219b67d2ae68','1586fa188a8e7fb1a8fedecb321495f1'),
+    ('820-2-09','REQ-17','a8d3d6fa476f1ce55ee3fe71ae0d3317','266bbdfad56fe944c22842ec577d2a08'),
+    ('820-2-09','REQ-18','73a4516f12e5ed3c77c5f3c5f5c48829','2a3fe6857d07a668dc3f6b038d971aeb'),
+    ('820-2-09','REQ-19','6b52ba4903bb1f997ce4ab1bc5b799bc','69d9994801060f24335d6125da2a396b'),
     ('820-2-16','REQ-37','4e6d4583e096e1649395faca525b844b','05659845cff02f41fdc2f19defbb83d2')),
 fl AS (SELECT fv.*, md5(concat_ws('|', md5(coalesce(f.description,'')), coalesce(f.visible_when,''), coalesce(array_to_string(f.consumer_worksheets, ','),''), coalesce(md5(f.enum_values::text),''), f.label_de, coalesce(f.label_en,''), f.is_required::text, f.data_type, md5(coalesce(f.verification_quote,'')), coalesce(f.source_anchor,''))) AS sig
          FROM fv JOIN standards s ON s.code = 'DWA-M-820-2' JOIN worksheet_templates w ON w.standard_id = s.id AND w.code = fv.ws

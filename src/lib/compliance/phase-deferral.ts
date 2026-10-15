@@ -118,12 +118,14 @@ export type PhaseDeferralText = {
 /** The DE / EN document text (shared by the conformity declaration, the checklist, the report and the Prüf-Memo). */
 export function phaseDeferralLines(deferrals: readonly PhaseDeferral[]): PhaseDeferralText {
   return {
-    headingDe: 'Noch nicht erreichte Phasen — nicht geprüft',
-    headingEn: 'Phases not reached yet — not checked',
+    // Fix round 1 of block 20261015140000: neutral for both driver kinds (`_erreicht` = phase reached, `_erteilt` /
+    // `_abgeschlossen` = phase completed).
+    headingDe: 'Phasen noch nicht erreicht bzw. noch nicht abgeschlossen — nicht geprüft',
+    headingEn: 'Phases not yet reached or not yet completed — not checked',
     introDe:
-      'Die folgenden Phasen sind als „noch nicht erreicht“ beantwortet. Die daran gebundenen Pflichten wurden nicht geprüft; diese Unterlage deckt nur die als erreicht markierten Phasen ab. Sobald eine Phase erreicht ist, wird sie auf „Ja“ gesetzt und das Arbeitsblatt erneut eingereicht.',
+      'Die folgenden Phasen sind als „noch nicht erreicht“ bzw. „noch nicht abgeschlossen“ beantwortet. Die daran gebundenen Pflichten wurden nicht geprüft; diese Unterlage deckt nur die als erreicht bzw. abgeschlossen markierten Phasen ab. Sobald eine Phase erreicht bzw. abgeschlossen ist, wird sie auf „Ja“ gesetzt und das Arbeitsblatt erneut eingereicht.',
     introEn:
-      'The following phases are answered “not reached yet”. The duties tied to them were not checked; this document covers only the phases marked reached. Once a phase is reached, it is set to “Yes” and the worksheet is submitted again.',
+      'The following phases are answered “not yet reached” or “not yet completed”. The duties tied to them were not checked; this document covers only the phases marked reached or completed. Once a phase is reached or completed, it is set to “Yes” and the worksheet is submitted again.',
     items: deferrals.map((d) => {
       const de: string[] = [];
       const en: string[] = [];

@@ -3,7 +3,7 @@ import { styles } from './styles';
 import { phaseDeferralLines, type PhaseDeferral } from '@/lib/compliance/phase-deferral';
 
 /**
- * C-9 (2026-10-14): „Noch nicht erreichte Phasen — nicht geprüft" — the phases answered „not reached" (phase drivers =
+ * C-9 (2026-10-14): „Phasen noch nicht erreicht bzw. noch nicht abgeschlossen — nicht geprüft" — the phases answered „not reached" or „not completed" (phase drivers =
  * Nein) and the duties their guards left unchecked, DE with the EN line below. Renders nothing when no phase is open.
  * Shared by the conformity declaration, the checklist, the standard report and the Prüf-Memo.
  */

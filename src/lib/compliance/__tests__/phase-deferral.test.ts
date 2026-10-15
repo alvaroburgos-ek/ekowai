@@ -76,8 +76,8 @@ describe('collectPhaseDeferrals', () => {
 describe('phaseDeferralLines (DE / EN document text)', () => {
   it('heading, driver line and duty list in both languages', () => {
     const t = phaseDeferralLines(collectPhaseDeferrals([D('phase_ausfuehrung_erreicht', false)], [G('REQ-43', ['phase_ausfuehrung_erreicht'])]));
-    expect(t.headingDe).toBe('Noch nicht erreichte Phasen — nicht geprüft');
-    expect(t.headingEn).toBe('Phases not reached yet — not checked');
+    expect(t.headingDe).toBe('Phasen noch nicht erreicht bzw. noch nicht abgeschlossen — nicht geprüft');
+    expect(t.headingEn).toBe('Phases not yet reached or not yet completed — not checked');
     expect(t.items[0].de).toBe('820-2-20 · Phase phase_ausfuehrung_erreicht = Nein — nicht geprüft: 820-2-20 REQ-43 (blockierend) Titel REQ-43');
     expect(t.items[0].en).toBe('820-2-20 · Phase phase_ausfuehrung_erreicht (EN) = No — not checked: 820-2-20 REQ-43 (blocking) Titel REQ-43');
   });

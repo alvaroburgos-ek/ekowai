@@ -331,7 +331,8 @@ async function gateView(p: Proj): Promise<Record<string, string>> {
 /** C-9: the „phases not reached“ list of the standard report (driver + gates not checked because of it). */
 async function c9(p: Proj): Promise<Array<{ ws: string; symbol: string; gates: string[]; elsewhere: string[] }>> {
   const rep = await loadStandardReportData(p.id, 'DWA-M-820-2');
-  return (rep.phaseDeferrals ?? []).map((d) => ({ ws: d.worksheetCode, symbol: d.symbol, gates: d.gates.map((g) => g.code), elsewhere: d.skippedElsewhere.map((g) => g.code) }));
+  return (rep.phaseDeferrals ?? []).map((d) => ({ ws: d.worksheetCode, symbol: d.symbol, gates: d.gates.map((g) => g.code).sort(), elsewhere: d.skippedElsewhere.map((g) => g.code).sort() }));
+  // (sorted: the report lists gates in DB row order, which changes when a row is updated — fix round 1)
 }
 const inherits = async (ws: string, sym: string) => {
   const [tp] = await harness.sql<{ id: string; standard_id: string }[]>`SELECT w.id, w.standard_id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-820-2' AND w.code = ${ws}`;
