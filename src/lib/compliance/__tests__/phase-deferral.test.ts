@@ -27,6 +27,15 @@ describe('isPhaseDriver', () => {
     expect(isPhaseDriver({ symbol: 'bauleistungen_vergeben', dataType: 'boolean' })).toBe(false);
     expect(isPhaseDriver({ symbol: 'pz_62_1_status', dataType: 'enum' })).toBe(false);
   });
+  it('block 20261015140000: phase_<name>_erteilt / phase_<name>_abgeschlossen are drivers too; other suffixes / no prefix are not', () => {
+    expect(isPhaseDriver({ symbol: 'phase_auftrag_erteilt', dataType: 'boolean' })).toBe(true);
+    expect(isPhaseDriver({ symbol: 'phase_planung_abgeschlossen', dataType: 'boolean' })).toBe(true);
+    expect(isPhaseDriver({ symbol: 'phase_vergabe_abgeschlossen', dataType: 'boolean' })).toBe(true);
+    expect(isPhaseDriver({ symbol: 'phase_auftrag_erteilt', dataType: 'date' })).toBe(false);
+    expect(isPhaseDriver({ symbol: 'inbetriebnahme_abgeschlossen', dataType: 'boolean' })).toBe(false);
+    expect(isPhaseDriver({ symbol: 'phase_vergabe_abgeschlossen_datum', dataType: 'boolean' })).toBe(false);
+    expect(isPhaseDriver({ symbol: 'phase_erteilt', dataType: 'boolean' })).toBe(false);
+  });
 });
 
 describe('collectPhaseDeferrals', () => {
