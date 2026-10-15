@@ -104,8 +104,10 @@ export const TWIN_SYMBOLS: Record<string, TwinRule[]> = {
       note: 'Bedarfsplanung Projekt abgeschlossen (DWA-M 820-1 M820-05) — 820-3 § 6.2 PZ 6.2-1 bewertet dieselbe Tatsache',
       valueMap: [[true, 'erreicht']],
       unmappedNote: {
-        de: 'Nein in DWA-M 820-1 M820-05 → hier je nach Stand „Teilweise erreicht“ oder „Nicht erreicht“ wählen (das Merkblatt legt die Stufe nicht fest).',
-        en: 'No on DWA-M 820-1 M820-05 → choose “Partially met” or “Not met” here depending on the state (the guideline does not fix the level).',
+        // C4 F4 (2026-10-15): at day 0 LPH 0 is still open, so „Phase noch nicht erreicht“ is the truthful answer; „Teilweise“ /
+        // „Nicht erreicht“ trigger the Projektstopp review (§ 3, printed p. 10) and belong to a completed phase only.
+        de: 'Nein in DWA-M 820-1 M820-05 → solange die Bedarfsplanung (LPH 0) noch läuft, hier „Phase noch nicht erreicht“ wählen. Erst wenn die Phase abgeschlossen ist und das Ziel verfehlt wurde: „Teilweise erreicht“ oder „Nicht erreicht“ – beides löst die Prüfung eines Projektstopps aus (§ 3).',
+        en: 'No on DWA-M 820-1 M820-05 → while the needs planning (LPH 0) is still running, choose “Phase not reached yet” here. Only once the phase is completed and the goal was missed: “Partially met” or “Not met” – both trigger the review of a project stop (§ 3).',
       },
     },
   ],
