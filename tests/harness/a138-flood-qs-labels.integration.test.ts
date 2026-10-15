@@ -7,7 +7,8 @@
  *   F-A9 · A138-26 Q_S_flood retired (active = false): Gl. (10) reads Q_S, inherited from its single producer A138-12 (Gl. (4)); the
  *          typed duplicate never entered Gl. (10). Proven through the REAL server recompute (recomputeWorksheetEquations → the report
  *          evaluator → saveWorksheet): V_Rück follows the A138-12 Q_S before AND after the block, a typed Q_S_flood never moves it.
- *   F-A7 labels · A138-26 r_D_30 relabelled r_D(T_n,Ü) (legacy 1D table only); T_n_Ue hint „leer = 30 a; 100 a, wenn …“.
+ *   F-A7 labels · A138-26 r_D_30 relabelled r_D(T_n,Ü) (read only without a KOSTRA 2D table: legacy 1D table or none at all);
+ *          T_n_Ue hint „leer = 30 a; 100 a, wenn …“.
  *
  * Disposable embedded Postgres only — no prod, no .env.local. REAL saveWorksheet / checkApprovalGate / loadInheritedFields /
  * recomputeWorksheetEquations. SEED: the DWA-A-138-1 encoding dump of prod taken 2026-10-15 (READ ONLY,
@@ -306,7 +307,7 @@ describe('DWA-A 138-1 A138-26 F-A9 + F-A7 labels — staged block on embedded Po
     expect(by.Q_S_flood).toMatchObject({ active: false, is_required: true, label_de: 'Versickerungsleistung Q_S (Überflutungsfall)' });
     expect(by.Q_S_flood.description).toContain('„Q_S l/s Versickerungsleistung (nach Gl. (4))“');
     // F-A7 labels
-    expect(by.r_D_30).toMatchObject({ active: true, is_required: false, unit: 'l/(s·ha)', label_de: 'Regenspende r_D(T_n,Ü) – nur bei Alt-Tabelle (1D)', label_en: 'Rainfall intensity r_D(T_n,Ü) – legacy 1D table only' });
+    expect(by.r_D_30).toMatchObject({ active: true, is_required: false, unit: 'l/(s·ha)', label_de: 'Regenspende r_D(T_n,Ü) – nur ohne KOSTRA-Tabelle (2D)', label_en: 'Rainfall intensity r_D(T_n,Ü) – only without a KOSTRA 2D table' });
     expect(by.T_n_Ue).toMatchObject({ active: true, is_required: true, label_de: 'Wiederkehrzeit Überflutung T_n,Ü' });
     expect(by.T_n_Ue.description.startsWith('leer = 30 a; 100 a, wenn die befestigten Flächen zu mehr als 70 % aus Dachflächen und nicht überflutbaren Flächen bestehen (§ 5.3.4.1).')).toBe(true);
     const q70 = '„Bestehen die befestigten Flächen des Grundstücks zum Beispiel um mehr als 70 % aus Dachflächen und nicht überflutbaren Flächen, wie Innenhöfe, ist die Überflutungsprüfung nach DIN 1986-100 für eine Wiederkehrzeit T_n = 100 Jahren nach Gl. (10) für Regenspenden r_D(100) iterativ zu führen.“';
@@ -341,7 +342,7 @@ describe('DWA-A 138-1 A138-26 F-A9 + F-A7 labels — staged block on embedded Po
     const [q] = await harness.sql<{ active: boolean }[]>`SELECT f.active FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id WHERE w.code = 'A138-26' AND f.symbol = 'Q_S_flood'`;
     log('rollback with one edited field', { l, label: r.label_de, qsFloodActive: q.active });
     expect(l).toEqual({ fields_archive_a138_fqs: 1, a138_fqs_written: 1 });
-    expect(r.label_de).toBe('Regenspende r_D(T_n,Ü) – nur bei Alt-Tabelle (1D)');
+    expect(r.label_de).toBe('Regenspende r_D(T_n,Ü) – nur ohne KOSTRA-Tabelle (2D)');
     expect(q.active).toBe(true);
     await harness.sql`UPDATE fields f SET description = left(f.description, length(f.description) - length(' (edited)')) FROM worksheet_templates w WHERE w.id = f.worksheet_template_id AND w.code = 'A138-26' AND f.symbol = 'r_D_30'`;
     await runFile(ROLLBACK);
@@ -357,7 +358,7 @@ describe('DWA-A 138-1 A138-26 F-A9 + F-A7 labels — staged block on embedded Po
     log('read-back (after)', post);
     expect(post[0]).toEqual([{ fields: '3', fields_pre: '0', fields_post: '3', fields_neither: null }]);
     expect((post[1] as Array<{ symbol: string; active: boolean; req: boolean; label_de: string }>).map((x) => `${x.symbol} ${x.active} ${x.req} ${x.label_de}`))
-      .toEqual(['Q_S_flood false true Versickerungsleistung Q_S (Überflutungsfall)', 'T_n_Ue true true Wiederkehrzeit Überflutung T_n,Ü', 'r_D_30 true false Regenspende r_D(T_n,Ü) – nur bei Alt-Tabelle (1D)']);
+      .toEqual(['Q_S_flood false true Versickerungsleistung Q_S (Überflutungsfall)', 'T_n_Ue true true Wiederkehrzeit Überflutung T_n,Ü', 'r_D_30 true false Regenspende r_D(T_n,Ü) – nur ohne KOSTRA-Tabelle (2D)']);
     expect(post[2]).toHaveLength(1); // the saved Q_S_flood value is kept
     expect(post[3]).toEqual([{ a138_12_q_s_feeds_26: true, gl10_reads_q_s: true, readers_of_q_s_flood: '0' }]);
     expect(post[4]).toEqual([{ field_archive: '3', written: '3' }]);
