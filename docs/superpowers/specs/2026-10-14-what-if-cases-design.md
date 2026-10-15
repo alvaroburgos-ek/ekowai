@@ -1,16 +1,16 @@
 # What-if cases (Fälle) — design
 
 **Date:** 2026-10-14 · **Status:** approved in conversation (sections 1–5), awaiting written-spec review
-**Owner:** Alvaro (EKOWAI) · **Origin:** DWA-A 138-1 readiness test on case C4 Hellenthal-Ramscheid (record `0bfb1ca6-3e20-4879-8be5-908805d95616`)
-**Prototype:** `Desktop\consulting\Hellenthal-Ramscheid-Bungalow\Deliverables\16_Flood-Check-Comparison_Gl10.html` (local only — client data)
+**Owner:** Alvaro (EKOWAI) · **Origin:** DWA-A 138-1 readiness test on test case C4 (anonymised)
+**Prototype:** local HTML prototype of the flood comparison (client data — kept on the engineer's PC, not in the repo)
 
 ## 1. Purpose
 
-An engineer often has to design before key inputs are measured. In Hellenthal the infiltration rate k_i is only a table value, so the A 138 sizing is not provable today, and the result depends on a field test: with k_i = 1·10⁻⁵ m/s the swale is ~49 m², with 1·10⁻⁶ it is ≥ 105 m². The flood check depends on whether T = 30 a or T = 100 a applies (§ 5.3.4.1, 70 % rule). The engineer needs to see these situations side by side — as numbers, as a chart over the rain duration, and step by step with the values filled into the guideline formula — and to hand the client a clearly labelled scenario annex.
+An engineer often has to design before key inputs are measured. In test case C4 the infiltration rate k_i is only a table value, so the A 138 sizing is not provable today, and the result depends on a field test: with k_i = 1·10⁻⁵ m/s the swale is ~49 m², with 1·10⁻⁶ it is ≥ 105 m². The flood check depends on whether T = 30 a or T = 100 a applies (§ 5.3.4.1, 70 % rule). The engineer needs to see these situations side by side — as numbers, as a chart over the rain duration, and step by step with the values filled into the guideline formula — and to hand the client a clearly labelled scenario annex.
 
 **Users:** the engineer (decide, learn, explain); the client (reads the annex); fill agents via MCP.
 
-**Success:** on Hellenthal the engineer opens A138-26, switches cases on, and sees F0/K5/K6 × T 30/100 as curves with their peaks; steps through D with the numbers in the formula; every value equals the hand calculation; the report gets an annex „Szenarien (Annahmen, nicht nachgewiesen)"; nothing in the real record, approvals, gates or the Konformitätserklärung changes.
+**Success:** on test case C4 the engineer opens A138-26, switches cases on, and sees F0/K5/K6 × T 30/100 as curves with their peaks; steps through D with the numbers in the formula; every value equals the hand calculation; the report gets an annex „Szenarien (Annahmen, nicht nachgewiesen)"; nothing in the real record, approvals, gates or the Konformitätserklärung changes.
 
 **Decisions taken (owner, 2026-10-14):** cases = what-if values on the same project (approach A), cases are project-wide (an override on an early sheet propagates through the whole chain), cases appear in the tool plus an optional report annex; project-to-project comparison/assessment is sub-project B (separate design, reuses this one's chart/table/step-through); implementation approach = in-memory overlay calculation (no shadow data, no project copies).
 
@@ -80,7 +80,7 @@ Standard report (Compliance-Bericht) gets „Anhang S – Szenarien (Annahmen, n
 
 ## 6. Testing
 
-- Hand-value tests (Hellenthal, 2026-10-14): k_i 3·10⁻⁸; V_VA 70.0038 m³ (D 10080, boundary-limited); K5 A_S,m 48.58 m² (D 180); K6 A_S,m 93.25 m² by Gl. 16 and 105.2 m² by Gl. 9; Gl. 10 T 30 a: 94.69 / 13.59 / 27.35 m³; T 100 a: 116.54 / 24.51 / 49.43 m³ (inputs in the C4 ledger entries of 2026-10-14).
+- Hand-value tests (test case C4, 2026-10-14): k_i 3·10⁻⁸; V_VA 70.0038 m³ (D 10080, boundary-limited); K5 A_S,m 48.58 m² (D 180); K6 A_S,m 93.25 m² by Gl. 16 and 105.2 m² by Gl. 9; Gl. 10 T 30 a: 94.69 / 13.59 / 27.35 m³; T 100 a: 116.54 / 24.51 / 49.43 m³ (inputs in the C4 ledger entries of 2026-10-14).
 - Real-equals-record: zero-override run equals stored derived values on approved A 138 test projects.
 - Isolation (embedded Postgres harness): creating, editing, running cases changes no row in project_parameters, worksheet_instances, approvals, audit; conformity PDF byte-identical apart from timestamps.
 - Visibility: a case switching a driver hides/drops the same values as the real record.
@@ -89,7 +89,7 @@ Standard report (Compliance-Bericht) gets „Anhang S – Szenarien (Annahmen, n
 
 ## 7. Rollout and phases
 
-- Migration adds the two tables only (safe to apply); code tolerates their absence; project setting „Fälle aktiv" gates the UI; first on TEST-M820-C4-Hellenthal and TEST-M820-C1-Forscheln.
+- Migration adds the two tables only (safe to apply); code tolerates their absence; project setting „Fälle aktiv" gates the UI; first on TEST-M820-C4 and TEST-M820-C1-Forscheln.
 - Process: implement → independent review → fix → re-review → push (owner) → deploy (owner).
 - **Phase A1:** tables, override CRUD + validation, chain runner, results columns, iteration chart + step-through on A 138, MCP tools.
 - **Phase A2:** report annex; iteration chart for the other standards that use `iterateGoverningDuration`.

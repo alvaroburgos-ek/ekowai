@@ -26,7 +26,7 @@
 - Visibility = the record's rules: own `visible_when` (`reportVisibility`) ∪ hidden-at-source (`sourceHiddenSymbolsByTemplate` via `gateHiddenSymbols`), inherited rows hidden at source dropped (`dropHiddenAtSource` / `hiddenAtSourceFieldIds`).
 - Chart: categorical colours in this fixed order — light `#2a78d6 #eb6834 #1baf7a #eda100 #e87ba4 #008300`, dark `#3987e5 #d95926 #199e70 #c98500 #d55181 #008300`; „Real" in ink; one y-axis; log x axis 5 min … 7 d; peak marker; „kein eindeutiges Maximum" marker when boundary-limited; crosshair tooltip with every visible case; legend always (≥ 2 series); T = 100 a dashed, T = 30 a solid; table view (step-through table) always available. Validator result (run 2026-10-14): light PASS with contrast WARN for slots 3/4/5 ⇒ direct labels at the peak + table view are mandatory; dark PASS.
 - DE/EN through the `locale: 'de' | 'en'` prop pattern of the worksheet components (no new next-intl keys except the tab label `projects.tabs.scenarios`).
-- Client data (Hellenthal C4) appears only in test fixtures, never in UI code.
+- Client data (test case C4) appears only in test fixtures, never in UI code.
 - Commit messages end with `Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>`. Verify `git config user.email` before the first commit (identity is configured in the worktree; do not change it).
 - Run commands from `C:\Users\Ekowai\_wt-m820` (branch `feat/what-if-cases`). Unit: `pnpm vitest run --project unit <path>`; harness: `pnpm vitest run --project integration <path>`; types: `pnpm typecheck`.
 
@@ -69,7 +69,7 @@
 | `src/lib/scenarios/iteration-series.ts` (create) | Gl. 8 / Gl. 10 (T 30/100) / Gl. 16 per-duration series |
 | `src/lib/scenarios/a138-mirror.ts` (create) | Mulde-path mirror of the save-path materialisations |
 | `src/lib/scenarios/sheet-series.ts` (create) | which series a sheet carries, from a value accessor |
-| `src/lib/scenarios/__fixtures__/hellenthal-a138.ts` (create) | anonymised C4-shaped A 138 chain (test-only) + baseline builder |
+| `src/lib/scenarios/__fixtures__/c4-a138-chain.ts` (create) | anonymised C4-shaped A 138 chain (test-only) + baseline builder |
 | `src/lib/eval/scenario-chain.ts` (create) | `runScenarioChain` (pure) |
 | `src/lib/scenarios/load-baseline.ts` (create) | `loadScenarioBaseline`, `loadScenariosEnabled` (server-only DB reads) |
 | `src/lib/actions/scenarios.ts` (create) | server actions: CRUD, overrides, settings, field search, `getScenarioResults` |
@@ -984,7 +984,7 @@ import { gl8Series, gl10Series, gl16Series, displayValue } from '../iteration-se
 import { computeMuldeGeometrySweep } from '@/lib/eval/materialize-asm';
 import { evaluateFormula } from '@/lib/eval/formula';
 import { floodCarrierFromSum } from '@/lib/eval/aggregators';
-import { KOSTRA_151093, rows } from '../__fixtures__/hellenthal-a138';
+import { KOSTRA_151093, rows } from '../__fixtures__/c4-a138-chain';
 
 const close = (a: number | null, b: number, rel = 1e-9) => {
   expect(a).not.toBeNull();
@@ -1115,11 +1115,11 @@ export function computeMuldeGeometrySweep(
 }
 ```
 
-Create the first section of `src/lib/scenarios/__fixtures__/hellenthal-a138.ts`:
+Create the first section of `src/lib/scenarios/__fixtures__/c4-a138-chain.ts`:
 
 ```ts
 /**
- * TEST FIXTURE ONLY — anonymised A 138 chain shaped like case C4 (TEST-M820-C4-Hellenthal, ledger 2026-10-14).
+ * TEST FIXTURE ONLY — anonymised A 138 chain shaped like case C4 (TEST-M820-C4, ledger 2026-10-14).
  * KOSTRA-DWD-2020 cell 151093, exact DWD rN values (l/(s·ha)), columns T = 5 / 30 / 100 a.
  * Never import from app/UI code.
  */
@@ -1221,7 +1221,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/eval/materialize-asm.ts src/lib/scenarios/iteration-series.ts src/lib/scenarios/__fixtures__/hellenthal-a138.ts src/lib/scenarios/__tests__/iteration-series.test.ts
+git add src/lib/eval/materialize-asm.ts src/lib/scenarios/iteration-series.ts src/lib/scenarios/__fixtures__/c4-a138-chain.ts src/lib/scenarios/__tests__/iteration-series.test.ts
 git commit -m "feat(scenarios): per-duration iteration series for Gl. 8, Gl. 10 (T 30/100), Gl. 16
 
 Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
@@ -1254,7 +1254,7 @@ Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 import { describe, it, expect } from 'vitest';
 import { mirrorA138, facilityRainRows, type MirrorAccessor } from '../a138-mirror';
 import { seriesForSheet } from '../sheet-series';
-import { rainfallCarrier } from '../__fixtures__/hellenthal-a138';
+import { rainfallCarrier } from '../__fixtures__/c4-a138-chain';
 
 function acc(nums: Record<string, number>, strs: Record<string, string> = {}): MirrorAccessor {
   const carrier = rainfallCarrier();
@@ -1511,7 +1511,7 @@ Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 
 **Files:**
 - Create: `src/lib/scenarios/baseline.ts`
-- Modify: `src/lib/scenarios/__fixtures__/hellenthal-a138.ts` (add imports at the top, append the chain)
+- Modify: `src/lib/scenarios/__fixtures__/c4-a138-chain.ts` (add imports at the top, append the chain)
 - Test: `src/lib/scenarios/__tests__/fixture.test.ts`
 
 **Interfaces:**
@@ -1531,7 +1531,7 @@ Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 ```ts
 // src/lib/scenarios/__tests__/fixture.test.ts
 import { describe, it, expect } from 'vitest';
-import { buildFixtureBaseline, FIXTURE_SHEETS, fid, EQ } from '../__fixtures__/hellenthal-a138';
+import { buildFixtureBaseline, FIXTURE_SHEETS, fid, EQ } from '../__fixtures__/c4-a138-chain';
 import { sortSheets } from '../baseline';
 
 describe('C4-shaped fixture', () => {
@@ -1597,7 +1597,7 @@ export function sortSheets(sheets: BaselineSheet[]): BaselineSheet[] {
 
 - [ ] **Step 4: Extend the fixture**
 
-At the top of `src/lib/scenarios/__fixtures__/hellenthal-a138.ts` add:
+At the top of `src/lib/scenarios/__fixtures__/c4-a138-chain.ts` add:
 
 ```ts
 import type { ScenarioBaseline, BaselineField, BaselineSheet, BaselineSection, StoredParameter, ScenarioOverrideInput } from '../baseline';
@@ -1818,7 +1818,7 @@ Run: `pnpm vitest run --project unit src/lib/scenarios/__tests__/fixture.test.ts
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/lib/scenarios/baseline.ts src/lib/scenarios/__fixtures__/hellenthal-a138.ts src/lib/scenarios/__tests__/fixture.test.ts
+git add src/lib/scenarios/baseline.ts src/lib/scenarios/__fixtures__/c4-a138-chain.ts src/lib/scenarios/__tests__/fixture.test.ts
 git commit -m "test(scenarios): baseline types + anonymised C4-shaped A 138 fixture chain
 
 Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
@@ -1855,7 +1855,7 @@ import { describe, it, expect } from 'vitest';
 import { runScenarioChain, MAX_PASSES } from '../scenario-chain';
 import {
   buildFixtureBaseline, overridesFor, fid, ENTERED, K5, K6, K6_GL9,
-} from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+} from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 import type { ScenarioBaseline } from '@/lib/scenarios/baseline';
 import type { ScenarioRun } from '@/lib/scenarios/types';
 
@@ -2921,13 +2921,13 @@ Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 ```ts
 // tests/harness/seed-scenarios.ts
 /**
- * What-if cases harness fixture: the anonymised C4-shaped A 138 chain (src/lib/scenarios/__fixtures__/hellenthal-a138.ts)
+ * What-if cases harness fixture: the anonymised C4-shaped A 138 chain (src/lib/scenarios/__fixtures__/c4-a138-chain.ts)
  * as real rows — templates in phase order, fields with consumer_worksheets / visible_when / enum_values, equations
  * (prod UUIDs where aggregators / profiles key on them), REQ-15 on A138-10. Values are NOT seeded here: the test saves
  * them through the REAL saveWorksheet so the record's derived values come from the real save path.
  */
 import type postgres from 'postgres';
-import { FIXTURE_SHEETS } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import { FIXTURE_SHEETS } from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 
 export type ScenarioHarnessFixture = {
   projectId: string; userId: string; standardId: string;
@@ -3014,7 +3014,7 @@ export function getScenarioHarness() {
 import './_harness-env-scenarios';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { getScenarioHarness } from './_harness-env-scenarios';
-import { FIXTURE_SHEETS, ENTERED, K5 } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import { FIXTURE_SHEETS, ENTERED, K5 } from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 import type * as Actions from '@/lib/actions/scenarios';
 import type { saveWorksheet as SaveWorksheet } from '@/lib/actions/worksheet';
 import type { recomputeWorksheetEquations as Recompute } from '@/lib/actions/recompute-worksheet';
@@ -4134,7 +4134,7 @@ Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 import { describe, it, expect } from 'vitest';
 import { stepLines } from '../step-text';
 import { gl8Series, gl10Series, gl16Series } from '../iteration-series';
-import { rows } from '../__fixtures__/hellenthal-a138';
+import { rows } from '../__fixtures__/c4-a138-chain';
 
 const K5_T30 = gl10Series(rows(30), { AcS_paved: 602.161, A_VA: 48.58, Q_S: 0.4858, Q_Dr: 0, V_VA: 14.57 }, 30);
 describe('stepLines', () => {
@@ -4171,7 +4171,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ScenarioStepThrough } from '../scenario-step-through';
 import { gl10Series } from '@/lib/scenarios/iteration-series';
-import { rows } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import { rows } from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 
 const real = gl10Series(rows(30), { AcS_paved: 602.161, A_VA: 50, Q_S: 0.0015, Q_Dr: 0, V_VA: 70.0037505216 }, 30);
 const k5 = gl10Series(rows(30), { AcS_paved: 602.161, A_VA: 48.58, Q_S: 0.4858, Q_Dr: 0, V_VA: 14.57 }, 30);
@@ -4350,7 +4350,7 @@ Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 import { describe, it, expect } from 'vitest';
 import { buildSheetView } from '../sheet-view';
 import { runScenarioChain } from '@/lib/eval/scenario-chain';
-import { buildFixtureBaseline, overridesFor, K5, fid } from '../__fixtures__/hellenthal-a138';
+import { buildFixtureBaseline, overridesFor, K5, fid } from '../__fixtures__/c4-a138-chain';
 import type { ScenarioResultsPayload, ScenarioSummary } from '../types';
 
 const b = buildFixtureBaseline();
@@ -4411,7 +4411,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { runScenarioChain } from '@/lib/eval/scenario-chain';
-import { buildFixtureBaseline } from '@/lib/scenarios/__fixtures__/hellenthal-a138';
+import { buildFixtureBaseline } from '@/lib/scenarios/__fixtures__/c4-a138-chain';
 
 const a = vi.hoisted(() => ({ getScenarioResults: vi.fn() }));
 vi.mock('@/lib/actions/scenarios', () => a);
@@ -4727,7 +4727,7 @@ Run `pnpm dev` against the local harness or dev DB with the staged migration app
 
 - [ ] **Step 5: Report**
 
-Report to the owner: commits, test counts (raw command output), the spec gaps G-1…G-8 for ruling, and the owner list: apply `_STAGED_20261014120000_project_scenarios.sql` (after review), push, deploy, enable „Fälle aktiv" on TEST-M820-C4-Hellenthal and TEST-M820-C1-Forscheln. Do not push.
+Report to the owner: commits, test counts (raw command output), the spec gaps G-1…G-8 for ruling, and the owner list: apply `_STAGED_20261014120000_project_scenarios.sql` (after review), push, deploy, enable „Fälle aktiv" on TEST-M820-C4 and TEST-M820-C1-Forscheln. Do not push.
 
 ---
 
