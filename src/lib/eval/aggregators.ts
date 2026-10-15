@@ -793,20 +793,24 @@ const a138_26_gl10: Aggregator = {
     const inflow_l_per_s = (r_D * (AcS_paved + A_VA)) / 10000; // l/s
     const net_l_per_s = inflow_l_per_s - (Q_S + Q_Dr); // l/s
     const inflow_volume_m3 = (net_l_per_s * D * 60) / 1000; // m³
-    const V_Rueck = inflow_volume_m3 - V_VA; // m³
+    const V_Rueck_raw = inflow_volume_m3 - V_VA; // m³
+    // Floor at 0 per §5.3.4.1: "ergibt … ein negatives Ergebnis für V_Rück,
+    // so wird V_Rück = 0 gesetzt" (same rule Path A already applies — L-6).
+    const V_Rueck = Math.max(0, V_Rueck_raw); // m³
 
     substituted['Zufluss r_D·(Σ+A_VA)/10⁴ (l/s)'] = inflow_l_per_s;
     substituted['Netto (l/s)'] = net_l_per_s;
     substituted['Flutvolumen (m³)'] = inflow_volume_m3;
     substituted['V_VA (m³)'] = V_VA;
-    substituted['V_Rück = Volumen − V_VA (m³)'] = V_Rueck;
+    substituted['V_Rück = Volumen − V_VA (m³)'] = V_Rueck_raw;
+    substituted['V_Rück = max(0, V_Rück) (m³)'] = V_Rueck;
 
     return {
       kind: 'computed',
       value: V_Rueck,
       substituted,
       formulaEvaluated:
-        'V_Rück = ((r_D(T_n,Ü)·(Σ(A_E,b,a·C_S)+A_VA)/10000) − (Q_S+Q_Dr))·D·60/1000  −  V_VA   (≥ 0 = Flutnachweis bestanden)',
+        'V_Rück = max(0, ((r_D(T_n,Ü)·(Σ(A_E,b,a·C_S)+A_VA)/10000) − (Q_S+Q_Dr))·D·60/1000  −  V_VA)   (§5.3.4 Gl. 10)',
     };
   },
 };
