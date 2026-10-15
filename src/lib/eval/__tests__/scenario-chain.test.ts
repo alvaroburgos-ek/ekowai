@@ -90,11 +90,9 @@ describe('cases — overrides propagate through the whole chain (spec §1, §3)'
     close(v(r, 'A138-12', 'A_S_m'), 105.2421);
     close(v(r, 'A138-13', 'q_S_AC'), 2, 1e-9);
   });
-  // KNOWN DEFECT (escalated in task-7-report.md, not fixed here): Gl. 9 in IEEE-754 gives
-  // (1e-6·105.2421·1000 + 0) / 526.2105 · 10^4 = 1.9999999999999998, and the shared compliance evaluator
-  // (src/lib/expr/evaluate.ts compare(): `ln >= rn`, no tolerance) reads that as < 2 ⇒ REQ-15 'fail' — for the
-  // record exactly as for the case. Hand value 2 ⇒ 'pass'. `it.fails` flips red once the boundary is handled.
-  it.fails('K6 sized by Gl. 9: q_S,AC = 2 ⇒ REQ-15 passes (exact boundary, see KNOWN DEFECT)', () => {
+  // F-A8 (fix/gate-float-tolerance, 0a3f73c): Gl. 9 gives 1.9999999999999998 in IEEE-754; the gate compare is now
+  // tolerant (relative 1e-9), so the exact boundary passes as the hand value 2 does.
+  it('K6 sized by Gl. 9: q_S,AC = 2 ⇒ REQ-15 passes (exact boundary, F-A8)', () => {
     const r = run(buildFixtureBaseline(), overridesFor(K6_GL9), 'k6gl9');
     expect(verdict(r, 'A138-10', 'A138-REQ-15')).toBe('pass');
   });
