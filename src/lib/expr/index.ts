@@ -9,3 +9,4 @@ export * from './parser';
 export * from './functions';
 export * from './scope';
 export * from './evaluate';
+export * from './numeric-compare';

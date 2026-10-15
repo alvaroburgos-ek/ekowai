@@ -15,6 +15,8 @@
  * Predicate ratified 2026-07-15; D3 addition (reasons) also binding.
  */
 
+import { compareNumbers } from '@/lib/expr/numeric-compare';
+
 // ---------------------------------------------------------------------------
 // FacilityType
 // ---------------------------------------------------------------------------
@@ -204,7 +206,7 @@ export function recommendedPhase4Gate(input: Phase4GateInput): Phase4Recommendat
   // CONDITIONAL branch — Tab.14 soft constraints
   const { t_E_hours, freeboardOk, slopeOk } = input.tab14;
   if (
-    (t_E_hours != null && t_E_hours > 84) ||
+    (t_E_hours != null && compareNumbers(t_E_hours, '>', 84)) ||
     freeboardOk === false ||
     slopeOk === false
   ) {
@@ -274,7 +276,7 @@ export function recommendationReasons(input: Phase4GateInput): string[] {
   // --- CONDITIONAL reasons ---
   const { t_E_hours, freeboardOk, slopeOk } = input.tab14;
 
-  if (t_E_hours != null && t_E_hours > 84) {
+  if (t_E_hours != null && compareNumbers(t_E_hours, '>', 84)) {
     reasons.push(`Entleerungszeit t_E = ${t_E_hours} h > 84 h (Tab. 14, §6.3.2)`);
   }
   if (freeboardOk === false) {
@@ -338,7 +340,7 @@ export function evalReq31Flaeche(
   r_D_n_used: number | null,
 ): { flagged: boolean; reason: string | null } | null {
   if (k_i == null || r_D_n_used == null || !isFinite(k_i) || !isFinite(r_D_n_used)) return null;
-  const feasible = k_i > r_D_n_used * 1e-7;
+  const feasible = compareNumbers(k_i, '>', r_D_n_used * 1e-7); // F-A8 tolerant
   if (feasible) return { flagged: false, reason: null };
   return {
     flagged: true,
@@ -362,7 +364,7 @@ export function evalReq32Rigole(inputs: {
   if (![q_VS, r_5_n, A_C].every(isFinite)) return null;
   const lhs = L_VS * q_VS;
   const rhs = r_5_n * A_C * 1e-4;
-  if (lhs >= rhs) return { flagged: false, reason: null };
+  if (compareNumbers(lhs, '>=', rhs)) return { flagged: false, reason: null }; // F-A8 tolerant
   return {
     flagged: true,
     reason:
@@ -386,7 +388,7 @@ export function evalReq33Schacht(inputs: {
   if (![A_S_FS, k_f_FS, A_S_Schacht, k_i].every(isFinite)) return null;
   const lhs = A_S_FS * k_f_FS;
   const rhs = A_S_Schacht * k_i;
-  if (lhs >= rhs) return { flagged: false, reason: null };
+  if (compareNumbers(lhs, '>=', rhs)) return { flagged: false, reason: null }; // F-A8 tolerant
   return {
     flagged: true,
     reason:
@@ -492,8 +494,9 @@ export function assemblePhase4Summary(
     (g.volumeSymbol === null || g.volumeValue != null);
 
   // meetsQsac — prefer explicit flag, else derive from measured q_S,AC (≥ 2 l/(s·ha), REQ-15).
+  // F-A8: the same tolerant `>=` as the REQ-15 gate, so both agree at the exact boundary.
   const meetsQsac =
-    g.meetsQsacFlag != null ? g.meetsQsacFlag : (g.qSac != null && g.qSac >= 2);
+    g.meetsQsacFlag != null ? g.meetsQsacFlag : (g.qSac != null && compareNumbers(g.qSac, '>=', 2));
 
   // blockGateFailed: per-facility BLOCK-gate condition eval (fan-out — now wired).
   //   flaeche → REQ-31 (§6.2.2 Gl.13, UNCONDITIONAL)
