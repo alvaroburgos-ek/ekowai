@@ -82,7 +82,7 @@ describe('Fläche (A138-16) — REQ-31 Gl.13 feasibility, no volume', () => {
     });
     expect(res.ok).toBe(true);
 
-    expect((await summaryRow(f.projectId, f.f_dimensioned))?.value_text).toBe('flaeche');
+    expect((await summaryRow(f.projectId, f.f_dimensioned))?.value_text).toBe('versickerungsflaeche'); // A138-23 vocabulary since 0cd9750 (2026-09-30, FACILITY_TYPE_TO_A138_23_ENUM); text column (harness field is text)
     // volumeSymbol is null for flaeche → volume stays null; footprint (a138_A_s_dim) suffices.
     expect((await summaryRow(f.projectId, f.f_volume))?.value_number).toBeNull();
     expect(Number((await summaryRow(f.projectId, f.f_footprint))?.value_number)).toBe(200);
@@ -182,7 +182,7 @@ describe('MRE (A138-19) — V_MR = persisted V_M + V_R (Gl.26)', () => {
     expect(vmr?.source_type).toBe('derived');
     expect(Number(vmr?.value_number)).toBeCloseTo(m.expectedVMR, 9); // 16.0
 
-    expect((await summaryRow(m.projectId, m.f_dimensioned))?.value_text).toBe('mre');
+    expect((await summaryRow(m.projectId, m.f_dimensioned))?.value_text).toBe('mulden_rigolen_element'); // A138-23 vocabulary since 0cd9750 (2026-09-30, FACILITY_TYPE_TO_A138_23_ENUM); text column (harness field is text)
     expect(Number((await summaryRow(m.projectId, m.f_volume))?.value_number)).toBeCloseTo(m.expectedVMR, 9);
     expect((await summaryRow(m.projectId, m.f_complete))?.value_boolean).toBe(true);
   });
@@ -206,10 +206,11 @@ describe('Schacht (A138-21) — V_S = π·d_i²/4·h_S (Gl.36; h_S swept Gl.37)'
     expect(vs?.source_type).toBe('derived');
     expect(Number(vs?.value_number)).toBeCloseTo(s.expectedVS, 6);
 
-    expect((await summaryRow(s.projectId, s.f_dimensioned))?.value_text).toBe('schacht');
+    expect((await summaryRow(s.projectId, s.f_dimensioned))?.value_text).toBe('versickerungsschacht'); // A138-23 vocabulary since 0cd9750 (2026-09-30, FACILITY_TYPE_TO_A138_23_ENUM); text column (harness field is text)
     expect(Number((await summaryRow(s.projectId, s.f_volume))?.value_number)).toBeCloseTo(s.expectedVS, 6);
-    // footprint maps to A_S_Schacht (=5) → present → complete=true.
-    expect(Number((await summaryRow(s.projectId, s.f_footprint))?.value_number)).toBe(5);
+    // footprint maps to A_S_Schacht → present → complete=true. Since 793297a (2026-09-30, readiness case A8) the shaft sweep
+    // persists A_S,Schacht = Gl.34 at the governing h_S (29.6576 here) over the entered 5.
+    expect(Number((await summaryRow(s.projectId, s.f_footprint))?.value_number)).toBeCloseTo(s.expectedASchacht, 6);
     expect((await summaryRow(s.projectId, s.f_complete))?.value_boolean).toBe(true);
   });
 });
@@ -232,7 +233,7 @@ describe('Becken (A138-22) — V_B via Gl.41 governing sweep', () => {
     expect(vb?.source_type).toBe('derived');
     expect(Number(vb?.value_number)).toBeCloseTo(b.expectedVB, 6);
 
-    expect((await summaryRow(b.projectId, b.f_dimensioned))?.value_text).toBe('becken');
+    expect((await summaryRow(b.projectId, b.f_dimensioned))?.value_text).toBe('versickerungsbecken'); // A138-23 vocabulary since 0cd9750 (2026-09-30, FACILITY_TYPE_TO_A138_23_ENUM); text column (harness field is text)
     expect(Number((await summaryRow(b.projectId, b.f_volume))?.value_number)).toBeCloseTo(b.expectedVB, 6);
     expect((await summaryRow(b.projectId, b.f_complete))?.value_boolean).toBe(true);
   });

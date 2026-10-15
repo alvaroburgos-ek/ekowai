@@ -345,7 +345,7 @@ export async function seedMre(base: Base): Promise<FacilityFixture & { expectedV
 }
 
 // ── SCHACHT (A138-21) — V_S = π·d_i²/4·h_S (Gl.36; h_S swept Gl.37) ──────────
-export async function seedSchacht(base: Base): Promise<FacilityFixture & { expectedVS: number }> {
+export async function seedSchacht(base: Base): Promise<FacilityFixture & { expectedVS: number; expectedASchacht: number }> {
   const ctx = await freshCtx(base);
   const projectId = await mkProject(ctx, 'HS-SCHACHT');
   const summary = await mkSummary(ctx, projectId);
@@ -383,6 +383,9 @@ export async function seedSchacht(base: Base): Promise<FacilityFixture & { expec
   };
   const hGov = Math.max(...RAIN_ROWS.map((r) => hOf(r.D_min, r.r_D_n)));
   const expectedVS = (Math.PI * d_i ** 2) / 4 * hGov;
+  // A_S,Schacht (Gl.34) at the governing head: persisted with V_S since 793297a (2026-09-30, readiness case A8) — it
+  // overwrites the entered 5 above, so the summary footprint is this derived value.
+  const expectedASchacht = (Math.PI * d_a ** 2) / 4 + (Math.PI * d_a * hGov) / 2;
 
   return {
     projectId, facilityInstanceId: i21, ws23InstanceId: summary.instanceId,
@@ -390,7 +393,7 @@ export async function seedSchacht(base: Base): Promise<FacilityFixture & { expec
     f_dimensioned: summary.f_dimensioned, f_volume: summary.f_volume, f_footprint: summary.f_footprint,
     f_complete: summary.f_complete, f_recommended: summary.f_recommended, f_reasons: summary.f_reasons,
     nudgeFieldId: dInnen, nudgeValue: 1.0,
-    expectedVS,
+    expectedVS, expectedASchacht,
   };
 }
 
