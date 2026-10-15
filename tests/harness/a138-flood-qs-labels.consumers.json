@@ -1,0 +1,1330 @@
+{
+ "_meta": {
+  "captured_at": "2026-10-15T07:35:10.492Z",
+  "source": "prod READ ONLY transaction (fields.consumer_worksheets, DWA-A-138-1)",
+  "rows": 301
+ },
+ "A138-01 a138_applicable": {
+  "consumer_worksheets": [
+   "A138-02"
+  ]
+ },
+ "A138-01 attest_a138_01_a138_req_25": {
+  "consumer_worksheets": null
+ },
+ "A138-01 attest_a138_01_a138_req_27": {
+  "consumer_worksheets": null
+ },
+ "A138-01 attest_a138_01_a138_req_29": {
+  "consumer_worksheets": null
+ },
+ "A138-01 client_contact": {
+  "consumer_worksheets": null
+ },
+ "A138-01 client_name": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-01 design_method": {
+  "consumer_worksheets": [
+   "A138-08",
+   "A138-13",
+   "A138-25",
+   "ALL_calculation"
+  ]
+ },
+ "A138-01 kostra_grid_cell": {
+  "consumer_worksheets": [
+   "A138-04"
+  ]
+ },
+ "A138-01 planner_firm": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-01 planner_name": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-01 planning_phase": {
+  "consumer_worksheets": [
+   "A138-09"
+  ]
+ },
+ "A138-01 project_name": {
+  "consumer_worksheets": [
+   "ALL"
+  ]
+ },
+ "A138-01 project_number": {
+  "consumer_worksheets": [
+   "ALL"
+  ]
+ },
+ "A138-01 project_type": {
+  "consumer_worksheets": [
+   "A138-02",
+   "A138-09"
+  ]
+ },
+ "A138-01 site_address": {
+  "consumer_worksheets": [
+   "A138-02",
+   "A138-04",
+   "A138-05"
+  ]
+ },
+ "A138-01 site_bundesland": {
+  "consumer_worksheets": [
+   "A138-02"
+  ]
+ },
+ "A138-01 site_lat": {
+  "consumer_worksheets": [
+   "A138-04"
+  ]
+ },
+ "A138-01 site_lon": {
+  "consumer_worksheets": [
+   "A138-04"
+  ]
+ },
+ "A138-01 site_municipality": {
+  "consumer_worksheets": [
+   "A138-02",
+   "A138-06"
+  ]
+ },
+ "A138-01 site_total_area": {
+  "consumer_worksheets": [
+   "A138-02",
+   "A138-07"
+  ]
+ },
+ "A138-01 wasserbehoerde": {
+  "consumer_worksheets": [
+   "A138-02",
+   "A138-06",
+   "A138-28"
+  ]
+ },
+ "A138-01 water_protection_zone": {
+  "consumer_worksheets": [
+   "A138-02",
+   "A138-06"
+  ]
+ },
+ "A138-02 authority_coordination_required": {
+  "consumer_worksheets": [
+   "A138-09"
+  ]
+ },
+ "A138-02 building_clearance_status": {
+  "consumer_worksheets": [
+   "A138-15"
+  ]
+ },
+ "A138-02 building_pit_depth_a": {
+  "consumer_worksheets": [
+   "A138-15"
+  ]
+ },
+ "A138-02 contaminated_land_status": {
+  "consumer_worksheets": [
+   "A138-15"
+  ]
+ },
+ "A138-02 direct_gw_injection": {
+  "consumer_worksheets": null
+ },
+ "A138-02 distance_to_building_actual": {
+  "consumer_worksheets": [
+   "A138-15"
+  ]
+ },
+ "A138-02 distance_to_building_check": {
+  "consumer_worksheets": [
+   "A138-15",
+   "A138-28"
+  ]
+ },
+ "A138-02 feasibility_code": {
+  "consumer_worksheets": null
+ },
+ "A138-02 feasibility_determination": {
+  "consumer_worksheets": [
+   "A138-03",
+   "A138-09",
+   "A138-15"
+  ]
+ },
+ "A138-02 geotech_hazards": {
+  "consumer_worksheets": [
+   "A138-15"
+  ]
+ },
+ "A138-02 gw_clearance": {
+  "consumer_worksheets": [
+   "A138-05",
+   "A138-15",
+   "A138-04"
+  ]
+ },
+ "A138-02 kf_initial_estimate": {
+  "consumer_worksheets": [
+   "A138-05"
+  ]
+ },
+ "A138-02 residential_accessibility": {
+  "consumer_worksheets": [
+   "A138-22"
+  ]
+ },
+ "A138-02 slope_risk": {
+  "consumer_worksheets": [
+   "A138-15"
+  ]
+ },
+ "A138-03 data_completeness": {
+  "consumer_worksheets": [
+   "A138-09"
+  ]
+ },
+ "A138-03 f_methode": {
+  "consumer_worksheets": [
+   "A138-11"
+  ]
+ },
+ "A138-03 permeability_test_method": {
+  "consumer_worksheets": [
+   "A138-05",
+   "A138-11"
+  ]
+ },
+ "A138-04 a138_dauerstufe_D": {
+  "consumer_worksheets": null
+ },
+ "A138-04 a138_jaehrlichkeit_T": {
+  "consumer_worksheets": null
+ },
+ "A138-04 a138_KOSTRA_DWD_Atlas": {
+  "consumer_worksheets": null
+ },
+ "A138-04 a138_regenspende_r_DT": {
+  "consumer_worksheets": null
+ },
+ "A138-04 attest_a138_04_a138_req_28": {
+  "consumer_worksheets": null
+ },
+ "A138-04 kostra_data_date": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-04 r_D_n_table": {
+  "consumer_worksheets": [
+   "A138-10",
+   "A138-13",
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22",
+   "A138-26"
+  ]
+ },
+ "A138-05 clearance_a": {
+  "consumer_worksheets": [
+   "A138-15",
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22"
+  ]
+ },
+ "A138-05 k_f": {
+  "consumer_worksheets": [
+   "A138-11",
+   "A138-15",
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22"
+  ]
+ },
+ "A138-05 k_f_layer_min": {
+  "consumer_worksheets": null
+ },
+ "A138-05 k_f_sites_min": {
+  "consumer_worksheets": null
+ },
+ "A138-05 kf_test_density_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-05 kf_test_sites": {
+  "consumer_worksheets": null
+ },
+ "A138-05 kf_test_sites_count": {
+  "consumer_worksheets": [
+   "A138-03",
+   "A138-28"
+  ]
+ },
+ "A138-05 kf_too_high_flag": {
+  "consumer_worksheets": [
+   "A138-02",
+   "A138-21",
+   "A138-28"
+  ]
+ },
+ "A138-05 mhgw": {
+  "consumer_worksheets": [
+   "A138-15",
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22"
+  ]
+ },
+ "A138-05 soil_classification": {
+  "consumer_worksheets": [
+   "A138-15"
+  ]
+ },
+ "A138-05 soil_layers": {
+  "consumer_worksheets": null
+ },
+ "A138-06 a138_tier": {
+  "consumer_worksheets": null
+ },
+ "A138-06 bbz_kf_max_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-06 bbz_organisch": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-06 bbz_ph": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-06 bbz_schlaemmkorn": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-06 bbz_thickness": {
+  "consumer_worksheets": [
+   "A138-12",
+   "A138-17",
+   "A138-19"
+  ]
+ },
+ "A138-06 belastungskategorie": {
+  "consumer_worksheets": [
+   "A138-07",
+   "A138-12",
+   "A138-15",
+   "A138-04"
+  ]
+ },
+ "A138-06 eta_AFS63": {
+  "consumer_worksheets": [
+   "A138-15",
+   "A138-28"
+  ]
+ },
+ "A138-06 eta_afs63_required": {
+  "consumer_worksheets": null
+ },
+ "A138-06 eta_geloest": {
+  "consumer_worksheets": [
+   "A138-15",
+   "A138-28"
+  ]
+ },
+ "A138-06 eta_geloest_required": {
+  "consumer_worksheets": null
+ },
+ "A138-06 flaechengruppe": {
+  "consumer_worksheets": [
+   "A138-12"
+  ]
+ },
+ "A138-06 r_krit": {
+  "consumer_worksheets": null
+ },
+ "A138-06 treatment_efficiency_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-06 treatment_required": {
+  "consumer_worksheets": [
+   "A138-12",
+   "A138-15"
+  ]
+ },
+ "A138-07 A_C": {
+  "consumer_worksheets": [
+   "A138-10",
+   "A138-13",
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22",
+   "A138-26",
+   "A138-12"
+  ]
+ },
+ "A138-07 A_C_preliminary": {
+  "consumer_worksheets": null
+ },
+ "A138-07 A_C_sealed": {
+  "consumer_worksheets": [
+   "A138-10"
+  ]
+ },
+ "A138-07 A_C_unsealed": {
+  "consumer_worksheets": [
+   "A138-10"
+  ]
+ },
+ "A138-07 A_E_ba": {
+  "consumer_worksheets": [
+   "A138-10"
+  ]
+ },
+ "A138-07 A_E_nba": {
+  "consumer_worksheets": [
+   "A138-10"
+  ]
+ },
+ "A138-07 C_m": {
+  "consumer_worksheets": [
+   "A138-10",
+   "A138-13",
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22",
+   "A138-26"
+  ]
+ },
+ "A138-07 flood_check_trigger": {
+  "consumer_worksheets": [
+   "A138-26"
+  ]
+ },
+ "A138-07 surface_inventory": {
+  "consumer_worksheets": [
+   "A138-10",
+   "A138-15",
+   "A138-26"
+  ]
+ },
+ "A138-08 A_E": {
+  "consumer_worksheets": [
+   "A138-09"
+  ]
+ },
+ "A138-08 f_A": {
+  "consumer_worksheets": [
+   "A138-13",
+   "A138-22"
+  ]
+ },
+ "A138-08 f_ort": {
+  "consumer_worksheets": [
+   "A138-11",
+   "A138-19",
+   "A138-20"
+  ]
+ },
+ "A138-08 f_Z": {
+  "consumer_worksheets": [
+   "A138-13",
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22"
+  ]
+ },
+ "A138-08 n": {
+  "consumer_worksheets": [
+   "A138-04",
+   "A138-10",
+   "A138-13",
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22"
+  ]
+ },
+ "A138-08 n_limit": {
+  "consumer_worksheets": null
+ },
+ "A138-08 schutzkategorie": {
+  "consumer_worksheets": null
+ },
+ "A138-08 simple_method_applicable": {
+  "consumer_worksheets": [
+   "A138-09",
+   "A138-15"
+  ]
+ },
+ "A138-08 t_f": {
+  "consumer_worksheets": [
+   "A138-09"
+  ]
+ },
+ "A138-08 T_n": {
+  "consumer_worksheets": [
+   "A138-04",
+   "A138-26"
+  ]
+ },
+ "A138-09 belastungskategorie_assigned": {
+  "consumer_worksheets": null
+ },
+ "A138-09 data_collection_completion_date": {
+  "consumer_worksheets": null
+ },
+ "A138-09 data_gaps_documented": {
+  "consumer_worksheets": null
+ },
+ "A138-09 data_quality_assessment": {
+  "consumer_worksheets": null
+ },
+ "A138-09 kf_value_certified": {
+  "consumer_worksheets": null
+ },
+ "A138-09 kostra_data_complete": {
+  "consumer_worksheets": null
+ },
+ "A138-09 phase_2_gate_result": {
+  "consumer_worksheets": [
+   "A138-10",
+   "A138-11",
+   "A138-12",
+   "A138-13",
+   "A138-14"
+  ]
+ },
+ "A138-09 site_data_complete": {
+  "consumer_worksheets": null
+ },
+ "A138-09 treatment_concept_decided": {
+  "consumer_worksheets": null
+ },
+ "A138-10 A_C": {
+  "consumer_worksheets": null
+ },
+ "A138-10 A_C_sealed": {
+  "consumer_worksheets": null
+ },
+ "A138-10 A_C_unsealed": {
+  "consumer_worksheets": null
+ },
+ "A138-10 A_E_b_a_total": {
+  "consumer_worksheets": null
+ },
+ "A138-10 A_E_nb_a_total": {
+  "consumer_worksheets": null
+ },
+ "A138-10 A_VA": {
+  "consumer_worksheets": [
+   "A138-14",
+   "A138-17",
+   "A138-19",
+   "A138-20",
+   "A138-22",
+   "A138-26",
+   "A138-13"
+  ]
+ },
+ "A138-10 C_m": {
+  "consumer_worksheets": null
+ },
+ "A138-10 D_min": {
+  "consumer_worksheets": null
+ },
+ "A138-10 Q_zu": {
+  "consumer_worksheets": [
+   "A138-13"
+  ]
+ },
+ "A138-10 r_D_n": {
+  "consumer_worksheets": null
+ },
+ "A138-10 sub_areas_A138_10": {
+  "consumer_worksheets": null
+ },
+ "A138-11 a138_k_f_design": {
+  "consumer_worksheets": null
+ },
+ "A138-11 a138_k_f_geo": {
+  "consumer_worksheets": null
+ },
+ "A138-11 a138_k_f_min": {
+  "consumer_worksheets": null
+ },
+ "A138-11 a138_korrekturfaktor": {
+  "consumer_worksheets": null
+ },
+ "A138-11 f_K": {
+  "consumer_worksheets": [
+   "A138-12",
+   "A138-19",
+   "A138-20"
+  ]
+ },
+ "A138-11 k_i": {
+  "consumer_worksheets": [
+   "A138-12",
+   "A138-13",
+   "A138-15",
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22",
+   "A138-26"
+  ]
+ },
+ "A138-12 A_S": {
+  "consumer_worksheets": [
+   "A138-16",
+   "A138-18",
+   "A138-21"
+  ]
+ },
+ "A138-12 A_S_m": {
+  "consumer_worksheets": [
+   "A138-13",
+   "A138-15",
+   "A138-16",
+   "A138-17",
+   "A138-19",
+   "A138-20",
+   "A138-22",
+   "A138-25"
+  ]
+ },
+ "A138-12 a_s_m_determination_method": {
+  "consumer_worksheets": null
+ },
+ "A138-12 a_s_m_needs_reconfirmation": {
+  "consumer_worksheets": null
+ },
+ "A138-12 a_s_m_provenance": {
+  "consumer_worksheets": null
+ },
+ "A138-12 A_S_max": {
+  "consumer_worksheets": null
+ },
+ "A138-12 A_S_min": {
+  "consumer_worksheets": null
+ },
+ "A138-12 ac_as_ratio": {
+  "consumer_worksheets": [
+   "A138-17",
+   "A138-19",
+   "A138-20",
+   "A138-22",
+   "A138-28"
+  ]
+ },
+ "A138-12 ac_as_ratio_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-12 ac_as_ratio_check_reason": {
+  "consumer_worksheets": null
+ },
+ "A138-12 ac_as_ratio_limit": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-12 Q_S": {
+  "consumer_worksheets": [
+   "A138-13",
+   "A138-25",
+   "A138-26"
+  ]
+ },
+ "A138-12 soil_bodenart_tab13": {
+  "consumer_worksheets": null
+ },
+ "A138-13 a138_bemessung_bestanden": {
+  "consumer_worksheets": null
+ },
+ "A138-13 a138_speichertyp": {
+  "consumer_worksheets": null
+ },
+ "A138-13 a138_V_Sp_erforderlich": {
+  "consumer_worksheets": null
+ },
+ "A138-13 a138_V_Sp_vorhanden": {
+  "consumer_worksheets": null
+ },
+ "A138-13 D_min": {
+  "consumer_worksheets": [
+   "A138-10"
+  ]
+ },
+ "A138-13 q_S_AC": {
+  "consumer_worksheets": [
+   "A138-25"
+  ]
+ },
+ "A138-13 r_D_n": {
+  "consumer_worksheets": [
+   "A138-10"
+  ]
+ },
+ "A138-13 rainfall_table_ref": {
+  "consumer_worksheets": null
+ },
+ "A138-13 V_VA": {
+  "consumer_worksheets": [
+   "A138-15",
+   "A138-22",
+   "A138-24",
+   "A138-26"
+  ]
+ },
+ "A138-14 A_C_calculated": {
+  "consumer_worksheets": null
+ },
+ "A138-14 D_optimal_min": {
+  "consumer_worksheets": null
+ },
+ "A138-14 general_calc_completion_date": {
+  "consumer_worksheets": null
+ },
+ "A138-14 k_i_calculated": {
+  "consumer_worksheets": null
+ },
+ "A138-14 phase_3_gate_result": {
+  "consumer_worksheets": [
+   "A138-15"
+  ]
+ },
+ "A138-14 q_S_AC_check_result": {
+  "consumer_worksheets": null
+ },
+ "A138-14 Q_S_calculated": {
+  "consumer_worksheets": null
+ },
+ "A138-14 r_D_n_optimal": {
+  "consumer_worksheets": null
+ },
+ "A138-14 V_VA_calculated": {
+  "consumer_worksheets": null
+ },
+ "A138-15 a138_anlagentyp_gewaehlt": {
+  "consumer_worksheets": null
+ },
+ "A138-15 a138_anlagentyp_kandidaten": {
+  "consumer_worksheets": null
+ },
+ "A138-15 a138_auswahlkriterien": {
+  "consumer_worksheets": null
+ },
+ "A138-15 attest_a138_15_a138_req_18": {
+  "consumer_worksheets": null
+ },
+ "A138-15 facility_type_selected": {
+  "consumer_worksheets": [
+   "A138-16",
+   "A138-17",
+   "A138-18",
+   "A138-19",
+   "A138-20",
+   "A138-21",
+   "A138-22",
+   "A138-23"
+  ]
+ },
+ "A138-16 A_S_flaeche": {
+  "consumer_worksheets": [
+   "A138-23",
+   "A138-24"
+  ]
+ },
+ "A138-16 a138_A_s_dim": {
+  "consumer_worksheets": null
+ },
+ "A138-16 a138_A_s_erf": {
+  "consumer_worksheets": null
+ },
+ "A138-16 a138_A_u": {
+  "consumer_worksheets": null
+ },
+ "A138-16 D_min_used": {
+  "consumer_worksheets": null
+ },
+ "A138-16 k_i_ge_r_check": {
+  "consumer_worksheets": null
+ },
+ "A138-16 r_D_n_used": {
+  "consumer_worksheets": null
+ },
+ "A138-16 rainfall_table_ref": {
+  "consumer_worksheets": null
+ },
+ "A138-17 A_VA_Mulde": {
+  "consumer_worksheets": null
+ },
+ "A138-17 b_M": {
+  "consumer_worksheets": null
+ },
+ "A138-17 boeschungsneigung": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20",
+   "A138-22"
+  ]
+ },
+ "A138-17 D_used_M": {
+  "consumer_worksheets": null
+ },
+ "A138-17 freibord": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20",
+   "A138-22"
+  ]
+ },
+ "A138-17 h_M": {
+  "consumer_worksheets": null
+ },
+ "A138-17 k_i_Mulde": {
+  "consumer_worksheets": null
+ },
+ "A138-17 L_M": {
+  "consumer_worksheets": null
+ },
+ "A138-17 n_M_Bemessung": {
+  "consumer_worksheets": null
+ },
+ "A138-17 r_D_n_used_M": {
+  "consumer_worksheets": null
+ },
+ "A138-17 rainfall_table_ref": {
+  "consumer_worksheets": null
+ },
+ "A138-17 t_E": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20",
+   "A138-22",
+   "A138-25"
+  ]
+ },
+ "A138-17 V_M": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20",
+   "A138-23",
+   "A138-24"
+  ]
+ },
+ "A138-17 V_M_erf": {
+  "consumer_worksheets": null
+ },
+ "A138-18 A_SOE": {
+  "consumer_worksheets": null
+ },
+ "A138-18 az": {
+  "consumer_worksheets": null
+ },
+ "A138-18 az_SOE": {
+  "consumer_worksheets": null
+ },
+ "A138-18 b_R": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20"
+  ]
+ },
+ "A138-18 d_a": {
+  "consumer_worksheets": [
+   "A138-21"
+  ]
+ },
+ "A138-18 d_i": {
+  "consumer_worksheets": [
+   "A138-21"
+  ]
+ },
+ "A138-18 D_used_R": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20"
+  ]
+ },
+ "A138-18 h_R": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20"
+  ]
+ },
+ "A138-18 L_R": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20",
+   "A138-23",
+   "A138-24"
+  ]
+ },
+ "A138-18 L_VS": {
+  "consumer_worksheets": null
+ },
+ "A138-18 n_R_Bemessung": {
+  "consumer_worksheets": null
+ },
+ "A138-18 q_VS": {
+  "consumer_worksheets": null
+ },
+ "A138-18 r_5_n": {
+  "consumer_worksheets": null
+ },
+ "A138-18 r_D_n_used_R": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20"
+  ]
+ },
+ "A138-18 rainfall_table_ref": {
+  "consumer_worksheets": null
+ },
+ "A138-18 s_F": {
+  "consumer_worksheets": null
+ },
+ "A138-18 s_R": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20"
+  ]
+ },
+ "A138-18 schuettmaterial": {
+  "consumer_worksheets": null
+ },
+ "A138-18 V_R": {
+  "consumer_worksheets": [
+   "A138-19",
+   "A138-20",
+   "A138-23"
+  ]
+ },
+ "A138-19 A_VA_MRE": {
+  "consumer_worksheets": null
+ },
+ "A138-19 k_f_BBZ": {
+  "consumer_worksheets": null
+ },
+ "A138-19 k_f_BBZ_quelle": {
+  "consumer_worksheets": null
+ },
+ "A138-19 k_i_BBZ": {
+  "consumer_worksheets": null
+ },
+ "A138-19 n_M_overflow_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-19 n_M_overflow_limit": {
+  "consumer_worksheets": [
+   "A138-20",
+   "A138-28"
+  ]
+ },
+ "A138-19 n_R": {
+  "consumer_worksheets": [
+   "A138-20"
+  ]
+ },
+ "A138-19 rainfall_table_ref": {
+  "consumer_worksheets": null
+ },
+ "A138-19 V_M_MRE": {
+  "consumer_worksheets": null
+ },
+ "A138-19 V_MR": {
+  "consumer_worksheets": [
+   "A138-23",
+   "A138-24"
+  ]
+ },
+ "A138-19 V_R_MRE": {
+  "consumer_worksheets": null
+ },
+ "A138-20 k_f_BBZ": {
+  "consumer_worksheets": null
+ },
+ "A138-20 k_f_BBZ_quelle": {
+  "consumer_worksheets": null
+ },
+ "A138-20 k_i_BBZ": {
+  "consumer_worksheets": null
+ },
+ "A138-20 n_R_MRS": {
+  "consumer_worksheets": null
+ },
+ "A138-20 Q_Dr": {
+  "consumer_worksheets": [
+   "A138-23",
+   "A138-24",
+   "A138-26",
+   "A138-13"
+  ]
+ },
+ "A138-20 Q_Dr_max": {
+  "consumer_worksheets": null
+ },
+ "A138-20 Q_Dr_min": {
+  "consumer_worksheets": null
+ },
+ "A138-20 Q_MUE": {
+  "consumer_worksheets": [
+   "A138-23"
+  ]
+ },
+ "A138-20 Q_zu_total_MRS": {
+  "consumer_worksheets": null
+ },
+ "A138-20 r_D_nR": {
+  "consumer_worksheets": null
+ },
+ "A138-20 r_MUE": {
+  "consumer_worksheets": null
+ },
+ "A138-20 rainfall_table_ref": {
+  "consumer_worksheets": null
+ },
+ "A138-20 V_MR": {
+  "consumer_worksheets": null
+ },
+ "A138-20 V_MUE": {
+  "consumer_worksheets": [
+   "A138-23"
+  ]
+ },
+ "A138-21 A_S_FS": {
+  "consumer_worksheets": null
+ },
+ "A138-21 A_S_Schacht": {
+  "consumer_worksheets": null
+ },
+ "A138-21 d_S_aussen": {
+  "consumer_worksheets": null
+ },
+ "A138-21 d_S_innen": {
+  "consumer_worksheets": null
+ },
+ "A138-21 h_S": {
+  "consumer_worksheets": [
+   "A138-23",
+   "A138-24"
+  ]
+ },
+ "A138-21 k_f_FS": {
+  "consumer_worksheets": null
+ },
+ "A138-21 k_i_FS": {
+  "consumer_worksheets": null
+ },
+ "A138-21 r_D_n_S": {
+  "consumer_worksheets": null
+ },
+ "A138-21 rainfall_table_ref": {
+  "consumer_worksheets": null
+ },
+ "A138-21 schacht_d_i_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-21 schacht_filter_thickness": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-21 schacht_filter_thickness_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-21 shaft_type": {
+  "consumer_worksheets": null
+ },
+ "A138-21 V_S": {
+  "consumer_worksheets": [
+   "A138-23",
+   "A138-24"
+  ]
+ },
+ "A138-22 A_S_m_Becken": {
+  "consumer_worksheets": null
+ },
+ "A138-22 A_VA_Becken": {
+  "consumer_worksheets": null
+ },
+ "A138-22 basin_h_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-22 basin_ki_min_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-22 h_B": {
+  "consumer_worksheets": null
+ },
+ "A138-22 n_B_Bemessung": {
+  "consumer_worksheets": null
+ },
+ "A138-22 r_D_n_B": {
+  "consumer_worksheets": null
+ },
+ "A138-22 rainfall_table_ref": {
+  "consumer_worksheets": null
+ },
+ "A138-22 residential_depth_check": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-22 V_B": {
+  "consumer_worksheets": [
+   "A138-23",
+   "A138-24"
+  ]
+ },
+ "A138-23 facility_design_completion_date": {
+  "consumer_worksheets": null
+ },
+ "A138-23 facility_footprint_m2": {
+  "consumer_worksheets": null
+ },
+ "A138-23 facility_meets_qsac": {
+  "consumer_worksheets": null
+ },
+ "A138-23 facility_specific_dimensioning_complete": {
+  "consumer_worksheets": null
+ },
+ "A138-23 facility_specific_volume_m3": {
+  "consumer_worksheets": null
+ },
+ "A138-23 facility_type_dimensioned": {
+  "consumer_worksheets": null
+ },
+ "A138-23 phase_4_gate_result": {
+  "consumer_worksheets": [
+   "A138-24",
+   "A138-25"
+  ]
+ },
+ "A138-23 phase_4_recommendation_reasons": {
+  "consumer_worksheets": null
+ },
+ "A138-23 recommended_phase_4_gate": {
+  "consumer_worksheets": null
+ },
+ "A138-24 A_C_final": {
+  "consumer_worksheets": null
+ },
+ "A138-24 attest_a138_24_a138_req_20": {
+  "consumer_worksheets": null
+ },
+ "A138-24 compilation_completion_date": {
+  "consumer_worksheets": null
+ },
+ "A138-24 design_basis_final": {
+  "consumer_worksheets": null
+ },
+ "A138-24 facility_type_final": {
+  "consumer_worksheets": null
+ },
+ "A138-24 flood_check_required_final": {
+  "consumer_worksheets": null
+ },
+ "A138-24 geometry_final_summary": {
+  "consumer_worksheets": null
+ },
+ "A138-24 kostra_design_T_n": {
+  "consumer_worksheets": null
+ },
+ "A138-24 q_S_AC_final": {
+  "consumer_worksheets": null
+ },
+ "A138-24 Q_S_final": {
+  "consumer_worksheets": null
+ },
+ "A138-24 V_VA_final": {
+  "consumer_worksheets": null
+ },
+ "A138-25 design_adequacy_result": {
+  "consumer_worksheets": [
+   "A138-27",
+   "A138-28"
+  ]
+ },
+ "A138-25 f_Z_appropriate_check": {
+  "consumer_worksheets": null
+ },
+ "A138-25 mhgw_clearance_ge_1m_check": {
+  "consumer_worksheets": null
+ },
+ "A138-25 qf_validation_complete": {
+  "consumer_worksheets": null
+ },
+ "A138-25 qsac_geq_2_check": {
+  "consumer_worksheets": null
+ },
+ "A138-25 qsac_value_verified": {
+  "consumer_worksheets": null
+ },
+ "A138-25 verification_completion_date": {
+  "consumer_worksheets": null
+ },
+ "A138-25 verification_notes": {
+  "consumer_worksheets": null
+ },
+ "A138-26 A_C_s_flood": {
+  "consumer_worksheets": null
+ },
+ "A138-26 A_E_b_a_flood": {
+  "consumer_worksheets": null
+ },
+ "A138-26 attest_a138_26_a138_req_24": {
+  "consumer_worksheets": null
+ },
+ "A138-26 attest_a138_26_a138_req_26": {
+  "consumer_worksheets": null
+ },
+ "A138-26 C_S": {
+  "consumer_worksheets": null
+ },
+ "A138-26 D_flood_min": {
+  "consumer_worksheets": null
+ },
+ "A138-26 flood_check_result": {
+  "consumer_worksheets": [
+   "A138-27",
+   "A138-28"
+  ]
+ },
+ "A138-26 Q_Dr_flood": {
+  "consumer_worksheets": null
+ },
+ "A138-26 Q_S_flood": {
+  "consumer_worksheets": null
+ },
+ "A138-26 r_D_30": {
+  "consumer_worksheets": null
+ },
+ "A138-26 T_n_Ue": {
+  "consumer_worksheets": null
+ },
+ "A138-26 V_Rueck": {
+  "consumer_worksheets": [
+   "A138-28"
+  ]
+ },
+ "A138-27 corrective_actions_description": {
+  "consumer_worksheets": null
+ },
+ "A138-27 corrective_actions_required": {
+  "consumer_worksheets": null
+ },
+ "A138-27 design_review_comments": {
+  "consumer_worksheets": null
+ },
+ "A138-27 design_review_date": {
+  "consumer_worksheets": null
+ },
+ "A138-27 design_review_reviewer": {
+  "consumer_worksheets": null
+ },
+ "A138-27 design_review_status": {
+  "consumer_worksheets": null
+ },
+ "A138-27 preliminary_vs_final_A_C_dev_pct": {
+  "consumer_worksheets": null
+ },
+ "A138-27 preliminary_vs_final_storage_dev_pct": {
+  "consumer_worksheets": null
+ },
+ "A138-27 qsac_deviation_from_threshold": {
+  "consumer_worksheets": null
+ },
+ "A138-28 data_collection_phase_complete": {
+  "consumer_worksheets": null
+ },
+ "A138-28 facility_design_phase_complete": {
+  "consumer_worksheets": null
+ },
+ "A138-28 final_compliance_verdict": {
+  "consumer_worksheets": null
+ },
+ "A138-28 final_documentation_complete": {
+  "consumer_worksheets": null
+ },
+ "A138-28 final_signoff_date": {
+  "consumer_worksheets": null
+ },
+ "A138-28 final_signoff_engineer": {
+  "consumer_worksheets": null
+ },
+ "A138-28 general_calc_phase_complete": {
+  "consumer_worksheets": null
+ },
+ "A138-28 permitting_documentation_ready": {
+  "consumer_worksheets": null
+ },
+ "A138-28 verification_phase_complete": {
+  "consumer_worksheets": null
+ }
+}
