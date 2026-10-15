@@ -515,7 +515,10 @@ describe('F-A8 — TS mirrors of the block gates use the same tolerant compariso
     expect(evalReq33Schacht({ shaftType: 'typ_b', A_S_FS: 0.0109, k_f_FS: 1e-3, A_S_Schacht: 1.1, k_i: 1e-5 })!.flagged).toBe(true);
   });
   it('REQ-31 Gl.13 strict > stays false at (tolerant) equality', () => {
-    expect(evalReq31Flaeche(100 * 1e-7, 100)!.flagged).toBe(true);
+    // k_i = 1e-5 equals r_D(n)·10⁻⁷ = 100·10⁻⁷ by hand, but in IEEE-754 100·1e-7 = 9.999999999999999e-6,
+    // so the untolerant `>` called it feasible. Tolerant: equal ⇒ strict `>` false ⇒ flagged.
+    expect(100 * 1e-7 < 1e-5).toBe(true); // precondition: non-bit-identical near-equal values
+    expect(evalReq31Flaeche(1e-5, 100)!.flagged).toBe(true);
     expect(evalReq31Flaeche(1.0001e-5, 100)!.flagged).toBe(false);
   });
 });

@@ -15,12 +15,19 @@
  *   ==  equal                !=  not equal
  *
  * REL_TOL 1e-9 is ~4.5 million ulps at magnitude 1 (far above accumulated
- * rounding in the engine's formulas) yet seven orders below any printed
- * precision in the encoded standards. ABS_TOL 1e-12 only matters at / near 0.
+ * rounding in the engine's formulas) yet far below any printed precision in
+ * the encoded standards — at EVERY magnitude, because it is purely relative.
+ *
+ * Fix round 1 (review F-A8 #1): there is NO meaningful absolute floor. A floor
+ * of 1e-12 was 2 % of the FLL-GAR limit `gtd_kf_m_s <= 5e-11` and let 5.1e-11
+ * pass a block gate. ABS_TOL is Number.MIN_VALUE, so a comparison
+ * against literal 0 is exact (0 == 0 and -0 == 0 stay equal via `a === b`).
+ * A difference against 0 (`a - b >= 0`) gets its tolerance from the
+ * evaluator, which compares the two operands instead (evaluate.ts acompare).
  * Non-numeric comparisons never come here.
  */
 export const REL_TOL = 1e-9;
-export const ABS_TOL = 1e-12;
+export const ABS_TOL = Number.MIN_VALUE; // 5e-324: only a sub-normal residual counts as 0
 
 export type NumericCompareOp = '>=' | '<=' | '==' | '!=' | '<' | '>';
 

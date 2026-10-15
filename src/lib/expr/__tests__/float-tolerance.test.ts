@@ -66,8 +66,11 @@ describe('F-A8 — ==, !=, <, >, <=, >= under tolerance', () => {
     expect(cond('x IN {0.3, 0.5}', { x: 0.1 + 0.2 })).toBe('pass');
     expect(cond('x IN {0.4, 0.5}', { x: 0.1 + 0.2 })).toBe('fail');
   });
-  it('the absolute floor handles comparisons against 0', () => {
-    expect(cond('x == 0', { x: 1e-13 })).toBe('pass');
+  it('comparisons against literal 0 are exact (no absolute floor)', () => {
+    expect(cond('x == 0', { x: 1e-13 })).toBe('fail');
+    expect(cond('x == 0', { x: 0 })).toBe('pass');
+    expect(cond('x == 0', { x: -0 })).toBe('pass');
+    expect(cond('x > 0', { x: 1e-300 })).toBe('pass');
     expect(cond('x == 0', { x: 1e-9 })).toBe('fail');
     expect(cond('x > 0', { x: 1e-9 })).toBe('pass');
   });
@@ -95,5 +98,64 @@ describe('F-A8 — shared helper', () => {
     expect(compareNumbers(q, '!=', 2)).toBe(false);
     expect(compareNumbers(q, '<', 2)).toBe(false);
     expect(compareNumbers(q, '>', 2)).toBe(false);
+  });
+});
+
+describe('F-A8 fix round 1 — small-magnitude limits are purely relative (FLL-GAR k gates)', () => {
+  it('REQ-42 `gtd_kf_m_s <= 5e-11` fails for 5.1e-11 and 5.001e-11', () => {
+    expect(cond('gtd_kf_m_s <= 5e-11', { gtd_kf_m_s: 5.1e-11 })).toBe('fail');
+    expect(cond('gtd_kf_m_s <= 5e-11', { gtd_kf_m_s: 5.001e-11 })).toBe('fail');
+    expect(cond('gtd_kf_m_s <= 5e-11 AND gtd_permittivitaet_m_s <= 5e-9', { gtd_kf_m_s: 5.1e-11, gtd_permittivitaet_m_s: 1e-9 })).toBe('fail');
+  });
+  it('REQ-12 / REQ-38 `<= 0.000000001` fails for 1.001e-9 and 1.0009e-9', () => {
+    expect(cond('kf_abdichtung <= 0.000000001', { kf_abdichtung: 1.001e-9 })).toBe('fail');
+    expect(cond('as_kf_m_s <= 0.000000001', { as_kf_m_s: 1.0009e-9 })).toBe('fail');
+  });
+  it('5e-11 computed with float noise at the limit (0.1 · 5e-10 = 5.000000000000001e-11) passes', () => {
+    const k = 0.1 * 5e-10;
+    expect(k).toBe(5.000000000000001e-11);
+    expect(cond('gtd_kf_m_s <= 5e-11', { gtd_kf_m_s: k })).toBe('pass');
+    expect(cond('a * b <= 5e-11', { a: 0.1, b: 5e-10 })).toBe('pass');
+  });
+  it('3e-8 vs 3.00003e-8 is not equal (5th significant digit)', () => {
+    expect(numbersEqual(3e-8, 3.00003e-8)).toBe(false);
+    expect(numbersEqual(1e-12, 0)).toBe(false);
+  });
+});
+
+describe('F-A8 fix round 1 — subtraction-form gates `a - b op 0` compare a op b', () => {
+  it('magnitude ~7: `m - m_min_required <= 0` / `m_min_required - m >= 0` with m = 0.07·100 = 7.000000000000001 pass', () => {
+    const m = 0.07 * 100;
+    expect(m).toBe(7.000000000000001);
+    expect(cond('m - m_min_required <= 0', { m, m_min_required: 7 })).toBe('pass');
+    expect(cond('m_min_required - m >= 0', { m, m_min_required: 7 })).toBe('pass');
+    expect(cond('m - m_min_required >= 0', { m: 6.99, m_min_required: 7 })).toBe('fail');
+  });
+  it('magnitude ~2000: Gl. 9 ×1000 = 1999.9999999999998 meets `m - m_min_required >= 0`; 0.1·0.2·1e5 meets `... <= 0`', () => {
+    const below = 1e-6 * 105.2421 * 1000 / 526.2105 * 1e4 * 1000;
+    expect(below).toBe(1999.9999999999998);
+    expect(cond('m - m_min_required >= 0', { m: below, m_min_required: 2000 })).toBe('pass');
+    expect(cond('m - m_min_required > 0', { m: below, m_min_required: 2000 })).toBe('fail');
+    const above = 0.1 * 0.2 * 100000;
+    expect(above).toBe(2000.0000000000005);
+    expect(cond('ns_fettabscheider - NS <= 0', { ns_fettabscheider: above, NS: 2000 })).toBe('pass');
+    expect(cond('m - m_min_required >= 0', { m: 1999.9, m_min_required: 2000 })).toBe('fail');
+  });
+  it('literal 0 on the left: `0 <= a - b` ⇔ `b <= a`', () => {
+    expect(cond('0 <= m - m_min_required', { m: 1.9999999999999998, m_min_required: 2 })).toBe('pass');
+    expect(cond('0 <= m - m_min_required', { m: 1.999, m_min_required: 2 })).toBe('fail');
+    expect(cond('0 > m - m_min_required', { m: 1.9999999999999998, m_min_required: 2 })).toBe('fail');
+  });
+  it('== / != on a difference against 0', () => {
+    expect(cond('a - b == 0', { a: 0.1 + 0.2, b: 0.3 })).toBe('pass');
+    expect(cond('a - b != 0', { a: 0.1 + 0.2, b: 0.3 })).toBe('fail');
+  });
+  it('a difference that is NOT the top-level node is not rewritten (exact residual vs 0)', () => {
+    const vals = { m: 1.9999999999999998, m_min_required: 2 };
+    expect(cond('(m - m_min_required) * 1 >= 0', vals)).toBe('fail');
+    expect(cond('m - m_min_required + 0 >= 0', vals)).toBe('fail');
+  });
+  it('a missing operand stays pending', () => {
+    expect(cond('m - m_min_required >= 0', { m: 2 })).toBe('pending');
   });
 });
