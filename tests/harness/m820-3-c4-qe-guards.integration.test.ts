@@ -472,7 +472,7 @@ describe('DWA-M 820-3 case C4 F3 / F4 QE assessment guards — staged block on e
     expect(await ledgers()).toEqual({ compliance_requirements_archive_m820_c4q: null, fields_archive_m820_c4q: null, m820_c4q_written: null });
     const r = await readback(5);
     log('BEFORE read-back R0..R4', r);
-    expect(r[0]).toMatchObject([{ fields: '91', fields_pre: '91', fields_post: '0', gates: '6', gates_pre: '6', gates_post: '0', fields_neither: null, gates_neither: null, new_equations: '0' }]);
+    expect(r[0]).toMatchObject([{ fields: '91', fields_pre: '91', fields_post: '0', gates: '6', gates_pre: '6', gates_post: '0', fields_neither: null, gates_neither: null, new_equations: '0', totals_widget_ok: '8', foreign_total_equations: '0' }]);
     expect(r[1]).toHaveLength(97);
     expect((r[2] as unknown[]).length).toBe(67);
     expect([...new Set((r[3] as Array<{ code: string }>).map((x) => x.code))].sort()).toEqual(['REQ-19', 'REQ-20', 'REQ-21', 'REQ-22', 'REQ-23', 'REQ-24']);
@@ -502,6 +502,25 @@ describe('DWA-M 820-3 case C4 F3 / F4 QE assessment guards — staged block on e
     expect(await ledgers()).toEqual({ compliance_requirements_archive_m820_c4q: null, fields_archive_m820_c4q: null, m820_c4q_written: null });
     await harness.sql`UPDATE fields f SET label_de = left(f.label_de, length(f.label_de) - length(' (drift)')) FROM worksheet_templates w WHERE w.id = f.worksheet_template_id AND w.code = 'M8203-17' AND f.symbol = 'qe66_items_n'`;
     expect(dumpDiff(PRE, await dump())).toEqual([]);
+    // fix round 1 (review finding 3): the per-statement preconditions are part of step 0 — a widget on a total, or a foreign equation
+    // writing a total, aborts the whole block (read-back R0 shows it) instead of silently skipping single statements
+    await harness.sql`UPDATE fields f SET widget = 'derived' FROM worksheet_templates w WHERE w.id = f.worksheet_template_id AND w.code = 'M8203-14' AND f.symbol = 'qe64a_items_total'`;
+    let errW = '';
+    try { await runFile(MIGRATION); } catch (x) { errW = String((x as Error).message); }
+    const r0w = (await readback(1))[0] as Array<{ totals_widget_ok: string; foreign_total_equations: string }>;
+    await harness.sql`UPDATE fields f SET widget = NULL FROM worksheet_templates w WHERE w.id = f.worksheet_template_id AND w.code = 'M8203-14' AND f.symbol = 'qe64a_items_total'`;
+    const [tp] = await harness.sql<{ id: string }[]>`SELECT w.id FROM worksheet_templates w WHERE w.code = 'M8203-18'`;
+    await harness.sql`INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol) VALUES (${tp.id}, 'M8203-18-X1', 'qe67_items_total = 7', ARRAY[]::text[], 'qe67_items_total')`;
+    let errX = '';
+    try { await runFile(MIGRATION); } catch (x) { errX = String((x as Error).message); }
+    const r0x = (await readback(1))[0] as Array<{ totals_widget_ok: string; foreign_total_equations: string }>;
+    await harness.sql`DELETE FROM equations WHERE equation_number = 'M8203-18-X1'`;
+    log('apply on a drifted widget / with a foreign total equation', { errW, errX, r0w: r0w[0], r0x: r0x[0] });
+    expect(errW).toMatch(/totals 7 of 8 with the expected widget; 0 foreign equations/);
+    expect(errX).toMatch(/totals 8 of 8 with the expected widget; 1 foreign equations/);
+    expect([r0w[0].totals_widget_ok, r0w[0].foreign_total_equations, r0x[0].totals_widget_ok, r0x[0].foreign_total_equations]).toEqual(['7', '0', '8', '1']);
+    expect(dumpDiff(PRE, await dump())).toEqual([]);
+    expect(await ledgers()).toEqual({ compliance_requirements_archive_m820_c4q: null, fields_archive_m820_c4q: null, m820_c4q_written: null });
   });
 
   it('b. apply: 91 fields + 6 gates changed, 8 equations inserted, nothing else; severities unchanged; every touched text DE + [EN] with its quote', async () => {
@@ -588,7 +607,7 @@ describe('DWA-M 820-3 case C4 F3 / F4 QE assessment guards — staged block on e
     await runFile(MIGRATION);
     const post = await readback();
     log('read-back (after) R0 / R3 / R4 / R5', [post[0], post[3], post[4], post[5]]);
-    if (!DISCOVER) expect(post[0]).toEqual([{ fields: '91', fields_pre: '0', fields_post: '91', gates: '6', gates_pre: '0', gates_post: '6', fields_neither: null, gates_neither: null, new_equations: '8' }]);
+    if (!DISCOVER) expect(post[0]).toEqual([{ fields: '91', fields_pre: '0', fields_post: '91', gates: '6', gates_pre: '0', gates_post: '6', fields_neither: null, gates_neither: null, new_equations: '8', totals_widget_ok: '8', foreign_total_equations: '0' }]);
     expect(post[1]).toHaveLength(97);
     expect(post[3]).toEqual([]);
     expect((post[4] as Array<{ equation_number: string }>).map((x) => x.equation_number)).toEqual(QE.map(([ws]) => `${ws}-D10`));
@@ -661,7 +680,7 @@ describe('DWA-M 820-3 case C4 F3 / F4 QE assessment guards — staged block on e
     const both1 = await dump();
     expect(tally(dumpDiff(afterO23, both1))).toEqual(APPLY_TALLY);
     const rb1 = await readback(1);
-    if (!DISCOVER) expect(rb1[0]).toEqual([{ fields: '91', fields_pre: '0', fields_post: '91', gates: '6', gates_pre: '0', gates_post: '6', fields_neither: null, gates_neither: null, new_equations: '8' }]);
+    if (!DISCOVER) expect(rb1[0]).toEqual([{ fields: '91', fields_pre: '0', fields_post: '91', gates: '6', gates_pre: '0', gates_post: '6', fields_neither: null, gates_neither: null, new_equations: '8', totals_widget_ok: '8', foreign_total_equations: '0' }]);
     const c4Both = await openRequired(P.c4);
     await runFile(ROLLBACK);
     expect(dumpDiff(afterO23, await dump())).toEqual([]);
@@ -692,12 +711,12 @@ describe('DWA-M 820-3 case C4 F3 / F4 QE assessment guards — staged block on e
     await runFile(MIGRATION);
     const both = await dump();
     expect(tally(dumpDiff(afterSib, both))).toEqual(APPLY_TALLY);
-    expect((await readback(1))[0]).toMatchObject([{ fields_post: '91', gates_post: '6', new_equations: '8' }]);
+    expect((await readback(1))[0]).toMatchObject([{ fields_post: '91', gates_post: '6', new_equations: '8', totals_widget_ok: '8', foreign_total_equations: '0' }]);
     await runFile(ROLLBACK);
     expect(dumpDiff(afterSib, await dump())).toEqual([]);
     await runFile(MIGRATION); // this block between / after: roll the siblings back first, then this one
     await sib(1);
-    expect((await readback(1))[0]).toMatchObject([{ fields_post: '91', gates_post: '6', new_equations: '8' }]);
+    expect((await readback(1))[0]).toMatchObject([{ fields_post: '91', gates_post: '6', new_equations: '8', totals_widget_ok: '8', foreign_total_equations: '0' }]);
     await runFile(ROLLBACK);
     expect(dumpDiff(PRE, await dump())).toEqual([]);
     // reverse order: this block first, then the siblings

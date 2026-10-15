@@ -6,7 +6,8 @@
 -- verification_quote md5 | source_anchor. Gate signature = md5 of condition | severity | description md5 | clause_reference.
 -- No comment line ends with a semicolon.
 
--- R0 · touched rows at pre / post state (before: fields_pre 91, gates_pre 6, *_post 0, new_equations 0 · after: 0 / 91, 0 / 6, new_equations 8)
+-- R0 · touched rows at pre / post state (before: fields_pre 91, gates_pre 6, *_post 0, new_equations 0 · after: 0 / 91, 0 / 6, new_equations 8;
+--      always: totals_widget_ok 8 (widget NULL at sig0 / 'derived' at sig1), foreign_total_equations 0)
 WITH fv(ws, sym, sig0, sig1) AS (VALUES
     ('M8203-11','qe62_assessor','119486e04a5ac00f8bbdbae6bd8c1fc3','60f7d2051866bf4de027f1f2efcd9233'),
     ('M8203-11','qe62_assessment_date','cb7a015c0bbab4ddaa27dc169bf87a74','2c7934d615f0dd3b09d1320edf1785ac'),
@@ -106,6 +107,15 @@ gv(ws, code, sig0, sig1) AS (VALUES
     ('M8203-18','REQ-24','bae5af06eba8f76ad1064cfa28d0584c','5f852e7c3ef60a940c336b6405ad7ad3'),
     ('M8203-23','REQ-20','86bd6d2125084117ae7db0f6bd875a10','036de3dff45981fa8672f6a039f8aa9f'),
     ('M8203-23','REQ-21','b624a3dee23aa7599ce6bfb49a1d98c1','881dd28e15e1fc98a9dd0aa74a0f3c08')),
+tv(ws, sym, eqno, formula, sig0, sig1) AS (VALUES
+    ('M8203-11','qe62_items_total','M8203-11-D10','qe62_items_total = 15','7a244e5efa75ae7dfbcf4fe404956dda','ef205169ac217110f2c030602e42ff89'),
+    ('M8203-12','qe63a_items_total','M8203-12-D10','qe63a_items_total = 21','9250e539735c45dea3988526c889527f','0883988cedd148b406035d5d4b2f2ff4'),
+    ('M8203-13','qe63b_items_total','M8203-13-D10','qe63b_items_total = 19','3ef9569260cd6ae74d87f88e4ff3a933','304beadc442600e9a722ee1d72563f16'),
+    ('M8203-14','qe64a_items_total','M8203-14-D10','qe64a_items_total = 17','126fa47d9ddef152415794b6b6a0af9d','2e8c2afc6d1ab19cf951ea83be95668a'),
+    ('M8203-15','qe64b_items_total','M8203-15-D10','qe64b_items_total = 33','b8898fa89197a92ae2e48dc306bf352f','ad39d6f20830de5916bc5df2bf4bb7f7'),
+    ('M8203-16','qe65_items_total','M8203-16-D10','qe65_items_total = 34','8ba9604fa2f310289bad287dcfbae92b','e91508d6b433f15de6f22af4f7515015'),
+    ('M8203-17','qe66_items_total','M8203-17-D10','qe66_items_total = 10','54ffc605d87fa495593c4899275e12a0','f6e67852778ab10145e0a326d192678e'),
+    ('M8203-18','qe67_items_total','M8203-18-D10','qe67_items_total = 6','0deaba82f96d3abf894c0289cb66c22e','1e9f16e2a534dce0c4da8943d2e5a015')),
 fl AS (SELECT fv.*, md5(concat_ws('|', md5(coalesce(f.description,'')), coalesce(f.visible_when,''), coalesce(array_to_string(f.consumer_worksheets, ','),''), coalesce(md5(f.enum_values::text),''), f.label_de, coalesce(f.label_en,''), f.is_required::text, f.data_type, md5(coalesce(f.verification_quote,'')), coalesce(f.source_anchor,''))) AS sig
          FROM fv JOIN standards s ON s.code = 'DWA-M-820-3' JOIN worksheet_templates w ON w.standard_id = s.id AND w.code = fv.ws
          JOIN fields f ON f.worksheet_template_id = w.id AND f.symbol = fv.sym AND f.active),
@@ -121,7 +131,13 @@ SELECT (SELECT count(*) FROM fl) AS fields,
        (SELECT string_agg(ws || ' ' || sym, ',') FROM fl WHERE sig <> sig0 AND sig <> sig1) AS fields_neither,
        (SELECT string_agg(ws || ' ' || code, ',') FROM gl WHERE sig <> sig0 AND sig <> sig1) AS gates_neither,
        (SELECT count(*) FROM equations e JOIN worksheet_templates w ON w.id = e.worksheet_template_id JOIN standards s ON s.id = w.standard_id
-         WHERE s.code = 'DWA-M-820-3' AND e.equation_number IN ('M8203-11-D10', 'M8203-12-D10', 'M8203-13-D10', 'M8203-14-D10', 'M8203-15-D10', 'M8203-16-D10', 'M8203-17-D10', 'M8203-18-D10')) AS new_equations;
+         WHERE s.code = 'DWA-M-820-3' AND e.equation_number IN ('M8203-11-D10', 'M8203-12-D10', 'M8203-13-D10', 'M8203-14-D10', 'M8203-15-D10', 'M8203-16-D10', 'M8203-17-D10', 'M8203-18-D10')) AS new_equations,
+       (SELECT count(*) FROM tv JOIN standards s ON s.code = 'DWA-M-820-3' JOIN worksheet_templates w ON w.standard_id = s.id AND w.code = tv.ws
+    JOIN fields f ON f.worksheet_template_id = w.id AND f.symbol = tv.sym AND f.active
+   WHERE (md5(concat_ws('|', md5(coalesce(f.description,'')), coalesce(f.visible_when,''), coalesce(array_to_string(f.consumer_worksheets, ','),''), coalesce(md5(f.enum_values::text),''), f.label_de, coalesce(f.label_en,''), f.is_required::text, f.data_type, md5(coalesce(f.verification_quote,'')), coalesce(f.source_anchor,''))) = tv.sig0 AND f.widget IS NULL) OR (md5(concat_ws('|', md5(coalesce(f.description,'')), coalesce(f.visible_when,''), coalesce(array_to_string(f.consumer_worksheets, ','),''), coalesce(md5(f.enum_values::text),''), f.label_de, coalesce(f.label_en,''), f.is_required::text, f.data_type, md5(coalesce(f.verification_quote,'')), coalesce(f.source_anchor,''))) = tv.sig1 AND f.widget = 'derived')) AS totals_widget_ok,
+       (SELECT count(*) FROM equations e JOIN worksheet_templates w ON w.id = e.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+    JOIN tv ON tv.sym = e.output_symbol
+   WHERE s.code = 'DWA-M-820-3' AND NOT (w.code = tv.ws AND e.equation_number = tv.eqno AND e.formula = tv.formula)) AS foreign_total_equations;
 
 -- R1 · rule columns of the guarded rows + the gates (before: no visible_when, items_total required and typed · after: phase clause, items_total derived)
 SELECT w.code AS ws, 'field' AS kind, f.symbol AS item, left(coalesce(f.visible_when, ''), 120) AS rule, coalesce(array_to_string(f.consumer_worksheets, ','), '') AS consumers, f.is_required::text || '/' || coalesce(f.widget, '-') AS req_or_sev
