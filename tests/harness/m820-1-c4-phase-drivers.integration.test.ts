@@ -4,20 +4,20 @@
  *   scripts/rollback-20261015150000-m820-1-c4-phase-drivers.sql
  *   scripts/verification/apply/readback-20261015150000-m820-1-c4-phase-drivers.sql
  * (apply order + behaviour list: vault 01-Projects/ekowai-wizard/m820-wizard-test/78_APPLY-ORDER-m820-1-c4-phase-drivers.md).
- *   One new phase driver (C-9 pattern): M820-20 phase_auftrag_erteilt (engineering contract awarded = procurement procedure completed),
- *   consumed by M820-21 … -24. Guards M820-20 (5), M820-21 (6), M820-22 (4), M820-23 award_date + contractor_auftragnehmer, M820-24 (5, on top
- *   of the 20261015130000 procurement-law clause) and nests the phase guard inside REQ-20, REQ-21, REQ-23 (block) and REQ-23-2 (warn).
- *   M820-07 mitigation_plan_date guarded by the existing mitigation_plan_approved (no approval, no approval date).
+ *   Fix round 1: TWO phase drivers (C-9 pattern). M820-17 phase_vergabeverfahren_erreicht (procedure started) guards M820-20 (5), M820-21 (6)
+ *   + REQ-21, M820-22 (4); M820-23 phase_auftrag_erteilt (award; shown only when the first is Ja) guards M820-23 award_date + contractor,
+ *   M820-24 (5, on top of the 20261015130000 law clause), REQ-20, REQ-23, REQ-23-2 (nested inside the existing guards).
+ *   M820-07 mitigation_plan_date guarded by the existing mitigation_plan_approved (tool logic: no approval, no approval date).
  *
  * Disposable embedded Postgres only — no prod, no .env.local. REAL saveWorksheet / checkApprovalGate / loadInheritedFields +
  * computeVisibility (the form's pair) / loadRequiredFieldCounts (progress) / loadStandardReportData (verdicts incl. warnings + the C-9
  * list). SEED: the three 2026-10-05 dumps + prior.json consumers, every M820 block applied on prod up to 20261008100000 AND the staged
  * 820-1 block 20261015130000 (this block must apply after it — test a2 proves the order guard). The block's pre-signatures were taken from
- * this seed; read-back R0 on prod (step 0) must show fields_pre 24 / gates_pre 4 / new_drivers 0 / f1_m820_24 5. 20261014100000 (staged,
+ * this seed; read-back R0 on prod (step 0) must show fields_pre 24 / gates_pre 4 / new_drivers 0 / f1_m820_24 5 (after: new_drivers 2). 20261014100000 (staged,
  * 820-2 only) is applied before AND after this block in test h. ROWS: synthetic projects, no client data (C4 = the driver answers of case
  * C4 on 820-1, same fixture as the 20261015130000 harness: 50 open required on 820-1 after that block).
- * C-9 listing: this branch recognises only `phase_<name>_erreicht`; the `_erteilt` rule is the phase-deferral.ts change of branch
- * data/m820-2-c4-phase-guards. Test g asserts the listing for whichever rule is present (isPhaseDriver).
+ * C-9 listing: this branch recognises `phase_<name>_erreicht` (lists the procedure driver); the `_erteilt` rule (award driver) is the
+ * phase-deferral.ts change of branch data/m820-2-c4-phase-guards. Test g asserts the listing for whichever rule is present.
  * DISCOVER=1 (env C4D_DISCOVER) records probe values + post signatures to C4D_OUT instead of asserting them.
  */
 // @vitest-environment node
@@ -206,7 +206,7 @@ async function ledgers(): Promise<Record<string, number | null>> {
 }
 const NONE = { compliance_requirements_archive_m820_c4d: null, fields_archive_m820_c4d: null, m820_c4d_written: null };
 const EMPTY = { compliance_requirements_archive_m820_c4d: 0, fields_archive_m820_c4d: 0, m820_c4d_written: 0 };
-const FULL = { compliance_requirements_archive_m820_c4d: 4, fields_archive_m820_c4d: 24, m820_c4d_written: 29 };
+const FULL = { compliance_requirements_archive_m820_c4d: 4, fields_archive_m820_c4d: 24, m820_c4d_written: 30 };
 const stmts = (p: string) => splitOnUnquotedSemicolons(readFileSync(p, 'utf8')).filter((s) => s.replace(/--.*$/gm, '').trim());
 const RB_STMTS = stmts(READBACK);
 /** R5 reads the block's ledgers, which exist only after an apply — before the apply run R0 … R4 (step 0 on prod). */
@@ -272,10 +272,13 @@ async function formHidden(p: Proj, ws: string): Promise<string[]> {
   );
   return [...vis.hiddenSymbols].sort();
 }
-const DRV = 'phase_auftrag_erteilt';
+const DRV = 'phase_auftrag_erteilt'; // award (M820-23), shown only when D1 = Ja
+const D1 = 'phase_vergabeverfahren_erreicht'; // procedure started (M820-17) — fix round 1
+const DRIVER_AT: Record<string, string> = { 'M820-17': D1, 'M820-23': DRV };
 /** The guarded symbols per sheet (F2, 820-1 part). */
 const GUARDED: Record<string, string[]> = {
   'M820-07': ['mitigation_plan_date'],
+  'M820-17': [],
   'M820-20': ['negotiation_rounds', 'protokoll_signiert', 'verhandlung_datum', 'verhandlung_ergebnis', 'verhandlung_thema'],
   'M820-21': ['gewaehrleistung_geregelt', 'kuendigung_geregelt', 'leistung_klar_definiert', 'verguetung_geregelt', 'vertragsentwurf_in_unterlagen', 'vertragspruefung_date'],
   'M820-22': ['berufshaftpflicht_vorhanden', 'gewaehrleistungszeit_jahre', 'haftpflicht_versicherungssumme', 'verschuldensgrenzen_definiert'],
@@ -287,7 +290,7 @@ async function guardHidden(p: Proj): Promise<Record<string, string[]>> {
   const out: Record<string, string[]> = {};
   for (const ws of Object.keys(GUARDED)) {
     const h = await formHidden(p, ws);
-    const watch = [...GUARDED[ws], ...(ws === 'M820-20' ? [DRV] : [])];
+    const watch = [...GUARDED[ws], ...(DRIVER_AT[ws] ? [DRIVER_AT[ws]] : [])];
     out[ws] = h.filter((s) => watch.includes(s));
   }
   return out;
@@ -348,12 +351,19 @@ const inherits = async (ws: string, sym: string) => {
 };
 /** Is the `_erteilt` driver rule of data/m820-2-c4-phase-guards present in this checkout? (C-9 listing only.) */
 const C9_LISTS_DRIVER = isPhaseDriver({ symbol: DRV, dataType: 'boolean' });
+// the procedure driver ends in _erreicht: listed by this branch's rule already
+expect(isPhaseDriver({ symbol: D1, dataType: 'boolean' })).toBe(true);
 
-const DRIVERS = (v: boolean) => async (p: Proj) => {
-  await save(p, 'M820-20', { [DRV]: b(v) });
-  await save(p, 'M820-07', { mitigation_plan_approved: b(v) });
+/** Phase state: 'nein' = procedure not started (award question hidden, not saved) · 'started' = started, not awarded · 'ja' = awarded.
+ *  mitigation_plan_approved follows (Nein / Nein / Ja) — as C4 answered it on day 0. */
+type Phase = 'nein' | 'started' | 'ja';
+const SET = (st: Phase) => async (p: Proj) => {
+  await save(p, 'M820-17', { [D1]: b(st !== 'nein') });
+  if (st !== 'nein') await save(p, 'M820-23', { [DRV]: b(st === 'ja') });
+  else await unset(p, DRV); // never answer a hidden question; a stale award answer would not be shown anyway
+  await save(p, 'M820-07', { mitigation_plan_approved: b(st === 'ja') });
 };
-async function unsetDrivers(p: Proj) { await unset(p, DRV); await unset(p, 'mitigation_plan_approved'); }
+async function unsetDrivers(p: Proj) { await unset(p, D1); await unset(p, DRV); await unset(p, 'mitigation_plan_approved'); }
 
 let PRE: TableDump;
 const P: Record<string, Proj> = {};
@@ -423,7 +433,7 @@ beforeAll(async () => {
     PROBES.push({ label: `open required 820-1 (progress) · ${k}`, run: () => openRequired(P[k]), before: undefined, after: undefined });
     PROBES.push({ label: `gates · ${k}`, run: () => gateView(P[k]), before: undefined, after: undefined });
   }
-  PROBES.push({ label: 'phase_auftrag_erteilt inherited on M820-21 / -22 / -23 / -24 / -25', run: async () => [await inherits('M820-21', DRV), await inherits('M820-22', DRV), await inherits('M820-23', DRV), await inherits('M820-24', DRV), await inherits('M820-25', DRV)], before: undefined, after: undefined });
+  PROBES.push({ label: 'drivers inherited (D1 on M820-20 … -24, award on M820-20 / -24, neither on M820-25)', run: async () => ({ d1: [await inherits('M820-20', D1), await inherits('M820-21', D1), await inherits('M820-22', D1), await inherits('M820-23', D1), await inherits('M820-24', D1), await inherits('M820-25', D1)], award: [await inherits('M820-20', DRV), await inherits('M820-24', DRV), await inherits('M820-25', DRV)] }), before: undefined, after: undefined });
   for (const p of PROBES) {
     const x = EXPECTED[p.label];
     if (!x) { if (DISCOVER) continue; throw new Error(`no expectation for ${p.label}`); }
@@ -448,7 +458,7 @@ const touchedTexts = () => harness.sql<{ k: string; description: string; vq: str
     UNION ALL SELECT 'f ' || w.code || ' ' || f.symbol, f.description, f.verification_quote, f.source_anchor FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id
      WHERE f.id IN (SELECT id FROM fields_archive_m820_c4d) OR f.id IN (SELECT id FROM m820_c4d_written WHERE tbl = 'fields_new') ORDER BY 1`;
 const R0_PRE = { fields: '24', fields_pre: '24', fields_post: '0', gates: '4', gates_pre: '4', gates_post: '0', fields_neither: null, gates_neither: null, new_drivers: '0', f1_m820_24: '5' };
-const R0_POST = { fields: '24', fields_pre: '0', fields_post: '24', gates: '4', gates_pre: '0', gates_post: '4', fields_neither: null, gates_neither: null, new_drivers: '1', f1_m820_24: '5' };
+const R0_POST = { fields: '24', fields_pre: '0', fields_post: '24', gates: '4', gates_pre: '0', gates_post: '4', fields_neither: null, gates_neither: null, new_drivers: '2', f1_m820_24: '5' };
 
 describe('DWA-M 820-1 case C4 F2 phase driver — staged block on embedded Postgres (seed = prod after 20261008100000 + staged 20261015130000)', () => {
   it('a. pre-state (read-back R0 fields_pre 24 / gates_pre 4 / new_drivers 0 / f1_m820_24 5, R3 = REQ-20, -21, -23, -23-2); probes BEFORE through the real paths', async () => {
@@ -483,34 +493,45 @@ describe('DWA-M 820-1 case C4 F2 phase driver — staged block on embedded Postg
     expect(dumpDiff(PRE, await dump())).toEqual([]);
   });
 
-  it('b. apply: 24 fields + 4 gates changed, 1 driver inserted, nothing else; severities unchanged; every touched text DE + [EN] with its quote', async () => {
+  it('b. apply: 24 fields + 4 gates changed, 2 drivers inserted, nothing else; severities unchanged; every touched text DE + [EN] with its quote', async () => {
     const sevBefore = await harness.sql`SELECT cr.id, cr.severity, cr.clause_reference FROM compliance_requirements cr ORDER BY 1`;
     await runFile(MIGRATION);
     const diff = dumpDiff(PRE, await dump());
     log('apply diff (table / sign counts)', tally(diff));
-    expect(tally(diff)).toEqual({ 'compliance_requirements +': 4, 'compliance_requirements -': 4, 'fields +': 25, 'fields -': 24 });
+    expect(tally(diff)).toEqual({ 'compliance_requirements +': 4, 'compliance_requirements -': 4, 'fields +': 26, 'fields -': 24 });
     expect(await ledgers()).toEqual(FULL);
     const sevAfter = await harness.sql`SELECT cr.id, cr.severity, cr.clause_reference FROM compliance_requirements cr ORDER BY 1`;
     expect([...sevAfter]).toEqual([...sevBefore]);
     const texts = await touchedTexts();
-    expect(texts).toHaveLength(29);
+    expect(texts).toHaveLength(30);
     // exactly one '[EN] ' block, after a newline, in every touched text
     expect(texts.filter((x) => x.description.split('\n[EN] ').length !== 2).map((x) => x.k)).toEqual([]);
-    // every guarded field + the driver carries a verbatim quote in description + verification_quote + source_anchor (PDF page)
-    // (mitigation_plan_approved: hint only, quote columns untouched)
-    const quoted = texts.filter((x) => x.vq !== null && x.k !== 'f M820-07 mitigation_plan_approved');
+    // every phase-guarded field + both drivers carry a verbatim print quote in description + verification_quote + source_anchor (PDF page)
+    // (M820-07: the date guard is TOOL LOGIC, labelled as such — no print quote; mitigation_plan_approved: hint only)
+    const quoted = texts.filter((x) => x.vq !== null && !x.k.startsWith('f M820-07 '));
     expect(quoted.map((x) => x.k)).toHaveLength(24);
     expect(quoted.filter((x) => !/„.{20,}“/.test(x.vq!) || !/PDF S\. \d+/.test(x.sa ?? '') || !/„.{20,}“/.test(x.description)).map((x) => x.k)).toEqual([]);
-    // every phase-guarded field and gate quotes the award as the end of the procedure (or its § 8.3 / Anhang F / E.1.4.2 consequence)
-    const phaseTexts = texts.filter((x) => (x.k.startsWith('g ') || /M820-2[0-4] /.test(x.k)) && x.k !== `f M820-20 ${DRV}`);
-    expect(phaseTexts.filter((x) => !x.description.includes('phase_auftrag_erteilt')).map((x) => x.k)).toEqual([]);
-    // the C-9 phase definition (820-3 § 2.1) is quoted on the driver
-    expect(texts.filter((x) => x.description.includes('der einen eindeutigen Beginn und ein definiertes Ende aufweist')).map((x) => x.k)).toEqual(['f M820-20 phase_auftrag_erteilt']);
-    // the driver follows the C-9 pattern of 20261008100000: boolean, required, section B, order 0, imported_unverified
+    const m07 = texts.find((x) => x.k === 'f M820-07 mitigation_plan_date')!;
+    expect([m07.vq!.startsWith('Werkzeug-Logik / tool logic'), m07.sa!.startsWith('Werkzeug-Logik / tool logic'), m07.description.includes('Werkzeug-Logik'), m07.description.includes('Anhang A (S.')]).toEqual([true, true, true, false]);
+    // review F-2 / F-4: the tool inferences presented as print are gone
+    expect(texts.filter((x) => /am geschlossenen Ingenieurvertrag beantwortet|stehen erst mit dem Ingenieurvertrag fest/.test(x.description)).map((x) => x.k)).toEqual([]);
+    // every phase-guarded field and gate names its driver; M820-20 … -22 + REQ-21 by the procedure driver, M820-23 / -24 + REQ-20 / -23 / -23-2 by both
+    const phaseTexts = texts.filter((x) => (x.k.startsWith('g ') || /M820-2[0-4] /.test(x.k)) && !x.k.endsWith(` ${DRV}`) && !x.k.endsWith(` ${D1}`));
+    expect(phaseTexts.filter((x) => !x.description.includes(D1)).map((x) => x.k)).toEqual([]);
+    // review F-8: § 8.3 has one EN wording in REQ-23 / REQ-23-2 / M820-24
+    expect(texts.filter((x) => x.description.includes('close the procurement procedure (§ 8 VgV)')).map((x) => x.k)).toEqual([]);
+    // review F-6: the award driver names its 820-2 twin
+    expect(texts.find((x) => x.k === `f M820-23 ${DRV}`)!.description).toMatch(/Gleiches Ereignis wie die Frage phase_auftrag_erteilt auf 820-2-09[\s\S]*Same event as the question phase_auftrag_erteilt on 820-2-09/);
+    // the C-9 phase definition (820-3 § 2.1) is quoted on both drivers
+    expect(texts.filter((x) => x.description.includes('der einen eindeutigen Beginn und ein definiertes Ende aufweist')).map((x) => x.k)).toEqual([`f M820-17 ${D1}`, `f M820-23 ${DRV}`]);
+    // the drivers follow the C-9 pattern of 20261008100000: boolean, required, section B, order 0, imported_unverified; award only after start
     const drv = await harness.sql`SELECT w.code AS ws, f.symbol, f.data_type, f.is_required AS req, ws.code AS sec, f.order_index AS oi, f.verification_status AS vs, coalesce(f.visible_when, '') AS vis, array_to_string(f.consumer_worksheets, ',') AS cons
       FROM fields f JOIN worksheet_templates w ON w.id = f.worksheet_template_id JOIN worksheet_sections ws ON ws.id = f.section_id
-     WHERE f.symbol = ${DRV} ORDER BY 1`;
-    expect([...drv]).toEqual([{ ws: 'M820-20', symbol: DRV, data_type: 'boolean', req: true, sec: 'B', oi: 0, vs: 'imported_unverified', vis: '', cons: 'M820-21,M820-22,M820-23,M820-24' }]);
+     WHERE f.symbol IN (${D1}, ${DRV}) ORDER BY 1`;
+    expect([...drv]).toEqual([
+      { ws: 'M820-17', symbol: D1, data_type: 'boolean', req: true, sec: 'B', oi: 0, vs: 'imported_unverified', vis: '', cons: 'M820-20,M820-21,M820-22,M820-23,M820-24' },
+      { ws: 'M820-23', symbol: DRV, data_type: 'boolean', req: true, sec: 'B', oi: 0, vs: 'imported_unverified', vis: `${D1} == true`, cons: 'M820-20,M820-24' },
+    ]);
     const post = Object.fromEntries((await sigs()).map((r) => [r.k, r.sig]));
     log('post-state signatures (read-back R0 sig1)', post);
     if (DISCOVER) DISCOVERED.sig1 = post;
@@ -523,32 +544,32 @@ describe('DWA-M 820-1 case C4 F2 phase driver — staged block on embedded Postg
     expect(await ledgers()).toEqual(FULL);
   });
 
-  it('d. rollback: byte-equal to the pre-state (driver and its saved answers removed), archives and ledger emptied; second rollback no-op', async () => {
-    await save(P.rb, 'M820-20', { [DRV]: b(false) }); // a saved driver answer must not block the rollback (own project)
+  it('d. rollback: byte-equal to the pre-state (drivers and their saved answers removed), archives and ledger emptied; second rollback no-op', async () => {
+    await SET('started')(P.rb); // saved driver answers must not block the rollback (own project)
     await runFile(ROLLBACK);
     const after = await dump();
     expect(dumpDiff(PRE, after)).toEqual([]);
     expect(digest(after)).toEqual(digest(PRE));
     expect(await ledgers()).toEqual(EMPTY);
-    const [left] = await harness.sql<{ n: number }[]>`SELECT count(*)::int AS n FROM project_parameters pp JOIN fields f ON f.id = pp.field_id WHERE f.symbol = ${DRV}`;
+    const [left] = await harness.sql<{ n: number }[]>`SELECT count(*)::int AS n FROM project_parameters pp JOIN fields f ON f.id = pp.field_id WHERE f.symbol IN (${D1}, ${DRV})`;
     expect(left.n).toBe(0);
     await runFile(ROLLBACK);
     expect(dumpDiff(PRE, await dump())).toEqual([]);
     expect(await ledgers()).toEqual(EMPTY);
   });
 
-  it('d2. a gate and the driver edited after the apply are left alone by the rollback (archive + ledger rows kept); the rest is restored', async () => {
+  it('d2. a gate and a driver edited after the apply are left alone by the rollback (archive + ledger rows kept); the rest is restored', async () => {
     await runFile(MIGRATION);
     await harness.sql`UPDATE compliance_requirements cr SET description = cr.description || ' (edited)' FROM worksheet_templates w WHERE w.id = cr.worksheet_template_id AND w.code = 'M820-20' AND cr.code = 'REQ-20'`;
     await harness.sql`UPDATE fields f SET label_de = f.label_de || ' (edited)' WHERE f.symbol = ${DRV}`;
     await runFile(ROLLBACK);
     const l = await ledgers();
     const req20 = (await harness.sql<{ condition: string }[]>`SELECT cr.condition FROM compliance_requirements cr JOIN worksheet_templates w ON w.id = cr.worksheet_template_id WHERE w.code = 'M820-20' AND cr.code = 'REQ-20'`)[0].condition;
-    const drivers = (await harness.sql<{ symbol: string }[]>`SELECT symbol FROM fields WHERE symbol = ${DRV}`).map((x) => x.symbol);
-    log('rollback with one edited gate + the edited driver', { l, req20, drivers });
+    const drivers = (await harness.sql<{ symbol: string }[]>`SELECT symbol FROM fields WHERE symbol IN (${D1}, ${DRV}) ORDER BY 1`).map((x) => x.symbol);
+    log('rollback with one edited gate + the edited award driver', { l, req20, drivers });
     expect(l).toEqual({ compliance_requirements_archive_m820_c4d: 1, fields_archive_m820_c4d: 0, m820_c4d_written: 2 });
-    expect(req20).toMatch(/THEN \(IF phase_auftrag_erteilt == true THEN \(negotiation_rounds >= 1\)\)$/);
-    expect(drivers).toEqual([DRV]);
+    expect(req20).toMatch(/THEN \(IF phase_vergabeverfahren_erreicht == true THEN \(IF phase_auftrag_erteilt == true THEN \(negotiation_rounds >= 1\)\)\)$/);
+    expect(drivers).toEqual([DRV]); // the unedited procedure driver is gone, the edited award driver stays
     await harness.sql`UPDATE compliance_requirements cr SET description = left(cr.description, length(cr.description) - length(' (edited)')) FROM worksheet_templates w WHERE w.id = cr.worksheet_template_id AND w.code = 'M820-20' AND cr.code = 'REQ-20'`;
     await harness.sql`UPDATE fields f SET label_de = left(f.label_de, length(f.label_de) - length(' (edited)')) WHERE f.symbol = ${DRV}`;
     await runFile(ROLLBACK);
@@ -560,76 +581,75 @@ describe('DWA-M 820-1 case C4 F2 phase driver — staged block on embedded Postg
     expect(RB_STMTS).toHaveLength(6);
     expect(readFileSync(READBACK, 'utf8').split(/;\s*(?:\n|$)/).filter((s) => s.replace(/--.*$/gm, '').trim())).toHaveLength(6);
     await runFile(MIGRATION);
-    await save(P.rb, 'M820-20', { [DRV]: b(false) });
+    await SET('started')(P.rb);
     const post = await readback();
     log('read-back (after)', post);
     if (!DISCOVER) expect(post[0]).toEqual([R0_POST]);
-    expect(post[1]).toHaveLength(29);
+    expect(post[1]).toHaveLength(30);
     check('read-back R1 after', post[1], EXPECTED['read-back R1 after']?.[1]);
     expect(post[3]).toEqual([]);
-    expect((post[4] as Array<{ symbol: string; value: string }>).map((x) => `${x.symbol} ${x.value}`)).toEqual([`${DRV} false`]);
-    expect(post[5]).toEqual([{ gate_archive: '4', field_archive: '24', written: '29', written_new: '1' }]);
+    expect((post[4] as Array<{ symbol: string; value: string }>).map((x) => `${x.symbol} ${x.value}`)).toEqual([`${D1} true`, `${DRV} false`]);
+    expect(post[5]).toEqual([{ gate_archive: '4', field_archive: '24', written: '30', written_new: '2' }]);
     await runFile(ROLLBACK);
     expect(dumpDiff(PRE, await dump())).toEqual([]);
   });
 
-  it('f. AFTER, drivers unanswered: guarded questions stay visible (fail-safe), REQ-20 / REQ-21 / REQ-23 wait and name the driver', async () => {
+  it('f. AFTER, drivers unanswered: guarded questions stay visible (fail-safe), REQ-20 / REQ-21 / REQ-23 wait and name the procedure driver', async () => {
     await runFile(MIGRATION);
     const after = await probeAll();
-    log('AFTER probes (driver unanswered)', Object.fromEntries(PROBES.map((p, i) => [p.label, after[i]])));
+    log('AFTER probes (drivers unanswered)', Object.fromEntries(PROBES.map((p, i) => [p.label, after[i]])));
     PROBES.forEach((p, i) => check(`after ${p.label}`, after[i], p.after));
     if (!DISCOVER) {
       // non-vacuity: the block changes what the real paths report (not only the definition rows)
       const changed = PROBES.filter((p) => JSON.stringify(p.before) !== JSON.stringify(p.after)).map((p) => p.label);
       log('probes that changed', changed);
       expect(changed).toEqual(expect.arrayContaining(['missing required (gate) · c4', 'open required 820-1 (progress) · c4', 'gates · pub', 'gates · pubdir',
-        'phase_auftrag_erteilt inherited on M820-21 / -22 / -23 / -24 / -25']));
-      expect(changed).not.toContain('form hides (guarded + driver) · c4'); // unanswered driver: nothing hidden (fail-safe)
+        'drivers inherited (D1 on M820-20 … -24, award on M820-20 / -24, neither on M820-25)']));
+      expect(changed).not.toContain('form hides (guarded + driver) · c4'); // unanswered drivers: nothing hidden (fail-safe)
     }
+    const named: Record<string, string[] | null> = {};
     for (const [ws, code] of [['M820-20', 'REQ-20'], ['M820-21', 'REQ-21'], ['M820-24', 'REQ-23']]) {
       const g = await checkApprovalGate(P.pub.inst.get(ws)!);
-      const named = g.pendingBlockConditions.find((c) => c.code === code)?.missingInputs.map((x) => x.symbol) ?? null;
-      expect(named, code).toEqual([DRV]);
+      named[code] = g.pendingBlockConditions.find((c) => c.code === code)?.missingInputs.map((x) => x.symbol) ?? null;
     }
+    log('pending block gates name', named);
+    expect(Object.entries(named).filter(([, n]) => !n || !n.includes(D1)).map(([c]) => c)).toEqual([]);
+    // procedure started, award unanswered: REQ-21 applies (fails), REQ-20 / REQ-23 now wait for the award driver
+    await save(P.pub, 'M820-17', { [D1]: b(true) });
+    const g20 = await checkApprovalGate(P.pub.inst.get('M820-20')!);
+    const g21 = await checkApprovalGate(P.pub.inst.get('M820-21')!);
+    expect(g20.pendingBlockConditions.find((c) => c.code === 'REQ-20')?.missingInputs.map((x) => x.symbol)).toContain(DRV);
+    expect(g21.failingBlockConditions.map((c) => c.code)).toContain('REQ-21');
+    await unset(P.pub, D1);
     await runFile(ROLLBACK);
   });
 
-  it('g. AFTER, C4 benchmark + public both ways: Nein ⇒ hidden, gates not applicable (C-9 when the rule is present); Ja ⇒ visible and the checks refuse as before', async () => {
+  it('g. AFTER, C4 benchmark + public both ways: Nein ⇒ hidden, gates not applicable, C-9; started ⇒ REQ-21 fails as before; awarded ⇒ all checks refuse as before', async () => {
     await runFile(MIGRATION);
     const view = async (p: Proj) => ({ hidden: await guardHidden(p), missing: await missing(p), open: await openRequired(p), gates: await gateView(p), c9: await c9(p) });
-    await DRIVERS(false)(P.c4);
-    const c4Nein = await view(P.c4);
-    await DRIVERS(true)(P.c4);
-    const c4Ja = await view(P.c4);
-    await DRIVERS(false)(P.c4);
-    const c4Back = await view(P.c4);
-    await DRIVERS(true)(P.pub);
-    const pubJa = await view(P.pub);
-    await DRIVERS(false)(P.pub);
-    const pubNein = await view(P.pub);
-    await DRIVERS(false)(P.pubdir);
-    const pubdirNein = await view(P.pubdir);
-    await DRIVERS(true)(P.pubdir);
-    const pubdirJa = await view(P.pubdir);
-    const res = { c4Nein, c4Ja, c4Back, pubJa, pubNein, pubdirNein, pubdirJa };
+    const res: Record<string, Awaited<ReturnType<typeof view>>> = {};
+    for (const [k, p, st] of [['c4Nein', 'c4', 'nein'], ['c4Started', 'c4', 'started'], ['c4Ja', 'c4', 'ja'], ['c4Back', 'c4', 'nein'],
+      ['pubNein', 'pub', 'nein'], ['pubStarted', 'pub', 'started'], ['pubJa', 'pub', 'ja'],
+      ['pubdirNein', 'pubdir', 'nein'], ['pubdirStarted', 'pubdir', 'started'], ['pubdirJa', 'pubdir', 'ja']] as Array<[string, string, Phase]>) {
+      await SET(st)(P[p]);
+      res[k] = await view(P[p]);
+    }
     log('C4 benchmark + public both ways (after)', res);
-    // C-9 listing depends on the code rule (see header): compare without it, then assert it per rule
     const noC9 = (x: Record<string, unknown>) => { const { c9: _c9, ...rest } = x; return rest; };
     for (const [k, v] of Object.entries(res)) check(`g ${k}`, noC9(v), EXPECTED[`g ${k}`]?.[1]);
     const c9of = Object.fromEntries(Object.entries(res).map(([k, v]) => [k, v.c9]));
     log(`C-9 lists (rule for _erteilt present: ${C9_LISTS_DRIVER})`, c9of);
+    if (DISCOVER) DISCOVERED[C9_LISTS_DRIVER ? 'g C-9 with the _erteilt rule' : 'g C-9 with this branch rule'] = c9of;
     if (!DISCOVER) {
-      expect(c4Back).toEqual(c4Nein);
-      // the C4 day-0 count on 820-1: 50 after 20261015130000 → 51 with the new driver unanswered → 31 once the driver (and
+      // C4 day-0 count on 820-1: 50 after 20261015130000 → 52 with both new drivers unanswered → 31 when the procedure driver (and
       // mitigation_plan_approved, as C4 answered it) say Nein
       expect((PROBES.find((p) => p.label === 'open required 820-1 (progress) · c4')!.before as Record<string, number>).ALL_820_1).toBe(50);
-      expect((PROBES.find((p) => p.label === 'open required 820-1 (progress) · c4')!.after as Record<string, number>).ALL_820_1).toBe(51);
-      expect(c4Nein.open.ALL_820_1).toBe(31);
-      if (C9_LISTS_DRIVER) {
-        expect(c9of).toEqual(EXPECTED['g C-9 with the _erteilt rule'][1]);
-      } else {
-        expect(Object.values(c9of).every((x) => x.length === 0)).toBe(true); // narrow rule: no 820-1 driver is listed
-      }
+      expect((PROBES.find((p) => p.label === 'open required 820-1 (progress) · c4')!.after as Record<string, number>).ALL_820_1).toBe(52);
+      expect(res.c4Nein.open.ALL_820_1).toBe(31);
+      expect(res.c4Back.hidden).toEqual(res.c4Nein.hidden);
+      // review F-1: a bound VgV-F client between notice and award: REQ-21 refuses as before the block
+      expect(res.pubStarted.gates['REQ-21']).toBe('block:fail/fail');
+      expect(c9of).toEqual(EXPECTED[C9_LISTS_DRIVER ? 'g C-9 with the _erteilt rule' : 'g C-9 with this branch rule'][1]);
     }
     await unsetDrivers(P.c4); await unsetDrivers(P.pub); await unsetDrivers(P.pubdir);
     await runFile(ROLLBACK);
@@ -657,11 +677,11 @@ describe('DWA-M 820-1 case C4 F2 phase driver — staged block on embedded Postg
     const afterO23 = await dump();
     await runFile(MIGRATION);
     const both1 = await dump();
-    expect(tally(dumpDiff(afterO23, both1))).toEqual({ 'compliance_requirements +': 4, 'compliance_requirements -': 4, 'fields +': 25, 'fields -': 24 });
+    expect(tally(dumpDiff(afterO23, both1))).toEqual({ 'compliance_requirements +': 4, 'compliance_requirements -': 4, 'fields +': 26, 'fields -': 24 });
     const rb1 = await readback(1);
     if (!DISCOVER) expect(rb1[0]).toEqual([R0_POST]);
     expect(await o23R0()).toMatchObject([{ fields_post: '2', gates_post: '1', fields_neither: null, gates_neither: null }]);
-    await DRIVERS(false)(P.c4);
+    await SET('nein')(P.c4);
     const c4Both = { hidden: await guardHidden(P.c4), open: await openRequired(P.c4), gates: await gateView(P.c4) };
     await unsetDrivers(P.c4);
     await runFile(ROLLBACK);
@@ -671,7 +691,7 @@ describe('DWA-M 820-1 case C4 F2 phase driver — staged block on embedded Postg
     // h3 · this block first, then O-2/O-3
     await runFile(MIGRATION);
     await runFile(O23);
-    expect(dumpDiff(both1, await dump()).filter((l) => !l.includes(DRV))).toEqual([]);
+    expect(dumpDiff(both1, await dump()).filter((l) => !l.includes(DRV) && !l.includes(D1))).toEqual([]);
     expect(await o23R0()).toMatchObject([{ fields_post: '2', gates_post: '1', fields_neither: null, gates_neither: null }]);
     expect((await readback(1))[0]).toEqual(rb1[0]);
     log('C4 with both blocks', c4Both);
