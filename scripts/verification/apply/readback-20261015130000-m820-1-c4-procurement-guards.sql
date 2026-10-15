@@ -24,7 +24,7 @@ WITH fv(ws, sym, guard, sig0, sig1) AS (VALUES
     ('M820-13','liability_insurance_sonstige','D','8905cd473eaf58f475a14f027662be41','4a266986ee08af336f678170ef24b740'),
     ('M820-15','documentation_structure','D','88a3f1019639ad8ccafe35440b6a0a07','43fc64ae3a581619f344899d490ee562'),
     ('M820-17','date_procurement_start','D','b89c23a93d3ecb03b95cf2461fa098fc','cf43ef41e45f3759e27611647804b96c'),
-    ('M820-01','vergaberecht_freiwillig_angewendet','hint','6fccd64e264121e8f2fb040943c5e1c3','b19db154d9a7b88a9e406185b59b7a8f'),
+    ('M820-01','vergaberecht_freiwillig_angewendet','hint','6fccd64e264121e8f2fb040943c5e1c3','cf2c8113ce8ea58e51205103359c76a7'),
     ('M820-10','procurement_procedure','hint','a0c31e8244a5013dd1c57e01a5b8170e','c480dee5bfa82f8b0e663015287308a2')),
 sv(ws, code, sig0, sig1) AS (VALUES
     ('M820-09','A','43dd40326d5839cf5946de96549bf4fb','294668f1db4721124e02576c2dfd36bc'),
@@ -80,13 +80,21 @@ SELECT p.name AS project, coalesce(fw.value_boolean::text, '(unanswered)') AS ve
  WHERE pc.value_enum = 'privat_ohne_foerderung'
  ORDER BY 1;
 
--- R3 · any time: 820-1 block gates that read an L-guarded symbol WITHOUT the L clause (expect 0 rows before and after — no gate is changed by this block)
-SELECT w.code AS ws, cr.code, cr.severity, cr.condition
+-- R3 · any time: DWA-M 820-1 gates (any severity) that read a guarded symbol without being switched off by the same guard. Expect 0 rows
+-- before and after (no gate is changed by this block). Part L: the 38 procurement-law symbols (28 of M820-09 + 10 fields) read by a gate
+-- whose condition lacks the L clause. Part D: any gate reading one of the 6 competition symbols (none exists).
+-- Gates that read L symbols today, all with the L clause: REQ-07, REQ-08, REQ-10, REQ-22, REQ-23, REQ-26 (block), REQ-23-2 (warn).
+SELECT 'L' AS guard, w.code AS ws, cr.code, cr.severity, cr.condition
   FROM compliance_requirements cr JOIN worksheet_templates w ON w.id = cr.worksheet_template_id JOIN standards s ON s.id = w.standard_id
- WHERE s.code = 'DWA-M-820-1' AND cr.severity = 'block'
-   AND cr.condition ~ '(threshold_status|eu_threshold_value|oberschwellig_check|auftragswert_manipulation_check|exclusion_123_gwb_checked|information_letters_sent|electronic_transmission|contract_invalidity_135_gwb_risk|vergabevermerk_complete|alle_unterlagen_archiviert|vergabeakte_unterzeichnet|final_signoff_date)'
+ WHERE s.code = 'DWA-M-820-1'
+   AND cr.condition ~ '\m(threshold_status|eu_threshold_value|eu_threshold_review_interval_years|cost_estimate_near_threshold|auftragswert_manipulation_check|loseausnahme_applicable|lot_share_threshold_pct|lot_value_threshold_construction|lot_value_threshold_services|oberschwellig_check|eu_threshold_value_anhb23|eu_threshold_verordnung_anhb23|eu_threshold_konsistent_code|oberschwellig_code|cost_estimate_near_threshold_code|lot_value_threshold_services_calc|lot_value_threshold_construction_calc|lot_share_threshold_pct_calc|eu_threshold_review_interval_years_calc|lose|lose_count|lose_gesamt_eur|lose_gesamt_ok|lose_ausnahme_sum_eur|lose_ausnahme_anteil_pct|lose_ausnahme_max_eur|lose_ausnahme_verletzt|loseausnahme_code|exclusion_123_gwb_checked|exclusion_124_gwb_selected|information_letters_sent|electronic_transmission|contract_invalidity_135_gwb_risk|vergabevermerk_complete|alle_unterlagen_archiviert|vergabeakte_unterzeichnet|archive_location|final_signoff_date)\M'
    AND position($q$client_organization_type != 'privat_ohne_foerderung' OR vergaberecht_freiwillig_angewendet == true$q$ IN cr.condition) = 0
- ORDER BY 1, 2;
+UNION ALL
+SELECT 'D', w.code, cr.code, cr.severity, cr.condition
+  FROM compliance_requirements cr JOIN worksheet_templates w ON w.id = cr.worksheet_template_id JOIN standards s ON s.id = w.standard_id
+ WHERE s.code = 'DWA-M-820-1'
+   AND cr.condition ~ '\m(mindesteignung_definiert|qualitaets_check_date|liability_insurance_personenschaden|liability_insurance_sonstige|documentation_structure|date_procurement_start)\M'
+ ORDER BY 1, 2, 3;
 
 -- R4 · after the apply only (the tables exist from then on): archives and ledger (expect 18 / 7 / 25)
 SELECT (SELECT count(*) FROM fields_archive_m820_c4g) AS field_archive, (SELECT count(*) FROM worksheet_sections_archive_m820_c4g) AS section_archive,

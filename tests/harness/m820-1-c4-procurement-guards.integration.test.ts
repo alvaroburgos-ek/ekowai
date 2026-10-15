@@ -498,6 +498,14 @@ describe('DWA-M 820-1 case C4 F1 procurement guards — staged block on embedded
     expect((r[2] as Array<{ vergaberecht_freiwillig_angewendet: string; procurement_procedure: string }>).map((x) => `${x.vergaberecht_freiwillig_angewendet} ${x.procurement_procedure}`).sort())
       .toEqual(['(unanswered) direktvergabe', 'false direktvergabe', 'false direktvergabe', 'false suchverfahren', 'true vgv_f']);
     expect(r[3]).toEqual([]);
+    // R3 positive control (review fix 3): without the „lacks the L clause" filter, the same regex finds exactly the 7 gates that read an
+    // L symbol today (all L-guarded), and no gate reads a D symbol — so R3's 0 rows are not vacuous.
+    const r3all = RB_STMTS[3].replace(/\n\s*AND position\(\$q\$[^\n]*\n/, '\n');
+    expect(r3all).not.toEqual(RB_STMTS[3]);
+    const ctrl = [...(await harness.sql.unsafe(r3all))] as unknown as Array<{ guard: string; code: string; severity: string }>;
+    log('R3 positive control', ctrl.map((x) => `${x.guard} ${x.code} ${x.severity}`));
+    expect(ctrl.map((x) => `${x.guard} ${x.code} ${x.severity}`).sort()).toEqual(
+      ['L REQ-07 block', 'L REQ-08 block', 'L REQ-10 block', 'L REQ-22 block', 'L REQ-23 block', 'L REQ-23-2 warn', 'L REQ-26 block']);
     const before = await probeAll();
     log('BEFORE probes', Object.fromEntries(PROBES.map((p, i) => [p.label, before[i]])));
     if (!DISCOVER) expect(before).toEqual(PROBES.map((p) => p.before));
