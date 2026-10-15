@@ -25,7 +25,7 @@ WITH fv(ws, sym, sig0, sig1) AS (VALUES
     ('820-2-16','permit_conditions_tracked','2771ae2e189a8419a81b74f47b4e3e1a','a99022ab9fa4e61dbc67d36a6c3b7fbc'),
     ('820-2-04','eigene_regelwerke_vorhanden','7303e8f54248deb96e3c94dfb1abe9ec','54c6d0dabb3c47dc0b5540f0b484d50d'),
     ('820-2-14','oeffentlichkeitsbeteiligung_vorgesehen','43bb8c5c24510530886811964e0e65a9','1c616a11dff660904b36f3a4f1eaee72'),
-    ('820-2-20','phase_ausfuehrung_erreicht','37ab930379243190d04b8c31a3abeef2','c6f060f6fa44260b8e67db1ed2fe8207')),
+    ('820-2-20','phase_ausfuehrung_erreicht','37ab930379243190d04b8c31a3abeef2','805ff7c8e12a813b03221f49a0431550')),
 gv(ws, code, sig0, sig1) AS (VALUES
     ('820-2-09','REQ-16','c878af5ceae882134b77219b67d2ae68','1586fa188a8e7fb1a8fedecb321495f1'),
     ('820-2-09','REQ-17','a8d3d6fa476f1ce55ee3fe71ae0d3317','266bbdfad56fe944c22842ec577d2a08'),
