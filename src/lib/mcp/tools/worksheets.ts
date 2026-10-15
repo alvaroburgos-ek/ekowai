@@ -19,6 +19,35 @@ import { parametersToFieldValues } from '@/lib/eval/materialize-derived';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { assertInternalAccess } from './projects';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
+import { resolveRegisterConfig, type RegisterFieldLike } from '@/lib/eval/register-configs';
+
+/** One column of a json/register field's `columns` contract, as `get_worksheet` reports it
+ * (F7). `options` is present only for an enum column (kept out otherwise to stay small). */
+export type WorksheetRegisterColumn = { key: string; label: string; type: string; required: boolean; options?: string[] };
+
+/**
+ * F7: a fill agent must know the exact column keys/types/required flags/enum options of a
+ * json/register field to write rows with `set_field_values` — without this, it had to read the
+ * migration file. Resolves through `resolveRegisterConfig`, the SAME source the save-path
+ * validator (`registerRowWarnings`, called from `src/lib/actions/worksheet.ts`) reads for its
+ * "Pflichtspalte …" / unknown-column warnings, so the two cannot drift apart.
+ *
+ * Returns `undefined` — not an empty array — for a non-register field (including a raw json
+ * carrier like a `select_many` checklist) or a register with no columns, so the response does
+ * not grow a `columns: []` on every other field.
+ */
+export function registerColumnsForField(f: RegisterFieldLike): WorksheetRegisterColumn[] | undefined {
+  if (f.dataType !== 'json') return undefined;
+  const cfg = resolveRegisterConfig(f);
+  if (!cfg || cfg.columns.length === 0) return undefined;
+  return cfg.columns.map((c) => ({
+    key: c.key,
+    label: c.label,
+    type: c.type,
+    required: c.required ?? false,
+    ...(c.options ? { options: c.options } : {}),
+  }));
+}
 
 /** Renders a project_parameters row as the plain value the model should see. */
 function readValue(row: {
@@ -132,6 +161,10 @@ export function registerWorksheetTools(server: McpServer) {
           orderIndex: fields.orderIndex,
           sectionId: fields.sectionId,
           visibleWhen: fields.visibleWhen,
+          // F7: read-only here, used to resolve a json field's register columns below —
+          // stripped from `rest` before the field is returned.
+          widget: fields.widget,
+          uiConfig: fields.uiConfig,
         })
         .from(fields)
         .leftJoin(worksheetSections, eq(fields.sectionId, worksheetSections.id))
@@ -173,9 +206,11 @@ export function registerWorksheetTools(server: McpServer) {
       const merged = fieldRows.map((f) => {
         const param = byField.get(f.fieldId);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omitted from the response on purpose
-        const { sectionId: _sectionId, visibleWhen: _visibleWhen, ...rest } = f;
+        const { sectionId: _sectionId, visibleWhen: _visibleWhen, widget: _widget, uiConfig: _uiConfig, ...rest } = f;
+        const columns = registerColumnsForField({ symbol: f.symbol, dataType: f.dataType, widget: f.widget, uiConfig: f.uiConfig });
         return {
           ...rest,
+          ...(columns ? { columns } : {}),
           hidden: hiddenFieldIds.has(f.fieldId),
           // U-1 (ruling R-12): the value was last saved while the field was hidden by visible_when (or not re-saved
           // since) — not a conscious answer under the current selection; re-save it while visible to clear.

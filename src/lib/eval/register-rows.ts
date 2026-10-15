@@ -129,9 +129,15 @@ function columnHiddenInRow(c: RegisterColumn, values: RowValues, ctx: RegisterRo
 }
 
 /** Why a row is incomplete — one entry per failing column, in column order. Empty ⇔ complete. */
-export type RowIncompleteReason = { key: string; kind: 'missing' | 'below_min' | 'above_max' };
+export type RowIncompleteReason =
+  | { key: string; kind: 'missing' | 'below_min' | 'above_max' }
+  // F8 (820-2-03 korrespondenz finding): a required ENUM column whose raw cell is a non-empty
+  // string that names none of `options` is coerced to null by `coerce()` — the exact same shape
+  // as an unanswered cell. Without this branch it was reported as "Pflichtspalte X fehlt", which
+  // sends a fill agent looking for a field that is not empty at all.
+  | { key: string; kind: 'invalid_enum'; value: string; options: readonly string[] };
 
-function incompleteReasons(values: RowValues, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx): RowIncompleteReason[] {
+function incompleteReasons(values: RowValues, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx, raw?: Record<string, unknown>): RowIncompleteReason[] {
   const out: RowIncompleteReason[] = [];
   for (const c of columns) {
     if (c.type === 'derived') continue;
@@ -141,7 +147,17 @@ function incompleteReasons(values: RowValues, columns: readonly RegisterColumn[]
       if (c.required && gridCellCount(v) < 1) out.push({ key: c.key, kind: 'missing' });
       continue;
     }
-    if (c.required && (v === null || v === undefined || v === '')) { out.push({ key: c.key, kind: 'missing' }); continue; }
+    if (c.required && (v === null || v === undefined || v === '')) {
+      if (c.type === 'enum' && c.options && raw) {
+        const rawVal = raw[c.key];
+        if (typeof rawVal === 'string' && rawVal.length > 0 && !c.options.includes(rawVal)) {
+          out.push({ key: c.key, kind: 'invalid_enum', value: rawVal, options: c.options });
+          continue;
+        }
+      }
+      out.push({ key: c.key, kind: 'missing' });
+      continue;
+    }
     if (c.type === 'number' && typeof v === 'number') {
       if (c.min !== undefined && v < c.min) out.push({ key: c.key, kind: 'below_min' });
       else if (c.max !== undefined && v > c.max) out.push({ key: c.key, kind: 'above_max' });
@@ -150,8 +166,21 @@ function incompleteReasons(values: RowValues, columns: readonly RegisterColumn[]
   return out;
 }
 
-function isComplete(values: RowValues, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx): boolean {
-  return incompleteReasons(values, columns, ctx).length === 0;
+function isComplete(values: RowValues, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx, raw?: Record<string, unknown>): boolean {
+  return incompleteReasons(values, columns, ctx, raw).length === 0;
+}
+
+/** DE/EN text for one `RowIncompleteReason`, shared by `registerRowWarnings`. */
+function reasonText(r: RowIncompleteReason, lang: 'de' | 'en'): string {
+  switch (r.kind) {
+    case 'missing': return lang === 'de' ? `Pflichtspalte ${r.key} fehlt` : `required column ${r.key} missing`;
+    case 'below_min': return lang === 'de' ? `${r.key} unter Minimum` : `${r.key} below minimum`;
+    case 'above_max': return lang === 'de' ? `${r.key} über Maximum` : `${r.key} above maximum`;
+    case 'invalid_enum':
+      return lang === 'de'
+        ? `${r.key} = "${r.value}" ist kein gültiger Wert (erlaubt: ${r.options.join(', ')})`
+        : `${r.key} = "${r.value}" is not a valid value (allowed: ${r.options.join(', ')})`;
+  }
 }
 
 export function prepareRegisterRows(carrierRaw: unknown, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx, opts: RegisterRowsOpts = {}): PreparedRegister {
@@ -228,7 +257,7 @@ export function prepareRegisterRows(carrierRaw: unknown, columns: readonly Regis
         else if (!(diagnostics ?? []).includes(line)) (diagnostics ??= []).push(line);
       }
     }
-    rows.push({ id: str(r.id) ?? genId(), values, complete: isComplete(values, columns, ctx) });
+    rows.push({ id: str(r.id) ?? genId(), values, complete: isComplete(values, columns, ctx, r) });
   }
   return {
     rows,
@@ -387,11 +416,9 @@ export function registerRowWarnings(symbol: string, carrierRaw: unknown, cfg: Re
     const prepared = prepareRegisterRows({ rows: [raw] }, columns, ctx, opts).rows[0];
     if (!prepared) return;
     if (!prepared.complete) {
-      const reasons = incompleteReasons(prepared.values, columns, ctx);
-      const de = reasons.length === 0 ? 'unvollständig'
-        : reasons.map((r) => (r.kind === 'missing' ? `Pflichtspalte ${r.key} fehlt` : r.kind === 'below_min' ? `${r.key} unter Minimum` : `${r.key} über Maximum`)).join(', ');
-      const en = reasons.length === 0 ? 'incomplete'
-        : reasons.map((r) => (r.kind === 'missing' ? `required column ${r.key} missing` : r.kind === 'below_min' ? `${r.key} below minimum` : `${r.key} above maximum`)).join(', ');
+      const reasons = incompleteReasons(prepared.values, columns, ctx, raw);
+      const de = reasons.length === 0 ? 'unvollständig' : reasons.map((r) => reasonText(r, 'de')).join(', ');
+      const en = reasons.length === 0 ? 'incomplete' : reasons.map((r) => reasonText(r, 'en')).join(', ');
       const e = incompleteBy.get(de) ?? { de, en, rows: [] };
       e.rows.push(n);
       incompleteBy.set(de, e);

@@ -102,4 +102,28 @@ describe('B — registerRowWarnings (save-time warning, one line per register)',
     const w = registerRowWarnings('qe62_items', { rows: [{ id: 'a', nr: 'n1', rating: 'y' }, { id: 'b', nr: 1, rating: 'y' }] }, { columns: qeColumns('QE_B1') }, ctx);
     expect(w).toBe('Register qe62_items: nr = 1 ist kein Schlüssel der Tabelle QE_B1 (Zeile 2) [EN] nr = 1 is not a key of table QE_B1 (row 2)');
   });
+
+  // F8 (820-2-03 korrespondenz finding): `richtung` is a required enum column with options
+  // ['gesendet', 'empfangen']. A value outside that set ("eingehend") is coerced to null by
+  // `coerce()` — exactly like an unanswered cell — so before the fix it was reported as
+  // "Pflichtspalte richtung fehlt", sending a fill agent looking for a field that is not empty.
+  // It must instead name the bad value and list the allowed ones.
+  it('an invalid enum value in a required column is reported as invalid, not missing (F8)', () => {
+    const cols: RegisterColumn[] = [
+      { key: 'datum', label: 'Datum', type: 'date', required: true },
+      { key: 'richtung', label: 'Richtung', type: 'enum', required: true, options: ['gesendet', 'empfangen'] },
+      { key: 'betreff', label: 'Betreff', type: 'text', required: true },
+    ];
+    const invalid = registerRowWarnings('korrespondenz', { rows: [{ id: 'a', datum: '2026-10-15', richtung: 'eingehend', betreff: 'x' }] }, { columns: cols }, {});
+    expect(invalid).toBe(
+      'Register korrespondenz: Zeile 1 unvollständig (richtung = "eingehend" ist kein gültiger Wert (erlaubt: gesendet, empfangen)) — wird nicht gezählt'
+      + ' [EN] row 1 incomplete (richtung = "eingehend" is not a valid value (allowed: gesendet, empfangen)) — not counted',
+    );
+    // An actually EMPTY richtung still says "missing", never "invalid".
+    const missing = registerRowWarnings('korrespondenz', { rows: [{ id: 'b', datum: '2026-10-15', betreff: 'x' }] }, { columns: cols }, {});
+    expect(missing).toBe(
+      'Register korrespondenz: Zeile 1 unvollständig (Pflichtspalte richtung fehlt) — wird nicht gezählt'
+      + ' [EN] row 1 incomplete (required column richtung missing) — not counted',
+    );
+  });
 });
