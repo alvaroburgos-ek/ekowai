@@ -48,8 +48,8 @@ describe('Real run (zero overrides) — C4 hand values, spec §6', () => {
     close(v(r, 'A138-17', 'V_M_erf'), 70.1126145216);
     expect(v(r, 'A138-17', 'D_used_M')).toBe(10080);
   });
-  it('Gl. 10 record state (T 30 a column per F-A7) and both flood series', () => {
-    close(v(r, 'A138-26', 'V_Rueck'), 31.640062406400006);
+  it('Gl. 10 record state follows T_n_Ue = 100 a (F-A7) and both flood series', () => {
+    close(v(r, 'A138-26', 'V_Rueck'), 55.30568077439999); // T_n_Ue = 100 in the fixture → T 100 a column (F-A7)
     close(r.iterations.find((x) => x.key === 'A138-26:Gl10:T30')?.governingValue, 31.640062406400006);
     close(r.iterations.find((x) => x.key === 'A138-26:Gl10:T100')?.governingValue, 55.30568077439999);
   });

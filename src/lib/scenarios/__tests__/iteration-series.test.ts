@@ -64,7 +64,7 @@ describe('Gl. 10 (A138-26) — prototype cases F0/K5/K6 × T 30/100 (spec §6)',
       equationId: '8e3c7e22-e3c7-449a-b267-928332c89306', formula: 'V_Rueck = 0', inputSymbols: [], outputSymbol: 'V_Rueck', inputs: [],
       aggregator: {
         floodSubAreas: floodCarrierFromSum(SUM_CS), gl10Scalars: sc, kostraUnit: null,
-        floodKostra30Col: { rows: rows(30).map((x, i) => ({ id: `r${i}`, ...x })) }, missingFlood30Reason: null,
+        floodKostraCol: { rows: rows(30).map((x, i) => ({ id: `r${i}`, ...x })) }, missingFloodColReason: null,
       },
     });
     expect(state.kind).toBe('computed');

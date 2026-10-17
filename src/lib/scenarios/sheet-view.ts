@@ -50,7 +50,7 @@ export function buildSheetView(payload: ScenarioResultsPayload, code: string, lo
   const rows: SheetView['rows'] = [];
   const eqs = realRun?.sheets[code]?.equations ?? [];
   const eqOutputs = new Set<string>();
-  // A3-M6: on the flood check the Gl. 10 headline follows T_n_Ue (the engine row reads the T = 30 a column, F-A7).
+  // A3-M6: on the flood check the Gl. 10 headline follows T_n_Ue (since F-A7 the engine row reads the same T_n_Ue column).
   const floodOut = code === FLOOD_SHEET ? runs.flatMap(({ run }) => run.iterations).find((it) => it.kind === 'gl10' && it.worksheetCode === code)?.outputSymbol ?? null : null;
   const realT = realRun ? floodT(realRun) : 30;
   const floodCell = (run: ScenarioRun, T: number): SheetCell | null => {
