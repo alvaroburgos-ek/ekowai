@@ -26,6 +26,7 @@ import { readFileSync, appendFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { startHarness, type Harness } from './embedded-pg';
+import { applyM820ProdOverlay, lostProdQuotes } from './m820-prod-overlay';
 import type { saveWorksheet as SaveWorksheet } from '@/lib/actions/worksheet';
 import type { checkApprovalGate as CheckApprovalGate } from '@/lib/actions/approval-gate';
 import type { loadInheritedFields as LoadInheritedFields } from '@/lib/db/queries/worksheet';
@@ -397,6 +398,7 @@ beforeAll(async () => {
     }
   }
   for (const blk of PRIOR_BLOCKS) await runFile(blk); // = prod after 20261008100000
+  expect(await applyM820ProdOverlay(sql)).toEqual({ fields: 729, matched: 729 }); // + prod verification_quote (2026-10-17): seed = prod
   await runFile(F1); // + the staged 820-1 F1 block this one builds on
   ({ saveWorksheet } = await import('@/lib/actions/worksheet'));
   ({ checkApprovalGate } = await import('@/lib/actions/approval-gate'));
@@ -503,6 +505,8 @@ describe('DWA-M 820-1 case C4 F2 phase driver — staged block on embedded Postg
     const sevAfter = await harness.sql`SELECT cr.id, cr.severity, cr.clause_reference FROM compliance_requirements cr ORDER BY 1`;
     expect([...sevAfter]).toEqual([...sevBefore]);
     const texts = await touchedTexts();
+    // 2026-10-17: every printed quote prod already held in verification_quote survives (kept first, the guard quote appended after " | ")
+    expect(lostProdQuotes('DWA-M-820-1', texts)).toEqual([]);
     expect(texts).toHaveLength(30);
     // exactly one '[EN] ' block, after a newline, in every touched text
     expect(texts.filter((x) => x.description.split('\n[EN] ').length !== 2).map((x) => x.k)).toEqual([]);

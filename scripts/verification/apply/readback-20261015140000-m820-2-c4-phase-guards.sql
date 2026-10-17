@@ -1,28 +1,28 @@
 -- Read-back for scripts/migrations/20261015140000_m820_2_c4_phase_guards.sql (DWA-M 820-2 case C4 F2 / F6). READ ONLY.
 -- Run BEFORE the apply (step 0: R0 … R4) and AFTER (R0 … R5). Expected values: vault 01-Projects/ekowai-wizard/m820-wizard-test/
 -- 77_APPLY-ORDER-m820-2-c4-phase-guards.md and the harness tests/harness/m820-2-c4-phase-guards.integration.test.ts. Signatures sig0 come
--- from the harness seed (2026-10-05 dumps + every M820 block applied on prod up to 20261008100000), sig1 from the harness after the apply.
+-- = prod 2026-10-17 (regenerated; was the harness seed: 2026-10-05 dumps + every M820 block applied on prod up to 20261008100000), sig1 from the harness after the apply.
 -- Field signature = md5 of description md5 | visible_when | consumer_worksheets | enum md5 | label_de | label_en | is_required | data_type |
 -- verification_quote md5 | source_anchor. Gate signature = md5 of condition | severity | description md5 | clause_reference.
 -- No comment line ends with a semicolon.
 
 -- R0 · touched rows at pre / post state (before: fields_pre 18, gates_pre 5, *_post 0, new_drivers 0 · after: 0 / 18, 0 / 5, new_drivers 3)
 WITH fv(ws, sym, sig0, sig1) AS (VALUES
-    ('820-2-09','contract_amendments_tracked','9d783c15a59e38f12ba6d2b1434c39dc','18e4e391960fc89a87b4201ddb95b060'),
-    ('820-2-09','approval_procedure_defined','5554fc75ce2fde090f6bee301c7cec0d','c4dde98f6c7bf2b525dab951554df653'),
-    ('820-2-09','quality_monitoring_active','384127a88abaafa85c0acef73a19b96c','0fd4fb1d1b6ddc1287d519f82a664e32'),
-    ('820-2-09','qs_plan_lph8_present','0af92015e1429d6a26032500ef9714c0','1981fc68514b0acb0fd3322cb786400c'),
+    ('820-2-09','contract_amendments_tracked','8ecd44163de218f50d8b2027c2565dab','e2e0fd227dd6d79227a9fa126aa32bdb'),
+    ('820-2-09','approval_procedure_defined','88bc818e61ce17e4abe76e45e7d842b0','1170f82d7026edbfdc9c4cb449b93aec'),
+    ('820-2-09','quality_monitoring_active','c7724b4831b817edcb6b61c9528baa70','84197de663c2c25fc4c32e93c4d0a944'),
+    ('820-2-09','qs_plan_lph8_present','2d3aa864315d771e14fd955d85b742d4','ac269993005afd468fb5e8a9740056b6'),
     ('820-2-15','planning_summary_date','852683a89742373fb462d4d87b71fafa','0044407dfd784401064aa717dee628d1'),
-    ('820-2-19','vergabeverfahren_used','ec9ddea1967da1aee4115bf7ef6a501e','e0a03f43ed7a3f0b3bf44ef421d79eea'),
-    ('820-2-19','auswahlentscheidung_dokumentiert','d6a67da068118583ed87efb20b2e6b2a','d8d91f4557fbe26b61f1799701fa39d1'),
+    ('820-2-19','vergabeverfahren_used','0730fe8162ff707c0e39f8ad1f2f7f17','82b2735681748b740aeb340c08ea0d36'),
+    ('820-2-19','auswahlentscheidung_dokumentiert','ebb8b90e641ed12c6cea7c92c9f5f9f4','ebc88190295fb0c4e888b9f62218ed4a'),
     ('820-2-19','zuschlag_erteilt_datum','da2a5e497b6ff4e389243a315bc05bec','d429f2cdc2fd0d68442d7d6e2e80e9fa'),
     ('820-2-19','final_contract_value','9f68a3102b8158d21475b41e389e5e46','dcaae7d8650cd4d0edfea4c35fbc9f26'),
     ('820-2-19','vergabesumme_summary_date','a79fc1a1719233964122b8cf4080bf37','7d20bb6f18008a248c75d708835e1b5a'),
-    ('820-2-25','approval_release_process','2312157d5674397884af9dc3c0f305ef','d8a4cfc65793cbb08eed78eaa5b84de8'),
-    ('820-2-25','guidelines_update_schedule','dddbe61cfb1f63b2c8362c261bb9cafe','9d547875104ad6ccb8ee72f85781799f'),
+    ('820-2-25','approval_release_process','ad194cd79271b2a0db1774bc654c5236','ba810f8062fa05cdb6f6dc6e8016c3ed'),
+    ('820-2-25','guidelines_update_schedule','33c1aab69e99f1aaa5c8c705f1fc003e','86b56b523fb91509a36ec27120809e24'),
     ('820-2-21','changes_record_date','7ec5edf40c9c803786bdc2cab179d6d1','56f3cff96be0bf1de1d2ed6ef00d5d08'),
-    ('820-2-21','kommunikations_plan_dokumentiert','105614c1bc4d32b370db1b915ce0b7d4','79f8b180ec43a115131e338e3e8170b2'),
-    ('820-2-16','permit_conditions_tracked','2771ae2e189a8419a81b74f47b4e3e1a','a99022ab9fa4e61dbc67d36a6c3b7fbc'),
+    ('820-2-21','kommunikations_plan_dokumentiert','026e78c8b0ba168a8ff68f6a188944bf','00382ff77e647997911b3804774af08e'),
+    ('820-2-16','permit_conditions_tracked','86087e19b76b2f004c3623ff520bd518','4bb691bc1f55c33008801a92c7613314'),
     ('820-2-04','eigene_regelwerke_vorhanden','7303e8f54248deb96e3c94dfb1abe9ec','54c6d0dabb3c47dc0b5540f0b484d50d'),
     ('820-2-14','oeffentlichkeitsbeteiligung_vorgesehen','43bb8c5c24510530886811964e0e65a9','1c616a11dff660904b36f3a4f1eaee72'),
     ('820-2-20','phase_ausfuehrung_erreicht','37ab930379243190d04b8c31a3abeef2','805ff7c8e12a813b03221f49a0431550')),

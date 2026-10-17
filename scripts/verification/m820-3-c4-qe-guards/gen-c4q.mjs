@@ -1,6 +1,6 @@
 // Generator for 20261015160000_m820_3_c4_qe_guards (migration, rollback, read-back) — DWA-M 820-3 case C4 F3 / F4.
 // Inputs (this folder): c4q-state.json (pre-state rows + sig0 of the touched DWA-M-820-3 sheets; seed = tests/harness/*.dump.json + every
-// M820 block up to 20261008100000) and c4q-sig1.json (post signatures from the harness discovery run, C4Q_DISCOVER=1).
+// M820 block up to 20261008100000; verification_quote + fsig refreshed from prod 2026-10-17 by refresh-c4q-state.mjs) and c4q-sig1.json (post signatures from the harness discovery run, C4Q_DISCOVER=1).
 // Run: node scripts/verification/m820-3-c4-qe-guards/gen-c4q.mjs  — rewrites the three SQL files; the SQL stays the reviewed artefact.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -19,6 +19,10 @@ const gsig0 = (ws, code) => S.gsig.find((x) => x.ws === ws && x.code === code).s
 const q = (s) => { if (s.includes('$m$')) throw new Error('dollar tag in text'); return `$m$${s}$m$`; };
 const split = (desc) => { const p = desc.split('\n[EN] '); if (p.length !== 2) throw new Error('no single [EN] block: ' + desc.slice(0, 80)); return p; };
 const join = (de, en) => `${de}\n[EN] ${en}`;
+// 2026-10-17: prod carries printed-source quotes in verification_quote on most of these rows (the 2026-10-05 dumps had no such column);
+// the block keeps them and appends its own quote — prod evidence is never replaced.
+const VQ_SEP = ' | ';
+const keepVq = (f, own) => (f.verification_quote ? `${f.verification_quote}${VQ_SEP}${own}` : own);
 const replaceOnce = (s, a, b) => { if (!s.includes(a)) throw new Error(`text not found: ${a}`); return s.replace(a, b); };
 
 // ── print facts (re-read 2026-10-15 from DWA-M_820-3.pdf: pdftotext -layout + pdftoppm page images; printed = PDF − 2) ──
@@ -75,7 +79,7 @@ for (const s of SHEETS) {
   const gs = guardSentences(s.ph, s.ws);
   for (const a of ASSESS) {
     const sym = `${s.p}_${a}`; const f = fieldOf(s.ws, sym);
-    if (f.visible_when || f.verification_quote || f.source_anchor || f.widget) throw new Error('unexpected pre-state ' + sym);
+    if (f.visible_when || f.source_anchor || f.widget) throw new Error('unexpected pre-state ' + sym);
     let [de, en] = split(f.description);
     const set = { visible_when: q(PHASE_GUARD[s.ph]) };
     if (a === 'items_total') {
@@ -84,14 +88,14 @@ for (const s of SHEETS) {
       de = `Gesamtzahl der gedruckten Kriterien in Anhang ${s.tab} (${s.ws === 'M8203-11' ? 'QE 6.2: Bedarfsplanung Projekt' : s.head.slice(4)}${segDe}): ${s.n} (Nr. ${s.nr}). Vom Werkzeug als Konstante gesetzt (Gleichung ${eqno}) – keine Eingabe mehr: gezählt sind die nummerierten Zeilen der gedruckten Tabelle (Anhang ${s.tab}, gedr. S. ${s.pr}). Nenner für die Anteile unten.`;
       en = `Total number of printed criteria in Anhang ${s.tab} (${s.head.slice(4)}${segEn}): ${s.n} (Nr. ${s.nr}). Set by the tool as a constant (equation ${eqno}) – no longer an input: counted are the numbered rows of the printed table (Anhang ${s.tab}, printed pp. ${s.pr}). Denominator for the shares below.`;
       set.is_required = 'false'; set.widget = q('derived');
-      set.verification_quote = q(`Werkzeug-Ableitung / tool derivation (Gleichung ${eqno}): Zeilennummern der gedruckten Tabelle „${s.head}“ (PDF S. ${s.pdf} / gedr. S. ${s.pr})${s.seg ? `, ${s.seg}` : ''}: Nr. ${s.nr.replace('–', ' … ')} = ${s.n}; letzte Zeile „${s.last}“. ${VQ_GUARD}`);
+      set.verification_quote = q(keepVq(f, `Werkzeug-Ableitung / tool derivation (Gleichung ${eqno}): Zeilennummern der gedruckten Tabelle „${s.head}“ (PDF S. ${s.pdf} / gedr. S. ${s.pr})${s.seg ? `, ${s.seg}` : ''}: Nr. ${s.nr.replace('–', ' … ')} = ${s.n}; letzte Zeile „${s.last}“. ${VQ_GUARD}`));
       set.source_anchor = q(`DWA-M 820-3 ${s.z} (PDF S. ${s.pdf}) — derived; ${A21} — visible_when`);
       eqRows.push({ ws: s.ws, eqno, sym, n: s.n, clause: S.equations.find((e) => e.equation_number === `${s.ws}-D1`).clause_reference,
         desc: join(`Gesamtzahl der gedruckten Kriterien dieses Blatts als Konstante: Tabelle „${s.head}“ (gedr. S. ${s.pr})${s.seg ? `, ${s.seg}` : ''} nummeriert die Zeilen Nr. ${s.nr} → ${s.n}. Werkzeug-Ableitung (Zählung der gedruckten Zeilennummern); ersetzt die bisherige Eingabe ${sym}. Nenner der Anteile ${s.ws}-D6 … -D9.`,
           `Total number of printed criteria of this sheet as a constant: table "${s.head}" (printed pp. ${s.pr})${s.segEn ? `, ${s.segEn}` : ''} numbers the rows Nr. ${s.nr} → ${s.n}. Tool derivation (count of the printed row numbers); replaces the former input ${sym}. Denominator of the shares ${s.ws}-D6 … -D9.`),
         vq: `Zeilennummern der gedruckten Tabelle „${s.head}“ (PDF S. ${s.pdf} / gedr. S. ${s.pr}): Nr. ${s.nr.replace('–', ' … ')}; letzte Zeile „${s.last}“ — Zählung = Werkzeug-Ableitung` });
     } else {
-      set.verification_quote = q(VQ_GUARD);
+      set.verification_quote = q(keepVq(f, VQ_GUARD));
       set.source_anchor = q(`${A21} — visible_when`);
     }
     set.description = q(join(`${de} ${gs.de}`, `${en} ${gs.en}`));
@@ -104,7 +108,7 @@ for (const sym of SUMMARY) {
   const gde = `Nur sichtbar, sobald mindestens ein Phasenziel der Projektphasen § 6.2 bis § 6.7 (M8203-11, -13, -15, -16, -17, -18) mit „Erreicht“, „Teilweise erreicht“ oder „Nicht erreicht“ bewertet ist – vorher ist keine Phase abgeschlossen und es gibt keine QE-Bewertung zusammenzufassen. Grundlage – § 2.1 (S. 8) Phasenziele: ${Q21}; die Regel selbst ist Werkzeug-Logik. Solange ein Phasenziel unbeantwortet ist, bleibt die Frage sichtbar.`;
   const gen = `Shown only once at least one phase goal of the project phases § 6.2 to § 6.7 (M8203-11, -13, -15, -16, -17, -18) is rated "Met", "Partially met" or "Not met" – before that no phase is completed and there is no QE assessment to summarise. Basis – § 2.1 (p. 8) phase goals: ${Q21EN}; the rule itself is tool logic. While a phase goal is unanswered, the question stays visible.`;
   fieldRows.push({ ws: 'M8203-23', sym, set: { visible_when: q(ALL_GUARD), description: q(join(`${de} ${gde}`, `${en} ${gen}`)),
-    verification_quote: q(`Werkzeug-Logik / tool logic (visible_when): Zusammenfassung erst, wenn mindestens ein Phasenziel der Projektphasen bewertet ist. Grundlage § 2.1 (S. 8) Phasenziele: ${Q21}`), source_anchor: q(`${A21} — visible_when`) }, extraWhere: '', kind: 'guard' });
+    verification_quote: q(keepVq(f, `Werkzeug-Logik / tool logic (visible_when): Zusammenfassung erst, wenn mindestens ein Phasenziel der Projektphasen bewertet ist. Grundlage § 2.1 (S. 8) Phasenziele: ${Q21}`)), source_anchor: q(`${A21} — visible_when`) }, extraWhere: '', kind: 'guard' });
 }
 // goal hints (F4 on pz_62_1; block sentence on the first goal of every phase) + consumers for the split sheets
 const blockSentence = (extra, extraEn) => ({
@@ -224,8 +228,9 @@ ${SHEETS.map((s) => `--   ${s.ws} ${s.p}_items_total = ${s.n}: „${s.head}“ P
 -- ${NF} fields and ${NG} gates match, the ${NE} totals carry widget NULL (at sig0) / 'derived' (at sig1), and no equation other than the
 -- block's own <ws>-D10 constant outputs a qe*_items_total (fix round 1, review db7b982 finding 3); every UPDATE matches the pre-state signature (fields md5(description md5 | visible_when | consumer_worksheets |
 -- enum md5 | label_de | label_en | is_required | data_type | verification_quote md5 | source_anchor), active only; items_total also widget IS
--- NULL; gates md5(condition | severity | description md5 | clause_reference)). Signatures from the harness seed (the three 2026-10-05 dumps +
--- every M820 block applied on prod up to 20261008100000); read-back R0 on prod must show fields_pre ${NF} / gates_pre ${NG} / new_equations 0.
+-- NULL; gates md5(condition | severity | description md5 | clause_reference)). Signatures = prod 2026-10-17 (the three 2026-10-05 dumps +
+-- every M820 block applied on prod up to 20261008100000 + prod's verification_quote; regenerated from a read-only prod export — prod quotes
+-- are kept, each guard quote is appended after " | "); read-back R0 on prod must show fields_pre ${NF} / gates_pre ${NG} / new_equations 0.
 -- Equations are INSERTed only when the sheet has no equation with that number or that output. Idempotent. In-transaction archives
 -- ${T.ga} / ${T.fa} + ledger ${T.led} (md5 of every row as written; inserted equations as 'equations_new').
 -- No row is deleted, activated or deactivated; no severity changes; no new gate; saved project values are not touched.
@@ -378,7 +383,7 @@ for (const sym of SUMMARY) drv.push(`('${sym}', 'pz_62_1_status')`);
 const rbk = `-- Read-back for scripts/migrations/${ID}_m820_3_c4_qe_guards.sql (DWA-M 820-3 case C4 F3 / F4). READ ONLY.
 -- Run BEFORE the apply (step 0: R0 … R4) and AFTER (R0 … R5). Expected values: vault 01-Projects/ekowai-wizard/m820-wizard-test/
 -- 79_APPLY-ORDER-m820-3-c4-qe-guards.md and the harness tests/harness/m820-3-c4-qe-guards.integration.test.ts. Signatures sig0 come
--- from the harness seed (2026-10-05 dumps + every M820 block applied on prod up to 20261008100000), sig1 from the harness after the apply.
+-- = prod 2026-10-17 (regenerated; was the harness seed: 2026-10-05 dumps + every M820 block up to 20261008100000), sig1 from the harness after the apply.
 -- Field signature = md5 of description md5 | visible_when | consumer_worksheets | enum md5 | label_de | label_en | is_required | data_type |
 -- verification_quote md5 | source_anchor. Gate signature = md5 of condition | severity | description md5 | clause_reference.
 -- No comment line ends with a semicolon.

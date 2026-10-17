@@ -24,6 +24,7 @@ import { readFileSync, appendFileSync, writeFileSync, existsSync } from 'node:fs
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { startHarness, type Harness } from './embedded-pg';
+import { applyM820ProdOverlay, lostProdQuotes } from './m820-prod-overlay';
 import type { saveWorksheet as SaveWorksheet } from '@/lib/actions/worksheet';
 import type { checkApprovalGate as CheckApprovalGate } from '@/lib/actions/approval-gate';
 import type { loadInheritedFields as LoadInheritedFields } from '@/lib/db/queries/worksheet';
@@ -41,11 +42,11 @@ const ROLLBACK = resolve(ROOT, 'scripts/rollback-20261015160000-m820-3-c4-qe-gua
 const READBACK = resolve(ROOT, 'scripts/verification/apply/readback-20261015160000-m820-3-c4-qe-guards.sql');
 const O23 = resolve(ROOT, 'scripts/migrations/20261014100000_m820_followup_o2_o3.sql');
 const O23_ROLLBACK = resolve(ROOT, 'scripts/rollback-20261014100000-m820-followup-o2-o3.sql');
-// staged sibling blocks on other standards (other worktrees; test h2 runs only when they exist on this machine)
+// staged sibling blocks on other standards (in this tree since e8db65a; test h2 runs only when they exist)
 const SIB = {
-  c4f: ['C:/Users/Ekowai/_wt-m820-guards/scripts/migrations/20261015130000_m820_1_c4_procurement_guards.sql', 'C:/Users/Ekowai/_wt-m820-guards/scripts/rollback-20261015130000-m820-1-c4-procurement-guards.sql'],
-  c4d: ['C:/Users/Ekowai/_wt-m820-guards/scripts/migrations/20261015150000_m820_1_c4_phase_drivers.sql', 'C:/Users/Ekowai/_wt-m820-guards/scripts/rollback-20261015150000-m820-1-c4-phase-drivers.sql'],
-  c4p: ['C:/Users/Ekowai/_wt-m820-2g/scripts/migrations/20261015140000_m820_2_c4_phase_guards.sql', 'C:/Users/Ekowai/_wt-m820-2g/scripts/rollback-20261015140000-m820-2-c4-phase-guards.sql'],
+  c4f: [resolve(ROOT, 'scripts/migrations/20261015130000_m820_1_c4_procurement_guards.sql'), resolve(ROOT, 'scripts/rollback-20261015130000-m820-1-c4-procurement-guards.sql')],
+  c4d: [resolve(ROOT, 'scripts/migrations/20261015150000_m820_1_c4_phase_drivers.sql'), resolve(ROOT, 'scripts/rollback-20261015150000-m820-1-c4-phase-drivers.sql')],
+  c4p: [resolve(ROOT, 'scripts/migrations/20261015140000_m820_2_c4_phase_guards.sql'), resolve(ROOT, 'scripts/rollback-20261015140000-m820-2-c4-phase-guards.sql')],
 };
 const SIB_PRESENT = Object.values(SIB).every(([a, b]) => existsSync(a) && existsSync(b));
 const DISCOVER = !!process.env.C4Q_DISCOVER;
@@ -413,6 +414,7 @@ beforeAll(async () => {
     }
   }
   for (const blk of PRIOR_BLOCKS) await runFile(blk); // = prod after 20261008100000
+  expect(await applyM820ProdOverlay(sql)).toEqual({ fields: 729, matched: 729 }); // + prod verification_quote (2026-10-17): seed = prod
   ({ saveWorksheet } = await import('@/lib/actions/worksheet'));
   ({ checkApprovalGate } = await import('@/lib/actions/approval-gate'));
   ({ loadInheritedFields } = await import('@/lib/db/queries/worksheet'));
@@ -537,14 +539,16 @@ describe('DWA-M 820-3 case C4 F3 / F4 QE assessment guards — staged block on e
     // exactly one '[EN] ' block, after a newline, in every touched text (fields, gates, new equations)
     expect(texts.filter((x) => x.description.split('\n[EN] ').length !== 2).map((x) => x.k)).toEqual([]);
     // every guarded field (67) carries the § 2.1 quote in description + verification_quote and a PDF page in source_anchor; tool logic is labelled
-    const guarded = texts.filter((x) => x.k.startsWith('f ') && x.vq !== null);
+    // (2026-10-17: prod already holds printed quotes on most rows — the guard quote is appended after them, every prod quote survives)
+    expect(lostProdQuotes(STD, texts)).toEqual([]);
+    const guarded = texts.filter((x) => x.k.startsWith('f ') && /Werkzeug-Logik \/ tool logic \(visible_when\)/.test(x.vq ?? ''));
     expect(guarded).toHaveLength(67);
     expect(guarded.filter((x) => !x.description.includes(Q21) || !x.vq!.includes(Q21) || !/Werkzeug-Logik \/ tool logic/.test(x.vq!) || !/PDF S\. \d+/.test(x.sa ?? '')).map((x) => x.k)).toEqual([]);
     expect(guarded.filter((x) => !/Werkzeug-Logik/.test(x.description.split('\n[EN] ')[0]) || !/tool logic/.test(x.description.split('\n[EN] ')[1])).map((x) => x.k)).toEqual([]);
     // the derived totals and their equations name the printed table and its last row, labelled as a tool derivation
     const totals = texts.filter((x) => /_items_total$/.test(x.k) && x.k.startsWith('f M8203-1'));
     expect(totals).toHaveLength(8);
-    expect(totals.filter((x) => !/^Werkzeug-Ableitung \/ tool derivation/.test(x.vq!) || !/letzte Zeile „/.test(x.vq!)).map((x) => x.k)).toEqual([]);
+    expect(totals.filter((x) => !/(^| \| )Werkzeug-Ableitung \/ tool derivation/.test(x.vq!) || !/letzte Zeile „/.test(x.vq!)).map((x) => x.k)).toEqual([]);
     // F4: the pz_62_1_status hint no longer pushes „Teilweise“ at day 0 and quotes § 3
     const pz621 = texts.find((x) => x.k === 'f M8203-11 pz_62_1_status')!.description;
     expect(pz621).toContain('solange die Bedarfsplanung (LPH 0) noch läuft → hier „Phase noch nicht erreicht“');

@@ -1,31 +1,31 @@
 -- Read-back for scripts/migrations/20261015130000_m820_1_c4_procurement_guards.sql (DWA-M 820-1 case C4 finding F1). READ ONLY.
 -- Run BEFORE the apply (step 0: R0 … R3) and AFTER (R0 … R4). Expected values: vault 01-Projects/ekowai-wizard/m820-wizard-test/
 -- 76_APPLY-ORDER-m820-1-c4-procurement-guards.md and the harness tests/harness/m820-1-c4-procurement-guards.integration.test.ts.
--- Signatures sig0 come from the harness seed (2026-10-05 dumps + every M820 block applied on prod up to 20261008100000), sig1 from the
+-- Signatures sig0 = prod 2026-10-17 (regenerated; was the harness seed: 2026-10-05 dumps + every M820 block applied on prod up to 20261008100000), sig1 from the
 -- harness after the apply. Field signature = md5 of description md5 | visible_when | consumer_worksheets | enum md5 | label_de |
 -- label_en | is_required | data_type | verification_quote md5 | source_anchor. Section signature = md5 of visible_when | title_de | code.
 -- Unaffected by 20261014100000 (DWA-M 820-2 only) — the same values before and after that block. No comment line ends with a semicolon.
 
 -- R0 · touched rows at pre / post state (before: fields_pre 18, sections_pre 7, *_post 0 · after: 0 / 18 and 0 / 7)
 WITH fv(ws, sym, guard, sig0, sig1) AS (VALUES
-    ('M820-12','exclusion_123_gwb_checked','L','8a4f55d87860495a149a20773b16b0ab','fb69e79a7cebc6bd0a1b307782fa2816'),
-    ('M820-12','exclusion_124_gwb_selected','L','a29d9ca9f4c376b38e5a84520c4ee95e','5e72023f78d978fe211fee033977c653'),
-    ('M820-23','information_letters_sent','L','4401df0bcdfab77a66ea3498c4ed21f8','0e57871af7ede6c6aa88c7428304b93c'),
-    ('M820-23','electronic_transmission','L','48c7957257c29512a09100541ffc5e51','f3024256127861548ef0cf3e26a78b5e'),
-    ('M820-23','contract_invalidity_135_gwb_risk','L','e1b8a9868d8be05eb67179ca2a12486b','386be4cc675925ecb8c9d414611fecfc'),
-    ('M820-24','vergabevermerk_complete','L','3887ea6e9962db66ac99aa5f9cf95c65','25c97e9d2e0d242f0d039fff05e8a559'),
-    ('M820-24','alle_unterlagen_archiviert','L','b633ff2c51bf8b63868fcbae63ca2ae9','72a7504bf0b669f5aca60ea32daae367'),
+    ('M820-12','exclusion_123_gwb_checked','L','9cd22ec43c9aaaa68db20aeaefa608ec','e1daa13324885b4bda5d67c737741233'),
+    ('M820-12','exclusion_124_gwb_selected','L','5dcf2c69c3b954215c12ee2c019f4b13','dde6437864d16383aa95e6a6233a0595'),
+    ('M820-23','information_letters_sent','L','48b72f0e88f750c98d93f9dee0d2989a','24032b094b28b71b853ea718c4afc23a'),
+    ('M820-23','electronic_transmission','L','ee591659f884581f6db2a69e3ab6231b','44aaad627cc6e1e4d81c525cdbb6b1db'),
+    ('M820-23','contract_invalidity_135_gwb_risk','L','908bde35381b3a8a833cff6f7291d4c6','e7031e81813b25b8bce7064777bf7d1a'),
+    ('M820-24','vergabevermerk_complete','L','d97aabb5c7066f7253b323c7eb936a30','2a478c040146e421a99accd1de7144d5'),
+    ('M820-24','alle_unterlagen_archiviert','L','c8b338e7dbc29cca3b9b36629c03e809','07a0209742b61b51bad418239e0aec02'),
     ('M820-24','vergabeakte_unterzeichnet','L','589360fbc1c296bf9105fde06e737a0a','47c73b2ba5625c71caf1f9dc5641a34b'),
-    ('M820-24','archive_location','L','dcd91a06a09499b03e531ab750324711','ec7011a103908d2591aaa72e88ce1989'),
+    ('M820-24','archive_location','L','dcef43c671446a17ab75b824f1af965e','b2ad0b34b5e2720357d1a273a172a343'),
     ('M820-24','final_signoff_date','L','f3d77e9514b525085c126daed37f1dc2','2a4f72beb749c1385df6243b8f210c6c'),
-    ('M820-11','mindesteignung_definiert','D','19f4269309b535eb0e27719af561c801','0c6b04ce25c4aaf1c24c879a54a9e16c'),
+    ('M820-11','mindesteignung_definiert','D','457f0dc5f6fea9918bec5de9d053efea','54e06d6b9366b352fb51a1e70fe73a06'),
     ('M820-11','qualitaets_check_date','D','f07ec5e837e6da9a1f56775d36e8adfb','aa04fdcf2355134797d24a576402cd7f'),
-    ('M820-13','liability_insurance_personenschaden','D','b7b2ff375e3c23648a5c8b21c0920fe9','9ccc0e974de5665324687e3878f501b7'),
-    ('M820-13','liability_insurance_sonstige','D','8905cd473eaf58f475a14f027662be41','4a266986ee08af336f678170ef24b740'),
-    ('M820-15','documentation_structure','D','88a3f1019639ad8ccafe35440b6a0a07','43fc64ae3a581619f344899d490ee562'),
+    ('M820-13','liability_insurance_personenschaden','D','9244f366f05e39091f606ee0bf0a1892','9e137ce15d7580c2e63b1c82b5791d7a'),
+    ('M820-13','liability_insurance_sonstige','D','0e02b2608059f7dcd3bd338bd6a26acb','21a861b4012d591a69e02dbb7a3bee0b'),
+    ('M820-15','documentation_structure','D','3d987952e30cb85d3b4dab0ef63f016e','9f778d8051700def94bfadee6c0d1b46'),
     ('M820-17','date_procurement_start','D','b89c23a93d3ecb03b95cf2461fa098fc','cf43ef41e45f3759e27611647804b96c'),
     ('M820-01','vergaberecht_freiwillig_angewendet','hint','6fccd64e264121e8f2fb040943c5e1c3','cf2c8113ce8ea58e51205103359c76a7'),
-    ('M820-10','procurement_procedure','hint','a0c31e8244a5013dd1c57e01a5b8170e','c480dee5bfa82f8b0e663015287308a2')),
+    ('M820-10','procurement_procedure','hint','cac88579d920c3b0c3214104010a9766','ec1f9b36bbaf2cb9cd2ad0212b7f72d9')),
 sv(ws, code, sig0, sig1) AS (VALUES
     ('M820-09','A','43dd40326d5839cf5946de96549bf4fb','294668f1db4721124e02576c2dfd36bc'),
     ('M820-09','B','6c1970325ca947af0a5574df5f469079','d4995d595d1ca66fb3e95105ec948b8c'),
