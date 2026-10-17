@@ -25,6 +25,14 @@ const handler = createMcpHandler(
     registerResultTools(server);
   },
   {
+    // Refuse `subscriptions/listen` instead of opening a notification stream.
+    // A 2026-protocol client (the Claude connector) opens one after every
+    // initialize; the SDK keeps it open until the client hangs up, which on a
+    // Vercel function means the 300 s timeout — observed every ~4 min, around
+    // the clock, from 2026-10-14 to 2026-10-17 (method confirmed in the log on
+    // 2026-10-17). This server never pushes notifications, so the client loses
+    // nothing; the SDK answers the request at once with a JSON-RPC error.
+    maxSubscriptions: 0,
     // One compact line per JSON-RPC message, so the Vercel request log shows
     // WHICH method a hung or slow call was. Incident 2026-10-14: POST /api/mcp
     // calls ran into the 300 s function timeout every few minutes and the log
