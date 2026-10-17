@@ -17,12 +17,38 @@ import { registerResultTools } from '@/lib/mcp/tools/results';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const handler = createMcpHandler((server) => {
-  registerProjectTools(server);
-  registerWorksheetTools(server);
-  registerFieldTools(server);
-  registerResultTools(server);
-});
+const handler = createMcpHandler(
+  (server) => {
+    registerProjectTools(server);
+    registerWorksheetTools(server);
+    registerFieldTools(server);
+    registerResultTools(server);
+  },
+  {
+    // One compact line per JSON-RPC message, so the Vercel request log shows
+    // WHICH method a hung or slow call was. Incident 2026-10-14: POST /api/mcp
+    // calls ran into the 300 s function timeout every few minutes and the log
+    // could not say what they were. Parameters are deliberately not logged —
+    // they carry project data.
+    onEvent: (event) => {
+      if (event.type === 'REQUEST_RECEIVED') {
+        console.log(JSON.stringify({ mcp: 'received', method: event.method }));
+      } else if (event.type === 'REQUEST_COMPLETED') {
+        console.log(
+          JSON.stringify({
+            mcp: 'completed',
+            method: event.method,
+            durationMs: event.duration,
+            status: event.status,
+          }),
+        );
+      } else if (event.type === 'ERROR') {
+        const message = event.error instanceof Error ? event.error.message : String(event.error);
+        console.error(JSON.stringify({ mcp: 'error', message }));
+      }
+    },
+  },
+);
 
 const authenticated = withMcpAuth(handler, verifyMcpToken, {
   required: true,
