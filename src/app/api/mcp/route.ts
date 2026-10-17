@@ -51,8 +51,11 @@ const handler = createMcpHandler(
           }),
         );
       } else if (event.type === 'ERROR') {
+        // warn, not error: the SDK reports the deliberate subscriptions/listen
+        // refusal through this channel too, and that must not read as a failure
+        // in the Vercel error log.
         const message = event.error instanceof Error ? event.error.message : String(event.error);
-        console.error(JSON.stringify({ mcp: 'error', message }));
+        console.warn(JSON.stringify({ mcp: 'error', message }));
       }
     },
   },
