@@ -27,6 +27,15 @@ describe('isPhaseDriver', () => {
     expect(isPhaseDriver({ symbol: 'bauleistungen_vergeben', dataType: 'boolean' })).toBe(false);
     expect(isPhaseDriver({ symbol: 'pz_62_1_status', dataType: 'enum' })).toBe(false);
   });
+  it('block 20261015140000: phase_<name>_erteilt / phase_<name>_abgeschlossen are drivers too; other suffixes / no prefix are not', () => {
+    expect(isPhaseDriver({ symbol: 'phase_auftrag_erteilt', dataType: 'boolean' })).toBe(true);
+    expect(isPhaseDriver({ symbol: 'phase_planung_abgeschlossen', dataType: 'boolean' })).toBe(true);
+    expect(isPhaseDriver({ symbol: 'phase_vergabe_abgeschlossen', dataType: 'boolean' })).toBe(true);
+    expect(isPhaseDriver({ symbol: 'phase_auftrag_erteilt', dataType: 'date' })).toBe(false);
+    expect(isPhaseDriver({ symbol: 'inbetriebnahme_abgeschlossen', dataType: 'boolean' })).toBe(false);
+    expect(isPhaseDriver({ symbol: 'phase_vergabe_abgeschlossen_datum', dataType: 'boolean' })).toBe(false);
+    expect(isPhaseDriver({ symbol: 'phase_erteilt', dataType: 'boolean' })).toBe(false);
+  });
 });
 
 describe('collectPhaseDeferrals', () => {
@@ -67,8 +76,8 @@ describe('collectPhaseDeferrals', () => {
 describe('phaseDeferralLines (DE / EN document text)', () => {
   it('heading, driver line and duty list in both languages', () => {
     const t = phaseDeferralLines(collectPhaseDeferrals([D('phase_ausfuehrung_erreicht', false)], [G('REQ-43', ['phase_ausfuehrung_erreicht'])]));
-    expect(t.headingDe).toBe('Noch nicht erreichte Phasen — nicht geprüft');
-    expect(t.headingEn).toBe('Phases not reached yet — not checked');
+    expect(t.headingDe).toBe('Phasen noch nicht erreicht bzw. noch nicht abgeschlossen — nicht geprüft');
+    expect(t.headingEn).toBe('Phases not yet reached or not yet completed — not checked');
     expect(t.items[0].de).toBe('820-2-20 · Phase phase_ausfuehrung_erreicht = Nein — nicht geprüft: 820-2-20 REQ-43 (blockierend) Titel REQ-43');
     expect(t.items[0].en).toBe('820-2-20 · Phase phase_ausfuehrung_erreicht (EN) = No — not checked: 820-2-20 REQ-43 (blocking) Titel REQ-43');
   });

@@ -90,13 +90,42 @@ async function gateBlocks(ws: string, code: string): Promise<boolean> {
   return result.failingBlockConditions.some((c) => c.code === code);
 }
 
+/** The gate's pending entry (block gate waiting for inputs) for `code` on `ws`, with the approval verdict. */
+async function gatePending(ws: string, code: string): Promise<{ ok: boolean; missing: string[] | null }> {
+  const result = await checkApprovalGate(fixture.instances[ws]);
+  const p = result.pendingBlockConditions.find((c) => c.code === code);
+  return { ok: result.ok, missing: p ? p.missingInputs.map((m) => m.symbol) : null };
+}
+
 const driven = new Set<string>();
-/** Prove a gate ENFORCING both ways: passing saves → NOT blocked; violating
- *  saves → blocked (definite fail). Records the code as driven for the 29/29 audit. */
-async function proveBothWays(gateWs: string, code: string, passSaves: Save[], violateSaves: Save[]): Promise<void> {
+/** Prove a gate ENFORCING both ways: passing saves → NOT blocked; violating saves → blocked
+ *  (definite fail, or pending when `pendingOn` is set). Records the code as driven for the 29/29 audit. */
+async function proveBothWays(
+  gateWs: string,
+  code: string,
+  passSaves: Save[],
+  violateSaves: Save[],
+  /**
+   * Set when the violating save CLEARS an input the gate's existence check reads: since engine rule A1 (b170bef, 2026-09-30)
+   * `x IS NOT NULL` on a never-entered / cleared symbol is pending, not a definite fail, and by the owner ruling 2026-10-05
+   * (approval-gate.ts ApprovalGateResult.pendingBlockConditions) a pending block gate BLOCKS the approval like a failing one.
+   * The violation is then proven as: NOT in the failing list, in the pending list naming exactly this symbol, and the
+   * approval refused (ok false). Same rebaseline as the m820 harness (8fc7ab6 / d67ea7b); A138 rebaselined 2026-10-15.
+   */
+  pendingOn?: string,
+): Promise<void> {
   await applySaves(passSaves);
   expect(await gateBlocks(gateWs, code), `${code}@${gateWs} should NOT block in passing state`).toBe(false);
+  if (pendingOn) expect((await gatePending(gateWs, code)).missing, `${code}@${gateWs} should NOT be pending in passing state`).toBeNull();
   await applySaves(violateSaves);
+  if (pendingOn) {
+    expect(await gateBlocks(gateWs, code), `${code}@${gateWs} cleared input is pending (A1), not a definite fail`).toBe(false);
+    const p = await gatePending(gateWs, code);
+    expect(p.missing, `${code}@${gateWs} SHOULD block (pending) in violating state`).toContain(pendingOn);
+    expect(p.ok, `${code}@${gateWs} approval SHOULD be refused in violating state`).toBe(false);
+    driven.add(code);
+    return;
+  }
   expect(await gateBlocks(gateWs, code), `${code}@${gateWs} SHOULD block in violating state`).toBe(true);
   driven.add(code);
 }
@@ -176,7 +205,8 @@ describe('DWA-A-138-1 — Phase 1/2 scope & data gates', () => {
   it('REQ-03  k_f IS NOT NULL AND permeability_test_method IS NOT NULL (cross-worksheet)', () =>
     proveBothWays('A138-04', 'A138-REQ-03',
       [{ ws: 'A138-05', values: { k_f: 1e-5 } }, { ws: 'A138-03', values: { permeability_test_method: 'feldversuch' } }],
-      [{ ws: 'A138-03', values: { permeability_test_method: null } }]));
+      [{ ws: 'A138-03', values: { permeability_test_method: null } }],
+      'permeability_test_method')); // cleared → pending (A1, b170bef) → blocks the approval (owner ruling 2026-10-05)
   it('REQ-04  gw_clearance >= 1.0', () =>
     proveBothWays('A138-02', 'A138-REQ-04',
       [{ ws: 'A138-02', values: { gw_clearance: 1.5 } }],
@@ -184,15 +214,18 @@ describe('DWA-A-138-1 — Phase 1/2 scope & data gates', () => {
   it('REQ-05  r_D_n_table IS NOT NULL AND kostra_grid_cell IS NOT NULL (json carrier + cross-worksheet)', () =>
     proveBothWays('A138-04', 'A138-REQ-05',
       [{ ws: 'A138-04', values: { r_D_n_table: jTab } }, { ws: 'A138-01', values: { kostra_grid_cell: '7130-21' } }],
-      [{ ws: 'A138-04', values: { r_D_n_table: null } }]));
+      [{ ws: 'A138-04', values: { r_D_n_table: null } }],
+      'r_D_n_table')); // cleared → pending (A1, b170bef) → blocks the approval (owner ruling 2026-10-05)
   it('REQ-06  surface_inventory IS NOT NULL (json carrier)', () =>
     proveBothWays('A138-07', 'A138-REQ-06',
       [{ ws: 'A138-07', values: { surface_inventory: jSurf } }],
-      [{ ws: 'A138-07', values: { surface_inventory: null } }]));
+      [{ ws: 'A138-07', values: { surface_inventory: null } }],
+      'surface_inventory')); // cleared → pending (A1, b170bef) → blocks the approval (owner ruling 2026-10-05)
   it('REQ-07  belastungskategorie IS NOT NULL', () =>
     proveBothWays('A138-06', 'A138-REQ-07',
       [{ ws: 'A138-06', values: { belastungskategorie: 'BK_I' } }],
-      [{ ws: 'A138-06', values: { belastungskategorie: null } }]));
+      [{ ws: 'A138-06', values: { belastungskategorie: null } }],
+      'belastungskategorie')); // cleared → pending (A1, b170bef) → blocks the approval (owner ruling 2026-10-05)
   it('REQ-08  n IN {0.1, 0.2, 0.33, 0.5} (numeric membership)', () =>
     proveBothWays('A138-08', 'A138-REQ-08',
       [{ ws: 'A138-08', values: { n: 0.2 } }],
@@ -218,7 +251,8 @@ describe('DWA-A-138-1 — Phase 4 facility-selection & summary gates', () => {
   it('REQ-17  facility_type_selected IS NOT NULL', () =>
     proveBothWays('A138-15', 'A138-REQ-17',
       [{ ws: 'A138-15', values: { facility_type_selected: 'flaeche' } }],
-      [{ ws: 'A138-15', values: { facility_type_selected: null } }]));
+      [{ ws: 'A138-15', values: { facility_type_selected: null } }],
+      'facility_type_selected')); // cleared → pending (A1, b170bef) → blocks the approval (owner ruling 2026-10-05)
   it('REQ-18  attest_a138_15_a138_req_18 == True', () =>
     proveBothWays('A138-15', 'A138-REQ-18',
       [{ ws: 'A138-15', values: { attest_a138_15_a138_req_18: true } }],
@@ -241,7 +275,8 @@ describe('DWA-A-138-1 — Überflutungsnachweis (A138-26) gates', () => {
   it('REQ-22  IF flood_check_trigger THEN V_Rueck IS NOT NULL  (#22-guard, cross-worksheet)', async () => {
     await proveBothWays('A138-26', 'A138-REQ-22',
       [{ ws: 'A138-07', values: { flood_check_trigger: true } }, { ws: 'A138-26', values: { V_Rueck: 1500 } }],
-      [{ ws: 'A138-26', values: { V_Rueck: null } }]);
+      [{ ws: 'A138-26', values: { V_Rueck: null } }],
+      'V_Rueck'); // guard flood_check_trigger definite TRUE, body cleared → pending (A1, b170bef) → blocks (owner ruling 2026-10-05)
   });
   it('REQ-22  vacuously passes when the guard is false (flood_check_trigger = false)', async () => {
     await applySaves([{ ws: 'A138-07', values: { flood_check_trigger: false } }, { ws: 'A138-26', values: { V_Rueck: null } }]);

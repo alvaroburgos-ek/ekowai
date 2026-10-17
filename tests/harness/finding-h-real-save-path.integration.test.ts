@@ -111,7 +111,10 @@ describe('Finding H — V_M through the REAL saveWorksheet (embedded Postgres)',
         AND field_id IN (${fixture.f_dimensioned}, ${fixture.f_volume}, ${fixture.f_complete})`;
     const by = (id: string) => summary.find((r) => r.field_id === id);
 
-    expect(by(fixture.f_dimensioned)?.value_text).toBe('mulde');
+    // Facility TYPE in the A138-23 field's own vocabulary since 0cd9750 (2026-09-30, FACILITY_TYPE_TO_A138_23_ENUM:
+    // engine token 'mulde' → 'versickerungsmulde'); text column because the harness field is text. The same
+    // assertion was rebaselined in worksheet-phase4-summary.integration.test.ts by 0cd9750; this file was missed.
+    expect(by(fixture.f_dimensioned)?.value_text).toBe('versickerungsmulde');
     const vol = by(fixture.f_volume)?.value_number;
     expect(vol == null ? null : Number(vol)).toBeCloseTo(EXPECTED_V_M, 6);
     expect(by(fixture.f_complete)?.value_boolean).toBe(true);

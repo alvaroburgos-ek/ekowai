@@ -8,6 +8,7 @@ import {
   History,
   ClipboardList,
   Wind,
+  Layers,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -20,6 +21,7 @@ export function buildProjectTabs(
   base: string,
   t: (k: string) => string,
   isVsme: boolean,
+  opts: { scenarios?: boolean } = {},
 ): Tab[] {
   const base_tabs: Tab[] = [
     { href: base, label: t('projects.tabs.overview'), icon: FolderKanban, matchExact: true },
@@ -32,10 +34,11 @@ export function buildProjectTabs(
     );
   }
 
-  base_tabs.push(
-    { href: `${base}/documents`, label: t('projects.tabs.documents'), icon: FileText },
-    { href: `${base}/reports`, label: t('projects.tabs.reports'), icon: History },
-  );
+  base_tabs.push({ href: `${base}/documents`, label: t('projects.tabs.documents'), icon: FileText });
+  if (opts.scenarios) {
+    base_tabs.push({ href: `${base}/scenarios`, label: t('projects.tabs.scenarios'), icon: Layers });
+  }
+  base_tabs.push({ href: `${base}/reports`, label: t('projects.tabs.reports'), icon: History });
 
   return base_tabs;
 }
@@ -44,15 +47,17 @@ export function ProjectTabs({
   locale,
   projectId,
   isVsme = false,
+  showScenarios = false,
 }: {
   locale: 'de' | 'en';
   projectId: string;
   isVsme?: boolean;
+  showScenarios?: boolean;
 }) {
   const pathname = usePathname();
   const t = useTranslations();
   const base = `/${locale}/projects/${projectId}`;
-  const tabs = buildProjectTabs(base, t, isVsme);
+  const tabs = buildProjectTabs(base, t, isVsme, { scenarios: showScenarios });
 
   return (
     <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">

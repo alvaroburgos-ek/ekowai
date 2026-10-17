@@ -117,3 +117,27 @@ describe('assemblePhase4Summary — Finding B: booleans persist false, not null'
     expect(findWrite(writes, 'facility_specific_dimensioning_complete')!.value).toBe(true);
   });
 });
+
+describe('assemblePhase4Summary — F-A8: derived meetsQsac uses the tolerant q_S,AC ≥ 2 boundary', () => {
+  const base = (qSac: number): Phase4SummaryGathered => ({
+    facilityType: 'mulde',
+    facilityWorksheetCode: 'A138-17',
+    volumeSymbol: 'V_M',
+    footprintSymbol: 'A_S_m',
+    volumeValue: 30,
+    footprintValue: 105.2421,
+    qSac,
+    meetsQsacFlag: null,
+    tEHours: null,
+  });
+  it('Gl. 9 at the exact limit (1e-6·105.2421·1000 / 526.2105 · 1e4 = 1.9999999999999998) meets q_S,AC ≥ 2', () => {
+    const q = (1e-6 * 105.2421 * 1000 + 0) / 526.2105 * 1e4;
+    expect(q).toBe(1.9999999999999998);
+    const { writes } = assemblePhase4Summary(base(q), NOW);
+    expect(findWrite(writes, 'facility_meets_qsac')!.value).toBe(true);
+  });
+  it('1.999 still does not meet it', () => {
+    const { writes } = assemblePhase4Summary(base(1.999), NOW);
+    expect(findWrite(writes, 'facility_meets_qsac')!.value).toBe(false);
+  });
+});

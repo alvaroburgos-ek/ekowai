@@ -60,14 +60,14 @@ function reportData(withDeferrals: boolean) {
 describe('PhaseDeferralsSection in the documents', () => {
   it('conformity declaration lists the phase and the unchecked duty (DE + EN)', async () => {
     const t = await text(<ConformityDocument data={conformity(DEFERRALS)} />);
-    expect(t).toContain('Phases not reached yet');
+    expect(t).toContain('Phases not yet reached or not yet completed');
     expect(t).toContain('820-2-23 REQ-48');
     expect(t).toContain('not checked');
   });
 
   it('conformity declaration without open phases: no section', async () => {
-    expect(await text(<ConformityDocument data={conformity()} />)).not.toContain('Phases not reached yet');
-    expect(await text(<ConformityDocument data={conformity([])} />)).not.toContain('Phases not reached yet');
+    expect(await text(<ConformityDocument data={conformity()} />)).not.toContain('Phases not yet reached or not yet completed');
+    expect(await text(<ConformityDocument data={conformity([])} />)).not.toContain('Phases not yet reached or not yet completed');
   });
 
   it('checklist lists it too', async () => {
@@ -77,6 +77,6 @@ describe('PhaseDeferralsSection in the documents', () => {
   it('standard report and Pruef-Memo list it; absent without deferrals', async () => {
     expect(await text(<StandardReportDocument data={reportData(true)} />)).toContain('820-2-23 REQ-48');
     expect(await text(<PruefmemoDocument data={reportData(true)} />)).toContain('820-2-23 REQ-48');
-    expect(await text(<StandardReportDocument data={reportData(false)} />)).not.toContain('Phases not reached yet');
+    expect(await text(<StandardReportDocument data={reportData(false)} />)).not.toContain('Phases not yet reached or not yet completed');
   });
 });

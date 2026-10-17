@@ -83,7 +83,7 @@ describe.sequential('DWA-A 138-1 Mulde pilot script — real save path', () => {
     const { by } = await readSummary();
 
     // Value-column per data type (standing rule): text→value_text, number→value_number, boolean→value_boolean, enum→value_enum.
-    expect(by(fixture.f_dimensioned)?.value_text).toBe('mulde');
+    expect(by(fixture.f_dimensioned)?.value_text).toBe('versickerungsmulde'); // A138-23 vocabulary since 0cd9750 (2026-09-30, FACILITY_TYPE_TO_A138_23_ENUM); text column (harness field is text)
 
     const footprint = by(fixture.f_footprint)?.value_number;
     expect(footprint == null ? null : Number(footprint)).toBeCloseTo(943.4339, 4);

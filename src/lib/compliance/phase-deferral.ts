@@ -5,7 +5,9 @@
  * Rule (generic, no per-standard list):
  *  - a PHASE DRIVER is a boolean field whose symbol matches `phase_<name>_erreicht` (the encoding convention introduced
  *    with DWA-M 820-2 block 20261008100000: `phase_ausfuehrung_erreicht`, `phase_inbetriebnahme_erreicht`,
- *    `phase_gewaehrleistung_erreicht`). A future encoding that wants this listing names its driver the same way.
+ *    `phase_gewaehrleistung_erreicht`) or, since DWA-M 820-2 block 20261015140000 (case C4, F2), `phase_<name>_erteilt` /
+ *    `phase_<name>_abgeschlossen` (`phase_auftrag_erteilt`, `phase_planung_abgeschlossen`, `phase_vergabe_abgeschlossen` — a
+ *    phase whose end is an award or a completion). A future encoding that wants this listing names its driver the same way.
  *  - a phase is NOT REACHED when its driver is answered `false` on a sheet where it is visible (hidden or unanswered
  *    drivers are not listed: nothing was declared).
  *  - a gate was NOT CHECKED BECAUSE OF the driver when its verdict is a guard-skipped pass and the definitely-false
@@ -17,7 +19,7 @@
  * that the gates accept and the REQ-xx-3 warnings already report, so nothing is listed for it here.
  */
 
-const PHASE_DRIVER_RE = /^phase_[a-z0-9_]+_erreicht$/;
+const PHASE_DRIVER_RE = /^phase_[a-z0-9_]+_(?:erreicht|erteilt|abgeschlossen)$/;
 
 export function isPhaseDriver(f: { symbol: string; dataType: string }): boolean {
   return f.dataType === 'boolean' && PHASE_DRIVER_RE.test(f.symbol);
@@ -116,12 +118,14 @@ export type PhaseDeferralText = {
 /** The DE / EN document text (shared by the conformity declaration, the checklist, the report and the Prüf-Memo). */
 export function phaseDeferralLines(deferrals: readonly PhaseDeferral[]): PhaseDeferralText {
   return {
-    headingDe: 'Noch nicht erreichte Phasen — nicht geprüft',
-    headingEn: 'Phases not reached yet — not checked',
+    // Fix round 1 of block 20261015140000: neutral for both driver kinds (`_erreicht` = phase reached, `_erteilt` /
+    // `_abgeschlossen` = phase completed).
+    headingDe: 'Phasen noch nicht erreicht bzw. noch nicht abgeschlossen — nicht geprüft',
+    headingEn: 'Phases not yet reached or not yet completed — not checked',
     introDe:
-      'Die folgenden Phasen sind als „noch nicht erreicht“ beantwortet. Die daran gebundenen Pflichten wurden nicht geprüft; diese Unterlage deckt nur die als erreicht markierten Phasen ab. Sobald eine Phase erreicht ist, wird sie auf „Ja“ gesetzt und das Arbeitsblatt erneut eingereicht.',
+      'Die folgenden Phasen sind als „noch nicht erreicht“ bzw. „noch nicht abgeschlossen“ beantwortet. Die daran gebundenen Pflichten wurden nicht geprüft; diese Unterlage deckt nur die als erreicht bzw. abgeschlossen markierten Phasen ab. Sobald eine Phase erreicht bzw. abgeschlossen ist, wird sie auf „Ja“ gesetzt und das Arbeitsblatt erneut eingereicht.',
     introEn:
-      'The following phases are answered “not reached yet”. The duties tied to them were not checked; this document covers only the phases marked reached. Once a phase is reached, it is set to “Yes” and the worksheet is submitted again.',
+      'The following phases are answered “not yet reached” or “not yet completed”. The duties tied to them were not checked; this document covers only the phases marked reached or completed. Once a phase is reached or completed, it is set to “Yes” and the worksheet is submitted again.',
     items: deferrals.map((d) => {
       const de: string[] = [];
       const en: string[] = [];

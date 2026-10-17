@@ -504,3 +504,21 @@ describe('verdict-reasons consistency', () => {
     expect(reasons.some((r) => r.includes('unvollständig'))).toBe(true);
   });
 });
+
+describe('F-A8 — TS mirrors of the block gates use the same tolerant comparison as the DSL', () => {
+  it('REQ-33 Gl.38 at the exact boundary (0.011·1e-3 vs 1.1·1e-5, float 1.1e-5 < 1.1000000000000001e-5) is not flagged', () => {
+    expect(0.011 * 1e-3 < 1.1 * 1e-5).toBe(true); // precondition: the untolerant >= would flag it
+    expect(evalReq33Schacht({ shaftType: 'typ_b', A_S_FS: 0.011, k_f_FS: 1e-3, A_S_Schacht: 1.1, k_i: 1e-5 }))
+      .toEqual({ flagged: false, reason: null });
+  });
+  it('REQ-33 clearly below still flags', () => {
+    expect(evalReq33Schacht({ shaftType: 'typ_b', A_S_FS: 0.0109, k_f_FS: 1e-3, A_S_Schacht: 1.1, k_i: 1e-5 })!.flagged).toBe(true);
+  });
+  it('REQ-31 Gl.13 strict > stays false at (tolerant) equality', () => {
+    // k_i = 1e-5 equals r_D(n)·10⁻⁷ = 100·10⁻⁷ by hand, but in IEEE-754 100·1e-7 = 9.999999999999999e-6,
+    // so the untolerant `>` called it feasible. Tolerant: equal ⇒ strict `>` false ⇒ flagged.
+    expect(100 * 1e-7 < 1e-5).toBe(true); // precondition: non-bit-identical near-equal values
+    expect(evalReq31Flaeche(1e-5, 100)!.flagged).toBe(true);
+    expect(evalReq31Flaeche(1.0001e-5, 100)!.flagged).toBe(false);
+  });
+});

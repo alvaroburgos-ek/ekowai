@@ -94,7 +94,11 @@ describe('Gl. 10 — V_Rück flood-check (A138-26)', () => {
     );
   });
 
-  it('smaller-storm safe case → −17.701 m³ (V_VA covers flood)', () => {
+  it('smaller-storm safe case → raw −17.701 m³ floored to 0 (L-6)', () => {
+    // §5.3.4.1: "ergibt die Berechnung nach GL. (10) ein negatives Ergebnis
+    // für V_Rück, so wird V_Rück = 0 gesetzt" (DWA-A 138-1, printed p. 50 /
+    // PDF p. 52). A negative raw result means NO flood volume, never a
+    // negative V_Rück.
     const safeCarrier: FloodSubAreasCarrier = {
       rows: [
         { id: 'r1', label: 'paved 600 m²', kind: 'paved', area_m2: 600, c_S: 1.0 },
@@ -111,11 +115,12 @@ describe('Gl. 10 — V_Rück flood-check (A138-26)', () => {
     const r = evaluateFormula(gl10Req(safeCarrier, safeScalars));
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
-    const expected =
+    // The raw (unfloored) arithmetic is still −17.701 m³ …
+    const rawExpected =
       ((300 * (600 * 1.0 + 50)) / 10000 - (5 + 0)) * 5 * 60 / 1000 - 22.051;
-    expect(r.value).toBeCloseTo(expected, 6);
-    expect(r.value).toBeLessThan(0);
-    expect(r.value).toBeCloseTo(-17.701, 3);
+    expect(rawExpected).toBeCloseTo(-17.701, 3);
+    // … but Gl. (10) floors a negative V_Rück at 0 (no flood volume).
+    expect(r.value).toBe(0);
   });
 
   it('per-row contribution visible in substituted', () => {

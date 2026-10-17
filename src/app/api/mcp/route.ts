@@ -4,6 +4,7 @@ import { registerProjectTools } from '@/lib/mcp/tools/projects';
 import { registerWorksheetTools } from '@/lib/mcp/tools/worksheets';
 import { registerFieldTools } from '@/lib/mcp/tools/fields';
 import { registerResultTools } from '@/lib/mcp/tools/results';
+import { registerScenarioTools } from '@/lib/mcp/tools/scenarios';
 
 /**
  * The MCP endpoint. An engineer adds this URL as a connector in the Claude app;
@@ -23,6 +24,7 @@ const handler = createMcpHandler(
     registerWorksheetTools(server);
     registerFieldTools(server);
     registerResultTools(server);
+    registerScenarioTools(server);
   },
   {
     // Refuse `subscriptions/listen` instead of opening a notification stream.

@@ -36,6 +36,7 @@
     "tabs": {
       "overview": "Overview",
       "documents": "Documents",
+      "scenarios": "Cases",
       "reports": "Report history"
     },
     "name": "Project name",

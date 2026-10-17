@@ -20,6 +20,7 @@
 import { parseCondition, parseNumeric } from './parser';
 import { isConditionNode, type ArithNode, type Expr, type Node } from './ast';
 import { MATH_FUNCTIONS_1, MATH_FUNCTIONS_2, canonicalFunctionName } from './functions';
+import { compareNumbers, numbersEqual } from './numeric-compare';
 import {
   ExprError,
   type ConditionOptions,
@@ -602,6 +603,21 @@ function isEnumRhs(n: Extract<Node, { kind: 'acompare' }>): boolean {
   return (n.op === '==' || n.op === '!=') && n.left.kind === 'call' && n.right.kind === 'aref';
 }
 
+/**
+ * F-A8 fix round 1 — subtraction-form gates. `a - b op 0` ⇔ `a op b` and
+ * `0 op a - b` ⇔ `b op a`, so the comparison runs on the two operands and gets
+ * the relative tolerance (a residual against literal 0 has no scale of its own;
+ * numeric-compare.ts has no meaningful absolute floor). Only a TOP-LEVEL binary
+ * `-` against the literal `0` is rewritten; anything else is compared as is.
+ * Returns the operands in `left op right` order, or null when not this shape.
+ */
+function zeroDifferenceOperands(n: Extract<Node, { kind: 'acompare' }>): { left: ArithNode; right: ArithNode } | null {
+  const isZero = (x: ArithNode) => x.kind === 'anum' && x.value === 0;
+  if (isZero(n.right) && n.left.kind === 'abin' && n.left.op === '-') return { left: n.left.left, right: n.left.right };
+  if (isZero(n.left) && n.right.kind === 'abin' && n.right.op === '-') return { left: n.right.right, right: n.right.left };
+  return null;
+}
+
 function evalNodeCore(n: Node, ctx: Ctx): Ternary {
   // Conditions never throw — even inside a strict call chain.
   const c: Ctx = ctx.strict ? { ...ctx, strict: false } : ctx;
@@ -649,6 +665,14 @@ function evalNodeCore(n: Node, ctx: Ctx): Ternary {
     }
     case 'acompare': {
       if (c.hidden && hiddenReferences(n, c.hidden).length > 0) return 'na';
+      const diff = zeroDifferenceOperands(n);
+      if (diff) {
+        // Same operand evaluation as the `abin` '-' it replaces (both sides, then null ⇒ missing).
+        const a = num(evalValueCore(diff.left, c), c);
+        const b = num(evalValueCore(diff.right, c), c);
+        if (a === null || b === null) return 'missing';
+        return compareNumbers(a, n.op, b) ? 'true' : 'false';
+      }
       const l = evalValueCore(n.left, c);
       let r: Value;
       if (isEnumRhs(n)) {
@@ -719,14 +743,12 @@ function compare(v: Value, op: string, r: Value): boolean {
   // Numeric comparison if both sides parse to finite numbers.
   const ln = toNumber(v);
   const rn = toNumber(r);
+  // F-A8: tolerant (relative + absolute, see numeric-compare.ts) — a value computed
+  // exactly to a printed limit (Gl. 9: 1.9999999999999998 vs `>= 2`) meets it.
   if (ln !== null && rn !== null) {
     switch (op) {
-      case '>=': return ln >= rn;
-      case '<=': return ln <= rn;
-      case '==': return ln === rn;
-      case '!=': return ln !== rn;
-      case '<': return ln < rn;
-      case '>': return ln > rn;
+      case '>=': case '<=': case '==': case '!=': case '<': case '>':
+        return compareNumbers(ln, op, rn);
     }
   }
   // Equality across heterogeneous types — coerce to string.
@@ -735,15 +757,22 @@ function compare(v: Value, op: string, r: Value): boolean {
   return false;
 }
 
+/** F-A8: NaN (an unparsable string) is never equal — as with the former `===`. */
+function numericEquals(a: number, b: number): boolean {
+  return !Number.isNaN(a) && !Number.isNaN(b) && numbersEqual(a, b);
+}
+
 function equals(a: Value, b: Value): boolean {
   if (a === null || b === null) return a === b;
+  // F-A8: two numbers (e.g. a numeric `IN {…}` member) are equal under the shared tolerance.
+  if (typeof a === 'number' && typeof b === 'number') return numericEquals(a, b);
   if (typeof a === typeof b) return a === b;
   // boolean ↔ string ('true'/'false')
   if (typeof a === 'boolean' && typeof b === 'string') return String(a).toLowerCase() === b.toLowerCase();
   if (typeof a === 'string' && typeof b === 'boolean') return a.toLowerCase() === String(b).toLowerCase();
-  // number ↔ string
-  if (typeof a === 'number' && typeof b === 'string') return a === Number(b);
-  if (typeof a === 'string' && typeof b === 'number') return Number(a) === b;
+  // number ↔ string (F-A8: tolerant numeric equality)
+  if (typeof a === 'number' && typeof b === 'string') return numericEquals(a, Number(b));
+  if (typeof a === 'string' && typeof b === 'number') return numericEquals(Number(a), b);
   return false;
 }
 

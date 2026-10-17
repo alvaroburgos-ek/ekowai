@@ -134,12 +134,12 @@ describe('A138-26 Gl.10 — native 2D grid 30-column path', () => {
     expect(col30.status).toBe('ok');
 
     // AggregatorContext with the 30-column rows fed as kostraTable (the
-    // refactored aggregator reads floodKostra30Col when status=ok)
+    // refactored aggregator reads floodKostraCol when status=ok)
     const ctx: AggregatorContext = {
       floodSubAreas: FLOOD_CARRIER,
       gl10Scalars: scalarsNoR,
       kostraUnit: 'l/(s·ha)',
-      floodKostra30Col: col30.status === 'ok' ? { rows: col30.rows } : null,
+      floodKostraCol: col30.status === 'ok' ? { rows: col30.rows } : null,
     };
 
     const req = makeFloodReq(ctx);
@@ -180,7 +180,7 @@ describe('A138-26 Gl.10 — native 2D grid 30-column path', () => {
       floodSubAreas: tinyCarrier,
       gl10Scalars: negScalars,
       kostraUnit: 'l/(s·ha)',
-      floodKostra30Col: col30.status === 'ok' ? { rows: col30.rows } : null,
+      floodKostraCol: col30.status === 'ok' ? { rows: col30.rows } : null,
     };
 
     const req = makeFloodReq(ctx);
@@ -219,13 +219,13 @@ describe('A138-26 Gl.10 — legacy carrier fallback (single-eval, regression gua
     expect(legCol.status).toBe('legacy');
   });
 
-  it('legacy path: no floodKostra30Col → uses scalar r_D_T_n_Ue + D', () => {
-    // Legacy fallback: floodKostra30Col is null → aggregator uses typed r_D_T_n_Ue
+  it('legacy path: no floodKostraCol → uses scalar r_D_T_n_Ue + D', () => {
+    // Legacy fallback: floodKostraCol is null → aggregator uses typed r_D_T_n_Ue
     const ctx: AggregatorContext = {
       floodSubAreas: FLOOD_CARRIER,
       gl10Scalars: FLOOD_SCALARS_LEGACY,
       kostraUnit: 'l/(s·ha)',
-      floodKostra30Col: null, // explicit null → legacy single-eval
+      floodKostraCol: null, // explicit null → legacy single-eval
     };
 
     const req = makeFloodReq(ctx);
@@ -248,7 +248,7 @@ describe('A138-26 Gl.10 — legacy carrier fallback (single-eval, regression gua
       floodSubAreas: FLOOD_CARRIER,
       gl10Scalars: { ...FLOOD_SCALARS_LEGACY, r_D_T_n_Ue: null },
       kostraUnit: 'l/(s·ha)',
-      floodKostra30Col: null,
+      floodKostraCol: null,
     };
 
     const req = makeFloodReq(ctx);
@@ -285,15 +285,15 @@ describe('A138-26 Gl.10 — missing 30-column in native grid', () => {
     expect(col30_missing.status).toBe('missing');
   });
 
-  it('missing col → aggregator given floodKostra30Col=null with missingReason → manual_required', () => {
-    // When the 30-column is missing, the wiring layer sets floodKostra30Col=null
-    // AND passes a missingFlood30Reason. The aggregator surfaces manual_required.
+  it('missing col → aggregator given floodKostraCol=null with missingReason → manual_required', () => {
+    // When the 30-column is missing, the wiring layer sets floodKostraCol=null
+    // AND passes a missingFloodColReason. The aggregator surfaces manual_required.
     const ctx: AggregatorContext = {
       floodSubAreas: FLOOD_CARRIER,
       gl10Scalars: { ...FLOOD_SCALARS_LEGACY, r_D_T_n_Ue: null }, // no typed value either
       kostraUnit: 'l/(s·ha)',
-      floodKostra30Col: null,
-      missingFlood30Reason: 'Regenspende r_D für T_n = 30 a nicht in der Niederschlagstabelle erfasst',
+      floodKostraCol: null,
+      missingFloodColReason: 'Regenspende r_D für T_n = 30 a nicht in der Niederschlagstabelle erfasst',
     };
 
     const req = makeFloodReq(ctx);
